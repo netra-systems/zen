@@ -420,13 +420,287 @@ class StartupManager:
         
         return healthy, details
 
+    async def initialize_system(self, app) -> bool:
+        """
+        Initialize system with all startup components registered and executed in proper order.
+        
+        This method registers all startup components based on priority configuration,
+        integrates with DatabaseInitializer, and executes the complete startup sequence.
+        
+        Args:
+            app: FastAPI application instance
+            
+        Returns:
+            bool: True if initialization succeeded, False otherwise
+        """
+        try:
+            # Import required modules for initialization
+            from fastapi import FastAPI
+            from netra_backend.app.startup_module import (
+                initialize_logging, setup_multiprocessing_env, validate_database_environment,
+                run_database_migrations, setup_database_connections, initialize_core_services,
+                setup_security_services, initialize_clickhouse, initialize_websocket_components,
+                startup_health_checks, validate_schema, register_websocket_handlers,
+                start_monitoring
+            )
+            from netra_backend.app.services.startup_fixes_integration import startup_fixes
+            from netra_backend.app.services.background_task_manager import background_task_manager
+            from netra_backend.app.db.database_initializer import DatabaseInitializer
+            from netra_backend.app.core.startup_config import StartupConfig
+            
+            # Clear any existing components to ensure clean initialization
+            self.components.clear()
+            self.circuit_breakers.clear()
+            
+            # Register database as CRITICAL priority - must succeed
+            self.register_component(
+                name="database",
+                init_func=lambda: self._initialize_database(app),
+                priority=ComponentPriority.CRITICAL,
+                timeout_seconds=60.0,
+                max_retries=3
+            )
+            
+            # Register redis as HIGH priority
+            self.register_component(
+                name="redis", 
+                init_func=lambda: self._initialize_redis(app),
+                priority=ComponentPriority.HIGH,
+                dependencies=["database"],
+                timeout_seconds=30.0,
+                max_retries=2
+            )
+            
+            # Register auth_service as HIGH priority
+            self.register_component(
+                name="auth_service",
+                init_func=lambda: self._initialize_auth_service(app),
+                priority=ComponentPriority.HIGH,
+                dependencies=["database"],
+                timeout_seconds=30.0,
+                max_retries=2
+            )
+            
+            # Register websocket as HIGH priority
+            self.register_component(
+                name="websocket",
+                init_func=lambda: self._initialize_websocket(app),
+                priority=ComponentPriority.HIGH,
+                dependencies=["database", "redis"],
+                timeout_seconds=30.0,
+                max_retries=2
+            )
+            
+            # Register clickhouse as MEDIUM priority
+            self.register_component(
+                name="clickhouse",
+                init_func=lambda: self._initialize_clickhouse_wrapper(),
+                priority=ComponentPriority.MEDIUM,
+                timeout_seconds=45.0,
+                max_retries=2
+            )
+            
+            # Register monitoring as MEDIUM priority
+            self.register_component(
+                name="monitoring",
+                init_func=lambda: self._initialize_monitoring_wrapper(app),
+                priority=ComponentPriority.MEDIUM,
+                dependencies=["database"],
+                timeout_seconds=20.0,
+                max_retries=1
+            )
+            
+            # Register background_tasks as MEDIUM priority
+            self.register_component(
+                name="background_tasks",
+                init_func=lambda: self._initialize_background_tasks(app),
+                priority=ComponentPriority.MEDIUM,
+                dependencies=["database"],
+                timeout_seconds=20.0,
+                max_retries=1
+            )
+            
+            # Register metrics as LOW priority
+            self.register_component(
+                name="metrics",
+                init_func=lambda: self._initialize_metrics(app),
+                priority=ComponentPriority.LOW,
+                timeout_seconds=15.0,
+                max_retries=1
+            )
+            
+            # Register tracing as LOW priority
+            self.register_component(
+                name="tracing", 
+                init_func=lambda: self._initialize_tracing(app),
+                priority=ComponentPriority.LOW,
+                timeout_seconds=15.0,
+                max_retries=1
+            )
+            
+            # Initialize logging first (synchronous, required for other components)
+            start_time, logger = initialize_logging()
+            logger.info("Starting robust system initialization...")
+            
+            # Execute the startup sequence
+            success = await self.startup()
+            
+            if success:
+                logger.info("Robust system initialization completed successfully")
+                # Store components in app state for monitoring
+                app.state.startup_manager = self
+                return True
+            else:
+                logger.error("Robust system initialization failed")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error in initialize_system: {e}")
+            return False
+
+    async def _initialize_database(self, app) -> None:
+        """Initialize PostgreSQL database with DatabaseInitializer integration"""
+        from netra_backend.app.startup_module import (
+            setup_multiprocessing_env, validate_database_environment,
+            run_database_migrations, setup_database_connections
+        )
+        from netra_backend.app.db.database_initializer import DatabaseInitializer
+        from netra_backend.app.logging_config import central_logger
+        
+        logger = central_logger.get_logger(__name__)
+        
+        # Setup multiprocessing environment
+        setup_multiprocessing_env(logger)
+        
+        # Validate database environment
+        validate_database_environment(logger)
+        
+        # Run migrations
+        run_database_migrations(logger)
+        
+        # Initialize database connections using DatabaseInitializer
+        db_initializer = DatabaseInitializer()
+        await db_initializer.initialize_postgresql()
+        
+        # Setup database connections in FastAPI app
+        await setup_database_connections(app)
+        
+        logger.info("Database initialization completed successfully")
+
+    async def _initialize_redis(self, app) -> None:
+        """Initialize Redis connection and services"""
+        from netra_backend.app.redis_manager import redis_manager
+        from netra_backend.app.logging_config import central_logger
+        
+        logger = central_logger.get_logger(__name__)
+        
+        # Initialize Redis manager
+        await redis_manager.initialize()
+        
+        # Store in app state
+        app.state.redis_manager = redis_manager
+        
+        logger.info("Redis initialization completed successfully")
+
+    async def _initialize_auth_service(self, app) -> None:
+        """Initialize authentication and security services"""
+        from netra_backend.app.startup_module import initialize_core_services, setup_security_services
+        from netra_backend.app.logging_config import central_logger
+        
+        logger = central_logger.get_logger(__name__)
+        
+        # Initialize core services including KeyManager
+        key_manager = initialize_core_services(app, logger)
+        
+        # Setup security services
+        setup_security_services(app, key_manager)
+        
+        logger.info("Auth service initialization completed successfully")
+
+    async def _initialize_websocket(self, app) -> None:
+        """Initialize WebSocket components and handlers"""
+        from netra_backend.app.startup_module import initialize_websocket_components, register_websocket_handlers
+        from netra_backend.app.logging_config import central_logger
+        
+        logger = central_logger.get_logger(__name__)
+        
+        # Register WebSocket handlers
+        register_websocket_handlers(app)
+        
+        # Initialize WebSocket components
+        await initialize_websocket_components(logger)
+        
+        logger.info("WebSocket initialization completed successfully")
+
+    async def _initialize_background_tasks(self, app) -> None:
+        """Initialize background task management"""
+        from netra_backend.app.services.background_task_manager import background_task_manager
+        from netra_backend.app.services.startup_fixes_integration import startup_fixes
+        from netra_backend.app.logging_config import central_logger
+        
+        logger = central_logger.get_logger(__name__)
+        
+        # Initialize background task manager
+        app.state.background_task_manager = background_task_manager
+        logger.info("Background task manager initialized")
+        
+        # Apply startup fixes
+        try:
+            fix_results = await startup_fixes.run_comprehensive_verification()
+            applied_fixes = fix_results.get('total_fixes', 0)
+            logger.info(f"Applied {applied_fixes}/5 startup fixes")
+        except Exception as e:
+            logger.warning(f"Error applying startup fixes: {e}")
+        
+        logger.info("Background tasks initialization completed successfully")
+
+    async def _initialize_metrics(self, app) -> None:
+        """Initialize metrics collection and reporting"""
+        from netra_backend.app.logging_config import central_logger
+        
+        logger = central_logger.get_logger(__name__)
+        
+        # Initialize metrics collection (placeholder for metrics setup)
+        # This would integrate with actual metrics collection system
+        app.state.metrics_enabled = True
+        
+        logger.info("Metrics initialization completed successfully")
+
+    async def _initialize_tracing(self, app) -> None:
+        """Initialize distributed tracing"""
+        from netra_backend.app.logging_config import central_logger
+        
+        logger = central_logger.get_logger(__name__)
+        
+        # Initialize tracing (placeholder for tracing setup)
+        # This would integrate with actual tracing system like OpenTelemetry
+        app.state.tracing_enabled = True
+        
+        logger.info("Tracing initialization completed successfully")
+
+    async def _initialize_clickhouse_wrapper(self) -> None:
+        """Wrapper for ClickHouse initialization with proper logger access"""
+        from netra_backend.app.startup_module import initialize_clickhouse
+        from netra_backend.app.logging_config import central_logger
+        
+        logger = central_logger.get_logger(__name__)
+        await initialize_clickhouse(logger)
+
+    async def _initialize_monitoring_wrapper(self, app) -> None:
+        """Wrapper for monitoring initialization with proper logger access"""
+        from netra_backend.app.startup_module import start_monitoring
+        from netra_backend.app.logging_config import central_logger
+        
+        logger = central_logger.get_logger(__name__)
+        await start_monitoring(app, logger)
+
 
 # Global instance
 startup_manager = StartupManager()
 
 
-async def initialize_system() -> bool:
-    """Main entry point for system initialization"""
+async def initialize_system_components() -> bool:
+    """Main entry point for system initialization (deprecated - use initialize_system)"""
     return await startup_manager.startup()
 
 

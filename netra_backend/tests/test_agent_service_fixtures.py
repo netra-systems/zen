@@ -69,3 +69,88 @@ def verify_orchestration_metrics(orchestrator, expected_agents=None, expected_ta
     if expected_tasks is not None:
         assert orchestrator.metrics["tasks_executed"] == expected_tasks
     return True
+
+
+@pytest.fixture
+def agent_service():
+    """Create a mock agent service for testing."""
+    from netra_backend.app.services.agent_service import AgentService
+    service = MagicMock(spec=AgentService)
+    service.initialize = AsyncMock()
+    service.shutdown = AsyncMock()
+    service.execute = AsyncMock(return_value={"status": "completed", "result": "test result"})
+    return service
+
+
+@pytest.fixture  
+def mock_supervisor():
+    """Create a mock supervisor for testing."""
+    supervisor = MagicMock()
+    supervisor.run = AsyncMock(return_value={"status": "completed", "result": "supervised result"})
+    supervisor.initialize = AsyncMock()
+    supervisor.shutdown = AsyncMock()
+    return supervisor
+
+
+@pytest.fixture
+def mock_thread_service():
+    """Create a mock thread service for testing.""" 
+    thread_service = MagicMock()
+    thread_service.get_thread = AsyncMock(return_value={"id": "thread1", "name": "test thread"})
+    thread_service.create_thread = AsyncMock(return_value={"id": "thread1", "name": "new thread"})
+    return thread_service
+
+
+@pytest.fixture
+def mock_message_handler():
+    """Create a mock message handler for testing."""
+    handler = MagicMock()
+    handler.handle_message = AsyncMock(return_value={"status": "handled"})
+    handler.send_message = AsyncMock()
+    return handler
+
+
+def create_mock_request_model():
+    """Create a mock request model for testing."""
+    from netra_backend.app.schemas import RequestModel
+    request = MagicMock(spec=RequestModel)
+    request.message = "test message" 
+    request.thread_id = "thread123"
+    request.user_id = "user123"
+    request.run_id = "run123"
+    return request
+
+
+def create_concurrent_request_models(count: int = 3):
+    """Create multiple mock request models for concurrent testing."""
+    requests = []
+    for i in range(count):
+        request = create_mock_request_model()
+        request.message = f"test message {i}"
+        request.thread_id = f"thread{i}"
+        request.user_id = f"user{i}"
+        request.run_id = f"run{i}"
+        requests.append(request)
+    return requests
+
+
+def create_websocket_message(message_type: str = "chat", content: str = "test"):
+    """Create a mock websocket message for testing."""
+    return {
+        "type": message_type,
+        "content": content,
+        "timestamp": "2023-01-01T00:00:00Z",
+        "user_id": "user123"
+    }
+
+
+def verify_agent_execution_result(result, expected_status: str = "completed"):
+    """Verify agent execution result matches expectations."""
+    assert result is not None
+    # Handle both dict and mock objects
+    if hasattr(result, "get"):
+        status = result.get("status")
+    else:
+        status = getattr(result, "status", None)
+    assert status == expected_status
+    return True

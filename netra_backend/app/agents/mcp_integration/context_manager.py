@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
 
-from netra_backend.app.agents.base import (
+from netra_backend.app.agents.base_agent import (
     BaseExecutionInterface,
     ExecutionMonitor,
 )

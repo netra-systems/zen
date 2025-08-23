@@ -8,7 +8,7 @@ import asyncio
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.github_analyzer.config_parser import (
     ConfigurationExtractor,
 )

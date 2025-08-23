@@ -8,7 +8,7 @@ Business Value: Foundation for specialized domain expertise in AI consultation.
 
 from typing import Any, Dict, List
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger

@@ -51,7 +51,7 @@
         <rule>
           <description>Importing application code for testing</description>
           <example>
-            from netra_backend.app.agents.base import BaseAgent
+            from netra_backend.app.agents.base_agent import BaseAgent
             from netra_backend.app.core.exceptions import NetraError
           </example>
         </rule>
@@ -97,8 +97,8 @@
   <forbidden_patterns>
     <pattern>
       <description>Old app-relative imports</description>
-      <forbidden>from netra_backend.app.agents.base import BaseAgent</forbidden>
-      <correct>from netra_backend.app.agents.base import BaseAgent</correct>
+      <forbidden>from netra_backend.app.agents.base_agent import BaseAgent</forbidden>
+      <correct>from netra_backend.app.agents.base_agent import BaseAgent</correct>
       <severity>CRITICAL</severity>
     </pattern>
     
@@ -112,7 +112,7 @@
     <pattern>
       <description>Implicit relative imports</description>
       <forbidden>from agents.base import BaseAgent</forbidden>
-      <correct>from netra_backend.app.agents.base import BaseAgent</correct>
+      <correct>from netra_backend.app.agents.base_agent import BaseAgent</correct>
       <severity>CRITICAL</severity>
     </pattern>
     

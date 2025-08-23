@@ -32,7 +32,7 @@ from websockets.exceptions import ConnectionClosedError
 
 from netra_backend.app.auth_integration.auth import get_current_user
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path for tests

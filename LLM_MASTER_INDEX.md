@@ -641,7 +641,7 @@ A comprehensive AI optimization agent system with 30+ specialized tools:
 | **Agent State** | `/app/agents/state.py` | `from netra_backend.app.agents.state import DeepAgentState` | 114 uses |
 | **Tool Dispatcher** | `/app/agents/tool_dispatcher.py` | `from netra_backend.app.agents.tool_dispatcher import ToolDispatcher` | 49 uses |
 | **Supervisor** | `/app/agents/supervisor_consolidated.py` | `from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent` | 32 uses |
-| **Base Agent** | `/app/agents/base.py` | `from netra_backend.app.agents.base import BaseSubAgent` | 21 uses |
+| **Base Agent** | `/app/agents/base.py` | `from netra_backend.app.agents.base_agent import BaseSubAgent` | 21 uses |
 | **Error Handler** | `/app/agents/error_handler.py` | `from netra_backend.app.agents.error_handler import global_error_handler` | Agent errors |
 
 ### Core Services (Business Logic)

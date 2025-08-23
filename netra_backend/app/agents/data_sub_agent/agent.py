@@ -14,7 +14,7 @@ import asyncio
 import time
 from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern Base Components

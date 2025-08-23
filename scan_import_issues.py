@@ -43,7 +43,7 @@ class ImportIssueScanner:
                     'from websocket.ws_manager',
                     'from ..websocket.ws_manager'
                 ],
-                'correct_import': 'from netra_backend.app.websocket.ws_manager import WebSocketManager'
+                'correct_import': 'from netra_backend.app.ws_manager import WebSocketManager'
             }
         }
         

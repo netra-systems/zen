@@ -12,7 +12,7 @@
 import time
 from typing import List, Optional
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 
 # Import modular components

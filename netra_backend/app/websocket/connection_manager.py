@@ -10,9 +10,8 @@ single entry point for all WebSocket connection operations.
 from netra_backend.app.logging_config import central_logger
 
 # Import the primary connection management implementation
-from netra_backend.app.websocket.load_balanced_connection_manager import (
-    LoadBalancedConnectionManager
-)
+# LoadBalancedConnectionManager has been consolidated - using simple WebSocket manager
+from netra_backend.app.ws_manager import WebSocketManager as LoadBalancedConnectionManager
 
 # Import connection registry for connection tracking
 from netra_backend.app.websocket.connection_registry import (
@@ -20,9 +19,6 @@ from netra_backend.app.websocket.connection_registry import (
     ConnectionInfoProvider,
     ConnectionCleanupManager
 )
-
-# Import basic WebSocket manager for simple operations
-from netra_backend.app.websocket.ws_manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -33,8 +29,10 @@ def get_connection_manager() -> LoadBalancedConnectionManager:
     """Get the main connection manager instance."""
     return LoadBalancedConnectionManager()
 
-def get_simple_websocket_manager() -> WebSocketManager:
+def get_simple_websocket_manager():
     """Get a simple WebSocket manager for basic operations."""
+    # Lazy import to avoid circular dependency
+    from netra_backend.app.ws_manager import WebSocketManager
     return WebSocketManager()
 
 # Export all for backward compatibility
@@ -44,6 +42,5 @@ __all__ = [
     'get_simple_websocket_manager',
     'ConnectionRegistry',
     'ConnectionInfoProvider',
-    'ConnectionCleanupManager',
-    'WebSocketManager'
+    'ConnectionCleanupManager'
 ]

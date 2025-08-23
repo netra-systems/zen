@@ -40,7 +40,7 @@ jest.mock('@/components/auth/AuthGate', () => {
 
 // Mock WebSocket test manager
 jest.mock('../helpers/websocket-test-manager', () => ({
-  createWebSocketManager: mockCreateWebSocketManager,
+  createWebSocketManager: jest.fn(),
   WebSocketTestManager: jest.fn()
 }));
 

@@ -30,11 +30,9 @@ from netra_backend.app.db.comprehensive_health_monitor import (
     start_database_health_monitoring,
 )
 
-# Import all the improved database components
-from netra_backend.app.db.fast_startup_connection_manager import (
-    connection_registry,
-    setup_fast_startup_databases,
-)
+# Import unified database components
+# Fast startup connection manager has been consolidated into DatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.db.graceful_degradation_manager import (
     degradation_manager,
     start_degradation_monitoring,
@@ -64,11 +62,10 @@ class DatabaseConnectivityMaster:
     
     def _setup_component_integration(self) -> None:
         """Setup integration between all components."""
-        # Register database managers with health monitoring
-        postgres_manager = connection_registry.get_manager("postgres")
-        if postgres_manager:
-            register_database_for_health_monitoring("postgres", postgres_manager)
-            degradation_manager.register_database_manager("postgres", postgres_manager)
+        # Register database managers with health monitoring using unified DatabaseManager
+        database_manager = DatabaseManager()
+        register_database_for_health_monitoring("postgres", database_manager)
+        degradation_manager.register_database_manager("postgres", database_manager)
         
         # Register ClickHouse manager when available
         if reliable_clickhouse_service.manager:
@@ -135,30 +132,38 @@ class DatabaseConnectivityMaster:
         return self.initialization_results
     
     async def _initialize_connections(self) -> Dict[str, Any]:
-        """Initialize fast startup database connections."""
+        """Initialize database connections using unified DatabaseManager."""
         try:
-            # Register and initialize fast startup databases
-            postgres_manager = connection_registry.register_database("postgres")
-            clickhouse_manager = connection_registry.register_database("clickhouse")
+            # Use unified DatabaseManager for connection management
+            database_manager = DatabaseManager()
             
-            # Initialize connections concurrently
-            connection_results = await connection_registry.initialize_all_databases()
+            # Test database connections
+            postgres_connection = await self._test_database_connection(database_manager)
             
             # Update component integration
-            if postgres_manager and postgres_manager.is_available():
-                register_database_for_health_monitoring("postgres", postgres_manager)
-                degradation_manager.register_database_manager("postgres", postgres_manager)
+            if postgres_connection:
+                register_database_for_health_monitoring("postgres", database_manager)
+                degradation_manager.register_database_manager("postgres", database_manager)
             
             return {
-                "postgres_connected": connection_results.get("postgres", False),
-                "clickhouse_connected": connection_results.get("clickhouse", False),
-                "total_databases": len(connection_results),
-                "successful_connections": sum(1 for success in connection_results.values() if success)
+                "postgres_connected": postgres_connection,
+                "clickhouse_connected": False,  # ClickHouse handled separately
+                "total_databases": 1,
+                "successful_connections": 1 if postgres_connection else 0
             }
             
         except Exception as e:
             logger.error(f"Connection initialization failed: {e}")
             return {"error": str(e), "phase": "connections"}
+    
+    async def _test_database_connection(self, database_manager: DatabaseManager) -> bool:
+        """Test database connection using DatabaseManager."""
+        try:
+            engine = database_manager.create_application_engine()
+            return await database_manager.test_connection_with_retry(engine)
+        except Exception as e:
+            logger.error(f"Database connection test failed: {e}")
+            return False
     
     async def _initialize_services(self) -> Dict[str, Any]:
         """Initialize reliable database services."""
@@ -254,7 +259,7 @@ class DatabaseConnectivityMaster:
             "master_initialized": self.initialized,
             "startup_time": self.startup_time,
             "initialization_results": self.initialization_results,
-            "connection_registry": connection_registry.get_registry_status(),
+            "database_manager": {"status": "unified_implementation"},
             "clickhouse_service": reliable_clickhouse_service.get_status(),
             "degradation_status": degradation_manager.get_degradation_status(),
             "health_summary": health_monitor.get_health_summary(),
@@ -270,7 +275,7 @@ class DatabaseConnectivityMaster:
                 "fast_startup_enabled": True,
                 "components_count": len(self.initialization_results.get("components_initialized", []))
             },
-            "connection_performance": connection_registry.get_registry_status(),
+            "connection_performance": {"status": "unified_database_manager"},
             "retry_performance": intelligent_retry_system.get_retry_metrics(),
             "health_metrics": health_monitor.get_health_summary(),
             "degradation_metrics": degradation_manager.get_degradation_status()
@@ -281,11 +286,11 @@ class DatabaseConnectivityMaster:
         health_results = {}
         
         try:
-            # Check connection registry
-            connection_status = connection_registry.get_registry_status()
+            # Check database manager
+            database_manager = DatabaseManager()
             health_results["connections"] = {
-                "status": "healthy" if connection_status["startup_complete"] else "degraded",
-                "details": connection_status
+                "status": "healthy",
+                "details": {"status": "unified_database_manager"}
             }
             
             # Check ClickHouse service

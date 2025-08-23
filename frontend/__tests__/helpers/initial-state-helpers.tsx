@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { jest } from '@jest/globals';
-import { resetAuthServiceMocks } from '../mocks/auth-service-mock';
+// Auth service mocks handled by test setup
 import { useAppStore } from '@/store/app';
 
 interface MockStorageItem {
@@ -54,7 +54,6 @@ export const setupMockCookies = (cookies: MockCookie[] = []) => {
 };
 
 export const setupInitialStateMocks = () => {
-  resetAuthServiceMocks();
   jest.clearAllMocks();
   
   jest.mocked(useAppStore).mockReturnValue({

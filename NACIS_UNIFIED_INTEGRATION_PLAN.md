@@ -253,7 +253,7 @@ class NACISSemanticCache:
 
 ```python
 # netra_backend/app/agents/enhanced_researcher.py
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.interface import (
     BaseExecutionInterface,
     ExecutionContext,

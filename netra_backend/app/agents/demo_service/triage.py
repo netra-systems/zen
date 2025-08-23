@@ -19,7 +19,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 # Legacy compatibility
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.errors import (
     AgentExecutionError,

@@ -106,6 +106,16 @@ else:
         if os.environ.get("GEMINI_API_KEY") and not os.environ.get("GOOGLE_API_KEY"):
 
             os.environ["GOOGLE_API_KEY"] = os.environ["GEMINI_API_KEY"]
+        
+        # Validate that at least Gemini key is available for real LLM testing
+        gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        if not gemini_key or gemini_key.startswith("test-"):
+            import warnings
+            warnings.warn(
+                "ENABLE_REAL_LLM_TESTING=true but no valid Gemini API key found. "
+                "Real LLM tests will fail. Set GEMINI_API_KEY or GOOGLE_API_KEY environment variable.",
+                stacklevel=2
+            )
 
     else:
         # Use mock keys for regular testing

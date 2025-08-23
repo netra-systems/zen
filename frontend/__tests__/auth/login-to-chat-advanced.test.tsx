@@ -58,7 +58,7 @@ describe('Auth Login Advanced Features', () => {
       
       await act(async () => {
         await user.click(screen.getByTestId('remember-me-checkbox'));
-        await performLogin('user@example.com', 'password123');
+        await performLogin('user@example.com', 'password123', screen);
       });
       
       expect(document.cookie).toContain('remember_me=true');
@@ -69,7 +69,7 @@ describe('Auth Login Advanced Features', () => {
       
       await act(async () => {
         await user.click(screen.getByTestId('remember-me-checkbox'));
-        await performLogin('user@example.com', 'password123');
+        await performLogin('user@example.com', 'password123', screen);
       });
       
       expect(authService.setTokenExpiration).toHaveBeenCalledWith('extended');
@@ -80,7 +80,7 @@ describe('Auth Login Advanced Features', () => {
       
       await act(async () => {
         await user.click(screen.getByTestId('remember-me-checkbox'));
-        await performLogin('user@example.com', 'password123');
+        await performLogin('user@example.com', 'password123', screen);
       });
       
       await act(async () => {
@@ -134,7 +134,7 @@ describe('Auth Login Advanced Features', () => {
       renderLoginComponent();
       
       await act(async () => {
-        await performLogin('mfa@example.com', 'password123');
+        await performLogin('mfa@example.com', 'password123', screen);
       });
       
       await waitFor(() => {
@@ -152,7 +152,7 @@ describe('Auth Login Advanced Features', () => {
       renderLoginComponent();
       
       await act(async () => {
-        await performLogin('mfa@example.com', 'password123');
+        await performLogin('mfa@example.com', 'password123', screen);
         await user.type(screen.getByTestId('mfa-code-input'), '123456');
         await user.click(screen.getByTestId('verify-mfa-button'));
       });
@@ -169,7 +169,7 @@ describe('Auth Login Advanced Features', () => {
       renderLoginComponent();
       
       await act(async () => {
-        await performLogin('mfa@example.com', 'password123');
+        await performLogin('mfa@example.com', 'password123', screen);
         await user.type(screen.getByTestId('mfa-code-input'), '000000');
         await user.click(screen.getByTestId('verify-mfa-button'));
       });
@@ -191,7 +191,7 @@ describe('Auth Login Advanced Features', () => {
       renderLoginComponent();
       
       await act(async () => {
-        await performLogin('mfa@example.com', 'password123');
+        await performLogin('mfa@example.com', 'password123', screen);
         await user.type(screen.getByTestId('mfa-code-input'), '123456');
         await user.click(screen.getByTestId('verify-mfa-button'));
       });

@@ -18,7 +18,7 @@ from netra_backend.app.schemas.websocket_message_types import (
     ServerMessage,
     WebSocketValidationError,
 )
-from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.connection_info import ConnectionInfo
 
 # Import unified WebSocket system
 from netra_backend.app.websocket.unified import (

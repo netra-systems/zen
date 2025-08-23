@@ -18,7 +18,7 @@ from netra_backend.app.config import get_config, settings
 from netra_backend.app.services.background_task_manager import background_task_manager
 from netra_backend.app.services.startup_fixes_integration import startup_fixes
 from netra_backend.app.core.performance_optimization_manager import performance_manager
-from netra_backend.app.core.startup_manager import StartupManager
+from netra_backend.app.core.startup_manager import startup_manager
 from netra_backend.app.db.index_optimizer import index_manager
 from netra_backend.app.db.migration_utils import (
     create_alembic_config,
@@ -730,8 +730,7 @@ async def _run_startup_phase_three(app: FastAPI, logger: logging.Logger) -> None
 
 async def run_complete_startup(app: FastAPI) -> Tuple[float, logging.Logger]:
     """Run complete startup sequence with improved initialization handling."""
-    # Initialize the centralized startup manager
-    startup_manager = StartupManager()
+    # Use the global startup manager instance
     
     # Check if we should use the new robust startup system
     config = get_config()

@@ -67,3 +67,29 @@ class NetraSecurityException(NetraException):
             user_message="Security violation detected. Access denied",
             **kwargs
         )
+
+
+class TokenRevokedError(NetraException):
+    """Raised when authentication token has been revoked."""
+    
+    def __init__(self, message: str = None, **kwargs):
+        super().__init__(
+            message=message or "Authentication token has been revoked",
+            code=ErrorCode.TOKEN_INVALID,
+            severity=ErrorSeverity.HIGH,
+            user_message="Your session has been revoked. Please log in again",
+            **kwargs
+        )
+
+
+class TokenTamperError(NetraException):
+    """Raised when token tampering is detected."""
+    
+    def __init__(self, message: str = None, **kwargs):
+        super().__init__(
+            message=message or "Token tampering detected",
+            code=ErrorCode.SECURITY_VIOLATION,
+            severity=ErrorSeverity.CRITICAL,
+            user_message="Security violation detected. Please log in again",
+            **kwargs
+        )

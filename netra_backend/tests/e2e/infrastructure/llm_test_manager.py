@@ -31,7 +31,7 @@ class LLMTestConfig(BaseModel):
     cache_enabled: bool = Field(default=True)
     timeout_seconds: int = Field(default=30)
     max_retries: int = Field(default=3)
-    fallback_to_mock: bool = Field(default=True)
+    fallback_to_mock: bool = Field(default=False)  # Changed: Default to False to ensure real LLM tests fail without proper keys
 
 class LLMTestRequest(BaseModel):
     """Request structure for LLM testing."""
@@ -63,9 +63,11 @@ class LLMTestManager:
         """Load configuration from environment variables."""
         # Test-specific configuration from environment for LLM testing
         enabled = os.getenv("ENABLE_REAL_LLM_TESTING", "false").lower() == "true"
-        models_str = os.getenv("LLM_TEST_MODELS", "gpt-4,claude-3-opus")
+        models_str = os.getenv("LLM_TEST_MODELS", "gemini-pro")  # Default to Gemini for testing
         models = self._parse_models_from_string(models_str)
-        return LLMTestConfig(enabled=enabled, models=models)
+        # When real LLM is enabled, never fall back to mocks
+        fallback_to_mock = False if enabled else True
+        return LLMTestConfig(enabled=enabled, models=models, fallback_to_mock=fallback_to_mock)
         
     def _parse_models_from_string(self, models_str: str) -> List[LLMTestModel]:
         """Parse model names from comma-separated string."""
@@ -108,11 +110,21 @@ class LLMTestManager:
         # For test clients, read API key directly for test setup
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key or api_key.startswith("test-"):
+            if self.config.enabled and not self.config.fallback_to_mock:
+                raise NetraException(
+                    f"Real LLM testing enabled but no valid OpenAI API key found. "
+                    f"Please set OPENAI_API_KEY environment variable."
+                )
             return None
         try:
             import openai
             return openai.AsyncOpenAI(api_key=api_key)
         except ImportError:
+            if self.config.enabled and not self.config.fallback_to_mock:
+                raise NetraException(
+                    f"Real LLM testing enabled but openai package not installed. "
+                    f"Run: pip install openai"
+                )
             return None
             
     def _create_anthropic_client(self, model: LLMTestModel) -> Optional[Any]:
@@ -120,11 +132,21 @@ class LLMTestManager:
         # For test clients, read API key directly for test setup
         api_key = os.getenv("ANTHROPIC_API_KEY")
         if not api_key or api_key.startswith("test-"):
+            if self.config.enabled and not self.config.fallback_to_mock:
+                raise NetraException(
+                    f"Real LLM testing enabled but no valid Anthropic API key found. "
+                    f"Please set ANTHROPIC_API_KEY environment variable."
+                )
             return None
         try:
             import anthropic
             return anthropic.AsyncAnthropic(api_key=api_key)
         except ImportError:
+            if self.config.enabled and not self.config.fallback_to_mock:
+                raise NetraException(
+                    f"Real LLM testing enabled but anthropic package not installed. "
+                    f"Run: pip install anthropic"
+                )
             return None
             
     def _create_gemini_client(self, model: LLMTestModel) -> Optional[Any]:
@@ -132,12 +154,22 @@ class LLMTestManager:
         # For test clients, read API key directly for test setup
         api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
         if not api_key or api_key.startswith("test-"):
+            if self.config.enabled and not self.config.fallback_to_mock:
+                raise NetraException(
+                    f"Real LLM testing enabled but no valid Gemini API key found. "
+                    f"Please set GEMINI_API_KEY or GOOGLE_API_KEY environment variable."
+                )
             return None
         try:
             import google.generativeai as genai
             genai.configure(api_key=api_key)
             return genai.GenerativeModel(model.value)
         except ImportError:
+            if self.config.enabled and not self.config.fallback_to_mock:
+                raise NetraException(
+                    f"Real LLM testing enabled but google-generativeai package not installed. "
+                    f"Run: pip install google-generativeai"
+                )
             return None
             
     def _initialize_mock_clients(self):
@@ -188,7 +220,11 @@ class LLMTestManager:
         if self.config.fallback_to_mock:
             return await self._generate_mock_response(request, start_time)
         else:
-            raise NetraException(f"No available client for model {request.model}")
+            raise NetraException(
+                f"Real LLM testing enabled but no available client for model {request.model}. "
+                f"Ensure ENABLE_REAL_LLM_TESTING=true and appropriate API keys are set. "
+                f"For Gemini: set GEMINI_API_KEY or GOOGLE_API_KEY environment variable."
+            )
             
     async def _try_real_generation(self, request: LLMTestRequest, start_time: float) -> Optional[LLMTestResponse]:
         """Try generating with real client."""

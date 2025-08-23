@@ -33,7 +33,8 @@ We prioritize a globally coherent, modular architecture. Globally correct > loca
 ### 2.1. Architectural Tenets
 *   **Single Responsibility Principle (SRP):** Each module, function, and agent task must have one clear purpose.
 *   **Single unified concepts**: CRUCIAL: Unique Concept = ONCE per service. Duplicates = Abominations. Each concept in each service must only exist ONCE and ONLY ONCE.
-*   **ATOMIC SCOPE** Every edit must represent a COMPLETE update to the system. ALways be aware of scope. Only task subagents with scope you are 99.99% sure they an handle successfully. Split and dive work.
+*   **ATOMIC SCOPE** Every edit must represent a COMPLETE update to the system. ALways be aware of scope. Only task subagents with scope you are 99.99% sure they an handle successfully. Split work. Complete work is defined as: all relevant parts of the system are updated, integrated, tested, validated, working, production grade, high quality, follow ALL rules in claude.md, legacy code is deleted, prior versions are deleted as relevant, documented in xmls, docs, and other relevant places, QA tested and validated.
+*   **REFACTORS = ATOMIC SCOPE** All refactors must be complete atomic updates as per 2.1 Atomic scope.
 *   **RANDOM NEW FEATURES ARE FORBIDDEN** Every edit must be focused on the most MINIMAL possible edit to achieve the goals. Adding random new features is forbidden.
 *   **BASICS FIRST** The basic and expected flows > exotic cases.
 *   **LEGACY IS FORBIDDEN** Always maintain one and only one latest version of every concept. Remove and delete all legacy code during edits as a single atomic action.

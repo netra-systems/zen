@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
     ActionsToMeetGoalsSubAgent,
 )
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.corpus_admin_sub_agent import CorpusAdminSubAgent
 
 # DataSubAgent is imported later to avoid circular dependency

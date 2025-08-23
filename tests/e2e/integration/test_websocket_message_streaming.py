@@ -14,7 +14,7 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real components, No mock i
 
 from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
 from netra_backend.app.schemas.websocket_models import BroadcastResult, WebSocketStats
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 from netra_backend.app.websocket.connection import ConnectionInfo
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Any, Dict, List, Optional

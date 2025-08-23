@@ -28,7 +28,7 @@ from netra_backend.app.core.json_parsing_utils import (
 )
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.base import BaseSubAgent
+    from netra_backend.app.agents.base_agent import BaseSubAgent
     from netra_backend.app.agents.state import DeepAgentState
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     from netra_backend.app.llm.llm_manager import LLMManager

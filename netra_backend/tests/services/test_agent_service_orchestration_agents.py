@@ -32,10 +32,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.tests.test_agent_service_fixtures import (
-    AgentOrchestrator,
+from netra_backend.tests.test_agent_service_mock_classes import (
+    MockOrchestrator,
     AgentState,
-    MockSupervisorAgent,
+    MockAgent,
 )
 
 class TestAgentLifecycleManagement:
@@ -44,7 +44,7 @@ class TestAgentLifecycleManagement:
     @pytest.fixture
     def orchestrator(self):
         """Create agent orchestrator for testing."""
-        return AgentOrchestrator()
+        return MockOrchestrator()
     async def test_agent_creation_and_assignment(self, orchestrator):
         """Test agent creation and user assignment."""
         agent = await orchestrator.get_or_create_agent("user1")

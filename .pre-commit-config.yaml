@@ -92,3 +92,22 @@ repos:
         stages: [commit]
         pass_filenames: true
         description: 'Prevents relative imports (. or ..) - all imports must be absolute'
+        
+      # DUPLICATE CODE DETECTION: Prevent regression of duplicate patterns
+      - id: duplicate-code-detection
+        name: Duplicate Code Detection
+        entry: python scripts/precommit_duplicate_detector.py
+        language: system
+        files: '\.py$'
+        stages: [commit]
+        pass_filenames: true
+        description: 'Detects duplicate classes, functions, and WebSocket pattern regressions'
+        
+      # COMPREHENSIVE DUPLICATE SCAN: Full codebase scan (manual trigger)
+      - id: duplicate-code-scan-full
+        name: Full Duplicate Code Scan
+        entry: python scripts/detect_duplicate_code.py --threshold 0.8
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        description: 'Comprehensive duplicate detection across entire codebase'

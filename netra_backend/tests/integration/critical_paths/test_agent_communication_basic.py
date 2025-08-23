@@ -20,7 +20,7 @@ from typing import Any, Dict, List
 import aiohttp
 import pytest
 
-from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.redis_manager import RedisManager
 from test_framework.test_patterns import L3IntegrationTest
 
