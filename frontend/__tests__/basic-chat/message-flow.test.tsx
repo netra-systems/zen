@@ -131,7 +131,7 @@ import {
 } from './test-data-factories';
 
 // Type definitions
-import { WebSocketMessage } from '@/types/registry';
+import { WebSocketMessage } from '@/types/unified';
 
 describe('Comprehensive Message Flow Tests', () => {
   let testManager: RealWebSocketTestManager;

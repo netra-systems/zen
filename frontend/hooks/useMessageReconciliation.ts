@@ -26,7 +26,7 @@ import {
   ReconciliationStats, 
   ReconciliationConfig 
 } from '../services/reconciliation';
-import { Message } from '@/types/registry';
+import { Message } from '@/types/unified';
 import { logger } from '@/lib/logger';
 
 /**

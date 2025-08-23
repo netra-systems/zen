@@ -186,5 +186,6 @@ The permissive hook strategy allows us to:
 - Incrementally improve the codebase
 - Focus enforcement where it matters most (core application code)
 - Provide escape hatches for emergencies
+- **Fail fast by default** for immediate feedback on first error
 
-This balanced approach ensures we can maintain velocity while progressively improving code quality.
+This balanced approach ensures we can maintain velocity while progressively improving code quality. The fail-fast default means developers get immediate feedback on the first issue found, reducing time spent waiting for all checks to complete.

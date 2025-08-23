@@ -1,5 +1,5 @@
-import { Message } from '@/types/registry';
-import { Thread } from '@/types/registry';
+import { Message } from '@/types/unified';
+import { Thread } from '@/types/unified';
 import { authInterceptor } from '@/lib/auth-interceptor';
 import { logger } from '@/lib/logger';
 

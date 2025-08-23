@@ -4,7 +4,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { generateUniqueId } from '@/lib/utils';
-import type { ChatMessage } from '@/types/registry';
+import type { ChatMessage } from '@/types/unified';
 
 // ============================================
 // Thread Store State

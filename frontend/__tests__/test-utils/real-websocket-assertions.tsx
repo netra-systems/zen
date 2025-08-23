@@ -12,7 +12,7 @@
  * - Functions: ≤8 lines each (MANDATORY)
  */
 
-import { WebSocketMessage } from '@/types/registry';
+import { WebSocketMessage } from '@/types/unified';
 import { RealWebSocketTestManager, createRealTestMessage, testRealMessageFlow } from './real-websocket-utils';
 
 // Real Performance Testing Utilities

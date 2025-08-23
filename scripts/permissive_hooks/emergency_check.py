@@ -36,9 +36,9 @@ def main():
     is_emergency, flag = check_for_emergency_flag()
     
     if is_emergency:
-        print(f"\n🚨 EMERGENCY MODE DETECTED: {flag}")
-        print("⚠️  Bypassing standard checks for emergency fix")
-        print("📝 Remember to follow up with proper cleanup commit")
+        print(f"\nEMERGENCY MODE DETECTED: {flag}")
+        print("WARNING: Bypassing standard checks for emergency fix")
+        print("Remember to follow up with proper cleanup commit")
         
         # Log this bypass for tracking
         try:
@@ -53,7 +53,7 @@ def main():
     
     # Check if we're in CI/CD environment (should not block CI)
     if os.environ.get('CI') or os.environ.get('GITHUB_ACTIONS'):
-        print("📦 CI/CD environment detected - using relaxed checks")
+        print("CI/CD environment detected - using relaxed checks")
         return 0
     
     # Normal mode - continue with other checks

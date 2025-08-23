@@ -5,7 +5,7 @@
  */
 
 // Import unified Message types from registry
-import type { Message, MessageRole } from '@/types/registry';
+import type { Message, MessageRole } from '@/types/unified';
 
 export interface DemoChatProps {
   industry: string

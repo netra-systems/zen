@@ -17,7 +17,7 @@
  * - Revenue Impact: Increases user satisfaction and retention (+$7K MRR)
  */
 
-import { WebSocketMessage, Message, createMessage } from '@/types/registry';
+import { WebSocketMessage, Message, createMessage } from '@/types/unified';
 import { 
   OptimisticMessage, 
   ReconciliationConfig, 

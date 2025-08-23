@@ -17,8 +17,8 @@ import type {
   MessageReaction,
   Thread,
   ThreadMetadata
-} from '@/types/registry';
-import { MessageType } from '@/types/registry';
+} from '@/types/unified';
+import { MessageType } from '@/types/unified';
 
 // Re-export for backwards compatibility
 export type { Message, BaseMessage, MessageRole, MessageMetadata, MessageAttachment, MessageReaction, Thread, ThreadMetadata };
@@ -74,7 +74,7 @@ export interface SubAgentStatusData {
 }
 
 // Thread management types - Use unified types from registry
-// Import Thread and ThreadMetadata from '@/types/registry' for consistent typing
+// Import Thread and ThreadMetadata from '@/types/unified' for consistent typing
 
 // Chat state mutations
 export type ChatAction = 

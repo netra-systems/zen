@@ -6,7 +6,7 @@
 
 import { logger } from '@/lib/logger';
 import type { UnifiedWebSocketEvent } from '@/types/unified-chat';
-import type { WebSocketMessage } from '@/types/registry';
+import type { WebSocketMessage } from '@/types/unified';
 
 export interface AgentUpdate {
   agentId: string;

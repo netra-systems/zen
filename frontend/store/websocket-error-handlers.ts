@@ -3,7 +3,7 @@
 
 import type { UnifiedWebSocketEvent } from '@/types/websocket-event-types';
 import type { UnifiedChatState } from '@/types/store-types';
-import type { ChatMessage } from '@/types/registry';
+import type { ChatMessage } from '@/types/unified';
 import { MessageFormatterService } from '@/services/messageFormatter';
 
 /**

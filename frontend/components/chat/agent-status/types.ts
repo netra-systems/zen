@@ -2,7 +2,7 @@
  * Agent Status Component Types
  * 
  * This file re-exports consolidated agent types for component-specific use.
- * All types now come from the single source of truth: @/types/agent-types
+ * All types now come from the single source of truth: @/types/unified
  */
 
 import { 
@@ -10,7 +10,7 @@ import {
   AgentStatusCardProps as BaseAgentStatusCardProps,
   AgentTool,
   AgentMetrics
-} from '@/types/agent-types';
+} from '@/types/unified';
 
 // Re-export consolidated types for component use
 export type { AgentStatus };

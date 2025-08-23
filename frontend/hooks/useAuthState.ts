@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { User } from '@/types/registry';
+import { User } from '@/types/unified';
 
 /**
  * Enhanced Auth State Hook - Single Source of Truth for Auth Status

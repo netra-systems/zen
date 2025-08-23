@@ -110,17 +110,17 @@ def main():
                 print(f"   - {issue}")
     
     if not all_passed:
-        print(f"\n📝 Found {total_issues} issue(s) in modified lines")
-        print("💡 These checks apply only to the lines you're changing")
+        print(f"\nFound {total_issues} issue(s) in modified lines")
+        print("These checks apply only to the lines you're changing")
         # Don't block commit for minor issues in edited lines
         if total_issues > 10:
-            print("❌ Too many issues in modified code. Please fix critical issues.")
+            print("ERROR: Too many issues in modified code. Please fix critical issues.")
             return 1
         else:
-            print("⚠️  Warning: Issues found but allowing commit (incremental improvement)")
+            print("WARNING: Issues found but allowing commit (incremental improvement)")
             return 0
     else:
-        print("✅ All modified lines pass quality checks")
+        print("OK: All modified lines pass quality checks")
     
     return 0
 

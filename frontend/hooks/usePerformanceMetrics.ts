@@ -3,8 +3,8 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import type { 
   PerformanceMetrics, 
   MetricsOptions
-} from '@/types/performance-metrics';
-import { DEFAULT_PERFORMANCE_METRICS } from '@/types/performance-metrics';
+} from '@/types/unified';
+import { DEFAULT_PERFORMANCE_METRICS } from '@/types/unified';
 
 export const usePerformanceMetrics = (
   componentName?: string, 

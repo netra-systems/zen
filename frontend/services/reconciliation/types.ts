@@ -16,7 +16,7 @@
  * - Revenue Impact: Prevents user-facing errors (+$2K MRR saved)
  */
 
-import { Message } from '@/types/registry';
+import { Message } from '@/types/unified';
 
 /**
  * Optimistic message with reconciliation metadata

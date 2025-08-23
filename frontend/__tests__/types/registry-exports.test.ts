@@ -3,7 +3,7 @@
  * Prevents runtime ReferenceError issues with enum exports
  */
 
-import * as registry from '@/types/registry';
+import * as registry from '@/types/unified';
 import * as enums from '@/types/shared/enums';
 
 describe('Type Registry Export Safety', () => {
@@ -58,7 +58,7 @@ describe('Type Registry Export Safety', () => {
   describe('No default exports (regression prevention)', () => {
     it('should not have default export in registry', () => {
       // This test ensures we don't accidentally re-add problematic default exports
-      const registryModule = require('@/types/registry');
+      const registryModule = require('@/types/unified');
       expect(registryModule.default).toBeUndefined();
     });
 
@@ -72,7 +72,7 @@ describe('Type Registry Export Safety', () => {
   describe('Module initialization order', () => {
     it('should handle circular imports safely', () => {
       // Import in different order to test initialization
-      const { MessageType: MT1 } = require('@/types/registry');
+      const { MessageType: MT1 } = require('@/types/unified');
       const { MessageType: MT2 } = require('@/types/shared/enums');
       
       expect(MT1).toBe(MT2);

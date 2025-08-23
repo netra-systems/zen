@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "session-end": {
+      "enabled": true,
+      "command": "python scripts/claude_session_end_hook.py",
+      "description": "Automatically commits changes to the current branch when Claude session ends",
+      "options": {
+        "stay_on_current_branch": true,
+        "auto_stage": true,
+        "include_timestamp": true
+      }
+    },
+    "pre-commit": {
+      "enabled": false,
+      "command": "pre-commit run",
+      "description": "Run pre-commit hooks before creating commits"
+    }
+  },
+  "settings": {
+    "hooks_enabled": true,
+    "verbose": true,
+    "log_file": "logs/claude_hooks.log"
+  }
+}

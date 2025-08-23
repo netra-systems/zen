@@ -4,7 +4,7 @@ import { NextPage } from 'next';
 import { authService } from '@/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { User } from '@/types/registry';
+import { User } from '@/types/unified';
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { Shield, Settings, Users, Database, Activity, FileText, LucideIcon } from 'lucide-react';
 

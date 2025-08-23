@@ -13,7 +13,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { useAuthStore } from '@/store/authStore';
-import { User } from '@/types/registry';
+import { User } from '@/types/unified';
 
 // Mock localStorage globally
 const mockLocalStorage = {

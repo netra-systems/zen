@@ -13,7 +13,7 @@
  */
 
 import { act } from '@testing-library/react';
-import { Message, Thread } from '@/types/registry';
+import { Message, Thread } from '@/types/unified';
 import { RealAuthStoreTestManager, RealChatStoreTestManager } from './real-state-utils';
 
 // Real Performance Testing for State

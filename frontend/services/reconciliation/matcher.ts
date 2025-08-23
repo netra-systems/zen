@@ -17,7 +17,7 @@
  * - Revenue Impact: Prevents data inconsistencies (+$4K MRR saved)
  */
 
-import { WebSocketMessage } from '@/types/registry';
+import { WebSocketMessage } from '@/types/unified';
 import { OptimisticMessage, MatchingResult, ReconciliationConfig } from './types';
 import { logger } from '@/lib/logger';
 

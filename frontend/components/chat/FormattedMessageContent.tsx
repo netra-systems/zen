@@ -15,7 +15,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import type { Message } from '@/types/registry';
+import type { Message } from '@/types/unified';
 import { 
   MessageFormatterService, 
   type FormattedContent,

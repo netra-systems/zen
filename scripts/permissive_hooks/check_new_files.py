@@ -56,7 +56,7 @@ def check_new_file_compliance(filepath):
         # Check for proper type hints in new files
         import ast
         try:
-            tree = ast.parse(path.read_text())
+            tree = ast.parse(path.read_text(encoding='utf-8', errors='replace'))
             for node in ast.walk(tree):
                 if isinstance(node, ast.FunctionDef):
                     if node.returns is None and node.name != '__init__':
@@ -77,6 +77,8 @@ def main():
     print(f"Checking {len(new_files)} new file(s) for compliance...")
     
     all_passed = True
+    failed_count = 0
+    
     for filepath in new_files:
         # Only check Python/TypeScript files
         if not filepath.endswith(('.py', '.ts', '.tsx')):
@@ -86,15 +88,21 @@ def main():
         
         if not passed:
             all_passed = False
-            print(f"\n❌ NEW FILE: {filepath}")
+            failed_count += 1
+            print(f"\nERROR: NEW FILE: {filepath}")
             for issue in issues:
                 print(f"   - {issue}")
+            
+            # With fail-fast enabled, pre-commit will stop here
+            # Return immediately on first failure for faster feedback
+            print("\nNew files must meet quality standards.")
+            print("Tip: Break large files into smaller modules")
+            return 1
         else:
-            print(f"✅ NEW FILE OK: {filepath}")
+            print(f"OK: NEW FILE: {filepath}")
     
     if not all_passed:
-        print("\n⚠️  New files must meet quality standards.")
-        print("💡 Tip: Break large files into smaller modules")
+        print(f"\n{failed_count} new file(s) failed quality checks")
         return 1
     
     return 0

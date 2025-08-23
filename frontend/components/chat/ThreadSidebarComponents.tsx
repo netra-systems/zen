@@ -9,7 +9,7 @@ import {
   Check,
   Loader2
 } from 'lucide-react';
-import type { Thread, getThreadTitle } from '@/types/registry';
+import type { Thread, getThreadTitle } from '@/types/unified';
 
 interface ThreadSidebarHeaderProps {
   onCreateThread: () => Promise<void>;

@@ -135,10 +135,11 @@ def main():
                         has_errors = True
     
     if has_errors:
-        print("\n❌ Critical issues found in high-priority files")
+        print("\nERROR: Critical issues found in high-priority files")
+        print("Fail-fast enabled - stopping at first critical error")
         return 1
     else:
-        print("\n✅ All priority checks passed (warnings may exist)")
+        print("\nOK: All priority checks passed (warnings may exist)")
         return 0
 
 if __name__ == '__main__':

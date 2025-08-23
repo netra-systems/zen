@@ -15,7 +15,7 @@ import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager
 import { MessageInput } from '@/components/chat/MessageInput';
 import { MessageItem } from '@/components/chat/MessageItem';
 import MainChat from '@/components/chat/MainChat'; // Default import
-import type { Message } from '@/types/registry';
+import type { Message } from '@/types/unified';
 import { TestProviders } from '@/__tests__/setup/test-providers';
 
 // Test message factories (8 lines max each)

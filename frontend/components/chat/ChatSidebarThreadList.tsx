@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Thread, getThreadTitle } from '@/types/registry';
+import { Thread, getThreadTitle } from '@/types/unified';
 
 const formatThreadTime = (thread: Thread): string => {
   const timestamp = thread.updated_at || thread.created_at;

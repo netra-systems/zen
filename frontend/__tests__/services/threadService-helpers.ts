@@ -3,7 +3,7 @@
  * Provides utilities for testing ThreadService functionality
  */
 
-import { ThreadMetadata } from '@/types/registry';
+import { ThreadMetadata } from '@/types/unified';
 
 // Test data constants
 export const TEST_METADATA: ThreadMetadata = {
