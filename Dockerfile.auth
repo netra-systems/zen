@@ -2,10 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including tini for proper signal handling
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    tini \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
@@ -21,6 +22,10 @@ COPY shared/ ./shared/
 
 # Set environment variables
 ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
 
-# Run the application with gunicorn for production
-CMD ["sh", "-c", "gunicorn auth_service.main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-8080} --workers 2 --timeout 120 --access-logfile - --error-logfile -"]
+# Use tini as entrypoint for proper signal handling
+ENTRYPOINT ["tini", "-g", "--"]
+
+# Run the application with gunicorn configuration file
+CMD ["gunicorn", "auth_service.main:app", "--config", "auth_service/gunicorn_config.py"]
