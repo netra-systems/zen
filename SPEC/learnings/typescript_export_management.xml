@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>TypeScript Export Management</name>
+        <type>Learning</type>
+        <version>1.0</version>
+        <description>Learnings about managing TypeScript exports to prevent duplicate export errors and module conflicts</description>
+    </metadata>
+
+    <learning id="duplicate-export-resolution" severity="critical" date="2025-08-23">
+        <title>Duplicate Export Resolution in Type Registry</title>
+        
+        <problem>
+            <description>
+                isValidWebSocketMessageType was exported twice in registry.ts - once directly from shared/enums 
+                and once via re-export from domains/websocket, causing "Duplicate export" module parse errors.
+            </description>
+            <symptoms>
+                <symptom>Module parse error: "Duplicate export 'isValidWebSocketMessageType'"</symptom>
+                <symptom>Build failures in TypeScript compilation</symptom>
+                <symptom>Runtime import conflicts when using barrel exports</symptom>
+            </symptoms>
+        </problem>
+        
+        <root-cause>
+            <analysis>
+                1. domains/websocket.ts was re-exporting isValidWebSocketMessageType from shared/enums
+                2. registry.ts was also exporting it directly from shared/enums  
+                3. registry.ts was also importing from domains/websocket, creating a re-export chain conflict
+                4. TypeScript module system detected the same symbol being exported multiple times
+            </analysis>
+            <pattern>Re-export chain conflicts in barrel export patterns</pattern>
+        </root-cause>
+        
+        <solution>
+            <approach>Single Export Source Principle</approach>
+            <steps>
+                <step>1. Removed isValidWebSocketMessageType from the runtime exports list in registry.ts line 142</step>
+                <step>2. Removed the re-export from domains/websocket.ts</step>
+                <step>3. Kept only the single export from shared/enums in registry.ts</step>
+                <step>4. Also fixed duplicate type exports for WebSocketMessage and BaseWebSocketPayload</step>
+            </steps>
+            <result>Clean single export path for all symbols, eliminating module parse conflicts</result>
+        </solution>
+        
+        <prevention-strategies>
+            <strategy id="avoid-re-export-chains">
+                <title>Avoid Re-exporting Already Exported Symbols</title>
+                <description>Don't re-export functions/values that are already exported from their original source</description>
+                <implementation>Map all exports before creating barrel exports to identify conflicts</implementation>
+            </strategy>
+            
+            <strategy id="barrel-export-mapping">
+                <title>Complete Export Chain Mapping</title>
+                <description>When using barrel exports, ensure each symbol is exported only once across the entire export chain</description>
+                <implementation>Create export dependency graph before implementing barrel patterns</implementation>
+            </strategy>
+            
+            <strategy id="type-only-exports">
+                <title>Type vs Runtime Export Separation</title>
+                <description>Use type-only exports (`export type`) for interfaces to avoid runtime conflicts</description>
+                <implementation>Separate type exports from value exports in module organization</implementation>
+            </strategy>
+            
+            <strategy id="direct-source-exports">
+                <title>Direct Source Exports in Registry</title>
+                <description>Registry modules should export directly from source modules, not through intermediate re-export chains</description>
+                <implementation>Import and export directly from original source rather than through barrel files</implementation>
+            </strategy>
+            
+            <strategy id="duplicate-detection-testing">
+                <title>Regular Duplicate Export Detection</title>
+                <description>Run duplicate export detection tests regularly to catch issues early</description>
+                <implementation>Add automated checks in CI/CD pipeline to detect duplicate exports</implementation>
+            </strategy>
+        </prevention-strategies>
+        
+        <patterns>
+            <anti-pattern id="duplicate-export-chains">
+                <title>Multiple Export Paths for Same Symbol</title>
+                <example>
+                    // BAD: registry.ts
+                    export { isValidWebSocketMessageType } from './shared/enums';  // Direct export
+                    export * from './domains/websocket';  // Re-exports same symbol
+                    
+                    // domains/websocket.ts  
+                    export { isValidWebSocketMessageType } from '../shared/enums';  // Re-export
+                </example>
+                <why-bad>Creates duplicate export paths causing module parse errors</why-bad>
+            </anti-pattern>
+            
+            <good-pattern id="single-export-source">
+                <title>Single Export Source</title>
+                <example>
+                    // GOOD: registry.ts
+                    export { isValidWebSocketMessageType } from './shared/enums';  // Single export
+                    export type { WebSocketMessage, BaseWebSocketPayload } from './domains/websocket';  // Type-only
+                    
+                    // domains/websocket.ts
+                    // No re-export, define domain-specific interfaces only
+                    export interface WebSocketMessage { ... }
+                </example>
+                <why-good>Clear single export path eliminates conflicts and improves maintainability</why-good>
+            </good-pattern>
+        </patterns>
+        
+        <impact>
+            <business-impact>
+                <metric>Build reliability improved - eliminates random TypeScript compilation failures</metric>
+                <metric>Developer productivity increased - reduces debugging time for module conflicts</metric>
+                <metric>Code maintainability enhanced - clearer export dependency relationships</metric>
+            </business-impact>
+            <technical-impact>
+                <metric>Module parse errors eliminated</metric>
+                <metric>TypeScript compilation stability improved</metric>
+                <metric>Import/export dependency graph simplified</metric>
+            </technical-impact>
+        </impact>
+        
+        <related-learnings>
+            <learning-ref id="type-safety">Type Safety patterns and circular import prevention</learning-ref>
+            <learning-ref id="circular-import-detection">Circular import detection and resolution strategies</learning-ref>
+        </related-learnings>
+    </learning>
+</specification>
