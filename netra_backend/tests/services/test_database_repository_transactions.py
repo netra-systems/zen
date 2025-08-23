@@ -18,7 +18,7 @@ from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
 from netra_backend.app.core.exceptions import DatabaseError
 
 from netra_backend.app.db.transaction_core import with_deadlock_retry
-from netra_backend.tests.database_transaction_test_helpers import (
+from netra_backend.tests.services.database_transaction_test_helpers import (
     MockDatabaseModel,
     assert_all_sessions_closed,
     configure_mock_query_results,
@@ -26,7 +26,7 @@ from netra_backend.tests.database_transaction_test_helpers import (
     create_tracked_session_factory,
     run_multiple_transaction_cycles,
 )
-from netra_backend.tests.database_transaction_test_mocks import (
+from netra_backend.tests.services.database_transaction_test_mocks import (
     MockRepository,
     TransactionTestManager,
 )

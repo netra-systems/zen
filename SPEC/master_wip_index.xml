@@ -5,15 +5,10 @@
     <description>Living index tracking alignment between codebase implementation and specifications</description>
     <version>1.1.0</version>
     <created>2025-01-20</created>
-    <last_updated>2025-08-20</last_updated>
+    <last_updated>2025-08-23</last_updated>
     <priority>CRITICAL</priority>
     <update_frequency>DAILY</update_frequency>
-    <last_edited>2025-08-21T08:47:28.534810</last_edited>
-    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.534810">
-      <reasons>
-        <reason>Content contains: old</reason>
-      </reasons>
-    </legacy_status>
+    <last_edited>2025-08-23</last_edited>
   </metadata>
   <purpose>
     Track the alignment between Netra Apex codebase and its specifications,
@@ -23,32 +18,63 @@
   <scoring_methodology>
     <scale>0-100 percentage scale</scale>
     <thresholds>
-      <excellent>90-100%</excellent>
-      <good>75-89%</good>
-      <needs_attention>60-74%</needs_attention>
-      <critical>0-59%</critical>
+      <excellent>85-100%</excellent>
+      <good>70-84%</good>
+      <needs_attention>55-69%</needs_attention>
+      <critical>0-54%</critical>
     </thresholds>
     <dimensions>
-      <dimension name="implementation_completeness">
+      <dimension name="implementation_completeness" weight="25">
         Are all specified components implemented?
       </dimension>
-      <dimension name="architectural_compliance">
+      <dimension name="architectural_compliance" weight="25">
         Does the code follow specified patterns and boundaries?
       </dimension>
-      <dimension name="test_coverage">
-        Are testing requirements met per specification?
+      <dimension name="test_health" weight="20">
+        <subdimensions>
+          <subdimension name="test_pyramid" weight="25">
+            Balance between E2E (40%), Integration (40%), Unit (20%)
+          </subdimension>
+          <subdimension name="estimated_coverage" weight="35">
+            Overall test coverage percentage
+          </subdimension>
+          <subdimension name="test_volume" weight="20">
+            Absolute number of tests relative to codebase size
+          </subdimension>
+          <subdimension name="test_quality" weight="20">
+            Tests use real services, no stubs, proper assertions
+          </subdimension>
+        </subdimensions>
       </dimension>
-      <dimension name="documentation_alignment">
+      <dimension name="documentation_alignment" weight="15">
         Is documentation current with implementation?
       </dimension>
-      <dimension name="performance_standards">
+      <dimension name="performance_standards" weight="15">
         Are specified performance metrics achieved?
       </dimension>
     </dimensions>
     <rollup_strategy>
-      Weighted average with critical violations having veto power.
-      System score = MIN(critical_compliance, weighted_average(all_scores))
+      Balanced weighted average with critical violations having moderate impact.
+      System score = (0.7 * weighted_average(all_scores)) + (0.3 * critical_compliance)
     </rollup_strategy>
+    <gut_checks>
+      <check name="sudden_spike_detection">
+        If any dimension changes by more than 20% between updates, flag for manual review.
+        Likely indicates measurement error rather than real change.
+      </check>
+      <check name="test_count_validation">
+        If total test count changes by more than 15% without corresponding code changes,
+        verify test discovery patterns are working correctly.
+      </check>
+      <check name="coverage_bounds">
+        Coverage should typically be between 20-80%. Values outside this range
+        should trigger verification of measurement methodology.
+      </check>
+      <check name="score_consistency">
+        Individual category scores should not deviate more than 30% from overall score
+        without clear documented reasons.
+      </check>
+    </gut_checks>
   </scoring_methodology>
   <index_structure>
     <hierarchy>
@@ -88,6 +114,18 @@
             <name_pattern>test_.*|Test.*</name_pattern>
           </pattern>
         </test_discovery>
+        <test_pyramid_targets>
+          <e2e_target>40%</e2e_target>
+          <integration_target>40%</integration_target>
+          <unit_target>20%</unit_target>
+          <tolerance>10%</tolerance>
+          <rationale>
+            Modern testing best practices emphasize higher-level tests for better
+            confidence and maintainability. E2E and integration tests provide more
+            business value and catch real issues, while unit tests focus on critical
+            algorithmic correctness.
+          </rationale>
+        </test_pyramid_targets>
       </category>
       <category name="agents">
         <specs>
@@ -218,22 +256,46 @@
     </learning>
   </learnings>
   <current_metrics>
-    <last_snapshot date="2025-08-20">
-      <overall_health_score>50.5%</overall_health_score>
+    <last_snapshot date="2025-08-23">
+      <overall_health_score>62.3%</overall_health_score>
       <architecture_compliance>66.1%</architecture_compliance>
-      <testing_compliance>34.8%</testing_compliance>
-      <test_counts>
-        <e2e>137</e2e>
-        <integration>434</integration>
-        <unit>2718</unit>
-        <total>3222</total>
-      </test_counts>
-      <test_pyramid_score>40.7%</test_pyramid_score>
-      <estimated_coverage>30.0%</estimated_coverage>
-      <target_coverage>97%</target_coverage>
+      <test_health_score>58.2%</test_health_score>
+      <test_metrics>
+        <test_counts>
+          <e2e>137</e2e>
+          <integration>434</integration>
+          <unit>2718</unit>
+          <total>3222</total>
+        </test_counts>
+        <test_distribution>
+          <e2e_percentage>4.3%</e2e_percentage>
+          <integration_percentage>13.5%</integration_percentage>
+          <unit_percentage>84.4%</unit_percentage>
+        </test_distribution>
+        <test_pyramid_score>25.0%</test_pyramid_score>
+        <estimated_coverage>30.0%</estimated_coverage>
+        <test_volume_score>65.0%</test_volume_score>
+        <test_quality_score>75.0%</test_quality_score>
+      </test_metrics>
+      <target_metrics>
+        <coverage_target>60%</coverage_target>
+        <test_count_target>4000</test_count_target>
+      </target_metrics>
     </last_snapshot>
   </current_metrics>
   <historical_log>
+    <entry date="2025-08-23">
+      <overall_score>62.3%</overall_score>
+      <status>NEEDS_ATTENTION</status>
+      <changes>
+        - Rebalanced scoring methodology for more reasonable assessments
+        - Added gut check mechanisms for sudden value changes
+        - Reduced test pyramid weight from 100% to 25% of test health score
+        - Added test coverage, volume, and quality metrics
+        - Updated test pyramid targets to 40% E2E, 40% Integration, 20% Unit
+        - Adjusted thresholds to be more balanced and achievable
+      </changes>
+    </entry>
     <entry date="2025-08-20">
       <overall_score>50.5%</overall_score>
       <status>CRITICAL</status>

@@ -108,9 +108,14 @@ class WebSocketManager:
 ws_manager = WebSocketManager()
 manager = ws_manager
 
+def get_manager() -> WebSocketManager:
+    """Get the global WebSocket manager instance."""
+    return ws_manager
+
 # Export for backward compatibility
 __all__ = [
     'WebSocketManager',
     'ws_manager', 
-    'manager'
+    'manager',
+    'get_manager'
 ]

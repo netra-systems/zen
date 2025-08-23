@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.database_transaction_test_mocks import MockRepository
+from netra_backend.tests.services.database_transaction_test_mocks import MockRepository
 
 @pytest.fixture
 def performance_repository():

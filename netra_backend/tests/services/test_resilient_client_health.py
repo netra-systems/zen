@@ -10,7 +10,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from netra_backend.app.services.external_api_client import ResilientHTTPClient
-from netra_backend.tests.external_api_client_utils import (
+from netra_backend.tests.services.external_api_client_utils import (
     create_healthy_circuit_mock,
     verify_error_health_check,
     verify_successful_health_check,
