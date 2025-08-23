@@ -36,7 +36,7 @@ from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.database.postgres_service import PostgresService
 from netra_backend.app.services.metrics.resource_monitor import ResourceMonitor
 from netra_backend.app.services.resource_pool import AgentResourcePool
-from test_framework.testcontainers_utils import TestcontainerHelper
+from test_framework.testcontainers_utils import ContainerHelper
 
 logger = logging.getLogger(__name__)
 
@@ -558,7 +558,7 @@ class L3ResourcePoolManager:
 @pytest.fixture
 async def testcontainer_infrastructure():
     """Setup real Redis and Postgres containers for L3 testing."""
-    helper = TestcontainerHelper()
+    helper = ContainerHelper()
     
     # Start Redis container
     redis_container_instance = RedisContainer("redis:7-alpine")

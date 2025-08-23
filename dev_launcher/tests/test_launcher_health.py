@@ -67,7 +67,7 @@ class TestHealthMonitor(unittest.TestCase):
     def _register_service_with_recovery(self, health_check, recovery):
         """Register service with recovery handler."""
         self.monitor.register_service(
-            "TestService", health_check, recovery, max_failures=2
+            "TestService", health_check, recovery, max_failures=2, grace_period_seconds=0
         )
         # Mark service as ready and enable monitoring per SPEC requirements
         self.monitor.mark_service_ready("TestService")
@@ -88,7 +88,7 @@ class TestHealthMonitor(unittest.TestCase):
     def test_monitoring_thread(self):
         """Test the monitoring thread operation."""
         health_check = Mock(return_value=True)
-        self.monitor.register_service("TestService", health_check)
+        self.monitor.register_service("TestService", health_check, grace_period_seconds=0)
         self._test_thread_execution(health_check)
     
     def _test_thread_execution(self, health_check):
@@ -129,8 +129,12 @@ class TestAdvancedHealthMonitor(unittest.TestCase):
                 service,
                 lambda s=service: health_dict[s],
                 lambda s=service: self._recovery_handler(s, health_dict, recovery_list),
-                max_failures=2
+                max_failures=2,
+                grace_period_seconds=0
             )
+            # Mark each service as ready
+            self.monitor.mark_service_ready(service)
+        self.monitor.enable_monitoring()
     
     def _recovery_handler(self, service, health_dict, recovery_list):
         """Handle recovery for a service."""
@@ -158,10 +162,15 @@ class TestAdvancedHealthMonitor(unittest.TestCase):
     def _register_performance_services(self, check_times):
         """Register multiple services for performance test."""
         for i in range(10):
+            service_name = f"PerfService{i}"
             self.monitor.register_service(
-                f"PerfService{i}",
-                lambda ct=check_times: self._timed_health_check(ct)
+                service_name,
+                lambda ct=check_times: self._timed_health_check(ct),
+                grace_period_seconds=0
             )
+            # Mark each service as ready
+            self.monitor.mark_service_ready(service_name)
+        self.monitor.enable_monitoring()
     
     def _timed_health_check(self, check_times):
         """Health check that measures timing."""
@@ -209,7 +218,7 @@ class TestAdvancedHealthMonitor(unittest.TestCase):
 class TestErrorRecovery(unittest.TestCase):
     """Test error recovery mechanisms."""
     
-    @patch('dev_launcher.launcher.load_or_create_config')
+    @patch('dev_launcher.service_config.load_or_create_config')
     def test_port_conflict_recovery(self, mock_config):
         """Test recovery from port conflicts."""
         config = self._create_dynamic_config()
@@ -254,7 +263,7 @@ class TestErrorRecovery(unittest.TestCase):
             self.assertTrue(result)
         return attempt_count
     
-    @patch('dev_launcher.launcher.load_or_create_config')
+    @patch('dev_launcher.service_config.load_or_create_config')
     def test_resource_cleanup_on_error(self, mock_config):
         """Test proper resource cleanup on errors."""
         config = self._create_test_config()

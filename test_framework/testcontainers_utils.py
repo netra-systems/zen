@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any
 import asyncio
 
 
-class TestcontainerHelper:
+class ContainerHelper:
     """Helper class for managing test containers."""
     
     def __init__(self):

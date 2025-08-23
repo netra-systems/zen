@@ -1,6 +1,6 @@
 {
   "redis": {
-    "mode": "mock",
+    "mode": "local",
     "config": {
       "host": "localhost",
       "port": 6379,
@@ -8,7 +8,7 @@
     }
   },
   "clickhouse": {
-    "mode": "mock",
+    "mode": "local",
     "config": {
       "host": "localhost",
       "port": 9000,
@@ -19,7 +19,7 @@
     }
   },
   "postgres": {
-    "mode": "mock",
+    "mode": "local",
     "config": {
       "host": "localhost",
       "port": 5433,
@@ -29,13 +29,9 @@
     }
   },
   "llm": {
-    "mode": "mock",
+    "mode": "shared",
     "config": {
-      "providers": [
-        "anthropic",
-        "openai",
-        "gemini"
-      ],
+      "providers": ["anthropic", "openai", "gemini"],
       "default_provider": "gemini"
     }
   }

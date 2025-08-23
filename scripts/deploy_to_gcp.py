@@ -49,11 +49,12 @@ class ServiceConfig:
 class GCPDeployer:
     """Manages deployment of services to Google Cloud Platform."""
     
-    def __init__(self, project_id: str, region: str = "us-central1"):
+    def __init__(self, project_id: str, region: str = "us-central1", service_account_path: Optional[str] = None):
         self.project_id = project_id
         self.region = region
         self.project_root = Path(__file__).parent.parent
         self.registry = f"gcr.io/{project_id}"
+        self.service_account_path = service_account_path
         
         # Use gcloud.cmd on Windows
         self.gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
@@ -121,7 +122,12 @@ class GCPDeployer:
             if result.returncode != 0:
                 print("❌ gcloud CLI is not installed")
                 return False
-                
+            
+            # Authenticate with service account if provided
+            if self.service_account_path:
+                if not self.authenticate_with_service_account():
+                    return False
+                    
             # Check if project is set
             result = subprocess.run(
                 [self.gcloud_cmd, "config", "get-value", "project"],
@@ -146,6 +152,42 @@ class GCPDeployer:
         except FileNotFoundError:
             print("❌ gcloud CLI is not installed")
             print("Please install: https://cloud.google.com/sdk/docs/install")
+            return False
+    
+    def authenticate_with_service_account(self) -> bool:
+        """Authenticate using service account key file."""
+        if not self.service_account_path:
+            return True
+            
+        service_account_file = Path(self.service_account_path)
+        if not service_account_file.exists():
+            print(f"❌ Service account file not found: {service_account_file}")
+            return False
+            
+        print(f"🔐 Authenticating with service account: {service_account_file}")
+        
+        try:
+            # Activate service account
+            result = subprocess.run(
+                [
+                    self.gcloud_cmd, "auth", "activate-service-account",
+                    "--key-file", str(service_account_file)
+                ],
+                capture_output=True,
+                text=True,
+                check=True,
+                shell=self.use_shell
+            )
+            
+            print("✅ Service account authentication successful")
+            
+            # Also set GOOGLE_APPLICATION_CREDENTIALS for ADC
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(service_account_file)
+            
+            return True
+            
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to authenticate with service account: {e.stderr}")
             return False
     
     def run_pre_deployment_checks(self) -> bool:
@@ -794,6 +836,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Run pre-deployment checks (architecture, tests, etc.)")
     parser.add_argument("--cleanup", action="store_true", 
                        help="Clean up deployments")
+    parser.add_argument("--service-account", 
+                       help="Path to service account JSON key file for authentication")
     
     args = parser.parse_args()
     
@@ -803,7 +847,7 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
         print("   Example: python scripts/deploy_to_gcp.py --project {} --build-local --run-checks\n".format(args.project))
         time.sleep(2)
     
-    deployer = GCPDeployer(args.project, args.region)
+    deployer = GCPDeployer(args.project, args.region, service_account_path=args.service_account)
     
     try:
         if args.cleanup:

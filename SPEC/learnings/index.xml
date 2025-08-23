@@ -212,8 +212,13 @@
             <critical-takeaway>Import tests MUST track full import chains, not just direct imports.</critical-takeaway>
         </category>
 
-        <category name="E2E Testing" path="SPEC/learnings/e2e_testing.xml" keywords="End-to-End, Integration, Circuit Breaker">
-            <critical-takeaway>Use circuit breaker patterns. Ensure proper fixture dependencies.</critical-takeaway>
+        <category name="E2E Testing" path="SPEC/learnings/e2e_testing.xml" keywords="End-to-End, Integration, Mock Mode, Database Session, TypeScript Exports, OAuth Testing, Agent Testing">
+            <critical-takeaway>Mock mode detection enables rapid testing without external dependencies.</critical-takeaway>
+            <critical-takeaway>Database session factories enable predictable test database state management.</critical-takeaway>
+            <critical-takeaway>TypeScript type vs runtime export separation prevents import errors and enables proper optimization.</critical-takeaway>
+            <critical-takeaway>OAuth tests must handle multiple valid failure modes (302, 401, 503) depending on configuration and state.</critical-takeaway>
+            <critical-takeaway>Agent system testing requires end-to-end patterns covering database persistence and WebSocket communication.</critical-takeaway>
+            <critical-takeaway>Complete module structures with proper exports prevent import failures and system integration issues.</critical-takeaway>
         </category>
 
         <category name="Startup" path="SPEC/learnings/startup.xml" keywords="Initialization, Boot, Config">
@@ -371,6 +376,27 @@
     </categories>
     
     <recent_major_fixes>
+        <fix date="2025-08-22" category="E2E Testing Infrastructure Comprehensive Repair">
+            <title>E2E Testing Infrastructure Comprehensive Repair - Mock Mode, Database Sessions, TypeScript Exports</title>
+            <impact>Established robust end-to-end testing patterns across all system components and integration points</impact>
+            <key_areas>
+                <area>Complete backend billing module structure with proper exports and dependencies</area>
+                <area>Robust mock mode detection and startup patterns for rapid testing cycles</area>
+                <area>TypeScript type vs runtime export strategy clarification preventing import errors</area>
+                <area>OAuth testing patterns standardized for security and reliability with multiple status code handling</area>
+                <area>Agent system integration testing patterns covering database persistence and WebSocket communication</area>
+                <area>Database session factory patterns for predictable test database state management</area>
+                <area>Legacy test cleanup completed for system clarity and conflict elimination</area>
+            </key_areas>
+            <business_value>
+                <metric>Rapid development cycles through reliable mock mode implementation</metric>
+                <metric>Comprehensive integration validation through robust e2e testing</metric>
+                <metric>Secure development practices through proper OAuth testing patterns</metric>
+                <metric>Scalable agent system development through integration test patterns</metric>
+                <metric>Maintainable codebase through clear module structure patterns</metric>
+            </business_value>
+        </fix>
+        
         <fix date="2025-08-22" category="Cross-System Test Infrastructure">
             <title>Comprehensive Test Infrastructure Restoration - 2660+ Tests Fixed</title>
             <impact>Restored functionality to entire test suite across 4 services (Backend, Auth, Frontend, Dev Launcher)</impact>

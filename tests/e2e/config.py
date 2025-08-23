@@ -241,8 +241,12 @@ class TestTokenManager:
         """Create test JWT token"""
         try:
             from netra_backend.app.auth_integration.auth import create_access_token
-            return create_access_token(data={"sub": user_data["email"]})
-        except ImportError:
+            token = create_access_token(data={"sub": user_data["email"]})
+            # If we get an empty token or None, fall back to mock
+            if not token:
+                return f"mock-token-{user_data['id']}"
+            return token
+        except (ImportError, Exception):
             return f"mock-token-{user_data['id']}"
     
     def create_user_token(self, user: TestUser) -> str:

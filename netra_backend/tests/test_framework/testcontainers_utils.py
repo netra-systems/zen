@@ -8,7 +8,7 @@ import sys
 
 # Add parent directories to path
 
-class TestcontainerHelper:
+class ContainerHelper:
     """Helper class for managing test containers."""
     
     def __init__(self):

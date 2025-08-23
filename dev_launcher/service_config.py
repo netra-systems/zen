@@ -1,6 +1,18 @@
 """
 Service configuration management for the dev launcher.
 
+DEFAULT CONFIGURATION:
+- Redis:       LOCAL (localhost:6379)
+- ClickHouse:  LOCAL (localhost:9000)
+- PostgreSQL:  LOCAL (localhost:5433)
+- LLM:         SHARED (API providers - Anthropic, OpenAI, Gemini)
+- Auth:        LOCAL (localhost:8081)
+
+TO OVERRIDE DEFAULTS:
+1. Environment variables: Set REDIS_MODE=shared, CLICKHOUSE_MODE=shared, etc.
+2. Configuration file: Create .dev_services.json with custom settings
+3. Interactive wizard: Run the launcher and choose custom configuration
+
 Provides clear options for using local vs shared resources with user-friendly prompts.
 """
 
@@ -69,7 +81,7 @@ class ServicesConfiguration:
     # Core services with their configurations
     redis: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="redis",
-        mode=ResourceMode.LOCAL if os.environ.get("REDIS_MODE", "local").lower() == "local" else ResourceMode.SHARED,
+        mode=ResourceMode(os.environ.get("REDIS_MODE", "local").lower()) if os.environ.get("REDIS_MODE") else ResourceMode.LOCAL,
         local_config={
             "host": os.environ.get("REDIS_HOST", "localhost"),
             "port": int(os.environ.get("REDIS_PORT", "6379")),
@@ -86,7 +98,7 @@ class ServicesConfiguration:
     
     clickhouse: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="clickhouse",
-        mode=ResourceMode.LOCAL,  # Always use local ClickHouse for development
+        mode=ResourceMode(os.environ.get("CLICKHOUSE_MODE", "local").lower()) if os.environ.get("CLICKHOUSE_MODE") else ResourceMode.LOCAL,
         local_config={
             "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
             "port": int(os.environ.get("CLICKHOUSE_NATIVE_PORT", "9000")),
@@ -109,7 +121,7 @@ class ServicesConfiguration:
     
     postgres: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="postgres",
-        mode=ResourceMode.LOCAL,  # Usually local for development
+        mode=ResourceMode(os.environ.get("POSTGRES_MODE", "local").lower()) if os.environ.get("POSTGRES_MODE") else ResourceMode.LOCAL,
         local_config={
             "host": "localhost",
             "port": 5433,
@@ -130,7 +142,7 @@ class ServicesConfiguration:
     
     llm: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="llm",
-        mode=ResourceMode.SHARED,  # Always use real LLM APIs
+        mode=ResourceMode(os.environ.get("LLM_MODE", "shared").lower()) if os.environ.get("LLM_MODE") else ResourceMode.SHARED,
         local_config={
             # Local LLM options (e.g., Ollama)
             "provider": "ollama",
@@ -146,7 +158,7 @@ class ServicesConfiguration:
     
     auth_service: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="auth_service",
-        mode=ResourceMode.LOCAL,  # Auth service runs locally
+        mode=ResourceMode(os.environ.get("AUTH_MODE", "local").lower()) if os.environ.get("AUTH_MODE") else ResourceMode.LOCAL,
         local_config={
             "host": "localhost",
             "port": 8081,
@@ -373,16 +385,17 @@ class ServiceConfigWizard:
         
         # Quick setup option
         use_defaults = self._ask_yes_no(
-            "Use recommended configuration? (Shared Redis & ClickHouse, Local PostgreSQL)",
+            "Use recommended configuration? (Local for all services except LLM)",
             default=True
         )
         
         if use_defaults:
             safe_print(f"\n{get_emoji('check')} Using recommended configuration:")
-            print("  • Redis:      SHARED (Cloud Redis)")
-            print("  • ClickHouse: SHARED (Cloud ClickHouse)")
-            print("  • PostgreSQL: LOCAL  (Local database)")
-            print("  • LLM:        SHARED (API access)")
+            print("  • Redis:      LOCAL  (Local Redis)")
+            print("  • ClickHouse: LOCAL  (Local ClickHouse)")
+            print("  • PostgreSQL: LOCAL  (Local PostgreSQL)")
+            print("  • LLM:        SHARED (API providers)")
+            print("  • Auth:       LOCAL  (Local auth service)")
             return self.config
         
         # Custom configuration
@@ -392,14 +405,14 @@ class ServiceConfigWizard:
         self._configure_service(
             self.config.redis,
             "Redis (caching & real-time features)",
-            recommended_mode=ResourceMode.SHARED
+            recommended_mode=ResourceMode.LOCAL
         )
         
         # Configure ClickHouse
         self._configure_service(
             self.config.clickhouse,
             "ClickHouse (analytics & metrics)",
-            recommended_mode=ResourceMode.SHARED
+            recommended_mode=ResourceMode.LOCAL
         )
         
         # Configure PostgreSQL
@@ -414,6 +427,13 @@ class ServiceConfigWizard:
             self.config.llm,
             "LLM Services (AI features)",
             recommended_mode=ResourceMode.SHARED
+        )
+        
+        # Configure Auth Service
+        self._configure_service(
+            self.config.auth_service,
+            "Auth Service (authentication & authorization)",
+            recommended_mode=ResourceMode.LOCAL
         )
         
         # Validate configuration
@@ -506,7 +526,20 @@ class ServiceConfigWizard:
 
 
 def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
-    """Load existing configuration or create a new one."""
+    """Load existing configuration or create a new one.
+    
+    Default configuration:
+    - Redis: LOCAL
+    - ClickHouse: LOCAL
+    - PostgreSQL: LOCAL
+    - LLM: SHARED (API providers)
+    - Auth Service: LOCAL
+    
+    To override defaults:
+    1. Set environment variables (e.g., REDIS_MODE=shared)
+    2. Create .dev_services.json file with custom configuration
+    3. Use interactive wizard when prompted
+    """
     config_path = Path.cwd() / ".dev_services.json"
     
     # Try to load existing configuration
@@ -538,5 +571,5 @@ def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
     else:
         # Use defaults in non-interactive mode
         config = ServicesConfiguration()
-        logger.info("Using default service configuration (all services in SHARED mode)")
+        logger.info("Using default service configuration (LOCAL for all except LLM)")
         return config

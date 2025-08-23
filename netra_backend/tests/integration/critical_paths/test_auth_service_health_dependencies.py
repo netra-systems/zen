@@ -43,7 +43,7 @@ from netra_backend.app.core.health_checkers import (
     check_redis_health,
 )
 from netra_backend.app.logging_config import central_logger
-from test_framework.testcontainers_utils import TestcontainerHelper
+from test_framework.testcontainers_utils import ContainerHelper
 
 logger = central_logger.get_logger(__name__)
 

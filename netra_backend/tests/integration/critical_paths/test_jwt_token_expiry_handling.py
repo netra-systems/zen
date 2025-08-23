@@ -32,7 +32,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import MagicMock, patch
 
-import freezegun
+from test_framework.freezegun_mock import freeze_time
 import jwt
 import pytest
 from netra_backend.app.clients.auth_client import auth_client
@@ -128,7 +128,7 @@ class TestJWTTokenExpiryHandling:
         metrics = ExpiryTestMetrics()
         
         # Create token with short expiry
-        with freezegun.freeze_time("2024-01-01 12:00:00") as frozen_time:
+        with freeze_time("2024-01-01 12:00:00") as frozen_time:
             token_data = await token_manager.create_token(
                 user_id="user123",
                 role="user",
@@ -185,7 +185,7 @@ class TestJWTTokenExpiryHandling:
         """Test grace period for recently expired tokens"""
         metrics = ExpiryTestMetrics()
         
-        with freezegun.freeze_time("2024-01-01 12:00:00") as frozen_time:
+        with freeze_time("2024-01-01 12:00:00") as frozen_time:
             # Create token
             token_data = await token_manager.create_token(
                 user_id="user456",
@@ -224,7 +224,7 @@ class TestJWTTokenExpiryHandling:
         """Test automatic token refresh before expiry"""
         metrics = ExpiryTestMetrics()
         
-        with freezegun.freeze_time("2024-01-01 12:00:00") as frozen_time:
+        with freeze_time("2024-01-01 12:00:00") as frozen_time:
             # Create initial tokens
             token_data = await token_manager.create_token(
                 user_id="user789",
@@ -267,7 +267,7 @@ class TestJWTTokenExpiryHandling:
         self, token_manager
     ):
         """Test sliding window expiry (activity extends token)"""
-        with freezegun.freeze_time("2024-01-01 12:00:00") as frozen_time:
+        with freeze_time("2024-01-01 12:00:00") as frozen_time:
             # Create token with sliding window enabled
             token_data = await token_manager.create_token(
                 user_id="user_sliding",
@@ -305,7 +305,7 @@ class TestJWTTokenExpiryHandling:
         metrics = ExpiryTestMetrics()
         token_count = 100
         
-        with freezegun.freeze_time("2024-01-01 12:00:00") as frozen_time:
+        with freeze_time("2024-01-01 12:00:00") as frozen_time:
             # Create tokens with staggered expiry times
             tokens = []
             for i in range(token_count):
@@ -395,7 +395,7 @@ class TestJWTTokenExpiryHandling:
         self, token_manager
     ):
         """Test token expiring during request processing"""
-        with freezegun.freeze_time("2024-01-01 12:00:00") as frozen_time:
+        with freeze_time("2024-01-01 12:00:00") as frozen_time:
             # Create token with very short expiry
             token_data = await token_manager.create_token(
                 user_id="user_processing",
@@ -482,7 +482,7 @@ class TestJWTTokenExpiryHandling:
         """Test scheduled expiry notifications"""
         metrics = ExpiryTestMetrics()
         
-        with freezegun.freeze_time("2024-01-01 12:00:00") as frozen_time:
+        with freeze_time("2024-01-01 12:00:00") as frozen_time:
             # Create token with 30-minute expiry
             token_data = await token_manager.create_token(
                 user_id="user_notify",

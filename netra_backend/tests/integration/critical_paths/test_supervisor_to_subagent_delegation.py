@@ -40,7 +40,7 @@ from netra_backend.app.schemas.registry import (
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.database.postgres_service import PostgresService
 from netra_backend.app.services.llm.llm_manager import LLMManager
-from test_framework.testcontainers_utils import TestcontainerHelper
+from test_framework.testcontainers_utils import ContainerHelper
 
 logger = logging.getLogger(__name__)
 
@@ -360,7 +360,7 @@ class L3AgentDelegationManager:
 @pytest.fixture
 async def testcontainer_infrastructure():
     """Setup real Redis and Postgres containers for L3 testing."""
-    helper = TestcontainerHelper()
+    helper = ContainerHelper()
     
     # Start Redis container
     redis_container_instance = RedisContainer("redis:7-alpine")

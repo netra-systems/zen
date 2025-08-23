@@ -31,7 +31,6 @@ from sqlalchemy.orm import sessionmaker
 
 # Real service imports - NO MOCKS
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.db.models import User, Organization, OrganizationMember, UserPermission
 from netra_backend.app.db.session import get_db_session
 
 
