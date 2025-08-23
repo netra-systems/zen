@@ -189,4 +189,4 @@ def _log_auth_connection_info(dbapi_conn: Connection):
 
 
 # Export main setup function
-__all__ = ["setup_auth_async_engine_events", "AuthDatabaseConfig"]
+__all__ = ["setup_auth_async_engine_events", "AuthDatabaseConfig", "get_settings", "_monitor_auth_pool_usage"]

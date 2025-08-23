@@ -28,6 +28,7 @@ ARCHITECTURAL COMPLIANCE:
 
 import asyncio
 import logging
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -40,14 +41,12 @@ import pytest
 # Add parent directories to sys.path for imports
 
 from tests.e2e.service_failure_recovery_helpers import (
-    create_auth_failure_simulator,
-    create_degradation_tester,
-    create_recovery_time_validator,
-    create_state_preservation_validator,
+    AuthServiceFailureSimulator,
+    GracefulDegradationTester,
+    RecoveryTimeValidator,
+    StatePreservationValidator,
 )
-from tests.e2e.integration.service_orchestrator import (
-    create_service_orchestrator,
-)
+from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.real_websocket_client import RealWebSocketClient
 from tests.e2e.test_websocket_real_connection import WebSocketRealConnectionTester
@@ -69,8 +68,8 @@ class AuthServiceRecoveryTester:
     async def setup_test_environment(self) -> bool:
         """Setup complete test environment with all services."""
         try:
-            self.orchestrator = create_service_orchestrator()
-            await self.orchestrator.start_test_environment("auth_recovery_test")
+            self.orchestrator = E2EServiceOrchestrator()
+            await self.orchestrator.test_start_test_environment("auth_recovery_test")
             await self._wait_for_environment_stability()
             return True
         except Exception as e:
@@ -80,6 +79,15 @@ class AuthServiceRecoveryTester:
     async def _wait_for_environment_stability(self) -> None:
         """Wait for environment to stabilize after startup."""
         await asyncio.sleep(3)  # Allow services to fully initialize
+    
+    def _get_service_url(self, service_name: str) -> str:
+        """Get service URL for a given service."""
+        if service_name == "backend":
+            return "http://localhost:8000"
+        elif service_name == "auth":
+            return "http://localhost:8001"
+        else:
+            return f"http://localhost:8000"  # Default
     
     async def establish_authenticated_sessions(self, user_count: int = 3) -> Dict[str, Dict[str, Any]]:
         """Establish multiple authenticated sessions before Auth failure."""
@@ -138,7 +146,7 @@ class AuthServiceRecoveryTester:
     async def _test_backend_session(self, token: str) -> Dict[str, Any]:
         """Test Backend HTTP session with token."""
         try:
-            backend_url = self.orchestrator.get_service_url("backend")
+            backend_url = self._get_service_url("backend")
             headers = {"Authorization": f"Bearer {token}"}
             
             async with httpx.AsyncClient(timeout=5.0) as client:
@@ -148,44 +156,88 @@ class AuthServiceRecoveryTester:
             return {"authenticated": False, "error": str(e)}
     
     async def simulate_auth_service_failure(self) -> bool:
-        """Simulate Auth service failure by killing the process."""
+        """Simulate Auth service failure by stopping the service."""
         try:
-            # Find and kill the Auth service process 
-            import subprocess
+            # First try orchestrator-based service stopping
+            if hasattr(self.orchestrator, 'stop_service'):
+                try:
+                    success = await self.orchestrator.stop_service("auth")
+                    if success:
+                        await self._verify_auth_service_down()
+                        logger.info("Auth service failure simulated via orchestrator")
+                        return True
+                except Exception as e:
+                    logger.warning(f"Orchestrator stop failed: {e}")
             
-            # Get the actual auth service port from the orchestrator
+            # Fallback: Direct service manager
             auth_service = self.orchestrator.services_manager.services.get("auth")
-            auth_port = auth_service.port if auth_service else 8081
+            if auth_service and hasattr(auth_service, 'stop'):
+                try:
+                    await auth_service.stop()
+                    await self._verify_auth_service_down()
+                    logger.info("Auth service failure simulated via service manager")
+                    return True
+                except Exception as e:
+                    logger.warning(f"Service manager stop failed: {e}")
             
-            # Find the process using the auth port
-            result = subprocess.run(
-                ["netstat", "-ano"], 
-                capture_output=True, 
-                text=True
-            )
+            # Fallback: Process-based stopping (cross-platform)
+            return await self._stop_auth_process()
             
-            lines = result.stdout.split('\n')
-            auth_pid = None
-            
-            for line in lines:
-                if f":{auth_port}" in line and "LISTENING" in line:
-                    parts = line.split()
-                    if len(parts) >= 5:
-                        auth_pid = parts[-1]
-                        break
-            
-            if auth_pid:
-                # Kill the Auth service process
-                subprocess.run(["taskkill", "/F", "/PID", auth_pid], check=True)
-                await asyncio.sleep(2)  # Wait for process to be killed
-                logger.info(f"Auth service failure simulated successfully (PID: {auth_pid}, Port: {auth_port})")
-                await self._verify_auth_service_down()
-                return True
-            else:
-                logger.error(f"Could not find Auth service process on port {auth_port}")
-                return False
         except Exception as e:
             logger.error(f"Auth failure simulation error: {e}")
+            return False
+    
+    async def _stop_auth_process(self) -> bool:
+        """Stop auth process using cross-platform approach."""
+        try:
+            auth_port = 8081  # Default auth port
+            
+            if sys.platform == "win32":
+                # Windows approach
+                result = subprocess.run(
+                    ["netstat", "-ano"], 
+                    capture_output=True, 
+                    text=True
+                )
+                
+                lines = result.stdout.split('\n')
+                auth_pid = None
+                
+                for line in lines:
+                    if f":{auth_port}" in line and "LISTENING" in line:
+                        parts = line.split()
+                        if len(parts) >= 5:
+                            auth_pid = parts[-1]
+                            break
+                
+                if auth_pid:
+                    subprocess.run(["taskkill", "/F", "/PID", auth_pid], check=True)
+                    await asyncio.sleep(2)
+                    await self._verify_auth_service_down()
+                    logger.info(f"Auth process killed (PID: {auth_pid})")
+                    return True
+            else:
+                # Unix approach
+                result = subprocess.run(
+                    ["lsof", "-t", f"-i:{auth_port}"],
+                    capture_output=True,
+                    text=True
+                )
+                
+                if result.returncode == 0 and result.stdout.strip():
+                    pids = result.stdout.strip().split('\n')
+                    for pid in pids:
+                        subprocess.run(["kill", "-9", pid], check=True)
+                    await asyncio.sleep(2)
+                    await self._verify_auth_service_down()
+                    logger.info(f"Auth processes killed: {pids}")
+                    return True
+            
+            logger.warning("Could not find auth service process to kill")
+            return False
+            
+        except Exception as e:
+            logger.error(f"Process-based auth stop failed: {e}")
             return False
     
     async def _verify_auth_service_down(self) -> None:
@@ -258,7 +310,7 @@ class AuthServiceRecoveryTester:
     async def _test_backend_during_outage(self, token: str) -> Dict[str, Any]:
         """Test Backend HTTP access during Auth outage."""
         try:
-            backend_url = self.orchestrator.get_service_url("backend")
+            backend_url = self._get_service_url("backend")
             headers = {"Authorization": f"Bearer {token}"}
             
             async with httpx.AsyncClient(timeout=5.0) as client:
@@ -289,35 +341,76 @@ class AuthServiceRecoveryTester:
     async def restore_auth_service(self) -> bool:
         """Restore Auth service and verify recovery."""
         try:
-            # Restart the Auth service manually
+            # Use the orchestrator to restart the Auth service properly
+            if hasattr(self.orchestrator, 'restart_service'):
+                success = await self.orchestrator.restart_service("auth")
+                if success:
+                    await self._verify_auth_service_restored()
+                    logger.info("Auth service restored successfully via orchestrator")
+                    return True
             
-            # Get the port that was being used
+            # Fallback: Manual restart using the orchestrator's service manager
             auth_service = self.orchestrator.services_manager.services.get("auth")
-            auth_port = auth_service.port if auth_service else 8081
+            if auth_service:
+                # Try to restart the service through the service manager
+                try:
+                    await auth_service.stop()
+                    await asyncio.sleep(2)
+                    await auth_service.start()
+                    await asyncio.sleep(3)
+                    await self._verify_auth_service_restored()
+                    logger.info("Auth service restored via service manager")
+                    return True
+                except Exception as restart_error:
+                    logger.warning(f"Service manager restart failed: {restart_error}")
             
-            # Start the Auth service in the background
-            auth_main = self.orchestrator.project_root / "auth_service" / "main.py"
+            # Final fallback: Direct process management
+            return await self._manual_auth_restart()
+            
+        except Exception as e:
+            logger.error(f"Auth service restoration error: {e}")
+            return False
+    
+    async def _manual_auth_restart(self) -> bool:
+        """Manual auth service restart as last resort."""
+        try:
+            import subprocess
+            
+            auth_port = 8081  # Default auth port
+            
+            # Start the Auth service manually (Windows compatible)
+            project_root = Path(__file__).parent.parent.parent.parent
+            auth_main = project_root / "auth_service" / "main.py"
+            
+            if not auth_main.exists():
+                logger.error(f"Auth service main.py not found at {auth_main}")
+                return False
+            
             cmd = [
                 sys.executable, str(auth_main),
                 "--host", "0.0.0.0",
                 "--port", str(auth_port)
             ]
             
-            # Start the process in the background
-            subprocess.Popen(
+            # Start the process (let it run in background)
+            process = subprocess.Popen(
                 cmd,
-                cwd=str(self.orchestrator.project_root),
+                cwd=str(project_root),
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
+                creationflags=subprocess.CREATE_NEW_CONSOLE if sys.platform == "win32" else 0
             )
             
-            # Wait for service to start
+            # Give the service time to start
             await asyncio.sleep(5)
+            
+            # Verify it started
             await self._verify_auth_service_restored()
-            logger.info(f"Auth service restored successfully on port {auth_port}")
+            logger.info(f"Auth service manually restarted on port {auth_port}")
             return True
+            
         except Exception as e:
-            logger.error(f"Auth service restoration error: {e}")
+            logger.error(f"Manual auth restart failed: {e}")
             return False
     
     async def _verify_auth_service_restored(self) -> None:
@@ -367,7 +460,7 @@ class AuthServiceRecoveryTester:
         """Test circuit breaker activation during Auth degradation."""
         try:
             # Test that Backend still responds during Auth outage
-            backend_url = self.orchestrator.get_service_url("backend")
+            backend_url = self._get_service_url("backend")
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(f"{backend_url}/health")
                 return {
@@ -378,11 +471,11 @@ class AuthServiceRecoveryTester:
         except Exception as e:
             return {"degraded_properly": False, "error": str(e)}
     
-    async def test_cleanup_test_environment(self) -> None:
+    async def cleanup_test_environment(self) -> None:
         """Cleanup test environment and resources."""
         try:
             if self.orchestrator:
-                await self.orchestrator.stop_test_environment("auth_recovery_test")
+                await self.orchestrator.test_stop_test_environment("auth_recovery_test")
             
             # Close any remaining WebSocket connections
             for session_data in self.authenticated_sessions.values():

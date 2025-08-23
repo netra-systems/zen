@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 class AuthConfig:
     """Centralized configuration for auth service"""
     
+    # Class attribute for environment (used by tests)
+    ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower()
+    
     @staticmethod
     def get_environment() -> str:
         """Get current environment"""

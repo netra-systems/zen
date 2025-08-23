@@ -14,10 +14,9 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real agent testing
 import asyncio
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -44,6 +43,7 @@ class TestSubAgent(BaseSubAgent):
         })
         self.state = SubAgentLifecycle.COMPLETED
 
+
 class AgentOrchestrationTester:
     """Tests multi-agent orchestration and coordination."""
     
@@ -56,9 +56,9 @@ class AgentOrchestrationTester:
         self.orchestration_metrics = {}
         
         # Create mocked dependencies for SupervisorAgent
-        self.db_session = AsyncMock(spec=AsyncSession)
-        self.websocket_manager = AsyncMock(spec=WebSocketManager)
-        self.tool_dispatcher = AsyncMock(spec=ToolDispatcher)
+        self.db_session = AsyncMock()
+        self.websocket_manager = AsyncMock()
+        self.tool_dispatcher = AsyncMock()
     
     async def create_supervisor_agent(self, name: str) -> SupervisorAgent:
         """Create supervisor agent for orchestration."""
@@ -207,6 +207,7 @@ class AgentOrchestrationTester:
             "message": f"Simulated failure recovery for {failing_agent}"
         }
 
+
 class TestAgentOrchestration:
     """E2E tests for agent orchestration."""
     
@@ -298,26 +299,7 @@ class TestAgentOrchestration:
         successful = [r for r in results if isinstance(r, dict) and r.get("status") == "success"]
         assert len(successful) >= 2, "Too many concurrent coordination failures"
         assert total_time < 12.0, f"Concurrent orchestration too slow: {total_time:.2f}s"
-    
-    # Helper methods (≤8 lines each per CLAUDE.md)
-    
-    async def _execute_coordination_workflow(self, supervisor, sub_agents, task):
-        """Execute multi-agent coordination workflow."""
-        responses = []
-        for agent in sub_agents:
-            response = await self._execute_sub_agent_task(agent.name, task)
-            responses.append({"agent_name": agent.name, "response_data": response})
-        return {"status": "success", "sub_agent_responses": responses, "agents_coordinated": len(sub_agents)}
-    
-    async def _execute_sub_agent_task(self, agent_name: str, task: str) -> Dict[str, Any]:
-        """Execute task on specific sub-agent."""
-        await asyncio.sleep(0.1)
-        return {"status": "success", "agent": agent_name, "task_completed": task[:30]}
-    
-    async def _simulate_agent_failure_recovery(self, supervisor, failing_agent):
-        """Simulate agent failure and recovery mechanisms."""
-        await asyncio.sleep(0.05)
-        return {"error_handled": True, "fallback_triggered": True, "recovery_strategy": "fallback_agent"}
+
 
 @pytest.mark.critical
 class TestCriticalOrchestrationScenarios:

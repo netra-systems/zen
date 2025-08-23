@@ -26,6 +26,12 @@ class SessionManager:
         self.redis_url = AuthConfig.get_redis_url()
         self.session_ttl = AuthConfig.get_session_ttl_hours()
         self.redis_client = None
+        
+        # Initialize fallback mode BEFORE attempting Redis connection
+        self._fallback_mode = False
+        self._memory_sessions = {}
+        
+        # Try to connect to Redis if enabled
         self.redis_enabled = self._should_enable_redis()
         if self.redis_enabled:
             self._connect_redis()
@@ -35,10 +41,6 @@ class SessionManager:
         # Initialize race condition protection
         self.used_refresh_tokens = set()
         self._session_locks = {}
-        
-        # In-memory fallback for when Redis fails
-        self._memory_sessions = {}
-        self._fallback_mode = False
             
     def _should_enable_redis(self) -> bool:
         """Determine if Redis should be enabled based on environment"""

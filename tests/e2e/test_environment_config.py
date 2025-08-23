@@ -12,27 +12,36 @@ from enum import Enum
 class TestEnvironmentType(Enum):
     """Test environment types."""
     LOCAL = "local"
+    TEST = "test"
     DEV = "dev"
     STAGING = "staging"
     PRODUCTION = "production"
 
 
 @dataclass
+class ServiceUrls:
+    """Service URL configuration."""
+    backend: str
+    auth: str
+    frontend: str
+    websocket: str
+
+
+@dataclass
+class DatabaseConfig:
+    """Database configuration."""
+    url: str
+    redis_url: str
+    clickhouse_url: Optional[str] = None
+
+
+@dataclass
 class TestEnvironmentConfig:
     """Configuration for test environments."""
     
-    name: str = "test"
-    api_base_url: str = "http://localhost:8000"
-    websocket_url: str = "ws://localhost:8000/websocket"
-    auth_service_url: str = "http://localhost:8001"
-    
-    # Service configurations
-    services: Dict[str, Dict[str, Any]] = None
-    
-    # Database configurations
-    postgres_url: Optional[str] = None
-    clickhouse_url: Optional[str] = None
-    redis_url: str = "redis://localhost:6379"
+    environment: TestEnvironmentType
+    services: ServiceUrls
+    database: DatabaseConfig
     
     # Test user credentials
     test_user_email: str = "test@example.com"
@@ -47,66 +56,87 @@ class TestEnvironmentConfig:
     use_real_llm: bool = False
     use_real_database: bool = False
     enable_monitoring: bool = False
-    
-    def __post_init__(self):
-        """Post-init processing."""
-        if self.services is None:
-            self.services = {}
 
 
-class TestEnvironment:
-    """Test environment manager."""
+def get_test_environment_config(environment: Optional[TestEnvironmentType] = None) -> TestEnvironmentConfig:
+    """Get test environment configuration.
     
-    def __init__(self, env_type: TestEnvironmentType = TestEnvironmentType.LOCAL):
-        self.env_type = env_type
-        self.config = self._create_config(env_type)
+    Args:
+        environment: Optional environment type override
+        
+    Returns:
+        TestEnvironmentConfig for the specified environment
+    """
+    # Auto-detect environment if not specified
+    if environment is None:
+        env_var = os.getenv("TEST_ENVIRONMENT", "test").lower()
+        environment = TestEnvironmentType.TEST if env_var == "test" else TestEnvironmentType.DEV
     
-    def _create_config(self, env_type: TestEnvironmentType) -> TestEnvironmentConfig:
-        """Create configuration based on environment type."""
-        configs = {
-            TestEnvironmentType.LOCAL: TestEnvironmentConfig(
-                name="local",
-                api_base_url="http://localhost:8000",
-                websocket_url="ws://localhost:8000/ws",
-                auth_service_url="http://localhost:8001"
+    # Environment-specific configurations
+    if environment == TestEnvironmentType.TEST:
+        return TestEnvironmentConfig(
+            environment=TestEnvironmentType.TEST,
+            services=ServiceUrls(
+                backend="http://localhost:8000",
+                auth="http://localhost:8001",
+                frontend="http://localhost:3000",
+                websocket="ws://localhost:8000/ws"
             ),
-            TestEnvironmentType.DEV: TestEnvironmentConfig(
-                name="dev",
-                api_base_url=os.getenv("DEV_API_URL", "http://localhost:8000"),
-                websocket_url=os.getenv("DEV_WS_URL", "ws://localhost:8000/ws"),
-                auth_service_url=os.getenv("DEV_AUTH_URL", "http://localhost:8001"),
-                use_real_database=True
+            database=DatabaseConfig(
+                url=os.getenv("TEST_DATABASE_URL", "postgresql://test:test@localhost:5432/test_db"),
+                redis_url=os.getenv("TEST_REDIS_URL", "redis://localhost:6379"),
+                clickhouse_url=os.getenv("TEST_CLICKHOUSE_URL", "clickhouse://localhost:8123")
             ),
-            TestEnvironmentType.STAGING: TestEnvironmentConfig(
-                name="staging", 
-                api_base_url=os.getenv("STAGING_API_URL", "https://staging.netra.ai"),
-                websocket_url=os.getenv("STAGING_WS_URL", "wss://staging.netra.ai/ws"),
-                auth_service_url=os.getenv("STAGING_AUTH_URL", "https://auth.staging.netra.ai"),
-                use_real_database=True,
-                use_real_llm=True
-            ),
-            TestEnvironmentType.PRODUCTION: TestEnvironmentConfig(
-                name="production",
-                api_base_url=os.getenv("PROD_API_URL", "https://api.netra.ai"),
-                websocket_url=os.getenv("PROD_WS_URL", "wss://api.netra.ai/ws"),
-                auth_service_url=os.getenv("PROD_AUTH_URL", "https://auth.netra.ai"),
-                use_real_database=True,
-                use_real_llm=True,
-                enable_monitoring=True
-            )
-        }
-        return configs[env_type]
+            use_real_database=False
+        )
     
-    def get_config(self) -> TestEnvironmentConfig:
-        """Get environment configuration."""
-        return self.config
+    elif environment == TestEnvironmentType.DEV:
+        return TestEnvironmentConfig(
+            environment=TestEnvironmentType.DEV,
+            services=ServiceUrls(
+                backend="http://localhost:8000",
+                auth="http://localhost:8081",
+                frontend="http://localhost:3000",
+                websocket="ws://localhost:8000/ws"
+            ),
+            database=DatabaseConfig(
+                url=os.getenv("DATABASE_URL", "postgresql://dev:dev@localhost:5432/dev_db"),
+                redis_url=os.getenv("REDIS_URL", "redis://localhost:6379"),
+                clickhouse_url=os.getenv("CLICKHOUSE_URL", "clickhouse://localhost:8123")
+            ),
+            use_real_database=True
+        )
+    
+    elif environment == TestEnvironmentType.STAGING:
+        return TestEnvironmentConfig(
+            environment=TestEnvironmentType.STAGING,
+            services=ServiceUrls(
+                backend=os.getenv("STAGING_API_URL", "https://staging.netra.ai"),
+                auth=os.getenv("STAGING_AUTH_URL", "https://auth.staging.netra.ai"),
+                frontend=os.getenv("STAGING_FRONTEND_URL", "https://staging.netra.ai"),
+                websocket=os.getenv("STAGING_WS_URL", "wss://staging.netra.ai/ws")
+            ),
+            database=DatabaseConfig(
+                url=os.getenv("STAGING_DATABASE_URL", "postgresql://staging:staging@localhost:5432/staging_db"),
+                redis_url=os.getenv("STAGING_REDIS_URL", "redis://localhost:6379"),
+                clickhouse_url=os.getenv("STAGING_CLICKHOUSE_URL", "clickhouse://localhost:8123")
+            ),
+            use_real_database=True,
+            use_real_llm=True
+        )
+    
+    else:
+        # Default to local/test configuration
+        return get_test_environment_config(TestEnvironmentType.TEST)
 
 
 def get_test_config(env_name: str = "test") -> TestEnvironmentConfig:
-    """Get test configuration for specified environment."""
-    return TestEnvironmentConfig(name=env_name)
-
-
-def get_test_environment_config(env_name: str = "test") -> TestEnvironmentConfig:
-    """Get test environment configuration for specified environment."""
-    return TestEnvironmentConfig(name=env_name)
+    """Get test configuration for specified environment name."""
+    env_map = {
+        "test": TestEnvironmentType.TEST,
+        "dev": TestEnvironmentType.DEV,
+        "staging": TestEnvironmentType.STAGING,
+        "production": TestEnvironmentType.PRODUCTION
+    }
+    env_type = env_map.get(env_name, TestEnvironmentType.TEST)
+    return get_test_environment_config(env_type)

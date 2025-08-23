@@ -18,8 +18,32 @@ from typing import Any, Dict, Optional, Union
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-from tests.e2e.real_client_types import ClientConfig
-from tests.e2e.websocket_dev_utilities import ConnectionMetrics, ConnectionState
+try:
+    from tests.e2e.integration.real_client_types import ClientConfig, ConnectionState as IntegrationConnectionState
+except ImportError:
+    from tests.e2e.real_client_types import ClientConfig
+    IntegrationConnectionState = None
+    
+try:
+    from tests.e2e.websocket_dev_utilities import ConnectionMetrics, ConnectionState
+except ImportError:
+    # Fallback definitions
+    from enum import Enum
+    from dataclasses import dataclass
+    
+    class ConnectionState(Enum):
+        DISCONNECTED = "disconnected"
+        CONNECTING = "connecting"
+        CONNECTED = "connected"
+        FAILED = "failed"
+        
+    @dataclass
+    class ConnectionMetrics:
+        connection_time: float = 0.0
+        requests_sent: int = 0
+        responses_received: int = 0
+        retry_count: int = 0
+        last_error: str = ""
 
 
 class RealWebSocketClient:

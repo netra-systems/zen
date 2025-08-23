@@ -1,29 +1,30 @@
 {
   "redis": {
-    "mode": "local",
+    "mode": "shared",
     "config": {
-      "host": "localhost",
-      "port": 6379,
+      "host": "redis-17593.c305.ap-south-1-1.ec2.redns.redis-cloud.com",
+      "port": 17593,
+      "password": "cpmdn7pVpsJSK2mb7lUTj2VaQhSC1L3S",
       "db": 0
     }
   },
   "clickhouse": {
-    "mode": "local",
+    "mode": "shared",
     "config": {
-      "host": "localhost",
-      "port": 9000,
-      "http_port": 8123,
+      "host": "clickhouse_host_url_placeholder",
+      "port": 8443,
       "user": "default",
-      "password": "netra_dev_password",
-      "database": "netra_dev"
+      "password": "46YQC0J~6SfZ.",
+      "database": "default",
+      "secure": true
     }
   },
   "postgres": {
-    "mode": "local",
+    "mode": "shared",
     "config": {
-      "host": "localhost",
-      "port": 5433,
-      "user": "postgres",
+      "host": "dev-postgres.example.com",
+      "port": 5432,
+      "user": "dev_user",
       "password": "",
       "database": "netra_dev"
     }

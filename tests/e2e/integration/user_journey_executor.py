@@ -81,11 +81,11 @@ class UserJourneyExecutor:
             raise ValueError("User must have tokens")
         
         ws_client = RealWebSocketClient(
-            url=self.orchestrator.get_websocket_url(),
-            headers={"Authorization": f"Bearer {user.tokens['access_token']}"}
+            self.orchestrator.get_websocket_url()
         )
         
-        await ws_client.connect()
+        headers = {"Authorization": f"Bearer {user.tokens['access_token']}"}
+        await ws_client.connect(headers=headers)
         self.websocket_connections.append(ws_client)
         return ws_client
     
@@ -103,16 +103,19 @@ class UserJourneyExecutor:
             journey_results["steps_completed"].append("websocket_connected")
             
             # Step 2: Send test message
-            await ws_client.send_json({
+            await ws_client.send({
                 "type": "chat_message",
                 "payload": {"content": "Hello from E2E test"}
             })
             journey_results["steps_completed"].append("message_sent")
             
             # Step 3: Wait for response
-            response = await ws_client.receive_json(timeout=10)
-            journey_results["steps_completed"].append("response_received")
-            journey_results["response"] = response
+            response = await ws_client.receive(timeout=10.0)
+            if response:
+                journey_results["steps_completed"].append("response_received")
+                journey_results["response"] = response
+            else:
+                journey_results["errors"].append("No response received from WebSocket")
             
         except Exception as e:
             journey_results["errors"].append(str(e))
