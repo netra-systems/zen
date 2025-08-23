@@ -1,3 +1,4 @@
+import os
 import redis.asyncio as redis
 
 from netra_backend.app.config import get_config
@@ -61,11 +62,23 @@ class RedisManager:
 
     def _create_redis_client(self):
         """Create Redis client with configuration."""
-        return redis.Redis(
-            host=settings.redis.host, port=settings.redis.port,
-            decode_responses=True, username=settings.redis.username,
-            password=settings.redis.password, socket_connect_timeout=10, socket_timeout=5
-        )
+        # FIX: Support local fallback when remote Redis fails
+        redis_mode = os.environ.get("REDIS_MODE", "shared").lower()
+        
+        if redis_mode == "local":
+            # Use local Redis configuration as fallback
+            return redis.Redis(
+                host="localhost", port=6379,
+                decode_responses=True, 
+                socket_connect_timeout=10, socket_timeout=5
+            )
+        else:
+            # Use configured Redis settings
+            return redis.Redis(
+                host=settings.redis.host, port=settings.redis.port,
+                decode_responses=True, username=settings.redis.username,
+                password=settings.redis.password, socket_connect_timeout=10, socket_timeout=5
+            )
 
     async def _test_redis_connection(self):
         """Test Redis connection."""
@@ -78,7 +91,7 @@ class RedisManager:
         self.redis_client = None
 
     async def connect(self):
-        """Connect to Redis if enabled."""
+        """Connect to Redis if enabled with local fallback."""
         if not self.enabled:
             logger.info("Redis connection skipped - service is disabled in development mode")
             return
@@ -87,6 +100,19 @@ class RedisManager:
             self.redis_client = self._create_redis_client()
             await self._test_redis_connection()
         except Exception as e:
+            # FIX: Try local fallback if remote Redis fails
+            redis_mode = os.environ.get("REDIS_MODE", "shared").lower()
+            if redis_mode != "local":
+                logger.warning(f"Remote Redis failed: {e}. Attempting local fallback...")
+                os.environ["REDIS_MODE"] = "local"
+                try:
+                    self.redis_client = self._create_redis_client()
+                    await self._test_redis_connection()
+                    logger.info("Successfully connected to local Redis fallback")
+                    return
+                except Exception as fallback_error:
+                    logger.error(f"Local Redis fallback also failed: {fallback_error}")
+            
             self._handle_connection_error(e)
 
     async def disconnect(self):

@@ -30,7 +30,12 @@ import httpx
 import pytest
 
 
-from netra_backend.app.schemas.core_enums import CircuitBreakerState
+# Circuit breaker state constants for testing
+CIRCUIT_BREAKER_STATES = {
+    'OPEN': 'open',
+    'CLOSED': 'closed',
+    'HALF_OPEN': 'half_open'
+}
 from tests.e2e.health_check_core import (
     HEALTH_STATUS,
     SERVICE_ENDPOINTS,
@@ -38,7 +43,7 @@ from tests.e2e.health_check_core import (
     create_healthy_result,
     create_service_error_result,
 )
-from tests.health_service_checker import ServiceHealthChecker
+from tests.e2e.health_service_checker import ServiceHealthChecker
 
 logger = logging.getLogger(__name__)
 

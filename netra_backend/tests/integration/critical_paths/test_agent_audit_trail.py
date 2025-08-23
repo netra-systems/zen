@@ -32,7 +32,8 @@ import pytest
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
+from netra_backend.app.core.database_types import DatabaseType
 
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
@@ -200,7 +201,7 @@ class AuditEventEnricher:
 class AuditStorage:
     """Stores audit events with different storage backends."""
     
-    def __init__(self, db_manager: DatabaseConnectionManager, redis_service: RedisService):
+    def __init__(self, db_manager: ConnectionManager, redis_service: RedisService):
         self.db_manager = db_manager
         self.redis_service = redis_service
         self.encryption_key = "test_encryption_key"  # In practice, use proper key management
@@ -475,8 +476,7 @@ class AuditTrailManager:
         
     async def initialize_services(self):
         """Initialize required services."""
-        self.db_manager = DatabaseConnectionManager()
-        await self.db_manager.initialize()
+        self.db_manager = ConnectionManager(DatabaseType.POSTGRESQL)
         
         self.redis_service = RedisService()
         await self.redis_service.initialize()

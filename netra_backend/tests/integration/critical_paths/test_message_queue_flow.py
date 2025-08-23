@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
 
 from netra_backend.app.services.message_queue import MessageQueueService
 from netra_backend.app.services.redis_service import RedisService
@@ -51,7 +51,7 @@ class MessageQueueFlowManager:
         self.supervisor_agent = SupervisorAgent()
         await self.supervisor_agent.initialize()
         
-        self.db_manager = DatabaseConnectionManager()
+        self.db_manager = ConnectionManager()
         await self.db_manager.initialize()
         
         self.redis_service = RedisService()

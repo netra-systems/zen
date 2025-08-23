@@ -431,5 +431,5 @@ class MessageHandlerService:
         return await message_queue.get_queue_stats()
 
 
-# Import MessageRouter for backward compatibility with tests
-from netra_backend.app.services.websocket.message_router import MessageRouter
+# MessageRouter import removed to prevent circular import
+# Tests should import MessageRouter directly from message_router module

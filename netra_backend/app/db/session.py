@@ -4,7 +4,7 @@ from typing import AsyncIterator, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.db.postgres import async_session_factory, get_async_db
+from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -61,9 +61,10 @@ session_manager = DatabaseSessionManager()
 
 def _validate_session_factory():
     """Validate that session factory is initialized."""
+    from netra_backend.app.db.postgres_core import async_session_factory
     if async_session_factory is None:
         logger.error("async_session_factory is not initialized")
-        raise RuntimeError("Database not configured")
+        raise RuntimeError("Database not configured. async_session_factory is not initialized.")
 
 @asynccontextmanager
 async def _get_validated_session() -> AsyncIterator[AsyncSession]:

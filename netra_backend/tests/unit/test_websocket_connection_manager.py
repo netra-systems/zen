@@ -27,7 +27,7 @@ class TestWebSocketConnectionManager:
     @pytest.fixture
     def manager(self):
         """Create connection manager with mocked dependencies."""
-        with patch('netra_backend.app.websocket.connection_manager.ConnectionExecutionOrchestrator'):
+        with patch('netra_backend.app.websocket.connection.ConnectionExecutionOrchestrator'):
             manager = ConnectionManager()
             manager.orchestrator = Mock()
             return manager
@@ -92,7 +92,7 @@ class TestWebSocketConnectionManager:
     
     def test_is_connection_alive(self, manager, connection_info):
         """Test checking if connection is alive."""
-        with patch('netra_backend.app.websocket.connection_manager.ConnectionValidator') as mock_validator:
+        with patch('netra_backend.app.websocket.connection_info.ConnectionValidator') as mock_validator:
             mock_validator.is_websocket_connected.return_value = True
             
             is_alive = manager.is_connection_alive(connection_info)

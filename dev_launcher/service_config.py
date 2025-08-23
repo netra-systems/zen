@@ -109,7 +109,7 @@ class ServicesConfiguration:
             "secure": False
         },
         shared_config={
-            "host": os.environ.get("CLICKHOUSE_SHARED_HOST", "clickhouse_host_url_placeholder"),
+            "host": os.environ.get("CLICKHOUSE_SHARED_HOST", "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"),
             "port": 8443,
             "user": "default",
             "password": "46YQC0J~6SfZ.",
@@ -290,31 +290,49 @@ class ServicesConfiguration:
         return warnings
     
     def _check_redis_installed(self) -> bool:
-        """Check if Redis is installed locally."""
+        """Check if Redis is installed and running locally."""
         try:
-            import subprocess
-            result = subprocess.run(["redis-cli", "--version"], capture_output=True, text=True)
-            return result.returncode == 0
-        except:
-            return False
+            from dev_launcher.service_availability_checker import ServiceAvailabilityChecker
+            checker = ServiceAvailabilityChecker()
+            return checker._check_redis_availability()
+        except ImportError:
+            # Fallback to basic version check
+            try:
+                import subprocess
+                result = subprocess.run(["redis-cli", "--version"], capture_output=True, text=True, timeout=5)
+                return result.returncode == 0
+            except:
+                return False
     
     def _check_clickhouse_installed(self) -> bool:
-        """Check if ClickHouse is installed locally."""
+        """Check if ClickHouse is installed and running locally."""
         try:
-            import subprocess
-            result = subprocess.run(["clickhouse-client", "--version"], capture_output=True, text=True)
-            return result.returncode == 0
-        except:
-            return False
+            from dev_launcher.service_availability_checker import ServiceAvailabilityChecker
+            checker = ServiceAvailabilityChecker()
+            return checker._check_clickhouse_availability()
+        except ImportError:
+            # Fallback to basic version check
+            try:
+                import subprocess
+                result = subprocess.run(["clickhouse-client", "--version"], capture_output=True, text=True, timeout=5)
+                return result.returncode == 0
+            except:
+                return False
     
     def _check_postgres_installed(self) -> bool:
-        """Check if PostgreSQL is installed locally."""
+        """Check if PostgreSQL is installed and running locally."""
         try:
-            import subprocess
-            result = subprocess.run(["psql", "--version"], capture_output=True, text=True)
-            return result.returncode == 0
-        except:
-            return False
+            from dev_launcher.service_availability_checker import ServiceAvailabilityChecker
+            checker = ServiceAvailabilityChecker()
+            return checker._check_postgres_availability()
+        except ImportError:
+            # Fallback to basic version check
+            try:
+                import subprocess
+                result = subprocess.run(["psql", "--version"], capture_output=True, text=True, timeout=5)
+                return result.returncode == 0
+            except:
+                return False
     
     def save_to_file(self, path: Path):
         """Save configuration to a JSON file."""
@@ -526,13 +544,19 @@ class ServiceConfigWizard:
 
 
 def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
-    """Load existing configuration or create a new one.
+    """Load existing configuration or create a new one with smart service detection.
     
-    Default configuration:
-    - Redis: LOCAL
-    - ClickHouse: LOCAL
-    - PostgreSQL: LOCAL
-    - LLM: SHARED (API providers)
+    This function now includes intelligent service availability checking:
+    - Automatically detects if local services are installed and available
+    - Falls back to shared services when local ones aren't available
+    - Validates API keys and provides guidance
+    - Ensures smooth cold start experience
+    
+    Default configuration with smart detection:
+    - Redis: LOCAL (if available) → SHARED (if not)
+    - ClickHouse: LOCAL (if available) → SHARED (if not)  
+    - PostgreSQL: LOCAL (if available) → SHARED (if not)
+    - LLM: SHARED (if API keys valid) → MOCK (if not)
     - Auth Service: LOCAL
     
     To override defaults:
@@ -548,10 +572,15 @@ def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
             config = ServicesConfiguration.load_from_file(config_path)
             logger.info("Loaded existing service configuration")
             
-            # Validate the loaded configuration
+            # Check service availability and auto-adjust if needed
+            config, availability_warnings = _check_and_adjust_services(config, interactive)
+            
+            # Validate the configuration
             warnings = config.validate()
+            warnings.extend(availability_warnings)
+            
             if warnings and interactive:
-                # Log warnings but don't prompt user
+                # Log warnings but don't prompt user in non-verbose mode
                 for warning in warnings:
                     logger.debug(f"Configuration notice: {warning}")
             
@@ -559,17 +588,75 @@ def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
         except Exception as e:
             logger.warning(f"Failed to load configuration: {e}")
     
-    # Create new configuration
+    # Create new configuration with smart detection
+    config = ServicesConfiguration()
+    
     if interactive:
         try:
-            wizard = ServiceConfigWizard()
-            return wizard.run()
+            # Check if user wants to run wizard or use smart defaults
+            setup_unicode_console()
+            use_smart_defaults = _ask_use_smart_defaults()
+            
+            if use_smart_defaults:
+                config, warnings = _check_and_adjust_services(config, interactive)
+                
+                if warnings:
+                    print()
+                    safe_print(f"{get_emoji('info')} Configuration adjustments made:")
+                    for warning in warnings:
+                        print(f"  • {warning}")
+                
+                # Save the smart configuration
+                config.save_to_file(config_path)
+                safe_print(f"{get_emoji('check')} Smart configuration saved to {config_path}")
+                
+                return config
+            else:
+                # Run interactive wizard
+                wizard = ServiceConfigWizard()
+                return wizard.run()
+                
         except EOFError:
-            logger.info("Non-interactive mode detected, using default configuration")
-            config = ServicesConfiguration()
+            logger.info("Non-interactive mode detected, using smart default configuration")
+            config, _ = _check_and_adjust_services(config, False)
             return config
     else:
-        # Use defaults in non-interactive mode
-        config = ServicesConfiguration()
-        logger.info("Using default service configuration (LOCAL for all except LLM)")
+        # Non-interactive mode: use smart defaults
+        config, warnings = _check_and_adjust_services(config, False)
+        logger.info("Using smart default service configuration with availability detection")
+        
+        if warnings:
+            for warning in warnings:
+                logger.info(f"Service adjustment: {warning}")
+        
         return config
+
+
+def _ask_use_smart_defaults() -> bool:
+    """Ask user if they want to use smart defaults or run wizard."""
+    print("\n" + "="*60)
+    safe_print(f"{get_emoji('rocket')} Netra Development Environment Setup")
+    print("="*60)
+    print("\nChoose setup method:")
+    print("  1. Smart Setup (Recommended) - Automatically detect and configure services")
+    print("  2. Custom Setup - Interactive wizard for manual configuration")
+    print()
+    
+    try:
+        choice = input("Choose setup method [1-2, default=1]: ").strip() or "1"
+        return choice == "1"
+    except EOFError:
+        logger.info("Non-interactive mode: using smart defaults")
+        return True
+
+
+def _check_and_adjust_services(config: ServicesConfiguration, 
+                              interactive: bool) -> tuple[ServicesConfiguration, list[str]]:
+    """Check service availability and adjust configuration accordingly."""
+    try:
+        from dev_launcher.service_availability_checker import check_and_configure_services
+        return check_and_configure_services(config, interactive=interactive)
+    except ImportError:
+        logger.warning("Service availability checker not available, using basic validation")
+        warnings = config.validate()
+        return config, warnings

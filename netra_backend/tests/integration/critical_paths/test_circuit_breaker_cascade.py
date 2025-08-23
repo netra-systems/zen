@@ -30,7 +30,7 @@ from netra_backend.app.core.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerRegistry,
 )
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
 from netra_backend.app.core.health_checkers import (
     check_postgres_health,
     check_redis_health,
@@ -67,7 +67,7 @@ class CircuitBreakerCascadeManager:
         await self.redis_service.connect()
         
         # Real database connection manager
-        self.db_manager = DatabaseConnectionManager()
+        self.db_manager = ConnectionManager()
         await self.db_manager.initialize()
         
         # Real WebSocket manager

@@ -16,6 +16,7 @@ from fastapi.responses import JSONResponse
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.security.oauth_security import (
     OAuthSecurityManager, 
+    OAuthStateCleanupManager,
     SessionFixationProtector, 
     validate_cors_origin
 )
@@ -58,6 +59,7 @@ def get_redis_client():
 
 # Initialize with Redis client that matches session manager
 oauth_security = OAuthSecurityManager(auth_service.session_manager.redis_client)
+oauth_cleanup_manager = OAuthStateCleanupManager(auth_service.session_manager.redis_client)
 session_fixation_protector = SessionFixationProtector(auth_service.session_manager)
 
 def get_client_info(request: Request) -> dict:
@@ -405,6 +407,15 @@ async def dev_login(
     from auth_service.auth_core.database.repository import AuthUserRepository
     
     try:
+        # CRITICAL FIX: Ensure database tables exist before creating users
+        # This prevents dev login failures when tables don't exist in cold start scenarios
+        try:
+            await auth_db.create_tables()
+            logger.info("Database tables created/verified for dev login")
+        except Exception as table_error:
+            logger.warning(f"Table creation failed, attempting to continue: {table_error}")
+            # Continue anyway as tables might already exist
+        
         # Sync to main database first to get/create the user
         from auth_service.auth_core.database.models import AuthUser
         
@@ -573,6 +584,14 @@ async def oauth_callback(
             
             user_info = user_response.json()
         
+        # CRITICAL FIX: Ensure database tables exist for OAuth flows too
+        try:
+            await auth_db.create_tables()
+            logger.debug("Database tables created/verified for OAuth callback")
+        except Exception as table_error:
+            logger.warning(f"Table creation failed in OAuth callback: {table_error}")
+            # Continue anyway as tables might already exist
+            
         # Create or update user in main database
         async with auth_db.get_session() as session:
             repo = AuthUserRepository(session)
@@ -879,6 +898,14 @@ async def oauth_callback_post(
         
         # Create or update user in database with enhanced error handling and retries
         try:
+            # CRITICAL FIX: Ensure database tables exist for POST OAuth callback too
+            try:
+                await auth_db.create_tables()
+                logger.debug("Database tables created/verified for OAuth POST callback")
+            except Exception as table_error:
+                logger.warning(f"Table creation failed in OAuth POST callback: {table_error}")
+                # Continue anyway as tables might already exist
+            
             # Use auth service's retry mechanism for database operations
             async def db_operation():
                 async with auth_db.get_session() as session:

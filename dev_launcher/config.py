@@ -22,10 +22,11 @@ logger = logging.getLogger(__name__)
 class LauncherConfig:
     """Configuration for the development launcher."""
     
-    # Port configuration
+    # Port configuration - FIX: Force dynamic ports by default to avoid conflicts
     backend_port: Optional[int] = None
-    frontend_port: int = ServicePorts.FRONTEND_DEFAULT
+    frontend_port: int = ServicePorts.FRONTEND_DEFAULT  # Will be dynamically allocated if conflicts
     dynamic_ports: bool = True  # Default to dynamic allocation
+    enable_port_conflict_resolution: bool = True  # Auto-resolve port conflicts
     
     # Reload configuration (uses native reload)
     backend_reload: bool = False  # Default to no reload for performance
@@ -97,12 +98,24 @@ class LauncherConfig:
     
     def _validate(self):
         """Validate configuration values."""
-        # Validate ports
+        # FIX: Enhanced port validation with conflict detection
         if self.backend_port and not (ServicePorts.DYNAMIC_PORT_MIN <= self.backend_port <= ServicePorts.DYNAMIC_PORT_MAX):
-            raise ValueError(f"Invalid backend port: {self.backend_port}. Must be between {ServicePorts.DYNAMIC_PORT_MIN} and {ServicePorts.DYNAMIC_PORT_MAX}.")
+            if self.enable_port_conflict_resolution:
+                logger.warning(f"Invalid backend port {self.backend_port}, will use dynamic allocation")
+                self.backend_port = None
+            else:
+                raise ValueError(f"Invalid backend port: {self.backend_port}. Must be between {ServicePorts.DYNAMIC_PORT_MIN} and {ServicePorts.DYNAMIC_PORT_MAX}.")
         
         if not (1 <= self.frontend_port <= 65535):
-            raise ValueError(f"Invalid frontend port: {self.frontend_port}. Must be between 1 and 65535.")
+            if self.enable_port_conflict_resolution:
+                logger.warning(f"Invalid frontend port {self.frontend_port}, will use default")
+                self.frontend_port = ServicePorts.FRONTEND_DEFAULT
+            else:
+                raise ValueError(f"Invalid frontend port: {self.frontend_port}. Must be between 1 and 65535.")
+        
+        # FIX: Check for port conflicts at validation time
+        if self.enable_port_conflict_resolution:
+            self._resolve_port_conflicts()
         
         # Validate project root exists
         if not self.project_root.exists():
@@ -117,6 +130,62 @@ class LauncherConfig:
         
         if not frontend_dir.exists():
             raise ValueError(f"Frontend directory not found: {frontend_dir}\nAre you running from the correct directory?")
+    
+    def _resolve_port_conflicts(self):
+        """FIX: Resolve port conflicts using service discovery system."""
+        try:
+            from dev_launcher.service_discovery_system import service_discovery
+            
+            # Load existing service registrations
+            service_discovery.load_discovery_file()
+            
+            # Check backend port
+            if self.backend_port and not service_discovery.is_port_available(self.backend_port):
+                logger.warning(f"Backend port {self.backend_port} is in use, enabling dynamic allocation")
+                self.backend_port = None
+                self.dynamic_ports = True
+            
+            # Check frontend port
+            if not service_discovery.is_port_available(self.frontend_port):
+                logger.warning(f"Frontend port {self.frontend_port} is in use, will find alternative")
+                # Find alternative port using service discovery
+                alt_port = service_discovery.find_available_port(
+                    preferred_port=None, 
+                    port_range=(3001, 3010)
+                )
+                if alt_port:
+                    logger.info(f"Using alternative frontend port {alt_port}")
+                    self.frontend_port = alt_port
+                else:
+                    logger.warning("No alternative frontend ports available, will use dynamic allocation")
+                    self.dynamic_ports = True
+                    
+        except ImportError:
+            logger.warning("Service discovery system not available, falling back to basic port checking")
+            # Fallback to original implementation
+            import socket
+            
+            def is_port_available(port):
+                try:
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                        sock.settimeout(1)
+                        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                        sock.bind(('127.0.0.1', port))
+                        return True
+                except OSError:
+                    return False
+            
+            if self.backend_port and not is_port_available(self.backend_port):
+                self.backend_port = None
+                self.dynamic_ports = True
+            
+            if not is_port_available(self.frontend_port):
+                for alt_port in range(3001, 3010):
+                    if is_port_available(alt_port):
+                        self.frontend_port = alt_port
+                        break
+                else:
+                    self.dynamic_ports = True
     
     @classmethod
     def from_args(cls, args) -> "LauncherConfig":

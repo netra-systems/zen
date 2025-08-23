@@ -27,7 +27,7 @@ import time
 
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from tests.e2e.concurrent_user_models import IsolationValidator
-from tests.e2e.integration.concurrent_user_simulators import (
+from tests.e2e.concurrent_user_simulators import (
     ConcurrentUserSimulator,
     ConcurrentWebSocketManager,
 

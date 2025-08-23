@@ -303,3 +303,64 @@ def create_test_config(**overrides) -> Dict[str, Any]:
     }
     base_config.update(overrides)
     return base_config
+
+
+class CriticalPathMetrics:
+    """Metrics collection for critical path testing."""
+    
+    def __init__(self):
+        self.metrics = {}
+        self.start_time = None
+        self.end_time = None
+    
+    def start_timing(self):
+        """Start timing measurement."""
+        import time
+        self.start_time = time.time()
+    
+    def end_timing(self):
+        """End timing measurement.""" 
+        import time
+        self.end_time = time.time()
+    
+    def get_duration(self) -> float:
+        """Get duration in seconds."""
+        if self.start_time and self.end_time:
+            return self.end_time - self.start_time
+        return 0.0
+    
+    def add_metric(self, name: str, value: Any):
+        """Add a metric value."""
+        self.metrics[name] = value
+    
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get all collected metrics."""
+        return self.metrics.copy()
+
+
+class L4StagingCriticalPathTestBase:
+    """Base class for L4 staging critical path tests."""
+    
+    def __init__(self):
+        self.metrics = CriticalPathMetrics()
+        self.staging_config = {}
+    
+    async def setUp(self):
+        """Set up L4 staging test environment."""
+        self.metrics.start_timing()
+        # Initialize staging environment
+        pass
+    
+    async def tearDown(self):
+        """Clean up L4 staging test environment."""
+        self.metrics.end_timing()
+        # Clean up staging resources
+        pass
+    
+    def get_staging_config(self) -> Dict[str, Any]:
+        """Get staging configuration."""
+        return self.staging_config
+    
+    def set_staging_config(self, config: Dict[str, Any]):
+        """Set staging configuration."""
+        self.staging_config.update(config)

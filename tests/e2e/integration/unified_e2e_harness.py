@@ -10,8 +10,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from tests.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.e2e.user_journey_executor import TestUser, UserJourneyExecutor
+from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
+from tests.e2e.integration.user_journey_executor import TestUser, UserJourneyExecutor
 from tests.e2e.test_environment_config import (
     TestEnvironmentConfig,
     TestEnvironmentType,

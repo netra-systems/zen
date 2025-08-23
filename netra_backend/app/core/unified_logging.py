@@ -201,3 +201,7 @@ def log_execution_time(operation_name: Optional[str] = None):
 def get_central_logger() -> UnifiedLogger:
     """Get the central logger instance."""
     return central_logger
+
+def get_logger(name: Optional[str] = None):
+    """Get a logger instance with the given name."""
+    return central_logger.get_logger(name)

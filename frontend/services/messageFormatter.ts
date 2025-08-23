@@ -154,11 +154,14 @@ export interface RenderingHints {
  * Processes message content through formatting pipeline
  */
 export const processMessageContent = (content: string): ProcessedContent => {
-  const metadata = createFormattingMetadata(content);
-  const processedContent = cleanAndNormalizeContent(content);
+  // Ensure content is a string
+  const stringContent = typeof content === 'string' ? content : String(content || '');
+  
+  const metadata = createFormattingMetadata(stringContent);
+  const processedContent = cleanAndNormalizeContent(stringContent);
   const renderingHints = createRenderingHints(metadata);
   
-  return { originalContent: content, processedContent, metadata, renderingHints };
+  return { originalContent: stringContent, processedContent, metadata, renderingHints };
 };
 
 /**
@@ -196,6 +199,7 @@ export const enhanceMessageWithFormatting = (message: Message): Message => {
   
   return {
     ...message,
+    content: processed.originalContent, // Ensure content is always a safe string
     metadata: enhancedMetadata
   };
 };

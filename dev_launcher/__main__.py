@@ -481,24 +481,44 @@ def main():
 
 
 def _print_troubleshooting_info():
-    """Print Windows-specific troubleshooting information."""
-    if sys.platform == "win32":
-        print("\n🔧 TROUBLESHOOTING (Windows):")
-        print("   1. Check if ports are in use: netstat -ano | findstr \":8000 :3000 :8081\"")
-        print("   2. Kill hanging processes: tasklist | findstr \"node python uvicorn\"")
-        print("   3. Force kill if needed: taskkill /F /T /IM \"process_name.exe\"")
-        print("   4. Check Windows Defender/Firewall settings")
-        print("   5. Run as Administrator if permission issues persist")
-    else:
-        print("\n🔧 TROUBLESHOOTING:")
-        print("   1. Check if ports are in use: lsof -i :8000,:3000,:8081")
-        print("   2. Kill hanging processes: pkill -f \"uvicorn|next|node\"")
-        print("   3. Check system resources: ps aux | grep -E \"(uvicorn|next|node)\"")
-        print("   4. Review logs in ./logs/ directory")
+    """Print comprehensive troubleshooting information."""
+    print("\n🔧 TROUBLESHOOTING GUIDE:")
+    print("="*50)
     
-    print("   5. Try running with --verbose for more details")
-    print("   6. Check that all dependencies are installed")
-    print("   7. Ensure .env files are properly configured")
+    # System-specific process management
+    if sys.platform == "win32":
+        print("Process Management (Windows):")
+        print("   1. Check ports: netstat -ano | findstr \":8000 :3000 :8081\"")
+        print("   2. List processes: tasklist | findstr \"node python uvicorn\"")
+        print("   3. Kill process: taskkill /F /T /IM \"process_name.exe\"")
+        print("   4. Check Windows Defender/Firewall settings")
+        print("   5. Try running as Administrator if permission issues persist")
+    else:
+        print("Process Management (Unix/Linux/Mac):")
+        print("   1. Check ports: lsof -i :8000,:3000,:8081")
+        print("   2. Kill processes: pkill -f \"uvicorn|next|node\"")
+        print("   3. System resources: ps aux | grep -E \"(uvicorn|next|node)\"")
+    
+    print("\nService Configuration Issues:")
+    print("   • If local services not available, the platform auto-switches to shared services")
+    print("   • For Redis/ClickHouse/PostgreSQL: Install locally or use shared mode")
+    print("   • For AI features: Set up API keys (ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.)")
+    print("   • Check service status: python -m dev_launcher --list-services")
+    print("   • Reset services: python -m dev_launcher --reset-services")
+    
+    print("\nGeneral Issues:")
+    print("   • Review logs in ./logs/ directory")
+    print("   • Run with --verbose for detailed output")
+    print("   • Check all dependencies are installed")
+    print("   • Verify .env files are properly configured")
+    print("   • Ensure you're in the project root directory")
+    
+    print("\nQuick Fixes:")
+    print("   • Try: python -m dev_launcher --reset-services")
+    print("   • Try: python -m dev_launcher --no-cache")
+    print("   • Try: python -m dev_launcher --verbose")
+    
+    print("="*50)
 
 
 if __name__ == "__main__":

@@ -41,14 +41,12 @@ class TestSyntaxFix:
 
 class TestScalingEdgeCases:
     # """Test edge cases in scaling analysis workflows."""
-    
     # async def test_extreme_usage_increase(self, scaling_analysis_setup):
     # """Test handling of extreme usage increase scenarios."""
     # setup = scaling_analysis_setup
     # state = create_extreme_usage_state()
     # results = await execute_scaling_workflow(setup, state)
     # validate_extreme_usage_handling(results)
-    
     # async def test_declining_usage_analysis(self, scaling_analysis_setup):
     # """Test analysis of declining usage scenarios."""
     # setup = scaling_analysis_setup

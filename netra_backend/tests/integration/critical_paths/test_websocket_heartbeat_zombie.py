@@ -1139,7 +1139,6 @@ class TestWebSocketHeartbeatZombieL3:
         for connection_id, websocket, _ in zombie_connections:
 
             assert websocket.close_called or not websocket.is_active, \
-
                 f"Zombie connection {connection_id} should be closed"
     
     @pytest.mark.asyncio
@@ -1332,7 +1331,6 @@ class TestWebSocketHeartbeatZombieL3:
         # Response time should be reasonable
 
         assert 0.05 <= metrics.average_response_time <= 0.5, \
-
             f"Average response time {metrics.average_response_time:.3f}s seems unreasonable"
     
     @mock_justified("L3: WebSocket heartbeat and zombie detection testing with controlled connection simulation")
@@ -1481,7 +1479,6 @@ class TestWebSocketHeartbeatZombieL3:
         # Performance assertions
 
         assert final_metrics["failed_cleanups"] <= final_metrics["connections_cleaned_up"] * 0.1, \
-
             "Failed cleanup rate should be below 10%"
         
         logger.info(f"Reliability test results: {detection_accuracy:.2f} detection accuracy, "

@@ -31,7 +31,7 @@ import pytest
 
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
 
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
@@ -359,7 +359,7 @@ class AgentErrorPropagationManager:
         self.redis_service = RedisService()
         await self.redis_service.initialize()
         
-        self.db_manager = DatabaseConnectionManager()
+        self.db_manager = ConnectionManager()
         await self.db_manager.initialize()
         
         self.error_collector = ErrorCollector()

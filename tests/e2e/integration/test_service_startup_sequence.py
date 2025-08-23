@@ -23,8 +23,8 @@ import pytest
 
 # Add project root to path for imports
 
-from tests.e2e.integration.service_failure_tester import ServiceFailureScenarioTester
-from tests.e2e.integration.startup_sequence_validator import ServiceStartupSequenceValidator
+from tests.e2e.service_failure_tester import ServiceFailureScenarioTester
+from tests.e2e.startup_sequence_validator import ServiceStartupSequenceValidator
 
 # PYTEST TEST IMPLEMENTATIONS
 

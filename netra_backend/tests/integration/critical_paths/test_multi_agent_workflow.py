@@ -27,7 +27,7 @@ import pytest
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
 from netra_backend.app.services.llm.llm_manager import LLMManager
 
 # Real components for L2 testing
@@ -257,7 +257,7 @@ class MultiAgentWorkflowManager:
         self.redis_service = RedisService()
         await self.redis_service.initialize()
         
-        self.db_manager = DatabaseConnectionManager()
+        self.db_manager = ConnectionManager()
         await self.db_manager.initialize()
         
     async def create_simple_workflow(self) -> WorkflowDefinition:

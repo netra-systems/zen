@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, AsyncGenerator
 from unittest.mock import MagicMock, AsyncMock, patch
 from contextlib import asynccontextmanager
 
-from netra_backend.app.services.mesh.service_discovery import ServiceRegistry
+from netra_backend.app.services.mesh.service_discovery import ServiceDiscovery as ServiceRegistry
 from netra_backend.app.services.mesh.service_mesh import ServiceMesh
 
 

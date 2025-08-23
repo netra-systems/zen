@@ -60,6 +60,49 @@ class AuthDatabaseManager:
         return AuthDatabaseManager.get_auth_database_url_async()
     
     @staticmethod
+    async def create_user_with_rollback(user_data: dict) -> dict:
+        """Create user with proper transaction rollback handling.
+        
+        FIX: Ensures complete rollback on failure to prevent partial user records.
+        
+        Args:
+            user_data: User data dictionary with email, name, etc.
+            
+        Returns:
+            Created user data or raises exception with cleanup
+        """
+        from auth_service.auth_core.database.connection_manager import get_connection
+        
+        async with get_connection() as conn:
+            async with conn.transaction():
+                try:
+                    # Create user record
+                    user_id = await conn.fetchval(
+                        "INSERT INTO users (email, name, created_at) VALUES ($1, $2, NOW()) RETURNING id",
+                        user_data.get("email"), user_data.get("name")
+                    )
+                    
+                    # Create associated profile if data provided
+                    if user_data.get("profile_data"):
+                        await conn.execute(
+                            "INSERT INTO user_profiles (user_id, data, created_at) VALUES ($1, $2, NOW())",
+                            user_id, user_data["profile_data"]
+                        )
+                    
+                    # Return complete user data
+                    return {
+                        "id": user_id,
+                        "email": user_data.get("email"),
+                        "name": user_data.get("name"),
+                        "created_at": "now"
+                    }
+                    
+                except Exception as e:
+                    # Transaction automatically rolls back on exception
+                    logger.error(f"User creation failed, transaction rolled back: {e}")
+                    raise Exception(f"Failed to create user: {e}") from e
+    
+    @staticmethod
     def get_auth_database_url_async() -> str:
         """Get async database URL for auth service.
         

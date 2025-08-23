@@ -39,11 +39,7 @@ import pytest
 
 from tests.e2e.config import TEST_USERS, TEST_ENDPOINTS
 from tests.e2e.integration.websocket_message_format_validators import (
-    MessageFormatValidator, FieldConsistencyChecker, CoroutineErrorDetector, MessageStructureValidator,
-    MessageFormatValidator,
-    FieldConsistencyChecker,
-    CoroutineErrorDetector,
-    MessageStructureValidator
+    MessageFormatValidator, FieldConsistencyChecker, CoroutineErrorDetector, MessageStructureValidator
 )
 
 

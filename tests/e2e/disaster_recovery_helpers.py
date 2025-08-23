@@ -10,8 +10,10 @@ Modular design for disaster recovery testing with backup, failure simulation, an
 """
 
 import asyncio
+import hashlib
 import json
 import logging
+import os
 import shutil
 import subprocess
 import tempfile
@@ -694,7 +696,6 @@ class DataIntegrityValidator:
             
             await redis_client.aclose()
             
-            import hashlib
             return hashlib.md5(checksum_data.encode()).hexdigest()
         except Exception:
             return "error"

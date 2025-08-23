@@ -31,7 +31,7 @@ import pytest
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
 
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
@@ -248,7 +248,7 @@ class ProviderPricing:
 class CostTracker:
     """Tracks and manages AI operation costs."""
     
-    def __init__(self, db_manager: DatabaseConnectionManager, redis_service: RedisService):
+    def __init__(self, db_manager: ConnectionManager, redis_service: RedisService):
         self.db_manager = db_manager
         self.redis_service = redis_service
         self.pricing = ProviderPricing()
@@ -775,7 +775,7 @@ class CostTrackingManager:
         
     async def initialize_services(self):
         """Initialize required services."""
-        self.db_manager = DatabaseConnectionManager()
+        self.db_manager = ConnectionManager()
         await self.db_manager.initialize()
         
         self.redis_service = RedisService()

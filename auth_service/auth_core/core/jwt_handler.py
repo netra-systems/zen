@@ -193,7 +193,8 @@ class JWTHandler:
     
     def refresh_access_token(self, refresh_token: str) -> Optional[tuple]:
         """Generate new access token from refresh token"""
-        payload = self.validate_token(refresh_token, "refresh")
+        # For token consumption operations, we DO need replay protection
+        payload = self.validate_token_for_consumption(refresh_token, "refresh")
         if not payload:
             return None
             
@@ -207,6 +208,64 @@ class JWTHandler:
         new_refresh = self.create_refresh_token(user_id)
         
         return new_access, new_refresh
+    
+    def validate_token_for_consumption(self, token: str, token_type: str = "access") -> Optional[Dict]:
+        """
+        Validate token for consumption operations (token exchange, refresh, etc.)
+        This includes replay protection via JWT ID tracking.
+        """
+        try:
+            # Check if token is blacklisted first
+            if self.is_token_blacklisted(token):
+                logger.warning("Token is blacklisted")
+                return None
+            
+            # First validate token security (algorithm, etc.)
+            if not self.security_validator.validate_token_security(token):
+                logger.warning("Token failed security validation")
+                return None
+            
+            payload = jwt.decode(
+                token, 
+                self.secret, 
+                algorithms=[self.algorithm],
+                options={
+                    "verify_signature": True,
+                    "verify_exp": True,
+                    "verify_iat": True,
+                    "verify_aud": False,
+                    "require": ["exp", "iat", "sub"]
+                }
+            )
+            
+            if payload.get("token_type") != token_type:
+                logger.warning(f"Invalid token type: expected {token_type}")
+                return None
+            
+            # Check if user is blacklisted
+            user_id = payload.get("sub")
+            if user_id and self.is_user_blacklisted(user_id):
+                logger.warning(f"User {user_id} is blacklisted")
+                return None
+            
+            # Additional security checks
+            if not self._validate_token_claims(payload):
+                logger.warning("Token claims validation failed")
+                return None
+            
+            # For consumption operations, include replay protection
+            if not self._validate_cross_service_token_with_replay_protection(payload, token):
+                logger.warning("Cross-service token validation with replay protection failed")
+                return None
+                
+            return payload
+            
+        except jwt.ExpiredSignatureError:
+            logger.info("Token expired")
+            return None
+        except jwt.InvalidTokenError as e:
+            logger.warning(f"Invalid token: {e}")
+            return None
     
     def _build_payload(self, sub: str, token_type: str, 
                       exp_minutes: int, **kwargs) -> Dict:
@@ -303,15 +362,11 @@ class JWTHandler:
                 logger.warning(f"Invalid token audience: {audience} (env: {env})")
                 return False
             
-            # Check for token replay attacks by validating jti (JWT ID) if present
-            jti = payload.get("jti")
-            if jti and self._is_token_id_used(jti):
-                logger.warning(f"Token ID already used (replay attack): {jti}")
-                return False
-            
-            # Track token ID to prevent replay attacks
-            if jti:
-                self._track_token_id(jti, payload.get("exp", 0))
+            # PERFORMANCE FIX: Do NOT track JWT IDs for validation operations
+            # JWT ID tracking should only apply to token consumption operations (like token exchange)
+            # Validation is a read operation and should be idempotent and concurrent-safe
+            # Token replay protection is handled by expiry times and should not prevent
+            # legitimate concurrent validations of the same valid token
             
             # Validate token was issued within acceptable time window
             iat = payload.get("iat", 0)
@@ -328,6 +383,29 @@ class JWTHandler:
             
         except Exception as e:
             logger.error(f"Cross-service token validation error: {e}")
+            return False
+    
+    def _validate_cross_service_token_with_replay_protection(self, payload: Dict, token: str) -> bool:
+        """Validate token for consumption operations with JWT ID replay protection"""
+        try:
+            # First do standard cross-service validation
+            if not self._validate_cross_service_token(payload, token):
+                return False
+            
+            # Additional replay protection for consumption operations
+            jti = payload.get("jti")
+            if jti and self._is_token_id_used(jti):
+                logger.warning(f"Token ID already used (replay attack): {jti}")
+                return False
+            
+            # Track token ID to prevent replay attacks
+            if jti:
+                self._track_token_id(jti, payload.get("exp", 0))
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Cross-service token validation with replay protection error: {e}")
             return False
     
     def _is_token_id_used(self, jti: str) -> bool:

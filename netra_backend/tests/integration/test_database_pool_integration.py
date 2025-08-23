@@ -28,7 +28,7 @@ from sqlalchemy.pool import QueuePool, StaticPool
 
 from test_framework.mock_utils import mock_justified
 
-class DatabaseConnectionManager:
+class ConnectionManager:
     """Mock database connection manager for integration testing."""
     
     def __init__(self, database_url, **kwargs):
@@ -94,7 +94,7 @@ class TestDatabasePoolIntegration:
         - Pool size limits are enforced
         - Configuration parameters are applied correctly
         """
-        db_manager = DatabaseConnectionManager(test_database_url, **pool_config)
+        db_manager = ConnectionManager(test_database_url, **pool_config)
         
         await db_manager.initialize()
         
@@ -108,7 +108,7 @@ class TestDatabasePoolIntegration:
             
         await db_manager.cleanup()
 
-    def _verify_pool_configuration(self, db_manager: DatabaseConnectionManager, expected_config: Dict[str, Any]):
+    def _verify_pool_configuration(self, db_manager: ConnectionManager, expected_config: Dict[str, Any]):
         """Verify pool configuration matches expected values."""
         engine = db_manager.get_engine()
         pool = engine.pool
@@ -135,7 +135,7 @@ class TestDatabasePoolIntegration:
             'pool_timeout': 5
         }
         
-        db_manager = DatabaseConnectionManager(test_database_url, **pool_config)
+        db_manager = ConnectionManager(test_database_url, **pool_config)
         await db_manager.initialize()
         
         # Test acquiring connections up to the limit
@@ -172,7 +172,7 @@ class TestDatabasePoolIntegration:
         # Use short recycle time for testing
         short_recycle_config = {**pool_config, 'pool_recycle': 1}  # 1 second
         
-        db_manager = DatabaseConnectionManager(test_database_url, **short_recycle_config)
+        db_manager = ConnectionManager(test_database_url, **short_recycle_config)
         await db_manager.initialize()
         
         # Get initial connection and note creation time
@@ -199,7 +199,7 @@ class TestDatabasePoolIntegration:
 
     async def test_connection_pool_under_load(self, test_database_url, pool_config):
         """Test connection pool behavior under concurrent load."""
-        db_manager = DatabaseConnectionManager(test_database_url, pool_config)
+        db_manager = ConnectionManager(test_database_url, pool_config)
         await db_manager.initialize()
         
         async def concurrent_database_work(worker_id: int) -> Dict[str, Any]:
@@ -227,7 +227,7 @@ class TestDatabasePoolIntegration:
     async def test_pool_failover_scenarios(self, pool_config):
         """Test connection pool behavior during database failures and recovery."""
         failing_db_url = "postgresql+asyncpg://nonexistent:5432/nonexistent"
-        db_manager = DatabaseConnectionManager(failing_db_url, **pool_config)
+        db_manager = ConnectionManager(failing_db_url, **pool_config)
         
         with patch('app.core.database_connection_manager.create_async_engine') as mock_create_engine:
             mock_engine = Mock()
@@ -248,7 +248,7 @@ class TestDatabasePoolIntegration:
 
     async def test_connection_leak_detection_and_cleanup(self, test_database_url, pool_config):
         """Test connection leak detection and automatic cleanup."""
-        db_manager = DatabaseConnectionManager(test_database_url, pool_config)
+        db_manager = ConnectionManager(test_database_url, pool_config)
         await db_manager.initialize()
         
         leaked_sessions = []
@@ -278,7 +278,7 @@ class TestDatabasePoolIntegration:
                     pass
             await db_manager.cleanup()
 
-    def _get_pool_checked_out_count(self, db_manager: DatabaseConnectionManager) -> int:
+    def _get_pool_checked_out_count(self, db_manager: ConnectionManager) -> int:
         """Get the number of checked out connections from pool."""
         try:
             engine = db_manager.get_engine()
@@ -292,7 +292,7 @@ class TestDatabasePoolIntegration:
     async def test_pool_configuration_validation(self):
         """Test database pool configuration validation and error handling."""
         with pytest.raises(Exception) as exc_info:
-            db_manager = DatabaseConnectionManager("sqlite+aiosqlite:///test.db", pool_size=-1)
+            db_manager = ConnectionManager("sqlite+aiosqlite:///test.db", pool_size=-1)
             await db_manager.initialize()
         
         assert 'pool_size' in str(exc_info.value).lower()
@@ -342,7 +342,7 @@ class TestDatabasePoolIntegration:
         
         await connectivity_master.cleanup_all()
 
-    def _collect_pool_metrics(self, db_manager: DatabaseConnectionManager) -> Dict[str, Any]:
+    def _collect_pool_metrics(self, db_manager: ConnectionManager) -> Dict[str, Any]:
         """Collect current pool metrics for analysis."""
         try:
             engine = db_manager.get_engine()

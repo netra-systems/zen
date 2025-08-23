@@ -41,14 +41,12 @@ class TestSyntaxFix:
 
 class TestScalingWorkflowIntegrity:
     # """Test integrity of complete scaling analysis workflows."""
-    
     # async def test_end_to_end_data_consistency(self, scaling_analysis_setup):
     # """Test data consistency throughout scaling analysis workflow."""
     # setup = scaling_analysis_setup
     # state = create_50_percent_increase_state()
     # results = await execute_scaling_workflow(setup, state)
     # validate_data_consistency_across_agents(results, state)
-    
     # async def test_scaling_recommendations_coherence(self, scaling_analysis_setup):
     # """Test coherence of scaling recommendations across agents."""
     # setup = scaling_analysis_setup

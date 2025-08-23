@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.app.core.rate_limiting.tier_enforcer import TierEnforcementService
+from netra_backend.app.services.rate_limiting.rate_limiting_service import RateLimitingService as TierEnforcementService
 from netra_backend.app.redis_manager import RedisManager
 
 from netra_backend.app.schemas.UserPlan import PlanTier, PlanUsageSummary, UsageRecord

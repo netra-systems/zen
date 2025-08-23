@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional
 import httpx
 import pytest
 import websockets
-from l4_staging_critical_base import L4StagingCriticalPathTestBase
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
 
 @dataclass
 class SessionData:

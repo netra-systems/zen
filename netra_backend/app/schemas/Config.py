@@ -101,9 +101,16 @@ class ClickHouseNativeConfig(BaseModel):
     password: str = ""
     database: str = "default"
 
+class ClickHouseHTTPConfig(BaseModel):
+    host: str = "clickhouse_host_url_placeholder"
+    port: int = 8123  # Standard ClickHouse HTTP port
+    user: str = "default"
+    password: str = ""
+    database: str = "default"
+
 class ClickHouseHTTPSConfig(BaseModel):
     host: str = "clickhouse_host_url_placeholder"
-    port: int = 8443
+    port: int = 8443  # Standard ClickHouse HTTPS port
     user: str = "default"
     password: str = ""
     database: str = "default"
@@ -154,6 +161,7 @@ class AppConfig(BaseModel):
     google_cloud: GoogleCloudConfig = GoogleCloudConfig()
     oauth_config: OAuthConfig = Field(default_factory=OAuthConfig)
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
+    clickhouse_http: ClickHouseHTTPConfig = ClickHouseHTTPConfig()
     clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
     clickhouse_logging: ClickHouseLoggingConfig = ClickHouseLoggingConfig()
     langfuse: LangfuseConfig = LangfuseConfig()
@@ -291,6 +299,14 @@ class AppConfig(BaseModel):
     fast_startup_mode: str = Field(default="false", description="Fast startup mode flag")
     skip_migrations: str = Field(default="false", description="Skip migrations flag")
     disable_startup_checks: str = Field(default="false", description="Disable startup checks flag")
+    
+    # Robust startup configuration
+    use_robust_startup: str = Field(default="true", description="Use robust startup manager with dependency resolution")
+    graceful_startup_mode: str = Field(default="true", description="Allow graceful degradation during startup")
+    allow_degraded_mode: str = Field(default="true", description="Allow system to run in degraded mode if non-critical services fail")
+    startup_max_retries: int = Field(default=3, description="Maximum retries for startup components")
+    startup_circuit_breaker_threshold: int = Field(default=3, description="Circuit breaker failure threshold")
+    startup_recovery_timeout: int = Field(default=300, description="Circuit breaker recovery timeout in seconds")
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(

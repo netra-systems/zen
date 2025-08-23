@@ -30,7 +30,7 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
 
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
@@ -105,7 +105,7 @@ class StateSerializer:
 class StorageManager:
     """Manages state storage in Redis and database."""
     
-    def __init__(self, redis_service: RedisService, db_manager: DatabaseConnectionManager):
+    def __init__(self, redis_service: RedisService, db_manager: ConnectionManager):
         self.redis_service = redis_service
         self.db_manager = db_manager
         self.serializer = StateSerializer()
@@ -267,7 +267,7 @@ class AgentStatePersistenceManager:
         self.redis_service = RedisService()
         await self.redis_service.initialize()
         
-        self.db_manager = DatabaseConnectionManager()
+        self.db_manager = ConnectionManager()
         await self.db_manager.initialize()
         
         self.storage_manager = StorageManager(self.redis_service, self.db_manager)

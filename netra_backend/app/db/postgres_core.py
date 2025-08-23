@@ -316,7 +316,7 @@ def get_converted_async_db_url() -> str:
 
 
 def initialize_postgres():
-    """Initialize PostgreSQL connection if not already initialized."""
+    """Initialize PostgreSQL connection with robust database initialization."""
     global async_engine, async_session_factory
     logger.debug(f"initialize_postgres called. Current async_engine: {async_engine is not None}, async_session_factory: {async_session_factory is not None}")
     
@@ -331,6 +331,8 @@ def initialize_postgres():
         # Don't reassign to None here, as it creates local variables
         
         try:
+            # Initialize the engine and session factory directly
+            logger.info("Initializing async engine and session factory...")
             _initialize_async_engine()
             logger.debug(f"After _initialize_async_engine(), async_engine: {async_engine is not None}, async_session_factory: {async_session_factory is not None}")
             

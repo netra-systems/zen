@@ -27,7 +27,7 @@ import pytest
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.config import get_settings
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
 
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.redis_service import RedisService
@@ -57,7 +57,7 @@ class SystemInitializationManager:
 
             if service_name == "database":
 
-                service = DatabaseConnectionManager()
+                service = ConnectionManager()
 
                 await service.initialize()
 
@@ -200,7 +200,7 @@ async def test_microservice_startup_orchestration(system_manager):
 
         ("redis", RedisService),
 
-        ("database", DatabaseConnectionManager), 
+        ("database", ConnectionManager), 
 
         ("health_check", HealthCheckService),
 
@@ -255,11 +255,11 @@ async def test_dependency_resolution_chain(system_manager):
     
     # Simulate database failure
 
-    with patch('app.services.database.connection_manager.DatabaseConnectionManager.initialize', 
+    with patch('app.services.database.connection_manager.ConnectionManager.initialize', 
 
                side_effect=Exception("Database unavailable")):
 
-        db_started = await system_manager.start_service("database", DatabaseConnectionManager)
+        db_started = await system_manager.start_service("database", ConnectionManager)
 
         assert not db_started
     
@@ -287,7 +287,7 @@ async def test_health_check_endpoints_integration(system_manager):
 
     await system_manager.start_service("redis", RedisService)
 
-    await system_manager.start_service("database", DatabaseConnectionManager)
+    await system_manager.start_service("database", ConnectionManager)
 
     await system_manager.start_service("health_check", HealthCheckService)
     
@@ -334,7 +334,7 @@ async def test_graceful_shutdown_sequence(system_manager):
 
         ("redis", RedisService),
 
-        ("database", DatabaseConnectionManager),
+        ("database", ConnectionManager),
 
         ("health_check", HealthCheckService),
 
@@ -390,7 +390,7 @@ async def test_startup_performance_benchmarks(system_manager):
 
         ("redis", RedisService),
 
-        ("database", DatabaseConnectionManager),
+        ("database", ConnectionManager),
 
         ("health_check", HealthCheckService),
 

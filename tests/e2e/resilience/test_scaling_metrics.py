@@ -41,14 +41,12 @@ class TestSyntaxFix:
 
 class TestScalingMetricsValidation:
     # """Test validation of scaling metrics and projections."""
-    
     # async def test_usage_metrics_accuracy(self, scaling_analysis_setup):
     # """Test accuracy of usage metrics collection and projection."""
     # setup = scaling_analysis_setup
     # state = create_50_percent_increase_state()
     # results = await execute_scaling_workflow(setup, state)
     # validate_usage_metrics_accuracy(results, state)
-    
     # async def test_cost_projection_validation(self, scaling_analysis_setup):
     # """Test validation of cost projection calculations."""
     # setup = scaling_analysis_setup

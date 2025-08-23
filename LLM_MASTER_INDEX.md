@@ -270,6 +270,7 @@ python unified_test_runner.py --service backend --no-bad-test-detection
 | **WebSocket** | `websocket_message_paradox.xml`, `websocket_*.xml` | Async handling, error patterns |
 | **Configuration** | `configuration_secrets.xml`, `environment_*.xml` | Unified config system |
 | **Testing** | `testing.xml`, `e2e_testing.xml`, `bad_test_detection.xml` | TDD workflows, real vs mock |
+| **E2E Test Infrastructure** | `e2e_test_infrastructure_fixes.xml` | Redis async, Postgres config, test collection fixes |
 | **Frontend Testing** | `frontend_testing_patterns.xml` | **NEW: Complete React/Jest patterns** |
 | **Database** | `database_asyncio.xml`, `database_*.xml` | Async patterns, connections |
 | **Frontend** | `frontend.xml`, `react-content-handling.xml` | Zustand patterns, React |

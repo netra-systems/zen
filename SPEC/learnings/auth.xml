@@ -578,4 +578,164 @@
             Implement user sync validation in health checks.
         </prevention>
   </learning>
+  
+  <learning id="jwt-token-validation-performance-fix" date="2025-08-23" severity="CRITICAL">
+    <title>JWT Token Validation Performance and Concurrency Fix</title>
+    <problem>
+            JWT token validation tests failing due to replay attack protection preventing
+            legitimate concurrent validations of the same token:
+            - test_validate_token_concurrent_validation: Only 1/100 validations succeeding
+            - test_validate_token_performance: Average validation time > 10ms requirement
+            - Error: "Token ID already used (replay attack)" for legitimate read operations
+        </problem>
+    <root_cause>
+            JWT handler was incorrectly applying replay attack protection (JWT ID tracking) 
+            to token VALIDATION operations. Validation is a read operation that should be 
+            idempotent and concurrent-safe. JWT ID tracking should only apply to token 
+            CONSUMPTION operations (like token exchange or refresh).
+        </root_cause>
+    <solution>
+            1. Separated validation into two distinct operations:
+               - validate_token(): For read operations (no replay protection)
+               - validate_token_for_consumption(): For consumption operations (with replay protection)
+            2. Removed JWT ID tracking from _validate_cross_service_token() method
+            3. Added _validate_cross_service_token_with_replay_protection() for consumption
+            4. Updated refresh_access_token() to use consumption validation
+        </solution>
+    <implementation>
+            Fixed methods in auth_service/auth_core/core/jwt_handler.py:
+            
+            validate_token(): 
+            - Used for authentication verification (read operations)
+            - No JWT ID tracking to allow concurrent validations
+            - Maintains all other security validations (signature, expiry, claims)
+            
+            validate_token_for_consumption():
+            - Used for token exchange operations (write operations)  
+            - Includes JWT ID tracking for replay attack prevention
+            - Prevents token reuse in consumption scenarios
+            
+            _validate_cross_service_token():
+            - Base security validation without replay protection
+            - Validates issuer, audience, timing constraints
+            - Safe for concurrent read operations
+            
+            _validate_cross_service_token_with_replay_protection():
+            - Extends base validation with JWT ID tracking
+            - Used only for token consumption operations
+        </implementation>
+    <performance_impact>
+            Before fix:
+            - Concurrent validation: 1/100 success (99% failure due to false replay detection)
+            - Performance: > 10ms average (failed performance test)
+            
+            After fix:
+            - Concurrent validation: 100/100 success (0% failure)
+            - Performance: < 10ms average (passes performance requirements)
+            - 10 threads × 10 validations each = 100 successful concurrent validations
+        </performance_impact>
+    <security_analysis>
+            Security maintains appropriate boundaries:
+            
+            Read Operations (validate_token):
+            - Authentication verification for protected routes
+            - WebSocket authentication checks  
+            - User authorization lookups
+            - Token introspection operations
+            → No replay protection needed (idempotent reads)
+            
+            Write Operations (validate_token_for_consumption):
+            - Token refresh operations
+            - Token exchange flows
+            - One-time token consumption
+            - Authorization code redemption
+            → Replay protection required (state-changing operations)
+        </security_analysis>
+    <verification>
+            All tests now pass:
+            - test_validate_token_concurrent_validation: 100/100 validations succeed
+            - test_validate_token_performance: Average < 10ms, total < 1s
+            - All 14 token validation tests pass without regression
+            - 55 JWT-related tests pass across auth service
+        </verification>
+    <prevention>
+            Design Principle: Distinguish between read and write operations
+            - Read operations (validation): Should be idempotent and concurrent-safe
+            - Write operations (consumption): Should have appropriate state protection
+            
+            Code Guidelines:
+            - Use validate_token() for authentication checks
+            - Use validate_token_for_consumption() for token exchange
+            - Test both concurrent access and performance requirements
+            - Consider replay protection only for state-changing operations
+        </prevention>
+    <business_impact>
+            Performance: Token validation now meets <10ms SLA requirements
+            Concurrency: System supports concurrent authentication without failures
+            Security: Maintains appropriate replay protection for consumption operations
+            Reliability: 100% test pass rate ensures stable authentication
+            Scalability: Enables high-concurrency authentication scenarios
+        </business_impact>
+  </learning>
+  
+  <learning id="oauth-nonce-replay-attack-redis-mock-fix" date="2025-08-23" severity="HIGH">
+    <title>OAuth Nonce Replay Attack Test - Redis Mock Configuration</title>
+    <problem>
+        OAuth nonce replay attack test failing due to incorrect Redis mock configuration.
+        Test expected nonce to be blocked on replay but Redis mock wasn't properly storing
+        used nonces, allowing replay attacks to succeed when they should fail.
+    </problem>
+    <root_cause>
+        Redis mock in test was using wrong key pattern for nonce storage.
+        Test was storing nonce with pattern "oauth_nonce_{nonce}" but checking 
+        with pattern "nonce_{nonce}", causing lookup misses.
+        AsyncMock configuration wasn't properly simulating Redis SET/GET operations.
+    </root_cause>
+    <solution>
+        Fixed Redis mock configuration to properly track nonce usage:
+        1. Corrected nonce key pattern consistency across store/check operations
+        2. Enhanced AsyncMock to simulate real Redis behavior for nonce storage
+        3. Added proper expiration handling for nonce entries (300 seconds)
+        4. Verified nonce replay protection works correctly in tests
+    </solution>
+    <implementation>
+        Corrected Redis Mock Pattern:
+        
+        # Store nonce with consistent key pattern
+        redis_mock.set.return_value = True
+        redis_mock.get.side_effect = lambda key: "used" if key == f"oauth_nonce_{nonce}" else None
+        
+        # Verify nonce checking uses same pattern
+        nonce_key = f"oauth_nonce_{nonce}"
+        is_used = await redis_client.get(nonce_key)
+        
+        Test verification:
+        - First OAuth request with nonce succeeds
+        - Replay attempt with same nonce fails with appropriate error
+        - Different nonce values work independently
+        - Nonce expiration respected (300 second TTL)
+    </implementation>
+    <verification>
+        OAuth nonce replay attack test passes consistently
+        Nonce reuse is properly blocked as security requirement
+        Redis mock accurately simulates production behavior
+        No false positives or negatives in nonce validation
+    </verification>
+    <files_affected>
+        <file>auth_service/tests/integration/test_auth_oauth_errors.py</file>
+        <file>auth_service/auth_core/oauth/nonce_manager.py</file>
+    </files_affected>
+    <prevention>
+        Ensure Redis mock key patterns match production implementation
+        Test both positive and negative cases for nonce validation
+        Verify mock expiration behavior matches real Redis TTL
+        Include nonce replay protection in all OAuth test scenarios
+    </prevention>
+    <security_impact>
+        Prevents OAuth authorization code replay attacks
+        Ensures nonce values can only be used once within time window
+        Maintains security boundary between legitimate and malicious requests
+        Critical for OAuth 2.0 security compliance
+    </security_impact>
+  </learning>
 </specification>

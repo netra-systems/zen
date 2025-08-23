@@ -290,10 +290,32 @@ export const FormattedMessageContent: React.FC<FormattedMessageContentProps> = R
 /**
  * Renders fallback content for invalid formatting
  */
-const renderFallbackContent = (content: string, className: string) => {
+const renderFallbackContent = (content: any, className: string) => {
+  // Safely convert any content to string, handling objects, circular refs, etc.
+  const safeContent = useMemo(() => {
+    if (typeof content === 'string') return content;
+    if (content == null) return '';
+    
+    try {
+      return JSON.stringify(content, (key, value) => {
+        if (value && typeof value === 'object') {
+          if (value.constructor === Object || Array.isArray(value)) {
+            return value;
+          }
+          return `[${value.constructor?.name || 'Object'}]`;
+        }
+        if (typeof value === 'function') return '[Function]';
+        if (typeof value === 'symbol') return '[Symbol]';
+        return value;
+      });
+    } catch (error) {
+      return '[Invalid Content - Unable to display safely]';
+    }
+  }, [content]);
+
   return (
     <div className={`whitespace-pre-wrap text-gray-800 leading-relaxed ${className}`}>
-      {content}
+      {safeContent}
     </div>
   );
 };

@@ -48,7 +48,7 @@ from tests.e2e.health_check_core import (
     create_healthy_result,
     create_service_error_result,
 )
-from tests.health_service_checker import ServiceHealthChecker
+from tests.e2e.health_service_checker import ServiceHealthChecker
 
 logger = logging.getLogger(__name__)
 

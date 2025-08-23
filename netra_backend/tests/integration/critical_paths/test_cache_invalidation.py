@@ -24,7 +24,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
 from netra_backend.app.services.cache.cache_manager import LLMCacheManager
 # from netra_backend.app.services.notification_service import NotificationService  # FIXME: Missing service
 
@@ -51,7 +51,7 @@ class CacheInvalidationManager:
         self.cache_manager = LLMCacheManager()
         await self.cache_manager.initialize()
         
-        self.db_manager = DatabaseConnectionManager()
+        self.db_manager = ConnectionManager()
         await self.db_manager.initialize()
         
         # self.notification_service = NotificationService()  # FIXME: Missing service

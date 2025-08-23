@@ -113,3 +113,13 @@ class ErrorAggregation:
     affected_users: Set[str] = field(default_factory=set)
     severity_distribution: Dict[str, int] = field(default_factory=dict)
     recent_occurrences: deque = field(default_factory=lambda: deque(maxlen=100))
+
+
+class ResourceError(Exception):
+    """Exception raised for resource-related errors."""
+    
+    def __init__(self, message: str, resource_type: str = None, details: Dict[str, Any] = None):
+        self.message = message
+        self.resource_type = resource_type
+        self.details = details or {}
+        super().__init__(message)

@@ -35,7 +35,7 @@ from watchdog.observers import Observer
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager as ConnectionManager
 from netra_backend.app.core.events import EventBus
 
 # Real components for L2 testing

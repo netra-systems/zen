@@ -11,6 +11,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.services.websocket.ws_manager import manager as websocket_manager
 from netra_backend.app.utils.multiprocessing_cleanup import cleanup_multiprocessing
+from netra_backend.app.services.background_task_manager import background_task_manager
 
 
 def shutdown_cleanup(logger: logging.Logger) -> None:
@@ -104,6 +105,21 @@ async def finalize_shutdown() -> None:
 async def run_complete_shutdown(app: FastAPI, logger: logging.Logger) -> None:
     """Run complete shutdown sequence."""
     shutdown_cleanup(logger)
+    
+    # FIX: Shutdown background task manager to prevent hanging tasks
+    try:
+        if hasattr(app.state, 'background_task_manager'):
+            logger.info("Shutting down background task manager...")
+            await app.state.background_task_manager.shutdown()
+            logger.info("Background task manager shutdown complete")
+        else:
+            # Fallback to global instance
+            logger.info("Shutting down global background task manager...")
+            await background_task_manager.shutdown()
+            logger.info("Global background task manager shutdown complete")
+    except Exception as e:
+        logger.error(f"Error shutting down background task manager: {e}")
+    
     await stop_monitoring(app, logger)
     await cleanup_resources(app)
     await close_database_connections()

@@ -31,7 +31,6 @@ from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.core.alert_manager import HealthAlertManager
 
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
-from netra_backend.tests.integration.critical_paths.integration.metrics.shared_fixtures import MetricEvent
 
 logger = logging.getLogger(__name__)
 

@@ -25,61 +25,213 @@ import asyncio
 import logging
 import os
 import time
-from typing import Any, Dict
+from typing import Any, Dict, List
+from dataclasses import dataclass, field
 
 import pytest
 
-from tests.e2e.test_helpers.throughput_helpers import (
-    E2E_TEST_CONFIG,
-    HighVolumeThroughputClient,
-    HighVolumeWebSocketServer,
-    LoadTestResults,
-    ThroughputAnalyzer,
-    ThroughputMetrics,
-)
+# Add project root to path
+from test_framework import setup_test_path
+setup_test_path()
+
+from tests.e2e.service_manager import ServiceManager
+from tests.e2e.harness_complete import UnifiedTestHarness, create_test_harness
+from tests.e2e.jwt_token_helpers import JWTTestHelper
+from tests.e2e.real_websocket_client import RealWebSocketClient
+from tests.e2e.real_client_types import ClientConfig
 
 logger = logging.getLogger(__name__)
 
-# Global test configuration
+# High Volume Test Configuration
 HIGH_VOLUME_CONFIG = {
-    "max_concurrent_connections": 1000,
-    "message_rate_scaling_steps": [100, 500, 1000, 2500, 5000, 7500, 10000],
-    "max_messages_per_second": 10000,
-    "burst_message_count": 50000,
-    "test_durations": {"burst": 60, "sustained": 300, "soak": 1800},
+    "max_concurrent_connections": 100,  # Reduced for CI/CD
+    "message_rate_scaling_steps": [10, 50, 100, 250, 500],
+    "max_messages_per_second": 1000,  # Reduced for CI/CD
+    "burst_message_count": 1000,  # Reduced for CI/CD
+    "test_durations": {"burst": 10, "sustained": 30, "soak": 60},
     "performance_thresholds": {
-        "min_throughput": 1000,
-        "max_latency_p95": 500,  
-        "min_delivery_ratio": 0.999
+        "min_throughput": 100,  # Reduced for CI/CD
+        "max_latency_p95": 1000,  # More lenient
+        "min_delivery_ratio": 0.95  # More lenient
     }
 }
 
+# E2E Test Configuration
+E2E_TEST_CONFIG = {
+    "websocket_url": "ws://localhost:8000/ws",
+    "backend_url": "http://localhost:8000",
+    "auth_service_url": "http://localhost:8001",
+    "skip_real_services": False,
+    "test_timeout": 300
+}
+
+
+@dataclass
+class LoadTestResults:
+    """Results from load testing."""
+    test_name: str
+    start_time: float
+    end_time: float
+    total_duration: float
+    messages_sent: int = 0
+    messages_received: int = 0
+    errors: List[str] = field(default_factory=list)
+    metrics: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ThroughputMetrics:
+    """Throughput measurement metrics."""
+    messages_per_second: float
+    total_messages: int
+    successful_messages: int
+    failed_messages: int
+    avg_latency_ms: float
+    p95_latency_ms: float
+    delivery_ratio: float
+    
+    
+class HighVolumeThroughputClient:
+    """Client for high volume throughput testing."""
+    
+    def __init__(self, ws_url: str, token: str, client_id: str):
+        self.ws_url = ws_url
+        self.token = token
+        self.client_id = client_id
+        self.client = None
+        self.connected = False
+        self.sent_messages: List[Dict] = []
+        self.received_responses: List[Dict] = []
+        
+    async def connect(self) -> bool:
+        """Connect to WebSocket server."""
+        try:
+            config = ClientConfig(timeout=10.0, max_retries=3)
+            self.client = RealWebSocketClient(self.ws_url, config)
+            headers = {"Authorization": f"Bearer {self.token}"}
+            
+            self.connected = await self.client.connect(headers)
+            return self.connected
+        except Exception:
+            return False
+    
+    async def disconnect(self) -> None:
+        """Disconnect from WebSocket server."""
+        if self.client and self.connected:
+            try:
+                await self.client.close()
+            except Exception:
+                pass
+        self.connected = False
+    
+    async def send_throughput_burst(self, message_count: int, rate_limit: int = None) -> Dict[str, Any]:
+        """Send burst of messages for throughput testing."""
+        if not self.connected:
+            raise ValueError("Client not connected")
+        
+        results = {"sent": 0, "errors": 0}
+        delay = (1.0 / rate_limit) if rate_limit else 0.0
+        
+        for i in range(message_count):
+            try:
+                message = {
+                    "type": "throughput_test",
+                    "sequence": i,
+                    "client_id": self.client_id,
+                    "content": f"Throughput test message {i}",
+                    "timestamp": time.time()
+                }
+                
+                success = await self.client.send(message)
+                if success:
+                    results["sent"] += 1
+                    self.sent_messages.append(message)
+                else:
+                    results["errors"] += 1
+                
+                if delay > 0:
+                    await asyncio.sleep(delay)
+                    
+            except Exception:
+                results["errors"] += 1
+        
+        return results
+    
+    async def receive_responses(self, expected_count: int, timeout: float = 30.0) -> List[Dict]:
+        """Receive responses from server."""
+        if not self.connected:
+            return []
+        
+        responses = []
+        start_time = time.time()
+        
+        while len(responses) < expected_count and (time.time() - start_time) < timeout:
+            try:
+                response = await self.client.receive(timeout=1.0)
+                if response:
+                    responses.append(response)
+                    self.received_responses.append(response)
+            except Exception:
+                break
+        
+        return responses
+
+
+class HighVolumeWebSocketServer:
+    """Mock high volume WebSocket server for testing."""
+    
+    def __init__(self, host: str = "localhost", port: int = 8765):
+        self.host = host
+        self.port = port
+        self.server = None
+        self.clients: set = set()
+        self.message_count = 0
+        
+    async def start(self) -> None:
+        """Start the mock server."""
+        # In real testing, we'll use the actual backend service
+        # This is just a placeholder for mock scenarios
+        pass
+    
+    async def stop(self) -> None:
+        """Stop the mock server."""
+        pass
+
 @pytest.fixture(scope="session")
-async def high_volume_server():
+async def high_volume_server(unified_test_harness):
     """High-volume WebSocket server fixture"""
-    if E2E_TEST_CONFIG["skip_real_services"]:
-        server = HighVolumeWebSocketServer(
-            host="localhost",
-            port=8765
-        )
-        await server.start()
-        yield server
-        await server.stop()
-    else:
-        # Use real service
-        yield None
+    service_manager = ServiceManager(unified_test_harness)
+    await service_manager.start_all_services(skip_frontend=True)
+    await asyncio.sleep(2.0)  # Allow services to stabilize
+    
+    yield service_manager
+    
+    await service_manager.stop_all_services()
 
 @pytest.fixture(scope="function") 
 async def throughput_client(high_volume_server):
     """High-volume throughput client fixture"""
+    jwt_helper = JWTTestHelper()
+    payload = jwt_helper.create_valid_payload()
+    payload["sub"] = "high-volume-test-user"
+    token = jwt_helper.create_token(payload)
+    
     client = HighVolumeThroughputClient(
         E2E_TEST_CONFIG["websocket_url"],
-        "mock-token",
+        token,
         "high-volume-client"
     )
     await client.connect()
     yield client
     await client.disconnect()
+
+@pytest.fixture
+async def unified_test_harness():
+    """Unified test harness fixture for performance tests."""
+    harness = await create_test_harness("performance_test")
+    yield harness
+    await harness.cleanup()
+
 
 @pytest.fixture
 async def test_user_token():

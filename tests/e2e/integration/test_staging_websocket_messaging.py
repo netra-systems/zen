@@ -49,7 +49,7 @@ class StagingWebSocketTester:
     
     async def cleanup_websockets(self) -> None:
         """Clean up all WebSocket connections."""
-#         for client in self.websocket_clients: # Possibly broken comprehension
+        for client in self.websocket_clients:
             await client.close()
         self.websocket_clients.clear()
 
@@ -76,6 +76,7 @@ async def test_user(staging_harness: UnifiedE2ETestHarness) -> TestUser:
 
 class TestStagingWebSocketConnection:
     # """Test WebSocket connection establishment in staging environment."""
+    pass
     
     # async def test_websocket_connection_with_authentication(, self, staging_tester: StagingWebSocketTester, test_user: TestUser
     # ):
@@ -103,6 +104,7 @@ class TestStagingWebSocketConnection:
 
 class TestStagingWebSocketMessaging:
     # """Test WebSocket messaging functionality in staging environment."""
+    pass
     
     # async def test_send_example_prompt_llm_costs(, self, staging_tester: StagingWebSocketTester, test_user: TestUser
     # ):
@@ -181,6 +183,7 @@ class TestStagingWebSocketMessaging:
 
 class TestStagingWebSocketAuthentication:
     # """Test WebSocket authentication flows in staging environment."""
+    pass
     
     # async def test_websocket_authentication_flow(, self, staging_tester: StagingWebSocketTester, test_user: TestUser
     # ):
@@ -214,6 +217,7 @@ class TestStagingWebSocketAuthentication:
 
 class TestStagingWebSocketReconnection:
     # """Test WebSocket reconnection logic in staging environment."""
+    pass
     
     # async def test_websocket_reconnection_after_disconnect(, self, staging_tester: StagingWebSocketTester, test_user: TestUser
     # ):
@@ -268,6 +272,7 @@ class TestStagingWebSocketReconnection:
 
 class TestStagingWebSocketConcurrency:
     # """Test concurrent WebSocket connections in staging environment."""
+    pass
     
     # async def test_multiple_concurrent_websocket_connections(, self, staging_tester: StagingWebSocketTester
     # ):
@@ -339,6 +344,7 @@ class TestStagingWebSocketConcurrency:
 
 class TestStagingWebSocketRateLimit:
     # """Test WebSocket rate limiting in staging environment."""
+    pass
     
     # async def test_rate_limiting_websocket_messages(, self, staging_tester: StagingWebSocketTester, test_user: TestUser
     # ):
@@ -371,6 +377,7 @@ class TestStagingWebSocketRateLimit:
 
 class TestStagingWebSocketHeartbeat:
     # """Test WebSocket ping/pong heartbeat in staging environment."""
+    pass
     
     # async def test_websocket_ping_pong_heartbeat(, self, staging_tester: StagingWebSocketTester, test_user: TestUser
     # ):
@@ -397,6 +404,7 @@ class TestStagingWebSocketHeartbeat:
 
 class TestStagingWebSocketErrorHandling:
     # """Test WebSocket error handling in staging environment."""
+    pass
     
     # async def test_error_handling_invalid_messages(, self, staging_tester: StagingWebSocketTester, test_user: TestUser
     # ):
