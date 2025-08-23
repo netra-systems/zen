@@ -5,6 +5,7 @@ Maintains 450-line limit with focused single responsibility
 import logging
 import os
 import time
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
@@ -119,6 +120,11 @@ class JWTHandler:
             if not self._validate_token_claims(payload):
                 logger.warning("Token claims validation failed")
                 return None
+            
+            # CRITICAL FIX: Cross-service validation
+            if not self._validate_cross_service_token(payload, token):
+                logger.warning("Cross-service token validation failed")
+                return None
                 
             return payload
             
@@ -209,10 +215,12 @@ class JWTHandler:
         
         payload = {
             "sub": sub,
-            "iat": now,
-            "exp": exp,
+            "iat": int(now.timestamp()),
+            "exp": int(exp.timestamp()),
             "token_type": token_type,
-            "iss": "netra-auth-service"
+            "iss": "netra-auth-service",  # CRITICAL FIX: Issuer claim
+            "aud": "netra-platform",      # CRITICAL FIX: Audience claim
+            "jti": str(uuid.uuid4())      # CRITICAL FIX: JWT ID for replay protection
         }
         payload.update(kwargs)
         return payload
@@ -270,6 +278,74 @@ class JWTHandler:
             logger.error(f"Token claims validation error: {e}")
             return False
     
+    def _validate_cross_service_token(self, payload: Dict, token: str) -> bool:
+        """CRITICAL FIX: Validate token for cross-service security"""
+        try:
+            # Check for service-specific claims that indicate token origin
+            issuer = payload.get("iss", "netra-auth-service")
+            audience = payload.get("aud", "netra-platform")
+            
+            # Validate issuer and audience for cross-service security
+            if issuer != "netra-auth-service":
+                logger.warning(f"Invalid token issuer: {issuer}")
+                return False
+            
+            if audience not in ["netra-platform", "netra-backend", "netra-auth"]:
+                logger.warning(f"Invalid token audience: {audience}")
+                return False
+            
+            # Check for token replay attacks by validating jti (JWT ID) if present
+            jti = payload.get("jti")
+            if jti and self._is_token_id_used(jti):
+                logger.warning(f"Token ID already used (replay attack): {jti}")
+                return False
+            
+            # Track token ID to prevent replay attacks
+            if jti:
+                self._track_token_id(jti, payload.get("exp", 0))
+            
+            # Validate token was issued within acceptable time window
+            iat = payload.get("iat", 0)
+            now = time.time()
+            if iat > now + 60:  # Allow 1 minute clock skew
+                logger.warning(f"Token issued in future: {iat} > {now}")
+                return False
+            
+            if now - iat > 86400:  # Token older than 24 hours (max validity)
+                logger.warning(f"Token too old: issued {now - iat} seconds ago")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Cross-service token validation error: {e}")
+            return False
+    
+    def _is_token_id_used(self, jti: str) -> bool:
+        """Check if JWT ID has been used (for replay attack prevention)"""
+        # In production, this should use Redis or database
+        # For now, use in-memory tracking
+        if not hasattr(self, '_used_token_ids'):
+            self._used_token_ids = set()
+        return jti in self._used_token_ids
+    
+    def _track_token_id(self, jti: str, exp: int):
+        """Track JWT ID to prevent replay attacks"""
+        if not hasattr(self, '_used_token_ids'):
+            self._used_token_ids = set()
+        self._used_token_ids.add(jti)
+        
+        # Clean up expired token IDs periodically
+        if len(self._used_token_ids) > 10000:
+            self._cleanup_expired_token_ids()
+    
+    def _cleanup_expired_token_ids(self):
+        """Clean up expired token IDs to prevent memory leaks"""
+        # This is a simple cleanup; in production use proper expiration tracking
+        if hasattr(self, '_used_token_ids') and len(self._used_token_ids) > 5000:
+            self._used_token_ids.clear()
+            logger.info("Cleaned up token ID tracking cache")
+
     def blacklist_token(self, token: str) -> bool:
         """Add token to blacklist for immediate invalidation"""
         try:

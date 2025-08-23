@@ -31,7 +31,11 @@
   "llm": {
     "mode": "shared",
     "config": {
-      "providers": ["anthropic", "openai", "gemini"],
+      "providers": [
+        "anthropic",
+        "openai",
+        "gemini"
+      ],
       "default_provider": "gemini"
     }
   }

@@ -74,71 +74,39 @@ UNIFIED_WEBSOCKET_CONFIG = {
 }
 
 
-class UnifiedWebSocketManager:
+# Import the proper unified WebSocket manager
+from netra_backend.app.websocket.unified_websocket_manager import UnifiedWebSocketManager
+
+# Route-specific manager wrapper for database session injection
+class UnifiedWebSocketRouteManager:
     """
-    Unified WebSocket Manager - Single source of truth for all WebSocket connections.
-    
-    Handles:
-    - JWT authentication via headers/subprotocols
-    - Message format detection and routing
-    - Rate limiting and connection management
-    - Both regular JSON and JSON-RPC protocols
-    - MCP service integration
+    Route-specific wrapper for UnifiedWebSocketManager.
+    Handles database session injection for WebSocket routes.
     """
     
     def __init__(self, db_session: AsyncSession):
         """Initialize with injected database session."""
         self.db_session = db_session
+        self.unified_manager = UnifiedWebSocketManager.get_instance()
         self.connections: Dict[str, Dict[str, Any]] = {}
-        self.message_handlers: Dict[str, callable] = {}
         self.cors_handler = get_websocket_cors_handler()
         self.mcp_service = MCPService()
         self._stats = {
             "connections_created": 0,
             "connections_closed": 0,
             "messages_processed": 0,
-            "json_rpc_messages": 0,
-            "regular_messages": 0,
             "mcp_sessions": 0,
             "errors_handled": 0,
             "security_violations": 0,
             "start_time": time.time()
         }
-        
-        # Initialize message routing
-        self._init_message_routing()
     
-    def _init_message_routing(self) -> None:
-        """Initialize message type routing handlers."""
-        self.message_handlers = {
-            # System messages
-            "ping": self._handle_ping,
-            "pong": self._handle_pong,
-            "heartbeat": self._handle_heartbeat,
-            
-            # JSON-RPC wrapper
-            "jsonrpc": self._handle_jsonrpc_wrapper,
-            
-            # Regular WebSocket messages
-            "user_message": self._handle_user_message,
-            "start_agent": self._handle_start_agent,
-            "stop_agent": self._handle_stop_agent,
-            "create_thread": self._handle_create_thread,
-            "switch_thread": self._handle_switch_thread,
-            "delete_thread": self._handle_delete_thread,
-            "list_threads": self._handle_list_threads,
-            "get_thread_history": self._handle_thread_history,
-            
-            # MCP-specific (handled as JSON-RPC subtypes)
-            "mcp_request": self._handle_mcp_request
-        }
+    # Message routing is now handled by the unified manager
     
     async def validate_jwt_authentication(self, websocket: WebSocket) -> Dict[str, Any]:
         """
         Validate JWT token from secure sources ONLY.
-        
-        SECURITY: NEVER accept tokens from query parameters.
-        Production: NO development mode bypasses.
+        Delegates to auth client for actual validation.
         """
         token = None
         auth_method = None
@@ -232,22 +200,12 @@ class UnifiedWebSocketManager:
     
     async def add_connection(self, user_id: str, websocket: WebSocket, 
                            session_info: Dict[str, Any]) -> str:
-        """Add connection with rate limiting and pooling."""
-        connection_id = f"unified_{user_id}_{int(time.time() * 1000)}"
+        """Add connection - delegates to unified manager."""
+        # Delegate to the unified manager for actual connection handling
+        connection_info = await self.unified_manager.connect_user(user_id, websocket)
+        connection_id = connection_info.connection_id
         
-        # Enforce connection limits per user
-        user_connections = [
-            conn_id for conn_id, conn in self.connections.items()
-            if conn["user_id"] == user_id
-        ]
-        
-        max_connections = UNIFIED_WEBSOCKET_CONFIG["limits"]["max_connections_per_user"]
-        if len(user_connections) >= max_connections:
-            # Close oldest connection
-            oldest_conn_id = min(user_connections, key=lambda cid: self.connections[cid]["created_at"])
-            await self.remove_connection(oldest_conn_id, "Connection limit exceeded")
-        
-        # Create MCP session for this connection
+        # Create MCP session for this route-specific connection
         mcp_session_id = await self.mcp_service.create_session(
             metadata={"websocket": True, "user_id": user_id, "connection_id": connection_id}
         )
@@ -273,12 +231,13 @@ class UnifiedWebSocketManager:
         return connection_id
     
     async def remove_connection(self, connection_id: str, reason: str = "Normal closure") -> None:
-        """Remove connection with cleanup."""
+        """Remove connection - delegates to unified manager."""
         if connection_id not in self.connections:
             return
-        
+            
         conn = self.connections[connection_id]
         websocket = conn["websocket"]
+        user_id = conn["user_id"]
         mcp_session_id = conn.get("mcp_session_id")
         
         # Close MCP session
@@ -288,64 +247,20 @@ class UnifiedWebSocketManager:
             except Exception as e:
                 logger.warning(f"Error closing MCP session {mcp_session_id}: {e}")
         
-        # Close WebSocket if still connected
-        if websocket.application_state == WebSocketState.CONNECTED:
-            try:
-                await websocket.close(code=1000, reason=reason)
-            except Exception as e:
-                logger.warning(f"Error closing WebSocket {connection_id}: {e}")
+        # Delegate to unified manager for actual connection cleanup
+        await self.unified_manager.disconnect_user(user_id, websocket, 1000, reason)
         
-        del self.connections[connection_id]
+        # Clean up route-specific tracking
+        if connection_id in self.connections:
+            del self.connections[connection_id]
         self._stats["connections_closed"] += 1
         logger.info(f"Unified WebSocket connection removed: {connection_id} ({reason})")
     
-    async def detect_message_format(self, raw_message: str) -> Dict[str, Any]:
-        """
-        Detect and parse message format with backward compatibility.
-        
-        Supports:
-        1. Unified envelope: {"type": "message_type", "payload": {}, "timestamp": 123}
-        2. JSON-RPC: {"jsonrpc": "2.0", "method": "...", "id": ...}
-        3. Legacy JSON: {"type": "ping"} (direct format)
-        """
-        try:
-            message_data = json.loads(raw_message)
-        except json.JSONDecodeError as e:
-            return {"error": f"Invalid JSON: {str(e)}", "format": "invalid"}
-        
-        if not isinstance(message_data, dict):
-            return {"error": "Message must be JSON object", "format": "invalid"}
-        
-        # Format 1: JSON-RPC detection
-        if message_data.get("jsonrpc") == "2.0" and "method" in message_data:
-            return {
-                "format": "json_rpc",
-                "data": {
-                    "type": "jsonrpc",
-                    "payload": message_data,
-                    "timestamp": time.time()
-                }
-            }
-        
-        # Format 2: Unified envelope detection
-        if "type" in message_data and "payload" in message_data:
-            return {"format": "unified_envelope", "data": message_data}
-        
-        # Format 3: Legacy JSON detection (backward compatibility)
-        if "type" in message_data:
-            return {
-                "format": "legacy_json",
-                "data": {
-                    "type": message_data["type"],
-                    "payload": {k: v for k, v in message_data.items() if k != "type"},
-                    "timestamp": time.time()
-                }
-            }
-        
-        return {"error": "Unrecognized message format", "format": "unknown"}
+    # Message format detection is now handled by the unified manager
+    # All message handlers are delegated to the unified manager
     
     async def handle_message(self, connection_id: str, raw_message: str) -> bool:
-        """Handle unified message with format detection and routing."""
+        """Handle message - delegates to unified manager."""
         if connection_id not in self.connections:
             logger.error(f"Message for unknown connection: {connection_id}")
             return False
@@ -359,32 +274,20 @@ class UnifiedWebSocketManager:
             conn["last_activity"] = datetime.now(timezone.utc)
             conn["message_count"] += 1
             
-            # Validate message size
-            if len(raw_message) > UNIFIED_WEBSOCKET_CONFIG["limits"]["max_message_size"]:
-                await self._send_error(websocket, "Message too large", "MESSAGE_TOO_LARGE")
+            # Parse JSON message
+            try:
+                message_data = json.loads(raw_message)
+            except json.JSONDecodeError as e:
+                await self._send_error(websocket, f"Invalid JSON: {str(e)}", "FORMAT_ERROR")
                 return False
             
-            # Detect and parse message format
-            parse_result = await self.detect_message_format(raw_message)
-            if "error" in parse_result:
-                await self._send_error(websocket, parse_result["error"], "FORMAT_ERROR")
-                return False
+            # Delegate to unified manager for message handling
+            result = await self.unified_manager.handle_message(user_id, websocket, message_data)
             
-            message_format = parse_result["format"]
-            message_data = parse_result["data"]
-            message_type = message_data["type"]
-            
-            # Update format statistics
-            if message_format == "json_rpc":
-                conn["json_rpc_count"] += 1
-                self._stats["json_rpc_messages"] += 1
-            else:
-                conn["regular_count"] += 1
-                self._stats["regular_messages"] += 1
-            
-            # Route message to appropriate handler
-            handler = self.message_handlers.get(message_type, self._handle_unknown_message)
-            return await handler(connection_id, message_data, message_format)
+            if result:
+                self._stats["messages_processed"] += 1
+                
+            return result
             
         except Exception as e:
             self._stats["errors_handled"] += 1
@@ -393,212 +296,10 @@ class UnifiedWebSocketManager:
             await self._send_error(websocket, "Message processing failed", "PROCESSING_ERROR")
             return False
     
-    # Message Handlers
+    # All message handling is now delegated to the unified manager
     
-    async def _handle_ping(self, connection_id: str, message_data: Dict[str, Any], 
-                          message_format: str) -> bool:
-        """Handle ping message."""
-        conn = self.connections[connection_id]
-        websocket = conn["websocket"]
-        
-        response = {
-            "type": "pong",
-            "payload": {
-                "timestamp": time.time(),
-                "server_time": datetime.now(timezone.utc).isoformat(),
-                "connection_id": connection_id
-            },
-            "timestamp": time.time()
-        }
-        
-        await websocket.send_json(response)
-        return True
     
-    async def _handle_pong(self, connection_id: str, message_data: Dict[str, Any], 
-                          message_format: str) -> bool:
-        """Handle pong response."""
-        logger.debug(f"Pong received from {connection_id}")
-        return True
     
-    async def _handle_heartbeat(self, connection_id: str, message_data: Dict[str, Any], 
-                               message_format: str) -> bool:
-        """Handle heartbeat message."""
-        # Heartbeat updates activity automatically
-        return True
-    
-    async def _handle_jsonrpc_wrapper(self, connection_id: str, message_data: Dict[str, Any], 
-                                     message_format: str) -> bool:
-        """Handle JSON-RPC messages (including MCP protocol)."""
-        conn = self.connections[connection_id]
-        websocket = conn["websocket"]
-        mcp_session_id = conn["mcp_session_id"]
-        
-        jsonrpc_data = message_data["payload"]
-        method = jsonrpc_data.get("method")
-        message_id = jsonrpc_data.get("id")
-        
-        try:
-            # Update MCP session activity
-            await self.mcp_service.update_session_activity(mcp_session_id)
-            
-            # Handle ping specially for compatibility
-            if method == "ping":
-                response = {
-                    "type": "jsonrpc",
-                    "payload": {
-                        "jsonrpc": "2.0",
-                        "result": {
-                            "pong": True,
-                            "timestamp": time.time(),
-                            "session_id": mcp_session_id,
-                            "connection_id": connection_id
-                        },
-                        "id": message_id
-                    },
-                    "timestamp": time.time()
-                }
-                await websocket.send_json(response)
-                return True
-            
-            # For other JSON-RPC methods, return not implemented
-            response = {
-                "type": "jsonrpc",
-                "payload": {
-                    "jsonrpc": "2.0",
-                    "error": {
-                        "code": -32601,
-                        "message": "Method not found",
-                        "data": f"Method '{method}' is not implemented in unified endpoint"
-                    },
-                    "id": message_id
-                },
-                "timestamp": time.time()
-            }
-            await websocket.send_json(response)
-            return True
-            
-        except Exception as e:
-            error_response = {
-                "type": "jsonrpc",
-                "payload": {
-                    "jsonrpc": "2.0",
-                    "error": {
-                        "code": -32603,
-                        "message": "Internal error",
-                        "data": str(e)
-                    },
-                    "id": message_id
-                },
-                "timestamp": time.time()
-            }
-            await websocket.send_json(error_response)
-            return False
-    
-    async def _handle_user_message(self, connection_id: str, message_data: Dict[str, Any], 
-                                  message_format: str) -> bool:
-        """Handle user chat messages through agent service."""
-        conn = self.connections[connection_id]
-        user_id = conn["user_id"]
-        
-        try:
-            # Process through agent service
-            from netra_backend.app.llm.llm_manager import LLMManager
-            from netra_backend.app.services.agent_service_core import AgentService
-            from netra_backend.app.services.agent_service_factory import _create_supervisor_agent
-            
-            llm_manager = LLMManager()
-            supervisor = _create_supervisor_agent(self.db_session, llm_manager)
-            agent_service = AgentService(supervisor)
-            
-            # Process message using database session
-            await agent_service.handle_websocket_message(
-                user_id, 
-                message_data,  # Pass unified message format
-                self.db_session
-            )
-            
-            await self.db_session.commit()
-            logger.info(f"User message processed for {user_id}")
-            return True
-            
-        except Exception as e:
-            await self.db_session.rollback()
-            logger.error(f"User message processing failed for {user_id}: {e}", exc_info=True)
-            await self._send_processing_error(connection_id, str(e))
-            return False
-    
-    async def _handle_start_agent(self, connection_id: str, message_data: Dict[str, Any], 
-                                 message_format: str) -> bool:
-        """Handle start agent request."""
-        # Delegate to user message handler for now
-        return await self._handle_user_message(connection_id, message_data, message_format)
-    
-    async def _handle_stop_agent(self, connection_id: str, message_data: Dict[str, Any], 
-                                message_format: str) -> bool:
-        """Handle stop agent request."""
-        conn = self.connections[connection_id]
-        websocket = conn["websocket"]
-        
-        response = {
-            "type": "agent_stopped",
-            "payload": {
-                "message": "Agent processing stopped",
-                "timestamp": time.time()
-            },
-            "timestamp": time.time()
-        }
-        await websocket.send_json(response)
-        return True
-    
-    async def _handle_create_thread(self, connection_id: str, message_data: Dict[str, Any], 
-                                   message_format: str) -> bool:
-        """Handle thread creation."""
-        return await self._handle_user_message(connection_id, message_data, message_format)
-    
-    async def _handle_switch_thread(self, connection_id: str, message_data: Dict[str, Any], 
-                                   message_format: str) -> bool:
-        """Handle thread switching."""
-        return await self._handle_user_message(connection_id, message_data, message_format)
-    
-    async def _handle_delete_thread(self, connection_id: str, message_data: Dict[str, Any], 
-                                   message_format: str) -> bool:
-        """Handle thread deletion."""
-        return await self._handle_user_message(connection_id, message_data, message_format)
-    
-    async def _handle_list_threads(self, connection_id: str, message_data: Dict[str, Any], 
-                                  message_format: str) -> bool:
-        """Handle list threads request."""
-        return await self._handle_user_message(connection_id, message_data, message_format)
-    
-    async def _handle_thread_history(self, connection_id: str, message_data: Dict[str, Any], 
-                                    message_format: str) -> bool:
-        """Handle thread history request."""
-        return await self._handle_user_message(connection_id, message_data, message_format)
-    
-    async def _handle_mcp_request(self, connection_id: str, message_data: Dict[str, Any], 
-                                 message_format: str) -> bool:
-        """Handle MCP-specific requests."""
-        # MCP requests should come as JSON-RPC, redirect to that handler
-        return await self._handle_jsonrpc_wrapper(connection_id, message_data, message_format)
-    
-    async def _handle_unknown_message(self, connection_id: str, message_data: Dict[str, Any], 
-                                     message_format: str) -> bool:
-        """Handle unknown message types."""
-        conn = self.connections[connection_id]
-        websocket = conn["websocket"]
-        message_type = message_data.get("type", "unknown")
-        
-        response = {
-            "type": "error",
-            "payload": {
-                "message": f"Unknown message type: {message_type}",
-                "code": "UNKNOWN_MESSAGE_TYPE",
-                "supported_types": list(self.message_handlers.keys())
-            },
-            "timestamp": time.time()
-        }
-        await websocket.send_json(response)
-        return False
     
     # Utility Methods
     
@@ -618,62 +319,30 @@ class UnifiedWebSocketManager:
         except Exception as e:
             logger.error(f"Failed to send error message: {e}")
     
-    async def _send_processing_error(self, connection_id: str, error_message: str) -> None:
-        """Send processing error to connection."""
-        if connection_id not in self.connections:
-            return
-        
-        conn = self.connections[connection_id]
-        websocket = conn["websocket"]
-        
-        try:
-            error_response = {
-                "type": "agent_error",
-                "payload": {
-                    "error": error_message,
-                    "timestamp": time.time(),
-                    "recoverable": True,
-                    "suggestion": "Please try again or rephrase your message"
-                },
-                "timestamp": time.time()
-            }
-            await websocket.send_json(error_response)
-        except Exception as e:
-            logger.error(f"Failed to send processing error: {e}")
-    
     def get_stats(self) -> Dict[str, Any]:
-        """Get comprehensive statistics."""
+        """Get route-specific statistics and delegate to unified manager."""
         uptime = time.time() - self._stats["start_time"]
         
-        # Calculate format distribution
-        format_stats = {"json_rpc": 0, "regular": 0}
-        connection_states = {}
+        # Get unified manager stats
+        unified_stats = self.unified_manager.get_unified_stats()
         
-        for conn in self.connections.values():
-            format_stats["json_rpc"] += conn.get("json_rpc_count", 0)
-            format_stats["regular"] += conn.get("regular_count", 0)
-            
-            state = conn.get("status", "unknown")
-            connection_states[state] = connection_states.get(state, 0) + 1
-        
-        return {
+        # Add route-specific stats
+        route_stats = {
             **self._stats,
             "uptime_seconds": uptime,
-            "active_connections": len(self.connections),
-            "messages_per_second": self._stats["messages_processed"] / max(uptime, 1),
-            "format_distribution": format_stats,
-            "connection_states": connection_states,
-            "connections_by_user": {
-                user_id: len([c for c in self.connections.values() if c["user_id"] == user_id])
-                for user_id in set(c["user_id"] for c in self.connections.values())
-            }
+            "route_connections": len(self.connections),
+        }
+        
+        return {
+            "route_stats": route_stats,
+            "unified_stats": unified_stats
         }
     
     async def cleanup(self) -> None:
-        """Cleanup all resources."""
-        logger.info(f"Cleaning up UnifiedWebSocketManager with {len(self.connections)} connections")
+        """Cleanup route-specific resources."""
+        logger.info(f"Cleaning up UnifiedWebSocketRouteManager with {len(self.connections)} connections")
         
-        # Close all connections
+        # Close all MCP sessions and route-specific connections
         cleanup_tasks = []
         for connection_id in list(self.connections.keys()):
             cleanup_tasks.append(self.remove_connection(connection_id, "Server shutdown"))
@@ -685,13 +354,13 @@ class UnifiedWebSocketManager:
         if self.db_session:
             await self.db_session.close()
         
-        logger.info("UnifiedWebSocketManager cleanup completed")
+        logger.info("UnifiedWebSocketRouteManager cleanup completed")
 
 
 @asynccontextmanager
 async def get_unified_websocket_manager(db_session: AsyncSession):
-    """Context manager for unified WebSocket manager."""
-    manager = UnifiedWebSocketManager(db_session)
+    """Context manager for unified WebSocket route manager."""
+    manager = UnifiedWebSocketRouteManager(db_session)
     try:
         yield manager
     finally:

@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y \
 COPY auth_service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install gunicorn for production deployment
+RUN pip install gunicorn
+
 # Copy application code
 COPY auth_service/ ./auth_service/
 COPY shared/ ./shared/
@@ -19,5 +22,5 @@ COPY shared/ ./shared/
 # Set environment variables
 ENV PYTHONPATH=/app
 
-# Run the application - use sh to evaluate PORT env var
-CMD ["sh", "-c", "uvicorn auth_service.main:app --host 0.0.0.0 --port ${PORT:-8001}"]
+# Run the application with gunicorn for production
+CMD ["sh", "-c", "gunicorn auth_service.main:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-8080} --workers 2 --timeout 120 --access-logfile - --error-logfile -"]

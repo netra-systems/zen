@@ -8,9 +8,9 @@ from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.main import app
 from netra_backend.app.routes.websocket_unified import (
     UNIFIED_WEBSOCKET_CONFIG,
-    UnifiedWebSocketManager,
     get_unified_websocket_manager,
 )
+from netra_backend.app.websocket.unified_websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict

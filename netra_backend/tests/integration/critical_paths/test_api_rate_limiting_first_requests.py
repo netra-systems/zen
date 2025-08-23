@@ -33,7 +33,7 @@ import redis.asyncio as redis
 from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.tests.integration.config import TestTier
+from netra_backend.tests.integration.config import ServiceTier
 
 logger = central_logger.get_logger(__name__)
 

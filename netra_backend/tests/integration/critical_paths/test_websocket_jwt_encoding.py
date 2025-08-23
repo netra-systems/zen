@@ -25,7 +25,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import jwt
 import pytest
 from fastapi import WebSocket
-from netra_backend.app.routes.websocket_unified import UnifiedWebSocketManager, unified_websocket_endpoint
+from netra_backend.app.routes.websocket_unified import unified_websocket_endpoint
+from netra_backend.app.websocket.unified_websocket_manager import UnifiedWebSocketManager
 from starlette.websockets import WebSocketState
 
 from netra_backend.app.db.postgres import get_async_db

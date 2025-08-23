@@ -35,11 +35,11 @@ from netra_backend.app.services.billing.usage_tracker import UsageTracker
 from netra_backend.app.services.llm.llm_manager import LLMManager
 
 # # from app.schemas.billing import UsageEvent, BillingTier  # Class may not exist, commented out  # Class may not exist, commented out
-from netra_backend.tests.integration.config import TEST_CONFIG, TestTier  # Comment out since config structure may vary
+from netra_backend.tests.integration.config import TEST_CONFIG, ServiceTier  # Comment out since config structure may vary
 
 TEST_CONFIG = {"mock": True}
 
-class TestTier:
+class ServiceTier:
 
     FREE = "free"
 

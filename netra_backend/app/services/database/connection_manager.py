@@ -48,11 +48,17 @@ class DatabaseConfig(BaseModel):
     username: str
     password: str
     db_type: DatabaseType
-    pool_size: int = 10
-    max_overflow: int = 20
-    pool_timeout: int = 30
-    pool_recycle: int = 3600
+    pool_size: int = 20  # Increased for production load
+    max_overflow: int = 30  # Allow more overflow connections
+    pool_timeout: int = 60  # Increased timeout for resilience
+    pool_recycle: int = 1800  # 30 minutes - more frequent recycling
+    pool_pre_ping: bool = True  # Enable pre-ping for health checking
+    pool_reset_on_return: str = "rollback"  # Safe connection reset
     echo: bool = False
+    # Circuit breaker settings
+    max_retries: int = 3
+    retry_delay: float = 0.5
+    health_check_interval: int = 30  # seconds
 
 
 class ConnectionMetrics(BaseModel):
@@ -62,13 +68,17 @@ class ConnectionMetrics(BaseModel):
     idle_connections: int = 0
     failed_connections: int = 0
     connection_errors: int = 0
+    pool_exhaustion_count: int = 0
+    circuit_breaker_trips: int = 0
+    successful_recoveries: int = 0
     last_connection_time: Optional[datetime] = None
     last_error_time: Optional[datetime] = None
     last_error_message: Optional[str] = None
+    last_pool_exhaustion_time: Optional[datetime] = None
 
 
 class DatabaseConnection:
-    """Individual database connection wrapper."""
+    """Individual database connection wrapper with circuit breaker."""
     
     def __init__(self, config: DatabaseConfig):
         self.config = config
@@ -77,6 +87,9 @@ class DatabaseConnection:
         self.session_factory: Optional[sessionmaker] = None
         self.metrics = ConnectionMetrics()
         self._connection_lock = asyncio.Lock()
+        self._circuit_breaker_count = 0
+        self._circuit_breaker_reset_time = None
+        self._retry_count = 0
     
     async def connect(self) -> bool:
         """Establish database connection."""
@@ -94,7 +107,7 @@ class DatabaseConnection:
                 else:
                     raise ValueError(f"Unsupported database type: {self.config.db_type}")
                 
-                # Create async engine
+                # Create async engine with enhanced pooling
                 self.engine = create_async_engine(
                     url,
                     poolclass=QueuePool,
@@ -102,7 +115,20 @@ class DatabaseConnection:
                     max_overflow=self.config.max_overflow,
                     pool_timeout=self.config.pool_timeout,
                     pool_recycle=self.config.pool_recycle,
-                    echo=self.config.echo
+                    pool_pre_ping=self.config.pool_pre_ping,
+                    pool_reset_on_return=self.config.pool_reset_on_return,
+                    echo=self.config.echo,
+                    # Additional resilience settings
+                    connect_args={
+                        "server_settings": {
+                            "application_name": "netra_core",
+                            "tcp_keepalives_idle": "600",  # 10 minutes
+                            "tcp_keepalives_interval": "30",  # 30 seconds
+                            "tcp_keepalives_count": "3",  # 3 probes
+                        },
+                        "command_timeout": 30,  # Query timeout
+                        "prepared_statement_cache_size": 100,
+                    }
                 )
                 
                 # Create session factory
@@ -126,6 +152,13 @@ class DatabaseConnection:
                 self.metrics.connection_errors += 1
                 self.metrics.last_error_time = datetime.utcnow()
                 self.metrics.last_error_message = str(e)
+                
+                # Update circuit breaker
+                self._circuit_breaker_count += 1
+                if self._circuit_breaker_count >= self.config.max_retries:
+                    self.metrics.circuit_breaker_trips += 1
+                    self._circuit_breaker_reset_time = datetime.utcnow()
+                    
                 return False
     
     async def disconnect(self) -> None:
@@ -139,11 +172,22 @@ class DatabaseConnection:
             self.state = ConnectionState.DISCONNECTED
     
     async def get_session(self) -> AsyncSession:
-        """Get database session."""
+        """Get database session with pool exhaustion handling."""
         if not self.session_factory or self.state != ConnectionState.CONNECTED:
-            raise RuntimeError("Database not connected")
+            # Try to reconnect if disconnected
+            if self.state == ConnectionState.DISCONNECTED:
+                await self.connect()
+            if not self.session_factory or self.state != ConnectionState.CONNECTED:
+                raise RuntimeError("Database not connected")
         
-        return self.session_factory()
+        try:
+            return self.session_factory()
+        except Exception as e:
+            # Check if this is a pool exhaustion error
+            if "pool timeout" in str(e).lower() or "pool limit" in str(e).lower():
+                self.metrics.pool_exhaustion_count += 1
+                self.metrics.last_pool_exhaustion_time = datetime.utcnow()
+            raise
     
     async def health_check(self) -> bool:
         """Check connection health."""
@@ -160,23 +204,36 @@ class DatabaseConnection:
             return False
     
     def get_metrics(self) -> ConnectionMetrics:
-        """Get connection metrics."""
+        """Get connection metrics with enhanced pool information."""
         if self.engine and hasattr(self.engine.pool, 'size'):
             pool = self.engine.pool
-            self.metrics.active_connections = pool.checkedin()
-            self.metrics.idle_connections = pool.checkedout()
+            try:
+                # Get pool status safely
+                status = pool.status()
+                self.metrics.active_connections = status.checked_out
+                self.metrics.idle_connections = status.checked_in
+            except (AttributeError, Exception):
+                # Fallback for older SQLAlchemy versions
+                try:
+                    self.metrics.active_connections = pool.checkedin() if hasattr(pool, 'checkedin') else 0
+                    self.metrics.idle_connections = pool.checkedout() if hasattr(pool, 'checkedout') else 0
+                except Exception:
+                    pass
         
         return self.metrics
 
 
 class ConnectionManager:
-    """Central database connection manager."""
+    """Central database connection manager with circuit breaker support."""
     
     def __init__(self):
         self._connections: Dict[str, DatabaseConnection] = {}
         self._default_connection: Optional[str] = None
-        self._health_check_interval = 60  # seconds
+        self._health_check_interval = 30  # seconds - more frequent health checks
         self._health_check_task: Optional[asyncio.Task] = None
+        self._connection_recovery_task: Optional[asyncio.Task] = None
+        self._global_circuit_breaker_count = 0
+        self._last_global_recovery = None
     
     def add_connection(self, name: str, config: DatabaseConfig, is_default: bool = False) -> None:
         """Add database connection configuration."""
@@ -239,17 +296,31 @@ class ConnectionManager:
             await session.close()
     
     async def health_check_all(self) -> Dict[str, bool]:
-        """Health check all connections."""
+        """Health check all connections with circuit breaker support."""
         results = {}
         
         for name, connection in self._connections.items():
             healthy = await connection.health_check()
             results[name] = healthy
             
-            # Attempt reconnection if unhealthy
+            # Attempt reconnection if unhealthy and circuit breaker allows
             if not healthy and connection.state == ConnectionState.ERROR:
+                # Check circuit breaker
+                if connection._circuit_breaker_reset_time:
+                    # Circuit breaker is open, check if enough time has passed
+                    time_since_trip = datetime.utcnow() - connection._circuit_breaker_reset_time
+                    if time_since_trip.total_seconds() < 60:  # 1 minute cooldown
+                        continue
+                    else:
+                        # Reset circuit breaker
+                        connection._circuit_breaker_count = 0
+                        connection._circuit_breaker_reset_time = None
+                
                 connection.state = ConnectionState.RECONNECTING
-                await connection.connect()
+                success = await connection.connect()
+                if success:
+                    connection.metrics.successful_recoveries += 1
+                    self._last_global_recovery = datetime.utcnow()
         
         return results
     

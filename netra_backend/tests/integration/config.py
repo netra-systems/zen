@@ -13,8 +13,8 @@ TEST_CONFIG = {
     "mock": True,
     "test_environment": "integration",
     "rate_limits": {
-        TestTier.FREE: {"requests_per_minute": 10, "burst": 5},
-        TestTier.PRO: {"requests_per_minute": 100, "burst": 20},
-        TestTier.ENTERPRISE: {"requests_per_minute": 1000, "burst": 100},
+        ServiceTier.FREE: {"requests_per_minute": 10, "burst": 5},
+        ServiceTier.PRO: {"requests_per_minute": 100, "burst": 20},
+        ServiceTier.ENTERPRISE: {"requests_per_minute": 1000, "burst": 100},
     }
 }

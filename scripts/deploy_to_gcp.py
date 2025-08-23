@@ -81,7 +81,7 @@ class GCPDeployer:
             ServiceConfig(
                 name="auth",
                 directory="auth_service",
-                port=8001,
+                port=8080,
                 dockerfile="Dockerfile.auth",
                 cloud_run_name="netra-auth",
                 memory="512Mi",
