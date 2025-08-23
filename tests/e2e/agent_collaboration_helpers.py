@@ -67,7 +67,7 @@ class AgentCollaborationTestCore:
         """Setup collaboration test environment."""
         self.active_sessions.clear(); self.performance_metrics.clear()
     
-    async def teardown_test_environment(self) -> None:
+    async def test_teardown_test_environment(self) -> None:
         """Cleanup collaboration test environment."""
         self.active_sessions.clear(); self.performance_metrics.clear()
     

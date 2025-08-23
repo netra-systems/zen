@@ -10,10 +10,9 @@ from typing import Any, Callable, Dict, Optional
 import websockets
 from websockets.exceptions import ConnectionClosed, WebSocketException
 
-from .real_client_types import ClientConfig, ConnectionState
+from netra_backend.tests.e2e.real_client_types import ClientConfig, ConnectionState
 
 logger = logging.getLogger(__name__)
-
 
 class RealWebSocketClient:
     """Real WebSocket client for integration testing."""

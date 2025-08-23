@@ -18,8 +18,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from .real_critical_auth_helpers import CriticalUserJourneyHelpers
-
+from netra_backend.tests.e2e.first_time_user.real_critical_auth_helpers import CriticalUserJourneyHelpers
 
 # Team and Collaboration Fixtures
 @pytest.fixture
@@ -34,7 +33,6 @@ async def team_workspace_config():
     })
     return workspace_config
 
-
 @pytest.fixture
 def team_invitation_config():
     """Team invitation configuration"""
@@ -44,7 +42,6 @@ def team_invitation_config():
         "role_assignment": True,
         "welcome_email_template": "team_invitation"
     }
-
 
 @pytest.fixture
 def collaboration_features_config():
@@ -57,13 +54,11 @@ def collaboration_features_config():
         "permission_inheritance": True
     }
 
-
 # Error Handling and Recovery Fixtures
 @pytest.fixture
 def error_simulation_scenarios():
     """Error simulation scenarios for recovery testing"""
     return CriticalUserJourneyHelpers.setup_error_simulation_scenarios()
-
 
 @pytest.fixture
 async def error_recovery_config():
@@ -76,7 +71,6 @@ async def error_recovery_config():
         "user_notification": True
     }
     return recovery_config
-
 
 @pytest.fixture
 def support_channel_config():
@@ -92,7 +86,6 @@ def support_channel_config():
         "priority_support": True
     }
 
-
 # Cross-Service Integration Fixtures
 @pytest.fixture
 def cross_service_config():
@@ -104,7 +97,6 @@ def cross_service_config():
         "load_balancing": True,
         "health_monitoring": True
     }
-
 
 @pytest.fixture
 async def service_mesh_config():
@@ -118,7 +110,6 @@ async def service_mesh_config():
     }
     return mesh_config
 
-
 @pytest.fixture
 def token_validation_config():
     """Token validation configuration for cross-service auth"""
@@ -129,7 +120,6 @@ def token_validation_config():
         "token_rotation": True,
         "validation_cache_ttl": 300
     }
-
 
 # Value Demonstration and Upgrade Flow Fixtures
 @pytest.fixture
@@ -143,7 +133,6 @@ async def value_demonstration_config():
     }
     return value_config
 
-
 @pytest.fixture
 def upgrade_flow_config():
     """Upgrade flow configuration for conversion testing"""
@@ -153,7 +142,6 @@ def upgrade_flow_config():
         "trial_periods": {"growth": 14, "professional": 30, "enterprise": 45},
         "discount_strategies": ["first_time_user", "volume_discount", "annual_plan"]
     }
-
 
 @pytest.fixture
 async def free_tier_limitation_config():
@@ -175,7 +163,6 @@ async def free_tier_limitation_config():
     }
     return limitation_config
 
-
 # Data Isolation and Concurrent Testing Fixtures
 @pytest.fixture
 def data_isolation_validators():
@@ -187,7 +174,6 @@ def data_isolation_validators():
         "permission_isolation": True,
         "audit_trail_separation": True
     }
-
 
 @pytest.fixture
 async def concurrent_testing_environment():
@@ -204,7 +190,6 @@ async def concurrent_testing_environment():
         }
     }
     return concurrent_config
-
 
 @pytest.fixture
 def stress_testing_scenarios():
@@ -227,7 +212,6 @@ def stress_testing_scenarios():
         }
     }
 
-
 # Real-time Monitoring and Metrics Fixtures
 @pytest.fixture
 async def real_time_monitoring_config():
@@ -247,7 +231,6 @@ async def real_time_monitoring_config():
         }
     }
     return monitoring_config
-
 
 @pytest.fixture
 def user_experience_metrics():
@@ -273,7 +256,6 @@ def user_experience_metrics():
         }
     }
 
-
 # Security and Compliance Testing Fixtures
 @pytest.fixture
 async def security_testing_config():
@@ -284,7 +266,6 @@ async def security_testing_config():
         "access_control": {"role_based_permissions": True, "api_rate_limiting": True}
     }
 
-
 @pytest.fixture
 def compliance_validation_config():
     """Compliance validation configuration"""
@@ -292,7 +273,6 @@ def compliance_validation_config():
         "regulatory_compliance": {"gdpr": True, "ccpa": True, "soc2": True},
         "audit_requirements": {"access_logging": True, "compliance_monitoring": True}
     }
-
 
 # Integration Testing Environment Fixtures
 @pytest.fixture

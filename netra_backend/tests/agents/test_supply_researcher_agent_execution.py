@@ -2,17 +2,10 @@
 Execution and async tests for SupplyResearcherAgent
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
@@ -21,15 +14,12 @@ import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supply_researcher_sub_agent import (
     ResearchType,
-    # Add project root to path
     SupplyResearcherAgent,
 )
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.supply_research_service import SupplyResearchService
-
 
 class TestSupplyResearcherAgentExecution:
     """Test suite for SupplyResearcherAgent execution functionality"""
@@ -69,6 +59,7 @@ class TestSupplyResearcherAgentExecution:
             db=mock_db,
             supply_service=mock_supply_service
         )
+    @pytest.mark.asyncio
     async def test_execute_agent(self, agent, mock_db):
         """Test agent execution flow"""
         state = DeepAgentState(
@@ -99,6 +90,7 @@ class TestSupplyResearcherAgentExecution:
             
             assert hasattr(state, 'supply_research_result')
             assert state.supply_research_result["research_type"] == "pricing"
+    @pytest.mark.asyncio
     async def test_process_scheduled_research(self, agent):
         """Test processing scheduled research for multiple providers"""
         with patch.object(agent, 'execute', new_callable=AsyncMock) as mock_execute:
@@ -111,6 +103,7 @@ class TestSupplyResearcherAgentExecution:
             assert result["research_type"] == "pricing"
             assert result["providers_processed"] == 2
             assert mock_execute.call_count == 2
+    @pytest.mark.asyncio
     async def test_concurrent_research_processing(self, agent):
         """Test processing multiple providers concurrently"""
         providers = ["openai", "anthropic", "google", "mistral", "cohere"]
@@ -134,6 +127,7 @@ class TestSupplyResearcherAgentExecution:
             # Increased margin to account for overhead and system variations
             assert elapsed < len(providers) * 0.1 * 1.5  # More generous margin for concurrent execution
             assert result["providers_processed"] == len(providers)
+    @pytest.mark.asyncio
     async def test_redis_cache_integration(self, agent):
         """Test Redis caching for research results"""
         with patch('app.redis_manager.RedisManager') as mock_redis:

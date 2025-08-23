@@ -5,7 +5,6 @@ Tests time-series analysis capabilities and anomaly detection
 
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
 
-
 class TestTimeSeriesAnalysis:
     """Test time-series analysis capabilities"""
     

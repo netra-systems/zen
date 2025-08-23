@@ -3,31 +3,20 @@ Tests for security service permission checking functionality.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import MagicMock
 
 import pytest
 from cryptography.fernet import Fernet
 
-# Add project root to path
-from .security_service_test_mocks import (
+from netra_backend.tests.security_service_test_mocks import (
     EnhancedSecurityService,
     MockUser,
 )
-
-# Add project root to path
-
 
 @pytest.fixture
 def security_service_with_permissions():
@@ -36,7 +25,6 @@ def security_service_with_permissions():
     key_manager.jwt_secret_key = "test_key_for_permissions"
     key_manager.fernet_key = Fernet.generate_key()
     return EnhancedSecurityService(key_manager)
-
 
 @pytest.fixture
 def permission_test_users(security_service_with_permissions):
@@ -48,7 +36,6 @@ def permission_test_users(security_service_with_permissions):
         _create_viewer_permission_user()
     ]
     return users
-
 
 class TestSecurityServicePermissions:
     """Test permission checking functionality"""
@@ -139,7 +126,6 @@ class TestSecurityServicePermissions:
         invalid_user.roles = ['invalid_role']
         assert 'admin' not in invalid_user.roles
 
-
 def _create_admin_permission_user() -> MockUser:
     """Create admin user with full permissions"""
     admin = MockUser("admin_001", "admin@company.com", "Admin User")
@@ -149,7 +135,6 @@ def _create_admin_permission_user() -> MockUser:
     admin.feature_flags = {'beta_features': True, 'advanced_analytics': True}
     return admin
 
-
 def _set_admin_tool_permissions(admin: MockUser) -> None:
     """Set tool permissions for admin user"""
     admin.tool_permissions = {
@@ -157,7 +142,6 @@ def _set_admin_tool_permissions(admin: MockUser) -> None:
         'premium_optimizer': {'allowed': True},
         'restricted_tool': {'allowed': True}
     }
-
 
 def _create_moderator_permission_user() -> MockUser:
     """Create moderator user with limited permissions"""
@@ -168,7 +152,6 @@ def _create_moderator_permission_user() -> MockUser:
     moderator.feature_flags = {'beta_features': True}
     return moderator
 
-
 def _set_moderator_tool_permissions(moderator: MockUser) -> None:
     """Set tool permissions for moderator user"""
     moderator.tool_permissions = {
@@ -176,7 +159,6 @@ def _set_moderator_tool_permissions(moderator: MockUser) -> None:
         'premium_optimizer': {'allowed': True},
         'restricted_tool': {'allowed': False}
     }
-
 
 def _create_regular_permission_user() -> MockUser:
     """Create regular user with basic permissions"""
@@ -186,7 +168,6 @@ def _create_regular_permission_user() -> MockUser:
     user.feature_flags = {}
     return user
 
-
 def _set_user_tool_permissions(user: MockUser) -> None:
     """Set tool permissions for regular user"""
     user.tool_permissions = {
@@ -194,7 +175,6 @@ def _set_user_tool_permissions(user: MockUser) -> None:
         'premium_optimizer': {'allowed': False},
         'restricted_tool': {'allowed': False}
     }
-
 
 def _create_viewer_permission_user() -> MockUser:
     """Create viewer user with read-only permissions"""
@@ -204,13 +184,11 @@ def _create_viewer_permission_user() -> MockUser:
     viewer.feature_flags = {}
     return viewer
 
-
 def _assert_admin_tool_permissions(admin: MockUser) -> None:
     """Assert admin has all tool permissions"""
     assert admin.tool_permissions['data_analyzer']['allowed'] is True
     assert admin.tool_permissions['premium_optimizer']['allowed'] is True
     assert admin.tool_permissions['restricted_tool']['allowed'] is True
-
 
 def _assert_moderator_tool_permissions(moderator: MockUser) -> None:
     """Assert moderator has limited tool permissions"""
@@ -218,12 +196,10 @@ def _assert_moderator_tool_permissions(moderator: MockUser) -> None:
     assert moderator.tool_permissions['premium_optimizer']['allowed'] is True
     assert moderator.tool_permissions['restricted_tool']['allowed'] is False
 
-
 def _assert_user_rate_limits(user: MockUser) -> None:
     """Assert user has proper rate limits"""
     data_analyzer = user.tool_permissions.get('data_analyzer', {})
     assert data_analyzer.get('rate_limit') == 50
-
 
 def _assert_role_hierarchy(admin: MockUser, moderator: MockUser, user: MockUser, viewer: MockUser) -> None:
     """Assert proper role hierarchy"""
@@ -236,7 +212,6 @@ def _assert_role_hierarchy(admin: MockUser, moderator: MockUser, user: MockUser,
     # User has more than viewer
     assert len(user.tool_permissions) > len(viewer.tool_permissions)
 
-
 def _assert_data_analyzer_access(admin: MockUser, moderator: MockUser, user: MockUser, viewer: MockUser) -> None:
     """Assert data analyzer access permissions"""
     assert admin.tool_permissions.get('data_analyzer', {}).get('allowed') is True
@@ -244,14 +219,12 @@ def _assert_data_analyzer_access(admin: MockUser, moderator: MockUser, user: Moc
     assert user.tool_permissions.get('data_analyzer', {}).get('allowed') is True
     assert viewer.tool_permissions.get('data_analyzer', {}).get('allowed', False) is False
 
-
 def _assert_premium_optimizer_access(admin: MockUser, moderator: MockUser, user: MockUser, viewer: MockUser) -> None:
     """Assert premium optimizer access permissions"""
     assert admin.tool_permissions.get('premium_optimizer', {}).get('allowed') is True
     assert moderator.tool_permissions.get('premium_optimizer', {}).get('allowed') is True
     assert user.tool_permissions.get('premium_optimizer', {}).get('allowed') is False
     assert viewer.tool_permissions.get('premium_optimizer', {}).get('allowed', False) is False
-
 
 def _assert_feature_flag_access(admin: MockUser, moderator: MockUser, user: MockUser, viewer: MockUser) -> None:
     """Assert feature flag access permissions"""

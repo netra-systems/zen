@@ -23,7 +23,6 @@ from netra_backend.app.services.websocket.ws_manager import (
     get_manager as get_ws_manager,
 )
 
-
 class CriticalUserJourneyHelpers:
     """Core helper methods for critical user journey validation (≤8 lines each)"""
     
@@ -96,7 +95,6 @@ class CriticalUserJourneyHelpers:
             "invalid_credentials": {"status": 401, "type": "auth"}
         }
 
-
 class OAuthFlowHelpers:
     """OAuth flow testing helpers (≤8 lines each)"""
     
@@ -109,8 +107,11 @@ class OAuthFlowHelpers:
             "redirect_uri": "http://localhost:3000/auth/callback",
             "state": str(uuid.uuid4())
         }
-        result = await auth_env["auth_client"].initiate_oauth(oauth_data)
-        return {"oauth_url": result.get("authorization_url"), "state": oauth_data["state"]}
+        # Get OAuth config from auth client
+        oauth_config = auth_env["auth_client"].get_oauth_config()
+        # Simulate OAuth initiation by returning mock URL
+        authorization_url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={oauth_config.client_id}&redirect_uri={oauth_data['redirect_uri']}&state={oauth_data['state']}&scope=openid email profile"
+        return {"oauth_url": authorization_url, "state": oauth_data["state"]}
 
     @staticmethod
     async def create_user_profile(oauth_result):
@@ -146,7 +147,6 @@ class OAuthFlowHelpers:
         }
         assert session_result["validated"], "User session should be validated"
         return welcome_data
-
 
 class AIProviderHelpers:
     """AI provider connection testing helpers (≤8 lines each)"""
@@ -200,7 +200,6 @@ class AIProviderHelpers:
             "cost_alerts": True
         }
         return tracking_config
-
 
 class WebSocketHelpers:
     """WebSocket testing helpers (≤8 lines each)"""

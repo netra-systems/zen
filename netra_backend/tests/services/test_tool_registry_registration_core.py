@@ -3,17 +3,10 @@ Core Tool Registry Registration Tests
 Tests basic tool registration functionality
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import json
 from datetime import UTC, datetime
@@ -25,11 +18,7 @@ from langchain_core.tools import BaseTool
 
 from netra_backend.app.core.exceptions_base import NetraException
 
-# Add project root to path
 from netra_backend.app.services.tool_registry import ToolRegistry
-
-# Add project root to path
-
 
 class MockTool(BaseTool):
     """Mock tool for testing"""
@@ -48,7 +37,6 @@ class MockTool(BaseTool):
     
     async def _arun(self, query: str) -> str:
         return self._run(query)
-
 
 class TestToolRegistryRegistration:
     """Test tool registration functionality"""
@@ -223,7 +211,6 @@ class TestToolRegistryRegistration:
         # Assert - no tools should be registered due to rollback
         registered_tools = tool_registry.get_tools(["triage"])
         assert len(registered_tools) == 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

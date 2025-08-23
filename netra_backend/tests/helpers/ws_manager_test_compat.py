@@ -15,7 +15,6 @@ from netra_backend.app.websocket.connection import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)
 
-
 class WebSocketTestCompatibilityMixin:
     """Mixin providing test-compatible API methods."""
 

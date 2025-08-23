@@ -10,21 +10,10 @@ Business Value Justification (BVJ):
 L3 Test: Uses real Redis containers via Docker for WebSocket pub/sub validation.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -41,11 +30,9 @@ from netra_backend.app.schemas import User
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
     MockWebSocketForRedis,
-    # Add project root to path
 
     RedisContainer,
 
@@ -60,7 +47,6 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 )
 from test_framework.mock_utils import mock_justified
 
-
 @pytest.mark.L3
 
 @pytest.mark.integration
@@ -69,7 +55,6 @@ class TestWebSocketRedisPubSubL3:
 
     """L3 integration tests for WebSocket connections with real Redis pub/sub."""
     
-
     @pytest.fixture(scope="class")
 
     async def redis_container(self):
@@ -84,7 +69,6 @@ class TestWebSocketRedisPubSubL3:
 
         await container.stop()
     
-
     @pytest.fixture
 
     async def redis_client(self, redis_container):
@@ -99,7 +83,6 @@ class TestWebSocketRedisPubSubL3:
 
         await client.close()
     
-
     @pytest.fixture
 
     async def pubsub_client(self, redis_container):
@@ -118,7 +101,6 @@ class TestWebSocketRedisPubSubL3:
 
         await client.close()
     
-
     @pytest.fixture
 
     async def ws_manager(self, redis_container):
@@ -127,8 +109,7 @@ class TestWebSocketRedisPubSubL3:
 
         _, redis_url = redis_container
         
-
-        with patch('app.ws_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 
@@ -140,15 +121,12 @@ class TestWebSocketRedisPubSubL3:
 
             mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
             
-
             manager = WebSocketManager()
 
             yield manager
             
-
             await test_redis_mgr.redis_client.close()
     
-
     @pytest.fixture
 
     def test_users(self):
@@ -175,7 +153,6 @@ class TestWebSocketRedisPubSubL3:
 
         ]
     
-
     async def test_websocket_redis_connection_setup(self, ws_manager, redis_client, test_users):
 
         """Test WebSocket connection establishment with Redis integration."""
@@ -214,7 +191,6 @@ class TestWebSocketRedisPubSubL3:
 
         await ws_manager.disconnect_user(user.id, websocket)
     
-
     async def test_redis_pubsub_message_broadcasting(self, ws_manager, redis_client, pubsub_client, test_users):
 
         """Test message broadcasting through Redis pub/sub."""
@@ -224,7 +200,6 @@ class TestWebSocketRedisPubSubL3:
 
         channels = []
         
-
         for user in test_users:
 
             websocket = MockWebSocketForRedis(user.id)
@@ -249,7 +224,6 @@ class TestWebSocketRedisPubSubL3:
 
                                          {"thread_id": "thread_123", "content": "Redis test"})
         
-
         await redis_client.publish(target_channel, json.dumps(test_message))
         
         # Verify message delivery
@@ -258,7 +232,6 @@ class TestWebSocketRedisPubSubL3:
 
         received_message = await wait_for_message(pubsub_client)
         
-
         if received_message:
 
             assert received_message['type'] == "thread_update"
@@ -271,7 +244,6 @@ class TestWebSocketRedisPubSubL3:
 
             await ws_manager.disconnect_user(user.id, websocket)
     
-
     async def test_websocket_reconnection_redis_state(self, ws_manager, redis_client, test_users):
 
         """Test WebSocket reconnection with Redis state recovery."""
@@ -312,7 +284,6 @@ class TestWebSocketRedisPubSubL3:
 
         new_connection_info = await ws_manager.connect_user(user.id, second_websocket)
         
-
         assert new_connection_info is not None
 
         assert user.id in ws_manager.active_connections
@@ -321,7 +292,6 @@ class TestWebSocketRedisPubSubL3:
 
         await ws_manager.disconnect_user(user.id, second_websocket)
     
-
     async def test_concurrent_connections_performance(self, ws_manager, redis_client):
 
         """Test performance with multiple concurrent WebSocket connections."""
@@ -344,7 +314,6 @@ class TestWebSocketRedisPubSubL3:
 
             connections.append((user_id, websocket))
         
-
         setup_time = time.time() - setup_start
 
         assert len(ws_manager.active_connections) >= connection_count
@@ -363,7 +332,6 @@ class TestWebSocketRedisPubSubL3:
 
             tasks.append(task)
         
-
         await asyncio.gather(*tasks)
         
         # Cleanup
@@ -376,7 +344,6 @@ class TestWebSocketRedisPubSubL3:
 
         assert setup_time < 10.0  # Should setup quickly
     
-
     async def test_redis_channel_isolation(self, ws_manager, redis_client, pubsub_client, test_users):
 
         """Test Redis channel management and isolation."""
@@ -405,12 +372,10 @@ class TestWebSocketRedisPubSubL3:
 
         message2 = create_test_message("private_message", user2.id, {"recipient": user2.id})
         
-
         await redis_client.publish(channel1, json.dumps(message1))
 
         await redis_client.publish(channel2, json.dumps(message2))
         
-
         await asyncio.sleep(0.1)
         
         # Verify isolation (implementation dependent)
@@ -422,7 +387,6 @@ class TestWebSocketRedisPubSubL3:
 
         await ws_manager.disconnect_user(user2.id, ws2)
     
-
     @mock_justified("L3: Using real Redis container for integration validation")
 
     async def test_redis_failover_recovery(self, redis_container, ws_manager, test_users):
@@ -439,7 +403,6 @@ class TestWebSocketRedisPubSubL3:
 
         connection_info = await ws_manager.connect_user(user.id, websocket)
         
-
         assert connection_info is not None
 
         assert not websocket.closed
@@ -471,7 +434,6 @@ class TestWebSocketRedisPubSubL3:
         # Cleanup
 
         await ws_manager.disconnect_user(user.id, websocket)
-
 
 if __name__ == "__main__":
 

@@ -37,9 +37,6 @@ import pytest_asyncio
 import websockets
 
 # Add parent directories to sys.path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent))
 
 from netra_backend.app.logging_config import central_logger
 from tests.e2e.oauth_test_providers import (
@@ -362,7 +359,7 @@ class OAuthEndpointValidator:
             logger.error(f"JWT claims validation failed: {e}")
             return {"valid": False, "error": str(e)}
     
-    async def cleanup_test_resources(self) -> None:
+    async def test_cleanup_test_resources(self) -> None:
         """Clean up OAuth test resources and services"""
         try:
             # Close HTTP clients

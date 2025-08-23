@@ -4,17 +4,10 @@ Tests unified registry initialization, tool addition, and cross-registry discove
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime
@@ -27,18 +20,13 @@ from langchain_core.tools import BaseTool
 
 from netra_backend.app.core.exceptions_base import NetraException
 
-# Add project root to path
 from netra_backend.app.services.tool_registry import ToolRegistry
-
-# Add project root to path
-
 
 class ToolStatus(Enum):
     ACTIVE = "active"
     INACTIVE = "inactive" 
     DEPRECATED = "deprecated"
     MAINTENANCE = "maintenance"
-
 
 class MockAdvancedTool(BaseTool):
     """Advanced mock tool with lifecycle management"""
@@ -72,7 +60,6 @@ class MockAdvancedTool(BaseTool):
     def mark_deprecated(self):
         self.status = ToolStatus.DEPRECATED
 
-
 class UnifiedToolRegistry:
     """Unified registry managing multiple tool registries and orchestration"""
     
@@ -105,7 +92,6 @@ class UnifiedToolRegistry:
             tools = registry.get_all_tools()
             found_tools.extend([tool for tool in tools if hasattr(tool, 'category') and tool.category == category])
         return found_tools
-
 
 class TestUnifiedToolRegistryManagement:
     """Test unified tool registry management functionality"""

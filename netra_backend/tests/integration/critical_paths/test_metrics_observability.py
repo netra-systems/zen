@@ -10,17 +10,10 @@ Critical Path: Metrics collection -> Data aggregation -> Alert generation -> Das
 Coverage: Prometheus metrics, Grafana dashboards, OpenTelemetry tracing, log aggregation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -33,17 +26,13 @@ import pytest
 
 from netra_backend.app.services.observability.alert_manager import AlertManager
 
-# Add project root to path
 from netra_backend.app.services.observability.metrics_collector import MetricsCollector
 from netra_backend.app.services.observability.prometheus_exporter import (
     PrometheusExporter,
 )
 from netra_backend.app.services.observability.tracing_service import TracingService
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class ObservabilityManager:
     """Manages observability testing with real metrics collection."""
@@ -257,7 +246,6 @@ class ObservabilityManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def observability_manager():
     """Create observability manager for testing."""
@@ -265,7 +253,6 @@ async def observability_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_business_metrics_collection(observability_manager):
@@ -288,7 +275,6 @@ async def test_business_metrics_collection(observability_manager):
     
     # Verify metrics are stored
     assert len(observability_manager.collected_metrics) == 3
-
 
 @pytest.mark.asyncio
 async def test_observability_security_controls(observability_manager):

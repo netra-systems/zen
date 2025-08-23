@@ -11,17 +11,10 @@ Coverage: Alert routing accuracy, escalation timing, notification reliability, i
 L3 Realism: Tests with real notification services and actual escalation workflows
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -35,11 +28,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.alert_manager import HealthAlertManager
 from netra_backend.app.core.shared_health_types import AlertSeverity, SystemAlert
-
-# Add project root to path
 
 logger = logging.getLogger(__name__)
 
@@ -51,14 +41,12 @@ pytestmark = [
     pytest.mark.alerting
 ]
 
-
 class AlertSeverity(Enum):
     """Alert severity levels."""
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
     CRITICAL = "critical"
-
 
 class NotificationChannel(Enum):
     """Notification delivery channels."""
@@ -67,7 +55,6 @@ class NotificationChannel(Enum):
     PAGERDUTY = "pagerduty"
     WEBHOOK = "webhook"
     SMS = "sms"
-
 
 @dataclass
 class AlertRule:
@@ -83,7 +70,6 @@ class AlertRule:
     auto_resolve: bool = False
     business_hours_only: bool = False
 
-
 @dataclass
 class NotificationDelivery:
     """Tracks notification delivery attempts."""
@@ -96,7 +82,6 @@ class NotificationDelivery:
     delivery_time_ms: float
     error_message: Optional[str] = None
 
-
 @dataclass
 class EscalationEvent:
     """Tracks alert escalation events."""
@@ -107,7 +92,6 @@ class EscalationEvent:
     trigger_reason: str
     channels_notified: List[NotificationChannel]
     success: bool
-
 
 class AlertRoutingValidator:
     """Validates alert routing and escalation with real notification services."""
@@ -512,7 +496,6 @@ class AlertRoutingValidator:
         except Exception as e:
             logger.error(f"Alert routing cleanup failed: {e}")
 
-
 class AlertRoutingEngine:
     """Mock alert routing engine for L3 testing."""
     
@@ -545,7 +528,6 @@ class AlertRoutingEngine:
     async def shutdown(self):
         """Shutdown routing engine."""
         pass
-
 
 class NotificationService:
     """Mock notification service for L3 testing."""
@@ -581,7 +563,6 @@ class NotificationService:
         """Shutdown notification service."""
         pass
 
-
 class EscalationService:
     """Mock escalation service for L3 testing."""
     
@@ -613,7 +594,6 @@ class EscalationService:
         """Shutdown escalation service."""
         pass
 
-
 @pytest.fixture
 async def alert_routing_validator():
     """Create alert routing validator for L3 testing."""
@@ -621,7 +601,6 @@ async def alert_routing_validator():
     await validator.initialize_alerting_services()
     yield validator
     await validator.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_alert_routing_accuracy_l3(alert_routing_validator):
@@ -643,7 +622,6 @@ async def test_alert_routing_accuracy_l3(alert_routing_validator):
     # Verify rule coverage
     assert len(routing_results["rule_matches"]) >= 3
     assert len(routing_results["channel_distributions"]) >= 3
-
 
 @pytest.mark.asyncio
 async def test_critical_alert_escalation_l3(alert_routing_validator):
@@ -671,7 +649,6 @@ async def test_critical_alert_escalation_l3(alert_routing_validator):
     assert escalation_results["on_time_escalations"] >= escalation_results["escalations_triggered"] * 0.9
     assert escalation_results["missed_escalations"] <= 1
 
-
 @pytest.mark.asyncio
 async def test_notification_delivery_reliability_l3(alert_routing_validator):
     """Test notification delivery reliability across channels.
@@ -697,7 +674,6 @@ async def test_notification_delivery_reliability_l3(alert_routing_validator):
         if stats["sent"] > 0:
             assert stats["reliability_percentage"] >= 80.0
 
-
 @pytest.mark.asyncio
 async def test_alert_routing_performance_l3(alert_routing_validator):
     """Test alert routing performance under load.
@@ -722,7 +698,6 @@ async def test_alert_routing_performance_l3(alert_routing_validator):
         
         max_latency = max(routing_results["routing_latency_ms"])
         assert max_latency <= 200.0  # No single routing should exceed 200ms
-
 
 @pytest.mark.asyncio
 async def test_alert_deduplication_and_grouping_l3(alert_routing_validator):

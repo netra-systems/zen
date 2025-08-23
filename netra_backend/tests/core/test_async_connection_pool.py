@@ -3,33 +3,23 @@ Tests for AsyncConnectionPool - connection management
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from unittest.mock import Mock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
 from netra_backend.app.core.exceptions_service import ServiceError
-from .async_utils_helpers import (
+from netra_backend.tests.helpers.async_utils_helpers import (
     create_close_connection,
-    # Add project root to path
     create_connection_counter,
     create_slow_connection_factory,
 )
-
 
 class TestAsyncConnectionPool:
     """Test AsyncConnectionPool for connection management"""
@@ -143,7 +133,6 @@ class TestAsyncConnectionPool:
         )
         await pool.close()
         assert pool._closed == True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

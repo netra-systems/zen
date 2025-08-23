@@ -16,17 +16,10 @@ Mock-Real Spectrum: L3 (Real SUT with Real Local Services)
 - Real agent initialization under stress
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import base64
@@ -49,19 +42,15 @@ import jwt
 import pytest
 import websockets
 
-# Add project root to path
-
-
 # Set test environment
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
 # Test infrastructure imports
-from clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 
 from netra_backend.app.core.exceptions_websocket import WebSocketAuthenticationError
-
 
 class TestWebSocketAuthColdStartExtendedL3:
     """Extended L3 Integration tests for WebSocket authentication during cold start."""
@@ -679,7 +668,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         
         async with websockets.connect(ws_url, extra_headers=headers) as websocket:
             # Simulate tier upgrade in backend
-            with patch('app.clients.auth_client.auth_client.get_user_tier') as mock_tier:
+            with patch('netra_backend.app.clients.auth_client.auth_client.get_user_tier') as mock_tier:
                 mock_tier.return_value = "enterprise"
                 
                 await websocket.send(json.dumps({
@@ -1076,7 +1065,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         ws_url = f"ws://localhost:8000/websocket"
         
         # Simulate auth service failures
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             failure_count = 0
             
             async def failing_validation(*args, **kwargs):
@@ -1141,7 +1130,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             initial_data = json.loads(response)
         
         # Simulate database unavailability
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database connection failed")
             
             # Second connection - should use cache
@@ -1187,7 +1176,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         ws_url = f"ws://localhost:8000/websocket"
         
         # Simulate partial database failure (read works, write fails)
-        with patch('app.db.postgres.execute') as mock_execute:
+        with patch('netra_backend.app.db.postgres.execute') as mock_execute:
             async def partial_failure(query, *args, **kwargs):
                 if "SELECT" in query:
                     return [{"user_id": "split_brain_user_0", "tier": "mid"}]
@@ -1243,7 +1232,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         headers = {"Authorization": f"Bearer {token}"}
         
         # Simulate database unavailability
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database unavailable")
             
             async with websockets.connect(ws_url, extra_headers=headers) as ws:
@@ -1289,7 +1278,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         queued_operations = []
         
         # Phase 1: Database is down
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database down")
             
             async with websockets.connect(ws_url, extra_headers=headers) as ws:
@@ -1345,11 +1334,11 @@ class TestWebSocketAuthColdStartExtendedL3:
             await ws.recv()
         
         # Simulate extended database outage
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database down")
             
             # Simulate cache expiry
-            with patch('app.cache.redis_cache.get') as mock_cache_get:
+            with patch('netra_backend.app.cache.redis_cache.get') as mock_cache_get:
                 mock_cache_get.return_value = None  # Cache miss
                 
                 async with websockets.connect(ws_url, extra_headers=headers) as ws:
@@ -1382,9 +1371,9 @@ class TestWebSocketAuthColdStartExtendedL3:
         failover_sequence = []
         
         # Mock all data sources
-        with patch('app.db.postgres.get_primary_db') as mock_primary:
-            with patch('app.db.postgres.get_replica_db') as mock_replica:
-                with patch('app.cache.redis_cache.get') as mock_cache:
+        with patch('netra_backend.app.db.postgres.get_primary_db') as mock_primary:
+            with patch('netra_backend.app.db.postgres.get_replica_db') as mock_replica:
+                with patch('netra_backend.app.cache.redis_cache.get') as mock_cache:
                     
                     async def track_primary(*args, **kwargs):
                         failover_sequence.append("primary")
@@ -1562,7 +1551,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert data["type"] == "error"  # Should be denied
             
             # Simulate role upgrade in backend
-            with patch('app.clients.auth_client.auth_client.get_user_roles') as mock_roles:
+            with patch('netra_backend.app.clients.auth_client.auth_client.get_user_roles') as mock_roles:
                 mock_roles.return_value = ["user", "admin"]
                 
                 # Notify session of role change
@@ -1731,7 +1720,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         audit_logs = []
         
         # Mock audit logging
-        with patch('app.core.audit.log_privileged_operation') as mock_audit:
+        with patch('netra_backend.app.core.audit.log_privileged_operation') as mock_audit:
             async def capture_audit(*args, **kwargs):
                 audit_logs.append(kwargs)
                 return True

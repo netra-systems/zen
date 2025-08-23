@@ -59,7 +59,7 @@ class ExportPipelineCore:
         """Setup export pipeline test environment."""
         await self.request_manager.initialize_backend_connection()
     
-    async def teardown_test_environment(self) -> None:
+    async def test_teardown_test_environment(self) -> None:
         """Cleanup export pipeline test environment."""
         await self.request_manager.cleanup_connections()
 

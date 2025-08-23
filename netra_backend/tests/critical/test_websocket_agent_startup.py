@@ -3,17 +3,10 @@
 Tests ensure agents actually start when users send their first message.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 import uuid
@@ -24,13 +17,9 @@ import pytest
 
 from netra_backend.app.db.models_postgres import Run, Thread
 
-# Add project root to path
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
-
-# Add project root to path
-
 
 class TestAgentStartupWithoutContext:
     """Test agent startup when there's no prior thread/context."""
@@ -87,7 +76,7 @@ class TestAgentStartupWithoutContext:
             # Note: No thread_id field
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -111,7 +100,7 @@ class TestAgentStartupWithoutContext:
             "references": []
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -135,8 +124,8 @@ class TestAgentStartupWithoutContext:
         mock_thread_service.get_or_create_thread = AsyncMock(return_value=None)
         message_handler.thread_service = mock_thread_service
         
-        with patch('app.ws_manager.manager.send_error') as mock_send_error:
-            with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
+            with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                 mock_db.return_value.__aexit__ = AsyncMock()
@@ -157,7 +146,7 @@ class TestAgentStartupWithoutContext:
             "references": []
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -207,7 +196,7 @@ class TestAgentStartupWithoutContext:
         existing_thread.metadata_ = {"user_id": "test_user"}
         mock_thread_service.get_thread = AsyncMock(return_value=existing_thread)
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -238,8 +227,8 @@ class TestAgentStartupWithoutContext:
         other_thread.metadata_ = {"user_id": "different_user"}  # Different user
         mock_thread_service.get_thread = AsyncMock(return_value=other_thread)
         
-        with patch('app.ws_manager.manager.send_error') as mock_send_error:
-            with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
+            with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                 mock_db.return_value.__aexit__ = AsyncMock()
@@ -263,8 +252,8 @@ class TestAgentStartupWithoutContext:
         # Make supervisor throw exception
         mock_supervisor.run = AsyncMock(side_effect=Exception("Supervisor failed"))
         
-        with patch('app.ws_manager.manager.send_error') as mock_send_error:
-            with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.ws_manager.manager.send_error') as mock_send_error:
+            with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                 mock_db.return_value.__aexit__ = AsyncMock()
@@ -281,7 +270,7 @@ class TestAgentStartupWithoutContext:
         payload1 = {"content": "First message", "references": []}
         payload2 = {"content": "Second message", "references": []}
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -308,7 +297,7 @@ class TestAgentStartupWithoutContext:
             "references": ["file1.csv", "report.pdf", "metrics.json"]
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -321,7 +310,6 @@ class TestAgentStartupWithoutContext:
                 mock_create_msg.assert_called()
                 call_args = mock_create_msg.call_args
                 # Check if references were included in the message metadata or content
-
 
 class TestAgentStartupEdgeCases:
     """Additional edge cases for agent startup."""

@@ -11,17 +11,10 @@ Coverage: Service discovery patterns, health checking, caching behavior
 L4 Realism: Tests against staging service mesh infrastructure with real microservices
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -30,10 +23,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.integration.service_mesh_fixtures import service_mesh_l4
-
-# Add project root to path
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +34,6 @@ pytestmark = [
     pytest.mark.service_mesh,
     pytest.mark.slow
 ]
-
 
 class ServiceDiscoveryL4Tests:
     """Service discovery specific test implementations."""
@@ -142,7 +131,6 @@ class ServiceDiscoveryL4Tests:
                 "response_time": health_time
             }
 
-
 @pytest.mark.asyncio
 async def test_service_discovery_l4_staging(service_mesh_l4):
     """Test service discovery with L4 realism in staging."""
@@ -170,7 +158,6 @@ async def test_service_discovery_l4_staging(service_mesh_l4):
     avg_cache_improvement = sum(r["cache_performance_improvement"] for r in successful_discoveries) / len(successful_discoveries)
     assert avg_cache_improvement > 50.0, f"Cache performance improvement insufficient: {avg_cache_improvement}%"
 
-
 @pytest.mark.asyncio
 async def test_service_discovery_cache_behavior(service_mesh_l4):
     """Test service discovery caching behavior."""
@@ -196,7 +183,6 @@ async def test_service_discovery_cache_behavior(service_mesh_l4):
     assert cache_speedup > 30.0, f"Cache speedup insufficient: {cache_speedup}%"
     
     logger.info(f"Cache performance: {cache_speedup:.1f}% improvement")
-
 
 @pytest.mark.asyncio
 async def test_service_discovery_health_monitoring(service_mesh_l4):
@@ -230,7 +216,6 @@ async def test_service_discovery_health_monitoring(service_mesh_l4):
     
     logger.info(f"Health monitoring: {len(healthy_instances)}/{len(health_results)} instances healthy, "
                f"{health_rate:.1f}% health rate, {avg_response_time:.3f}s avg response time")
-
 
 @pytest.mark.asyncio
 async def test_service_discovery_concurrent_access(service_mesh_l4):
@@ -270,7 +255,6 @@ async def test_service_discovery_concurrent_access(service_mesh_l4):
     
     logger.info(f"Concurrent discovery: {len(successful_results)}/{len(results)} requests successful, "
                f"{success_rate:.1f}% success rate, {total_time:.2f}s total time")
-
 
 @pytest.mark.asyncio
 async def test_service_discovery_instance_registration(service_mesh_l4):
@@ -327,7 +311,6 @@ async def test_service_discovery_instance_registration(service_mesh_l4):
         assert len(remaining_instances) == len(lookup_after_dereg["instances"]), "Deregistered instance still found"
     
     logger.info("Service instance registration/deregistration cycle successful")
-
 
 @pytest.mark.asyncio
 async def test_service_discovery_failure_recovery(service_mesh_l4):

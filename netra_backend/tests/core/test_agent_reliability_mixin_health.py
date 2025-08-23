@@ -1,16 +1,9 @@
 """Health monitoring tests for AgentReliabilityMixin - metrics and status."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import time
 from datetime import UTC, datetime, timedelta
@@ -18,12 +11,10 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 # Import the components we're testing
 from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.agent_reliability_types import AgentError, AgentHealthStatus
 from netra_backend.app.core.error_codes import ErrorSeverity
-
 
 class MockAgent(AgentReliabilityMixin):
     """Mock agent for testing the reliability mixin."""
@@ -31,7 +22,6 @@ class MockAgent(AgentReliabilityMixin):
     def __init__(self, name: str = "TestAgent"):
         self.name = name
         super().__init__()
-
 
 class TestAgentReliabilityMixinMetrics:
     """Test health metrics calculations."""
@@ -141,7 +131,6 @@ class TestAgentReliabilityMixinMetrics:
         
         status = mock_agent._determine_health_status(0.5, 2)
         assert status == "degraded"
-
 
 class TestAgentReliabilityMixinHealthStatus:
     """Test health status functionality."""

@@ -3,29 +3,18 @@ ClickHouse Test Data Manager
 Handles test data insertion and management for ClickHouse
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 from dataclasses import asdict
 from typing import Any, Dict, List
 
-from .data_generator import RealisticDataGenerator
+from netra_backend.tests.clickhouse.data_generator import RealisticDataGenerator
 
-# Add project root to path
-from .data_models import LLMEvent, LogEntry, WorkloadMetric
-
-# Add project root to path
-
+from netra_backend.tests.clickhouse.data_models import LLMEvent, LogEntry, WorkloadMetric
 
 class ClickHouseTestData:
     """Manage test data for ClickHouse tests"""

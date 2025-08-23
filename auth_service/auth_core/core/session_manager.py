@@ -6,8 +6,9 @@ import asyncio
 import json
 import logging
 import os
+import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
 import redis
@@ -34,6 +35,10 @@ class SessionManager:
         # Initialize race condition protection
         self.used_refresh_tokens = set()
         self._session_locks = {}
+        
+        # In-memory fallback for when Redis fails
+        self._memory_sessions = {}
+        self._fallback_mode = False
             
     def _should_enable_redis(self) -> bool:
         """Determine if Redis should be enabled based on environment"""
@@ -46,43 +51,73 @@ class SessionManager:
         return True
         
     def _connect_redis(self):
-        """Establish Redis connection"""
-        try:
-            self.redis_client = redis.from_url(
-                self.redis_url,
-                decode_responses=True
-            )
-            self.redis_client.ping()
-            logger.info("Redis connected for session management")
-        except Exception as e:
-            logger.error(f"Redis connection failed: {e}")
-            self.redis_client = None
+        """Establish Redis connection with retry logic"""
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                self.redis_client = redis.from_url(
+                    self.redis_url,
+                    decode_responses=True,
+                    socket_connect_timeout=5,
+                    socket_timeout=5,
+                    retry_on_timeout=True,
+                    health_check_interval=30
+                )
+                self.redis_client.ping()
+                logger.info("Redis connected for session management")
+                self._fallback_mode = False
+                return
+            except Exception as e:
+                logger.error(f"Redis connection attempt {attempt + 1} failed: {e}")
+                if attempt == max_retries - 1:
+                    self.redis_client = None
+                    self._enable_fallback_mode()
+                else:
+                    time.sleep(1 * (attempt + 1))  # Exponential backoff
     
-    def create_session(self, user_id: str, user_data: Dict) -> str:
+    def create_session(self, user_id: str, user_data: Dict, session_id: Optional[str] = None) -> str:
         """Create new session and return session ID"""
-        session_id = str(uuid.uuid4())
+        # Allow custom session ID for session fixation protection
+        if not session_id:
+            session_id = str(uuid.uuid4())
         session_data = {
             "user_id": user_id,
-            "created_at": datetime.utcnow().isoformat(),
-            "last_activity": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "last_activity": datetime.now(timezone.utc).isoformat(),
             **user_data
         }
         
         if not self.redis_enabled:
-            # Return session ID but don't store when Redis is disabled
-            logger.debug(f"Created session {session_id} (Redis disabled - not stored)")
-            return session_id
+            # Use memory fallback when Redis is disabled
+            if self._store_session_memory(session_id, session_data):
+                return session_id
+            return None
         
+        # Try Redis first, fallback to memory if Redis fails
         if self._store_session(session_id, session_data):
             return session_id
-        return None
+        else:
+            # Redis failed, try memory fallback
+            self._enable_fallback_mode()
+            if self._store_session_memory(session_id, session_data):
+                return session_id
+            return None
     
     async def get_session(self, session_id: str) -> Optional[Dict]:
-        """Retrieve session data"""
-        if not self.redis_enabled or not self.redis_client:
-            # Return None when Redis is disabled - sessions won't be stored/retrieved
-            logger.debug(f"Session retrieval skipped for {session_id} (Redis disabled)")
-            return None
+        """Retrieve session data with fallback support including database restore"""
+        if not self.redis_enabled:
+            # Try memory first, then database
+            memory_session = self._get_session_memory(session_id)
+            if memory_session:
+                return memory_session
+            return await self._restore_session_from_db(session_id)
+        
+        if self._fallback_mode:
+            # Already in fallback mode, try memory then database
+            memory_session = self._get_session_memory(session_id)
+            if memory_session:
+                return memory_session
+            return await self._restore_session_from_db(session_id)
             
         try:
             key = self._get_session_key(session_id)
@@ -93,9 +128,18 @@ class SessionManager:
                 # Update last activity
                 await self._update_activity_async(session_id)
                 return session
+            else:
+                # CRITICAL FIX: Try to restore from database if not in Redis
+                return await self._restore_session_from_db(session_id)
                 
         except Exception as e:
-            logger.error(f"Session retrieval failed: {e}")
+            logger.error(f"Redis session retrieval failed: {e}")
+            # Enable fallback and try memory then database
+            self._enable_fallback_mode()
+            memory_session = self._get_session_memory(session_id)
+            if memory_session:
+                return memory_session
+            return await self._restore_session_from_db(session_id)
             
         return None
     
@@ -112,16 +156,19 @@ class SessionManager:
             return False
             
         session.update(updates)
-        session["last_activity"] = datetime.utcnow().isoformat()
+        session["last_activity"] = datetime.now(timezone.utc).isoformat()
         
         return self._store_session(session_id, session)
     
     def delete_session(self, session_id: str) -> bool:
-        """Delete session (logout)"""
-        if not self.redis_enabled or not self.redis_client:
-            # Return True to indicate operation "succeeded" when Redis is disabled
-            logger.debug(f"Session deletion skipped for {session_id} (Redis disabled)")
-            return True
+        """Delete session (logout) with fallback support"""
+        if not self.redis_enabled:
+            # Use memory fallback when Redis is disabled
+            return self._delete_session_memory(session_id)
+        
+        if self._fallback_mode:
+            # Already in fallback mode, use memory
+            return self._delete_session_memory(session_id)
             
         try:
             key = self._get_session_key(session_id)
@@ -129,8 +176,10 @@ class SessionManager:
             return result > 0
             
         except Exception as e:
-            logger.error(f"Session deletion failed: {e}")
-            return False
+            logger.error(f"Redis session deletion failed: {e}")
+            # Enable fallback and try memory
+            self._enable_fallback_mode()
+            return self._delete_session_memory(session_id)
     
     async def validate_session(self, session_id: str) -> bool:
         """Check if session is valid and active"""
@@ -148,7 +197,7 @@ class SessionManager:
         last_activity = datetime.fromisoformat(session["last_activity"])
         expiry = last_activity + timedelta(hours=self.session_ttl)
         
-        if datetime.utcnow() > expiry:
+        if datetime.now(timezone.utc) > expiry:
             self.delete_session(session_id)
             return False
             
@@ -215,24 +264,37 @@ class SessionManager:
     
     def _store_session(self, session_id: str, 
                       session_data: Dict) -> bool:
-        """Store session data in Redis"""
+        """Store session data in Redis with database backup for persistence"""
         if not self.redis_enabled or not self.redis_client:
             logger.debug(f"Session storage skipped for {session_id} (Redis disabled)")
-            return True  # Return True to indicate operation "succeeded"
+            # Store in memory as fallback
+            self._memory_sessions[session_id] = session_data
+            # Also backup to database for persistence
+            asyncio.create_task(self._backup_session_to_db(session_id, session_data))
+            return True
             
         try:
             key = self._get_session_key(session_id)
             value = json.dumps(session_data)
             
-            return self.redis_client.setex(
+            result = self.redis_client.setex(
                 key,
                 timedelta(hours=self.session_ttl),
                 value
             )
             
+            # CRITICAL FIX: Also backup to database for persistence across restarts
+            if result:
+                asyncio.create_task(self._backup_session_to_db(session_id, session_data))
+            
+            return result
+            
         except Exception as e:
             logger.error(f"Session storage failed: {e}")
-            return False
+            # Enable fallback mode and store in memory
+            self._enable_fallback_mode()
+            self._memory_sessions[session_id] = session_data
+            return True
     
     def _update_activity(self, session_id: str):
         """Update session last activity timestamp"""
@@ -282,3 +344,130 @@ class SessionManager:
             return True
         except Exception:
             return False
+    
+    def _enable_fallback_mode(self):
+        """Enable in-memory fallback when Redis fails"""
+        if not self._fallback_mode:
+            self._fallback_mode = True
+            logger.warning("Redis connection failed, enabling in-memory session fallback")
+    
+    def _store_session_memory(self, session_id: str, session_data: Dict) -> bool:
+        """Store session in memory as fallback"""
+        try:
+            self._memory_sessions[session_id] = {
+                **session_data,
+                "_expires_at": datetime.now(timezone.utc) + timedelta(hours=self.session_ttl)
+            }
+            logger.debug(f"Session {session_id} stored in memory fallback")
+            return True
+        except Exception as e:
+            logger.error(f"Memory session storage failed: {e}")
+            return False
+    
+    def _get_session_memory(self, session_id: str) -> Optional[Dict]:
+        """Retrieve session from memory fallback"""
+        try:
+            session = self._memory_sessions.get(session_id)
+            if not session:
+                return None
+            
+            # Check expiration
+            if datetime.now(timezone.utc) > session.get("_expires_at", datetime.now(timezone.utc)):
+                del self._memory_sessions[session_id]
+                return None
+            
+            # Update last activity
+            session["last_activity"] = datetime.now(timezone.utc).isoformat()
+            session["_expires_at"] = datetime.now(timezone.utc) + timedelta(hours=self.session_ttl)
+            
+            # Return session without internal fields
+            return {k: v for k, v in session.items() if not k.startswith("_")}
+        except Exception as e:
+            logger.error(f"Memory session retrieval failed: {e}")
+            return None
+    
+    def _delete_session_memory(self, session_id: str) -> bool:
+        """Delete session from memory fallback"""
+        try:
+            if session_id in self._memory_sessions:
+                del self._memory_sessions[session_id]
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Memory session deletion failed: {e}")
+            return False
+    
+    def regenerate_session_id(self, old_session_id: str, user_id: str, user_data: Dict) -> str:
+        """Regenerate session ID for session fixation protection"""
+        import secrets
+        
+        # Create new session with cryptographically secure ID
+        new_session_id = secrets.token_urlsafe(32)
+        
+        # Create new session
+        self.create_session(user_id, user_data, new_session_id)
+        
+        # Delete old session if it exists
+        if old_session_id:
+            self.delete_session(old_session_id)
+        
+        logger.info(f"Session ID regenerated for user {user_id}")
+        return new_session_id
+
+    async def _backup_session_to_db(self, session_id: str, session_data: Dict):
+        """CRITICAL FIX: Backup session to database for persistence across restarts"""
+        try:
+            from auth_service.auth_core.database.connection import auth_db
+            from auth_service.auth_core.database.models import AuthSession
+            from datetime import datetime, timezone, timedelta
+            
+            async with auth_db.get_session() as session:
+                # Create or update session record
+                expires_at = datetime.now(timezone.utc) + timedelta(hours=self.session_ttl)
+                
+                auth_session = AuthSession(
+                    id=session_id,
+                    user_id=session_data.get("user_id"),
+                    ip_address=session_data.get("ip_address"),
+                    user_agent=session_data.get("user_agent"),
+                    expires_at=expires_at,
+                    is_active=True
+                )
+                
+                # Use merge to handle existing records
+                await session.merge(auth_session)
+                await session.commit()
+                
+        except Exception as e:
+            logger.error(f"Failed to backup session {session_id} to database: {e}")
+
+    async def _restore_session_from_db(self, session_id: str) -> Optional[Dict]:
+        """CRITICAL FIX: Restore session from database when Redis is unavailable"""
+        try:
+            from auth_service.auth_core.database.connection import auth_db
+            from auth_service.auth_core.database.models import AuthSession
+            from sqlalchemy import select
+            from datetime import datetime, timezone
+            
+            async with auth_db.get_session() as session:
+                stmt = select(AuthSession).where(
+                    AuthSession.id == session_id,
+                    AuthSession.is_active == True,
+                    AuthSession.expires_at > datetime.now(timezone.utc)
+                )
+                result = await session.execute(stmt)
+                auth_session = result.scalar_one_or_none()
+                
+                if auth_session:
+                    return {
+                        "user_id": auth_session.user_id,
+                        "created_at": auth_session.created_at.isoformat(),
+                        "last_activity": auth_session.last_activity.isoformat(),
+                        "ip_address": auth_session.ip_address,
+                        "user_agent": auth_session.user_agent
+                    }
+                    
+        except Exception as e:
+            logger.error(f"Failed to restore session {session_id} from database: {e}")
+        
+        return None

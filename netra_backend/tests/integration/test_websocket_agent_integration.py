@@ -6,17 +6,10 @@ These tests ensure the message routing fix is working end-to-end.
 ROOT CAUSE ADDRESSED: Messages were being validated but never forwarded to agent service.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -24,13 +17,9 @@ from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-from logging_config import central_logger
-
-# Add project root to path
-
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-
 
 @pytest.mark.asyncio
 class TestWebSocketAgentIntegration:
@@ -50,7 +39,7 @@ class TestWebSocketAgentIntegration:
         websocket_manager = Mock()
         
         # Create supervisor with mocked components
-        with patch('app.agents.supervisor_consolidated.AsyncSession'):
+        with patch('netra_backend.app.agents.supervisor_consolidated.AsyncSession'):
             supervisor = SupervisorAgent(
                 llm_manager=llm_manager,
                 tool_dispatcher=tool_dispatcher,
@@ -100,8 +89,8 @@ class TestWebSocketAgentIntegration:
         app.state.tool_dispatcher = Mock()
         
         # Mock WebSocket manager
-        with patch('app.startup_module.manager') as mock_manager:
-            with patch('app.agents.supervisor_consolidated.AsyncSession'):
+        with patch('netra_backend.app.startup_module.manager') as mock_manager:
+            with patch('netra_backend.app.agents.supervisor_consolidated.AsyncSession'):
                 _create_agent_supervisor(app)
         
         # Verify supervisor was created and stored
@@ -141,7 +130,7 @@ class TestWebSocketAgentIntegration:
         mock_db = Mock()
         
         # Execute
-        with patch('app.ws_manager.manager'):
+        with patch('netra_backend.app.ws_manager.manager'):
             await handler.handle_user_message(
                 user_id="test_user",
                 payload=payload,
@@ -215,7 +204,7 @@ class TestWebSocketAgentIntegration:
         ]
         
         # Execute concurrently
-        with patch('app.ws_manager.manager'):
+        with patch('netra_backend.app.ws_manager.manager'):
             tasks = [
                 agent_service.handle_websocket_message(
                     user_id=f"user_{i}",

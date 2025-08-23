@@ -11,22 +11,22 @@ from typing import Any, Dict
 
 import pytest
 
-from tests.e2e.helpers.error_propagation.database_error_helpers import (
+from tests.e2e.helpers.resilience.error_propagation.database_error_helpers import (
     DatabaseErrorHandlingValidator,
 )
-from tests.e2e.helpers.error_propagation.error_correlation_helpers import (
+from tests.e2e.helpers.resilience.error_propagation.error_correlation_helpers import (
     ErrorCorrelationValidator,
 )
-from tests.e2e.helpers.error_propagation.error_generators import (
+from tests.e2e.helpers.resilience.error_propagation.error_generators import (
     RealErrorPropagationTester,
 )
-from tests.e2e.helpers.error_propagation.error_recovery_helpers import (
+from tests.e2e.helpers.resilience.error_propagation.error_recovery_helpers import (
     NetworkFailureSimulationValidator,
 )
-from tests.e2e.helpers.error_propagation.error_validators import (
+from tests.e2e.helpers.resilience.error_propagation.error_validators import (
     AuthServiceFailurePropagationValidator,
 )
-from tests.e2e.helpers.error_propagation.user_message_helpers import (
+from tests.e2e.helpers.resilience.error_propagation.user_message_helpers import (
     UserFriendlyMessageValidator,
 )
 

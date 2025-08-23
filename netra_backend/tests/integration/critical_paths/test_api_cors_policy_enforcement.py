@@ -10,17 +10,10 @@ Critical Path: Preflight request -> CORS validation -> Policy enforcement -> Hea
 Coverage: CORS policies, preflight handling, origin validation, header management, security compliance
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -35,7 +28,6 @@ import pytest
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class CorsPolicy:
     """CORS policy configuration."""
@@ -45,7 +37,6 @@ class CorsPolicy:
     exposed_headers: List[str]
     allow_credentials: bool
     max_age: int  # Preflight cache duration in seconds
-
 
 class ApiCorsManager:
     """Manages L3 API CORS policy tests with real HTTP CORS validation."""
@@ -576,7 +567,6 @@ class ApiCorsManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def cors_manager():
     """Create CORS manager for L3 testing."""
@@ -584,7 +574,6 @@ async def cors_manager():
     await manager.initialize_cors_testing()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -623,7 +612,6 @@ async def test_public_api_wildcard_cors(cors_manager):
         
         assert "Access-Control-Allow-Origin" in cors_headers
         assert cors_headers["Access-Control-Allow-Origin"] == "*"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -678,7 +666,6 @@ async def test_auth_api_restricted_origins(cors_manager):
         if result["preflight_result"]:
             assert result["preflight_result"]["status_code"] in [403, 405]
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -708,7 +695,6 @@ async def test_preflight_request_handling(cors_manager):
     # Check max age
     max_age = int(cors_headers["Access-Control-Max-Age"])
     assert max_age > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -755,7 +741,6 @@ async def test_admin_api_strict_policy(cors_manager):
             exposed_headers = cors_headers["Access-Control-Expose-Headers"]
             assert "X-Operation-Status" in exposed_headers
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -773,7 +758,6 @@ async def test_webhook_no_cors_policy(cors_manager):
     cors_headers = result["cors_headers"]
     # Should not have CORS headers
     assert "Access-Control-Allow-Origin" not in cors_headers
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -811,7 +795,6 @@ async def test_embed_api_permissive_policy(cors_manager):
         if "Access-Control-Expose-Headers" in cors_headers:
             assert "X-Embed-Version" in cors_headers["Access-Control-Expose-Headers"]
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -839,7 +822,6 @@ async def test_complex_preflight_scenarios(cors_manager):
         assert "Content-Type" in allowed_headers
         assert "Authorization" in allowed_headers
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -865,7 +847,6 @@ async def test_cors_policy_violation_tracking(cors_manager):
     # Should have different types of violations
     violation_types = list(metrics["violation_breakdown"].keys())
     assert len(violation_types) > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -907,7 +888,6 @@ async def test_cors_performance_requirements(cors_manager):
     
     successful_results = [r for r in concurrent_results if r["status_code"] == 200]
     assert len(successful_results) >= 12  # Most should succeed
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

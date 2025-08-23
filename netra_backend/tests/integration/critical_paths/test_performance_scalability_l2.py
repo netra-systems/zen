@@ -4,21 +4,10 @@ Tests for load handling, throughput, and resource management.
 Total MRR Protection: $80K
 """
 
-# Add project root to path
-
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import gc
@@ -34,9 +23,7 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 
@@ -58,19 +45,16 @@ class PerformanceMetrics:
 
     throughput_rps: float = 0.0
 
-
 class TestPerformanceScalabilityL2:
 
     """L2 tests for performance and scalability (Tests 76-85)."""
     
-
     @pytest.mark.asyncio
 
     async def test_76_concurrent_user_load(self):
 
         """Test 76: Concurrent User Load
         
-
         Business Value Justification (BVJ):
 
         - Segment: Enterprise
@@ -81,7 +65,6 @@ class TestPerformanceScalabilityL2:
 
         - Revenue Impact: Protects $12K MRR from scaling limits
         
-
         Test Level: L2 (Real Internal Dependencies)
 
         - Real request handling
@@ -102,7 +85,6 @@ class TestPerformanceScalabilityL2:
 
                 self.resource_usage = []
             
-
             async def simulate_user(self, user_id: int, operations: int):
 
                 """Simulate a single user performing operations."""
@@ -111,7 +93,6 @@ class TestPerformanceScalabilityL2:
 
                 user_operations = []
                 
-
                 try:
 
                     for op in range(operations):
@@ -122,7 +103,6 @@ class TestPerformanceScalabilityL2:
 
                         await asyncio.sleep(0.01)  # 10ms operation
                         
-
                         duration = time.time() - start
 
                         user_operations.append({
@@ -135,17 +115,14 @@ class TestPerformanceScalabilityL2:
 
                         })
                     
-
                     self.completed_operations.extend(user_operations)
 
                     return True
                     
-
                 finally:
 
                     self.active_users -= 1
             
-
             async def run_concurrent_load(self, num_users: int, ops_per_user: int):
 
                 """Run concurrent user load test."""
@@ -182,7 +159,6 @@ class TestPerformanceScalabilityL2:
 
                 total_ops = len(self.completed_operations)
                 
-
                 return {
 
                     "users": num_users,
@@ -201,7 +177,6 @@ class TestPerformanceScalabilityL2:
 
                 }
         
-
         simulator = LoadSimulator()
         
         # Test with 50 concurrent users, 10 operations each
@@ -224,14 +199,12 @@ class TestPerformanceScalabilityL2:
 
         assert metrics["memory_increase_mb"] < 100  # Reasonable memory usage
     
-
     @pytest.mark.asyncio
 
     async def test_77_message_throughput(self):
 
         """Test 77: Message Throughput
         
-
         Business Value Justification (BVJ):
 
         - Segment: Enterprise
@@ -242,7 +215,6 @@ class TestPerformanceScalabilityL2:
 
         - Revenue Impact: Protects $10K MRR from throughput limits
         
-
         Test Level: L2 (Real Internal Dependencies)
 
         - Real message processing
@@ -265,7 +237,6 @@ class TestPerformanceScalabilityL2:
 
                 self.processing = True
             
-
             async def process_messages(self):
 
                 """Process messages from queue."""
@@ -288,12 +259,10 @@ class TestPerformanceScalabilityL2:
 
                         self.processed_count += 1
                         
-
                     except asyncio.TimeoutError:
 
                         continue
             
-
             async def send_message(self, message: Dict):
 
                 """Send message to processor."""
@@ -310,7 +279,6 @@ class TestPerformanceScalabilityL2:
 
                     return False
             
-
             async def benchmark_throughput(self, duration_seconds: float, target_mps: int):
 
                 """Benchmark message throughput."""
@@ -318,14 +286,12 @@ class TestPerformanceScalabilityL2:
 
                 processor_task = asyncio.create_task(self.process_messages())
                 
-
                 start_time = time.time()
 
                 sent_count = 0
 
                 message_interval = 1.0 / target_mps
                 
-
                 try:
 
                     while time.time() - start_time < duration_seconds:
@@ -340,29 +306,24 @@ class TestPerformanceScalabilityL2:
 
                         }
                         
-
                         if await self.send_message(message):
 
                             sent_count += 1
                         
-
                         await asyncio.sleep(message_interval)
                     
                     # Allow processing to complete
 
                     await asyncio.sleep(0.5)
                     
-
                 finally:
 
                     self.processing = False
 
                     await processor_task
                 
-
                 actual_duration = time.time() - start_time
                 
-
                 return {
 
                     "sent": sent_count,
@@ -379,7 +340,6 @@ class TestPerformanceScalabilityL2:
 
                 }
         
-
         processor = MessageProcessor()
         
         # Benchmark at 100 messages per second
@@ -400,14 +360,12 @@ class TestPerformanceScalabilityL2:
 
         assert metrics["dropped"] < 10  # Minimal drops
     
-
     @pytest.mark.asyncio
 
     async def test_78_database_query_optimization(self):
 
         """Test 78: Database Query Optimization
         
-
         Business Value Justification (BVJ):
 
         - Segment: Enterprise
@@ -418,7 +376,6 @@ class TestPerformanceScalabilityL2:
 
         - Revenue Impact: Protects $7K MRR from slow queries
         
-
         Test Level: L2 (Real Internal Dependencies)
 
         - Real query analysis
@@ -437,7 +394,6 @@ class TestPerformanceScalabilityL2:
 
                 self.execution_stats = []
             
-
             async def analyze_query(self, query: str):
 
                 """Analyze query for optimization opportunities."""
@@ -470,10 +426,8 @@ class TestPerformanceScalabilityL2:
 
                     analysis["estimated_cost"] *= 3
                 
-
                 return analysis
             
-
             async def optimize_query(self, query: str):
 
                 """Optimize query based on analysis."""
@@ -489,13 +443,11 @@ class TestPerformanceScalabilityL2:
 
                     optimized = optimized.replace("WHERE", "WHERE /* USE INDEX */")
                 
-
                 if analysis["has_subquery"]:
                     # Convert to JOIN if possible
 
                     optimized = optimized.replace("IN (SELECT", "JOIN (SELECT")
                 
-
                 return {
 
                     "original": query,
@@ -510,7 +462,6 @@ class TestPerformanceScalabilityL2:
 
                 }
             
-
             def _get_improvements(self, analysis):
 
                 improvements = []
@@ -525,7 +476,6 @@ class TestPerformanceScalabilityL2:
 
                 return improvements
         
-
         optimizer = QueryOptimizer()
         
         # Test query optimization
@@ -534,7 +484,6 @@ class TestPerformanceScalabilityL2:
 
         result = await optimizer.optimize_query(slow_query)
         
-
         assert result["optimized_cost"] < result["original_cost"]
 
         assert len(result["improvements"]) > 0
@@ -551,19 +500,16 @@ class TestPerformanceScalabilityL2:
 
         result = await optimizer.optimize_query(complex_query)
         
-
         assert "JOIN" in result["optimized"]
 
         assert result["optimized_cost"] < result["original_cost"]
     
-
     @pytest.mark.asyncio
 
     async def test_79_memory_leak_detection(self):
 
         """Test 79: Memory Leak Detection
         
-
         Business Value Justification (BVJ):
 
         - Segment: All
@@ -574,7 +520,6 @@ class TestPerformanceScalabilityL2:
 
         - Revenue Impact: Protects $8K MRR from memory issues
         
-
         Test Level: L2 (Real Internal Dependencies)
 
         - Real memory tracking
@@ -593,14 +538,12 @@ class TestPerformanceScalabilityL2:
 
                 self.potential_leaks = []
             
-
             def take_sample(self):
 
                 """Take memory sample."""
 
                 gc.collect()  # Force garbage collection
                 
-
                 sample = {
 
                     "timestamp": time.time(),
@@ -615,7 +558,6 @@ class TestPerformanceScalabilityL2:
 
                 return sample
             
-
             async def monitor_operation(self, operation, iterations=10):
 
                 """Monitor operation for memory leaks."""
@@ -628,12 +570,10 @@ class TestPerformanceScalabilityL2:
 
                     await operation()
                     
-
                     if i % 2 == 0:
 
                         self.take_sample()
                 
-
                 final = self.take_sample()
                 
                 # Analyze for leaks
@@ -648,7 +588,6 @@ class TestPerformanceScalabilityL2:
 
                     memory_trend = self._calculate_trend([s["memory_mb"] for s in self.samples])
                     
-
                     if memory_trend > 0.5:  # Growing more than 0.5 MB per iteration
 
                         self.potential_leaks.append({
@@ -661,7 +600,6 @@ class TestPerformanceScalabilityL2:
 
                         })
                 
-
                 return {
 
                     "memory_growth_mb": memory_growth,
@@ -676,7 +614,6 @@ class TestPerformanceScalabilityL2:
 
                 }
             
-
             def _calculate_trend(self, values):
 
                 """Calculate linear trend."""
@@ -691,36 +628,29 @@ class TestPerformanceScalabilityL2:
 
                 x = list(range(n))
                 
-
                 x_mean = sum(x) / n
 
                 y_mean = sum(values) / n
                 
-
                 numerator = sum((x[i] - x_mean) * (values[i] - y_mean) for i in range(n))
 
                 denominator = sum((x[i] - x_mean) ** 2 for i in range(n))
                 
-
                 return numerator / denominator if denominator != 0 else 0
         
-
         detector = MemoryLeakDetector()
         
         # Test operation without leak
 
         data_store = []
         
-
         async def clean_operation():
 
             temp_data = ["x" * 1000 for _ in range(100)]
             # Data is released after function
         
-
         result = await detector.monitor_operation(clean_operation, iterations=5)
         
-
         assert result["memory_growth_mb"] < 10  # Minimal growth
 
         assert not result["leak_detected"]
@@ -732,7 +662,6 @@ class TestPerformanceScalabilityL2:
 
             data_store.extend(["x" * 1000 for _ in range(100)])
         
-
         detector_leak = MemoryLeakDetector()
 
         result = await detector_leak.monitor_operation(leaky_operation, iterations=5)
@@ -741,14 +670,12 @@ class TestPerformanceScalabilityL2:
 
         assert result["object_growth"] > 0
     
-
     @pytest.mark.asyncio
 
     async def test_80_cpu_utilization_patterns(self):
 
         """Test 80: CPU Utilization Patterns
         
-
         Business Value Justification (BVJ):
 
         - Segment: Enterprise
@@ -759,7 +686,6 @@ class TestPerformanceScalabilityL2:
 
         - Revenue Impact: Protects $6K MRR through efficiency
         
-
         Test Level: L2 (Real Internal Dependencies)
 
         - Real CPU monitoring
@@ -778,7 +704,6 @@ class TestPerformanceScalabilityL2:
 
                 self.workload_patterns = {}
             
-
             async def profile_workload(self, workload_name: str, workload_func):
 
                 """Profile CPU usage for a workload."""
@@ -791,7 +716,6 @@ class TestPerformanceScalabilityL2:
 
                 sampling_task = asyncio.create_task(self._collect_samples())
                 
-
                 try:
                     # Run workload
 
@@ -801,14 +725,12 @@ class TestPerformanceScalabilityL2:
 
                     sampling_task.cancel()
                     
-
                     duration = time.time() - start_time
                     
                     # Analyze pattern
 
                     pattern = self._analyze_pattern()
                     
-
                     self.workload_patterns[workload_name] = {
 
                         "duration": duration,
@@ -823,15 +745,12 @@ class TestPerformanceScalabilityL2:
 
                     }
                     
-
                     return self.workload_patterns[workload_name]
                     
-
                 except asyncio.CancelledError:
 
                     pass
             
-
             async def _collect_samples(self):
 
                 """Collect CPU samples."""
@@ -848,7 +767,6 @@ class TestPerformanceScalabilityL2:
 
                     await asyncio.sleep(0.1)
             
-
             def _analyze_pattern(self):
 
                 """Analyze CPU usage pattern."""
@@ -857,10 +775,8 @@ class TestPerformanceScalabilityL2:
 
                     return {"avg": 0, "peak": 0, "type": "unknown", "efficiency": 0}
                 
-
                 cpu_values = [s["cpu_percent"] for s in self.cpu_samples]
                 
-
                 avg_cpu = sum(cpu_values) / len(cpu_values)
 
                 peak_cpu = max(cpu_values)
@@ -885,7 +801,6 @@ class TestPerformanceScalabilityL2:
 
                 efficiency = avg_cpu / peak_cpu if peak_cpu > 0 else 0
                 
-
                 return {
 
                     "avg": avg_cpu,
@@ -898,7 +813,6 @@ class TestPerformanceScalabilityL2:
 
                 }
         
-
         analyzer = CPUAnalyzer()
         
         # Test CPU-intensive workload
@@ -912,10 +826,8 @@ class TestPerformanceScalabilityL2:
 
             return "completed"
         
-
         pattern = await analyzer.profile_workload("cpu_intensive", cpu_workload)
         
-
         assert pattern["duration"] > 0
 
         assert pattern["avg_cpu"] >= 0
@@ -932,22 +844,18 @@ class TestPerformanceScalabilityL2:
 
             return "completed"
         
-
         analyzer_io = CPUAnalyzer()
 
         pattern_io = await analyzer_io.profile_workload("io_bound", io_workload)
         
-
         assert pattern_io["avg_cpu"] < pattern["avg_cpu"]  # Less CPU than compute
     
-
     @pytest.mark.asyncio
 
     async def test_81_network_latency_compensation(self):
 
         """Test 81: Network Latency Compensation
         
-
         Business Value Justification (BVJ):
 
         - Segment: Enterprise
@@ -958,7 +866,6 @@ class TestPerformanceScalabilityL2:
 
         - Revenue Impact: Protects $9K MRR from latency issues
         
-
         Test Level: L2 (Real Internal Dependencies)
 
         - Real latency measurement
@@ -985,14 +892,12 @@ class TestPerformanceScalabilityL2:
 
                 }
             
-
             async def measure_latency(self, endpoint: str):
 
                 """Measure latency to endpoint."""
 
                 measurements = []
                 
-
                 for _ in range(5):
 
                     start = time.time()
@@ -1002,15 +907,12 @@ class TestPerformanceScalabilityL2:
 
                     measurements.append((time.time() - start) * 1000)
                 
-
                 avg_latency = sum(measurements) / len(measurements)
 
                 self.latency_map[endpoint] = avg_latency
                 
-
                 return avg_latency
             
-
             async def optimize_for_latency(self, endpoint: str, operation):
 
                 """Optimize operation based on latency."""
@@ -1031,7 +933,6 @@ class TestPerformanceScalabilityL2:
 
                     strategy = "prefetch"
                 
-
                 if strategy in self.compensation_strategies:
 
                     return await self.compensation_strategies[strategy](operation)
@@ -1040,7 +941,6 @@ class TestPerformanceScalabilityL2:
 
                     return await operation()
             
-
             async def _prefetch_strategy(self, operation):
 
                 """Prefetch data to compensate for high latency."""
@@ -1048,7 +948,6 @@ class TestPerformanceScalabilityL2:
 
                 prefetch_data = await operation()
                 
-
                 return {
 
                     "strategy": "prefetch",
@@ -1059,14 +958,12 @@ class TestPerformanceScalabilityL2:
 
                 }
             
-
             async def _cache_strategy(self, operation):
 
                 """Cache results for medium latency."""
 
                 result = await operation()
                 
-
                 return {
 
                     "strategy": "cache",
@@ -1077,7 +974,6 @@ class TestPerformanceScalabilityL2:
 
                 }
             
-
             async def _batch_strategy(self, operation):
 
                 """Batch requests for efficiency."""
@@ -1088,7 +984,6 @@ class TestPerformanceScalabilityL2:
 
                     results.append(await operation())
                 
-
                 return {
 
                     "strategy": "batch",
@@ -1099,10 +994,8 @@ class TestPerformanceScalabilityL2:
 
                 }
         
-
         compensator = LatencyCompensator()
         
-
         async def data_operation():
 
             return {"value": "data", "timestamp": time.time()}
@@ -1121,14 +1014,12 @@ class TestPerformanceScalabilityL2:
 
         assert result["strategy"] in ["prefetch", "cache"]
     
-
     @pytest.mark.asyncio
 
     async def test_82_batch_processing_performance(self):
 
         """Test 82: Batch Processing Performance
         
-
         Business Value Justification (BVJ):
 
         - Segment: Enterprise
@@ -1139,7 +1030,6 @@ class TestPerformanceScalabilityL2:
 
         - Revenue Impact: Protects $7K MRR through efficiency
         
-
         Test Level: L2 (Real Internal Dependencies)
 
         - Real batch processing
@@ -1158,7 +1048,6 @@ class TestPerformanceScalabilityL2:
 
                 self.processing_stats = []
             
-
             async def process_batch(self, items: List[Any], processor_func):
 
                 """Process items in batch."""
@@ -1173,10 +1062,8 @@ class TestPerformanceScalabilityL2:
 
                 results = await asyncio.gather(*tasks, return_exceptions=True)
                 
-
                 duration = time.time() - start_time
                 
-
                 self.processing_stats.append({
 
                     "batch_size": len(items),
@@ -1189,10 +1076,8 @@ class TestPerformanceScalabilityL2:
 
                 })
                 
-
                 return results
             
-
             async def auto_batch(self, all_items: List[Any], processor_func):
 
                 """Automatically batch items for optimal processing."""
@@ -1215,7 +1100,6 @@ class TestPerformanceScalabilityL2:
 
                     all_results.extend(results)
                 
-
                 return {
 
                     "total_items": total_items,
@@ -1230,7 +1114,6 @@ class TestPerformanceScalabilityL2:
 
                 }
             
-
             async def _find_optimal_batch_size(self, sample_items, processor_func):
 
                 """Find optimal batch size using sample."""
@@ -1241,19 +1124,16 @@ class TestPerformanceScalabilityL2:
 
                 best_size = self.optimal_batch_size
                 
-
                 for size in test_sizes:
 
                     if size > len(sample_items):
 
                         continue
                     
-
                     batch = sample_items[:size]
 
                     await self.process_batch(batch, processor_func)
                     
-
                     if self.processing_stats:
 
                         throughput = self.processing_stats[-1]["items_per_second"]
@@ -1264,23 +1144,18 @@ class TestPerformanceScalabilityL2:
 
                             best_size = size
                 
-
                 return best_size
             
-
             def _calculate_avg_throughput(self):
 
                 if not self.processing_stats:
 
                     return 0
                 
-
                 return sum(s["items_per_second"] for s in self.processing_stats) / len(self.processing_stats)
         
-
         processor = BatchProcessor()
         
-
         async def process_item(item):
             # Simulate processing
 
@@ -1294,7 +1169,6 @@ class TestPerformanceScalabilityL2:
 
         result = await processor.auto_batch(items, process_item)
         
-
         assert result["total_items"] == 1000
 
         assert result["batch_size"] > 0
@@ -1303,14 +1177,12 @@ class TestPerformanceScalabilityL2:
 
         assert len(result["results"]) == 1000
     
-
     @pytest.mark.asyncio
 
     async def test_83_startup_time_optimization(self):
 
         """Test 83: Startup Time Optimization
         
-
         Business Value Justification (BVJ):
 
         - Segment: All
@@ -1321,7 +1193,6 @@ class TestPerformanceScalabilityL2:
 
         - Revenue Impact: Protects $8K MRR from slow startups
         
-
         Test Level: L2 (Real Internal Dependencies)
 
         - Real initialization profiling
@@ -1340,14 +1211,12 @@ class TestPerformanceScalabilityL2:
 
                 self.dependencies = {}
             
-
             async def profile_startup(self, startup_sequence: List):
 
                 """Profile startup sequence."""
 
                 total_start = time.time()
                 
-
                 for phase in startup_sequence:
 
                     phase_start = time.time()
@@ -1356,10 +1225,8 @@ class TestPerformanceScalabilityL2:
 
                     await phase["func"]()
                     
-
                     phase_duration = time.time() - phase_start
                     
-
                     self.startup_phases.append({
 
                         "name": phase["name"],
@@ -1372,10 +1239,8 @@ class TestPerformanceScalabilityL2:
 
                     })
                 
-
                 total_duration = time.time() - total_start
                 
-
                 return {
 
                     "total_duration": total_duration,
@@ -1386,7 +1251,6 @@ class TestPerformanceScalabilityL2:
 
                 }
             
-
             async def optimize_startup(self, startup_sequence: List):
 
                 """Optimize startup sequence."""
@@ -1402,7 +1266,6 @@ class TestPerformanceScalabilityL2:
 
                 sequential = [p for p in non_critical if not p.get("can_parallelize", False)]
                 
-
                 total_start = time.time()
                 
                 # Run critical first
@@ -1425,10 +1288,8 @@ class TestPerformanceScalabilityL2:
 
                     await phase["func"]()
                 
-
                 optimized_duration = time.time() - total_start
                 
-
                 return {
 
                     "optimized_duration": optimized_duration,
@@ -1441,7 +1302,6 @@ class TestPerformanceScalabilityL2:
 
                 }
             
-
             def _calculate_optimization_potential(self):
 
                 """Calculate potential optimization."""
@@ -1450,7 +1310,6 @@ class TestPerformanceScalabilityL2:
 
                     return 0
                 
-
                 parallelizable_time = sum(
 
                     p["duration"] for p in self.startup_phases
@@ -1459,13 +1318,10 @@ class TestPerformanceScalabilityL2:
 
                 )
                 
-
                 total_time = sum(p["duration"] for p in self.startup_phases)
                 
-
                 return parallelizable_time / total_time if total_time > 0 else 0
         
-
         optimizer = StartupOptimizer()
         
         # Define startup sequence
@@ -1474,22 +1330,18 @@ class TestPerformanceScalabilityL2:
 
             await asyncio.sleep(0.1)
         
-
         async def init_cache():
 
             await asyncio.sleep(0.05)
         
-
         async def load_config():
 
             await asyncio.sleep(0.02)
         
-
         async def warm_cache():
 
             await asyncio.sleep(0.08)
         
-
         startup_sequence = [
 
             {"name": "database", "func": init_database, "critical": True},
@@ -1518,14 +1370,12 @@ class TestPerformanceScalabilityL2:
 
         assert optimized["parallel_phases"] > 0
     
-
     @pytest.mark.asyncio
 
     async def test_84_resource_pool_sizing(self):
 
         """Test 84: Resource Pool Sizing
         
-
         Business Value Justification (BVJ):
 
         - Segment: Enterprise
@@ -1536,7 +1386,6 @@ class TestPerformanceScalabilityL2:
 
         - Revenue Impact: Protects $6K MRR through efficiency
         
-
         Test Level: L2 (Real Internal Dependencies)
 
         - Real pool management
@@ -1575,14 +1424,12 @@ class TestPerformanceScalabilityL2:
 
                 }
             
-
             async def acquire(self, timeout=5.0):
 
                 """Acquire resource from pool."""
 
                 self.metrics["acquisitions"] += 1
                 
-
                 if self.available > 0:
 
                     self.available -= 1
@@ -1609,7 +1456,6 @@ class TestPerformanceScalabilityL2:
 
                 start = time.time()
                 
-
                 while time.time() - start < timeout:
 
                     if self.available > 0:
@@ -1622,12 +1468,10 @@ class TestPerformanceScalabilityL2:
 
                     await asyncio.sleep(0.1)
                 
-
                 self.metrics["timeouts"] += 1
 
                 return False
             
-
             def release(self):
 
                 """Release resource back to pool."""
@@ -1644,7 +1488,6 @@ class TestPerformanceScalabilityL2:
 
                         asyncio.create_task(self._shrink_pool())
             
-
             async def _grow_pool(self):
 
                 """Grow pool size."""
@@ -1657,7 +1500,6 @@ class TestPerformanceScalabilityL2:
 
                 self.metrics["resizes"] += 1
             
-
             async def _shrink_pool(self):
 
                 """Shrink pool size."""
@@ -1672,7 +1514,6 @@ class TestPerformanceScalabilityL2:
 
                     self.metrics["resizes"] += 1
             
-
             def get_utilization(self):
 
                 """Get pool utilization metrics."""
@@ -1691,7 +1532,6 @@ class TestPerformanceScalabilityL2:
 
                 }
         
-
         pool = ResourcePool(min_size=5, max_size=20)
         
         # Simulate varying load
@@ -1716,7 +1556,6 @@ class TestPerformanceScalabilityL2:
 
                 tasks.append(pool.acquire())
             
-
             results = await asyncio.gather(*tasks)
             
             # Release all
@@ -1725,27 +1564,22 @@ class TestPerformanceScalabilityL2:
 
                 pool.release()
             
-
             return pool.get_utilization()
         
-
         utilization = await simulate_load()
         
-
         assert utilization["current_size"] > 5  # Pool grew
 
         assert utilization["metrics"]["resizes"] > 0  # Resizing occurred
 
         assert utilization["metrics"]["timeouts"] == 0  # No timeouts with proper sizing
     
-
     @pytest.mark.asyncio
 
     async def test_85_garbage_collection_impact(self):
 
         """Test 85: Garbage Collection Impact
         
-
         Business Value Justification (BVJ):
 
         - Segment: Enterprise
@@ -1756,7 +1590,6 @@ class TestPerformanceScalabilityL2:
 
         - Revenue Impact: Protects $7K MRR from GC pauses
         
-
         Test Level: L2 (Real Internal Dependencies)
 
         - Real GC monitoring
@@ -1777,7 +1610,6 @@ class TestPerformanceScalabilityL2:
 
                 gc.enable()
             
-
             async def measure_gc_impact(self, workload_func, duration=2.0):
 
                 """Measure GC impact on workload."""
@@ -1787,7 +1619,6 @@ class TestPerformanceScalabilityL2:
 
                 initial_count = gc.get_count()
                 
-
                 start_time = time.time()
 
                 gc_events = []
@@ -1810,12 +1641,10 @@ class TestPerformanceScalabilityL2:
 
                     post_gc_count = sum(gc.get_count())
                     
-
                     op_duration = time.time() - op_start
 
                     self.operation_latencies.append(op_duration)
                     
-
                     if post_gc_count > pre_gc_count:
 
                         gc_events.append({
@@ -1836,10 +1665,8 @@ class TestPerformanceScalabilityL2:
 
                 gc_duration = time.time() - gc_start
                 
-
                 return self._analyze_impact(gc_events, gc_duration)
             
-
             def _analyze_impact(self, gc_events, forced_gc_duration):
 
                 """Analyze GC impact on performance."""
@@ -1848,17 +1675,14 @@ class TestPerformanceScalabilityL2:
 
                     return {"error": "No operations measured"}
                 
-
                 avg_latency = sum(self.operation_latencies) / len(self.operation_latencies)
 
                 max_latency = max(self.operation_latencies)
                 
-
                 gc_affected_latencies = [e["latency_impact"] for e in gc_events]
 
                 avg_gc_latency = sum(gc_affected_latencies) / len(gc_affected_latencies) if gc_affected_latencies else 0
                 
-
                 return {
 
                     "avg_latency_ms": avg_latency * 1000,
@@ -1877,27 +1701,22 @@ class TestPerformanceScalabilityL2:
 
                 }
             
-
             def _get_recommendations(self, gc_events):
 
                 """Get GC tuning recommendations."""
 
                 recommendations = []
                 
-
                 if len(gc_events) > 10:
 
                     recommendations.append("High GC frequency - consider increasing generation thresholds")
                 
-
                 if any(e["latency_impact"] > 0.1 for e in gc_events):
 
                     recommendations.append("Long GC pauses detected - consider manual gc.collect() at idle times")
                 
-
                 return recommendations
         
-
         analyzer = GCAnalyzer()
         
         # Workload that creates garbage
@@ -1911,10 +1730,8 @@ class TestPerformanceScalabilityL2:
 
             return result
         
-
         impact = await analyzer.measure_gc_impact(memory_workload, duration=1.0)
         
-
         assert impact["avg_latency_ms"] >= 0
 
         assert impact["forced_gc_duration_ms"] >= 0

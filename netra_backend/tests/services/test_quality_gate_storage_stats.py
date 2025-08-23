@@ -3,17 +3,10 @@
 This module tests metrics storage, quality statistics, and batch validation functionality.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -24,16 +17,13 @@ import pytest
 
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
-    # Add project root to path
     QualityGateService,
     QualityLevel,
     QualityMetrics,
     ValidationResult,
 )
-
 
 class TestMetricsStorage:
     """Test metrics storage and retrieval"""
@@ -79,7 +69,6 @@ class TestMetricsStorage:
         assert parsed_metrics['overall_score'] == metrics.overall_score
         # Check TTL is 24 hours
         assert call_args[1]['ex'] == 86400
-
 
 class TestQualityStats:
     """Test quality statistics calculation"""
@@ -137,7 +126,6 @@ class TestQualityStats:
         triage_stats = stats[ContentType.TRIAGE.value]
         assert triage_stats['count'] == 100
 
-
 class TestBatchValidation:
     """Test batch validation functionality"""
     
@@ -184,7 +172,6 @@ class TestBatchValidation:
             assert len(results) == 5
             # Should be much less than 0.5s (sequential would take 0.5s)
             assert elapsed < 0.3
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

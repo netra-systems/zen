@@ -1,12 +1,8 @@
 export const examplePrompts = [
-  "I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",
-  "My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.",
-  "I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?",
-  "I need to optimize the 'user_authentication' function. What advanced methods can I use?",
-  "I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",
-  "I want to audit all uses of KV caching in my system to find optimization opportunities.",
-  "I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?",
-  "@Netra which of our Agent tools should switch to GPT-5? Which versions? What to set the verbosity to?",
-  "@Netra was the upgrade yesterday to GPT-5 worth it? Rollback anything where quality didn't improve much but cost was higher",
-  "@Netra GPT-5 is way too expensive for the real time chat feature. Move to claude 4.1 or GPT-5-mini? Validate quality impact"
+  "Help me reduce my AI costs by 30% while maintaining quality. I'm spending $5000/month on GPT-4 calls.",
+  "My chatbot response time is too slow at 3 seconds. Can you optimize it to under 1 second without increasing costs?",
+  "I'm launching a new feature next month that will 3x my API usage. How should I prepare my infrastructure?",
+  "Analyze my current AI model usage and recommend cost-effective alternatives that maintain performance.",
+  "I need to optimize our customer support AI agent - it's expensive but customers love the quality.",
+  "Help me implement intelligent caching to reduce redundant AI API calls and cut costs by 50%."
 ];

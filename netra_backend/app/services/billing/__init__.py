@@ -9,6 +9,8 @@ from netra_backend.app.services.billing.billing_engine import BillingEngine
 from netra_backend.app.services.billing.cost_calculator import CostCalculator
 from netra_backend.app.services.billing.invoice_generator import InvoiceGenerator
 from netra_backend.app.services.billing.payment_processor import PaymentProcessor
+from netra_backend.app.services.billing.pricing_config import pricing_config, PricingConfig
+from netra_backend.app.services.billing.revenue_calculator import RevenueCalculator
 from netra_backend.app.services.billing.token_counter import TokenCounter
 from netra_backend.app.services.billing.usage_tracker import UsageTracker
 
@@ -18,5 +20,8 @@ __all__ = [
     'InvoiceGenerator',
     'PaymentProcessor',
     'TokenCounter',
-    'CostCalculator'
+    'CostCalculator',
+    'RevenueCalculator',
+    'PricingConfig',
+    'pricing_config'
 ]

@@ -13,9 +13,7 @@ Comprehensive test to verify API rate limiting enforcement:
 This test ensures rate limiting protects the API from abuse.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -28,10 +26,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import aiohttp
 import pytest
-
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Configuration
 DEV_BACKEND_URL = "http://localhost:8000"
@@ -66,7 +60,6 @@ TEST_USERS = [
         "rate_limit": 10000
     }
 ]
-
 
 class RateLimitTester:
     """Test API rate limiting enforcement."""
@@ -627,7 +620,6 @@ class RateLimitTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -661,7 +653,6 @@ async def test_api_rate_limiting_enforcement():
         # Assert all tests passed
         assert all(results.values()), f"Some tests failed: {results}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*60)
@@ -678,7 +669,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

@@ -201,7 +201,7 @@ describe('Landing Page - First-Time User Experience', () => {
   });
 
   describe('P0: Authenticated User Redirect Flow', () => {
-    it('should redirect authenticated users to enterprise demo', async () => {
+    it('should redirect authenticated users directly to chat', async () => {
       const mockUser = {
         id: 'user-123',
         email: 'test@netrasystems.ai',
@@ -217,7 +217,7 @@ describe('Landing Page - First-Time User Experience', () => {
       renderWithProviders(<HomePage />);
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/enterprise-demo');
+        expect(mockPush).toHaveBeenCalledWith('/chat');
       });
     });
 
@@ -238,7 +238,7 @@ describe('Landing Page - First-Time User Experience', () => {
 
       // Quick redirect, minimal loading time
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/enterprise-demo');
+        expect(mockPush).toHaveBeenCalledWith('/chat');
       }, { timeout: 500 });
 
       expect(container.firstChild).toBeInTheDocument();
@@ -321,7 +321,7 @@ describe('Landing Page - First-Time User Experience', () => {
       rerender(<HomePage />);
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/enterprise-demo');
+        expect(mockPush).toHaveBeenCalledWith('/chat');
       });
     });
 

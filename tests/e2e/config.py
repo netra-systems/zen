@@ -41,12 +41,20 @@ class TestEnvironmentType(Enum):
     
     
 @dataclass
+class TestServices:
+    """Test service URLs"""
+    auth: str
+    backend: str
+    
+    
+@dataclass
 class TestEnvironmentConfig:
     """Test environment configuration"""
     environment_type: TestEnvironmentType
     base_url: str
     ws_url: str
     auth_url: str
+    services: TestServices
     redis_host: str = "localhost"
     redis_port: int = 6379
     postgres_host: str = "localhost"
@@ -233,8 +241,12 @@ class TestTokenManager:
         """Create test JWT token"""
         try:
             from netra_backend.app.auth_integration.auth import create_access_token
-            return create_access_token(data={"sub": user_data["email"]})
-        except ImportError:
+            token = create_access_token(data={"sub": user_data["email"]})
+            # If we get an empty token or None, fall back to mock
+            if not token:
+                return f"mock-token-{user_data['id']}"
+            return token
+        except (ImportError, Exception):
             return f"mock-token-{user_data['id']}"
     
     def create_user_token(self, user: TestUser) -> str:
@@ -312,21 +324,33 @@ def get_test_environment_config(env_type: TestEnvironmentType = TestEnvironmentT
             environment_type=TestEnvironmentType.LOCAL,
             base_url="http://localhost:8000",
             ws_url="ws://localhost:8000/ws",
-            auth_url="http://localhost:8001"
+            auth_url="http://localhost:8001",
+            services=TestServices(
+                auth="http://localhost:8001",
+                backend="http://localhost:8000"
+            )
         )
     elif env_type == TestEnvironmentType.DEV:
         return TestEnvironmentConfig(
             environment_type=TestEnvironmentType.DEV,
             base_url="https://dev.netra-apex.com",
             ws_url="wss://dev.netra-apex.com/ws",
-            auth_url="https://auth-dev.netra-apex.com"
+            auth_url="https://auth-dev.netra-apex.com",
+            services=TestServices(
+                auth="https://auth-dev.netra-apex.com",
+                backend="https://dev.netra-apex.com"
+            )
         )
     elif env_type == TestEnvironmentType.STAGING:
         return TestEnvironmentConfig(
             environment_type=TestEnvironmentType.STAGING,
             base_url="https://staging.netra-apex.com",
             ws_url="wss://staging.netra-apex.com/ws",
-            auth_url="https://auth-staging.netra-apex.com"
+            auth_url="https://auth-staging.netra-apex.com",
+            services=TestServices(
+                auth="https://auth-staging.netra-apex.com",
+                backend="https://staging.netra-apex.com"
+            )
         )
     else:
         raise ValueError(f"Unknown environment type: {env_type}")

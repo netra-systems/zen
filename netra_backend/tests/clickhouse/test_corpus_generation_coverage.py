@@ -3,17 +3,10 @@ Test Suite 3: Corpus Generation Coverage Tests
 Tests comprehensive coverage of corpus generation workflows
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -25,7 +18,6 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 import pytest
 from netra_backend.app.schemas import ContentGenParams, CorpusCreate, CorpusUpdate
 
-# Add project root to path
 from netra_backend.app.services.corpus_service import (
     ContentSource,
     CorpusService,
@@ -33,12 +25,10 @@ from netra_backend.app.services.corpus_service import (
 )
 from netra_backend.app.services.generation_service import (
     get_corpus_from_clickhouse,
-    # Add project root to path
     run_content_generation_job,
     run_synthetic_data_generation_job,
     save_corpus_to_clickhouse,
 )
-
 
 class TestCorpusLifecycle:
     """Test complete corpus lifecycle from creation to deletion"""
@@ -121,7 +111,6 @@ class TestCorpusLifecycle:
             db.delete.assert_called_with(corpus)
             db.commit.assert_called()
 
-
 class TestWorkloadTypesCoverage:
     """Test coverage of all workload types"""
     async def test_all_workload_types_supported(self):
@@ -178,7 +167,6 @@ class TestWorkloadTypesCoverage:
             # Verify all workload types are tracked
             assert len(stats["workload_distribution"]) == 6
             assert sum(stats["workload_distribution"].values()) == 1000
-
 
 class TestContentGeneration:
     """Test content generation workflows"""
@@ -252,7 +240,6 @@ class TestContentGeneration:
             assert len(corpus["rag_pipeline"]) == 1
             assert corpus["simple_chat"][0] == ("p1", "r1")
 
-
 class TestBatchProcessing:
     """Test batch processing capabilities"""
     async def test_batch_content_upload(self):
@@ -325,7 +312,6 @@ class TestBatchProcessing:
                         # Should call ingest 3 times (2 full batches + 1 partial)
                         assert mock_ingest.call_count == 3
 
-
 class TestCorpusCloning:
     """Test corpus cloning functionality"""
     async def test_corpus_clone_workflow(self):
@@ -379,7 +365,6 @@ class TestCorpusCloning:
             assert "INSERT INTO dest_table" in query
             assert "SELECT * FROM source_table" in query
 
-
 class TestValidationAndSafety:
     """Test validation and safety measures"""
     
@@ -431,7 +416,6 @@ class TestValidationAndSafety:
         filter_call = db.query().filter.call_args
         assert filter_call != None
 
-
 class TestMetadataTracking:
     """Test metadata tracking throughout corpus lifecycle"""
     async def test_corpus_metadata_creation(self):
@@ -470,7 +454,6 @@ class TestMetadataTracking:
         metadata = json.loads(result.metadata_)
         assert metadata["version"] == 2
         assert "updated_at" in metadata
-
 
 class TestErrorRecovery:
     """Test error recovery mechanisms"""

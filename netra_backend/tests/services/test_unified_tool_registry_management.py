@@ -3,39 +3,29 @@ Tests for unified tool registry management.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import MagicMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.tool_registry import ToolRegistry
-from .tool_registry_management_core import (
+from netra_backend.tests.tool_registry_management_core import (
     ToolHealthMonitor,
     ToolLifecycleManager,
     ToolMetricsCollector,
     ToolOrchestrator,
-    # Add project root to path
     UnifiedToolRegistry,
 )
-from .tool_registry_test_mocks import (
+from netra_backend.tests.tool_registry_test_mocks import (
     MockAdvancedTool,
     ToolStatus,
     assert_tool_status,
     create_test_tools,
 )
-
 
 @pytest.fixture
 def unified_registry():
@@ -49,7 +39,6 @@ def unified_registry():
         
     return unified
 
-
 @pytest.fixture
 def sample_tools():
     """Create sample tools for testing"""
@@ -60,7 +49,6 @@ def sample_tools():
         MockAdvancedTool("optimizer", "Performance optimization tool"),
         MockAdvancedTool("reporter", "Report generation tool")
     ]
-
 
 class TestUnifiedToolRegistryManagement:
     """Test unified tool registry management"""
@@ -138,18 +126,15 @@ class TestUnifiedToolRegistryManagement:
         _setup_integrated_workflow(unified_registry, sample_tools)
         _verify_workflow_integration(unified_registry)
 
-
 def _assert_registry_count(unified_registry, expected_count: int) -> None:
     """Assert unified registry has expected count"""
     assert len(unified_registry.registries) == expected_count
-
 
 def _assert_required_registries_present(unified_registry) -> None:
     """Assert required registries are present"""
     assert 'primary' in unified_registry.registries
     assert 'secondary' in unified_registry.registries
     assert 'specialized' in unified_registry.registries
-
 
 def _assert_management_components_initialized(unified_registry) -> None:
     """Assert management components are initialized"""
@@ -158,14 +143,12 @@ def _assert_management_components_initialized(unified_registry) -> None:
     assert unified_registry.health_monitor is not None
     assert unified_registry.metrics_collector is not None
 
-
 def _test_registry_replacement(unified_registry) -> None:
     """Test registry replacement functionality"""
     replacement_registry = ToolRegistry(MagicMock())
     unified_registry.add_registry('primary', replacement_registry)
     
     assert unified_registry.registries['primary'] is replacement_registry
-
 
 def _create_basic_chain_config(tools: list) -> dict:
     """Create basic chain configuration"""
@@ -175,7 +158,6 @@ def _create_basic_chain_config(tools: list) -> dict:
         'input_data': 'test input'
     }
 
-
 def _create_chain_config_with_data(tools: list) -> dict:
     """Create chain configuration with test data"""
     return {
@@ -183,7 +165,6 @@ def _create_chain_config_with_data(tools: list) -> dict:
         'tools': [{'tool': tool, 'params': {}} for tool in tools],
         'input_data': 'test execution data'
     }
-
 
 def _register_and_test_lifecycle(lifecycle_manager, tool) -> None:
     """Register tool and test lifecycle operations"""
@@ -199,13 +180,11 @@ def _register_and_test_lifecycle(lifecycle_manager, tool) -> None:
     assert success is True
     assert_tool_status(tool, ToolStatus.INACTIVE)
 
-
 def _assert_health_status_format(status: dict) -> None:
     """Assert health status has correct format"""
     required_keys = ['healthy_tools', 'total_tools', 'last_check', 'status']
     for key in required_keys:
         assert key in status
-
 
 def _verify_metrics_collection(metrics_collector) -> None:
     """Verify metrics collection functionality"""
@@ -216,7 +195,6 @@ def _verify_metrics_collection(metrics_collector) -> None:
     assert 'total_calls' in aggregated
     assert 'tool_details' in aggregated
 
-
 def _setup_integrated_workflow(unified_registry, sample_tools) -> None:
     """Setup integrated workflow for testing"""
     # Register tools with lifecycle manager
@@ -226,7 +204,6 @@ def _setup_integrated_workflow(unified_registry, sample_tools) -> None:
     # Check health for all tools
     for tool in sample_tools[:3]:
         unified_registry.health_monitor.check_tool_health(tool.name, tool)
-
 
 def _verify_workflow_integration(unified_registry) -> None:
     """Verify workflow integration works correctly"""

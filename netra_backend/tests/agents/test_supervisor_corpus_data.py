@@ -4,17 +4,10 @@ Split from large test file for architecture compliance
 Test classes: TestCorpusAdminDocumentManagement, TestSupplyResearcherDataCollection, TestDemoServiceWorkflow
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -32,23 +25,21 @@ from netra_backend.app.schemas import (
 )
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    # Add project root to path
     ExecutionStrategy,
 )
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from .supervisor_test_classes import (
+from netra_backend.tests.helpers.supervisor_test_classes import (
     CorpusAdminSubAgent,
     DemoService,
     SupplyResearcherSubAgent,
 )
-from .supervisor_test_helpers import (
+from netra_backend.tests.supervisor_test_helpers import (
     create_corpus_admin_mocks,
     create_demo_data,
     create_demo_service_mocks,
@@ -59,7 +50,6 @@ from .supervisor_test_helpers import (
     create_timestamp_data,
     setup_vector_store_mock,
 )
-
 
 # Mock classes for testing (would normally be imported)
 class CorpusAdminSubAgent:
@@ -81,7 +71,6 @@ class CorpusAdminSubAgent:
         """Update existing document"""
         return await self.vector_store.update_document(document)
 
-
 class SupplyResearcherSubAgent:
     """Mock SupplyResearcherSubAgent for testing"""
     def __init__(self, llm_manager, tool_dispatcher):
@@ -95,7 +84,6 @@ class SupplyResearcherSubAgent:
     
     async def validate_and_enrich(self, raw_data):
         return await self.enrichment_service.enrich(raw_data)
-
 
 class DemoService:
     """Mock demo service for testing"""
@@ -137,7 +125,6 @@ class DemoService:
         random.seed(self.random_seed)
         return self._create_metrics_dict(random)
 
-
 class TestCorpusAdminDocumentManagement:
     """Test 5: Test document indexing and retrieval"""
     def _setup_indexing_test(self):
@@ -153,6 +140,8 @@ class TestCorpusAdminDocumentManagement:
         assert result["indexed"] == 5
         assert result["failed"] == 0
         corpus_admin.vector_store.add_documents.assert_called_once()
+    
+    @pytest.mark.asyncio
     
     async def test_document_indexing_workflow(self):
         """Test document indexing workflow"""
@@ -180,6 +169,8 @@ class TestCorpusAdminDocumentManagement:
         assert len(results) == 2
         assert results[0]["score"] == 0.95
         assert results[0]["id"] == "doc1"
+    
+    @pytest.mark.asyncio
     
     async def test_document_retrieval_with_similarity_search(self):
         """Test document retrieval using similarity search"""
@@ -214,6 +205,8 @@ class TestCorpusAdminDocumentManagement:
         assert result["success"]
         corpus_admin.vector_store.update_document.assert_called_with(update)
     
+    @pytest.mark.asyncio
+    
     async def test_corpus_update_operations(self):
         """Test corpus update operations"""
         corpus_admin = self._setup_update_test()
@@ -221,7 +214,6 @@ class TestCorpusAdminDocumentManagement:
         update = self._create_update_data()
         result = await corpus_admin.update_document(update)
         self._assert_update_results(result, corpus_admin, update)
-
 
 class TestSupplyResearcherDataCollection:
     """Test 6: Test supply chain data research capabilities"""
@@ -248,6 +240,8 @@ class TestSupplyResearcherDataCollection:
         """Assert supply chain data collection results"""
         assert len(result["suppliers"]) == 2
         assert result["inventory"]["gpu"] == 1000
+    
+    @pytest.mark.asyncio
     
     async def test_supply_chain_data_collection(self):
         """Test supply chain data collection workflow"""
@@ -287,6 +281,8 @@ class TestSupplyResearcherDataCollection:
         assert result["quantity"] == 100
         assert "quality_score" in result
     
+    @pytest.mark.asyncio
+    
     async def test_data_validation_and_enrichment(self):
         """Test data validation and enrichment process"""
         supply_researcher = self._setup_validation_test()
@@ -294,7 +290,6 @@ class TestSupplyResearcherDataCollection:
         self._mock_enrichment_service(supply_researcher)
         result = await supply_researcher.validate_and_enrich(raw_data)
         self._assert_validation_results(result)
-
 
 class TestDemoServiceWorkflow:
     """Test 7: Test demo service scenario execution"""
@@ -317,6 +312,8 @@ class TestDemoServiceWorkflow:
         """Assert demo scenario execution results"""
         assert result["metrics"]["accuracy"] == 0.95
         assert len(result["recommendations"]) == 2
+    
+    @pytest.mark.asyncio
     
     async def test_demo_scenario_execution(self):
         """Test execution of demo scenarios"""
@@ -346,6 +343,8 @@ class TestDemoServiceWorkflow:
         assert results[0] != results[1]
         assert results[1] != results[2]
         assert all("timestamp" in r for r in results)
+    
+    @pytest.mark.asyncio
     
     async def test_demo_data_generation_variety(self):
         """Test variety in demo data generation"""

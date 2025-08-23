@@ -44,7 +44,6 @@ from tests.e2e.cost_tracking_helpers import (
 from netra_backend.app.schemas.UserPlan import PlanTier
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
-
 @pytest.mark.asyncio
 class TestCostTrackingAccuracyE2E:
     """Test #6: Complete cost tracking accuracy from operations to billing."""
@@ -78,7 +77,7 @@ class TestCostTrackingAccuracyE2E:
         return FrontendCostDisplayValidator()
     
     @pytest.mark.asyncio
-    async def test_complete_cost_tracking_flow_data_analysis(self, test_core, ai_operation_simulator,
+    async def test_complete_cost_tracking_flow_data_analysis(self, test_core, ai_operation_simulator:
                                                            cost_calculator_validator,
                                                            billing_accuracy_validator,
                                                            frontend_cost_validator):
@@ -105,7 +104,7 @@ class TestCostTrackingAccuracyE2E:
             await session["client"].close()
     
     @pytest.mark.asyncio
-    async def test_multiple_operations_cost_accuracy(self, test_core, ai_operation_simulator,
+    async def test_multiple_operations_cost_accuracy(self, test_core, ai_operation_simulator:
                                                    cost_calculator_validator,
                                                    billing_accuracy_validator):
         """Test cost accuracy across multiple operation types."""
@@ -134,7 +133,7 @@ class TestCostTrackingAccuracyE2E:
             await session["client"].close()
     
     @pytest.mark.asyncio
-    async def test_cost_tracking_performance_requirements(self, test_core, ai_operation_simulator,
+    async def test_cost_tracking_performance_requirements(self, test_core, ai_operation_simulator:
                                                         cost_calculator_validator):
         """Test cost tracking meets performance requirements."""
         session = await test_core.establish_user_session(PlanTier.PRO)
@@ -161,7 +160,7 @@ class TestCostTrackingAccuracyE2E:
             await session["client"].close()
     
     @pytest.mark.asyncio
-    async def test_frontend_cost_display_real_time_updates(self, test_core, ai_operation_simulator,
+    async def test_frontend_cost_display_real_time_updates(self, test_core, ai_operation_simulator:
                                                          frontend_cost_validator):
         """Test frontend cost display updates in real-time."""
         session = await test_core.establish_user_session(PlanTier.PRO)
@@ -183,7 +182,7 @@ class TestCostTrackingAccuracyE2E:
             await session["client"].close()
     
     @pytest.mark.asyncio
-    async def test_billing_database_consistency_validation(self, test_core, ai_operation_simulator,
+    async def test_billing_database_consistency_validation(self, test_core, ai_operation_simulator:
                                                          billing_accuracy_validator):
         """Test billing database consistency and integrity."""
         session = await test_core.establish_user_session(PlanTier.ENTERPRISE)
@@ -205,7 +204,6 @@ class TestCostTrackingAccuracyE2E:
             
         finally:
             await session["client"].close()
-    
     
     async def _execute_full_cost_tracking_flow(self, session: Dict, operation: Dict,
                                              test_core, cost_validator, billing_validator,
@@ -250,7 +248,6 @@ class TestCostTrackingAccuracyE2E:
             mock_llm.return_value = self._create_mock_llm_response(operation["expected_tokens"])
             
             return await test_core.execute_operation_with_cost_tracking(session, operation)
-    
     
     def _create_mock_llm_response(self, expected_tokens: int) -> AsyncMock:
         """Create mock LLM response for deterministic testing."""

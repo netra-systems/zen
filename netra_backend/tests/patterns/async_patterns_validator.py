@@ -10,10 +10,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List
 
-from .async_pattern_analyzer import AsyncPatternAnalyzer
-from .async_performance_analyzer import AsyncPerformanceAnalyzer
-from .async_resource_detector import AsyncResourceLeakDetector
-
+from netra_backend.tests.async_pattern_analyzer import AsyncPatternAnalyzer
+from netra_backend.tests.async_performance_analyzer import AsyncPerformanceAnalyzer
+from netra_backend.tests.async_resource_detector import AsyncResourceLeakDetector
 
 @dataclass
 class ValidationResult:
@@ -23,7 +22,6 @@ class ValidationResult:
     is_valid: bool
     issues: List[str]
     recommendations: List[str]
-
 
 class AsyncTestPatternValidator:
     """Main validator for async test patterns"""
@@ -201,7 +199,6 @@ class AsyncTestPatternValidator:
         mixed_count = 0  # Mixed patterns not implemented yet
         return {"async_count": async_count, "sync_count": sync_count, "mixed_count": mixed_count}
 
-
 async def validate_async_test_suite() -> Dict[str, Any]:
     """Validate entire async test suite"""
     validators = _initialize_validators()
@@ -209,7 +206,6 @@ async def validate_async_test_suite() -> Dict[str, Any]:
     validation_results = _run_pattern_validation(validators["validator"])
     leak_results = await validators["leak_detector"].stop_monitoring()
     return _compile_final_report(validation_results, leak_results)
-
 
 def _initialize_validators() -> Dict[str, Any]:
     """Initialize all validator components"""
@@ -219,12 +215,10 @@ def _initialize_validators() -> Dict[str, Any]:
         "performance_analyzer": AsyncPerformanceAnalyzer()
     }
 
-
 def _run_pattern_validation(validator: AsyncTestPatternValidator) -> Dict[str, Any]:
     """Run pattern validation on project"""
     project_path = "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1"
     return validator.validate_project(project_path)
-
 
 def _compile_final_report(validation_results: Dict, leak_results: Dict) -> Dict[str, Any]:
     """Compile final validation report"""
@@ -234,7 +228,6 @@ def _compile_final_report(validation_results: Dict, leak_results: Dict) -> Dict[
         "overall_status": "PASS" if validation_results["failed_files"] == 0 else "FAIL",
         "recommendations": _compile_recommendations(validation_results, leak_results)
     }
-
 
 def _compile_recommendations(validation_results: Dict, leak_results: Dict) -> List[str]:
     """Compile overall recommendations"""
@@ -251,7 +244,6 @@ def _compile_recommendations(validation_results: Dict, leak_results: Dict) -> Li
     recommendations.append("Use async context managers for test isolation")
     
     return recommendations
-
 
 async def test_validator_functionality():
     """Test the validator functionality itself"""
@@ -273,7 +265,6 @@ async def test_example():
     await leak_detector.start_monitoring()
     leak_results = await leak_detector.stop_monitoring()
     assert "has_leaks" in leak_results
-
 
 if __name__ == "__main__":
     # Run validation

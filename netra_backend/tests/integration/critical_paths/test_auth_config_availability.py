@@ -10,16 +10,10 @@ L3 Test: Real local services with containers for auth service config endpoint te
 Tests config availability, response time, structure validation, and resilience.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 
-# Add project root to path
 import sys
 from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -34,14 +28,9 @@ from unittest.mock import patch
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class AuthServiceContainer:
     """Manages Auth Service Docker container for L3 testing."""
@@ -132,7 +121,6 @@ class AuthServiceContainer:
         if result.returncode != 0:
             raise RuntimeError(f"Failed to start auth service: {result.stderr}")
 
-
 class PostgresContainer:
     """Manages PostgreSQL container for L3 testing."""
     
@@ -215,7 +203,6 @@ class PostgresContainer:
         """Validate PostgreSQL command result."""
         if result.returncode != 0:
             raise RuntimeError(f"Failed to start PostgreSQL: {result.stderr}")
-
 
 class AuthConfigAvailabilityManager:
     """Manages auth config endpoint availability testing."""
@@ -538,7 +525,6 @@ class AuthConfigAvailabilityManager:
         else:
             return "C"
 
-
 @pytest.mark.L3
 @pytest.mark.integration
 class TestAuthConfigAvailabilityL3:
@@ -709,7 +695,6 @@ class TestAuthConfigAvailabilityL3:
         logger.info(f"Performance test passed: {performance['success_rate']:.1%} success rate, "
                    f"{performance['avg_response_time']:.3f}s avg response time, "
                    f"grade {performance['performance_grade']}")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

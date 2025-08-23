@@ -11,8 +11,8 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth_service.tests.config.test_env import TestEnvironment
-from auth_service.tests.config.test_settings import TestSettings
+from auth_service.tests.config.test_env import AuthTestEnvironment
+from auth_service.tests.config.test_settings import MainTestSettings
 from auth_service.tests.factories import (
     AuthSessionFactory,
     AuthUserFactory,
@@ -28,8 +28,8 @@ class AsyncTestBase:
     
     def setup_method(self):
         """Setup for each test method"""
-        self.test_settings = TestSettings.for_unit_tests()
-        self.test_env = TestEnvironment()
+        self.test_settings = MainTestSettings.for_unit_tests()
+        self.test_env = AuthTestEnvironment()
         self.mock_objects = {}
     
     def teardown_method(self):
@@ -131,7 +131,7 @@ class AuthTestBase(AsyncTestBase):
                 permissions
             )
         else:
-            from ..factories.permission_factory import RoleFactory
+            from auth_service.tests.factories.permission_factory import RoleFactory
             user_permissions = RoleFactory.create_role_permissions(
                 user_data["id"],
                 role

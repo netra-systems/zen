@@ -10,9 +10,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Protects against revenue loss from outages
 """
 
-from ..test_utils import setup_test_path
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 import asyncio
 import json
@@ -28,11 +26,8 @@ from unittest.mock import MagicMock, patch
 import aiohttp
 import pytest
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
 # Import modules dynamically to avoid path issues
 import importlib
-
 
 class StartupTestSuite:
     """Comprehensive startup test suite with ultra-deep validation"""
@@ -63,7 +58,6 @@ class StartupTestSuite:
         validator = RedisValidator()
         result = await validator.validate_connection()
         assert result.success or result.is_optional, f"Redis error: {result.error}"
-
 
 class FrontendTypeValidator:
     """Validates TypeScript type exports and imports"""
@@ -135,7 +129,6 @@ class FrontendTypeValidator:
         
         return errors[:10]  # Limit to first 10 errors
 
-
 class AuthServiceValidator:
     """Validates auth service connectivity and configuration"""
     
@@ -189,7 +182,6 @@ class AuthServiceValidator:
                 return ValidationResult(True, "Health check passed")
         except Exception as e:
             return ValidationResult(False, f"Health check error: {str(e)}")
-
 
 class ClickHouseValidator:
     """Validates ClickHouse connectivity and authentication"""
@@ -252,7 +244,6 @@ class ClickHouseValidator:
         except Exception as e:
             return ValidationResult(False, f"Permission error: {str(e)}")
 
-
 class RedisValidator:
     """Validates Redis connectivity"""
     
@@ -291,7 +282,6 @@ class RedisValidator:
                 return ValidationResult(True, "Redis unavailable (optional)", is_optional=True)
             return ValidationResult(False, f"Redis error: {error_msg}")
 
-
 class ValidationResult:
     """Result of a validation check"""
     
@@ -301,31 +291,26 @@ class ValidationResult:
         self.error = None if success else message
         self.is_optional = is_optional
 
-
 # Test functions for pytest
 @pytest.mark.asyncio
 async def test_frontend_type_exports():
     """Test TypeScript type exports are valid"""
     await StartupTestSuite.test_frontend_type_exports()
 
-
 @pytest.mark.asyncio
 async def test_auth_service_connectivity():
     """Test auth service connectivity"""
     await StartupTestSuite.test_auth_service_connectivity()
-
 
 @pytest.mark.asyncio
 async def test_clickhouse_authentication():
     """Test ClickHouse authentication"""
     await StartupTestSuite.test_clickhouse_authentication()
 
-
 @pytest.mark.asyncio
 async def test_redis_connection():
     """Test Redis connection"""
     await StartupTestSuite.test_redis_connection()
-
 
 @pytest.mark.asyncio
 async def test_all_startup_validations():

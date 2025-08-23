@@ -11,7 +11,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Add auth_service to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 @pytest.mark.asyncio
 async def test_no_main_db_sync_module():

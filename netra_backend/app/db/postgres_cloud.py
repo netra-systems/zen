@@ -5,6 +5,11 @@ Business Value Justification (BVJ):
 - Business Goal: Production reliability and security
 - Value Impact: Secure, managed database connections for Cloud Run
 - Strategic Impact: Zero-downtime deployments and automatic failover
+
+Integration:
+- Uses DatabaseManager for environment detection and URL handling consistency
+- Preserves Cloud SQL specific connector logic and Unix socket connections
+- Provides centralized status monitoring with database manager integration
 """
 
 import os
@@ -20,6 +25,8 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.pool import NullPool
 from sqlalchemy import text
 
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -40,6 +47,10 @@ class CloudSQLManager:
             logger.debug("Cloud SQL already initialized, skipping")
             return
         
+        # Verify we're in a Cloud SQL environment
+        if not DatabaseManager.is_cloud_sql_environment():
+            raise RuntimeError("Cloud SQL initialization called but not in Cloud SQL environment")
+        
         try:
             # Import connector only when needed
             from google.cloud.sql.connector import Connector
@@ -47,11 +58,12 @@ class CloudSQLManager:
             # Initialize connector
             self.connector = Connector()
             
-            # Cloud SQL configuration from environment
-            db_user = os.environ.get("DB_USER", "")
-            db_pass = os.environ.get("DB_PASS", "")
-            db_name = os.environ.get("DB_NAME", "")
-            instance_connection_name = os.environ.get("INSTANCE_CONNECTION_NAME", "")
+            # Cloud SQL configuration from unified config
+            config = get_unified_config()
+            db_user = config.database.user or ""
+            db_pass = config.database.password or ""
+            db_name = config.database.name or ""
+            instance_connection_name = config.database.cloud_sql_instance_name or ""
             
             if not all([db_user, db_pass, db_name, instance_connection_name]):
                 raise ValueError("Missing required Cloud SQL environment variables")
@@ -67,16 +79,19 @@ class CloudSQLManager:
                     password=db_pass,
                     db=db_name,
                     # Additional connection parameters for resilience
-                    enable_iam_auth=os.getenv("ENABLE_IAM_AUTH", "false").lower() == "true",
-                    ip_type=os.getenv("CLOUD_SQL_IP_TYPE", "PRIVATE"),  # Prefer private IP
+                    enable_iam_auth=get_unified_config().database.enable_iam_auth,
+                    ip_type=get_unified_config().database.cloud_sql_ip_type,  # Prefer private IP
                 )
             
             # Create async engine with NullPool for serverless
+            # Use DatabaseManager's async URL format as template, but override with custom connector
+            template_url = DatabaseManager.get_application_url_async()
+            
             self.engine = create_async_engine(
                 "postgresql+asyncpg://",
                 creator=getconn,
-                echo=os.getenv("SQL_ECHO", "false").lower() == "true",
-                echo_pool=os.getenv("SQL_ECHO_POOL", "false").lower() == "true",
+                echo=get_unified_config().database.sql_echo,
+                echo_pool=get_unified_config().database.sql_echo_pool,
                 poolclass=NullPool,  # Required for Cloud Run serverless
                 # Additional settings for Cloud Run
                 connect_args={
@@ -158,7 +173,7 @@ class CloudSQLManager:
             "status": "active" if self._initialized else "not_initialized",
             "type": "cloud_sql",
             "pooling": "disabled",  # NullPool for serverless
-            "instance": os.environ.get("INSTANCE_CONNECTION_NAME", "not_configured"),
+            "instance": get_unified_config().database.cloud_sql_instance_name or "not_configured",
         }
 
 
@@ -183,3 +198,25 @@ async def initialize_cloud_db():
 async def close_cloud_db():
     """Close the Cloud SQL connection"""
     await cloud_db.close()
+
+
+def should_use_cloud_sql() -> bool:
+    """Check if Cloud SQL should be used based on environment detection.
+    
+    Returns:
+        True if Cloud SQL connector should be used
+    """
+    return DatabaseManager.is_cloud_sql_environment()
+
+
+def get_cloud_sql_status() -> dict:
+    """Get comprehensive Cloud SQL status for monitoring.
+    
+    Returns:
+        Status information including environment detection and connection state
+    """
+    return {
+        "cloud_sql_environment": DatabaseManager.is_cloud_sql_environment(),
+        "connection_status": cloud_db.get_connection_status(),
+        "database_manager_integration": True,
+    }

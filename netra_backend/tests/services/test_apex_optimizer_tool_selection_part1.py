@@ -3,17 +3,10 @@ Comprehensive tests for Apex Optimizer tool selection - Part 1: Helper Classes a
 Tests tool selection logic, helper classes, and basic optimization routing
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -32,14 +25,10 @@ from netra_backend.app.services.apex_optimizer_agent.tools.base import (
     ToolMetadata,
 )
 
-# Add project root to path
 from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
     ApexToolSelector,
 )
 from netra_backend.app.services.context import ToolContext
-
-# Add project root to path
-
 
 class OptimizationCategory(Enum):
     COST_OPTIMIZATION = "cost_optimization"
@@ -48,7 +37,6 @@ class OptimizationCategory(Enum):
     CACHE_OPTIMIZATION = "cache_optimization"
     MODEL_OPTIMIZATION = "model_optimization"
     MULTI_OBJECTIVE = "multi_objective"
-
 
 class MockOptimizationTool(BaseTool):
     """Mock optimization tool for testing"""
@@ -104,7 +92,6 @@ class MockOptimizationTool(BaseTool):
             'capabilities': self.capabilities,
             'success_rate': 1.0 if not self.should_fail else 0.0
         }
-
 
 class MockLLMConnector:
     """Mock LLM connector for tool selection"""
@@ -193,7 +180,6 @@ class MockLLMConnector:
     def get_request_history(self) -> List[Dict[str, Any]]:
         """Get history of LLM requests"""
         return self.requests.copy()
-
 
 class TestApexOptimizerToolSelection:
     """Test Apex optimizer tool selection functionality"""

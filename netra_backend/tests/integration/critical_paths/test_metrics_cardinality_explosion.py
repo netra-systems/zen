@@ -11,17 +11,10 @@ Coverage: High cardinality detection, label sanitization, metric dropping, cost 
 L3 Realism: Tests with real Prometheus instances and actual cardinality limits
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -40,10 +33,7 @@ from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 from netra_backend.app.core.alert_manager import HealthAlertManager
 
-# Add project root to path
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
-
-# Add project root to path
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +44,6 @@ pytestmark = [
     pytest.mark.observability,
     pytest.mark.cardinality
 ]
-
 
 @dataclass
 class CardinalityMetric:
@@ -70,7 +59,6 @@ class CardinalityMetric:
         if self.high_cardinality_labels is None:
             self.high_cardinality_labels = []
 
-
 @dataclass
 class CardinalityViolation:
     """Represents a cardinality violation event."""
@@ -82,7 +70,6 @@ class CardinalityViolation:
     detected_at: datetime
     projected_cost_impact: float
 
-
 @dataclass
 class CardinalityAnalysis:
     """Analysis results for metric cardinality."""
@@ -93,7 +80,6 @@ class CardinalityAnalysis:
     violations: List[CardinalityViolation]
     projected_monthly_cost: float
     protection_actions_taken: int
-
 
 class CardinalityProtectionValidator:
     """Validates cardinality explosion protection with real metrics infrastructure."""
@@ -486,7 +472,6 @@ class CardinalityProtectionValidator:
         except Exception as e:
             logger.error(f"Cardinality protection cleanup failed: {e}")
 
-
 class CardinalityMonitor:
     """Mock cardinality monitor for L3 testing."""
     
@@ -517,7 +502,6 @@ class CardinalityMonitor:
         """Shutdown cardinality monitor."""
         pass
 
-
 @pytest.fixture
 async def cardinality_protection_validator():
     """Create cardinality protection validator for L3 testing."""
@@ -525,7 +509,6 @@ async def cardinality_protection_validator():
     await validator.initialize_cardinality_services()
     yield validator
     await validator.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_high_cardinality_detection_l3(cardinality_protection_validator):
@@ -548,7 +531,6 @@ async def test_high_cardinality_detection_l3(cardinality_protection_validator):
     severities = [v.severity for v in analysis.violations]
     assert "critical" in severities or "error" in severities  # Should detect severe violations
 
-
 @pytest.mark.asyncio
 async def test_cardinality_protection_actions_l3(cardinality_protection_validator):
     """Test cardinality protection actions and cost control.
@@ -569,7 +551,6 @@ async def test_cardinality_protection_actions_l3(cardinality_protection_validato
     assert protection_results["protection_actions_taken"] > 0
     assert protection_results["cost_savings_projected"] > 0
     assert protection_results["protection_effectiveness"] > 0
-
 
 @pytest.mark.asyncio
 async def test_cardinality_cost_projection_l3(cardinality_protection_validator):
@@ -593,7 +574,6 @@ async def test_cardinality_cost_projection_l3(cardinality_protection_validator):
     assert low_analysis.projected_monthly_cost < 200.0  # Low cardinality should be cheap
     assert high_analysis.projected_monthly_cost > 100.0  # High cardinality should cost more
 
-
 @pytest.mark.asyncio
 async def test_cardinality_growth_simulation_l3(cardinality_protection_validator):
     """Test cardinality growth patterns and protection triggers.
@@ -616,7 +596,6 @@ async def test_cardinality_growth_simulation_l3(cardinality_protection_validator
         assert len(growth_simulation["protection_triggers"]) > 0
         for trigger in growth_simulation["protection_triggers"]:
             assert trigger["projected_cost"] > 500.0
-
 
 @pytest.mark.asyncio
 async def test_label_sanitization_effectiveness_l3(cardinality_protection_validator):
@@ -650,7 +629,6 @@ async def test_label_sanitization_effectiveness_l3(cardinality_protection_valida
     # Verify cost impact reduction
     cost_reduction_percentage = (protection_results["cost_savings_projected"] / pre_protection_analysis.projected_monthly_cost) * 100
     assert cost_reduction_percentage > 30.0  # Should reduce costs by at least 30%
-
 
 @pytest.mark.asyncio
 async def test_cardinality_alerting_thresholds_l3(cardinality_protection_validator):

@@ -12,17 +12,10 @@ All functions ≤8 lines per CLAUDE.md requirements.
 Module ≤300 lines per CLAUDE.md requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Any, Dict, Optional
@@ -30,21 +23,17 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, Request, Response
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
-# Add project root to path
 from netra_backend.app.middleware.security_middleware import (
     RateLimitTracker,
     SecurityConfig,
     SecurityMiddleware,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class TestRequestValidationMiddleware:
     """Test request validation middleware functionality."""
@@ -100,7 +89,6 @@ class TestRequestValidationMiddleware:
         request.method = "GET"
         return request
 
-
 class TestResponseTransformationMiddleware:
     """Test response transformation middleware functionality."""
     
@@ -139,7 +127,6 @@ class TestResponseTransformationMiddleware:
     def _create_security_middleware(self) -> SecurityMiddleware:
         """Create security middleware instance for testing."""
         return SecurityMiddleware(None)
-
 
 class TestRateLimitingMiddleware:
     """Test rate limiting middleware functionality."""
@@ -209,7 +196,6 @@ class TestRateLimitingMiddleware:
         request.url.__str__ = Mock(return_value=f"http://test.com{path}")
         return request
 
-
 class TestAuthenticationMiddleware:
     """Test authentication and authorization middleware."""
     
@@ -263,7 +249,6 @@ class TestAuthenticationMiddleware:
         request.headers = headers or {}
         request.headers.get = Mock(side_effect=lambda k, d=None: headers.get(k, d) if headers else d)
         return request
-
 
 class TestErrorHandlingMiddleware:
     """Test error handling middleware chain functionality."""

@@ -12,17 +12,10 @@ to validate auth service health check endpoints, dependency management,
 circuit breaker behavior, and graceful degradation patterns.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -35,11 +28,10 @@ from unittest.mock import patch
 
 import httpx
 import pytest
-from testcontainers.generic import GenericContainer
+from testcontainers.generic.server import ServerContainer as GenericContainer
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 
-# Add project root to path
 from netra_backend.app.core.circuit_breaker import (
     CircuitBreaker,
     CircuitConfig,
@@ -47,15 +39,13 @@ from netra_backend.app.core.circuit_breaker import (
 )
 from netra_backend.app.core.health_checkers import (
     check_clickhouse_health,
-    # Add project root to path
     check_postgres_health,
     check_redis_health,
 )
 from netra_backend.app.logging_config import central_logger
-from test_framework.testcontainers_utils import TestcontainerHelper
+from test_framework.testcontainers_utils import ContainerHelper
 
 logger = central_logger.get_logger(__name__)
-
 
 class AuthServiceHealthDependencyManager:
     """Manages containerized dependencies for Auth Service health check testing."""
@@ -608,7 +598,6 @@ class AuthServiceHealthDependencyManager:
         self.containers.clear()
         self.connection_urls.clear()
 
-
 @pytest.fixture
 async def auth_health_manager():
     """Create auth service health dependency manager."""
@@ -616,7 +605,6 @@ async def auth_health_manager():
     await manager.setup_all_dependencies()
     yield manager
     await manager.cleanup_all_containers()
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -724,7 +712,6 @@ class TestAuthServiceHealthDependenciesL3:
         for service_name, breaker in auth_health_manager.circuit_breakers.items():
             # Circuit breakers should be in closed state for healthy service
             assert breaker.state in [CircuitState.CLOSED, CircuitState.HALF_OPEN]
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

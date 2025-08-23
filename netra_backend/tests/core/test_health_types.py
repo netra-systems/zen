@@ -1,34 +1,24 @@
 """Tests for health monitoring types and enums."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from dataclasses import asdict
 from datetime import UTC, datetime
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.health_types import (
     AlertSeverity,
     ComponentHealth,
     HealthCheckResult,
-    # Add project root to path
     HealthStatus,
     RecoveryAction,
     SystemAlert,
     SystemResourceMetrics,
 )
-
 
 class TestHealthStatus:
     """Test HealthStatus enum."""
@@ -46,7 +36,6 @@ class TestHealthStatus:
         status_values = [status.value for status in HealthStatus]
         assert "healthy" in status_values
         assert "critical" in status_values
-
 
 class TestComponentHealth:
     """Test ComponentHealth dataclass."""
@@ -83,7 +72,6 @@ class TestComponentHealth:
         assert health.uptime == 0.0
         assert health.metadata == {}
 
-
 class TestSystemAlert:
     """Test SystemAlert dataclass."""
     
@@ -118,7 +106,6 @@ class TestSystemAlert:
         
         assert not alert.resolved
         assert alert.metadata == {}
-
 
 class TestHealthCheckResult:
     """Test HealthCheckResult dataclass."""
@@ -168,7 +155,6 @@ class TestHealthCheckResult:
         assert result.error_message == ""
         assert result.metadata == {}
 
-
 class TestSystemResourceMetrics:
     """Test SystemResourceMetrics dataclass."""
     
@@ -200,7 +186,6 @@ class TestSystemResourceMetrics:
         time_diff = datetime.now(UTC) - metrics.timestamp
         assert time_diff.total_seconds() < 1.0
 
-
 class TestAlertSeverity:
     """Test AlertSeverity enum."""
     
@@ -210,7 +195,6 @@ class TestAlertSeverity:
         assert AlertSeverity.WARNING.value == "warning"
         assert AlertSeverity.ERROR.value == "error"
         assert AlertSeverity.CRITICAL.value == "critical"
-
 
 class TestRecoveryAction:
     """Test RecoveryAction enum."""

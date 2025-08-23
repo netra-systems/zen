@@ -113,14 +113,14 @@ class TriageLLMProcessor:
     
     async def _execute_llm_with_fallback_protection(self, _llm_operation) -> Any:
         """Execute LLM operation with fallback protection."""
-        from .models import TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
         return await self.agent.llm_fallback_handler.execute_structured_with_fallback(
             _llm_operation, TriageResult, "triage_llm_call", "triage"
         )
     
     def _convert_result_to_dict(self, result: Any) -> dict:
         """Convert result to dictionary format."""
-        from .models import TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
         if isinstance(result, TriageResult):
             return result.model_dump()
         else:
@@ -187,14 +187,14 @@ class TriageLLMProcessor:
     
     async def _attempt_structured_llm_call(self, enhanced_prompt: str, correlation_id: str) -> dict:
         """Attempt a single structured LLM call."""
-        from .models import TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
         validated_result = await self._call_structured_llm(enhanced_prompt)
         self._log_llm_success(validated_result, correlation_id)
         return validated_result.model_dump()
     
     async def _call_structured_llm(self, enhanced_prompt: str):
         """Call structured LLM with triage schema."""
-        from .models import TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
         return await self.agent.llm_manager.ask_structured_llm(
             enhanced_prompt, llm_config_name='triage', schema=TriageResult, use_cache=False
         )
@@ -260,7 +260,7 @@ class TriageLLMProcessor:
     def _validate_or_return_raw(self, extracted_json: dict) -> dict:
         """Validate JSON or return raw data."""
         try:
-            from .models import TriageResult
+            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
             # Ensure metadata exists and has required fields
             if "metadata" not in extracted_json or extracted_json["metadata"] is None:
                 extracted_json["metadata"] = self._create_fallback_metadata()

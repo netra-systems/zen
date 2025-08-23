@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from .test_parser import extract_failing_tests
+from test_framework.test_parser import extract_failing_tests
 
 
 def _read_failing_tests_file(failing_tests_path: Path) -> Optional[Dict]:

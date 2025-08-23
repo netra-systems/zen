@@ -6,17 +6,10 @@ as hashable types (dict keys, set members, etc).
 Business Value: Prevents runtime crashes from type errors.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -27,14 +20,10 @@ import pytest
 
 from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
 
-# Add project root to path
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-
-# Add project root to path
-
 
 class TestExecutionContextHashableRegression:
     """Test suite to prevent ExecutionContext hashable type errors."""
@@ -208,7 +197,6 @@ class TestExecutionContextHashableRegression:
             # Skip if MCP integration not available
             pytest.skip("MCP integration not available")
 
-
 class TestDataclassSerializationPatterns:
     """Test correct serialization patterns for dataclasses."""
     
@@ -307,7 +295,6 @@ class TestDataclassSerializationPatterns:
         retrieved = cache.get_context_data(context)
         assert retrieved == {"result": "success"}
 
-
 class TestErrorHandlerRegressionFixes:
     """Test the specific fix applied to ExecutionErrorHandler."""
     
@@ -360,7 +347,6 @@ class TestErrorHandlerRegressionFixes:
         
         assert isinstance(result, ExecutionResult)
         assert result.status in [ExecutionStatus.FAILED, ExecutionStatus.DEGRADED]
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

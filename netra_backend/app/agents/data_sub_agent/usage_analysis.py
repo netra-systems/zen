@@ -52,6 +52,6 @@ class UsageAnalysisOperations:
     
     def _process_usage_patterns(self, data: List[Dict[str, Any]], days_back: int) -> Dict[str, Any]:
         """Process usage patterns data."""
-        from .usage_pattern_processor import UsagePatternProcessor
+        from netra_backend.app.agents.data_sub_agent.usage_pattern_processor import UsagePatternProcessor
         processor = UsagePatternProcessor()
         return processor.process_patterns(data, days_back)

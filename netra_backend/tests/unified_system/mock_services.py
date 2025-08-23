@@ -19,7 +19,6 @@ from aiohttp.test_utils import TestServer
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class MockResponse:
     """Standard mock response structure."""
@@ -27,14 +26,12 @@ class MockResponse:
     data: Dict[str, Any]
     headers: Optional[Dict[str, str]] = None
 
-
 @dataclass
 class MockServiceConfig:
     """Configuration for mock service."""
     name: str
     host: str = "localhost"
     port: int = 8888
-
 
 class MockOAuthProvider:
     """Mock OAuth provider for testing authentication flows."""
@@ -85,7 +82,6 @@ class MockOAuthProvider:
         """Get token expiry timestamp."""
         import time
         return time.time() + 3600
-
 
 class MockLLMService:
     """Mock LLM service for testing AI interactions."""
@@ -142,7 +138,6 @@ class MockLLMService:
                 "choices": [{"delta": {"content": word + " "}}]
             })
         return chunks
-
 
 class MockWebSocketServer:
     """Mock WebSocket server for testing real-time communication."""
@@ -226,7 +221,6 @@ class MockWebSocketServer:
         
         # Remove disconnected connections
         self._connections -= disconnected
-
 
 class MockHTTPService:
     """Mock HTTP service with health endpoints."""
@@ -353,7 +347,6 @@ class MockHTTPService:
             return f"http://{self.host}:{self.server.port}"
         return f"http://{self.host}:{self.port}"
 
-
 class MockWebSocketService:
     """Enhanced mock WebSocket service."""
     
@@ -461,7 +454,6 @@ class MockWebSocketService:
             return f"http://{self.host}:{self.server.port}"
         return f"http://{self.host}:{self.port}"
 
-
 class ServiceRegistry:
     """Registry for managing mock services."""
     
@@ -514,27 +506,22 @@ class ServiceRegistry:
             return service.url
         return None
 
-
 # Convenience functions for creating mock services
 def create_mock_auth_service(port: int = 0) -> MockHTTPService:
     """Create mock auth service with dynamic port allocation."""
     return MockHTTPService("auth-service", port)
 
-
 def create_mock_backend_service(port: int = 0) -> MockHTTPService:
     """Create mock backend service with dynamic port allocation."""
     return MockHTTPService("backend-service", port)
-
 
 def create_mock_frontend_service(port: int = 0) -> MockHTTPService:
     """Create mock frontend service with dynamic port allocation."""
     return MockHTTPService("frontend-service", port)
 
-
 def create_mock_websocket_service(port: int = 0) -> MockWebSocketService:
     """Create mock WebSocket service with dynamic port allocation."""
     return MockWebSocketService(port=port)
-
 
 async def setup_unified_mock_services() -> ServiceRegistry:
     """Setup complete mock service environment for unified testing."""

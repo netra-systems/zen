@@ -3,17 +3,10 @@ WebSocket concurrent connection testing module.
 Tests connection limits, pool management, and rapid connect/disconnect cycles.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -28,7 +21,6 @@ import psutil
 import pytest
 import websockets
 
-
 async def create_connection(user_id: str, conn_idx: int, connection_metrics: Dict) -> Optional[AsyncMock]:
     """Create a single WebSocket connection"""
     try:
@@ -38,7 +30,6 @@ async def create_connection(user_id: str, conn_idx: int, connection_metrics: Dic
         return mock_ws
     except Exception as e:
         return _handle_connection_failure(e, connection_metrics)
-
 
 def _create_mock_websocket(user_id: str, conn_idx: int) -> AsyncMock:
     mock_ws = AsyncMock()
@@ -51,13 +42,11 @@ def _create_mock_websocket(user_id: str, conn_idx: int) -> AsyncMock:
     mock_ws.close = AsyncMock()
     return mock_ws
 
-
 def _handle_connection_failure(e: Exception, connection_metrics: Dict) -> None:
     connection_metrics['failed'] += 1
     if 'limit' in str(e).lower():
         connection_metrics['rejected_over_limit'] += 1
     return None
-
 
 async def _create_connection_batch(batch_start: int, batch_end: int, connections: List, connection_metrics: Dict, max_connections_per_user: int):
     batch_tasks = []
@@ -71,12 +60,10 @@ async def _create_connection_batch(batch_start: int, batch_end: int, connections
         batch_tasks.append(task)
     return await asyncio.gather(*batch_tasks, return_exceptions=True)
 
-
 def _process_batch_results(batch_results: List, connections: List):
     for result in batch_results:
         if result and not isinstance(result, Exception):
             connections.append(result)
-
 
 def _calculate_metrics(connection_metrics: Dict, connections: List):
     connection_metrics['memory_end'] = psutil.Process().memory_info().rss / 1024 / 1024
@@ -84,13 +71,11 @@ def _calculate_metrics(connection_metrics: Dict, connections: List):
     connection_metrics['duration'] = time.time() - connection_metrics['start_time']
     connection_metrics['connections_per_second'] = len(connections) / connection_metrics['duration']
 
-
 def _verify_connection_metrics(connections: List, connection_metrics: Dict):
     assert len(connections) > 0, "Should establish some connections"
     assert len(connections) <= 1000, "Should enforce connection limit at 1000"
     assert connection_metrics['memory_used'] < 500, "Memory usage should be reasonable (<500MB)"
     assert connection_metrics['connections_per_second'] > 50, "Should handle >50 connections/second"
-
 
 async def _test_broadcasting(connections: List):
     broadcast_start = time.time()
@@ -113,7 +98,6 @@ async def test_concurrent_connection_limit_1000_users():
     await _test_broadcasting(connections)
     await _cleanup_connections(connections)
 
-
 def _initialize_connection_metrics() -> Dict:
     return {
         'successful': 0,
@@ -123,14 +107,12 @@ def _initialize_connection_metrics() -> Dict:
         'start_time': time.time()
     }
 
-
 async def _create_all_connections(connections: List, connection_metrics: Dict, target: int, batch_size: int, max_per_user: int):
     for batch_start in range(0, target, batch_size):
         batch_end = min(batch_start + batch_size, target)
         batch_results = await _create_connection_batch(batch_start, batch_end, connections, connection_metrics, max_per_user)
         _process_batch_results(batch_results, connections)
         await asyncio.sleep(0.1)
-
 
 async def _cleanup_connections(connections: List):
     cleanup_tasks = [conn.close() for conn in connections]

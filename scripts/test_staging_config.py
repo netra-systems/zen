@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 # Add app directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def test_staging_config():
     """Test configuration loading with staging environment variables."""

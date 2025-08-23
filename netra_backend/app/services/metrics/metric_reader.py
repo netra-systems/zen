@@ -71,7 +71,7 @@ class MetricReader:
     
     def count_unhealthy_agents(self, health_threshold: float = 0.7) -> int:
         """Count agents with health score below threshold."""
-        from .agent_metrics_models import calculate_health_score
+        from netra_backend.app.services.metrics.agent_metrics_models import calculate_health_score
         unhealthy_count = 0
         for metrics in self._agent_metrics.values():
             if calculate_health_score(metrics) < health_threshold:

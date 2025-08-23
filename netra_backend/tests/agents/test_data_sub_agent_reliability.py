@@ -3,17 +3,10 @@ Reliability and system tests for Data Sub Agent
 Focuses on error handling and caching
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
@@ -22,13 +15,9 @@ import pytest
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
-# Add project root to path
-from ..helpers.shared_test_types import (
+from netra_backend.tests.agents.helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
-
-# Add project root to path
-
 
 # Test fixtures for shared test classes
 @pytest.fixture
@@ -46,7 +35,6 @@ def db_session():
     db_mock.query = Mock()
     return db_mock
 
-
 class TestErrorHandling(SharedTestErrorHandling):
     """Test error handling and recovery - extends shared error handling."""
     
@@ -62,6 +50,8 @@ class TestErrorHandling(SharedTestErrorHandling):
             service.clickhouse_ops.fetch_data("SELECT 1")
         
         assert "Database unavailable" in str(exc_info.value)
+
+    @pytest.mark.asyncio
 
     async def test_retry_on_failure(self):
         """Test retry mechanism on processing failure"""
@@ -83,6 +73,8 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert result["success"] == True
         assert mock_process.call_count == 3
 
+    @pytest.mark.asyncio
+
     async def test_max_retries_exceeded(self):
         """Test behavior when max retries exceeded"""
         mock_llm_manager = Mock()
@@ -98,6 +90,8 @@ class TestErrorHandling(SharedTestErrorHandling):
                 
         assert "Persistent error" in str(exc_info.value)
         assert mock_process.call_count == 2
+
+    @pytest.mark.asyncio
 
     async def test_graceful_degradation(self):
         """Test graceful degradation on partial failure"""
@@ -126,9 +120,9 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert results[1]["status"] == "error"
         assert results[2]["status"] == "success"
 
-
 class TestCaching:
     """Test caching functionality"""
+    @pytest.mark.asyncio
     async def test_cache_hit(self):
         """Test cache hit for repeated data"""
         mock_llm_manager = Mock()
@@ -146,6 +140,8 @@ class TestCaching:
             
         assert result1 == result2
         mock_process.assert_not_called()
+
+    @pytest.mark.asyncio
 
     async def test_cache_expiration(self):
         """Test cache expiration with real TTL"""

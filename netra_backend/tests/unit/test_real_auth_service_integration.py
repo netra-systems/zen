@@ -21,17 +21,10 @@ COMPLIANCE:
 - Strong typing with Pydantic ✓
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import os
@@ -45,9 +38,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.auth_integration.auth import (
-    # Add project root to path
     get_current_user,
     get_current_user_optional,
     require_admin,
@@ -57,7 +48,6 @@ from netra_backend.app.auth_integration.auth import (
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.session import get_db_session
-
 
 class RealAuthServiceTestFixture:
     """Manages real auth service connections for testing"""
@@ -90,10 +80,8 @@ class RealAuthServiceTestFixture:
         await self.client.aclose()
         await self.auth_service_client.close()
 
-
 # Global fixture instance
 real_auth_fixture = RealAuthServiceTestFixture()
-
 
 @pytest.fixture(scope="session", autouse=True)
 async def ensure_auth_service():
@@ -105,18 +93,15 @@ async def ensure_auth_service():
     
     await real_auth_fixture.close()
 
-
 @pytest.fixture
 async def real_test_user():
     """Create real test user with token"""
     return await real_auth_fixture.create_real_dev_user()
 
-
 @pytest.fixture
 async def real_token(real_test_user):
     """Extract token from real test user"""
     return real_test_user["access_token"]
-
 
 @pytest.fixture
 async def real_credentials(real_token):
@@ -126,13 +111,11 @@ async def real_credentials(real_token):
         credentials=real_token
     )
 
-
 @pytest.fixture
 async def db_session():
     """Real database session"""
     async for session in get_db_session():
         yield session
-
 
 @pytest.mark.asyncio
 class TestRealTokenValidation:
@@ -164,7 +147,6 @@ class TestRealTokenValidation:
         result = await real_auth_fixture.validate_real_token("not.a.jwt")
         
         assert result is None or result.get("valid") is False
-
 
 @pytest.mark.asyncio
 class TestRealUserRetrieval:
@@ -230,7 +212,6 @@ class TestRealUserRetrieval:
         
         assert user is None
 
-
 @pytest.mark.asyncio 
 class TestRealPermissionValidation:
     """Real permission validation tests (no mocking)"""
@@ -284,7 +265,6 @@ class TestRealPermissionValidation:
                 await check_read_permission(user)
             assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
 
-
 @pytest.mark.asyncio
 class TestRealDatabaseIntegration:
     """Real database integration validation"""
@@ -329,7 +309,6 @@ class TestRealDatabaseIntegration:
         assert user1.id == user2.id
         assert user1.email == user2.email
         assert user1.is_active == user2.is_active
-
 
 @pytest.mark.asyncio
 class TestRealServiceCommunication:

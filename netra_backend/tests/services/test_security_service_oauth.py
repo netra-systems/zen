@@ -3,17 +3,10 @@ Tests for OAuth integration functionality.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -21,14 +14,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from cryptography.fernet import Fernet
 
-# Add project root to path
-from .security_service_test_mocks import (
+from netra_backend.tests.security_service_test_mocks import (
     EnhancedSecurityService,
     MockUser,
 )
-
-# Add project root to path
-
 
 @pytest.fixture
 def oauth_security_service():
@@ -37,7 +26,6 @@ def oauth_security_service():
     key_manager.jwt_secret_key = "oauth_test_key"
     key_manager.fernet_key = Fernet.generate_key()
     return EnhancedSecurityService(key_manager)
-
 
 class TestSecurityServiceOAuth:
     """Test OAuth integration functionality"""
@@ -169,7 +157,6 @@ class TestSecurityServiceOAuth:
             assert allowed is True
             oauth_security_service.record_rate_limit_attempt(identifier)
 
-
 class TestSecurityServiceConcurrency:
     """Test concurrent security service operations"""
     
@@ -246,7 +233,6 @@ class TestSecurityServiceConcurrency:
         tasks = [check_and_record_func() for _ in range(10)]
         return await asyncio.gather(*tasks)
 
-
 def _get_oauth_user_info() -> dict:
     """Get OAuth user info for testing"""
     return {
@@ -255,13 +241,11 @@ def _get_oauth_user_info() -> dict:
         "picture": "https://example.com/avatar.jpg"
     }
 
-
 def _create_oauth_user() -> MockUser:
     """Create OAuth user for testing"""
     user = MockUser("oauth_123", "oauth@example.com", "OAuth User")
     user.picture = "https://example.com/avatar.jpg"
     return user
-
 
 def _setup_oauth_new_user_mocks(mock_db_session: AsyncMock) -> None:
     """Setup mocks for new OAuth user creation"""
@@ -269,13 +253,11 @@ def _setup_oauth_new_user_mocks(mock_db_session: AsyncMock) -> None:
     mock_db_session.commit.return_value = None
     mock_db_session.refresh.return_value = None
 
-
 def _setup_oauth_existing_user_mocks(mock_db_session: AsyncMock, existing_user: MockUser) -> None:
     """Setup mocks for existing OAuth user"""
     mock_result = MagicMock()
     mock_result.scalars.return_value.first.return_value = existing_user
     mock_db_session.execute.return_value = mock_result
-
 
 def _assert_oauth_user_creation(mock_db_session: AsyncMock) -> None:
     """Assert OAuth user creation was attempted"""
@@ -283,12 +265,10 @@ def _assert_oauth_user_creation(mock_db_session: AsyncMock) -> None:
     mock_db_session.commit.assert_called_once()
     mock_db_session.refresh.assert_called_once()
 
-
 def _assert_oauth_existing_user(mock_db_session: AsyncMock, existing_user: MockUser) -> None:
     """Assert OAuth existing user handling"""
     # Should not create new user
     mock_db_session.add.assert_not_called()
-
 
 def _create_oauth_token_data(user: MockUser) -> dict:
     """Create OAuth token data"""
@@ -299,13 +279,11 @@ def _create_oauth_token_data(user: MockUser) -> dict:
         'picture': user.picture
     }
 
-
 def _assert_oauth_token_validation(validation_result: dict, user: MockUser) -> None:
     """Assert OAuth token validation"""
     assert validation_result.get('valid') is True
     assert validation_result.get('user_id') == user.id
     assert validation_result.get('email') == user.email
-
 
 async def _test_oauth_profile_update(oauth_security_service, mock_db_session, existing_user, updated_oauth_info):
     """Test OAuth profile update"""
@@ -317,20 +295,17 @@ async def _test_oauth_profile_update(oauth_security_service, mock_db_session, ex
         # Should update user profile
         assert user.full_name == updated_oauth_info["name"]
 
-
 def _assert_oauth_data_format(oauth_user_info: dict) -> None:
     """Assert OAuth data has correct format"""
     assert "email" in oauth_user_info
     assert "name" in oauth_user_info
     assert "@" in oauth_user_info["email"]
 
-
 def _assert_oauth_security_handling(suspicious_oauth_info: dict) -> None:
     """Assert OAuth security handling"""
     # Should validate and sanitize input
     assert "<script>" in suspicious_oauth_info["name"]  # Test data contains script
     assert "javascript:" in suspicious_oauth_info["picture"]  # Test data contains JavaScript
-
 
 def _assert_concurrent_authentication_results(results: list) -> None:
     """Assert concurrent authentication results"""
@@ -340,13 +315,11 @@ def _assert_concurrent_authentication_results(results: list) -> None:
             continue  # Acceptable for concurrent testing
         assert isinstance(result, dict)
 
-
 def _assert_concurrent_validation_results(results: list) -> None:
     """Assert concurrent validation results"""
     # All validations should succeed for same token
     for result in results:
         assert result.get('valid') is True
-
 
 def _assert_concurrent_rate_limit_results(results: list) -> None:
     """Assert concurrent rate limit results"""

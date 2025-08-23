@@ -5,21 +5,10 @@ Test 5: Multi-Agent Coordination First Response - $15K MRR
 Test 6: Session State Cross-Service Sync - $10K MRR
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -32,16 +21,12 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-# Add project root to path
-
-
 @pytest.mark.asyncio
 
 class TestMessagePersistence:
 
     """Test 4: Message Persistence During Processing"""
     
-
     @pytest.fixture
 
     async def db_session(self):
@@ -56,13 +41,11 @@ class TestMessagePersistence:
 
             yield session
     
-
     async def test_message_saved_before_processing(self, db_session):
 
         """Ensure messages persist before agent processing."""
         from netra_backend.app.services.message_service import MessageService
         
-
         message_service = Mock(spec=MessageService)
 
         message_service.save_message = AsyncMock(return_value={
@@ -73,7 +56,6 @@ class TestMessagePersistence:
 
         })
         
-
         message = {
 
             "content": "Optimize my costs",
@@ -94,7 +76,6 @@ class TestMessagePersistence:
 
         message_service.save_message.assert_called_once_with(message)
     
-
     async def test_message_recovery_after_crash(self, db_session):
 
         """Test message recovery after system crash."""
@@ -121,18 +102,15 @@ class TestMessagePersistence:
 
                 recovered.append(msg)
         
-
         assert len(recovered) == 2
 
         assert all(m["status"] == "pending" for m in recovered)
     
-
     async def test_message_queue_durability(self):
 
         """Test message queue persists during processing."""
         from netra_backend.app.services.queue_service import QueueService
         
-
         queue = Mock(spec=QueueService)
 
         queue.enqueue = AsyncMock()
@@ -151,11 +129,9 @@ class TestMessagePersistence:
 
             await queue.persist()  # Ensure durability
         
-
         assert queue.enqueue.call_count == 5
 
         assert queue.persist.call_count == 5
-
 
 @pytest.mark.asyncio
 
@@ -163,7 +139,6 @@ class TestMultiAgentCoordination:
 
     """Test 5: Multi-Agent Coordination First Response"""
     
-
     async def test_agent_orchestration_flow(self):
 
         """Test supervisor orchestrates multiple agents."""
@@ -181,7 +156,6 @@ class TestMultiAgentCoordination:
 
         }
         
-
         supervisor = Mock(spec=SupervisorAgent)
 
         supervisor.coordinate_agents = AsyncMock(return_value={
@@ -198,27 +172,23 @@ class TestMultiAgentCoordination:
 
         result = await supervisor.coordinate_agents("Reduce costs and improve latency")
         
-
         assert "triage_result" in result
 
         assert result["optimization"]["savings"] == 0.3
 
         assert result["performance"]["latency"] == 200
     
-
     async def test_parallel_agent_execution(self):
 
         """Test agents execute in parallel for speed."""
         import time
         
-
         async def slow_agent(delay: float):
 
             await asyncio.sleep(delay)
 
             return f"result_{delay}"
         
-
         start = time.time()
         
         # Execute 3 agents in parallel
@@ -233,7 +203,6 @@ class TestMultiAgentCoordination:
 
         ]
         
-
         results = await asyncio.gather(*tasks)
 
         duration = time.time() - start
@@ -244,7 +213,6 @@ class TestMultiAgentCoordination:
 
         assert len(results) == 3
     
-
     async def test_agent_response_aggregation(self):
 
         """Test proper aggregation of multi-agent responses."""
@@ -269,7 +237,6 @@ class TestMultiAgentCoordination:
 
         }
         
-
         for agent, resp in responses.items():
 
             if "recommendation" in resp:
@@ -280,11 +247,9 @@ class TestMultiAgentCoordination:
 
                 final_response["metrics"].update(resp["metrics"])
         
-
         assert len(final_response["recommendations"]) == 2
 
         assert final_response["metrics"]["potential_savings"] == 0.4
-
 
 @pytest.mark.asyncio
 
@@ -292,18 +257,15 @@ class TestSessionStateSync:
 
     """Test 6: Session State Cross-Service Sync"""
     
-
     async def test_session_sync_auth_to_backend(self):
 
         """Test session syncs from auth service to backend."""
         from netra_backend.app.services.session_service import SessionService
         
-
         session_service = Mock(spec=SessionService)
 
         session_service.sync_session = AsyncMock(return_value=True)
         
-
         session_data = {
 
             "user_id": "user_123",
@@ -328,25 +290,21 @@ class TestSessionStateSync:
 
         )
         
-
         assert synced is True
 
         session_service.sync_session.assert_called_once()
     
-
     async def test_redis_session_consistency(self):
 
         """Test Redis maintains session consistency."""
         from netra_backend.app.services.redis_manager import RedisManager
         
-
         redis = Mock(spec=RedisManager)
 
         redis.set = AsyncMock(return_value=True)
 
         redis.get = AsyncMock()
         
-
         session_key = "session:user_123"
 
         session_data = {"user_id": "user_123", "active": True}
@@ -365,23 +323,19 @@ class TestSessionStateSync:
 
         parsed = json.loads(retrieved)
         
-
         assert parsed["user_id"] == "user_123"
 
         assert parsed["active"] is True
     
-
     async def test_websocket_state_synchronization(self):
 
         """Test WebSocket connection state syncs across services."""
         from netra_backend.app.services.websocket_manager import WebSocketManager
         
-
         ws_manager = Mock(spec=WebSocketManager)
 
         ws_manager.sync_connection_state = AsyncMock()
         
-
         connection_state = {
 
             "user_id": "user_123",
@@ -398,5 +352,4 @@ class TestSessionStateSync:
 
         await ws_manager.sync_connection_state(connection_state)
         
-
         ws_manager.sync_connection_state.assert_called_once_with(connection_state)

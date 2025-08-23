@@ -1,0 +1,19 @@
+Defaulting to user installation because normal site-packages is not writeable
+Collecting testcontainers
+  Using cached testcontainers-4.12.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting docker (from testcontainers)
+  Using cached docker-7.1.0-py3-none-any.whl.metadata (3.8 kB)
+Requirement already satisfied: python-dotenv in c:\users\antho\appdata\roaming\python\python312\site-packages (from testcontainers) (1.1.1)
+Requirement already satisfied: typing-extensions in c:\users\antho\appdata\roaming\python\python312\site-packages (from testcontainers) (4.14.1)
+Requirement already satisfied: urllib3 in c:\users\antho\appdata\roaming\python\python312\site-packages (from testcontainers) (2.5.0)
+Requirement already satisfied: wrapt in c:\users\antho\appdata\roaming\python\python312\site-packages (from testcontainers) (1.17.3)
+Requirement already satisfied: pywin32>=304 in c:\users\antho\appdata\roaming\python\python312\site-packages (from docker->testcontainers) (311)
+Requirement already satisfied: requests>=2.26.0 in c:\users\antho\appdata\roaming\python\python312\site-packages (from docker->testcontainers) (2.32.3)
+Requirement already satisfied: charset-normalizer<4,>=2 in c:\users\antho\appdata\roaming\python\python312\site-packages (from requests>=2.26.0->docker->testcontainers) (3.4.2)
+Requirement already satisfied: idna<4,>=2.5 in c:\users\antho\appdata\roaming\python\python312\site-packages (from requests>=2.26.0->docker->testcontainers) (3.10)
+Requirement already satisfied: certifi>=2017.4.17 in c:\users\antho\appdata\roaming\python\python312\site-packages (from requests>=2.26.0->docker->testcontainers) (2025.7.14)
+Using cached testcontainers-4.12.0-py3-none-any.whl (111 kB)
+Using cached docker-7.1.0-py3-none-any.whl (147 kB)
+Installing collected packages: docker, testcontainers
+
+Successfully installed docker-7.1.0 testcontainers-4.12.0

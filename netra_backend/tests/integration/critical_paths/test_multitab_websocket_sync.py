@@ -24,21 +24,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -53,21 +42,15 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-
-
 logger = central_logger.get_logger(__name__)
-
 
 class TabCoordinator:
 
     """Coordinate WebSocket connections across multiple browser tabs."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -88,7 +71,6 @@ class TabCoordinator:
 
         }
     
-
     async def register_tab(self, user_id: str, tab_id: str, websocket: AsyncMock) -> Dict[str, Any]:
 
         """Register new browser tab for user."""
@@ -97,7 +79,6 @@ class TabCoordinator:
 
             self.user_tabs[user_id] = {}
         
-
         tab_info = {
 
             "tab_id": tab_id,
@@ -116,7 +97,6 @@ class TabCoordinator:
 
         }
         
-
         self.user_tabs[user_id][tab_id] = tab_info
 
         self.tab_metrics["tabs_registered"] += 1
@@ -143,7 +123,6 @@ class TabCoordinator:
 
         leader_elected = await self._elect_leader_if_needed(user_id)
         
-
         return {
 
             "tab_id": tab_id,
@@ -156,7 +135,6 @@ class TabCoordinator:
 
         }
     
-
     async def unregister_tab(self, user_id: str, tab_id: str) -> Dict[str, Any]:
 
         """Unregister browser tab and handle cleanup."""
@@ -165,7 +143,6 @@ class TabCoordinator:
 
             return {"success": False, "error": "Tab not found"}
         
-
         was_leader = self.user_tabs[user_id][tab_id]["is_leader"]
 
         del self.user_tabs[user_id][tab_id]
@@ -193,7 +170,6 @@ class TabCoordinator:
 
             await self._elect_leader_if_needed(user_id)
         
-
         return {
 
             "success": True,
@@ -204,7 +180,6 @@ class TabCoordinator:
 
         }
     
-
     async def _elect_leader_if_needed(self, user_id: str) -> bool:
 
         """Elect leader tab if none exists or current leader is gone."""
@@ -213,7 +188,6 @@ class TabCoordinator:
 
             return False
         
-
         current_leader = self.leader_tabs.get(user_id)
         
         # Check if current leader still exists and is valid
@@ -232,7 +206,6 @@ class TabCoordinator:
 
         )
         
-
         new_leader_id = oldest_tab[0]
 
         oldest_tab[1]["is_leader"] = True
@@ -245,10 +218,8 @@ class TabCoordinator:
 
         await self._notify_leadership_change(user_id, new_leader_id)
         
-
         return True
     
-
     async def _notify_leadership_change(self, user_id: str, new_leader_id: str):
 
         """Notify tabs about leadership change."""
@@ -257,7 +228,6 @@ class TabCoordinator:
 
             return
         
-
         leadership_message = {
 
             "type": "leadership_change",
@@ -268,7 +238,6 @@ class TabCoordinator:
 
         }
         
-
         for tab_id, tab_info in self.user_tabs[user_id].items():
 
             try:
@@ -287,7 +256,6 @@ class TabCoordinator:
 
                 logger.error(f"Failed to notify tab {tab_id}: {e}")
     
-
     def get_user_tabs(self, user_id: str) -> List[Dict[str, Any]]:
 
         """Get all tabs for user."""
@@ -296,7 +264,6 @@ class TabCoordinator:
 
             return []
         
-
         return [
 
             {
@@ -315,19 +282,16 @@ class TabCoordinator:
 
         ]
     
-
     def get_leader_tab(self, user_id: str) -> Optional[str]:
 
         """Get current leader tab for user."""
 
         return self.leader_tabs.get(user_id)
 
-
 class MessageDeduplicator:
 
     """Deduplicate messages across multiple tabs for same user."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -348,7 +312,6 @@ class MessageDeduplicator:
 
         }
     
-
     async def is_duplicate_message(self, user_id: str, message_id: str, message_content: Dict[str, Any]) -> bool:
 
         """Check if message is duplicate across user's tabs."""
@@ -373,7 +336,6 @@ class MessageDeduplicator:
 
             return True
         
-
         self.dedup_metrics["cache_misses"] += 1
         
         # Store message to prevent future duplicates
@@ -408,10 +370,8 @@ class MessageDeduplicator:
 
         self._cleanup_memory_cache()
         
-
         return False
     
-
     def _generate_content_key(self, message_content: Dict[str, Any]) -> str:
 
         """Generate consistent key from message content."""
@@ -429,12 +389,10 @@ class MessageDeduplicator:
 
         }
         
-
         key_string = json.dumps(key_fields, sort_keys=True)
 
         return str(hash(key_string))
     
-
     def _cleanup_memory_cache(self):
 
         """Clean up old entries from memory cache."""
@@ -449,17 +407,14 @@ class MessageDeduplicator:
 
         ]
         
-
         for key in expired_keys:
 
             del self.message_cache[key]
-
 
 class SharedStateManager:
 
     """Manage shared state across user's tabs."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -476,7 +431,6 @@ class SharedStateManager:
 
         }
     
-
     async def update_shared_state(self, user_id: str, state_updates: Dict[str, Any], tab_id: str) -> Dict[str, Any]:
 
         """Update shared state and sync across tabs."""
@@ -509,7 +463,6 @@ class SharedStateManager:
 
         self.user_states[user_id] = updated_state
         
-
         return {
 
             "updated_state": updated_state,
@@ -518,7 +471,6 @@ class SharedStateManager:
 
         }
     
-
     async def get_shared_state(self, user_id: str) -> Dict[str, Any]:
 
         """Get current shared state for user."""
@@ -534,7 +486,6 @@ class SharedStateManager:
 
         stored_state = await self.redis.hgetall(state_key)
         
-
         if not stored_state:
 
             return {}
@@ -553,12 +504,10 @@ class SharedStateManager:
 
                 parsed_state[k] = v
         
-
         self.user_states[user_id] = parsed_state
 
         return parsed_state.copy()
     
-
     async def _merge_state_updates(self, current_state: Dict[str, Any], updates: Dict[str, Any], tab_id: str) -> Dict[str, Any]:
 
         """Merge state updates with conflict resolution."""
@@ -567,7 +516,6 @@ class SharedStateManager:
 
         conflicts = 0
         
-
         for key, new_value in updates.items():
 
             if key in merged_state:
@@ -615,22 +563,18 @@ class SharedStateManager:
 
             self.state_metrics["conflicts_resolved"] += conflicts
         
-
         return merged_state
     
-
     async def sync_state_to_tabs(self, user_id: str, tab_coordinator: TabCoordinator, exclude_tab: str = None) -> int:
 
         """Sync shared state to all user's tabs."""
 
         self.state_metrics["sync_operations"] += 1
         
-
         user_tabs = tab_coordinator.get_user_tabs(user_id)
 
         shared_state = await self.get_shared_state(user_id)
         
-
         sync_message = {
 
             "type": "state_sync",
@@ -641,19 +585,16 @@ class SharedStateManager:
 
         }
         
-
         synced_tabs = 0
 
         for tab_info in user_tabs:
 
             tab_id = tab_info["tab_id"]
             
-
             if exclude_tab and tab_id == exclude_tab:
 
                 continue
             
-
             if user_id in tab_coordinator.user_tabs and tab_id in tab_coordinator.user_tabs[user_id]:
 
                 try:
@@ -674,15 +615,12 @@ class SharedStateManager:
 
                     logger.error(f"Failed to sync state to tab {tab_id}: {e}")
         
-
         return synced_tabs
-
 
 class MultiTabWebSocketManager:
 
     """Comprehensive multi-tab WebSocket management system."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -705,7 +643,6 @@ class MultiTabWebSocketManager:
 
         }
     
-
     async def connect_tab(self, user_id: str, tab_id: str, websocket: AsyncMock, initial_state: Dict[str, Any] = None) -> Dict[str, Any]:
 
         """Connect new browser tab with multi-tab coordination."""
@@ -734,7 +671,6 @@ class MultiTabWebSocketManager:
 
         self._update_performance_metrics(operation_time)
         
-
         return {
 
             **registration_result,
@@ -745,22 +681,18 @@ class MultiTabWebSocketManager:
 
         }
     
-
     async def disconnect_tab(self, user_id: str, tab_id: str) -> Dict[str, Any]:
 
         """Disconnect browser tab with cleanup."""
 
         start_time = time.time()
         
-
         result = await self.tab_coordinator.unregister_tab(user_id, tab_id)
         
-
         operation_time = time.time() - start_time
 
         self._update_performance_metrics(operation_time)
         
-
         return {
 
             **result,
@@ -769,21 +701,18 @@ class MultiTabWebSocketManager:
 
         }
     
-
     async def handle_tab_message(self, user_id: str, tab_id: str, message: Dict[str, Any]) -> Dict[str, Any]:
 
         """Handle message from specific tab with deduplication."""
 
         start_time = time.time()
         
-
         message_id = message.get("id", str(uuid.uuid4()))
         
         # Check for duplicates
 
         is_duplicate = await self.message_deduplicator.is_duplicate_message(user_id, message_id, message)
         
-
         if is_duplicate:
 
             return {
@@ -800,7 +729,6 @@ class MultiTabWebSocketManager:
 
         result = {"handled": True, "actions": []}
         
-
         if message.get("type") == "state_update":
             # Update shared state
 
@@ -812,7 +740,6 @@ class MultiTabWebSocketManager:
 
             synced_tabs = await self.shared_state_manager.sync_state_to_tabs(user_id, self.tab_coordinator, exclude_tab=tab_id)
             
-
             result["actions"].append({
 
                 "type": "state_updated",
@@ -821,7 +748,6 @@ class MultiTabWebSocketManager:
 
             })
         
-
         elif message.get("type") == "leader_action":
             # Ensure this is from leader tab
 
@@ -843,17 +769,14 @@ class MultiTabWebSocketManager:
 
                 result["reason"] = "not_leader_tab"
         
-
         operation_time = time.time() - start_time
 
         result["operation_time"] = operation_time
 
         self._update_performance_metrics(operation_time)
         
-
         return result
     
-
     async def broadcast_to_user_tabs(self, user_id: str, message: Dict[str, Any], exclude_leader: bool = False) -> Dict[str, Any]:
 
         """Broadcast message to all user's tabs."""
@@ -862,22 +785,18 @@ class MultiTabWebSocketManager:
 
         leader_tab = self.tab_coordinator.get_leader_tab(user_id)
         
-
         broadcast_count = 0
 
         failed_broadcasts = 0
         
-
         for tab_info in user_tabs:
 
             tab_id = tab_info["tab_id"]
             
-
             if exclude_leader and tab_id == leader_tab:
 
                 continue
             
-
             if user_id in self.tab_coordinator.user_tabs and tab_id in self.tab_coordinator.user_tabs[user_id]:
 
                 try:
@@ -900,7 +819,6 @@ class MultiTabWebSocketManager:
 
                     failed_broadcasts += 1
         
-
         return {
 
             "total_tabs": len(user_tabs),
@@ -911,7 +829,6 @@ class MultiTabWebSocketManager:
 
         }
     
-
     def _update_performance_metrics(self, operation_time: float):
 
         """Update performance metrics."""
@@ -936,7 +853,6 @@ class MultiTabWebSocketManager:
 
             self.performance_metrics["peak_concurrent_tabs"] = total_tabs
     
-
     async def get_comprehensive_metrics(self) -> Dict[str, Any]:
 
         """Get comprehensive metrics across all components."""
@@ -962,7 +878,6 @@ class MultiTabWebSocketManager:
             }
 
         }
-
 
 @pytest.fixture
 
@@ -1003,7 +918,6 @@ async def redis_client():
 
         yield client
 
-
 @pytest.fixture
 
 async def multitab_manager(redis_client):
@@ -1011,7 +925,6 @@ async def multitab_manager(redis_client):
     """Create multi-tab WebSocket manager."""
 
     return MultiTabWebSocketManager(redis_client)
-
 
 @pytest.mark.asyncio
 
@@ -1031,7 +944,6 @@ async def test_tab_registration_and_leader_election(multitab_manager):
 
     result1 = await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
     
-
     assert result1["is_leader"] is True
 
     assert result1["leader_elected"] is True
@@ -1044,7 +956,6 @@ async def test_tab_registration_and_leader_election(multitab_manager):
 
     result2 = await multitab_manager.connect_tab(user_id, "tab2", tab2_websocket)
     
-
     assert result2["is_leader"] is False
 
     assert result2["leader_elected"] is False
@@ -1056,7 +967,6 @@ async def test_tab_registration_and_leader_election(multitab_manager):
     leader_tab = multitab_manager.tab_coordinator.get_leader_tab(user_id)
 
     assert leader_tab == "tab1"
-
 
 @pytest.mark.asyncio
 
@@ -1078,7 +988,6 @@ async def test_leader_reelection_on_disconnect(multitab_manager):
 
     tab3_websocket = AsyncMock()
     
-
     await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
 
     await multitab_manager.connect_tab(user_id, "tab2", tab2_websocket)
@@ -1093,7 +1002,6 @@ async def test_leader_reelection_on_disconnect(multitab_manager):
 
     disconnect_result = await multitab_manager.disconnect_tab(user_id, "tab1")
     
-
     assert disconnect_result["success"] is True
 
     assert disconnect_result["was_leader"] is True
@@ -1105,7 +1013,6 @@ async def test_leader_reelection_on_disconnect(multitab_manager):
     new_leader = multitab_manager.tab_coordinator.get_leader_tab(user_id)
 
     assert new_leader in ["tab2", "tab3"]
-
 
 @pytest.mark.asyncio
 
@@ -1125,7 +1032,6 @@ async def test_message_deduplication_across_tabs(multitab_manager):
 
     tab2_websocket = AsyncMock()
     
-
     await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
 
     await multitab_manager.connect_tab(user_id, "tab2", tab2_websocket)
@@ -1160,7 +1066,6 @@ async def test_message_deduplication_across_tabs(multitab_manager):
 
     assert result2["reason"] == "duplicate_message"
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.integration
@@ -1179,10 +1084,8 @@ async def test_shared_state_synchronization(multitab_manager):
 
     tab2_websocket = AsyncMock()
     
-
     initial_state = {"theme": "light", "sidebar_open": True}
     
-
     await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket, initial_state)
 
     result2 = await multitab_manager.connect_tab(user_id, "tab2", tab2_websocket)
@@ -1201,16 +1104,13 @@ async def test_shared_state_synchronization(multitab_manager):
 
     }
     
-
     update_result = await multitab_manager.handle_tab_message(user_id, "tab1", state_update_message)
     
-
     assert update_result["handled"] is True
 
     assert update_result["actions"][0]["type"] == "state_updated"
 
     assert update_result["actions"][0]["synced_tabs"] == 1  # Synced to tab2
-
 
 @pytest.mark.asyncio
 
@@ -1230,7 +1130,6 @@ async def test_leader_only_actions(multitab_manager):
 
     tab2_websocket = AsyncMock()
     
-
     await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
 
     await multitab_manager.connect_tab(user_id, "tab2", tab2_websocket)
@@ -1245,7 +1144,6 @@ async def test_leader_only_actions(multitab_manager):
 
     }
     
-
     result1 = await multitab_manager.handle_tab_message(user_id, "tab1", leader_action)
 
     assert result1["handled"] is True
@@ -1259,7 +1157,6 @@ async def test_leader_only_actions(multitab_manager):
     assert result2["handled"] is False
 
     assert result2["reason"] == "not_leader_tab"
-
 
 @pytest.mark.asyncio
 
@@ -1299,10 +1196,8 @@ async def test_broadcast_to_user_tabs(multitab_manager):
 
     }
     
-
     result = await multitab_manager.broadcast_to_user_tabs(user_id, broadcast_message)
     
-
     assert result["total_tabs"] == 4
 
     assert result["successful_broadcasts"] == 4
@@ -1320,7 +1215,6 @@ async def test_broadcast_to_user_tabs(multitab_manager):
         elif hasattr(websocket_mock, 'send'):
 
             websocket_mock.send.assert_called_once()
-
 
 @pytest.mark.asyncio
 
@@ -1344,7 +1238,6 @@ async def test_concurrent_tab_operations(multitab_manager):
 
         return await multitab_manager.connect_tab(user_id, tab_id, websocket_mock)
     
-
     start_time = time.time()
 
     tasks = [connect_tab_task(i) for i in range(8)]
@@ -1367,7 +1260,6 @@ async def test_concurrent_tab_operations(multitab_manager):
 
     assert leader_count == 1
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.integration
@@ -1386,7 +1278,6 @@ async def test_state_conflict_resolution(multitab_manager):
 
     tab2_websocket = AsyncMock()
     
-
     await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
 
     await multitab_manager.connect_tab(user_id, "tab2", tab2_websocket)
@@ -1411,7 +1302,6 @@ async def test_state_conflict_resolution(multitab_manager):
 
     }
     
-
     later_update = {
 
         "type": "state_update",
@@ -1441,7 +1331,6 @@ async def test_state_conflict_resolution(multitab_manager):
     final_state = await multitab_manager.shared_state_manager.get_shared_state(user_id)
 
     assert final_state["document_title"]["value"] == "Title from Tab 2"
-
 
 @pytest.mark.asyncio
 
@@ -1491,11 +1380,9 @@ async def test_tab_lifecycle_performance(multitab_manager):
 
     avg_disconnection_time = sum(disconnection_times) / len(disconnection_times)
     
-
     assert avg_connection_time < 0.1  # Should be fast
 
     assert avg_disconnection_time < 0.1  # Should be fast
-
 
 @pytest.mark.asyncio
 
@@ -1509,7 +1396,6 @@ async def test_comprehensive_metrics_tracking(multitab_manager):
 
     initial_metrics = await multitab_manager.get_comprehensive_metrics()
     
-
     user_id = "test_user_metrics"
     
     # Perform various operations
@@ -1518,7 +1404,6 @@ async def test_comprehensive_metrics_tracking(multitab_manager):
 
     tab2_websocket = AsyncMock()
     
-
     await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
 
     await multitab_manager.connect_tab(user_id, "tab2", tab2_websocket)

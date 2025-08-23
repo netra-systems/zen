@@ -102,7 +102,7 @@ class RealErrorPropagationTester:
             logger.error(f"Failed to setup test environment: {e}")
             return False
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Clean up all test resources."""
         cleanup_tasks = []
         
@@ -206,3 +206,31 @@ async def run_real_error_propagation_validation() -> Dict[str, Any]:
         return {"error": str(e)}
     finally:
         await tester.cleanup_test_environment()
+
+
+# Error generation functions for testing
+def generate_network_error() -> Exception:
+    """Generate a network connection error for testing."""
+    import socket
+    return socket.error("Network connection failed")
+
+
+def generate_database_error() -> Exception:
+    """Generate a database connection error for testing."""
+    class DatabaseError(Exception):
+        pass
+    return DatabaseError("Database connection failed")
+
+
+def generate_auth_error() -> Exception:
+    """Generate an authentication error for testing."""
+    class AuthError(Exception):
+        pass
+    return AuthError("Authentication failed")
+
+
+def generate_websocket_error() -> Exception:
+    """Generate a WebSocket connection error for testing."""
+    class WebSocketError(Exception):
+        pass
+    return WebSocketError("WebSocket connection failed")

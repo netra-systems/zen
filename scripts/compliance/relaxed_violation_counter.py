@@ -8,7 +8,7 @@ Instead of counting every mock usage as a separate violation, counts one violati
 from collections import defaultdict
 from typing import Dict, List, Set, Tuple
 
-from .core import Violation
+from scripts.compliance.core import Violation
 
 
 class RelaxedViolationCounter:

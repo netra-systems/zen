@@ -92,7 +92,7 @@ ensuring production reliability and performance standards.
         async with aiofiles.open(file_path, 'wb') as f:
             await f.write(content)
     
-    async def cleanup_test_files(self) -> None:
+    async def test_cleanup_test_files(self) -> None:
         """Cleanup all test files."""
         for file_path in self.cleanup_paths:
             await self._cleanup_single_file(file_path)

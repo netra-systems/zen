@@ -8,17 +8,10 @@ ROOT CAUSE: The unified WebSocket system was validating messages but never forwa
 them to agent_service.handle_websocket_message(), causing total system failure.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -33,14 +26,10 @@ from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.websocket.connection import ConnectionInfo
 
-# Add project root to path
 from netra_backend.app.websocket.unified.message_handlers import (
     MessageHandler,
     MessageProcessor,
 )
-
-# Add project root to path
-
 
 class TestCriticalMessageRoutingToAgentService:
     """CRITICAL: Tests that messages MUST reach agent service or system fails silently."""
@@ -88,7 +77,7 @@ class TestCriticalMessageRoutingToAgentService:
             "payload": {"content": "Analyze our costs", "references": []}
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -115,7 +104,7 @@ class TestCriticalMessageRoutingToAgentService:
             "payload": {"user_request": "Start optimization", "thread_id": "thread_456"}
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -131,7 +120,7 @@ class TestCriticalMessageRoutingToAgentService:
         connection_info.metadata = {}  # No user_id
         message = {"type": "user_message", "payload": {"content": "Test"}}
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -150,7 +139,7 @@ class TestCriticalMessageRoutingToAgentService:
         del connection_info.websocket.app.state.agent_service
         message = {"type": "user_message", "payload": {"content": "Test"}}
         
-        with patch('app.websocket.unified.message_handlers.logger') as mock_logger:
+        with patch('netra_backend.app.websocket.unified.message_handlers.logger') as mock_logger:
             result = await message_processor.process_with_rate_limiting(connection_info, message)
             
             # Must log error about missing agent service
@@ -164,10 +153,10 @@ class TestCriticalMessageRoutingToAgentService:
         """Test 5: Database errors during agent processing MUST be handled."""
         message = {"type": "user_message", "payload": {"content": "Test"}}
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database connection failed")
             
-            with patch('app.websocket.unified.message_handlers.logger') as mock_logger:
+            with patch('netra_backend.app.websocket.unified.message_handlers.logger') as mock_logger:
                 result = await message_processor.process_with_rate_limiting(connection_info, message)
                 
                 # Should log the error
@@ -184,12 +173,12 @@ class TestCriticalMessageRoutingToAgentService:
         agent_service = connection_info.websocket.app.state.agent_service
         agent_service.handle_websocket_message.side_effect = Exception("Agent crashed")
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
             
-            with patch('app.websocket.unified.message_handlers.logger') as mock_logger:
+            with patch('netra_backend.app.websocket.unified.message_handlers.logger') as mock_logger:
                 result = await message_processor.process_with_rate_limiting(connection_info, message)
                 
                 # Must log the agent crash
@@ -208,7 +197,7 @@ class TestCriticalMessageRoutingToAgentService:
             }
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -280,7 +269,7 @@ class TestCriticalMessageRoutingToAgentService:
             for i in range(5)
         ]
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -303,12 +292,12 @@ class TestCriticalMessageRoutingToAgentService:
         """Test 12: Message forwarding MUST log message type for debugging."""
         message = {"type": "user_message", "payload": {"content": "Test"}}
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
             
-            with patch('app.websocket.unified.message_handlers.logger') as mock_logger:
+            with patch('netra_backend.app.websocket.unified.message_handlers.logger') as mock_logger:
                 await message_processor.process_with_rate_limiting(connection_info, message)
                 
                 # Should log the message type
@@ -320,7 +309,7 @@ class TestCriticalMessageRoutingToAgentService:
         """Test 13: Null payload MUST be handled without crashing."""
         message = {"type": "user_message", "payload": None}
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -337,7 +326,7 @@ class TestCriticalMessageRoutingToAgentService:
         """Test 14: Empty message type should still be forwarded (let agent decide)."""
         message = {"type": "", "payload": {"content": "Test"}}
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -361,7 +350,7 @@ class TestCriticalMessageRoutingToAgentService:
             }
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -385,12 +374,12 @@ class TestCriticalMessageRoutingToAgentService:
         agent_service = connection_info.websocket.app.state.agent_service
         agent_service.handle_websocket_message.side_effect = WebSocketDisconnect()
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
             
-            with patch('app.websocket.unified.message_handlers.logger') as mock_logger:
+            with patch('netra_backend.app.websocket.unified.message_handlers.logger') as mock_logger:
                 result = await message_processor.process_with_rate_limiting(connection_info, message)
                 
                 # Should handle disconnect gracefully
@@ -402,7 +391,7 @@ class TestCriticalMessageRoutingToAgentService:
         """Test 17: Database session MUST always be created for agent processing."""
         message = {"type": "user_message", "payload": {"content": "Test"}}
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -437,7 +426,7 @@ class TestCriticalMessageRoutingToAgentService:
             connection_info.metadata = {"user_id": user_id}
             connection_info.websocket.app.state.agent_service.handle_websocket_message.reset_mock()
             
-            with patch('app.db.postgres.get_async_db') as mock_db:
+            with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
                 mock_db.return_value.__aexit__ = AsyncMock()
@@ -457,7 +446,7 @@ class TestCriticalMessageRoutingToAgentService:
         # Process successful message
         message = {"type": "user_message", "payload": {"content": "Test"}}
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -496,7 +485,7 @@ class TestCriticalMessageRoutingToAgentService:
             }
         }
         
-        with patch('app.db.postgres.get_async_db') as mock_db:
+        with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()

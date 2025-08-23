@@ -44,6 +44,6 @@ class JobOperations(CoreServiceBase):
         self, config, db = None, user_id: str = None, corpus_id: str = None, job_id: str = None
     ) -> Dict:
         """Generate synthetic data through job operations"""
-        from .synthetic_data_service_main import SyntheticDataService
+        from netra_backend.app.services.synthetic_data.synthetic_data_service_main import SyntheticDataService
         service = SyntheticDataService()
         return await service.generate_synthetic_data(config, db, user_id, corpus_id, job_id)

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 # Import comprehensive reporter
-from .comprehensive_reporter import ComprehensiveTestReporter
+from test_framework.comprehensive_reporter import ComprehensiveTestReporter
 import subprocess
 from .failing_tests_manager import (
     clear_failing_tests,
@@ -16,15 +16,15 @@ from .failing_tests_manager import (
     show_failing_tests,
     update_failing_tests,
 )
-from .feature_flags import FeatureFlagManager, FeatureStatus
+from test_framework.feature_flags import FeatureFlagManager, FeatureStatus
 from .report_generators import (
     generate_json_report,
     generate_markdown_report,
     generate_text_report,
 )
-from .report_manager import print_summary, save_test_report
-from .test_config import RUNNERS, TEST_LEVELS
-from .test_parser import extract_failing_tests, parse_coverage, parse_test_counts
+from test_framework.report_manager import print_summary, save_test_report
+from test_framework.test_config import RUNNERS, TEST_LEVELS
+from test_framework.test_parser import extract_failing_tests, parse_coverage, parse_test_counts
 
 PROJECT_ROOT = Path(__file__).parent.parent
 

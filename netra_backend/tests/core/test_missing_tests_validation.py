@@ -6,27 +6,16 @@ Tests 11, 12, 14 from original missing tests covering:
 - Custom exception types and validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import Mock
 
 import pytest
 from cryptography.fernet import Fernet
 from pydantic import ValidationError
-
-# Add project root to path
-
-
 
 # Test 11: config_validator_schema_validation
 class TestConfigValidator:
@@ -111,7 +100,6 @@ class TestConfigValidator:
         with pytest.raises(ConfigurationValidationError, match="database_url is required"):
             validator.validate_config(mock_config)
 
-
 # Test 12: error_context_capture
 class TestErrorContext:
     """Test error context preservation and validation."""
@@ -174,7 +162,6 @@ class TestErrorContext:
         error_context.clear_context()
         assert error_context.get_trace_id() is None
         assert error_context.get_request_id() is None
-
 
 # Test 14: exceptions_custom_types
 class TestCustomExceptions:
@@ -267,7 +254,6 @@ class TestCustomExceptions:
         assert critical_exc.is_critical()
         assert not warning_exc.is_critical()
 
-
 # Additional validation utilities
 class TestValidationUtilities:
     """Test validation utility functions."""
@@ -327,7 +313,6 @@ class TestValidationUtilities:
         assert validate_data_type("123", int) == False
         assert validate_data_type(["a", "b"], list) == True
         assert validate_data_type({"key": "value"}, dict) == True
-
 
 # Run validation tests
 if __name__ == "__main__":

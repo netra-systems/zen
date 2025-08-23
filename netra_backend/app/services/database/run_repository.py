@@ -46,7 +46,7 @@ class RunRepository(BaseRepository[Run]):
                         metadata: Optional[Dict[str, Any]] = None) -> Optional[Run]:
         """Create a new run"""
         return await self.create(
-            db,
+            db=db,
             id=f"run_{uuid.uuid4()}",
             object="thread.run",
             created_at=int(time.time()),

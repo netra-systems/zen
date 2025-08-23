@@ -62,7 +62,7 @@ class SearchFilterTestCore:
         """Setup test environment for search filter tests."""
         pass  # Minimal setup for now
         
-    async def teardown_test_environment(self):
+    async def test_teardown_test_environment(self):
         """Teardown test environment and cleanup."""
         for session in self.active_sessions:
             await self._cleanup_session(session)
@@ -83,7 +83,7 @@ class SearchFilterTestCore:
         test_data.total_records = len(test_data.test_threads)
         return test_data
     
-    async def cleanup_test_data(self, test_data: SearchTestData):
+    async def test_cleanup_test_data(self, test_data: SearchTestData):
         """Cleanup test data after test completion."""
         await self._cleanup_session(test_data.session)
         
@@ -201,7 +201,7 @@ class FilterValidationCore:
 class PerformanceValidator:
     """Performance validation for search and filter operations."""
     
-    async def run_concurrent_searches(self, test_data: SearchTestData, concurrent_users: int, 
+    async def test_run_concurrent_searches(self, test_data: SearchTestData, concurrent_users: int, 
                                     searches_per_user: int) -> Dict[str, Any]:
         """Run concurrent search operations."""
         start_time = time.time()
@@ -216,7 +216,7 @@ class PerformanceValidator:
         return {"successful_searches": successful, "total_searches": len(tasks), 
                 "average_response_time": total_time / len(tasks), "error_rate": (len(tasks) - successful) / len(tasks)}
     
-    async def validate_query_optimization(self, test_data: SearchTestData, 
+    async def test_validate_query_optimization(self, test_data: SearchTestData, 
                                         search_terms: List[str]) -> Dict[str, Any]:
         """Validate backend query optimization."""
         start_time = time.time()

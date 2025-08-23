@@ -11,9 +11,7 @@ Comprehensive test for webhook delivery reliability:
 8. Circuit breaker for failing endpoints
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -30,13 +28,9 @@ import aiohttp
 import pytest
 from aiohttp import web
 
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 WEBHOOK_SERVICE_URL = os.getenv("WEBHOOK_SERVICE_URL", "http://localhost:8085")
 TEST_WEBHOOK_PORT = 9999
-
 
 class WebhookReliabilityTester:
     """Test webhook delivery reliability."""
@@ -506,7 +500,6 @@ class WebhookReliabilityTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -532,7 +525,6 @@ async def test_webhook_delivery_reliability():
         critical_tests = ["webhook_registration", "event_triggering", "delivery_retries"]
         for test in critical_tests:
             assert results.get(test, False), f"Critical test failed: {test}"
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(test_webhook_delivery_reliability())

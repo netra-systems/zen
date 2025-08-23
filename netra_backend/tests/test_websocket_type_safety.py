@@ -4,41 +4,32 @@ Entry point for WebSocket message type safety testing suite.
 Imports and orchestrates tests from focused modules.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import pytest
 
-from .test_websocket_bidirectional_types import (
+from netra_backend.tests.test_websocket_bidirectional_types import (
     TestBidirectionalTypeConsistency,
     TestWebSocketMessageValidation,
     TestWebSocketSendToThread,
 )
-from .test_websocket_client_to_server_types import (
+from netra_backend.tests.test_websocket_client_to_server_types import (
     TestClientMessageBatchValidation,
     TestClientToServerMessageTypes,
 )
-from .test_websocket_server_to_client_types import (
+from netra_backend.tests.test_websocket_server_to_client_types import (
     TestServerMessageBatchValidation,
     TestServerToClientMessageTypes,
 )
 
-# Add project root to path
 # Import from the focused modules
-from .test_websocket_type_safety_factory import (
+from netra_backend.tests.test_websocket_type_safety_factory import (
     WebSocketMessageFactory,
     WebSocketTestDataFactory,
 )
-
 
 class TestWebSocketTypeSafetyMain:
     """Main test class that orchestrates all WebSocket type safety tests."""
@@ -111,7 +102,6 @@ class TestWebSocketTypeSafetyMain:
         
         print("WebSocket send functionality tests passed!")
 
-
 class TestWebSocketMessageValidationEdgeCases:
     """Test edge cases in WebSocket message validation."""
     
@@ -183,7 +173,6 @@ class TestWebSocketMessageValidationEdgeCases:
         
         assert message["payload"]["content"] == "123456"
         assert message["payload"]["thread_id"] == "thread_456"
-
 
 # Message validation tests are now in dedicated modules
 # Import from websocket/ subdirectory for specific test types

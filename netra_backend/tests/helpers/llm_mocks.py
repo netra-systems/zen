@@ -7,10 +7,9 @@ from typing import Any, AsyncIterator, Type, TypeVar
 
 from pydantic import BaseModel
 
-from .mock_helpers import create_mock_structured_response
+from netra_backend.tests.mock_helpers import create_mock_structured_response
 
 T = TypeVar('T', bound=BaseModel)
-
 
 class MockLLM:
     """Mock LLM for when LLMs are disabled in dev mode."""
@@ -31,7 +30,6 @@ class MockLLM:
     def with_structured_output(self, schema: Type[T], **kwargs) -> 'MockStructuredLLM':
         """Return a mock structured LLM for dev mode."""
         return MockStructuredLLM(self.model_name, schema)
-
 
 class MockStructuredLLM:
     """Mock structured LLM for when LLMs are disabled in dev mode."""

@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 # Import components
-from .test_harness import UnifiedTestHarness
+from tests.e2e.test_harness import UnifiedTestHarness
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ class ServiceManager:
         self.harness = harness
         self.logger = logging.getLogger(f"{__name__}.ServiceManager")
         # Import the real service manager
-        from .service_manager import ServiceManager as RealServiceManager
+        from tests.e2e.service_manager import ServiceManager as RealServiceManager
         self._real_manager = RealServiceManager(harness)
     
     async def start_auth_service(self) -> None:
@@ -127,11 +127,11 @@ class TestDataSeeder:
     def __init__(self, harness):
         self.harness = harness
     
-    async def seed_test_data(self) -> None:
+    async def test_seed_test_data(self) -> None:
         """Seed test data"""
         pass
     
-    async def cleanup_test_data(self) -> None:
+    async def test_cleanup_test_data(self) -> None:
         """Cleanup test data"""
         pass
     
@@ -147,7 +147,7 @@ class HealthMonitor:
         self.harness = harness
         self.logger = logging.getLogger(f"{__name__}.HealthMonitor")
         # Import the real health monitor
-        from .service_manager import HealthMonitor as RealHealthMonitor
+        from tests.e2e.service_manager import HealthMonitor as RealHealthMonitor
         self._real_monitor = RealHealthMonitor(harness)
     
     async def wait_for_all_ready(self) -> None:
@@ -234,7 +234,7 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
         self.state.ready = True
         self.logger.info("All services started and verified healthy")
     
-    async def seed_test_data(self) -> None:
+    async def test_seed_test_data(self) -> None:
         """Seed test data for realistic testing scenarios."""
         await self.data_seeder.seed_test_data()
     
@@ -288,7 +288,7 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
     
     def _initialize_service_configs(self) -> None:
         """Initialize service configurations with proper settings."""
-        from .test_harness import ServiceConfig
+        from tests.e2e.test_harness import ServiceConfig
         
         self.state.services = {
             "auth_service": ServiceConfig(
@@ -309,7 +309,7 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
     
     async def _setup_test_environment(self) -> None:
         """Setup test environment variables and configuration."""
-        from .config import setup_test_environment
+        from tests.e2e.config import setup_test_environment
         setup_test_environment()
         self.logger.info("Test environment configured")
     

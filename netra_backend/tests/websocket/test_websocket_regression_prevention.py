@@ -4,21 +4,10 @@ Tests to prevent circular imports, agent registration failures, and message flow
 These tests ensure the WebSocket-Agent integration remains functional.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
@@ -27,15 +16,12 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 
-
 logger = central_logger.get_logger(__name__)
-
 
 class TestCircularImportPrevention:
 
     """Test that no circular imports exist between WebSocket and Agent modules."""
     
-
     def test_agent_executor_imports_independently(self):
 
         """Ensure agent executor can be imported without circular dependency."""
@@ -43,7 +29,6 @@ class TestCircularImportPrevention:
 
         assert BaseExecutionEngine is not None
     
-
     def test_websocket_modules_import_independently(self):
 
         """Ensure WebSocket modules can be imported without circular dependency."""
@@ -65,7 +50,6 @@ class TestCircularImportPrevention:
 
         assert BroadcastExecutor is not None
     
-
     def test_supervisor_imports_successfully(self):
 
         """Ensure supervisor can be imported with all dependencies."""
@@ -73,7 +57,6 @@ class TestCircularImportPrevention:
 
         assert SupervisorAgent is not None
     
-
     def test_agent_registry_imports_successfully(self):
 
         """Ensure agent registry can be imported."""
@@ -81,7 +64,6 @@ class TestCircularImportPrevention:
 
         assert AgentRegistry is not None
     
-
     def test_no_websocket_imports_in_agent_base(self):
 
         """Verify agent base modules don't import WebSocket modules."""
@@ -91,12 +73,10 @@ class TestCircularImportPrevention:
 
         assert 'websocket' not in module_str.lower() or 'websocket' in ['websocket_manager']
 
-
 class TestAgentRegistration:
 
     """Test agent registration during initialization."""
     
-
     @pytest.fixture
 
     def real_components(self):
@@ -106,7 +86,6 @@ class TestAgentRegistration:
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
         
-
         llm_manager = LLMManager()
 
         tool_dispatcher = ToolDispatcher(llm_manager)
@@ -115,14 +94,12 @@ class TestAgentRegistration:
 
         return llm_manager, tool_dispatcher, websocket_manager
     
-
     def test_registry_registers_default_agents(self, real_components):
 
         """Test that default agents are registered."""
 
         llm_manager, tool_dispatcher, _ = real_components
         
-
         registry = AgentRegistry(llm_manager, tool_dispatcher)
 
         registry.register_default_agents()
@@ -139,15 +116,13 @@ class TestAgentRegistration:
 
         assert "reporting" in registry.agents
     
-
     def test_supervisor_initializes_with_agents(self, real_components):
 
         """Test supervisor initialization with agent registry."""
 
         llm_manager, tool_dispatcher, websocket_manager = real_components
         
-
-        with patch('app.agents.supervisor_consolidated.AsyncSession'):
+        with patch('netra_backend.app.agents.supervisor_consolidated.AsyncSession'):
 
             supervisor = SupervisorAgent(
 
@@ -165,14 +140,12 @@ class TestAgentRegistration:
 
             assert len(supervisor.registry.list_agents()) > 0
 
-
 @pytest.mark.asyncio
 
 class TestWebSocketMessageFlow:
 
     """Test WebSocket message flow to agent execution."""
     
-
     async def test_user_message_triggers_agent_execution(self):
 
         """Test that user_message type triggers agent execution."""
@@ -207,7 +180,7 @@ class TestWebSocketMessageFlow:
         
         # Mock WebSocket manager to avoid actual sending
 
-        with patch('app.ws_manager.manager'):
+        with patch('netra_backend.app.ws_manager.manager'):
 
             await agent_service.handle_websocket_message(
 
@@ -223,17 +196,14 @@ class TestWebSocketMessageFlow:
 
         assert mock_supervisor.run.called
     
-
     async def test_message_handler_routes_correctly(self):
 
         """Test message handler routing for different message types."""
         
-
         mock_supervisor = Mock()
 
         mock_thread_service = Mock()
         
-
         handler = MessageHandlerService(mock_supervisor, mock_thread_service)
         
         # Test routing map
@@ -246,7 +216,6 @@ class TestWebSocketMessageFlow:
 
         assert hasattr(handler, 'handle_stop_agent')
     
-
     async def test_websocket_connection_lifecycle(self):
 
         """Test WebSocket connection establishment and message handling."""
@@ -256,32 +225,28 @@ class TestWebSocketMessageFlow:
 
         )
         
-
         mock_agent_service = AsyncMock()
 
         mock_agent_service.handle_websocket_message = AsyncMock()
         
         # Test process_agent_message
 
-        with patch('app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
 
             mock_db.return_value.__aenter__ = AsyncMock(return_value=Mock())
 
             mock_db.return_value.__aexit__ = AsyncMock()
             
-
             await process_agent_message("user_123", "test_data", mock_agent_service)
             
             # Verify agent service was called
 
             mock_agent_service.handle_websocket_message.assert_called_once()
 
-
 class TestAgentExecutionPipeline:
 
     """Test the agent execution pipeline."""
     
-
     def test_pipeline_executor_initialization(self):
 
         """Test pipeline executor can be initialized."""
@@ -291,35 +256,29 @@ class TestAgentExecutionPipeline:
 
         )
         
-
         mock_engine = Mock()
 
         mock_ws_manager = Mock()
 
         mock_db_session = None
         
-
         executor = PipelineExecutor(mock_engine, mock_ws_manager, mock_db_session)
 
         assert executor is not None
     
-
     def test_execution_engine_initialization(self):
 
         """Test execution engine can be initialized."""
         from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
         
-
         mock_registry = Mock()
 
         mock_ws_manager = Mock()
         
-
         engine = ExecutionEngine(mock_registry, mock_ws_manager)
 
         assert engine is not None
     
-
     @pytest.mark.asyncio
 
     async def test_agent_execution_core(self):
@@ -331,7 +290,6 @@ class TestAgentExecutionPipeline:
 
         )
         
-
         mock_registry = Mock()
 
         mock_agent = AsyncMock()
@@ -340,7 +298,6 @@ class TestAgentExecutionPipeline:
 
         mock_registry.get = Mock(return_value=mock_agent)
         
-
         executor = AgentExecutionCore(mock_registry)
         
         # Test execution
@@ -357,17 +314,14 @@ class TestAgentExecutionPipeline:
 
         )
         
-
         assert result is not None
 
         mock_agent.execute.assert_called_once()
-
 
 class TestWebSocketBroadcasting:
 
     """Test WebSocket broadcasting functionality."""
     
-
     @pytest.mark.asyncio
 
     async def test_broadcast_to_user(self):
@@ -375,21 +329,18 @@ class TestWebSocketBroadcasting:
         """Test broadcasting message to specific user."""
         from netra_backend.app.services.websocket.ws_manager import manager
         
-
         with patch.object(manager, 'send_to_user', new_callable=AsyncMock) as mock_send:
 
             await manager.send_to_user("user_123", {"type": "test"})
 
             mock_send.assert_called_once_with("user_123", {"type": "test"})
     
-
     @pytest.mark.asyncio  
 
     async def test_broadcast_to_room(self):
 
         """Test broadcasting message to room."""
         
-
         with patch.object(manager.broadcasting, 'broadcast_to_room', new_callable=AsyncMock) as mock_broadcast:
 
             await manager.broadcasting.broadcast_to_room("room_123", {"type": "test"})

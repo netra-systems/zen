@@ -6,17 +6,10 @@ Follows 450-line limit and 25-line function requirements.
 Targets 95% coverage of corpus generation functionality.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Dict
@@ -29,13 +22,11 @@ from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 
-# Add project root to path
 from netra_backend.app.schemas.admin_corpus_messages import (
     ConfigurationSuggestionRequest,
     ConfigurationSuggestionResponse,
     CorpusAutoCompleteRequest,
     CorpusAutoCompleteResponse,
-    # Add project root to path
     CorpusDiscoveryRequest,
     CorpusDiscoveryResponse,
     CorpusErrorMessage,
@@ -43,7 +34,6 @@ from netra_backend.app.schemas.admin_corpus_messages import (
     CorpusGenerationResponse,
     CorpusOperationStatus,
 )
-
 
 @pytest.fixture
 def admin_corpus_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
@@ -69,7 +59,6 @@ def admin_corpus_setup(real_llm_manager, real_websocket_manager, real_tool_dispa
             "agent": agent, "llm": mock_llm, "dispatcher": mock_dispatcher,
             "websocket": mock_websocket, "session_id": "test-session-001"
         }
-
 
 class TestAdminCorpusGeneration:
     """Main test class for admin corpus generation E2E workflow"""
@@ -179,7 +168,6 @@ class TestAdminCorpusGeneration:
         assert error.recoverable is True
         assert error.error_code == "INVALID_CONFIG"
 
-
 class TestDiscoveryWorkflow:
     """Test natural language discovery workflow"""
     
@@ -218,7 +206,6 @@ class TestDiscoveryWorkflow:
         )
         assert "required" in response.parameters
 
-
 class TestAutoCompletion:
     """Test auto-completion functionality"""
     
@@ -238,7 +225,6 @@ class TestAutoCompletion:
         )
         assert len(response.suggestions) <= request.limit
         assert all("optim" in s.lower() for s in response.suggestions)
-
 
 class TestWebSocketFlow:
     """Test WebSocket real-time updates"""
@@ -273,7 +259,6 @@ class TestWebSocketFlow:
         assert error_update["status"] == "error"
         assert "error_code" in error_update
         assert len(error_update["message"]) > 0
-
 
 class TestPerformanceScenarios:
     """Test performance and concurrent operations"""

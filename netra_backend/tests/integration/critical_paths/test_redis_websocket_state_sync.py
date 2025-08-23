@@ -11,21 +11,10 @@ L3 Test: Uses real Redis instance and real WebSocket connections to validate com
 session store → state sync pipeline with actual serialization/deserialization.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -42,7 +31,6 @@ from netra_backend.app.schemas import User
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
 from netra_backend.app.websocket.state_synchronization_manager import (
 
     ApplicationState,
@@ -50,10 +38,9 @@ from netra_backend.app.websocket.state_synchronization_manager import (
     StateUpdate,
 
 )
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
     MockWebSocketForRedis,
-    # Add project root to path
 
     RedisContainer,
 
@@ -68,7 +55,6 @@ from .integration.helpers.redis_l3_helpers import (
 )
 from test_framework.mock_utils import mock_justified
 
-
 @pytest.mark.L3
 
 @pytest.mark.integration
@@ -79,7 +65,6 @@ class TestRedisWebSocketStateSyncL3:
 
     """L3 tests for Redis session store to WebSocket state synchronization."""
     
-
     @pytest.fixture
 
     async def redis_container(self):
@@ -94,7 +79,6 @@ class TestRedisWebSocketStateSyncL3:
 
         await container.stop()
     
-
     @pytest.fixture
 
     async def redis_client(self, redis_container):
@@ -109,7 +93,6 @@ class TestRedisWebSocketStateSyncL3:
 
         await client.close()
     
-
     @pytest.fixture
 
     async def session_store(self, redis_container):
@@ -124,7 +107,6 @@ class TestRedisWebSocketStateSyncL3:
 
         await client.close()
     
-
     @pytest.fixture
 
     async def ws_manager_with_redis(self, redis_container):
@@ -135,7 +117,7 @@ class TestRedisWebSocketStateSyncL3:
         
         # Patch the global redis_manager instance
 
-        with patch('app.redis_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.redis_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 
@@ -151,15 +133,12 @@ class TestRedisWebSocketStateSyncL3:
 
             mock_redis_mgr.set = AsyncMock(side_effect=test_redis_mgr.set)
             
-
             manager = WebSocketManager()
 
             yield manager
             
-
             await test_redis_mgr.redis_client.close()
     
-
     @pytest.fixture
 
     def test_user(self):
@@ -180,7 +159,6 @@ class TestRedisWebSocketStateSyncL3:
 
         )
     
-
     async def test_session_store_websocket_state_recovery(self, redis_client, session_store, test_user):
 
         """Test L3 Redis session state storage and retrieval integration."""
@@ -223,7 +201,6 @@ class TestRedisWebSocketStateSyncL3:
 
         }
         
-
         session_key = f"session:state:{user_id}"
 
         await session_store.set_session_state(session_key, session_state)
@@ -270,7 +247,6 @@ class TestRedisWebSocketStateSyncL3:
 
         assert deserialized["recovered_state"]["current_thread"] == "thread_optimization_123"
     
-
     async def test_multiple_websocket_connections_share_redis_session(self, redis_client, session_store, test_user):
 
         """Test L3 Redis session sharing across multiple connection simulations."""
@@ -303,7 +279,6 @@ class TestRedisWebSocketStateSyncL3:
 
         }
         
-
         await session_store.set_session_state(session_key, shared_state)
         
         # L3 Test: Simulate multiple connections accessing same Redis session
@@ -349,7 +324,6 @@ class TestRedisWebSocketStateSyncL3:
 
         assert "connection_tracking" in final_state
         
-
         for i in range(connection_count):
 
             connection_key = f"connection_{i}"
@@ -358,7 +332,6 @@ class TestRedisWebSocketStateSyncL3:
 
             assert final_state["connection_tracking"][connection_key]["status"] == "active"
     
-
     async def test_session_expiry_and_cleanup_from_redis(self, session_store, redis_client, test_user):
 
         """Test session expiry and cleanup mechanisms."""
@@ -399,7 +372,6 @@ class TestRedisWebSocketStateSyncL3:
 
         assert expired_session is None
     
-
     async def test_concurrent_session_updates_from_multiple_connections(self, session_store, test_user):
 
         """Test L3 Redis concurrent session updates simulation."""
@@ -446,7 +418,6 @@ class TestRedisWebSocketStateSyncL3:
 
             }
             
-
             task = session_store.merge_session_state(session_key, state_update)
 
             update_tasks.append(task)
@@ -475,7 +446,6 @@ class TestRedisWebSocketStateSyncL3:
 
             assert final_state[connection_key]["update_sequence"] == conn_id
     
-
     async def test_state_recovery_after_redis_restart(self, redis_container, session_store, test_user):
 
         """Test L3 Redis state persistence through restart simulation."""
@@ -512,7 +482,6 @@ class TestRedisWebSocketStateSyncL3:
 
         }
         
-
         await session_store.set_session_state(session_key, critical_state)
         
         # L3 Test: Verify data is stored before simulated restart
@@ -544,17 +513,14 @@ class TestRedisWebSocketStateSyncL3:
 
         assert post_restart_state == pre_restart_state
 
-
 class SessionStore:
 
     """Redis session store for L3 testing."""
     
-
     def __init__(self, redis_client):
 
         self.redis_client = redis_client
     
-
     async def set_session_state(self, key: str, state: Dict[str, Any], expiry: int = 3600):
 
         """Store session state in Redis with optional expiry."""
@@ -563,7 +529,6 @@ class SessionStore:
 
         await self.redis_client.set(key, serialized_state, ex=expiry)
     
-
     async def get_session_state(self, key: str) -> Dict[str, Any]:
 
         """Retrieve session state from Redis."""
@@ -576,7 +541,6 @@ class SessionStore:
 
         return None
     
-
     async def merge_session_state(self, key: str, updates: Dict[str, Any]):
 
         """Merge updates into existing session state atomically."""
@@ -599,7 +563,6 @@ class SessionStore:
         # Save merged state
 
         await self.set_session_state(key, current_state)
-
 
 if __name__ == "__main__":
 

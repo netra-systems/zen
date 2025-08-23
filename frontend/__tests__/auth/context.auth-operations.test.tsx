@@ -3,6 +3,9 @@
  * Tests login and logout functionality
  * All functions ≤8 lines per architecture requirements
  */
+// Unmock auth service for proper service functionality
+jest.unmock('@/auth/service');
+
 
 import React from 'react';
 import { waitFor, act } from '@testing-library/react';
@@ -18,8 +21,40 @@ import {
   mockAuthConfig
 } from './helpers/test-helpers';
 
-// Mock dependencies
-jest.mock('@/auth/service');
+// Mock the entire auth module to ensure the context gets the mocked version
+jest.mock('@/auth/service', () => ({
+  authService: {
+    getAuthConfig: jest.fn(),
+    handleLogin: jest.fn(),
+    handleLogout: jest.fn(),
+    clearDevLogoutFlag: jest.fn(),
+    setDevLogoutFlag: jest.fn(),
+    getToken: jest.fn(),
+    getDevLogoutFlag: jest.fn(),
+    removeToken: jest.fn(),
+    handleDevLogin: jest.fn(),
+    getAuthHeaders: jest.fn(),
+    useAuth: jest.fn(),
+  }
+}));
+
+jest.mock('@/auth', () => ({
+  ...jest.requireActual('@/auth'),
+  authService: {
+    getAuthConfig: jest.fn(),
+    handleLogin: jest.fn(),
+    handleLogout: jest.fn(),
+    clearDevLogoutFlag: jest.fn(),
+    setDevLogoutFlag: jest.fn(),
+    getToken: jest.fn(),
+    getDevLogoutFlag: jest.fn(),
+    removeToken: jest.fn(),
+    handleDevLogin: jest.fn(),
+    getAuthHeaders: jest.fn(),
+    useAuth: jest.fn(),
+  }
+}));
+
 jest.mock('jwt-decode');
 jest.mock('@/store/authStore');
 jest.mock('@/lib/logger', () => ({
@@ -33,10 +68,25 @@ jest.mock('@/lib/logger', () => ({
 
 describe('AuthContext - Auth Operations', () => {
   let mockAuthStore: any;
+  let mockAuthService: any;
 
   beforeEach(() => {
     mockAuthStore = setupAuthStore();
-    setupBasicMocks();
+    
+    // Get the mocked authService instance
+    mockAuthService = require('@/auth/service').authService;
+    
+    // Setup the mock implementations directly
+    mockAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
+    mockAuthService.getToken.mockReturnValue(null);
+    mockAuthService.getDevLogoutFlag.mockReturnValue(false);
+    mockAuthService.handleLogin.mockImplementation(() => {});
+    mockAuthService.handleLogout.mockImplementation(() => Promise.resolve());
+    mockAuthService.setDevLogoutFlag.mockImplementation(() => {});
+    mockAuthService.clearDevLogoutFlag.mockImplementation(() => {});
+    mockAuthService.removeToken.mockImplementation(() => {});
+    mockAuthService.handleDevLogin.mockResolvedValue({ access_token: 'dev-token', token_type: 'Bearer' });
+    mockAuthService.getAuthHeaders.mockReturnValue({});
   });
 
   const waitForAuthConfig = async (result: any) => {
@@ -55,6 +105,7 @@ describe('AuthContext - Auth Operations', () => {
 
   const performLogin = (result: any) => {
     act(() => {
+      console.log('Calling login, authConfig at call time:', result.current?.authConfig);
       result.current?.login();
     });
   };
@@ -63,25 +114,35 @@ describe('AuthContext - Auth Operations', () => {
     const { result } = renderAuthHook();
     await waitForAuthConfig(result);
     
+    // Debug: Check what the context actually has
+    console.log('Auth config from context:', result.current?.authConfig);
+    console.log('Login function type:', typeof result.current?.login);
+    
     // Ensure auth config is properly set before calling login
     expect(result.current?.authConfig).toBeTruthy();
     
+    // Spy on the actual login function to ensure it's called
+    const loginSpy = jest.spyOn(result.current, 'login');
+    
     performLogin(result);
+    
+    // Verify the login function was actually called
+    expect(loginSpy).toHaveBeenCalled();
     
     // Wait for the login action to complete
     await waitFor(() => {
-      expect(authService.clearDevLogoutFlag).toHaveBeenCalled();
+      expect(mockAuthService.clearDevLogoutFlag).toHaveBeenCalled();
     });
-    expect(authService.handleLogin).toHaveBeenCalledWith(mockAuthConfig);
+    expect(mockAuthService.handleLogin).toHaveBeenCalledWith(mockAuthConfig);
   });
 
   const setupLoginWithError = () => {
-    setupAuthConfigError();
+    mockAuthService.getAuthConfig.mockRejectedValue(new Error('Network error'));
     return renderAuthHook();
   };
 
   const expectNoLogin = () => {
-    expect(authService.handleLogin).not.toHaveBeenCalled();
+    expect(mockAuthService.handleLogin).not.toHaveBeenCalled();
   };
 
   it('should not login when auth config is not available', async () => {
@@ -117,7 +178,7 @@ describe('AuthContext - Auth Operations', () => {
     
     // Wait for logout methods to be called
     await waitFor(() => {
-      expect(authService.handleLogout).toHaveBeenCalledWith(mockAuthConfig);
+      expect(mockAuthService.handleLogout).toHaveBeenCalledWith(mockAuthConfig);
     });
     await waitFor(() => {
       expect(mockAuthStore.logout).toHaveBeenCalled();
@@ -127,7 +188,7 @@ describe('AuthContext - Auth Operations', () => {
   it('should set dev logout flag in development mode', async () => {
     // Override the auth config to be in development mode
     const devConfig = { ...mockAuthConfig, development_mode: true };
-    jest.mocked(authService.getAuthConfig).mockResolvedValue(devConfig);
+    mockAuthService.getAuthConfig.mockResolvedValue(devConfig);
     
     const { result } = renderAuthHook();
     
@@ -135,25 +196,30 @@ describe('AuthContext - Auth Operations', () => {
     await waitFor(() => {
       expect(result.current).toBeDefined();
       expect(result.current?.authConfig?.development_mode).toBe(true);
+      expect(result.current?.loading).toBe(false);
     });
     
     // Perform logout
     await performLogout(result);
     
-    // Check dev logout flag was set
-    expect(authService.setDevLogoutFlag).toHaveBeenCalled();
-    expect(authService.handleLogout).toHaveBeenCalledWith(
-      expect.objectContaining({ development_mode: true })
-    );
+    // Wait for dev logout flag and logout methods to be called
+    await waitFor(() => {
+      expect(mockAuthService.setDevLogoutFlag).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(mockAuthService.handleLogout).toHaveBeenCalledWith(
+        expect.objectContaining({ development_mode: true })
+      );
+    });
   });
 
   const setupLogoutWithError = () => {
-    setupAuthConfigError();
+    mockAuthService.getAuthConfig.mockRejectedValue(new Error('Network error'));
     return renderAuthHook();
   };
 
   const expectNoLogout = () => {
-    expect(authService.handleLogout).not.toHaveBeenCalled();
+    expect(mockAuthService.handleLogout).not.toHaveBeenCalled();
   };
 
   it('should not logout when auth config is not available', async () => {

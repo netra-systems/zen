@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 # Import modular components
-from .test_executor import AutonomousReviewRunner, TestExecutionResult, TestExecutor
-from .test_reporter import ReportGenerator, TestProgressMonitor
+from test_framework.archived.experimental.test_executor import AutonomousReviewRunner, TestExecutionResult, TestExecutor
+from test_framework.archived.experimental.test_reporter import ReportGenerator, TestProgressMonitor
 
 
 class TestValidator:

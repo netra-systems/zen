@@ -3,39 +3,30 @@ Realistic Log Ingestion Tests
 Test realistic log ingestion patterns
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
-from .realistic_test_fixtures import (
-    # Add project root to path
-    generate_realistic_logs_fixture,
-    mock_clickhouse_client,
+from netra_backend.tests.fixtures.realistic_test_fixtures import (
+    generate_realistic_logs,
+    create_mock_clickhouse_client,
 )
-
 
 class TestRealisticLogIngestion:
     """Test realistic log ingestion patterns"""
     
-    async def test_streaming_log_ingestion(self, generate_realistic_logs_fixture, mock_clickhouse_client):
+    async def test_streaming_log_ingestion(self):
         """Test streaming ingestion of logs"""
-        logs = generate_realistic_logs_fixture(1000)
+        logs = generate_realistic_logs(1000)
+        mock_clickhouse_client = create_mock_clickhouse_client()
         
-        with patch('app.db.clickhouse.get_clickhouse_client') as mock_client:
+        with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_client:
             mock_client.return_value.__aenter__.return_value = mock_clickhouse_client
             
             # Simulate batch inserts

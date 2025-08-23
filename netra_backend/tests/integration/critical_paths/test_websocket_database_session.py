@@ -24,21 +24,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import threading
@@ -55,22 +44,16 @@ from sqlalchemy import event, text
 from sqlalchemy.exc import DatabaseError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-# Add project root to path
 from netra_backend.app.db.postgres import get_postgres_session
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-
-
 logger = central_logger.get_logger(__name__)
-
 
 class WebSocketSessionTracker:
 
     """Track WebSocket database session lifecycle."""
     
-
     def __init__(self):
 
         self.active_sessions = {}
@@ -91,7 +74,6 @@ class WebSocketSessionTracker:
 
         self.lock = asyncio.Lock()
     
-
     async def register_session(self, session_id: str, db_session: AsyncSession):
 
         """Register new database session for WebSocket."""
@@ -112,7 +94,6 @@ class WebSocketSessionTracker:
 
             self.session_metrics["created"] += 1
     
-
     async def record_operation(self, session_id: str, operation_type: str):
 
         """Record database operation for session."""
@@ -125,7 +106,6 @@ class WebSocketSessionTracker:
 
                 self.session_metrics[f"{operation_type}{'ted' if operation_type == 'commit' else 'ed' if operation_type == 'rollback' else 's'}"] += 1
     
-
     async def unregister_session(self, session_id: str):
 
         """Unregister and cleanup session."""
@@ -140,19 +120,16 @@ class WebSocketSessionTracker:
 
                 self.session_metrics["closed"] += 1
     
-
     def get_active_count(self) -> int:
 
         """Get count of active sessions."""
 
         return len(self.active_sessions)
 
-
 class WebSocketDatabaseManager:
 
     """Manage WebSocket database sessions with proper lifecycle."""
     
-
     def __init__(self, db_url: str = None):
 
         self.db_url = db_url or "sqlite+aiosqlite:///:memory:"
@@ -167,7 +144,6 @@ class WebSocketDatabaseManager:
 
         self.max_overflow = 20
     
-
     async def initialize(self):
 
         """Initialize database engine and session factory."""
@@ -184,7 +160,6 @@ class WebSocketDatabaseManager:
 
         )
         
-
         self.SessionLocal = async_sessionmaker(
 
             bind=self.engine,
@@ -217,7 +192,6 @@ class WebSocketDatabaseManager:
 
             """))
     
-
     @asynccontextmanager
 
     async def get_websocket_session(self, session_id: str) -> AsyncContextManager[AsyncSession]:
@@ -228,7 +202,6 @@ class WebSocketDatabaseManager:
 
             raise RuntimeError("Database not initialized")
         
-
         async with self.SessionLocal() as db_session:
 
             try:
@@ -249,14 +222,12 @@ class WebSocketDatabaseManager:
 
                 await self.tracker.unregister_session(session_id)
     
-
     async def save_websocket_message(self, session_id: str, user_id: str, content: str) -> str:
 
         """Save WebSocket message with proper transaction handling."""
 
         message_id = str(uuid.uuid4())
         
-
         async with self.get_websocket_session(session_id) as db_session:
 
             try:
@@ -269,7 +240,6 @@ class WebSocketDatabaseManager:
 
                 """)
                 
-
                 await db_session.execute(query, {
 
                     "id": message_id,
@@ -282,12 +252,10 @@ class WebSocketDatabaseManager:
 
                 })
                 
-
                 await db_session.commit()
 
                 await self.tracker.record_operation(session_id, "commit")
                 
-
             except Exception as e:
 
                 await db_session.rollback()
@@ -296,10 +264,8 @@ class WebSocketDatabaseManager:
 
                 raise e
         
-
         return message_id
     
-
     async def get_session_messages(self, session_id: str) -> List[Dict[str, Any]]:
 
         """Get all messages for WebSocket session."""
@@ -318,12 +284,10 @@ class WebSocketDatabaseManager:
 
             """)
             
-
             result = await db_session.execute(query, {"session_id": session_id})
 
             rows = result.fetchall()
             
-
             return [
 
                 {
@@ -342,7 +306,6 @@ class WebSocketDatabaseManager:
 
             ]
     
-
     async def cleanup_session_data(self, session_id: str) -> int:
 
         """Clean up all data for WebSocket session."""
@@ -359,7 +322,6 @@ class WebSocketDatabaseManager:
 
             return result.rowcount
     
-
     async def test_transaction_isolation(self, session_id: str) -> Dict[str, Any]:
 
         """Test transaction isolation between WebSocket sessions."""
@@ -379,7 +341,6 @@ class WebSocketDatabaseManager:
 
             """)
             
-
             await db_session.execute(query, {
 
                 "id": str(uuid.uuid4()),
@@ -392,7 +353,6 @@ class WebSocketDatabaseManager:
 
             })
             
-
             test_results["operations"].append("insert_without_commit")
             
             # Check if data is visible in another session
@@ -413,7 +373,6 @@ class WebSocketDatabaseManager:
 
                 count = result.scalar()
                 
-
                 if count > 0:
 
                     test_results["isolation_maintained"] = False
@@ -424,10 +383,8 @@ class WebSocketDatabaseManager:
 
                     test_results["operations"].append("isolation_verified")
         
-
         return test_results
     
-
     async def test_connection_pool_behavior(self) -> Dict[str, Any]:
 
         """Test database connection pool behavior under load."""
@@ -444,7 +401,6 @@ class WebSocketDatabaseManager:
 
         }
         
-
         async def create_session_task(task_id: int):
 
             session_id = f"pool_test_{task_id}"
@@ -474,12 +430,10 @@ class WebSocketDatabaseManager:
 
         await asyncio.gather(*tasks, return_exceptions=True)
         
-
         pool_info["concurrent_sessions"] = self.tracker.get_active_count()
 
         return pool_info
     
-
     async def close(self):
 
         """Close database engine and cleanup."""
@@ -488,26 +442,22 @@ class WebSocketDatabaseManager:
 
             await self.engine.dispose()
 
-
 class WebSocketTransactionManager:
 
     """Manage complex WebSocket transaction scenarios."""
     
-
     def __init__(self, db_manager: WebSocketDatabaseManager):
 
         self.db_manager = db_manager
 
         self.transaction_log = []
     
-
     async def execute_batch_operations(self, session_id: str, operations: List[Dict]) -> Dict[str, Any]:
 
         """Execute batch operations in single transaction."""
 
         results = {"success": True, "operations_completed": 0, "errors": []}
         
-
         async with self.db_manager.get_websocket_session(session_id) as db_session:
 
             try:
@@ -526,7 +476,6 @@ class WebSocketTransactionManager:
 
                         await db_session.execute(query, operation["data"])
                     
-
                     elif operation["type"] == "update":
 
                         query = text("""
@@ -539,21 +488,17 @@ class WebSocketTransactionManager:
 
                         await db_session.execute(query, operation["data"])
                     
-
                     elif operation["type"] == "error":
                         # Simulate error for testing
 
                         raise IntegrityError("Simulated error", None, None)
                     
-
                     results["operations_completed"] += 1
                 
-
                 await db_session.commit()
 
                 await self.db_manager.tracker.record_operation(session_id, "commit")
                 
-
             except Exception as e:
 
                 await db_session.rollback()
@@ -564,10 +509,8 @@ class WebSocketTransactionManager:
 
                 results["errors"].append(str(e))
         
-
         return results
     
-
     async def test_deadlock_prevention(self, session_count: int = 3) -> Dict[str, Any]:
 
         """Test deadlock prevention with concurrent transactions."""
@@ -582,7 +525,6 @@ class WebSocketTransactionManager:
 
         }
         
-
         async def concurrent_transaction(session_index: int):
 
             session_id = f"deadlock_test_{session_index}"
@@ -611,14 +553,12 @@ class WebSocketTransactionManager:
 
                 ]
                 
-
                 result = await self.execute_batch_operations(session_id, operations)
 
                 if result["success"]:
 
                     deadlock_results["successful_operations"] += 1
                 
-
             except Exception as e:
 
                 if "deadlock" in str(e).lower():
@@ -631,11 +571,9 @@ class WebSocketTransactionManager:
 
         deadlock_results["sessions_created"] = len(tasks)
         
-
         await asyncio.gather(*tasks, return_exceptions=True)
 
         return deadlock_results
-
 
 @pytest.fixture
 
@@ -651,7 +589,6 @@ async def db_manager():
 
     await manager.close()
 
-
 @pytest.fixture
 
 async def transaction_manager(db_manager):
@@ -659,7 +596,6 @@ async def transaction_manager(db_manager):
     """Create WebSocket transaction manager."""
 
     return WebSocketTransactionManager(db_manager)
-
 
 @pytest.mark.asyncio
 
@@ -677,7 +613,6 @@ async def test_websocket_session_lifecycle(db_manager):
 
     initial_count = db_manager.tracker.get_active_count()
     
-
     async with db_manager.get_websocket_session(session_id) as db_session:
         # Session should be active
 
@@ -690,7 +625,6 @@ async def test_websocket_session_lifecycle(db_manager):
     assert db_manager.tracker.get_active_count() == initial_count
 
     assert session_id not in db_manager.tracker.active_sessions
-
 
 @pytest.mark.asyncio
 
@@ -723,7 +657,6 @@ async def test_websocket_message_persistence(db_manager):
     assert messages[0]["content"] == content
 
     assert messages[0]["user_id"] == user_id
-
 
 @pytest.mark.asyncio
 
@@ -776,7 +709,6 @@ async def test_transaction_rollback_on_error(db_manager):
 
             })
             
-
             await db_session.execute(query, {
 
                 "id": message_id,  # Duplicate ID
@@ -789,7 +721,6 @@ async def test_transaction_rollback_on_error(db_manager):
 
             })
             
-
             await db_session.commit()
 
     except Exception:
@@ -799,7 +730,6 @@ async def test_transaction_rollback_on_error(db_manager):
     # Check rollback was recorded
 
     assert db_manager.tracker.session_metrics["rolled_back"] > initial_metrics["rolled_back"]
-
 
 @pytest.mark.asyncio
 
@@ -813,14 +743,12 @@ async def test_concurrent_websocket_sessions(db_manager):
 
     session_count = 5
     
-
     async def create_session_with_message(session_index: int):
 
         session_id = f"concurrent_session_{session_index}"
 
         content = f"Concurrent message {session_index}"
         
-
         message_id = await db_manager.save_websocket_message(
 
             session_id, f"user_{session_index}", content
@@ -845,7 +773,6 @@ async def test_concurrent_websocket_sessions(db_manager):
 
     assert db_manager.tracker.session_metrics["created"] >= session_count
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.integration
@@ -858,14 +785,11 @@ async def test_transaction_isolation_verification(db_manager):
 
     session_id = "isolation_test_session"
     
-
     isolation_result = await db_manager.test_transaction_isolation(session_id)
     
-
     assert isolation_result["isolation_maintained"] is True
 
     assert "isolation_verified" in isolation_result["operations"]
-
 
 @pytest.mark.asyncio
 
@@ -879,12 +803,10 @@ async def test_connection_pool_management(db_manager):
 
     pool_result = await db_manager.test_connection_pool_behavior()
     
-
     assert pool_result["operations_completed"] > 0
 
     assert pool_result["max_sessions"] > db_manager.connection_pool_size
     # Pool exhaustion is acceptable behavior under extreme load
-
 
 @pytest.mark.asyncio
 
@@ -898,7 +820,6 @@ async def test_batch_transaction_management(transaction_manager):
 
     session_id = "batch_test_session"
     
-
     operations = [
 
         {
@@ -939,16 +860,13 @@ async def test_batch_transaction_management(transaction_manager):
 
     ]
     
-
     result = await transaction_manager.execute_batch_operations(session_id, operations)
     
-
     assert result["success"] is True
 
     assert result["operations_completed"] == 2
 
     assert len(result["errors"]) == 0
-
 
 @pytest.mark.asyncio
 
@@ -989,7 +907,6 @@ async def test_websocket_session_cleanup(db_manager):
     messages_after = await db_manager.get_session_messages(session_id)
 
     assert len(messages_after) == 0
-
 
 @pytest.mark.asyncio
 

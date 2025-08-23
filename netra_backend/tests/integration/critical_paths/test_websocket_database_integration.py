@@ -10,21 +10,10 @@ Critical Path: WebSocket connection → Database session creation → Message pe
 Coverage: Real PostgreSQL, Redis, WebSocket server with minimal mocking (L3 Realism)
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import os
@@ -39,22 +28,16 @@ import redis.asyncio as redis
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-# Add project root to path
 from netra_backend.app.db.postgres import get_postgres_session
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-
-
 logger = central_logger.get_logger(__name__)
-
 
 class WebSocketDatabaseIntegrationTestManager:
 
     """Manages L3 WebSocket database integration testing with real services."""
     
-
     def __init__(self):
 
         self.redis_client = None
@@ -65,7 +48,6 @@ class WebSocketDatabaseIntegrationTestManager:
 
         self.db_session_pool = {}
         
-
     async def setup_real_redis(self) -> redis.Redis:
 
         """Setup real Redis instance for session management."""
@@ -99,7 +81,6 @@ class WebSocketDatabaseIntegrationTestManager:
 
             return self.redis_client
     
-
     async def setup_websocket_manager(self) -> WebSocketManager:
 
         """Setup real WebSocket manager with database integration."""
@@ -108,7 +89,6 @@ class WebSocketDatabaseIntegrationTestManager:
 
         return self.ws_manager
     
-
     @asynccontextmanager
 
     async def get_db_session(self):
@@ -120,7 +100,6 @@ class WebSocketDatabaseIntegrationTestManager:
 
             yield session
     
-
     async def create_websocket_session(self, user_id: str, websocket_mock: AsyncMock) -> str:
 
         """Create WebSocket session with database session management."""
@@ -141,12 +120,10 @@ class WebSocketDatabaseIntegrationTestManager:
 
         }
         
-
         if hasattr(self.redis_client, 'hset'):
 
             await self.redis_client.hset(f"ws_session:{session_id}", mapping=session_data)
         
-
         self.test_sessions[session_id] = {
 
             "user_id": user_id,
@@ -159,10 +136,8 @@ class WebSocketDatabaseIntegrationTestManager:
 
         }
         
-
         return session_id
     
-
     async def persist_websocket_message(self, session_id: str, message_content: str) -> str:
 
         """Persist WebSocket message to PostgreSQL through session."""
@@ -171,14 +146,12 @@ class WebSocketDatabaseIntegrationTestManager:
 
             raise ValueError(f"Session {session_id} not found")
         
-
         session_info = self.test_sessions[session_id]
 
         user_id = session_info["user_id"]
 
         message_id = str(uuid.uuid4())
         
-
         async with self.get_db_session() as db_session:
             # Simulate message persistence in test table
 
@@ -192,7 +165,6 @@ class WebSocketDatabaseIntegrationTestManager:
 
                 """)
                 
-
                 await db_session.execute(insert_query, {
 
                     "id": message_id,
@@ -228,10 +200,8 @@ class WebSocketDatabaseIntegrationTestManager:
 
                 }
         
-
         return message_id
     
-
     async def verify_message_persistence(self, session_id: str, message_id: str) -> bool:
 
         """Verify message was persisted correctly."""
@@ -257,7 +227,6 @@ class WebSocketDatabaseIntegrationTestManager:
 
             return False
     
-
     async def close_websocket_session(self, session_id: str) -> bool:
 
         """Close WebSocket session and cleanup database resources."""
@@ -280,10 +249,8 @@ class WebSocketDatabaseIntegrationTestManager:
 
         del self.test_sessions[session_id]
         
-
         return True
     
-
     async def test_concurrent_sessions(self, session_count: int = 3) -> Dict[str, Any]:
 
         """Test concurrent WebSocket sessions use separate DB sessions."""
@@ -298,7 +265,6 @@ class WebSocketDatabaseIntegrationTestManager:
 
         session_ids = await asyncio.gather(*session_tasks)
         
-
         message_tasks = [
 
             self.persist_websocket_message(session_id, f"Message {i}")
@@ -309,10 +275,8 @@ class WebSocketDatabaseIntegrationTestManager:
 
         message_ids = await asyncio.gather(*message_tasks)
         
-
         return {"sessions": len(session_ids), "messages": len(message_ids), "success": True}
     
-
     async def test_transaction_rollback(self, session_id: str) -> Dict[str, Any]:
 
         """Test transaction rollback on WebSocket error."""
@@ -321,7 +285,6 @@ class WebSocketDatabaseIntegrationTestManager:
 
             return {"error": "Session not found"}
         
-
         message_id = str(uuid.uuid4())
 
         try:
@@ -337,7 +300,6 @@ class WebSocketDatabaseIntegrationTestManager:
 
             return {"rollback_successful": True, "message_persisted": False}
     
-
     async def cleanup(self):
 
         """Clean up test resources."""
@@ -354,9 +316,7 @@ class WebSocketDatabaseIntegrationTestManager:
 
                 logger.warning(f"Redis cleanup failed: {e}")
         
-
         self.test_sessions.clear()
-
 
 @pytest.fixture
 
@@ -370,11 +330,9 @@ async def ws_db_manager():
 
     await manager.setup_websocket_manager()
     
-
     yield manager
 
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 
@@ -406,7 +364,6 @@ async def test_websocket_database_session_lifecycle(ws_db_manager):
 
     assert session_data["status"] == "connected"
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.integration
@@ -435,7 +392,6 @@ async def test_websocket_message_persistence(ws_db_manager):
 
     assert verified is True
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.integration
@@ -456,7 +412,6 @@ async def test_websocket_session_cleanup(ws_db_manager):
 
     cleanup_result = await ws_db_manager.close_websocket_session(session_id)
     
-
     assert cleanup_result is True
 
     assert session_id not in ws_db_manager.test_sessions
@@ -466,7 +421,6 @@ async def test_websocket_session_cleanup(ws_db_manager):
     session_data = await ws_db_manager.redis_client.hgetall(f"ws_session:{session_id}")
 
     assert session_data["status"] == "disconnected"
-
 
 @pytest.mark.asyncio
 
@@ -480,13 +434,11 @@ async def test_concurrent_websocket_sessions(ws_db_manager):
 
     result = await ws_db_manager.test_concurrent_sessions(session_count=3)
     
-
     assert result["sessions_created"] == 3
 
     assert result["messages_sent"] == 3
 
     assert result["all_verified"] is True
-
 
 @pytest.mark.asyncio
 
@@ -510,7 +462,6 @@ async def test_websocket_transaction_rollback(ws_db_manager):
 
     result = await ws_db_manager.test_transaction_rollback(session_id)
     
-
     assert result["rollback_successful"] is True
 
     assert result["message_persisted"] is False  # Message should not persist after rollback

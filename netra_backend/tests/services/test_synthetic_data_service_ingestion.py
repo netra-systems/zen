@@ -3,17 +3,10 @@ Real-time Ingestion Test Suite for Synthetic Data Service
 Testing real-time data ingestion to ClickHouse
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -22,17 +15,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from .test_synthetic_data_service_basic import IngestionMetrics
-
-# Add project root to path
-
+from netra_backend.tests.test_synthetic_data_service_basic import IngestionMetrics
 
 @pytest.fixture
 def ingestion_service():
     return SyntheticDataService()
-
 
 @pytest.fixture
 def mock_clickhouse():
@@ -40,7 +28,6 @@ def mock_clickhouse():
     client.execute = AsyncMock()
     client.query = AsyncMock()
     return client
-
 
 # ==================== Test Suite: Real-time Ingestion ====================
 
@@ -222,7 +209,6 @@ class TestRealTimeIngestion:
         assert len(progress_updates) == 10
         assert progress_updates[-1]["percentage"] == 100
         assert all(p["percentage"] <= 100 for p in progress_updates)
-
 
 # ==================== Test Runner ====================
 

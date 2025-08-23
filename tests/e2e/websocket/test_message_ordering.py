@@ -48,8 +48,6 @@ except ImportError:
     # Fallback for standalone execution
     import os
     import sys
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    sys.path.insert(0, project_root)
 
 from tests.e2e.real_websocket_client import RealWebSocketClient
 from netra_backend.app.logging_config import central_logger
@@ -508,8 +506,6 @@ if __name__ == "__main__":
     # Standalone validation
     
     # Add project root to path for standalone execution
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    sys.path.insert(0, project_root)
     
     # Quick validation run
     async def main():

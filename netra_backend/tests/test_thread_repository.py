@@ -1,16 +1,9 @@
 """Test thread repository operations to prevent regressions"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
@@ -20,11 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import Thread
 
-# Add project root to path
 from netra_backend.app.services.database.thread_repository import ThreadRepository
-
-# Add project root to path
-
 
 @pytest.fixture
 def mock_db():
@@ -38,7 +27,6 @@ def mock_db():
     mock.flush = AsyncMock()
     mock.delete = AsyncMock()
     return mock
-
 
 @pytest.fixture
 def thread_repo():
@@ -156,7 +144,6 @@ async def test_parameter_order_regression():
     assert params[1] == 'entity_id', f"Second parameter must be 'entity_id', but got '{params[1]}'"
     
     print("SUCCESS: Parameter order verified: get_by_id(self, db, entity_id)")
-
 
 if __name__ == "__main__":
     # Run the regression test directly

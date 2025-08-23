@@ -12,17 +12,10 @@ to ensure proper dependency resolution, health check propagation, and failure ha
 L3 Realism Level: Real services with Docker containers, local networking
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -38,17 +31,13 @@ import pytest
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 
-# Add project root to path
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.database.postgres_service import PostgresService
 from netra_backend.app.services.health_checker import HealthChecker
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from test_framework.docker_testing.compose_manager import DockerComposeManager
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class ServiceMetrics:
@@ -68,7 +57,6 @@ class ServiceMetrics:
         if self.ready_time is None:
             return time.time() - self.start_time
         return self.ready_time - self.start_time
-
 
 @dataclass
 class StartupSequenceMetrics:
@@ -97,7 +85,6 @@ class StartupSequenceMetrics:
         if self.total_services == 0:
             return 0.0
         return (self.successful_services / self.total_services) * 100.0
-
 
 class L3MultiServiceStartupManager:
     """Manages L3 multi-service startup sequence testing."""
@@ -733,7 +720,6 @@ class L3MultiServiceStartupManager:
         
         return cleanup_results
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
@@ -851,7 +837,6 @@ async def test_multi_service_startup_sequence_validation_l3():
                 await startup_manager.compose_manager.cleanup()
         except Exception as cleanup_error:
             logger.warning(f"Cleanup error: {cleanup_error}")
-
 
 if __name__ == "__main__":
     # Allow direct execution for debugging

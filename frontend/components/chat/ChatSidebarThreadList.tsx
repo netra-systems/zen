@@ -17,9 +17,50 @@ import { Thread, getThreadTitle } from '@/types/registry';
 
 const formatThreadTime = (thread: Thread): string => {
   const timestamp = thread.updated_at || thread.created_at;
-  if (!timestamp) return 'Unknown';
-  const date = new Date(typeof timestamp === 'number' ? timestamp * 1000 : timestamp);
-  return isNaN(date.getTime()) ? 'Unknown' : formatDistanceToNow(date, { addSuffix: true });
+  
+  // Early return for missing timestamp - this should handle the "Unknown" test case
+  if (!timestamp || timestamp === undefined || timestamp === null) {
+    return 'Unknown';
+  }
+  
+  try {
+    // Handle both Unix timestamp (seconds) and ISO string formats
+    let date: Date;
+    if (typeof timestamp === 'number') {
+      // Unix timestamp in seconds, convert to milliseconds
+      date = new Date(timestamp * 1000);
+    } else if (typeof timestamp === 'string') {
+      // ISO string or other string format
+      date = new Date(timestamp);
+    } else {
+      return 'Unknown';
+    }
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Unknown';
+    }
+    
+    // Use formatDistanceToNow with comprehensive error handling
+    try {
+      const result = formatDistanceToNow(date, { addSuffix: true });
+      if (!result || result === '' || result === 'Invalid Date') {
+        return 'Recently';
+      }
+      return result;
+    } catch (formatError) {
+      // If date-fns fails, create a basic fallback
+      const now = new Date();
+      const diffMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+      if (diffMinutes < 1) return 'just now';
+      if (diffMinutes < 60) return `${diffMinutes} minutes ago`;
+      const diffHours = Math.floor(diffMinutes / 60);
+      if (diffHours < 24) return `${diffHours} hours ago`;
+      return 'recently';
+    }
+  } catch (error) {
+    return 'Unknown';
+  }
 };
 
 const getThreadIcon = (thread: Thread, isActive: boolean) => {

@@ -81,7 +81,7 @@ class MockWebSocketServer:
             await websocket.send(json.dumps(error_response))
 
 @asynccontextmanager
-async def websocket_test_context(server_url: str, timeout: float = 30.0):
+async def test_websocket_test_context(server_url: str, timeout: float = 30.0):
     """Context manager for WebSocket connections in tests"""
     connection = None
     try:
@@ -147,7 +147,7 @@ def validate_message_ordering(sent_messages: List[Dict], received_messages: List
             
     return True
 
-async def stress_test_connections(server_url: str, num_connections: int, 
+async def test_stress_test_connections(server_url: str, num_connections: int, 
                                 messages_per_connection: int) -> Dict[str, Any]:
     """Create multiple concurrent connections and send messages"""
     results = {

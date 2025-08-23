@@ -4,17 +4,10 @@ Split from large test file for architecture compliance
 Test classes: TestQualitySupervisorValidation, TestAdminToolDispatcherRouting
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -32,23 +25,21 @@ from netra_backend.app.schemas import (
 )
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    # Add project root to path
     ExecutionStrategy,
 )
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from .supervisor_test_classes import (
+from netra_backend.tests.helpers.supervisor_test_classes import (
     MockAdminToolDispatcher,
     PermissionError,
     QualitySupervisor,
 )
-from .supervisor_test_helpers import (
+from netra_backend.tests.supervisor_test_helpers import (
     create_admin_dispatcher_mocks,
     create_admin_operation,
     create_quality_response_data,
@@ -56,7 +47,6 @@ from .supervisor_test_helpers import (
     setup_quality_response_mock,
     setup_tool_dispatcher_mock,
 )
-
 
 # Mock classes for testing (would normally be imported)
 class QualitySupervisor:
@@ -73,13 +63,12 @@ class QualitySupervisor:
         )
         return json.loads(quality_check)
 
-
 # Import real AdminToolDispatcher for proper testing
 from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
 
-
 class TestQualitySupervisorValidation:
     """Test 3: Test quality checks on agent responses"""
+    @pytest.mark.asyncio
     async def test_validates_response_quality_score(self):
         """Test validation of response quality scores"""
         mocks = create_quality_supervisor_mocks()
@@ -96,6 +85,7 @@ class TestQualitySupervisorValidation:
         assert result["approved"]
         assert result["quality_score"] == 0.85
         assert len(result["issues"]) == 0
+    @pytest.mark.asyncio
     async def test_rejects_low_quality_outputs(self):
         """Test rejection of low-quality outputs"""
         mocks = create_quality_supervisor_mocks()
@@ -112,6 +102,7 @@ class TestQualitySupervisorValidation:
         assert result["quality_score"] == 0.4
         assert len(result["issues"]) == 3
         assert "Incomplete analysis" in result["issues"]
+    @pytest.mark.asyncio
     async def test_quality_check_with_retry_improvement(self):
         """Test quality improvement through retry"""
         mocks = create_quality_supervisor_mocks()
@@ -133,9 +124,9 @@ class TestQualitySupervisorValidation:
         assert result2["approved"]
         assert result2["quality_score"] == 0.8
 
-
 class TestAdminToolDispatcherRouting:
     """Test 4: Test tool selection logic for admin operations"""
+    @pytest.mark.asyncio
     async def test_routes_to_correct_admin_tool(self):
         """Test routing to correct admin tool based on operation"""
         mocks = create_admin_dispatcher_mocks()
@@ -148,6 +139,7 @@ class TestAdminToolDispatcherRouting:
         mocks['tool_dispatcher'].execute_tool.assert_called_with("admin_user_management", operation["params"])
         assert result["success"]
         assert result["result"] == "User created"
+    @pytest.mark.asyncio
     async def test_validates_admin_permissions(self):
         """Test security checks for privileged operations"""
         mocks = create_admin_dispatcher_mocks()
@@ -158,6 +150,7 @@ class TestAdminToolDispatcherRouting:
             await admin_dispatcher.dispatch_admin_operation(operation)
         
         assert "Insufficient permissions" in str(exc.value)
+    @pytest.mark.asyncio
     async def test_admin_tool_audit_logging(self):
         """Test audit logging for admin operations"""
         mocks = create_admin_dispatcher_mocks()

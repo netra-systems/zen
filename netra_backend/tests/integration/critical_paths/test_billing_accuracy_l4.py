@@ -11,21 +11,10 @@ L4 Realism: Real LLM calls, real Redis cache, real database operations in stagin
 Performance Requirements: p99 < 500ms for billing calculations, 99.9% accuracy under load
 """
 
-# Add project root to path
-
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import logging
@@ -42,17 +31,15 @@ import pytest
 from netra_backend.app.services.billing.billing_engine import BillingEngine
 from netra_backend.app.services.billing.token_counter import TokenCounter
 
-# Add project root to path
 from netra_backend.app.services.billing.usage_tracker import UsageTracker
 from netra_backend.app.services.llm.llm_manager import LLMManager
 
-# Add project root to path
-# # from netra_backend.app.schemas.billing import UsageEvent, BillingTier  # Class may not exist, commented out  # Class may not exist, commented out
-from ..config import TEST_CONFIG, TestTier  # Comment out since config structure may vary
+# # from app.schemas.billing import UsageEvent, BillingTier  # Class may not exist, commented out  # Class may not exist, commented out
+from netra_backend.tests.integration.config import TEST_CONFIG, ServiceTier  # Comment out since config structure may vary
 
 TEST_CONFIG = {"mock": True}
 
-class TestTier:
+class ServiceTier:
 
     FREE = "free"
 
@@ -60,9 +47,7 @@ class TestTier:
 
     ENTERPRISE = "enterprise"
 
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 
@@ -86,14 +71,12 @@ class PerformanceMetrics:
 
     error_rate: float = 0.0
     
-
     def __post_init__(self):
 
         if self.response_times is None:
 
             self.response_times = []
     
-
     @property
 
     def p99_response_time(self) -> float:
@@ -106,7 +89,6 @@ class PerformanceMetrics:
 
         return statistics.quantiles(self.response_times, n=100)[98]
     
-
     @property
 
     def avg_response_time(self) -> float:
@@ -115,7 +97,6 @@ class PerformanceMetrics:
 
         return statistics.mean(self.response_times) if self.response_times else 0.0
     
-
     @property
 
     def success_rate(self) -> float:
@@ -128,12 +109,10 @@ class PerformanceMetrics:
 
         return (self.successful_requests / self.total_requests) * 100
 
-
 class BillingAccuracyL4Manager:
 
     """L4 billing accuracy test manager with real services and performance monitoring."""
     
-
     def __init__(self):
 
         self.usage_tracker = None
@@ -150,7 +129,6 @@ class BillingAccuracyL4Manager:
 
         self.billing_calculations = []
         
-
     async def initialize_services(self):
 
         """Initialize real billing services for L4 testing."""
@@ -162,32 +140,26 @@ class BillingAccuracyL4Manager:
 
             await self.usage_tracker.initialize()
             
-
             self.billing_engine = BillingEngine()
 
             await self.billing_engine.initialize()
             
-
             self.token_counter = TokenCounter()
 
             await self.token_counter.initialize()
             
-
             self.llm_manager = LLMManager()
 
             await self.llm_manager.initialize()
             
-
             logger.info("L4 billing services initialized with real components")
             
-
         except Exception as e:
 
             logger.error(f"Failed to initialize L4 billing services: {e}")
 
             raise
     
-
     async def execute_real_llm_request_with_billing(self, user_id: str, tier: str,  # BillingTier commented out
 
                                                    prompt: str) -> Dict[str, Any]:
@@ -198,7 +170,6 @@ class BillingAccuracyL4Manager:
 
         start_time = time.time()
         
-
         try:
             # Make real LLM request
 
@@ -214,7 +185,6 @@ class BillingAccuracyL4Manager:
 
             )
             
-
             if not llm_response.get("success"):
 
                 raise Exception(f"LLM request failed: {llm_response.get('error')}")
@@ -261,10 +231,8 @@ class BillingAccuracyL4Manager:
 
             }
             
-
             tracking_result = await self.usage_tracker.record_event(usage_event)
             
-
             response_time = time.time() - start_time
             
             # Update metrics
@@ -273,7 +241,6 @@ class BillingAccuracyL4Manager:
 
             self.metrics.response_times.append(response_time)
             
-
             if tracking_result.get("success"):
 
                 self.metrics.successful_requests += 1
@@ -282,7 +249,6 @@ class BillingAccuracyL4Manager:
 
                 self.metrics.failed_requests += 1
             
-
             return {
 
                 "request_id": request_id,
@@ -299,7 +265,6 @@ class BillingAccuracyL4Manager:
 
             }
             
-
         except Exception as e:
 
             self.metrics.total_requests += 1
@@ -308,7 +273,6 @@ class BillingAccuracyL4Manager:
 
             self.metrics.response_times.append(time.time() - start_time)
             
-
             logger.error(f"Real LLM request failed for {request_id}: {e}")
 
             return {
@@ -323,7 +287,6 @@ class BillingAccuracyL4Manager:
 
             }
     
-
     async def run_concurrent_billing_load_test(self, concurrent_users: int, 
 
                                              requests_per_user: int) -> Dict[str, Any]:
@@ -390,7 +353,6 @@ class BillingAccuracyL4Manager:
 
                          (isinstance(r, dict) and not r.get("success"))]
         
-
         return {
 
             "total_requests": len(tasks),
@@ -407,7 +369,6 @@ class BillingAccuracyL4Manager:
 
         }
     
-
     async def validate_billing_calculation_accuracy(self, user_id: str, 
 
                                                    expected_token_count: int) -> Dict[str, Any]:
@@ -421,7 +382,6 @@ class BillingAccuracyL4Manager:
 
             start_time = end_time - timedelta(hours=1)
             
-
             usage_data = await self.usage_tracker.get_usage_for_period(
 
                 user_id, start_time, end_time
@@ -444,14 +404,12 @@ class BillingAccuracyL4Manager:
 
             )
             
-
             token_accuracy = (
 
                 1.0 - abs(actual_token_count - expected_token_count) / expected_token_count
 
             ) if expected_token_count > 0 else 0.0
             
-
             self.metrics.token_count_accuracy = token_accuracy * 100
 
             self.metrics.billing_calculation_accuracy = (
@@ -460,7 +418,6 @@ class BillingAccuracyL4Manager:
 
             )
             
-
             return {
 
                 "success": True,
@@ -477,7 +434,6 @@ class BillingAccuracyL4Manager:
 
             }
             
-
         except Exception as e:
 
             logger.error(f"Billing validation failed: {e}")
@@ -490,7 +446,6 @@ class BillingAccuracyL4Manager:
 
             }
     
-
     async def measure_cache_performance(self) -> Dict[str, Any]:
 
         """Measure Redis cache performance for billing data."""
@@ -515,12 +470,10 @@ class BillingAccuracyL4Manager:
 
                 cached_data = await self.usage_tracker.get_cached_usage(user_id)
                 
-
                 response_time = time.time() - start_time
 
                 cache_response_times.append(response_time)
                 
-
                 if cached_data:
 
                     cache_hits += 1
@@ -529,15 +482,12 @@ class BillingAccuracyL4Manager:
 
                     cache_misses += 1
             
-
             cache_hit_rate = (cache_hits / (cache_hits + cache_misses)) * 100
 
             avg_cache_response_time = statistics.mean(cache_response_times)
             
-
             self.metrics.cache_hit_rate = cache_hit_rate
             
-
             return {
 
                 "cache_hit_rate": cache_hit_rate,
@@ -548,7 +498,6 @@ class BillingAccuracyL4Manager:
 
             }
             
-
         except Exception as e:
 
             logger.error(f"Cache performance measurement failed: {e}")
@@ -561,7 +510,6 @@ class BillingAccuracyL4Manager:
 
             }
     
-
     def get_performance_summary(self) -> Dict[str, Any]:
 
         """Get comprehensive performance summary."""
@@ -586,37 +534,30 @@ class BillingAccuracyL4Manager:
 
         }
     
-
     def _generate_performance_recommendations(self) -> List[str]:
 
         """Generate performance improvement recommendations."""
 
         recommendations = []
         
-
         if self.metrics.p99_response_time > 0.5:
 
             recommendations.append("P99 response time exceeds 500ms - consider optimization")
         
-
         if self.metrics.success_rate < 99.0:
 
             recommendations.append("Success rate below 99% - investigate error patterns")
         
-
         if self.metrics.cache_hit_rate < 80.0:
 
             recommendations.append("Cache hit rate below 80% - review caching strategy")
         
-
         if not recommendations:
 
             recommendations.append("All performance metrics meet SLA requirements")
         
-
         return recommendations
     
-
     async def cleanup(self):
 
         """Clean up L4 billing test resources."""
@@ -643,7 +584,6 @@ class BillingAccuracyL4Manager:
 
             logger.error(f"L4 cleanup failed: {e}")
 
-
 @pytest.fixture
 
 async def billing_l4_manager():
@@ -657,7 +597,6 @@ async def billing_l4_manager():
     yield manager
 
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 
@@ -696,7 +635,6 @@ async def test_billing_accuracy_under_concurrent_load(billing_l4_manager):
 
     logger.info(f"Billing load test completed: {performance}")
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.l4
@@ -721,10 +659,8 @@ async def test_token_counting_accuracy_at_scale(billing_l4_manager):
 
     ]
     
-
     total_expected_tokens = 0
     
-
     for prompt in test_prompts:
         # Execute real LLM request
 
@@ -734,12 +670,10 @@ async def test_token_counting_accuracy_at_scale(billing_l4_manager):
 
         )
         
-
         assert result["success"], f"LLM request failed: {result.get('error')}"
 
         assert result["token_count"] > 0, "Token count should be positive"
         
-
         total_expected_tokens += result["token_count"]
     
     # Validate billing accuracy
@@ -750,7 +684,6 @@ async def test_token_counting_accuracy_at_scale(billing_l4_manager):
 
     )
     
-
     assert validation["success"], f"Billing validation failed: {validation.get('error')}"
 
     assert validation["token_accuracy"] >= 99.0, f"Token accuracy {validation['token_accuracy']}% below 99%"
@@ -760,7 +693,6 @@ async def test_token_counting_accuracy_at_scale(billing_l4_manager):
     performance = billing_l4_manager.get_performance_summary()
 
     assert performance["sla_compliance"]["token_accuracy_above_99"], "Token accuracy below 99%"
-
 
 @pytest.mark.asyncio
 
@@ -782,7 +714,6 @@ async def test_billing_consistency_across_services(billing_l4_manager):
 
     user_billing_data = {}
     
-
     for user_id, tier in test_users:
         # Make LLM requests
 
@@ -822,7 +753,6 @@ async def test_billing_consistency_across_services(billing_l4_manager):
 
         )
         
-
         assert validation["success"], f"Consistency validation failed for {user_id}"
 
         assert validation["billing_success"], f"Billing calculation failed for {user_id}"
@@ -839,9 +769,7 @@ async def test_billing_consistency_across_services(billing_l4_manager):
 
     assert performance["sla_compliance"]["cache_hit_rate_above_80"], "Cache performance below SLA"
     
-
     logger.info(f"Billing consistency test completed successfully: {performance}")
-
 
 @pytest.mark.asyncio
 
@@ -856,17 +784,14 @@ async def test_billing_performance_under_sustained_load(billing_l4_manager):
 
     requests_per_second = 10
     
-
     test_user = f"sustained_load_user_{uuid.uuid4().hex[:8]}"
 
     tier = "mid"  # Mock tier value
     
-
     start_time = time.time()
 
     request_count = 0
     
-
     while time.time() - start_time < duration_seconds:
         # Execute batch of requests
 
@@ -914,10 +839,8 @@ async def test_billing_performance_under_sustained_load(billing_l4_manager):
 
     )
     
-
     assert validation["token_accuracy"] > 95.0, "Token accuracy degraded under sustained load"
     
-
     logger.info(f"Sustained load test completed: {request_count} requests in {duration_seconds}s")
 
     logger.info(f"Final performance metrics: {performance}")

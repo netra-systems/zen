@@ -9,8 +9,7 @@ from typing import Any, Dict, List, Optional, Type
 
 from pydantic import BaseModel
 
-from .llm_manager_helpers import LLMProvider, MockLLMResponse
-
+from netra_backend.tests.llm_manager_helpers import LLMProvider, MockLLMResponse
 
 class MockLLMClient:
     """Mock LLM client that can simulate different provider behaviors"""
@@ -97,7 +96,6 @@ class MockLLMClient:
             'success_rate': self.successful_requests / max(self.request_count, 1),
             'response_time': self.response_time
         }
-
 
 class MockStructuredLLMClient:
     """Mock structured LLM client"""

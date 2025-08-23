@@ -242,16 +242,39 @@ class DependencyHealthChecker(BaseHealthChecker):
 
 
 class CircuitBreakerHealthChecker(BaseHealthChecker):
-    """Health checker with circuit breaker integration."""
+    """Health checker with environment-aware circuit breaker integration."""
     
     def __init__(self, name: str, wrapped_checker: BaseHealthChecker):
         super().__init__(f"cb_{name}")
         self.wrapped_checker = wrapped_checker
         self.failure_count = 0
-        self.failure_threshold = 5
-        self.recovery_timeout = 30
+        
+        # Get environment-aware configuration
+        self._config = self._get_environment_config()
+        self.failure_threshold = self._config.failure_threshold
+        self.recovery_timeout = self._config.recovery_timeout
         self.last_failure_time: Optional[datetime] = None
         self.circuit_open = False
+    
+    def _get_environment_config(self):
+        """Get circuit breaker configuration for current environment."""
+        try:
+            from netra_backend.app.core.configuration import unified_config_manager
+            from netra_backend.app.core.circuit_breaker_types import CircuitConfig
+            
+            config = unified_config_manager.get_config()
+            environment = getattr(config, 'environment', 'production')
+            return CircuitConfig.create_for_environment(
+                name=f"health_check_{self.name}",
+                environment=environment
+            )
+        except Exception:
+            # Fallback to production defaults if configuration fails
+            from netra_backend.app.core.circuit_breaker_types import CircuitConfig
+            return CircuitConfig.create_for_environment(
+                name=f"health_check_{self.name}",
+                environment="production"
+            )
     
     async def check_health(self) -> HealthCheckResult:
         """Perform health check with circuit breaker protection."""

@@ -13,7 +13,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import ANY, MagicMock, Mock, call, patch
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
@@ -165,7 +164,7 @@ class TestFullIntegration(unittest.TestCase):
         """Run the full launch cycle."""
         with patch.object(LauncherConfig, '_validate'):
             config = LauncherConfig(load_secrets=False, no_browser=False)
-        with patch('dev_launcher.launcher.load_or_create_config'):
+        with patch('dev_launcher.service_config.load_or_create_config'):
             launcher = DevLauncher(config)
         return self._execute_launch(launcher)
     
@@ -232,7 +231,7 @@ class TestRollingRestart(unittest.TestCase):
         """Create launcher with configuration."""
         with patch.object(LauncherConfig, '_validate'):
             config = LauncherConfig(load_secrets=False)
-        with patch('dev_launcher.launcher.load_or_create_config'):
+        with patch('dev_launcher.service_config.load_or_create_config'):
             return DevLauncher(config)
     
     def _perform_rolling_restart(self, launcher):

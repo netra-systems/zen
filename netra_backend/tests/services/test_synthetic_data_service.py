@@ -1,35 +1,24 @@
 """Test synthetic data generation service for testing and development."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.synthetic_data_service import (
     GenerationStatus,
-    # Add project root to path
     SyntheticDataService,
     WorkloadCategory,
 )
-
 
 @pytest.fixture
 def synthetic_data_service():
     """Create a test synthetic data service instance."""
     return SyntheticDataService()
-
 
 class TestSyntheticDataService:
     """Test synthetic data service basic functionality."""
@@ -55,5 +44,3 @@ class TestSyntheticDataService:
         statuses = [status.value for status in GenerationStatus]
         expected_statuses = ["initiated", "running", "completed", "failed", "cancelled"]
         assert all(status in statuses for status in expected_statuses)
-
-

@@ -30,7 +30,6 @@ from tests.e2e.fixtures.core.thread_test_fixtures_core import (
 
 logger = central_logger.get_logger(__name__)
 
-
 class ThreadPerformanceTester:
     """Comprehensive thread performance testing."""
     
@@ -371,12 +370,10 @@ class ThreadPerformanceTester:
         
         return summary
 
-
 @pytest.fixture
 def thread_performance_tester(ws_thread_fixtures, thread_context_manager, performance_utils):
     """Thread performance tester fixture."""
     return ThreadPerformanceTester(ws_thread_fixtures, thread_context_manager, performance_utils)
-
 
 @pytest.mark.asyncio
 async def test_thread_creation_performance_under_load(ws_thread_fixtures, thread_performance_tester):
@@ -406,7 +403,6 @@ async def test_thread_creation_performance_under_load(ws_thread_fixtures, thread
                f"Average creation time must be < 0.5s, got {performance_data['avg_creation_time']:.3f}s"
         assert performance_data["max_creation_time"] < 2.0, \
                f"Max creation time must be < 2s, got {performance_data['max_creation_time']:.3f}s"
-
 
 @pytest.mark.asyncio
 async def test_thread_switching_performance_rapid_switches(ws_thread_fixtures, thread_performance_tester):
@@ -448,7 +444,6 @@ async def test_thread_switching_performance_rapid_switches(ws_thread_fixtures, t
         assert switching_data["avg_switch_time"] < 0.2, \
                f"Average switch time must be < 0.2s, got {switching_data['avg_switch_time']:.3f}s"
 
-
 @pytest.mark.asyncio
 async def test_concurrent_user_performance(ws_thread_fixtures, thread_performance_tester):
     """Test performance with multiple concurrent users."""
@@ -475,9 +470,8 @@ async def test_concurrent_user_performance(ws_thread_fixtures, thread_performanc
     assert actual_operations >= expected_total_operations * 0.8, \
            f"Should complete at least 80% of operations, got {actual_operations}/{expected_total_operations}"
 
-
 @pytest.mark.asyncio
-async def test_comprehensive_thread_operations_performance_target(ws_thread_fixtures, 
+async def test_comprehensive_thread_operations_performance_target(ws_thread_fixtures:
                                                                    thread_performance_tester,
                                                                    thread_context_manager):
     """Test all thread operations complete within comprehensive performance targets."""
@@ -532,7 +526,6 @@ async def test_comprehensive_thread_operations_performance_target(ws_thread_fixt
     # Verify system stability after load
     assert len(ws_thread_fixtures.active_connections) > 0, "Connection must remain stable"
     assert len(ws_thread_fixtures.thread_events) >= 15, "All operations must generate events"
-
 
 @pytest.mark.asyncio
 async def test_performance_metrics_collection_and_analysis(thread_performance_tester):

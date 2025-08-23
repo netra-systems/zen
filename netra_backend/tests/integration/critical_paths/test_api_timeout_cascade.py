@@ -10,17 +10,10 @@ Critical Path: Request timeout detection -> Cascade prevention -> Graceful degra
 Coverage: Timeout propagation, circuit breaking, cascade prevention, recovery mechanisms
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -34,7 +27,6 @@ import pytest
 
 logger = logging.getLogger(__name__)
 
-
 class TimeoutType(Enum):
     """Types of timeouts in the system."""
     REQUEST = "request"
@@ -42,7 +34,6 @@ class TimeoutType(Enum):
     READ = "read"
     WRITE = "write"
     SERVICE = "service"
-
 
 @dataclass
 class TimeoutConfig:
@@ -54,7 +45,6 @@ class TimeoutConfig:
     max_retries: int
     backoff_multiplier: float
     circuit_breaker_threshold: int
-
 
 class ApiTimeoutManager:
     """Manages L3 API timeout cascade tests with real timeout scenarios."""
@@ -642,7 +632,6 @@ class ApiTimeoutManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def timeout_manager():
     """Create timeout manager for L3 testing."""
@@ -650,7 +639,6 @@ async def timeout_manager():
     await manager.initialize_timeout_testing()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -666,7 +654,6 @@ async def test_service_timeout_handling(timeout_manager):
     assert result["timeout_occurred"] is True
     assert "timeout" in result["body"]["error"].lower()
     assert result["response_time"] >= 1.0  # Should respect timeout
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -685,7 +672,6 @@ async def test_timeout_retry_mechanism(timeout_manager):
     if "X-Retry-Count" in result["headers"]:
         retry_count = int(result["headers"]["X-Retry-Count"])
         assert retry_count > 1  # Should have retried
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -709,7 +695,6 @@ async def test_circuit_breaker_activation(timeout_manager):
                 assert "circuit breaker" in result["body"]["error"].lower()
                 break
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -726,7 +711,6 @@ async def test_timeout_cascade_detection(timeout_manager):
     # Should detect cascade when multiple services are affected
     if cascade_result["cascade_detected"]:
         assert len(timeout_manager.cascade_detections) > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -745,7 +729,6 @@ async def test_different_timeout_types(timeout_manager):
         # Should result in timeout
         assert result["status_code"] in [504, 500]
         assert result["timeout_occurred"] is True
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -768,7 +751,6 @@ async def test_service_recovery_after_timeout(timeout_manager):
             # Service should recover
             assert "success" in result["body"]["status"]
             break
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -794,7 +776,6 @@ async def test_concurrent_timeout_handling(timeout_manager):
     assert len(successful_results) > 0  # Some should succeed
     assert len(timeout_results) > 0     # Some should timeout
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -809,7 +790,6 @@ async def test_network_partition_simulation(timeout_manager):
     
     # Network partition should affect multiple services
     assert cascade_result["total_requests"] >= 6  # Multiple services tested
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -846,7 +826,6 @@ async def test_timeout_metrics_accuracy(timeout_manager):
         if h["consecutive_failures"] > 0
     ]
     assert len(failing_services) > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

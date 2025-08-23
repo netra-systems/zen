@@ -23,17 +23,10 @@ Performance Targets:
 - Recovery scenarios: < 5s each
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import uuid
@@ -47,7 +40,6 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 from netra_backend.app.core.exceptions_base import ErrorDetails, NetraException
 
-# Add project root to path
 from netra_backend.app.core.reliability import AgentReliabilityWrapper
 from netra_backend.app.core.reliability_circuit_breaker import (
     CircuitBreakerConfig,
@@ -60,9 +52,6 @@ from netra_backend.app.websocket.recovery import (
     WebSocketError,
     WebSocketRecoveryManager,
 )
-
-# Add project root to path
-
 
 class ErrorRecoveryTestFixtures:
     """Fixtures for controlled error injection and recovery testing"""
@@ -103,7 +92,6 @@ class ErrorRecoveryTestFixtures:
         else:
             session.commit = AsyncMock()
         return session
-
 
 class TestCascadingFailureScenarios:
     """Test cascading failure scenarios across agent system"""
@@ -186,7 +174,6 @@ class TestCascadingFailureScenarios:
         # Status should be None after successful recovery cleanup
         assert status is None
 
-
 class TestPartialSuccessHandling:
     """Test partial success scenarios and compensation patterns"""
     async def test_multi_data_source_partial_availability(self):
@@ -244,7 +231,6 @@ class TestPartialSuccessHandling:
         session.rollback.assert_called_once()
         assert len(write_operations) == 2  # Only 2 operations succeeded
 
-
 class TestRollbackMechanisms:
     """Test transaction rollback and state restoration mechanisms"""
     async def test_transaction_rollback_on_error(self):
@@ -298,7 +284,6 @@ class TestRollbackMechanisms:
         # Verify cleanup
         assert len(cleanup_called) == 3
         assert "cleanup_resource_0" in cleanup_called
-
 
 class TestRecoveryMechanisms:
     """Test automatic retry, manual intervention, and graceful degradation"""
@@ -368,7 +353,6 @@ class TestRecoveryMechanisms:
         assert alternative_result is not None
         assert alternative_result["workflow"] == "alternative"
         assert alternative_result["confidence"] < 1.0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

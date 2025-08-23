@@ -241,7 +241,7 @@ export const EnhancedWebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const buildWebSocketUrl = useCallback((config: WebSocketConfig): string => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     const wsUrl = apiUrl.replace(/^http/, 'ws');
-    const endpoint = config.endpoints?.websocket || '/ws/secure'; // Use secure endpoint by default
+    const endpoint = config.endpoints?.websocket || '/ws'; // Use unified endpoint
     return `${wsUrl}${endpoint}`;
   }, []);
 

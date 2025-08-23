@@ -11,17 +11,10 @@ integrity across PostgreSQL, ClickHouse, and Redis with 100K+ records.
 Tests migration, rollback, performance, and zero data loss guarantees.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -32,7 +25,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-# from netra_backend.app.services.redis.session_manager import RedisSessionManager
+# from app.services.redis.session_manager import RedisSessionManager
 from unittest.mock import AsyncMock
 
 import asyncpg
@@ -44,10 +37,8 @@ from sqlalchemy.orm import sessionmaker
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.db.client_clickhouse import ClickHouseClient
 
-# Add project root to path
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
-    # Add project root to path
     L4StagingCriticalPathTestBase,
 )
 
@@ -55,7 +46,6 @@ RedisSessionManager = AsyncMock
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class MigrationSnapshot:
@@ -70,7 +60,6 @@ class MigrationSnapshot:
     schema_version: str
     migration_id: Optional[str] = None
 
-
 @dataclass
 class MigrationMetrics:
     """Migration performance and business metrics."""
@@ -81,7 +70,6 @@ class MigrationMetrics:
     performance_impact_percent: float
     zero_data_loss_verified: bool
     business_continuity_maintained: bool
-
 
 class L4DataMigrationIntegrityTest(L4StagingCriticalPathTestBase):
     """L4 test for production data migration integrity across all databases."""
@@ -1337,7 +1325,6 @@ class L4DataMigrationIntegrityTest(L4StagingCriticalPathTestBase):
         if cleanup_errors:
             logger.warning(f"L4 migration test cleanup warnings: {'; '.join(cleanup_errors)}")
 
-
 # Pytest integration
 @pytest.fixture
 async def l4_migration_test():
@@ -1347,7 +1334,6 @@ async def l4_migration_test():
         yield test_instance
     finally:
         await test_instance.cleanup_l4_resources()
-
 
 @pytest.mark.L4
 @pytest.mark.staging
@@ -1400,7 +1386,6 @@ class TestDataMigrationIntegrityL4:
         logger.info(f"L4 Data Migration Integrity Test completed successfully: "
                    f"{metrics.validation_count} validations, {metrics.service_calls} service calls, "
                    f"{metrics.duration:.2f}s duration, {metrics.success_rate:.1f}% success rate")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

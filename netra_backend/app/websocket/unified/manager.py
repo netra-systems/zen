@@ -34,13 +34,13 @@ from netra_backend.app.websocket.lifecycle_integration import get_lifecycle_inte
 from netra_backend.app.websocket.rate_limiter import RateLimiter
 from netra_backend.app.websocket.room_manager import RoomManager
 
-from .broadcasting import UnifiedBroadcastingManager
-from .circuit_breaker import CircuitBreaker
+from netra_backend.app.websocket.unified.broadcasting import UnifiedBroadcastingManager
+from netra_backend.app.websocket.unified.circuit_breaker import CircuitBreaker
 
 # Import unified modules
-from .messaging import UnifiedMessagingManager
-from .state import UnifiedStateManager
-from .telemetry_manager import TelemetryManager
+from netra_backend.app.websocket.unified.messaging import UnifiedMessagingManager
+from netra_backend.app.websocket.unified.state import UnifiedStateManager
+from netra_backend.app.websocket.unified.telemetry_manager import TelemetryManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -103,31 +103,46 @@ class UnifiedWebSocketManager:
         # Start cleanup task on first connection if not already started
         await self.telemetry_manager.start_periodic_cleanup()
             
-        if not self.circuit_breaker.can_execute():
-            self._record_circuit_break()
-            raise ConnectionError("Circuit breaker is open")
-        
-        # Use enhanced lifecycle integration for connection
-        try:
+        # Use circuit breaker to protect connection establishment
+        async def _protected_connect():
+            # Use enhanced lifecycle integration for connection
             conn_info = await self.lifecycle_integrator.integrate_connection(user_id, websocket)
-            self.circuit_breaker.record_success()
             self.telemetry["connections_opened"] += 1
             
-            # Handle state synchronization for new connection
-            await self.messaging.message_handler.handle_new_connection_state_sync(
-                user_id, conn_info.connection_id, websocket
-            )
+            # Handle state synchronization for new connection with race condition protection
+            await self._sync_connection_state_safe(user_id, conn_info.connection_id, websocket)
             
             return conn_info
-            
+        
+        try:
+            # Execute connection with circuit breaker protection
+            return await self.circuit_breaker.execute_protected(_protected_connect)
         except Exception as e:
-            self.circuit_breaker.record_failure()
-            raise e
+            self._record_circuit_break()
+            logger.error(f"Failed to establish connection for user {user_id}: {e}")
+            raise ConnectionError(f"Connection establishment failed: {str(e)[:100]}")
 
     def _record_circuit_break(self) -> None:
         """Record circuit breaker activation."""
         self.telemetry["circuit_breaks"] += 1
         logger.warning("Circuit breaker prevented connection attempt")
+    
+    async def _sync_connection_state_safe(self, user_id: str, connection_id: str, websocket: WebSocket) -> None:
+        """Safely synchronize connection state with race condition protection."""
+        try:
+            # Add connection state sync timeout to prevent hangs
+            await asyncio.wait_for(
+                self.messaging.message_handler.handle_new_connection_state_sync(
+                    user_id, connection_id, websocket
+                ),
+                timeout=5.0  # 5 second timeout for state sync
+            )
+        except asyncio.TimeoutError:
+            logger.warning(f"Connection state sync timeout for user {user_id}")
+            # Don't fail connection establishment for state sync timeout
+        except Exception as e:
+            logger.warning(f"Connection state sync failed for user {user_id}: {e}")
+            # Don't fail connection establishment for state sync issues
 
     async def _execute_protected_connect(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Execute connection with circuit breaker protection."""

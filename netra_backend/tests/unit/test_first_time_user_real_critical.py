@@ -14,17 +14,10 @@ first-time user paths that determine whether a free user converts to paid.
 Each test failure = potential lost customer = lost $99-999/month recurring revenue.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import json
 import os
@@ -40,7 +33,6 @@ from fastapi import HTTPException, status
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 # Import REAL implementations
 from netra_backend.app.auth_integration.auth import (
     create_access_token,
@@ -56,7 +48,6 @@ from netra_backend.app.services.cost_calculator import CostCalculatorService, Co
 from netra_backend.app.services.user_service import user_service
 from netra_backend.app.websocket.connection import ConnectionInfo
 from netra_backend.app.websocket.rate_limiter import RateLimiter
-
 
 class TestFirstTimeUserRealCritical:
     """
@@ -456,7 +447,6 @@ class TestFirstTimeUserRealCritical:
         second_hash = get_password_hash(plain_password)
         assert second_hash != hashed_password  # Should be different due to salt
         assert verify_password(plain_password, second_hash) is True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

@@ -24,9 +24,6 @@ from typing import Any, Dict, Optional
 import pytest
 
 # Add parent directories to sys.path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent))
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 
@@ -34,11 +31,9 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 pytestmark = pytest.mark.skipif(
     os.environ.get("USE_REAL_SERVICES", "false").lower() != "true",
     reason="Real services disabled (set USE_REAL_SERVICES=true)"
-)
-
 
 class MultiServiceWebSocketAuthTester:
-    """Tests WebSocket authentication flow across Auth, Backend, and Database services."""
+    # """Tests WebSocket authentication flow across Auth, Backend, and Database services."""
     
     def __init__(self, real_services):
         """Initialize with real services context."""
@@ -53,6 +48,7 @@ class MultiServiceWebSocketAuthTester:
         start_time = time.time()
         
         try:
+    pass
             # Generate unique email if not provided
             if not email:
                 email = f"test-user-{uuid.uuid4().hex[:8]}@netrasystems.ai"
@@ -61,7 +57,6 @@ class MultiServiceWebSocketAuthTester:
             user_data = await self.auth_client.create_test_user(
                 email=email,
                 password="testpass123"
-            )
             
             creation_time = time.time() - start_time
             
@@ -72,7 +67,6 @@ class MultiServiceWebSocketAuthTester:
                 "user_id": user_data.get("user_id"),
                 "creation_time": creation_time,
                 "error": None
-            }
             
         except Exception as e:
             return {
@@ -82,7 +76,6 @@ class MultiServiceWebSocketAuthTester:
                 "user_id": None,
                 "creation_time": time.time() - start_time,
                 "error": str(e)
-            }
     
     async def validate_jwt_token_in_backend(self, token: str) -> Dict[str, Any]:
         """Validate JWT token against Backend service with user lookup verification."""
@@ -102,7 +95,6 @@ class MultiServiceWebSocketAuthTester:
                 "validation_time": validation_time,
                 "database_lookup_success": health_result,  # Health check implies user lookup worked
                 "error": None
-            }
             
         except Exception as e:
             return {
@@ -110,13 +102,13 @@ class MultiServiceWebSocketAuthTester:
                 "validation_time": time.time() - start_time,
                 "database_lookup_success": False,
                 "error": str(e)
-            }
     
     async def connect_websocket_with_auth(self, token: str, timeout: float = 10.0) -> Dict[str, Any]:
         """Connect WebSocket to Backend with JWT authentication and verify user context."""
         start_time = time.time()
         
         try:
+    pass
             # Create WebSocket client with JWT token
             ws_client = await self.factory.create_websocket_client(token)
             
@@ -136,7 +128,6 @@ class MultiServiceWebSocketAuthTester:
                     "connection_time": connection_time,
                     "auth_verified": pong_response is not None,
                     "error": None
-                }
             else:
                 return {
                     "websocket": None,
@@ -144,7 +135,6 @@ class MultiServiceWebSocketAuthTester:
                     "connection_time": connection_time,
                     "auth_verified": False,
                     "error": "Connection failed"
-                }
                 
         except Exception as e:
             return {
@@ -153,7 +143,6 @@ class MultiServiceWebSocketAuthTester:
                 "connection_time": time.time() - start_time,
                 "auth_verified": False,
                 "error": str(e)
-            }
     
     async def send_authenticated_message_with_user_context(
         self, ws_client, message: str, expected_user_email: str
@@ -162,6 +151,7 @@ class MultiServiceWebSocketAuthTester:
         start_time = time.time()
         
         try:
+    pass
             # Send chat message
             await ws_client.send_chat(message)
             
@@ -172,7 +162,6 @@ class MultiServiceWebSocketAuthTester:
             # Analyze response for user context validation
             user_context_valid = self._validate_user_context_in_response(
                 response, expected_user_email
-            )
             
             return {
                 "message_sent": True,
@@ -191,13 +180,17 @@ class MultiServiceWebSocketAuthTester:
                 "error": str(e)
             }
     
+
+class TestSyntaxFix:
+    """Generated test class"""
+
     def _validate_user_context_in_response(self, response: Optional[Dict], expected_email: str) -> bool:
         """Validate that response contains correct user context."""
         if not response:
             # No response is acceptable for some message types
             return True
             
-        # Look for user context indicators in response
+#         # Look for user context indicators in response # Possibly broken comprehension
         # This is implementation-dependent but could include user_id, session info, etc.
         if isinstance(response, dict):
             # Check if response has user context fields
@@ -222,14 +215,12 @@ class MultiServiceWebSocketAuthTester:
                     "reconnection_time": time.time() - reconnect_start,
                     "session_continuity": False,
                     "error": f"First connection failed: {first_connection['error']}"
-                }
             
             first_ws = first_connection["websocket"]
             
             # Send message on first connection
             first_message = await self.send_authenticated_message_with_user_context(
                 first_ws, "Message before reconnection", expected_user_email
-            )
             
             # Disconnect
             await first_ws.disconnect()
@@ -247,14 +238,12 @@ class MultiServiceWebSocketAuthTester:
                     "reconnection_time": reconnection_time,
                     "session_continuity": False,
                     "error": f"Reconnection failed: {second_connection['error']}"
-                }
             
             second_ws = second_connection["websocket"]
             
             # Send message on reconnected session
             second_message = await self.send_authenticated_message_with_user_context(
                 second_ws, "Message after reconnection", expected_user_email
-            )
             
             # Cleanup
             await second_ws.disconnect()
@@ -263,7 +252,6 @@ class MultiServiceWebSocketAuthTester:
             session_continuity = (
                 first_message["user_context_valid"] and 
                 second_message["user_context_valid"]
-            )
             
             return {
                 "reconnection_successful": True,
@@ -272,7 +260,6 @@ class MultiServiceWebSocketAuthTester:
                 "first_message_context": first_message["user_context_valid"],
                 "second_message_context": second_message["user_context_valid"],
                 "error": None
-            }
             
         except Exception as e:
             return {
@@ -280,8 +267,6 @@ class MultiServiceWebSocketAuthTester:
                 "reconnection_time": time.time() - reconnect_start,
                 "session_continuity": False,
                 "error": str(e)
-            }
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio
@@ -313,7 +298,7 @@ async def test_complete_multiservice_websocket_auth_flow(real_services):
     token_validation = await tester.validate_jwt_token_in_backend(jwt_token)
     assert token_validation["token_valid"], f"Backend rejected Auth service token: {token_validation['error']}"
     assert token_validation["database_lookup_success"], "Database user lookup failed in Backend"
-    assert token_validation["validation_time"] < 2.0, \
+    assert token_validation["validation_time"] < 2.0, 
         f"Token validation took {token_validation['validation_time']:.3f}s, too slow"
     
     print(f"✓ JWT token validated in Backend with DB lookup in {token_validation['validation_time']:.3f}s")
@@ -322,7 +307,7 @@ async def test_complete_multiservice_websocket_auth_flow(real_services):
     ws_connection = await tester.connect_websocket_with_auth(jwt_token)
     assert ws_connection["connected"], f"WebSocket connection failed: {ws_connection['error']}"
     assert ws_connection["auth_verified"], "WebSocket authentication verification failed"
-    assert ws_connection["connection_time"] < 10.0, \
+    assert ws_connection["connection_time"] < 10.0, 
         f"WebSocket connection took {ws_connection['connection_time']:.3f}s, too slow"
     
     websocket = ws_connection["websocket"]
@@ -333,10 +318,9 @@ async def test_complete_multiservice_websocket_auth_flow(real_services):
         # Phase 4: Send authenticated message and verify user context
         message_result = await tester.send_authenticated_message_with_user_context(
             websocket, "Test cross-service authentication", user_email
-        )
         assert message_result["message_sent"], f"Failed to send message: {message_result['error']}"
         assert message_result["user_context_valid"], "User context not maintained in WebSocket response"
-        assert message_result["response_time"] < 15.0, \
+        assert message_result["response_time"] < 15.0, 
             f"Message response took {message_result['response_time']:.3f}s, too slow"
         
         print(f"✓ Authenticated message sent with user context in {message_result['response_time']:.3f}s")
@@ -356,10 +340,8 @@ async def test_complete_multiservice_websocket_auth_flow(real_services):
         token_validation["validation_time"] + 
         ws_connection["connection_time"] + 
         message_result["response_time"]
-    )
     
     print(f"✓ Complete multi-service WebSocket auth flow successful in {total_flow_time:.3f}s")
-
 
 @pytest.mark.asyncio
 async def test_websocket_reconnect_maintains_session_continuity(real_services):
@@ -375,17 +357,16 @@ async def test_websocket_reconnect_maintains_session_continuity(real_services):
     
     # Test reconnection flow
     reconnect_result = await tester.test_websocket_reconnection_with_token(jwt_token, user_email)
-    assert reconnect_result["reconnection_successful"], \
+    assert reconnect_result["reconnection_successful"], 
         f"WebSocket reconnection failed: {reconnect_result['error']}"
-    assert reconnect_result["session_continuity"], \
+    assert reconnect_result["session_continuity"], 
         "Session continuity not maintained across reconnection"
-    assert reconnect_result["reconnection_time"] < 15.0, \
+    assert reconnect_result["reconnection_time"] < 15.0, 
         f"Reconnection took {reconnect_result['reconnection_time']:.3f}s, too slow"
     
     print(f"✓ WebSocket reconnection with session continuity in {reconnect_result['reconnection_time']:.3f}s")
     print(f"✓ First message context: {reconnect_result['first_message_context']}")
     print(f"✓ Second message context: {reconnect_result['second_message_context']}")
-
 
 @pytest.mark.asyncio 
 async def test_multiple_users_concurrent_websocket_auth(real_services):
@@ -422,10 +403,11 @@ async def test_multiple_users_concurrent_websocket_auth(real_services):
             print(f"⚠ User {i+1} connection failed: {error}")
     
     # Require at least 2 successful concurrent connections
-    assert len(successful_connections) >= 2, \
+    assert len(successful_connections) >= 2, 
         f"Expected ≥2 concurrent connections, got {len(successful_connections)}"
     
     try:
+    pass
         # Send messages from each connected user
         message_tasks = []
         for i, (user_idx, connection_result) in enumerate(successful_connections):
@@ -434,7 +416,6 @@ async def test_multiple_users_concurrent_websocket_auth(real_services):
             
             task = tester.send_authenticated_message_with_user_context(
                 websocket, f"Concurrent message from user {user_idx+1}", user_email
-            )
             message_tasks.append(task)
         
         message_results = await asyncio.gather(*message_tasks, return_exceptions=True)
@@ -448,19 +429,18 @@ async def test_multiple_users_concurrent_websocket_auth(real_services):
                     user_idx = successful_connections[i][0]
                     print(f"✓ User {user_idx+1} sent message with valid context")
         
-        assert successful_messages >= 2, \
+        assert successful_messages >= 2, 
             f"Expected ≥2 successful messages with user context, got {successful_messages}"
         
         print(f"✓ {successful_messages} concurrent authenticated messages with user context")
         
     finally:
         # Cleanup all WebSocket connections
-        for _, connection_result in successful_connections:
+#         for _, connection_result in successful_connections: # Possibly broken comprehension
             try:
                 await connection_result["websocket"].disconnect()
             except Exception as e:
                 print(f"Warning: Error disconnecting WebSocket: {e}")
-
 
 @pytest.mark.asyncio
 async def test_cross_service_token_consistency_validation(real_services):
@@ -476,18 +456,18 @@ async def test_cross_service_token_consistency_validation(real_services):
     
     # Test 1: Backend service validates Auth service token
     backend_validation = await tester.validate_jwt_token_in_backend(jwt_token)
-    assert backend_validation["token_valid"], \
+    assert backend_validation["token_valid"], 
         f"Backend rejected Auth service token: {backend_validation['error']}"
-    assert backend_validation["database_lookup_success"], \
+    assert backend_validation["database_lookup_success"], 
         "Database lookup failed in Backend service"
     
     print("✓ Token validated: Auth → Backend → Database")
     
     # Test 2: WebSocket accepts same token validated by Backend
     ws_connection = await tester.connect_websocket_with_auth(jwt_token)
-    assert ws_connection["connected"], \
+    assert ws_connection["connected"], 
         f"WebSocket rejected token accepted by Backend: {ws_connection['error']}"
-    assert ws_connection["auth_verified"], \
+    assert ws_connection["auth_verified"], 
         "WebSocket authentication failed despite Backend validation"
     
     websocket = ws_connection["websocket"]
@@ -496,10 +476,9 @@ async def test_cross_service_token_consistency_validation(real_services):
         # Test 3: WebSocket message processing maintains user context from token
         message_result = await tester.send_authenticated_message_with_user_context(
             websocket, "Cross-service consistency test", user_email
-        )
-        assert message_result["message_sent"], \
+        assert message_result["message_sent"], 
             f"Message failed despite valid token: {message_result['error']}"
-        assert message_result["user_context_valid"], \
+        assert message_result["user_context_valid"], 
             "User context lost despite consistent token validation"
         
         print("✓ User context maintained: Auth → Backend → WebSocket → Database")
@@ -509,7 +488,6 @@ async def test_cross_service_token_consistency_validation(real_services):
     
     print("✓ Token consistently validated across all service boundaries")
 
-
 # Business Impact Summary
 """
 Multi-Service WebSocket Authentication Flow Test - Business Impact
@@ -517,13 +495,13 @@ Multi-Service WebSocket Authentication Flow Test - Business Impact
 BVJ: Segment: ALL | Goal: Real-time features | Impact: $8K+ MRR churn risk
 
 Revenue Protection:
-- Prevents authentication failures in real-time chat that cause immediate churn
+    - Prevents authentication failures in real-time chat that cause immediate churn
 - Validates cross-service token consistency critical for enterprise reliability  
 - Tests database session handling that affects user experience quality
 - Ensures reconnection flows work for mobile/unstable network scenarios
 
 Technical Validation:
-- Auth service user creation and JWT token generation
+    - Auth service user creation and JWT token generation
 - Backend service token validation with database user lookup
 - WebSocket authentication with real connections (no mocking)
 - Message routing with authenticated user context preservation
@@ -531,13 +509,13 @@ Technical Validation:
 - Concurrent user authentication isolation
 
 Customer Impact:
-- Enterprise: Reliable cross-service authentication for SOC2 compliance
+    - Enterprise: Reliable cross-service authentication for SOC2 compliance
 - Free/Early: Seamless real-time chat onboarding without auth interruptions  
 - Mid: Multi-user team collaboration with proper session isolation
 - All: Network resilience with reconnection that maintains session state
 
 Performance Requirements:
-- User creation: <5s (allows for database operations)
+    - User creation: <5s (allows for database operations)
 - Token validation: <2s (cross-service network calls)
 - WebSocket connection: <10s (real network connection establishment)
 - Message delivery: <15s (end-to-end processing with user context)

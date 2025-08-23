@@ -8,8 +8,7 @@ import asyncio
 import random
 from typing import Any, Dict, Optional
 
-from ..e2e.infrastructure.llm_test_manager import LLMTestModel
-
+from netra_backend.tests.e2e.infrastructure.llm_test_manager import LLMTestModel
 
 class LLMTestMockClient:
     """Mock LLM client providing realistic responses for testing."""
@@ -136,7 +135,6 @@ class LLMTestMockClient:
         """Reset client metrics."""
         self._call_count = 0
         self._total_response_time = 0
-
 
 class MockClientFactory:
     """Factory for creating mock clients with consistent configuration."""

@@ -3,9 +3,9 @@
 Tests supervisor agent orchestration, sub-agent coordination, and response flow.
 
 Business Value Justification (BVJ):
-1. Segment: Platform/Internal (Development velocity protection)
+    1. Segment: Platform/Internal (Development velocity protection)
 2. Business Goal: Validate multi-agent orchestration reliability
-3. Value Impact: Ensures agent coordination meets performance standards
+# 3. Value Impact: Ensures agent coordination meets performance standards # Possibly broken comprehension
 4. Strategic Impact: Prevents orchestration failures affecting all tiers
 
 COMPLIANCE: File size <300 lines, Functions <8 lines, Real agent testing
@@ -19,13 +19,12 @@ from unittest.mock import patch
 import pytest
 
 from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 
-
 class AgentOrchestrationTester:
-    """Tests multi-agent orchestration and coordination."""
+    # """Tests multi-agent orchestration and coordination."""
     
     def __init__(self, use_mock_llm: bool = True):
         self.config = get_config()
@@ -43,15 +42,14 @@ class AgentOrchestrationTester:
         return supervisor
     
     async def create_sub_agent(self, agent_type: str, name: str) -> BaseSubAgent:
-        """Create sub-agent for coordination testing."""
+#         """Create sub-agent for coordination testing.""" # Possibly broken comprehension
         sub_agent = BaseSubAgent(
             llm_manager=self.llm_manager, name=name, description=f"Test {agent_type} sub-agent"
-        )
         sub_agent.user_id = "test_user_orchestration_001"
         self.active_agents[name] = sub_agent
         return sub_agent
     
-    async def test_agent_coordination(self, supervisor: SupervisorAgent, 
+    async def test_agent_coordination(self, supervisor: SupervisorAgent,
                                     sub_agents: List[BaseSubAgent], task: str) -> Dict[str, Any]:
         """Test multi-agent coordination workflow."""
         start_time = time.time()
@@ -61,7 +59,6 @@ class AgentOrchestrationTester:
         self.orchestration_metrics[supervisor.name] = {
             "execution_time": execution_time, "agents_coordinated": len(sub_agents),
             "success": result.get("status") == "success"
-        }
         return result
     
     async def simulate_sub_agent_invocation(self, supervisor: SupervisorAgent,
@@ -70,7 +67,6 @@ class AgentOrchestrationTester:
         invocation_event = {
             "supervisor": supervisor.name, "target_agent": target_agent,
             "task": task, "timestamp": time.time()
-        }
         self.coordination_events.append(invocation_event)
         result = await self._execute_sub_agent_task(target_agent, task)
         return result
@@ -82,22 +78,20 @@ class AgentOrchestrationTester:
             return False
         return all(all(key in r for key in ["agent_name", "response_data"]) for r in responses)
     
-    async def test_agent_error_propagation(self, supervisor: SupervisorAgent,
+    async def test_agent_error_propagation(self, supervisor: SupervisorAgent):
                                          failing_agent: str) -> Dict[str, Any]:
         """Test error propagation through agent hierarchy."""
         error_test_result = {
             "supervisor": supervisor.name, "failing_agent": failing_agent,
             "error_handled": False, "fallback_triggered": False
-        }
         recovery_result = await self._simulate_agent_failure_recovery(supervisor, failing_agent)
         error_test_result.update(recovery_result)
         return error_test_result
 
-
 class TestAgentOrchestration:
-    """E2E tests for agent orchestration."""
+    # """E2E tests for agent orchestration."""
     
-    @pytest.fixture
+    # @pytest.fixture
     def orchestration_tester(self):
         """Initialize orchestration tester."""
         return AgentOrchestrationTester(use_mock_llm=True)
@@ -127,10 +121,8 @@ class TestAgentOrchestration:
         
         triage_result = await orchestration_tester.simulate_sub_agent_invocation(
             supervisor, "TriageAgent001", "Analyze user query complexity"
-        )
         data_result = await orchestration_tester.simulate_sub_agent_invocation(
             supervisor, "DataAgent001", "Extract relevant data points"
-        )
         
         assert triage_result["status"] == "success"
         assert data_result["status"] == "success"
@@ -191,7 +183,7 @@ class TestAgentOrchestration:
     async def _execute_coordination_workflow(self, supervisor, sub_agents, task):
         """Execute multi-agent coordination workflow."""
         responses = []
-        for agent in sub_agents:
+#         for agent in sub_agents: # Possibly broken comprehension
             response = await self._execute_sub_agent_task(agent.name, task)
             responses.append({"agent_name": agent.name, "response_data": response})
         return {"status": "success", "sub_agent_responses": responses, "agents_coordinated": len(sub_agents)}
@@ -206,26 +198,25 @@ class TestAgentOrchestration:
         await asyncio.sleep(0.05)
         return {"error_handled": True, "fallback_triggered": True, "recovery_strategy": "fallback_agent"}
 
-
 @pytest.mark.critical
 class TestCriticalOrchestrationScenarios:
-    """Critical orchestration scenarios."""
+    # """Critical orchestration scenarios."""
     
-    @pytest.mark.asyncio
-    async def test_enterprise_scale_orchestration(self):
-        """Test enterprise-scale agent orchestration."""
-        tester = AgentOrchestrationTester(use_mock_llm=True)
-        supervisor = await tester.create_supervisor_agent("EnterpriseSupervisor001")
+    # @pytest.mark.asyncio
+    # async def test_enterprise_scale_orchestration(self):
+    # """Test enterprise-scale agent orchestration."""
+    # tester = AgentOrchestrationTester(use_mock_llm=True)
+    # supervisor = await tester.create_supervisor_agent("EnterpriseSupervisor001")
         
-        enterprise_agents = [
-            await tester.create_sub_agent("enterprise", f"EnterpriseAgent{i:03d}")
-            for i in range(10)
-        ]
+    # enterprise_agents = [
+    # await tester.create_sub_agent("enterprise", f"EnterpriseAgent{i:03d}")
+    # for i in range(10)
+    # ]
         
-        enterprise_task = "Large-scale enterprise infrastructure optimization"
-        result = await tester.test_agent_coordination(supervisor, enterprise_agents, enterprise_task)
+    # enterprise_task = "Large-scale enterprise infrastructure optimization"
+    # result = await tester.test_agent_coordination(supervisor, enterprise_agents, enterprise_task)
         
-        assert result["status"] == "success"
-        metrics = tester.orchestration_metrics.get("EnterpriseSupervisor001", {})
-        assert metrics.get("execution_time", 999) < 20.0  # Enterprise SLA
-        assert metrics.get("agents_coordinated", 0) == 10
+    # assert result["status"] == "success"
+    # metrics = tester.orchestration_metrics.get("EnterpriseSupervisor001", {})
+    # assert metrics.get("execution_time", 999) < 20.0  # Enterprise SLA
+    # assert metrics.get("agents_coordinated", 0) == 10

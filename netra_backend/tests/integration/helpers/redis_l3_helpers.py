@@ -19,7 +19,6 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-
 class RedisContainer:
     """Manages a real Redis Docker container for L3 testing."""
     
@@ -91,7 +90,6 @@ class RedisContainer:
         
         raise RuntimeError("Redis container failed to become ready")
 
-
 class MockWebSocketForRedis:
     """Mock WebSocket that tracks messages for Redis pub/sub testing."""
     
@@ -126,7 +124,6 @@ class MockWebSocketForRedis:
         self.closed = True
         self.client_state = WebSocketState.DISCONNECTED
 
-
 def create_test_message(message_type: str, user_id: str, data: Dict[str, Any] = None) -> Dict[str, Any]:
     """Create standardized test message."""
     return {
@@ -134,7 +131,6 @@ def create_test_message(message_type: str, user_id: str, data: Dict[str, Any] = 
         "data": data or {"user_id": user_id, "content": f"Test message for {user_id}"},
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
-
 
 async def verify_redis_connection(redis_url: str) -> bool:
     """Verify Redis connection is working."""
@@ -147,12 +143,10 @@ async def verify_redis_connection(redis_url: str) -> bool:
         logger.error(f"Redis connection verification failed: {e}")
         return False
 
-
 async def setup_pubsub_channels(pubsub_client, channels: List[str]) -> None:
     """Setup Redis pub/sub channel subscriptions."""
     await pubsub_client.subscribe(*channels)
     logger.info(f"Subscribed to channels: {channels}")
-
 
 async def wait_for_message(pubsub_client, timeout: float = 1.0) -> Dict[str, Any]:
     """Wait for and return Redis pub/sub message."""

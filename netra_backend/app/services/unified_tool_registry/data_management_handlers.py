@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict
 from netra_backend.app.db.models_postgres import User
 
 if TYPE_CHECKING:
-    from .registry import UnifiedToolRegistry
+    from netra_backend.app.services.unified_tool_registry.registry import UnifiedToolRegistry
 
 
 class DataManagementHandlers:

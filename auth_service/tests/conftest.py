@@ -8,14 +8,16 @@ from typing import AsyncGenerator
 from unittest.mock import patch
 
 import pytest
+import pytest_asyncio
 
 # Set auth-specific environment variables (common ones handled by root conftest)
-os.environ["ENVIRONMENT"] = "development"  # Use development so database gets initialized
+os.environ["ENVIRONMENT"] = "test"  # Use test environment for proper test setup
 os.environ["AUTH_FAST_TEST_MODE"] = "false"  # Disable fast test mode for integration tests
 os.environ["JWT_SECRET"] = "test_jwt_secret_key_that_is_long_enough_for_testing_purposes"
 os.environ["GOOGLE_CLIENT_ID"] = "test_google_client_id"
 os.environ["GOOGLE_CLIENT_SECRET"] = "test_google_client_secret"
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///test_auth.db"
+os.environ["AUTH_USE_FILE_DB"] = "true"  # Force file-based DB for tests
 os.environ["REDIS_URL"] = "redis://localhost:6379/1"
 
 @pytest.fixture(scope="session")
@@ -25,6 +27,55 @@ def event_loop():
     loop = policy.new_event_loop()
     yield loop
     loop.close()
+
+@pytest.fixture(scope="session", autouse=True)
+def initialize_test_database():
+    """Ensure database is initialized before any tests run"""
+    import asyncio
+    from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.models import Base
+    
+    async def setup_db():
+        # Force initialization regardless of test mode
+        if auth_db._initialized:
+            await auth_db.close()
+            auth_db._initialized = False
+        
+        # Initialize the database
+        await auth_db.initialize()
+        
+        # Create all tables
+        async with auth_db.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+            
+        return auth_db
+    
+    # Get or create event loop - avoid deprecation warning
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # No running loop, create a new one
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+    
+    # Run the setup
+    if not loop.is_running():
+        loop.run_until_complete(setup_db())
+    else:
+        # If we're in an async context, create a task
+        task = asyncio.create_task(setup_db())
+    
+    yield auth_db
+    
+    # Cleanup
+    try:
+        if not loop.is_running():
+            loop.run_until_complete(auth_db.close())
+    except:
+        pass
 
 @pytest.fixture
 async def auth_db():
@@ -40,12 +91,16 @@ def initialized_test_db():
     import asyncio
     from auth_service.auth_core.database.connection import auth_db
     
-    # Get or create event loop
+    # Get or create event loop - avoid deprecation warning
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
     except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        # No running loop, create a new one
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
     
     # Initialize database synchronously
     if not loop.is_running():
@@ -67,7 +122,7 @@ def initialized_test_db():
 @pytest.fixture
 def mock_auth_redis():
     """Auth-specific Redis mock for session management"""
-    with patch('auth_core.core.session_manager.redis') as mock:
+    with patch('auth_service.auth_core.core.session_manager.redis') as mock:
         mock.ping.return_value = True
         mock.get.return_value = None
         mock.set.return_value = True
@@ -84,6 +139,36 @@ def test_user_data():
         "provider": "google"
     }
 
+@pytest_asyncio.fixture(scope="function")
+async def test_db_session():
+    """Create async database session for tests with fresh tables"""
+    from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.models import Base
+    
+    # Force a fresh database connection for each test
+    if auth_db._initialized:
+        await auth_db.close()
+        auth_db._initialized = False
+    
+    # Initialize database
+    await auth_db.initialize()
+    
+    # Explicitly create all tables
+    async with auth_db.engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
+    # Create session directly without auto-commit context manager
+    session = auth_db.async_session_maker()
+    try:
+        yield session
+    finally:
+        # Clean rollback to prevent any pending transactions
+        try:
+            await session.rollback()
+        except:
+            pass
+        await session.close()
+
 @pytest.fixture
 def clean_environment():
     """Clean test environment"""
@@ -92,3 +177,18 @@ def clean_environment():
     # Restore original environment
     os.environ.clear()
     os.environ.update(original_env)
+
+@pytest.fixture
+def mock_auth_redis():
+    """Mock Redis client for OAuth security testing"""
+    from unittest.mock import Mock
+    
+    redis_mock = Mock()
+    
+    # Set up default mock behaviors
+    redis_mock.exists.return_value = False  # By default, keys don't exist
+    redis_mock.get.return_value = None
+    redis_mock.setex.return_value = True
+    redis_mock.ping.return_value = True
+    
+    return redis_mock

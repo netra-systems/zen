@@ -6,28 +6,19 @@ while maintaining 100% CI/CD pass rate.
 Scenario: Developing a new "smart_caching" feature
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import pytest
 
 from test_framework.decorators import (
     experimental_test,
-    # Add project root to path
     feature_flag,
     requires_feature,
     tdd_test,
 )
-
 
 # TDD Step 1: Write tests before implementation
 @tdd_test("smart_caching")
@@ -48,7 +39,6 @@ def test_cache_hit_optimization():
     # Algorithm should optimize for frequently accessed items
     optimized_keys = cache.get_optimized_keys()
     assert "key1" in optimized_keys[:3]  # Should be in top 3
-
 
 @tdd_test("smart_caching")
 def test_cache_eviction_policy():
@@ -73,7 +63,6 @@ def test_cache_eviction_policy():
     assert cache.get("rare") is None  # Should be evicted
     assert cache.get("new") is not None
 
-
 @tdd_test("smart_caching")
 def test_cache_performance_metrics():
     """Test cache performance tracking.
@@ -93,7 +82,6 @@ def test_cache_performance_metrics():
     assert metrics["hit_rate"] >= 0.5
     assert metrics["total_operations"] == 2
 
-
 # Traditional feature flag test (runs when feature is enabled)
 @feature_flag("smart_caching")
 def test_cache_integration_with_database():
@@ -112,7 +100,6 @@ def test_cache_integration_with_database():
     
     assert result is not None
     assert cache.get("user:123") == result  # Should be cached
-
 
 # Experimental advanced feature
 @experimental_test("Testing ML-based cache prediction")
@@ -140,7 +127,6 @@ def test_ml_cache_prediction():
     # Predict future access
     prediction = predictor.predict_access("user:123", "09:30")
     assert prediction > 0.7  # High probability of access
-
 
 if __name__ == "__main__":
     # When run directly, show which tests would be skipped

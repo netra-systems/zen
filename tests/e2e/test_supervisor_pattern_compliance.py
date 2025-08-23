@@ -25,7 +25,7 @@ from netra_backend.app.agents.supervisor.lifecycle_manager import (
 from netra_backend.app.agents.supervisor.workflow_orchestrator import (
     WorkflowOrchestrator,
 )
-from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
@@ -318,7 +318,7 @@ class TestSupervisorObservability:
         assert "performance_percentiles" in snapshot
 
 
-class TestModernSupervisorAgent:
+class TestSupervisorAgent:
     """Test modern supervisor agent integration."""
     
     @pytest.fixture
@@ -332,7 +332,7 @@ class TestModernSupervisorAgent:
     
     @pytest.fixture
     def supervisor(self, mock_dependencies):
-        return ModernSupervisorAgent(
+        return SupervisorAgent(
             mock_dependencies["db_session"],
             mock_dependencies["llm_manager"],
             mock_dependencies["websocket_manager"],

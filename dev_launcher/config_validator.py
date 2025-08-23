@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, Union
 import aiohttp
 from pydantic import BaseModel, Field
 
-from .service_config import ResourceMode, ServicesConfiguration
+from dev_launcher.service_config import ResourceMode, ServicesConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -290,7 +290,7 @@ async def _handle_fallback_action(
     result: ConfigValidationResult
 ) -> tuple[ServicesConfiguration, ConfigValidationResult]:
     """Handle fallback configuration actions."""
-    from .service_config import load_or_create_config
+    from dev_launcher.service_config import load_or_create_config
     
     if action == "use_defaults":
         config = ServicesConfiguration()

@@ -13,7 +13,7 @@ Business Value: Enables 15-20% performance optimization through monitoring.
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime as dt, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
@@ -44,7 +44,7 @@ class PerformanceStats:
     average_execution_time_ms: float = 0.0
     p95_execution_time_ms: float = 0.0
     error_rate: float = 0.0
-    last_execution_time: Optional[datetime] = None
+    last_execution_time: Optional[dt] = None
     execution_times: deque = field(default_factory=lambda: deque(maxlen=1000))
 
 
@@ -65,7 +65,7 @@ class ExecutionMonitor:
     def _initialize_health_indicators(self) -> Dict[str, Any]:
         """Initialize health indicator tracking."""
         return {
-            "system_start_time": datetime.utcnow(),
+            "system_start_time": dt.now(timezone.utc),
             "total_executions": 0,
             "active_executions": 0,
             "circuit_breaker_status": "healthy",
@@ -165,7 +165,7 @@ class ExecutionMonitor:
         """Record execution completion details."""
         stats = self._agent_stats[context.agent_name]
         stats.total_executions += 1
-        stats.last_execution_time = datetime.utcnow()
+        stats.last_execution_time = dt.now(timezone.utc)
         
         if result.success:
             stats.successful_executions += 1

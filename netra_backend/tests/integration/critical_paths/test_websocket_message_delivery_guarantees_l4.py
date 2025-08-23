@@ -3,17 +3,10 @@ L4 Integration Test: WebSocket Message Delivery Guarantees
 Tests message ordering, delivery confirmation, and retry mechanisms
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -21,8 +14,7 @@ import time
 from collections import defaultdict
 from typing import Dict, List, Optional, Set
 
-# Add project root to path
-# from netra_backend.app.services.websocket_service import WebSocketService
+# from app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -33,7 +25,6 @@ from netra_backend.app.config import get_config
 from netra_backend.app.models.websocket_message import WebSocketMessage
 from netra_backend.app.services.message_queue_service import MessageQueueService
 from netra_backend.app.services.redis_service import RedisService
-
 
 class TestWebSocketMessageDeliveryGuaranteesL4:
     """Test WebSocket message delivery guarantees under stress"""

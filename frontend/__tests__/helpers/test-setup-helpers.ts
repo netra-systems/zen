@@ -104,3 +104,33 @@ export function simulateSessionRestore() {
     user: user ? JSON.parse(user) : null,
   };
 }
+
+export function setupTestEnvironment() {
+  // Set up test environment variables
+  process.env.NEXT_PUBLIC_API_URL = 'http://localhost:8000';
+  process.env.NEXT_PUBLIC_WS_URL = 'ws://localhost:8000';
+  process.env.NODE_ENV = 'test';
+  
+  // Clear any existing state
+  resetTestStores();
+}
+
+export function cleanupTestEnvironment() {
+  // Clean up test environment
+  resetTestStores();
+  jest.clearAllMocks();
+  jest.restoreAllMocks();
+}
+
+export function clearTestStorage() {
+  // Clear all forms of browser storage
+  localStorage.clear();
+  sessionStorage.clear();
+  
+  // Clear cookies if needed
+  if (typeof document !== 'undefined') {
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+  }
+}

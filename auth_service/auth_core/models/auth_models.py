@@ -184,3 +184,27 @@ class PasswordResetConfirmResponse(BaseModel):
     """Password reset confirmation response"""
     success: bool
     message: str
+
+class User(BaseModel):
+    """User model for OAuth responses"""
+    id: str
+    email: EmailStr
+    name: Optional[str] = None
+    picture: Optional[str] = None
+    verified_email: Optional[bool] = True
+    provider: Optional[str] = None
+
+class OAuthState(BaseModel):
+    """OAuth state parameter model"""
+    nonce: str
+    timestamp: int
+    session_id: Optional[str] = None
+    origin: Optional[str] = None
+
+class OAuthCallbackRequest(BaseModel):
+    """OAuth callback request model"""
+    code: str
+    state: str
+    code_verifier: Optional[str] = None
+    code_challenge: Optional[str] = None
+    redirect_uri: Optional[str] = None

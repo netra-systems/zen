@@ -11,9 +11,7 @@ Comprehensive test to verify authentication session expiry and refresh:
 This test ensures proper session lifecycle management.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -27,14 +25,9 @@ import aiohttp
 import jwt
 import pytest
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 # Configuration
 DEV_BACKEND_URL = "http://localhost:8000"
 AUTH_SERVICE_URL = "http://localhost:8081"
-
 
 class AuthenticationSessionTester:
     """Test authentication session expiry and refresh."""
@@ -340,7 +333,6 @@ class AuthenticationSessionTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -361,7 +353,6 @@ async def test_authentication_session_expiry():
         print(f"\nTotal refreshes: {tester.refresh_count}")
         
         assert all(results.values()), f"Some tests failed: {results}"
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(test_authentication_session_expiry())

@@ -108,10 +108,10 @@ async def lifespan(app: FastAPI):
         logger.warning(f"Auth database initialization failed: {error_msg}")
         initialization_errors.append(f"Database: {error_msg}")
     
-    # In development, allow service to start even with DB issues
-    if env == "development" and initialization_errors:
-        logger.warning(f"Starting with {len(initialization_errors)} DB issues in development mode")
-    elif initialization_errors and env in ["staging", "production"]:
+    # In development and staging, allow service to start even with DB issues for initial deployment
+    if env in ["development", "staging"] and initialization_errors:
+        logger.warning(f"Starting with {len(initialization_errors)} DB issues in {env} mode")
+    elif initialization_errors and env == "production":
         raise RuntimeError(f"Critical database failures: {initialization_errors}")
     
     yield
@@ -169,27 +169,74 @@ else:
             "https://auth.netrasystems.ai"
         ]
     else:
-        # Development environment - support common dynamic ports
+        # Development environment - support common dynamic ports plus service discovery
         cors_origins = [
             "http://localhost:3000",
             "http://localhost:3001",
             "http://localhost:3002",
+            "http://localhost:3003",
+            "http://localhost:4000",
+            "http://localhost:4001",
+            "http://localhost:4200",
+            "http://localhost:5173",
+            "http://localhost:5174",
             "http://localhost:8000",
             "http://localhost:8001",
             "http://localhost:8002",
+            "http://localhost:8003",
             "http://localhost:8080",
             "http://localhost:8081",
             "http://localhost:8082",
+            "http://localhost:8083",
             "http://127.0.0.1:3000",
             "http://127.0.0.1:3001",
             "http://127.0.0.1:3002",
+            "http://127.0.0.1:3003",
+            "http://127.0.0.1:4000",
+            "http://127.0.0.1:4001",
+            "http://127.0.0.1:4200",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:5174",
             "http://127.0.0.1:8000",
             "http://127.0.0.1:8001",
             "http://127.0.0.1:8002",
+            "http://127.0.0.1:8003",
             "http://127.0.0.1:8080",
             "http://127.0.0.1:8081",
-            "http://127.0.0.1:8082"
+            "http://127.0.0.1:8082",
+            "http://127.0.0.1:8083"
         ]
+        
+        # Add service discovery origins if available
+        try:
+            from pathlib import Path
+            # Look for service discovery directory
+            project_root = Path(__file__).parent.parent
+            service_discovery_dir = project_root / ".service_discovery"
+            
+            if service_discovery_dir.exists():
+                # Add discovered service origins
+                import json
+                
+                # Read backend info
+                backend_file = service_discovery_dir / "backend.json"
+                if backend_file.exists():
+                    with open(backend_file, 'r') as f:
+                        backend_info = json.load(f)
+                        if backend_info.get('api_url'):
+                            cors_origins.append(backend_info['api_url'])
+                
+                # Read frontend info
+                frontend_file = service_discovery_dir / "frontend.json"
+                if frontend_file.exists():
+                    with open(frontend_file, 'r') as f:
+                        frontend_info = json.load(f)
+                        if frontend_info.get('url'):
+                            cors_origins.append(frontend_info['url'])
+                            
+                logger.info(f"Added service discovery origins, total: {len(cors_origins)} origins")
+        except Exception as e:
+            logger.warning(f"Failed to load service discovery origins: {e}")
 
 # Always use DynamicCORSMiddleware to properly handle OPTIONS requests
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -200,9 +247,10 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, allowed_origins=None):
         super().__init__(app)
         self.allowed_origins = allowed_origins or []
+        self._pattern_cache = {}  # Cache compiled patterns for performance
         
     def is_allowed_origin(self, origin: str) -> bool:
-        """Check if origin is allowed - supports dynamic ports for localhost."""
+        """Check if origin is allowed - supports dynamic ports for localhost and service discovery."""
         if not origin:
             return False
         
@@ -211,20 +259,63 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
             return True
             
         # If wildcard mode
-        if self.allowed_origins == ["*"]:
+        if "*" in self.allowed_origins:
             return True
             
         # In development, accept any localhost/127.0.0.1 origin with any port
         import re
-        localhost_pattern = r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]):\d+$'
-        if re.match(localhost_pattern, origin):
+        
+        # Use cached pattern or compile new one
+        if 'localhost_pattern' not in self._pattern_cache:
+            self._pattern_cache['localhost_pattern'] = re.compile(
+                r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?$', 
+                re.IGNORECASE
+            )
+        
+        if self._pattern_cache['localhost_pattern'].match(origin):
+            logger.debug(f"Auth service allowing localhost origin: {origin}")
             return True
         
-        # Also accept standard ports without explicit port numbers
-        standard_localhost = r'^https?://(localhost|127\.0\.0\.1)$'
-        if re.match(standard_localhost, origin):
-            return True
+        # Check service discovery origins if in development
+        if env == "development":
+            try:
+                from pathlib import Path
+                import json
+                
+                project_root = Path(__file__).parent.parent
+                service_discovery_dir = project_root / ".service_discovery"
+                
+                if service_discovery_dir.exists():
+                    # Check all service discovery files
+                    for service_file in service_discovery_dir.glob("*.json"):
+                        try:
+                            with open(service_file, 'r') as f:
+                                service_info = json.load(f)
+                                
+                            # Check various URL fields
+                            for url_field in ['url', 'api_url', 'ws_url']:
+                                if service_info.get(url_field):
+                                    service_origin = service_info[url_field]
+                                    # Convert WebSocket URLs to HTTP for CORS comparison
+                                    if service_origin.startswith('ws://'):
+                                        service_origin = service_origin.replace('ws://', 'http://')
+                                    elif service_origin.startswith('wss://'):
+                                        service_origin = service_origin.replace('wss://', 'https://')
+                                    
+                                    # Extract just the origin part if it has a path
+                                    if '/' in service_origin.split('://')[1]:
+                                        parts = service_origin.split('/')
+                                        service_origin = f"{parts[0]}//{parts[2]}"
+                                    
+                                    if origin == service_origin:
+                                        logger.debug(f"Auth service allowing service discovery origin: {origin}")
+                                        return True
+                        except (json.JSONDecodeError, IOError) as e:
+                            logger.debug(f"Could not read service file {service_file}: {e}")
+            except Exception as e:
+                logger.debug(f"Service discovery check failed: {e}")
         
+        logger.debug(f"Auth service denying origin: {origin}")
         return False
     
     async def dispatch(self, request, call_next):
@@ -237,8 +328,9 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
                 response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-                response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
+                response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With, X-Service-ID, X-Cross-Service-Auth"
                 response.headers["Access-Control-Max-Age"] = "3600"
+                response.headers["Vary"] = "Origin"
             return response
         
         # Process request
@@ -249,8 +341,9 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-            response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
-            response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type"
+            response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With, X-Service-ID, X-Cross-Service-Auth"
+            response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type, X-Service-Name, X-Service-Version"
+            response.headers["Vary"] = "Origin"
         
         return response
 
@@ -265,10 +358,33 @@ if AuthConfig.get_environment() in ["staging", "production"]:
     ]
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
-# Custom middleware for service identification
+# Custom middleware for request size limiting and service identification
 @app.middleware("http")
-async def add_service_headers(request: Request, call_next):
-    """Add service identification headers"""
+async def security_and_service_middleware(request: Request, call_next):
+    """Add security checks, request size limits, and service identification headers"""
+    # Check Content-Length for JSON payloads to prevent oversized requests
+    content_length = request.headers.get("content-length")
+    content_type = request.headers.get("content-type", "")
+    
+    if content_length and "json" in content_type.lower():
+        try:
+            size = int(content_length)
+            # Limit JSON payloads to 50KB for security
+            max_size = 50 * 1024  # 50KB
+            if size > max_size:
+                logger.warning(f"Request payload too large: {size} bytes (max: {max_size})")
+                return JSONResponse(
+                    status_code=413,  # Payload Too Large
+                    content={"detail": f"Request payload too large. Maximum size: {max_size} bytes"}
+                )
+        except ValueError:
+            # Invalid Content-Length header
+            logger.warning(f"Invalid Content-Length header: {content_length}")
+            return JSONResponse(
+                status_code=400,
+                content={"detail": "Invalid Content-Length header"}
+            )
+    
     response = await call_next(request)
     response.headers["X-Service-Name"] = "auth-service"
     response.headers["X-Service-Version"] = "1.0.0"

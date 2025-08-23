@@ -8,17 +8,10 @@ Tests the entire staging deployment pipeline from config to health checks.
 Each function ≤8 lines, file ≤300 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import os
@@ -27,14 +20,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest
-from main import create_app
+from netra_backend.app.main import create_app
 
-# Add project root to path
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.startup_checks.checker import StartupChecker
-
-# Add project root to path
-
 
 @pytest.fixture
 def staging_environment():
@@ -54,7 +43,6 @@ def staging_environment():
     with patch.dict(os.environ, env_vars):
         yield env_vars
 
-
 @pytest.fixture
 async def mock_external_services():
     """Mock external services for staging tests."""
@@ -69,7 +57,6 @@ async def mock_external_services():
                     "redis": mock_redis,
                     "clickhouse": mock_ch
                 }
-
 
 class TestStagingStartupFlow:
     """Test staging application startup flow."""
@@ -97,7 +84,6 @@ class TestStagingStartupFlow:
         assert app is not None
         assert hasattr(app, "state")
 
-
 class TestStagingHealthEndpoints:
     """Test staging health check endpoints."""
     
@@ -119,7 +105,6 @@ class TestStagingHealthEndpoints:
         from netra_backend.app.routes.health import router
         assert router is not None
 
-
 class TestStagingDatabaseConnectivity:
     """Test staging database connectivity."""
     
@@ -137,7 +122,6 @@ class TestStagingDatabaseConnectivity:
     async def test_clickhouse_connection_staging(self, staging_environment, mock_external_services):
         """Test ClickHouse connection for staging."""
         mock_external_services["clickhouse"].assert_called()
-
 
 class TestStagingAPIEndpoints:
     """Test staging API endpoint configurations."""
@@ -164,7 +148,6 @@ class TestStagingAPIEndpoints:
         assert rate_limit > 0
         assert rate_limit < 1000  # Not too high for staging
 
-
 class TestStagingWebSocketConfiguration:
     """Test staging WebSocket configurations."""
     
@@ -186,7 +169,6 @@ class TestStagingWebSocketConfiguration:
         max_reconnect_attempts = 5
         assert max_reconnect_attempts >= 3
         assert max_reconnect_attempts <= 10
-
 
 class TestStagingErrorHandling:
     """Test staging error handling configurations."""
@@ -210,7 +192,6 @@ class TestStagingErrorHandling:
         assert shutdown_timeout >= 10
         assert shutdown_timeout <= 60
 
-
 class TestStagingMonitoring:
     """Test staging monitoring configurations."""
     
@@ -231,7 +212,6 @@ class TestStagingMonitoring:
         """Test performance tracking for staging."""
         track_performance = True
         assert track_performance
-
 
 @pytest.mark.critical
 class TestStagingEndToEndFlow:

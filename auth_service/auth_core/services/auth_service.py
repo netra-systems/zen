@@ -2,10 +2,12 @@
 Auth Service - Core authentication business logic
 Single Source of Truth for authentication operations
 """
+import asyncio
 import hashlib
 import logging
 import os
 import secrets
+import time
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple
 
@@ -44,6 +46,15 @@ class AuthService:
         self.lockout_duration = int(os.getenv("LOCKOUT_DURATION_MINUTES", "15"))
         self.db_session = None  # Initialize as None, set later if database available
         
+        # Circuit breaker for external API calls
+        self._circuit_breaker_state = {}
+        self._failure_counts = {}
+        self._last_failure_times = {}
+        self._circuit_breaker_redis_prefix = "circuit_breaker:"
+        
+        # Simple in-memory user store for testing
+        self._test_users = {}
+        
     async def login(self, request: LoginRequest, 
                    client_info: Dict) -> LoginResponse:
         """Process user login"""
@@ -51,7 +62,7 @@ class AuthService:
             # Validate credentials based on provider
             user = await self._validate_credentials(request)
             if not user:
-                raise AuthError(
+                raise AuthException(
                     error="invalid_credentials",
                     error_code="AUTH001",
                     message="Invalid credentials provided"
@@ -59,7 +70,7 @@ class AuthService:
             
             # Check account status
             if not await self._check_account_status(user["id"]):
-                raise AuthError(
+                raise AuthException(
                     error="account_locked",
                     error_code="AUTH002",
                     message="Account is locked or disabled"
@@ -113,10 +124,13 @@ class AuthService:
     
     async def logout(self, token: str, 
                     session_id: Optional[str] = None) -> bool:
-        """Process user logout"""
+        """Process user logout with token blacklisting"""
         try:
             # Extract user from token
             user_id = self.jwt_handler.extract_user_id(token)
+            
+            # Blacklist the specific token to invalidate it immediately
+            self.jwt_handler.blacklist_token(token)
             
             # Delete session if provided
             if session_id:
@@ -137,6 +151,25 @@ class AuthService:
         except Exception as e:
             logger.error(f"Logout failed: {e}")
             return False
+    
+    def register_test_user(self, email: str, password: str) -> Dict:
+        """Register a test user in memory"""
+        import uuid
+        user_id = str(uuid.uuid4())
+        
+        self._test_users[email] = {
+            "id": user_id,
+            "email": email,
+            "password": password,
+            "name": "Test User",
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        return {
+            "user_id": user_id,
+            "email": email,
+            "message": "User registered successfully"
+        }
     
     async def validate_token(self, token: str) -> TokenResponse:
         """Validate access token"""
@@ -277,6 +310,17 @@ class AuthService:
                                   password: str) -> Optional[Dict]:
         """Validate local username/password"""
         if not self.db_session:
+            # Check test users store first
+            if email in self._test_users:
+                stored_user = self._test_users[email]
+                if stored_user["password"] == password:
+                    return {
+                        "id": stored_user["id"],
+                        "email": email,
+                        "name": stored_user.get("name", "Test User"),
+                        "permissions": ["read", "write"]
+                    }
+            
             # Fallback for testing
             hashed = hashlib.sha256(password.encode()).hexdigest()
             if email == "test@example.com":
@@ -326,9 +370,9 @@ class AuthService:
         return None
     
     async def _validate_google_oauth(self, token: str) -> Optional[Dict]:
-        """Validate Google OAuth token"""
-        try:
-            async with httpx.AsyncClient() as client:
+        """Validate Google OAuth token with circuit breaker"""
+        async def make_request():
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 # Verify token with Google
                 response = await client.get(
                     "https://www.googleapis.com/oauth2/v2/userinfo",
@@ -345,6 +389,12 @@ class AuthService:
                     "name": user_info.get("name", ""),
                     "permissions": ["read", "write"]
                 }
+        
+        try:
+            return await self._make_http_request_with_circuit_breaker("google_oauth", make_request)
+        except (httpx.ConnectError, httpx.TimeoutException) as e:
+            logger.error(f"Google OAuth validation failed: {e}")
+            return None
         except Exception as e:
             logger.error(f"Google OAuth validation failed: {e}")
             return None
@@ -560,3 +610,244 @@ class AuthService:
         
         # Real email sending logic would go here
         logger.info(f"Password reset email sent to {email}")
+    
+    async def _retry_with_exponential_backoff(self, operation, max_retries: int = 3, base_delay: float = 1.0):
+        """Execute operation with exponential backoff retry logic"""
+        for attempt in range(max_retries):
+            try:
+                return await operation()
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    # Last attempt failed, re-raise the exception
+                    raise e
+                
+                # Calculate delay with exponential backoff
+                delay = base_delay * (2 ** attempt)
+                logger.warning(f"Operation failed on attempt {attempt + 1}/{max_retries}, retrying in {delay}s: {e}")
+                await asyncio.sleep(delay)
+    
+    async def _audit_log_with_retry(self, event_type: str, 
+                                  user_id: Optional[str] = None,
+                                  success: bool = True, 
+                                  metadata: Dict = None,
+                                  client_info: Optional[Dict] = None):
+        """Log authentication events with retry logic"""
+        try:
+            await self._retry_with_exponential_backoff(
+                lambda: self._audit_log(event_type, user_id, success, metadata, client_info)
+            )
+        except Exception as e:
+            logger.error(f"Audit logging failed after retries: {e}")
+            # Don't fail the main operation if audit logging fails
+    
+    async def create_oauth_user_with_retry(self, user_info: Dict) -> Dict:
+        """Create or update user from OAuth info with database retry logic"""
+        if not self.db_session:
+            # Fallback for when no database is available
+            return {
+                "id": user_info.get("id", user_info.get("sub")),
+                "email": user_info["email"],
+                "name": user_info.get("name", ""),
+                "provider": user_info.get("provider", "google"),
+                "permissions": ["read", "write"]
+            }
+        
+        # Use database with retry logic
+        async def create_user_operation():
+            user_repo = AuthUserRepository(self.db_session)
+            auth_user = await user_repo.create_oauth_user(user_info)
+            return {
+                "id": auth_user.id,
+                "email": auth_user.email,
+                "name": auth_user.full_name,
+                "provider": auth_user.auth_provider,
+                "permissions": ["read", "write"],
+                "is_verified": auth_user.is_verified
+            }
+        
+        try:
+            return await self._retry_with_exponential_backoff(create_user_operation)
+        except Exception as e:
+            logger.error(f"Database user creation failed after retries: {e}")
+            # Return fallback user for graceful degradation
+            return {
+                "id": user_info.get("id", user_info.get("sub")),
+                "email": user_info["email"],
+                "name": user_info.get("name", ""),
+                "provider": user_info.get("provider", "google"),
+                "permissions": ["read", "write"],
+                "error": "database_unavailable"
+            }
+    
+    def _is_circuit_breaker_open(self, service: str) -> bool:
+        """Check if circuit breaker is open for a service with Redis persistence"""
+        try:
+            # Try to get state from Redis first
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_state"
+                redis_state = self.session_manager.redis_client.get(redis_key)
+                if redis_state:
+                    state = redis_state
+                else:
+                    state = self._circuit_breaker_state.get(service, "closed")
+            else:
+                state = self._circuit_breaker_state.get(service, "closed")
+        except Exception as e:
+            logger.warning(f"Failed to read circuit breaker state from Redis: {e}")
+            state = self._circuit_breaker_state.get(service, "closed")
+        
+        if state == "closed":
+            return False
+        
+        if state == "open":
+            # Check if we should transition to half-open
+            last_failure = self._get_last_failure_time(service)
+            if time.time() - last_failure > 60:  # 60 second timeout
+                self._set_circuit_breaker_state(service, "half-open")
+                logger.info(f"Circuit breaker for {service} transitioning to half-open")
+                return False
+            return True
+        
+        if state == "half-open":
+            return False
+        
+        return False
+    
+    def _record_success(self, service: str):
+        """Record successful call for circuit breaker"""
+        self._set_circuit_breaker_state(service, "closed")
+        self._set_failure_count(service, 0)
+        logger.info(f"Circuit breaker for {service} reset to closed state")
+        
+    def _record_failure(self, service: str):
+        """Record failed call for circuit breaker"""
+        current_failures = self._get_failure_count(service) + 1
+        self._set_failure_count(service, current_failures)
+        self._set_last_failure_time(service, time.time())
+        
+        # Open circuit breaker after 5 failures
+        if current_failures >= 5:
+            self._set_circuit_breaker_state(service, "open")
+            logger.warning(f"Circuit breaker opened for {service} after {current_failures} failures")
+        elif self._get_circuit_breaker_state(service) == "half-open":
+            # Failed in half-open state, go back to open
+            self._set_circuit_breaker_state(service, "open")
+            logger.warning(f"Circuit breaker for {service} returned to open state")
+    
+    async def _make_http_request_with_circuit_breaker(self, service: str, request_func):
+        """Make HTTP request with circuit breaker protection"""
+        if self._is_circuit_breaker_open(service):
+            logger.error(f"Circuit breaker is open for {service} - rejecting request")
+            raise httpx.ConnectError(f"Circuit breaker is open for {service}")
+        
+        try:
+            result = await request_func()
+            self._record_success(service)
+            return result
+        except (httpx.ConnectError, httpx.TimeoutException, Exception) as e:
+            self._record_failure(service)
+            logger.error(f"Request failed for {service}: {e}")
+            raise e
+    
+    def _set_circuit_breaker_state(self, service: str, state: str):
+        """Set circuit breaker state with Redis persistence"""
+        self._circuit_breaker_state[service] = state
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_state"
+                self.session_manager.redis_client.setex(redis_key, 3600, state)  # 1 hour TTL
+        except Exception as e:
+            logger.warning(f"Failed to persist circuit breaker state to Redis: {e}")
+    
+    def _get_circuit_breaker_state(self, service: str) -> str:
+        """Get circuit breaker state from Redis or memory"""
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_state"
+                redis_state = self.session_manager.redis_client.get(redis_key)
+                if redis_state:
+                    return redis_state
+        except Exception as e:
+            logger.warning(f"Failed to read circuit breaker state from Redis: {e}")
+        return self._circuit_breaker_state.get(service, "closed")
+    
+    def _set_failure_count(self, service: str, count: int):
+        """Set failure count with Redis persistence"""
+        self._failure_counts[service] = count
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_failures"
+                self.session_manager.redis_client.setex(redis_key, 3600, str(count))
+        except Exception as e:
+            logger.warning(f"Failed to persist failure count to Redis: {e}")
+    
+    def _get_failure_count(self, service: str) -> int:
+        """Get failure count from Redis or memory"""
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_failures"
+                redis_count = self.session_manager.redis_client.get(redis_key)
+                if redis_count:
+                    return int(redis_count)
+        except Exception as e:
+            logger.warning(f"Failed to read failure count from Redis: {e}")
+        return self._failure_counts.get(service, 0)
+    
+    def _set_last_failure_time(self, service: str, timestamp: float):
+        """Set last failure time with Redis persistence"""
+        self._last_failure_times[service] = timestamp
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_last_failure"
+                self.session_manager.redis_client.setex(redis_key, 3600, str(timestamp))
+        except Exception as e:
+            logger.warning(f"Failed to persist last failure time to Redis: {e}")
+    
+    def _get_last_failure_time(self, service: str) -> float:
+        """Get last failure time from Redis or memory"""
+        try:
+            if self.session_manager.redis_client:
+                redis_key = f"{self._circuit_breaker_redis_prefix}{service}_last_failure"
+                redis_time = self.session_manager.redis_client.get(redis_key)
+                if redis_time:
+                    return float(redis_time)
+        except Exception as e:
+            logger.warning(f"Failed to read last failure time from Redis: {e}")
+        return self._last_failure_times.get(service, 0)
+    
+    def reset_circuit_breaker(self, service: str = None):
+        """Reset circuit breaker state for a specific service or all services"""
+        if service:
+            # Reset specific service
+            self._circuit_breaker_state.pop(service, None)
+            self._failure_counts.pop(service, None)
+            self._last_failure_times.pop(service, None)
+            
+            # Clear from Redis too
+            try:
+                if self.session_manager.redis_client:
+                    redis_keys = [
+                        f"{self._circuit_breaker_redis_prefix}{service}_state",
+                        f"{self._circuit_breaker_redis_prefix}{service}_failures",
+                        f"{self._circuit_breaker_redis_prefix}{service}_last_failure"
+                    ]
+                    for key in redis_keys:
+                        self.session_manager.redis_client.delete(key)
+            except Exception as e:
+                logger.warning(f"Failed to clear circuit breaker state from Redis for {service}: {e}")
+        else:
+            # Reset all services
+            self._circuit_breaker_state.clear()
+            self._failure_counts.clear()
+            self._last_failure_times.clear()
+            
+            # Clear from Redis too
+            try:
+                if self.session_manager.redis_client:
+                    # Get all circuit breaker keys and delete them
+                    pattern = f"{self._circuit_breaker_redis_prefix}*"
+                    keys = self.session_manager.redis_client.keys(pattern)
+                    if keys:
+                        self.session_manager.redis_client.delete(*keys)
+            except Exception as e:
+                logger.warning(f"Failed to clear circuit breaker state from Redis: {e}")

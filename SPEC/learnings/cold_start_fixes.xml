@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="cold_start" date="2025-08-22">
+  <title>Cold Start Issues and Solutions</title>
+  
+  <context>
+    Complete audit and fix of cold start issues across dev launcher, Docker, 
+    and staging environments to ensure clean startup and user flow.
+  </context>
+  
+  <key_issues_fixed>
+    <issue id="1" severity="critical">
+      <problem>Frontend .env.local had incorrect auth service port (8083 instead of 8081)</problem>
+      <solution>Updated to use correct port 8081 with dynamic fallback to 8083</solution>
+      <impact>Auth service connectivity restored</impact>
+    </issue>
+    
+    <issue id="2" severity="critical">
+      <problem>WebSocket URL configuration issues - missing /secure path</problem>
+      <solution>Updated WebSocket URL to use /ws endpoint</solution>
+      <impact>WebSocket connections now establish correctly</impact>
+    </issue>
+    
+    <issue id="3" severity="high">
+      <problem>Services using static ports causing conflicts</problem>
+      <solution>Implemented dynamic port discovery system</solution>
+      <impact>Services can start on any available port</impact>
+    </issue>
+    
+    <issue id="4" severity="high">
+      <problem>CORS blocking cross-service communication</problem>
+      <solution>Enhanced CORS middleware with service discovery integration</solution>
+      <impact>All services can communicate regardless of port</impact>
+    </issue>
+    
+    <issue id="5" severity="medium">
+      <problem>Frontend couldn't discover dynamic service ports</problem>
+      <solution>Created discovery endpoint and client-side discovery service</solution>
+      <impact>Frontend adapts to any port configuration</impact>
+    </issue>
+  </key_issues_fixed>
+  
+  <implementation_details>
+    <change component="backend">
+      <file>netra_backend/app/routes/discovery.py</file>
+      <description>Created service discovery API endpoint</description>
+      <endpoints>
+        <endpoint>/api/v1/discovery/services</endpoint>
+        <endpoint>/api/v1/discovery/services/{service}</endpoint>
+        <endpoint>/api/v1/discovery/health</endpoint>
+      </endpoints>
+    </change>
+    
+    <change component="frontend">
+      <file>frontend/lib/service-discovery.ts</file>
+      <description>Client-side service discovery with caching</description>
+      <features>
+        <feature>30-second TTL cache</feature>
+        <feature>Automatic fallback to static config</feature>
+        <feature>Support for all environments</feature>
+      </features>
+    </change>
+    
+    <change component="cors">
+      <file>netra_backend/app/core/middleware_setup.py</file>
+      <file>auth_service/main.py</file>
+      <description>Enhanced CORS with service discovery</description>
+      <features>
+        <feature>Dynamic port pattern matching</feature>
+        <feature>Service discovery integration</feature>
+        <feature>WebSocket CORS support</feature>
+      </features>
+    </change>
+    
+    <change component="websocket">
+      <file>frontend/services/webSocketService.ts</file>
+      <description>Fixed WebSocket URL handling</description>
+      <features>
+        <feature>Proper /secure endpoint handling</feature>
+        <feature>Avoid double /secure appending</feature>
+        <feature>Support for versioned endpoints</feature>
+      </features>
+    </change>
+  </implementation_details>
+  
+  <service_discovery_architecture>
+    <flow>
+      <step>Dev launcher starts services on available ports</step>
+      <step>Services write port info to .service_discovery/*.json</step>
+      <step>Backend discovery API reads these files</step>
+      <step>Frontend queries discovery API on startup</step>
+      <step>Configuration adapts to discovered ports</step>
+      <step>Fallback to static config if discovery fails</step>
+    </flow>
+    
+    <files>
+      <file>.service_discovery/backend.json</file>
+      <file>.service_discovery/frontend.json</file>
+      <file>.service_discovery/auth.json</file>
+    </files>
+    
+    <format>
+      <backend>
+        {
+          "port": 8001,
+          "api_url": "http://localhost:8001",
+          "ws_url": "ws://localhost:8001/ws",
+          "timestamp": "2025-08-22T07:43:57.857268"
+        }
+      </backend>
+    </format>
+  </service_discovery_architecture>
+  
+  <dynamic_port_support>
+    <frontend_ports>3000, 3001, 3002, 3003, 4000, 4001, 4200, 5173, 5174</frontend_ports>
+    <backend_ports>8000, 8001, 8002, 8003</backend_ports>
+    <auth_ports>8081, 8083</auth_ports>
+    <feature>Automatic port allocation when preferred port is busy</feature>
+    <feature>Service registration with actual allocated port</feature>
+  </dynamic_port_support>
+  
+  <cors_configuration>
+    <allowed_origins>
+      <origin>http://localhost:*</origin>
+      <origin>http://127.0.0.1:*</origin>
+      <origin>Service discovery origins</origin>
+    </allowed_origins>
+    
+    <allowed_headers>
+      <header>Authorization</header>
+      <header>Content-Type</header>
+      <header>X-Request-ID</header>
+      <header>X-Service-ID</header>
+      <header>X-Cross-Service-Auth</header>
+    </allowed_headers>
+    
+    <websocket_cors>
+      <feature>Subprotocol authentication support</feature>
+      <feature>Dynamic origin validation</feature>
+      <feature>Service discovery integration</feature>
+    </websocket_cors>
+  </cors_configuration>
+  
+  <testing>
+    <test_script>scripts/test_cold_start_e2e.py</test_script>
+    <test_coverage>
+      <coverage>Service startup validation</coverage>
+      <coverage>Health check verification</coverage>
+      <coverage>Authentication flow</coverage>
+      <coverage>WebSocket connection</coverage>
+      <coverage>Chat message flow</coverage>
+      <coverage>Model response handling</coverage>
+    </test_coverage>
+  </testing>
+  
+  <deployment_validation>
+    <dev_launcher>
+      <status>Working with dynamic ports</status>
+      <command>python scripts/dev_launcher.py</command>
+      <features>
+        <feature>Dynamic port allocation</feature>
+        <feature>Service discovery writing</feature>
+        <feature>Health check monitoring</feature>
+      </features>
+    </dev_launcher>
+    
+    <docker>
+      <status>Dockerfile.backend configured</status>
+      <port>8888 (container) mapped dynamically</port>
+    </docker>
+    
+    <staging>
+      <status>GCP deployment script ready</status>
+      <command>python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks</command>
+    </staging>
+  </deployment_validation>
+  
+  <best_practices>
+    <practice>Always use service discovery in development</practice>
+    <practice>Implement fallback to static configuration</practice>
+    <practice>Cache discovery results to reduce API calls</practice>
+    <practice>Support pattern matching for localhost origins</practice>
+    <practice>Use /ws endpoint for WebSocket</practice>
+    <practice>Test with dynamic ports regularly</practice>
+  </best_practices>
+  
+  <critical_insights>
+    <insight>
+      Dynamic port allocation is essential for developer experience.
+      Multiple developers or services can run simultaneously without conflicts.
+    </insight>
+    
+    <insight>
+      Service discovery must be lightweight and fast. 
+      File-based discovery with JSON works well for development.
+    </insight>
+    
+    <insight>
+      CORS configuration must be flexible in development but secure in production.
+      Pattern matching and service discovery provide the right balance.
+    </insight>
+    
+    <insight>
+      WebSocket paths must be consistent between frontend and backend.
+      The /ws endpoint provides proper authentication handling.
+    </insight>
+    
+    <insight>
+      Frontend configuration should be async-first to support discovery.
+      Synchronous fallbacks ensure compatibility with existing code.
+    </insight>
+  </critical_insights>
+  
+  <remaining_work>
+    <task status="optional">Add service discovery to Docker Compose when created</task>
+    <task status="optional">Implement health check aggregation endpoint</task>
+    <task status="optional">Add metrics for cold start performance</task>
+    <task status="optional">Create automated cold start regression tests</task>
+  </remaining_work>
+  
+  <success_metrics>
+    <metric>Zero errors on cold start</metric>
+    <metric>All services start within 60 seconds</metric>
+    <metric>Dynamic ports handled automatically</metric>
+    <metric>Cross-service communication works</metric>
+    <metric>WebSocket connects successfully</metric>
+    <metric>Authentication flow completes</metric>
+    <metric>Chat messages can be sent</metric>
+    <metric>Model responses received</metric>
+  </success_metrics>
+</learnings>

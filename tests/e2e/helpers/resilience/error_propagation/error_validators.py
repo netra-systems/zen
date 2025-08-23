@@ -63,6 +63,23 @@ class AuthServiceFailurePropagationValidator:
                 api_result, ws_result, correlation_result
             )
         }
+
+
+# Validation functions for export
+def validate_error_propagation(error_context: Dict[str, Any]) -> bool:
+    """Validate that errors propagate correctly across service boundaries."""
+    required_fields = ["error_type", "source_service", "target_services"]
+    return all(field in error_context for field in required_fields)
+
+
+def validate_error_isolation(error_context: Dict[str, Any]) -> bool:
+    """Validate that errors are properly isolated to prevent cascading failures."""
+    return error_context.get("isolated", False) and error_context.get("contained", False)
+
+
+def validate_recovery_behavior(recovery_context: Dict[str, Any]) -> bool:
+    """Validate that service recovery behavior is appropriate."""
+    return recovery_context.get("recovered", False) and recovery_context.get("recovery_time", 0) < 30
     
     async def _test_http_auth_rejection(self, token: str, context: ErrorCorrelationContext) -> Dict[str, Any]:
         """Test HTTP API auth rejection with error context."""

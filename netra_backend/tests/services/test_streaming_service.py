@@ -1,17 +1,10 @@
 # app/tests/services/test_streaming_service.py
 """Test streaming service functionality."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from typing import AsyncGenerator
@@ -19,16 +12,13 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.streaming_service import (
     StreamChunk,
-    # Add project root to path
     StreamingService,
     StreamProtocol,
     TextStreamProcessor,
     get_streaming_service,
 )
-
 
 class TestStreamingService:
     """Test streaming service."""

@@ -3,29 +3,18 @@ Security Configuration Tests
 Tests security configuration and environment handling
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.enhanced_secret_manager import (
     EnhancedSecretManager,
     EnvironmentType,
 )
 from netra_backend.app.core.exceptions import NetraSecurityException
-
-# Add project root to path
-
 
 class TestSecurityConfiguration:
     """Test security configuration and environment handling."""
@@ -90,7 +79,6 @@ class TestSecurityConfiguration:
         """Test session security configuration."""
         # TODO: Implement SessionConfig when session management is centralized
         pass
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

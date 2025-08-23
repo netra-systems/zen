@@ -4,17 +4,10 @@ L3 Integration Test: Session Management Basic Operations
 Tests session creation, validation, expiration, and multi-device scenarios.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -25,13 +18,9 @@ from typing import Any, Dict
 import aiohttp
 import pytest
 
-# Add project root to path
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.session_service import SessionService
 from test_framework.test_patterns import L3IntegrationTest
-
-# Add project root to path
-
 
 class TestSessionManagementBasic(L3IntegrationTest):
     """Test session management from multiple angles."""
@@ -355,7 +344,6 @@ class TestSessionManagementBasic(L3IntegrationTest):
                 headers={"Authorization": f"Bearer {token}"}
             ) as resp:
                 assert resp.status == 200
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

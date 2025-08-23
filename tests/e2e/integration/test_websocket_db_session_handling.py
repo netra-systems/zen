@@ -4,13 +4,13 @@ CRITICAL WebSocket Database Session Handling Test: Validates correct database se
 Tests that WebSocket endpoints DON'T use Depends(get_async_db) and DO use context managers.
 
 Business Value Justification (BVJ):
-1. Segment: All tiers (Critical infrastructure)
+    1. Segment: All tiers (Critical infrastructure)
 2. Business Goal: Prevent production database connection failures in WebSockets
 3. Value Impact: Ensures reliable database access in real-time WebSocket connections
 4. Revenue Impact: Prevents complete WebSocket failure that blocks core platform features
 
 ARCHITECTURAL COMPLIANCE:
-- File size: <500 lines (comprehensive test implementation)
+    - File size: <500 lines (comprehensive test implementation)
 - Function size: <25 lines each (modular test methods)
 - Real database session validation
 - <10 seconds execution time
@@ -42,9 +42,8 @@ except ImportError:
         def __init__(self):
             pass
 
-
 class WebSocketDatabaseSessionTester:
-    """Tests WebSocket database session handling patterns."""
+    # """Tests WebSocket database session handling patterns."""
     
     def __init__(self):
         """Initialize tester with validation configuration."""
@@ -70,8 +69,9 @@ class WebSocketDatabaseSessionTester:
         compliant_files = []
         
         try:
-            # Import the routes to check for WebSocket endpoints
-            from netra_backend.app.routes import demo, websockets
+    pass
+#             # Import the routes to check for WebSocket endpoints # Possibly broken comprehension
+from netra_backend.app.routes import demo, websockets
             from netra_backend.app.routes.mcp import main as mcp_main
             
             # Check main websocket routes
@@ -81,14 +81,14 @@ class WebSocketDatabaseSessionTester:
                 ("app/routes/mcp/main.py", mcp_main)
             ]
             
-            for file_path, module in websocket_files:
+#             for file_path, module in websocket_files: # Possibly broken comprehension
                 file_violations = await self._check_file_for_depends_violations(file_path, module)
                 if file_violations:
                     violations.extend(file_violations)
                 else:
                     compliant_files.append(file_path)
             
-            # Also check source code directly for any missed endpoints
+#             # Also check source code directly for any missed endpoints # Possibly broken comprehension
             source_violations = await self._check_source_code_for_violations()
             violations.extend(source_violations)
             
@@ -101,7 +101,6 @@ class WebSocketDatabaseSessionTester:
                 "compliant_files": compliant_files,
                 "total_files_checked": len(websocket_files),
                 "message": f"Found {len(violations)} violations in WebSocket endpoints"
-            }
             
         except Exception as e:
             return {
@@ -110,18 +109,18 @@ class WebSocketDatabaseSessionTester:
                 "error": f"Failed to validate WebSocket routes: {str(e)}",
                 "violations": [],
                 "compliant_files": []
-            }
     
     async def _check_file_for_depends_violations(self, file_path: str, module) -> List[Dict[str, str]]:
         """Check a specific file for Depends() violations in WebSocket endpoints."""
         violations = []
         
         try:
+    pass
             # Get the source code
             source = inspect.getsource(module)
             lines = source.split('\n')
             
-            # Look for WebSocket endpoints with Depends
+#             # Look for WebSocket endpoints with Depends # Possibly broken comprehension
             in_websocket_function = False
             websocket_function_name = None
             
@@ -132,7 +131,7 @@ class WebSocketDatabaseSessionTester:
                     websocket_function_name = line.strip()
                     continue
                 
-                # If we're in a WebSocket function, check for Depends usage
+#                 # If we're in a WebSocket function, check for Depends usage # Possibly broken comprehension
                 if in_websocket_function:
                     # Check if this line contains function parameters
                     if "Depends(" in line and any(pattern in line for pattern in self.incorrect_patterns):
@@ -168,25 +167,27 @@ class WebSocketDatabaseSessionTester:
         violations = []
         
         try:
-            import glob
+    pass
+    import glob
             import os
             
-            # Search for Python files in routes directory
+#             # Search for Python files in routes directory # Possibly broken comprehension
             base_path = "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\routes"
             python_files = glob.glob(f"{base_path}/**/*.py", recursive=True)
             
-            for file_path in python_files:
+#             for file_path in python_files: # Possibly broken comprehension
                 try:
+    pass
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
                         lines = content.split('\n')
                     
-                    # Look for WebSocket endpoints with incorrect patterns
+#                     # Look for WebSocket endpoints with incorrect patterns # Possibly broken comprehension
                     for line_num, line in enumerate(lines, 1):
                         if ("@router.websocket" in line or 
                             ("websocket" in line.lower() and "async def" in line)):
                             
-                            # Check the next several lines for Depends usage
+#                             # Check the next several lines for Depends usage # Possibly broken comprehension
                             for check_line_num in range(line_num, min(line_num + 10, len(lines))):
                                 check_line = lines[check_line_num - 1]
                                 if "Depends(get_async_db)" in check_line:
@@ -213,15 +214,16 @@ class WebSocketDatabaseSessionTester:
         missing_patterns = []
         
         try:
+    pass
             # Check websocket helpers for correct patterns
-            from netra_backend.app.routes.utils import websocket_helpers
+from netra_backend.app.routes.utils import websocket_helpers
             
             source = inspect.getsource(websocket_helpers)
             lines = source.split('\n')
             
             # Look for correct async context manager usage
             for line_num, line in enumerate(lines, 1):
-                for pattern in self.correct_patterns:
+#                 for pattern in self.correct_patterns: # Possibly broken comprehension
                     if pattern in line:
                         correct_usages.append({
                             "file": "app/routes/utils/websocket_helpers.py",
@@ -232,7 +234,7 @@ class WebSocketDatabaseSessionTester:
             
             # Check if we found the essential patterns
             essential_found = any("async with get_async_db()" in usage["usage"] 
-                                for usage in correct_usages)
+#                                 for usage in correct_usages) # Possibly broken comprehension
             
             if not essential_found:
                 missing_patterns.append("async with get_async_db() as db_session")
@@ -245,7 +247,6 @@ class WebSocketDatabaseSessionTester:
                 "correct_usages": correct_usages,
                 "missing_patterns": missing_patterns,
                 "message": f"Found {len(correct_usages)} correct patterns, {len(missing_patterns)} missing"
-            }
             
         except Exception as e:
             return {
@@ -254,14 +255,13 @@ class WebSocketDatabaseSessionTester:
                 "error": f"Failed to validate correct patterns: {str(e)}",
                 "correct_usages": [],
                 "missing_patterns": []
-            }
     
     async def test_database_session_context_manager(self) -> Dict[str, Any]:
         """Test that database sessions work correctly with context manager pattern."""
         start_time = time.time()
         
         try:
-            from netra_backend.app.db.postgres import get_async_db
+    from netra_backend.app.db.postgres import get_async_db
             
             # Test the correct pattern
             session_acquired = False
@@ -283,7 +283,6 @@ class WebSocketDatabaseSessionTester:
                     "error": f"Context manager pattern failed: {str(e)}",
                     "session_acquired": session_acquired,
                     "session_closed": session_closed
-                }
             
             execution_time = time.time() - start_time
             
@@ -293,7 +292,6 @@ class WebSocketDatabaseSessionTester:
                 "session_acquired": session_acquired,
                 "session_closed": session_closed,
                 "message": "Database session context manager working correctly"
-            }
             
         except Exception as e:
             return {
@@ -302,14 +300,13 @@ class WebSocketDatabaseSessionTester:
                 "error": f"Failed to test context manager: {str(e)}",
                 "session_acquired": False,
                 "session_closed": False
-            }
     
     async def test_incorrect_depends_pattern_simulation(self) -> Dict[str, Any]:
         """Simulate the incorrect Depends() pattern to demonstrate the issue."""
         start_time = time.time()
         
         try:
-            from fastapi import Depends
+    from fastapi import Depends
             
             # Simulate what happens with Depends() in WebSocket
             # This should demonstrate the issue
@@ -342,20 +339,19 @@ class WebSocketDatabaseSessionTester:
                 "error_occurred": error_occurred,
                 "error_message": error_message,
                 "message": "Successfully demonstrated Depends() issue in WebSocket context"
-            }
             
         except Exception as e:
             return {
                 "success": False,
                 "execution_time": time.time() - start_time,
                 "error": f"Failed to simulate incorrect pattern: {str(e)}"
-            }
     
     async def run_comprehensive_validation(self) -> Dict[str, Any]:
         """Run comprehensive validation of WebSocket database session handling."""
         start_time = time.time()
         
         try:
+    pass
             # Run all validation tests
             depends_validation = await self.validate_websocket_routes_no_depends()
             patterns_validation = await self.validate_correct_session_patterns()
@@ -367,7 +363,6 @@ class WebSocketDatabaseSessionTester:
                 patterns_validation["success"] and
                 context_manager_test["success"] and
                 depends_simulation["success"]
-            )
             
             execution_time = time.time() - start_time
             
@@ -384,34 +379,30 @@ class WebSocketDatabaseSessionTester:
                     "correct_patterns_found": len(patterns_validation.get("correct_usages", [])),
                     "context_manager_works": context_manager_test["success"],
                     "depends_issue_demonstrated": depends_simulation.get("error_occurred", False)
-                }
-            }
             
         except Exception as e:
             return {
                 "success": False,
                 "execution_time": time.time() - start_time,
                 "error": f"Comprehensive validation failed: {str(e)}"
-            }
-
 
 async def run_simplified_websocket_validation() -> Dict[str, Any]:
     """Run simplified WebSocket validation without database setup."""
     start_time = time.time()
     
     try:
+    pass
         # Test 1: Check for incorrect Depends() pattern in WebSocket endpoints
         depends_violations = []
         correct_patterns = []
         
         # Check demo WebSocket endpoint (known to have the issue)
         try:
-            import sys
+    import sys
             # Add project root to path for standalone execution
             if 'app' not in sys.modules:
-                sys.path.insert(0, os.path.abspath('.'))
             
-            from netra_backend.app.routes.demo import demo_websocket_endpoint
+from netra_backend.app.routes.demo import demo_websocket_endpoint
             
             source = inspect.getsource(demo_websocket_endpoint)
             if "Depends(" in source and "websocket" in source.lower():
@@ -443,11 +434,10 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
                     "line": "unknown"
                 })
         
-        # Test 2: Check for correct patterns in websocket helpers
+#         # Test 2: Check for correct patterns in websocket helpers # Possibly broken comprehension
         try:
-            from netra_backend.app.routes.utils.websocket_helpers import (
+    from netra_backend.app.routes.utils.websocket_helpers import (
                 authenticate_websocket_user,
-            )
             
             source = inspect.getsource(authenticate_websocket_user)
             if "async with get_async_db()" in source:
@@ -477,9 +467,9 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
         # Test 3: Demonstrate the Depends() issue without database
         depends_issue_demo = {}
         try:
-            from fastapi import Depends
+    from fastapi import Depends
 
-            from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.db.postgres import get_async_db
         except ImportError:
             # Mock for standalone execution
             async def get_async_db():
@@ -494,7 +484,6 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
                 "depends_has_execute": hasattr(depends_result, 'execute'),
                 "depends_type": str(type(depends_result)),
                 "issue_demonstrated": True
-            }
         except Exception as e:
             depends_issue_demo = {"error": str(e), "issue_demonstrated": False}
         
@@ -510,7 +499,6 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
             has_correct_patterns and  # We expect to find correct patterns too
             performance_ok
             # Note: depends_issue_demo check is optional as it may fail in pytest environment
-        )
         
         return {
             "success": success,
@@ -523,8 +511,6 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
                 "total_violations": len(depends_violations),
                 "correct_patterns_found": len(correct_patterns),
                 "issue_demonstrated": depends_issue_demo.get("issue_demonstrated", False)
-            }
-        }
         
     except Exception as e:
         return {
@@ -534,8 +520,6 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
             "depends_violations": [],
             "correct_patterns": [],
             "depends_issue_demo": {}
-        }
-
 
 @pytest.mark.e2e
 @pytest.mark.websocket
@@ -619,7 +603,6 @@ async def test_websocket_database_session_handling():
     
     return result
 
-
 @pytest.mark.e2e
 @pytest.mark.websocket
 @pytest.mark.performance
@@ -675,11 +658,9 @@ async def test_websocket_db_session_performance():
             "total_time": total_time,
             "avg_check_time": avg_check_time,
             "success_rate": success_count / 10
-        }
         
     except Exception as e:
         pytest.fail(f"WebSocket database session performance test failed: {e}")
-
 
 if __name__ == "__main__":
     # Allow running this test standalone

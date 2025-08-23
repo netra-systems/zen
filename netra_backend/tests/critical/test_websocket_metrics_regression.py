@@ -6,32 +6,20 @@ especially when connection stats are missing or malformed.
 Business Value: Prevents metrics collection failures from impacting monitoring.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from monitoring import WebSocketMetrics
-from monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector, WebSocketMetrics
 
-# Add project root to path
 from netra_backend.app.agents.base.interface import ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-
-# Add project root to path
-
 
 class TestWebSocketMetricsRegression:
     """Critical regression tests for WebSocket metrics collection."""
@@ -178,7 +166,7 @@ class TestWebSocketMetricsRegression:
             ConnectionManager,
         )
         
-        manager = Modernget_connection_manager()
+        manager = ConnectionManager()
         
         # Test with None result
         mock_result = MagicMock()

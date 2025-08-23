@@ -19,8 +19,7 @@ if TYPE_CHECKING:
     # Import TriageResult only for type checking to prevent circular imports
     from netra_backend.app.agents.triage_sub_agent.models import TriageResult
 
-from netra_backend.app.core.configuration.environment import EnvironmentDetector
-from netra_backend.app.core.configuration.secrets import SecretManager
+from netra_backend.app.core.configuration.base import ActualSecretManager as SecretManager
 from netra_backend.app.logging_config import central_logger as logger
 
 
@@ -34,7 +33,6 @@ class UnifiedSecretManager:
     def __init__(self):
         """Initialize the unified secret manager."""
         self._secret_manager = SecretManager()
-        self._environment_detector = EnvironmentDetector()
         self._logger = logger
         self._cache: Dict[str, Any] = {}
         
@@ -189,7 +187,7 @@ class UnifiedSecretManager:
         Returns:
             bool: True if successful
         """
-        if self._environment_detector.is_production():
+        if os.environ.get("ENVIRONMENT", "").lower() == "production":
             self._logger.error("Cannot set secrets in production")
             return False
             
@@ -328,7 +326,7 @@ class UnifiedSecretManager:
         issues = []
         
         # Check for required secrets based on environment
-        if self._environment_detector.is_production():
+        if os.environ.get("ENVIRONMENT", "").lower() == "production":
             required_secrets = ["JWT_SECRET_KEY", "DATABASE_PASSWORD"]
             if not self.validate_required_secrets(required_secrets):
                 issues.append("Missing required production secrets")

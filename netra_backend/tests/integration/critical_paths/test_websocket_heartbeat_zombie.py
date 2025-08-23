@@ -10,21 +10,10 @@ Critical Path: Connection establishment -> Heartbeat monitoring -> Zombie detect
 Coverage: Heartbeat intervals, zombie detection <60s, connection pruning, resource reclamation, reconnection scenarios
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -40,16 +29,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from netra_backend.app.schemas import User
 
-# Add project root to path
-from netra_backend.app.core.cache.redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
-# Add project root to path
-
-
 logger = logging.getLogger(__name__)
-
 
 class ConnectionState(Enum):
 
@@ -64,7 +48,6 @@ class ConnectionState(Enum):
     CLEANUP_PENDING = "cleanup_pending"
 
     RECONNECTING = "reconnecting"
-
 
 @dataclass
 
@@ -81,7 +64,6 @@ class HeartbeatMetrics:
     average_response_time: float = 0.0
 
     last_heartbeat_time: Optional[datetime] = None
-
 
 @dataclass
 
@@ -100,7 +82,6 @@ class ZombieDetectionResult:
     zombie_reason: str
 
     cleanup_required: bool = True
-
 
 @dataclass
 
@@ -124,12 +105,10 @@ class ConnectionHealthState:
 
     cleanup_attempts: int = 0
 
-
 class MockWebSocketConnection:
 
     """Mock WebSocket connection for testing."""
     
-
     def __init__(self, user_id: str, connection_id: str = None):
 
         self.user_id = user_id
@@ -148,7 +127,6 @@ class MockWebSocketConnection:
 
         self.close_reason = None
         
-
     async def send(self, message: str):
 
         """Mock send message."""
@@ -167,7 +145,6 @@ class MockWebSocketConnection:
 
             raise ConnectionError("Connection is closed")
     
-
     async def receive(self):
 
         """Mock receive message."""
@@ -180,7 +157,6 @@ class MockWebSocketConnection:
 
         return None
     
-
     async def close(self, code: int = 1000, reason: str = ""):
 
         """Mock close connection."""
@@ -193,14 +169,12 @@ class MockWebSocketConnection:
 
         self.close_reason = reason
     
-
     def simulate_disconnect(self):
 
         """Simulate unexpected disconnection."""
 
         self.is_active = False
     
-
     def simulate_heartbeat_response(self, delay: float = 0.0):
 
         """Simulate heartbeat response from client."""
@@ -221,15 +195,12 @@ class MockWebSocketConnection:
 
                 })
         
-
         asyncio.create_task(add_response())
-
 
 class WebSocketHeartbeatZombieManager:
 
     """Manages WebSocket heartbeat monitoring and zombie detection."""
     
-
     def __init__(self, redis_client=None):
 
         self.redis_client = redis_client
@@ -268,7 +239,6 @@ class WebSocketHeartbeatZombieManager:
 
         self.cleanup_in_progress = False
     
-
     async def establish_connection(self, user_id: str, websocket: MockWebSocketConnection = None) -> str:
 
         """Establish new WebSocket connection with heartbeat monitoring."""
@@ -277,7 +247,6 @@ class WebSocketHeartbeatZombieManager:
 
             websocket = MockWebSocketConnection(user_id)
         
-
         connection_id = websocket.connection_id
         
         # Create health state
@@ -296,12 +265,10 @@ class WebSocketHeartbeatZombieManager:
 
         )
         
-
         self.connections[connection_id] = health_state
 
         self.websocket_connections[connection_id] = websocket
         
-
         self.total_connections += 1
 
         self.active_connections += 1
@@ -312,12 +279,10 @@ class WebSocketHeartbeatZombieManager:
 
             await self._cache_connection_state(health_state)
         
-
         logger.info(f"Established connection {connection_id} for user {user_id}")
 
         return connection_id
     
-
     async def _cache_connection_state(self, health_state: ConnectionHealthState):
 
         """Cache connection state in Redis."""
@@ -346,7 +311,6 @@ class WebSocketHeartbeatZombieManager:
 
             logger.warning(f"Failed to cache connection state: {e}")
     
-
     async def start_heartbeat_monitoring(self):
 
         """Start heartbeat monitoring for all connections."""
@@ -355,7 +319,6 @@ class WebSocketHeartbeatZombieManager:
 
             return
         
-
         self.monitoring_active = True
 
         logger.info("Starting heartbeat monitoring")
@@ -372,10 +335,8 @@ class WebSocketHeartbeatZombieManager:
 
         ]
         
-
         return monitoring_tasks
     
-
     async def stop_heartbeat_monitoring(self):
 
         """Stop heartbeat monitoring."""
@@ -384,7 +345,6 @@ class WebSocketHeartbeatZombieManager:
 
         logger.info("Stopping heartbeat monitoring")
     
-
     async def _heartbeat_sender_loop(self):
 
         """Send heartbeats to all active connections."""
@@ -397,7 +357,6 @@ class WebSocketHeartbeatZombieManager:
 
                 heartbeat_tasks = []
                 
-
                 for connection_id, health_state in self.connections.items():
 
                     if health_state.state == ConnectionState.ACTIVE:
@@ -406,22 +365,18 @@ class WebSocketHeartbeatZombieManager:
 
                         heartbeat_tasks.append(task)
                 
-
                 if heartbeat_tasks:
 
                     await asyncio.gather(*heartbeat_tasks, return_exceptions=True)
                 
-
                 await asyncio.sleep(self.heartbeat_interval)
                 
-
             except Exception as e:
 
                 logger.error(f"Error in heartbeat sender loop: {e}")
 
                 await asyncio.sleep(1)
     
-
     async def _send_heartbeat(self, connection_id: str, timestamp: datetime):
 
         """Send heartbeat to specific connection."""
@@ -432,12 +387,10 @@ class WebSocketHeartbeatZombieManager:
 
             health_state = self.connections.get(connection_id)
             
-
             if not websocket or not health_state:
 
                 return
             
-
             heartbeat_message = {
 
                 "type": "heartbeat",
@@ -448,7 +401,6 @@ class WebSocketHeartbeatZombieManager:
 
             }
             
-
             start_time = time.time()
 
             await websocket.send(json.dumps(heartbeat_message))
@@ -463,14 +415,12 @@ class WebSocketHeartbeatZombieManager:
 
             await self._check_heartbeat_response(connection_id, start_time)
             
-
         except Exception as e:
 
             logger.warning(f"Failed to send heartbeat to {connection_id}: {e}")
 
             await self._mark_connection_problematic(connection_id)
     
-
     async def _check_heartbeat_response(self, connection_id: str, start_time: float):
 
         """Check for heartbeat response within timeout."""
@@ -481,7 +431,6 @@ class WebSocketHeartbeatZombieManager:
 
             health_state = self.connections.get(connection_id)
             
-
             if not websocket or not health_state:
 
                 return
@@ -492,7 +441,6 @@ class WebSocketHeartbeatZombieManager:
 
             timeout = 5.0  # 5 second timeout for response
             
-
             try:
 
                 await asyncio.wait_for(self._wait_for_heartbeat_response(websocket), timeout=timeout)
@@ -517,10 +465,8 @@ class WebSocketHeartbeatZombieManager:
 
                 )
                 
-
                 health_state.last_heartbeat = datetime.now(timezone.utc)
                 
-
             except asyncio.TimeoutError:
                 # No response received
 
@@ -528,12 +474,10 @@ class WebSocketHeartbeatZombieManager:
 
                 logger.warning(f"Heartbeat response timeout for connection {connection_id}")
         
-
         except Exception as e:
 
             logger.error(f"Error checking heartbeat response for {connection_id}: {e}")
     
-
     async def _wait_for_heartbeat_response(self, websocket: MockWebSocketConnection):
 
         """Wait for heartbeat response from WebSocket."""
@@ -555,7 +499,6 @@ class WebSocketHeartbeatZombieManager:
 
         return False
     
-
     async def _zombie_detector_loop(self):
 
         """Detect zombie connections that haven't responded to heartbeats."""
@@ -568,7 +511,6 @@ class WebSocketHeartbeatZombieManager:
 
                 zombie_connections = []
                 
-
                 for connection_id, health_state in self.connections.items():
 
                     if health_state.state == ConnectionState.ACTIVE:
@@ -591,17 +533,14 @@ class WebSocketHeartbeatZombieManager:
 
                     logger.info(f"Detected {len(zombie_connections)} zombie connections")
                 
-
                 await asyncio.sleep(10)  # Check every 10 seconds
                 
-
             except Exception as e:
 
                 logger.error(f"Error in zombie detector loop: {e}")
 
                 await asyncio.sleep(1)
     
-
     async def _check_for_zombie(self, health_state: ConnectionHealthState, 
 
                               current_time: datetime) -> Optional[ZombieDetectionResult]:
@@ -637,7 +576,6 @@ class WebSocketHeartbeatZombieManager:
 
             time_since_heartbeat = (current_time - health_state.last_heartbeat).total_seconds() if health_state.last_heartbeat else 0
             
-
             return ZombieDetectionResult(
 
                 connection_id=health_state.connection_id,
@@ -672,10 +610,8 @@ class WebSocketHeartbeatZombieManager:
 
             )
         
-
         return None
     
-
     async def _handle_zombie_connection(self, zombie_result: ZombieDetectionResult):
 
         """Handle detected zombie connection."""
@@ -698,33 +634,28 @@ class WebSocketHeartbeatZombieManager:
 
                 await self._cache_connection_state(health_state)
         
-
         self.zombie_connections_detected += 1
 
         self.active_connections -= 1
         
-
         logger.warning(f"Detected zombie connection {connection_id} for user {zombie_result.user_id}: {zombie_result.zombie_reason}")
         
         # Schedule for cleanup
 
         await self._schedule_connection_cleanup(zombie_result)
     
-
     async def _schedule_connection_cleanup(self, zombie_result: ZombieDetectionResult):
 
         """Schedule zombie connection for cleanup."""
 
         connection_id = zombie_result.connection_id
         
-
         if connection_id in self.connections:
 
             health_state = self.connections[connection_id]
 
             health_state.state = ConnectionState.CLEANUP_PENDING
     
-
     async def _cleanup_scheduler_loop(self):
 
         """Schedule and perform cleanup of zombie connections."""
@@ -737,24 +668,20 @@ class WebSocketHeartbeatZombieManager:
 
                     await self._perform_cleanup_batch()
                 
-
                 await asyncio.sleep(30)  # Cleanup every 30 seconds
                 
-
             except Exception as e:
 
                 logger.error(f"Error in cleanup scheduler loop: {e}")
 
                 await asyncio.sleep(5)
     
-
     async def _perform_cleanup_batch(self):
 
         """Perform cleanup of zombie connections in batches."""
 
         self.cleanup_in_progress = True
         
-
         try:
             # Find connections pending cleanup
 
@@ -774,14 +701,12 @@ class WebSocketHeartbeatZombieManager:
 
                 cleanup_tasks = []
                 
-
                 for connection_id in batch:
 
                     task = self._cleanup_connection(connection_id)
 
                     cleanup_tasks.append(task)
                 
-
                 results = await asyncio.gather(*cleanup_tasks, return_exceptions=True)
                 
                 # Count successful cleanups
@@ -790,22 +715,18 @@ class WebSocketHeartbeatZombieManager:
 
                 failed_cleanups = len(results) - successful_cleanups
                 
-
                 self.connections_cleaned_up += successful_cleanups
 
                 self.failed_cleanups += failed_cleanups
                 
-
                 if batch:
 
                     logger.info(f"Cleanup batch completed: {successful_cleanups} successful, {failed_cleanups} failed")
         
-
         finally:
 
             self.cleanup_in_progress = False
     
-
     async def _cleanup_connection(self, connection_id: str) -> bool:
 
         """Cleanup specific connection and reclaim resources."""
@@ -843,19 +764,16 @@ class WebSocketHeartbeatZombieManager:
 
                 await self.redis_client.delete(cache_key)
             
-
             logger.info(f"Successfully cleaned up connection {connection_id}")
 
             return True
             
-
         except Exception as e:
 
             logger.error(f"Failed to cleanup connection {connection_id}: {e}")
 
             return False
     
-
     async def _mark_connection_problematic(self, connection_id: str):
 
         """Mark connection as problematic but not yet zombie."""
@@ -866,7 +784,6 @@ class WebSocketHeartbeatZombieManager:
 
             health_state.heartbeat_metrics.missed_heartbeats += 1
     
-
     async def handle_client_reconnection(self, user_id: str, new_websocket: MockWebSocketConnection) -> str:
 
         """Handle client reconnection scenario."""
@@ -890,13 +807,10 @@ class WebSocketHeartbeatZombieManager:
 
         new_connection_id = await self.establish_connection(user_id, new_websocket)
         
-
         logger.info(f"Handled reconnection for user {user_id}: cleaned up {len(existing_connections)} old connections, established {new_connection_id}")
         
-
         return new_connection_id
     
-
     def get_connection_metrics(self) -> Dict[str, Any]:
 
         """Get comprehensive connection metrics."""
@@ -907,7 +821,6 @@ class WebSocketHeartbeatZombieManager:
 
         cleanup_pending_count = sum(1 for hs in self.connections.values() if hs.state == ConnectionState.CLEANUP_PENDING)
         
-
         return {
 
             "total_connections": self.total_connections,
@@ -929,7 +842,6 @@ class WebSocketHeartbeatZombieManager:
             "monitoring_active": self.monitoring_active
 
         }
-
 
 @pytest.fixture
 
@@ -954,7 +866,6 @@ async def redis_client():
 
         yield None
 
-
 @pytest.fixture
 
 async def heartbeat_manager(redis_client):
@@ -966,7 +877,6 @@ async def heartbeat_manager(redis_client):
     yield manager
 
     await manager.stop_heartbeat_monitoring()
-
 
 @pytest.fixture
 
@@ -994,7 +904,6 @@ def test_users():
 
     ]
 
-
 @pytest.mark.L3
 
 @pytest.mark.integration
@@ -1003,7 +912,6 @@ class TestWebSocketHeartbeatZombieL3:
 
     """L3 integration tests for WebSocket heartbeat monitoring and zombie detection."""
     
-
     @pytest.mark.asyncio
 
     async def test_basic_heartbeat_monitoring_setup(self, heartbeat_manager, test_users):
@@ -1018,7 +926,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         websocket.simulate_heartbeat_response()  # Simulate responsive client
         
-
         connection_id = await heartbeat_manager.establish_connection(user.id, websocket)
 
         assert connection_id in heartbeat_manager.connections
@@ -1049,7 +956,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         assert not heartbeat_manager.monitoring_active
     
-
     @pytest.mark.asyncio
 
     async def test_zombie_detection_under_60_seconds(self, heartbeat_manager, test_users):
@@ -1063,7 +969,6 @@ class TestWebSocketHeartbeatZombieL3:
         websocket = MockWebSocketConnection(user.id)
         # Don't simulate heartbeat responses (zombie connection)
         
-
         connection_id = await heartbeat_manager.establish_connection(user.id, websocket)
         
         # Set aggressive timeouts for testing
@@ -1102,7 +1007,6 @@ class TestWebSocketHeartbeatZombieL3:
 
             await asyncio.sleep(1)
         
-
         await heartbeat_manager.stop_heartbeat_monitoring()
         
         # Assert detection requirements
@@ -1117,7 +1021,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         assert health_state.state in [ConnectionState.ZOMBIE, ConnectionState.CLEANUP_PENDING]
     
-
     @pytest.mark.asyncio
 
     async def test_heartbeat_interval_accuracy(self, heartbeat_manager, test_users):
@@ -1132,7 +1035,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         websocket.simulate_heartbeat_response()
         
-
         connection_id = await heartbeat_manager.establish_connection(user.id, websocket)
         
         # Set precise interval for testing
@@ -1149,20 +1051,16 @@ class TestWebSocketHeartbeatZombieL3:
 
         start_time = time.time()
         
-
         initial_heartbeats = heartbeat_manager.connections[connection_id].heartbeat_metrics.total_heartbeats_sent
         
-
         await asyncio.sleep(monitoring_duration)
         
-
         final_heartbeats = heartbeat_manager.connections[connection_id].heartbeat_metrics.total_heartbeats_sent
 
         actual_interval_count = final_heartbeats - initial_heartbeats
 
         expected_interval_count = monitoring_duration // heartbeat_manager.heartbeat_interval
         
-
         await heartbeat_manager.stop_heartbeat_monitoring()
         
         # Assert interval accuracy (allow ±1 interval tolerance)
@@ -1171,7 +1069,6 @@ class TestWebSocketHeartbeatZombieL3:
 
             f"Expected ~{expected_interval_count} heartbeats, got {actual_interval_count}"
     
-
     @pytest.mark.asyncio
 
     async def test_connection_pruning_and_cleanup(self, heartbeat_manager, test_users):
@@ -1181,7 +1078,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         connections = []
         
-
         for i, user in enumerate(test_users[:5]):
 
             websocket = MockWebSocketConnection(user.id)
@@ -1197,7 +1093,6 @@ class TestWebSocketHeartbeatZombieL3:
 
                 pass
             
-
             connection_id = await heartbeat_manager.establish_connection(user.id, websocket)
 
             connections.append((connection_id, websocket, i % 2 == 0))
@@ -1212,7 +1107,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         heartbeat_manager.cleanup_batch_size = 3
         
-
         initial_metrics = heartbeat_manager.get_connection_metrics()
 
         assert initial_metrics["active_connections"] == 5
@@ -1225,10 +1119,8 @@ class TestWebSocketHeartbeatZombieL3:
 
         await asyncio.sleep(45)  # Allow time for detection and cleanup
         
-
         final_metrics = heartbeat_manager.get_connection_metrics()
         
-
         await heartbeat_manager.stop_heartbeat_monitoring()
         
         # Verify cleanup occurred
@@ -1251,7 +1143,6 @@ class TestWebSocketHeartbeatZombieL3:
 
                 f"Zombie connection {connection_id} should be closed"
     
-
     @pytest.mark.asyncio
 
     async def test_client_reconnection_handling(self, heartbeat_manager, test_users):
@@ -1266,14 +1157,12 @@ class TestWebSocketHeartbeatZombieL3:
 
         old_websocket.simulate_heartbeat_response()
         
-
         old_connection_id = await heartbeat_manager.establish_connection(user.id, old_websocket)
         
         # Simulate connection becoming problematic (zombie)
 
         old_websocket.simulate_disconnect()
         
-
         await heartbeat_manager.start_heartbeat_monitoring()
         
         # Wait for zombie detection
@@ -1286,10 +1175,8 @@ class TestWebSocketHeartbeatZombieL3:
 
         new_websocket.simulate_heartbeat_response()
         
-
         new_connection_id = await heartbeat_manager.handle_client_reconnection(user.id, new_websocket)
         
-
         await heartbeat_manager.stop_heartbeat_monitoring()
         
         # Verify reconnection handling
@@ -1312,7 +1199,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         assert new_health_state.state == ConnectionState.ACTIVE, "New connection should be active"
     
-
     @pytest.mark.asyncio
 
     async def test_resource_reclamation_efficiency(self, heartbeat_manager, test_users):
@@ -1324,7 +1210,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         established_connections = []
         
-
         for i in range(connection_count):
 
             user_id = f"load_test_user_{i}"
@@ -1341,12 +1226,10 @@ class TestWebSocketHeartbeatZombieL3:
 
                 websocket.simulate_heartbeat_response()
             
-
             connection_id = await heartbeat_manager.establish_connection(user_id, websocket)
 
             established_connections.append((connection_id, websocket, i % 3 != 0))
         
-
         initial_metrics = heartbeat_manager.get_connection_metrics()
 
         assert initial_metrics["total_connections"] == connection_count
@@ -1367,10 +1250,8 @@ class TestWebSocketHeartbeatZombieL3:
 
         await asyncio.sleep(30)
         
-
         final_metrics = heartbeat_manager.get_connection_metrics()
         
-
         await heartbeat_manager.stop_heartbeat_monitoring()
         
         # Calculate efficiency metrics
@@ -1387,7 +1268,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         cleanup_efficiency = cleaned_up / detected_zombies if detected_zombies > 0 else 1.0
         
-
         assert detection_efficiency >= 0.8, f"Detection efficiency {detection_efficiency:.2f} below 80%"
 
         assert cleanup_efficiency >= 0.7, f"Cleanup efficiency {cleanup_efficiency:.2f} below 70%"
@@ -1402,7 +1282,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         assert active_websockets < connection_count, "Should have cleaned up some WebSocket connections"
     
-
     @pytest.mark.asyncio
 
     async def test_heartbeat_response_time_monitoring(self, heartbeat_manager, test_users):
@@ -1415,7 +1294,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         websocket = MockWebSocketConnection(user.id)
         
-
         connection_id = await heartbeat_manager.establish_connection(user.id, websocket)
         
         # Configure for testing
@@ -1430,14 +1308,12 @@ class TestWebSocketHeartbeatZombieL3:
 
         response_delays = [0.1, 0.2, 0.05, 0.3, 0.15]  # seconds
         
-
         for delay in response_delays:
 
             websocket.simulate_heartbeat_response(delay)
 
             await asyncio.sleep(heartbeat_manager.heartbeat_interval + 1)
         
-
         await heartbeat_manager.stop_heartbeat_monitoring()
         
         # Check response time metrics
@@ -1446,7 +1322,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         metrics = health_state.heartbeat_metrics
         
-
         assert metrics.total_heartbeats_sent >= len(response_delays)
 
         assert metrics.total_heartbeats_received >= len(response_delays) - 1  # Allow some tolerance
@@ -1461,7 +1336,6 @@ class TestWebSocketHeartbeatZombieL3:
 
             f"Average response time {metrics.average_response_time:.3f}s seems unreasonable"
     
-
     @mock_justified("L3: WebSocket heartbeat and zombie detection testing with controlled connection simulation")
 
     @pytest.mark.asyncio
@@ -1487,7 +1361,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         ]
         
-
         all_connections = []
 
         expected_zombies = 0
@@ -1504,7 +1377,6 @@ class TestWebSocketHeartbeatZombieL3:
 
                 websocket = MockWebSocketConnection(user_id)
                 
-
                 if scenario["type"] == "responsive":
 
                     websocket.simulate_heartbeat_response(scenario["response_delay"])
@@ -1529,7 +1401,6 @@ class TestWebSocketHeartbeatZombieL3:
 
                         expected_zombies += 1
                 
-
                 connection_id = await heartbeat_manager.establish_connection(user_id, websocket)
 
                 all_connections.append({
@@ -1564,10 +1435,8 @@ class TestWebSocketHeartbeatZombieL3:
 
         await asyncio.sleep(monitoring_duration)
         
-
         final_metrics = heartbeat_manager.get_connection_metrics()
         
-
         await heartbeat_manager.stop_heartbeat_monitoring()
         
         # Calculate reliability metrics
@@ -1586,7 +1455,6 @@ class TestWebSocketHeartbeatZombieL3:
 
         false_positives = 0
         
-
         for conn in responsive_connections:
 
             if conn["connection_id"] in heartbeat_manager.connections:
@@ -1597,7 +1465,6 @@ class TestWebSocketHeartbeatZombieL3:
 
                     false_positives += 1
         
-
         false_positive_rate = false_positives / len(responsive_connections) if responsive_connections else 0.0
         
         # Performance metrics
@@ -1618,11 +1485,9 @@ class TestWebSocketHeartbeatZombieL3:
 
             "Failed cleanup rate should be below 10%"
         
-
         logger.info(f"Reliability test results: {detection_accuracy:.2f} detection accuracy, "
 
                    f"{false_positive_rate:.2f} false positive rate, {cleanup_rate:.2f} cleanup rate")
-
 
 if __name__ == "__main__":
 

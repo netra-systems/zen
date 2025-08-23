@@ -11,17 +11,10 @@ L3 Test: Uses real authorization service with role-based access control.
 Security target: Zero unauthorized tool access with comprehensive audit trail.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -40,7 +33,6 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.exceptions_base import (
     AuthorizationException,
@@ -50,10 +42,7 @@ from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.security_service import SecurityService
 from test_framework.mock_utils import mock_justified
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class ToolPermissionLevel(Enum):
     """Tool permission levels for authorization testing."""
@@ -62,14 +51,12 @@ class ToolPermissionLevel(Enum):
     ADMIN = "admin"
     SYSTEM = "system"
 
-
 class AgentRole(Enum):
     """Agent roles for authorization testing."""
     BASIC_AGENT = "basic_agent"
     ADVANCED_AGENT = "advanced_agent"
     ADMIN_AGENT = "admin_agent"
     SYSTEM_AGENT = "system_agent"
-
 
 class MockTool:
     """Mock tool for authorization testing."""
@@ -95,7 +82,6 @@ class MockTool:
             "context": context,
             "execution_time": time.time()
         }
-
 
 class ToolAuthorizationService:
     """Service for managing tool authorization and access control."""
@@ -253,7 +239,6 @@ class ToolAuthorizationService:
                                         if log.get("agent_id") == agent_id])
         }
 
-
 class MockAuthorizedAgent(BaseSubAgent):
     """Mock agent that integrates with tool authorization system."""
     
@@ -277,7 +262,6 @@ class MockAuthorizedAgent(BaseSubAgent):
         except AuthorizationException as e:
             self.authorization_failures += 1
             raise e
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -580,7 +564,6 @@ class TestAgentToolAuthorizationL3:
             if time.time() - entry["timestamp"] < 300
         ])
         assert cache_hits > 0  # Should have cache entries
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

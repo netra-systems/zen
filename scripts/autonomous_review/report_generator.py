@@ -9,7 +9,7 @@ from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
-from .types import TestAnalysis
+from scripts.autonomous_review.types import TestAnalysis
 
 
 class ReportGenerator:

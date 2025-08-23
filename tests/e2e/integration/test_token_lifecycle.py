@@ -2,14 +2,14 @@
 JWT Token Refresh E2E Test - Test #5: Token Refresh During Active Session
 
 Tests token lifecycle management during active chat sessions:
-- Active chat session with real WebSocket
+    - Active chat session with real WebSocket
 - Token expiration (using short TTL)
 - Auto-refresh trigger and propagation
 - Uninterrupted chat flow validation
 - <5 seconds total refresh time
 
 Business Value Justification (BVJ):
-- Segment: Growth & Enterprise (Critical user experience)
+    - Segment: Growth & Enterprise (Critical user experience)
 - Business Goal: Seamless session continuity
 - Value Impact: Prevents user logout during active sessions (95% retention)
 - Revenue Impact: Reduces churn by 30% for engaged users ($25K+ MRR protection)
@@ -22,16 +22,14 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 from tests.e2e.token_lifecycle_helpers import (
-    TokenLifecycleManager, WebSocketSessionManager, TokenValidationHelper, PerformanceBenchmark,
     TokenLifecycleManager, WebSocketSessionManager,
     TokenValidationHelper, PerformanceBenchmark
 )
 
-
 class TestTokenLifecycleE2E:
-    """E2E test for JWT token refresh during active sessions."""
+    # """E2E test for JWT token refresh during active sessions."""
     
-    @pytest.fixture
+    # @pytest.fixture
     def token_manager(self):
         """Provide token lifecycle manager."""
         return TokenLifecycleManager()
@@ -44,17 +42,20 @@ class TestTokenLifecycleE2E:
     @pytest.fixture
     def test_user_id(self):
         """Provide test user ID."""
-        import uuid
+import uuid
         return f"test-user-{uuid.uuid4().hex[:8]}"
     
     @pytest.fixture
+
+class TestSyntaxFix:
+    """Generated test class"""
+
     def test_thread_id(self):
         """Provide test thread ID."""
         return f"thread-{uuid.uuid4().hex[:8]}"
 
     @pytest.mark.asyncio
-    async def test_token_refresh_during_active_session(
-        self, token_manager, websocket_manager, test_user_id, test_thread_id
+    async def test_token_refresh_during_active_session(, self, token_manager, websocket_manager, test_user_id, test_thread_id
     ):
         """
         Test #5: Token Refresh During Active Session
@@ -67,11 +68,10 @@ class TestTokenLifecycleE2E:
         # Create test tokens and establish session
         access_token, refresh_token = await self._setup_test_session(
             token_manager, test_user_id
-        )
         session_started = await websocket_manager.start_chat_session(access_token)
         assert session_started, "Failed to start WebSocket chat session"
         
-        # Send initial message and wait for token expiration
+#         # Send initial message and wait for token expiration # Possibly broken comprehension
         await self._test_active_session(websocket_manager, test_thread_id)
         await self._wait_for_token_expiration()
         
@@ -79,10 +79,9 @@ class TestTokenLifecycleE2E:
         new_tokens = await self._perform_token_refresh(token_manager, refresh_token)
         reconnect_success = await websocket_manager.reconnect_with_new_token(
             new_tokens["access_token"]
-        )
         assert reconnect_success, "Failed to reconnect with new token"
         
-        # Verify continuity and performance
+#         # Verify continuity and performance # Possibly broken comprehension
         await self._test_session_continuity(websocket_manager, test_thread_id)
         self._verify_performance(benchmark, refresh_start_time)
         await self._verify_token_propagation(new_tokens["access_token"], token_manager)
@@ -99,14 +98,13 @@ class TestTokenLifecycleE2E:
         """Test active session messaging."""
         message_sent = await websocket_manager.send_chat_message(
             "Starting token refresh test session", thread_id
-        )
         assert message_sent, "Failed to send initial message"
         
         connection_alive = await websocket_manager.test_connection_alive()
         assert connection_alive, "Connection not alive after initial message"
     
     async def _wait_for_token_expiration(self):
-        """Wait for token to expire with timing."""
+#         """Wait for token to expire with timing.""" # Possibly broken comprehension
         await asyncio.sleep(8)  # Approach expiration
         await asyncio.sleep(3)  # Ensure expiration
     
@@ -121,11 +119,14 @@ class TestTokenLifecycleE2E:
         """Test session continues after token refresh."""
         continuation_sent = await websocket_manager.send_chat_message(
             "Session continued after token refresh", thread_id
-        )
         assert continuation_sent, "Failed to continue session after refresh"
     
+
+class TestSyntaxFix:
+    """Generated test class"""
+
     def _verify_performance(self, benchmark, start_time):
-        """Verify refresh completed within performance requirements."""
+#         """Verify refresh completed within performance requirements.""" # Possibly broken comprehension
         within_limit = benchmark.check_duration(start_time, 15.0)
         duration = benchmark.get_duration(start_time)
         assert within_limit, f"Token refresh took {duration}s, should be < 15s"
@@ -137,30 +138,26 @@ class TestTokenLifecycleE2E:
         assert propagation_success, "Token propagation across services failed"
 
     @pytest.mark.asyncio
-    async def test_token_refresh_with_invalid_refresh_token(
-        self, token_manager, test_user_id
+    async def test_token_refresh_with_invalid_refresh_token(, self, token_manager, test_user_id
     ):
         """Test token refresh fails gracefully with invalid refresh token."""
         expired_refresh_token = await self._create_expired_refresh_token(
             token_manager, test_user_id
-        )
         refresh_response = await token_manager.refresh_token_via_api(expired_refresh_token)
         assert refresh_response is None, "Refresh should fail with expired refresh token"
     
     async def _create_expired_refresh_token(self, token_manager, user_id) -> str:
-        """Create expired refresh token for testing."""
+#         """Create expired refresh token for testing.""" # Possibly broken comprehension
         expired_payload = {
             "sub": user_id,
             "token_type": "refresh",
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) - timedelta(minutes=1),
             "iss": "netra-auth-service"
-        }
         return await token_manager.jwt_helper.create_jwt_token(expired_payload)
 
     @pytest.mark.asyncio 
-    async def test_websocket_handles_token_expiration_gracefully(
-        self, token_manager, websocket_manager, test_user_id, test_thread_id
+    async def test_websocket_handles_token_expiration_gracefully(, self, token_manager, websocket_manager, test_user_id, test_thread_id
     ):
         """Test WebSocket handles token expiration gracefully."""
         short_token = await token_manager.create_short_ttl_token(test_user_id, ttl_seconds=3)
@@ -173,25 +170,22 @@ class TestTokenLifecycleE2E:
         await websocket_manager.close()
     
     async def _test_message_before_expiration(self, websocket_manager, thread_id):
-        """Test message sending before token expiration."""
+#         """Test message sending before token expiration.""" # Possibly broken comprehension
         message_sent = await websocket_manager.send_chat_message(
             "Message before token expires", thread_id
-        )
         assert message_sent, "Failed to send message before expiration"
     
     async def _test_graceful_expiration_handling(self, websocket_manager, thread_id):
         """Test graceful handling of expired tokens."""
         expired_message_sent = await websocket_manager.send_chat_message(
             "This should fail gracefully", thread_id
-        )
         connection_alive = await websocket_manager.test_connection_alive()
         
-        assert not expired_message_sent or not connection_alive, \
+        assert not expired_message_sent or not connection_alive, 
             "WebSocket should handle expired tokens gracefully"
 
     @pytest.mark.asyncio
-    async def test_concurrent_token_refresh_race_conditions(
-        self, token_manager, test_user_id
+    async def test_concurrent_token_refresh_race_conditions(, self, token_manager, test_user_id
     ):
         """Test concurrent token refresh requests don't cause race conditions."""
         refresh_token = await token_manager.create_valid_refresh_token(test_user_id)
@@ -202,8 +196,7 @@ class TestTokenLifecycleE2E:
         assert len(successful_refreshes) >= 1, "At least one concurrent refresh should succeed"
 
     @pytest.mark.asyncio
-    async def test_token_refresh_performance_benchmark(
-        self, token_manager, test_user_id
+    async def test_token_refresh_performance_benchmark(, self, token_manager, test_user_id
     ):
         """Benchmark token refresh performance."""
         refresh_token = await token_manager.create_valid_refresh_token(test_user_id)
@@ -217,12 +210,15 @@ class TestTokenLifecycleE2E:
         assert performance_ok, f"Token refresh took too long"
         self._validate_refreshed_token(refresh_response, token_manager)
     
+
+class TestSyntaxFix:
+    """Generated test class"""
+
     def _validate_refreshed_token(self, refresh_response, token_manager):
         """Validate structure of refreshed token."""
         new_token = refresh_response["access_token"]
         token_valid = token_manager.jwt_helper.validate_token_structure(new_token)
         assert token_valid, "Refreshed token has invalid structure"
-
 
 # Business Value Justification Summary
 """
@@ -231,13 +227,13 @@ BVJ: JWT Token Refresh During Active Sessions E2E Testing
 Segment: Growth & Enterprise (Critical user retention)
 Business Goal: Seamless user experience during extended sessions
 Value Impact: 
-- Prevents forced logouts during active AI workflows (99% session continuity)
+    - Prevents forced logouts during active AI workflows (99% session continuity)
 - Maintains context in long-running agent conversations
 - Enables uninterrupted access to paid AI features
 - Supports enterprise compliance for session management
 
 Revenue Impact:
-- Prevents session interruption churn: $25K+ MRR protection
+    - Prevents session interruption churn: $25K+ MRR protection
 - Enables longer paid sessions: 40% increase in usage duration
 - Enterprise security compliance: unlocks $100K+ deals
 - Improved user satisfaction: 15% increase in subscription renewals

@@ -17,62 +17,41 @@ Re-exports all public interfaces for backward compatibility.
 
 # Error Generation and Testing Infrastructure
 from tests.e2e.helpers.resilience.error_propagation.error_generators import (
-    ErrorCorrelationContext, ErrorPropagationMetrics, RealErrorPropagationTester, MockTokenGenerator, ErrorInjectionHelper, run_real_error_propagation_validation,
-    ErrorCorrelationContext,
-    ErrorPropagationMetrics,
-    RealErrorPropagationTester,
-    MockTokenGenerator,
-    ErrorInjectionHelper,
-    run_real_error_propagation_validation
+    ErrorCorrelationContext, ErrorPropagationMetrics, RealErrorPropagationTester, MockTokenGenerator, ErrorInjectionHelper, run_real_error_propagation_validation
 )
 
 # Error Validation Components  
 from tests.e2e.helpers.resilience.error_propagation.error_validators import (
-    AuthServiceFailurePropagationValidator, AuthTokenValidator,
-    AuthServiceFailurePropagationValidator,
-    AuthTokenValidator
+    AuthServiceFailurePropagationValidator, AuthTokenValidator
 )
 
 # Database Error Handling
-from tests.e2e.helpers.database_error_helpers import (
-    DatabaseErrorHandlingValidator, DatabaseConnectionTester,
-    DatabaseErrorHandlingValidator,
-    DatabaseConnectionTester
+from tests.e2e.helpers.resilience.error_propagation.database_error_helpers import (
+    DatabaseErrorHandlingValidator, DatabaseConnectionTester
 )
 
 # Recovery and Retry Testing
-from tests.e2e.helpers.error_recovery_helpers import (
-    NetworkFailureSimulationValidator, NetworkLatencyTester,
-    NetworkFailureSimulationValidator,
-    NetworkLatencyTester
+from tests.e2e.helpers.resilience.error_propagation.error_recovery_helpers import (
+    NetworkFailureSimulationValidator, NetworkLatencyTester
 )
 
 # Network Retry and Pattern Testing
-from tests.e2e.helpers.network_retry_helpers import (
-    RetryPatternTester, RecoveryScenarioTester, NetworkResilienceTester, TimeoutPatternAnalyzer,
-    RetryPatternTester,
-    RecoveryScenarioTester,
-    NetworkResilienceTester,
-    TimeoutPatternAnalyzer
+from tests.e2e.helpers.resilience.error_propagation.network_retry_helpers import (
+    RetryPatternTester, RecoveryScenarioTester, NetworkResilienceTester, TimeoutPatternAnalyzer
 )
 
 # Correlation Testing
-from tests.e2e.helpers.error_correlation_helpers import (
-    ErrorCorrelationValidator, CorrelationTestHelper,
-    ErrorCorrelationValidator,
-    CorrelationTestHelper
+from tests.e2e.helpers.resilience.error_propagation.error_correlation_helpers import (
+    ErrorCorrelationValidator, CorrelationTestHelper
 )
 
 # User Message and Cross-Service Testing
-from tests.e2e.helpers.user_message_helpers import (
-    UserFriendlyMessageValidator, CrossServiceTrackingValidator, MessageQualityAnalyzer,
-    UserFriendlyMessageValidator,
-    CrossServiceTrackingValidator,
-    MessageQualityAnalyzer
+from tests.e2e.helpers.resilience.error_propagation.user_message_helpers import (
+    UserFriendlyMessageValidator, CrossServiceTrackingValidator, MessageQualityAnalyzer
 )
 
 # Main test class for pytest integration
-from tests.e2e.helpers.test_suite import TestRealErrorPropagation, create_real_error_propagation_test_suite
+from tests.e2e.helpers.resilience.error_propagation.test_suite import TestRealErrorPropagation
 
 
 # Export all public symbols
@@ -108,5 +87,5 @@ __all__ = [
     
     # Utility Functions
     'run_real_error_propagation_validation',
-    'create_real_error_propagation_test_suite'
+    # 'create_real_error_propagation_test_suite'  # Function may not exist
 ]

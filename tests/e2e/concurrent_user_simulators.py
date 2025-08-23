@@ -1,36 +1,25 @@
 """Concurrent User Simulators and WebSocket Management
 
 Business Value Justification (BVJ):
-- Segment: Enterprise (concurrent user simulation required)
+    - Segment: Enterprise (concurrent user simulation required)
 - Business Goal: Simulate realistic concurrent user behavior
 - Value Impact: Validates enterprise-grade concurrency handling
 - Revenue Impact: Protects $100K+ ARR from concurrency issues
 
 ARCHITECTURAL COMPLIANCE:
-- File size: <300 lines (MANDATORY)
+    - File size: <300 lines (MANDATORY)
 - Function size: <8 lines each (MANDATORY)
 - Modular design with focused responsibilities
 """
 
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from tests.e2e.concurrent_user_models import (
 from typing import Dict, List, Any, Optional
 import asyncio
 import time
 import uuid
-
-    ConcurrentUserMetrics, UserSession, MockServiceManager, MockWebSocketClient, IsolationValidator,
-
-    ConcurrentUserMetrics,
-
-    UserSession,
-
-    MockServiceManager,
-
-    MockWebSocketClient,
-
-    IsolationValidator
-
+from tests.e2e.concurrent_user_models import (
+    ConcurrentUserMetrics, UserSession, MockServiceManager, 
+    MockWebSocketClient, IsolationValidator
 )
 
 

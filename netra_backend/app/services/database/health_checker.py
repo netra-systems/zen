@@ -10,7 +10,6 @@ from typing import Any, Dict
 
 from sqlalchemy import text
 
-from netra_backend.app.db.postgres import async_engine
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -113,10 +112,25 @@ class ConnectionHealthChecker:
     
     async def _execute_test_query(self) -> None:
         """Execute a simple test query"""
+        # Get fresh engine reference to avoid stale None reference
+        from netra_backend.app.db.postgres_core import async_engine
         if async_engine:
-            async with async_engine.connect() as conn:
-                result = await conn.execute(text("SELECT 1"))
-                result.fetchone()
+            try:
+                # Add timeout to prevent hanging
+                async with async_engine.connect() as conn:
+                    result = await asyncio.wait_for(
+                        conn.execute(text("SELECT 1")), 
+                        timeout=10.0
+                    )
+                    result.fetchone()
+            except asyncio.TimeoutError:
+                logger.error("Database health check query timed out after 10 seconds")
+                raise
+            except Exception as e:
+                if "sslmode" in str(e):
+                    logger.error(f"CRITICAL: Health checker detected sslmode error - this indicates URL conversion was bypassed: {e}")
+                    logger.error(f"Engine URL: {getattr(async_engine, 'url', 'unknown')}")
+                raise
     
     def _record_success(self, test_result: Dict[str, Any], start_time: float) -> None:
         """Record successful test result"""
@@ -159,6 +173,8 @@ class ConnectionHealthChecker:
         response_times = []
         test_queries = self._get_test_queries()
         
+        # Get fresh engine reference to avoid stale None reference
+        from netra_backend.app.db.postgres_core import async_engine
         if async_engine:
             for query in test_queries:
                 response_time = await self._time_query(query)
@@ -176,6 +192,11 @@ class ConnectionHealthChecker:
     
     async def _time_query(self, query) -> float:
         """Time a single query execution"""
+        # Get fresh engine reference to avoid stale None reference
+        from netra_backend.app.db.postgres_core import async_engine
+        if not async_engine:
+            return 0.0  # Return 0 if engine not available
+        
         start_time = time.time()
         async with async_engine.connect() as conn:
             result = await conn.execute(query)

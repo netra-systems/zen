@@ -1,16 +1,9 @@
 """Thread-Agent Integration Fixtures and Tests"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -33,11 +26,7 @@ from netra_backend.app.schemas.agent_state import (
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.state_persistence import state_persistence_service
 
-# Add project root to path
 from netra_backend.app.services.thread_service import ThreadService
-
-# Add project root to path
-
 
 @pytest.fixture
 def mock_supervisor_agent():
@@ -50,7 +39,6 @@ def mock_supervisor_agent():
     agent.user_id = "test_user_123"
     return agent
 
-
 @pytest.fixture
 def mock_data_sub_agent():
     """Mock data sub-agent for testing."""
@@ -61,7 +49,6 @@ def mock_data_sub_agent():
     agent.state = Mock()
     agent.user_id = "test_user_123"
     return agent
-
 
 @pytest.fixture
 def thread_service():
@@ -83,7 +70,6 @@ def thread_service():
     service.delete_thread = AsyncMock(return_value=True)
     return service
 
-
 @pytest.fixture
 def agent_service():
     """Create agent service for testing."""
@@ -93,7 +79,6 @@ def agent_service():
     service.get_agent_status = AsyncMock(return_value={"status": "idle", "last_activity": "2025-01-20T10:00:00Z"})
     service.terminate_agent = AsyncMock(return_value=True)
     return service
-
 
 @pytest.fixture
 def mock_thread():
@@ -107,7 +92,6 @@ def mock_thread():
     thread.status = "active"
     return thread
 
-
 @pytest.fixture
 def mock_message():
     """Mock message object for testing."""
@@ -119,7 +103,6 @@ def mock_message():
     message.created_at = asyncio.get_event_loop().time()
     return message
 
-
 @pytest.fixture
 def mock_run():
     """Mock run object for testing."""
@@ -130,7 +113,6 @@ def mock_run():
     run.created_at = asyncio.get_event_loop().time()
     run.completed_at = asyncio.get_event_loop().time()
     return run
-
 
 @pytest.fixture
 async def test_session():
@@ -147,7 +129,6 @@ async def test_session():
     session.add = AsyncMock()
     session.delete = AsyncMock()
     return session
-
 
 # =============================================================================
 # THREAD-AGENT INTEGRATION TESTS
@@ -226,7 +207,6 @@ class TestThreadAgentIntegrationFixtures:
         assert hasattr(test_session, 'commit')
         assert hasattr(test_session, 'rollback')
         assert hasattr(test_session, 'execute')
-
 
 class TestThreadAgentIntegration:
     """Test thread-agent integration functionality."""

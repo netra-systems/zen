@@ -4,17 +4,10 @@ Tests agent state persistence, recovery, and error handling
 Split from oversized test_llm_agent_e2e_real.py
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -29,12 +22,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-from .llm_agent_fixtures import (
+from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
     mock_db_session,
-    # Add project root to path
     mock_llm_manager,
     mock_persistence_service,
     mock_tool_dispatcher,
@@ -42,6 +33,7 @@ from .llm_agent_fixtures import (
     supervisor_agent,
 )
 
+@pytest.mark.asyncio
 
 async def test_state_persistence(supervisor_agent):
     """Test agent state persistence and recovery"""
@@ -73,6 +65,7 @@ async def test_state_persistence(supervisor_agent):
     assert result is not None
     assert isinstance(result, DeepAgentState)
 
+@pytest.mark.asyncio
 
 async def test_error_recovery(supervisor_agent):
     """Test error handling and recovery mechanisms"""
@@ -92,6 +85,7 @@ async def test_error_recovery(supervisor_agent):
     except Exception as e:
         assert "Pipeline error" in str(e)
 
+@pytest.mark.asyncio
 
 async def test_state_recovery_from_interruption():
     """Test state recovery from interrupted execution"""
@@ -114,6 +108,7 @@ async def test_state_recovery_from_interruption():
     assert recovered_state.user_request == "Interrupted request"
     assert recovered_state.triage_result["category"] == "optimization"
 
+@pytest.mark.asyncio
 
 async def test_persistence_failure_handling():
     """Test handling of persistence failures"""
@@ -128,6 +123,7 @@ async def test_persistence_failure_handling():
     
     assert "Database connection failed" in str(exc_info.value)
 
+@pytest.mark.asyncio
 
 async def test_state_serialization_consistency():
     """Test state serialization and deserialization consistency"""
@@ -155,6 +151,7 @@ async def test_state_serialization_consistency():
     assert deserialized_data["chat_thread_id"] == "thread123"
     assert deserialized_data["triage_result"]["category"] == "optimization"
 
+@pytest.mark.asyncio
 
 async def test_concurrent_state_operations():
     """Test concurrent state save/load operations"""
@@ -189,6 +186,7 @@ async def test_concurrent_state_operations():
     for result in results:
         assert not isinstance(result, Exception)
 
+@pytest.mark.asyncio
 
 async def test_state_version_compatibility():
     """Test backward compatibility of state versions"""
@@ -211,7 +209,6 @@ async def test_state_version_compatibility():
         assert migrated_state.user_request == "Legacy request"
     except Exception as e:
         pytest.fail(f"State migration failed: {e}")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

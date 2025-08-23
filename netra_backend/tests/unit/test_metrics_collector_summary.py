@@ -7,20 +7,9 @@ Business Value: Provides billing analytics and usage pattern insights
 for customer optimization and revenue forecasting.
 """
 
-# Add project root to path
-
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 from collections import deque
 from datetime import datetime, timedelta
@@ -31,14 +20,10 @@ import pytest
 from netra_backend.app.monitoring.models import MetricsCollector
 from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 
-# Add project root to path
-
-
 class TestMetricsCollectorSummary:
 
     """Test suite for MetricsCollector summary and analysis features."""
     
-
     @pytest.fixture
 
     def collector(self):
@@ -47,7 +32,6 @@ class TestMetricsCollectorSummary:
 
         return MetricsCollector(retention_period=300)
     
-
     def test_get_recent_metrics_filtered(self, collector):
 
         """Test getting recent metrics with time filtering."""
@@ -56,33 +40,26 @@ class TestMetricsCollectorSummary:
 
         recent_time = datetime.now() - timedelta(seconds=100)
         
-
         old_metric = PerformanceMetric("test", 1.0, old_time)
 
         recent_metric = PerformanceMetric("test", 2.0, recent_time)
         
-
         collector._metrics_buffer["test_metric"].extend([old_metric, recent_metric])
         
-
         recent_metrics = collector.get_recent_metrics("test_metric", 300)
         
-
         assert len(recent_metrics) == 1
 
         assert recent_metrics[0].timestamp == recent_time
     
-
     def test_get_recent_metrics_nonexistent(self, collector):
 
         """Test getting recent metrics for non-existent metric."""
 
         metrics = collector.get_recent_metrics("nonexistent.metric", 300)
         
-
         assert metrics == []
     
-
     def test_get_metric_summary_with_data(self, collector):
 
         """Test metric summary calculation with data."""
@@ -91,15 +68,12 @@ class TestMetricsCollectorSummary:
 
         values = [10.0, 20.0, 30.0, 40.0, 50.0]
         
-
         metrics = [PerformanceMetric("test", values[i], times[i]) for i in range(5)]
 
         collector._metrics_buffer["test_metric"].extend(metrics)
         
-
         summary = collector.get_metric_summary("test_metric", 300)
         
-
         assert summary["count"] == 5
 
         assert summary["min"] == 10.0
@@ -110,56 +84,44 @@ class TestMetricsCollectorSummary:
 
         assert summary["current"] == 10.0  # Most recent (first in list)
     
-
     def test_get_metric_summary_empty(self, collector):
 
         """Test metric summary with no data."""
 
         summary = collector.get_metric_summary("empty_metric", 300)
         
-
         assert summary == {}
     
-
     def test_calculate_cache_hit_ratio_with_data(self, collector):
 
         """Test cache hit ratio calculation."""
 
         perf_stats = {"cache_stats": {"total_hits": 750, "size": 1000}}
         
-
         ratio = collector._calculate_cache_hit_ratio(perf_stats)
         
-
         assert ratio == 0.75
     
-
     def test_calculate_cache_hit_ratio_empty_cache(self, collector):
 
         """Test cache hit ratio with empty cache."""
 
         perf_stats = {"cache_stats": {"total_hits": 0, "size": 0}}
         
-
         ratio = collector._calculate_cache_hit_ratio(perf_stats)
         
-
         assert ratio == 0.0
     
-
     def test_calculate_cache_hit_ratio_missing_stats(self, collector):
 
         """Test cache hit ratio with missing cache stats."""
 
         perf_stats = {}
         
-
         ratio = collector._calculate_cache_hit_ratio(perf_stats)
         
-
         assert ratio == 0.0
     
-
     def test_metric_buffer_size_limits(self, collector):
 
         """Test that metric buffers respect size limits."""
@@ -175,7 +137,6 @@ class TestMetricsCollectorSummary:
 
         assert len(collector._metrics_buffer["test_metric"]) == 1000
     
-
     def test_summary_statistics_accuracy(self, collector):
 
         """Test accuracy of summary statistics calculations."""
@@ -184,17 +145,14 @@ class TestMetricsCollectorSummary:
 
         timestamps = [datetime.now() - timedelta(seconds=i) for i in range(5)]
         
-
         for i, (value, timestamp) in enumerate(zip(values, timestamps)):
 
             metric = PerformanceMetric("accuracy_test", value, timestamp)
 
             collector._metrics_buffer["accuracy_metric"].append(metric)
         
-
         summary = collector.get_metric_summary("accuracy_metric", 300)
         
-
         assert summary["min"] == 5.0
 
         assert summary["max"] == 45.0
@@ -203,7 +161,6 @@ class TestMetricsCollectorSummary:
 
         assert summary["count"] == 5
     
-
     def test_time_based_filtering_edge_cases(self, collector):
 
         """Test edge cases in time-based metric filtering."""
@@ -218,14 +175,12 @@ class TestMetricsCollectorSummary:
 
         outside_metric = PerformanceMetric("test", 3.0, now - timedelta(seconds=301))
         
-
         collector._metrics_buffer["boundary_test"].extend([
 
             outside_metric, boundary_metric, inside_metric
 
         ])
         
-
         recent_metrics = collector.get_recent_metrics("boundary_test", 300)
         
         # Should include boundary and inside metrics
@@ -234,7 +189,6 @@ class TestMetricsCollectorSummary:
 
         assert all(m.value in [1.0, 2.0] for m in recent_metrics)
     
-
     def test_metric_aggregation_performance(self, collector):
 
         """Test performance of metric aggregation with large datasets."""
@@ -244,7 +198,6 @@ class TestMetricsCollectorSummary:
 
         base_time = datetime.now()
         
-
         for i in range(large_dataset_size):
 
             timestamp = base_time - timedelta(seconds=i)
@@ -259,14 +212,12 @@ class TestMetricsCollectorSummary:
 
         summary = collector.get_metric_summary("performance_metric", 600)
         
-
         assert len(recent_metrics) == large_dataset_size
 
         assert summary["count"] == large_dataset_size
 
         assert summary["avg"] == (large_dataset_size - 1) / 2  # 0 to (n-1) average
     
-
     def test_concurrent_metric_access_safety(self, collector):
 
         """Test thread safety of metric access operations."""
@@ -298,7 +249,6 @@ class TestMetricsCollectorSummary:
 
                 assert isinstance(summary, dict)
     
-
     def test_metric_cleanup_efficiency(self, collector):
 
         """Test efficiency of metric cleanup operations."""
@@ -323,7 +273,6 @@ class TestMetricsCollectorSummary:
 
         ]
         
-
         collector._metrics_buffer["cleanup_test"].extend(old_metrics + new_metrics)
         
         # Cleanup should remove only old metrics
@@ -356,7 +305,6 @@ class TestMetricsCollectorSummary:
 
         ]
     
-
     def _populate_metric_buffer(self, collector, metric_name, values, timestamps=None):
 
         """Helper to populate metric buffer with specific values."""
@@ -369,7 +317,6 @@ class TestMetricsCollectorSummary:
 
         collector._metrics_buffer[metric_name].extend(metrics)
     
-
     def _assert_summary_valid(self, summary, expected_count):
 
         """Helper to assert summary structure is valid."""
@@ -392,7 +339,6 @@ class TestMetricsCollectorSummary:
 
             assert summary == {}
     
-
     def _verify_metric_ordering(self, metrics):
 
         """Helper to verify metrics are in expected time order."""

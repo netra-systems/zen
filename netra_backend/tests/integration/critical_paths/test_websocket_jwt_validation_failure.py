@@ -3,17 +3,10 @@ Test case for WebSocket JWT validation failure scenario.
 Reproduces the authentication failure when auth service rejects the JWT token.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -23,10 +16,6 @@ import pytest
 import websockets
 from fastapi import WebSocketDisconnect
 from fastapi.testclient import TestClient
-
-# Add project root to path
-
-
 
 @pytest.mark.asyncio
 async def test_websocket_jwt_validation_failure():
@@ -41,10 +30,10 @@ async def test_websocket_jwt_validation_failure():
     from netra_backend.app.main import app
     
     # Mock the auth client to return validation failure
-    with patch('app.clients.auth_client.auth_client') as mock_auth_client:
+    with patch('netra_backend.app.clients.auth_client.auth_client') as mock_auth_client:
         # Configure auth client to return invalid token response
         mock_validate = AsyncMock(return_value={"valid": False})
-        mock_auth_client.validate_token = mock_validate
+        mock_auth_client.validate_token_jwt = mock_validate
         
         # Use TestClient for WebSocket testing
         with TestClient(app) as client:
@@ -54,7 +43,7 @@ async def test_websocket_jwt_validation_failure():
             try:
                 # This should fail with authentication error
                 with client.websocket_connect(
-                    "/ws/secure",
+                    "/ws",
                     subprotocols=[invalid_jwt],
                     headers={
                         "Origin": "http://localhost:3000"
@@ -75,7 +64,6 @@ async def test_websocket_jwt_validation_failure():
             # Verify auth validation was attempted
             mock_validate.assert_called_once_with(invalid_jwt)
 
-
 @pytest.mark.asyncio 
 async def test_websocket_auth_service_401_response():
     """
@@ -90,7 +78,7 @@ async def test_websocket_auth_service_401_response():
     from netra_backend.app.main import app
     
     # Mock httpx client to simulate 401 from auth service
-    with patch('app.clients.auth_client_core.httpx.AsyncClient') as mock_client_class:
+    with patch('netra_backend.app.clients.auth_client_core.httpx.AsyncClient') as mock_client_class:
         mock_client = AsyncMock()
         mock_client_class.return_value.__aenter__.return_value = mock_client
         
@@ -107,7 +95,7 @@ async def test_websocket_auth_service_401_response():
             
             try:
                 with client.websocket_connect(
-                    "/ws/secure",
+                    "/ws",
                     subprotocols=[jwt_token],
                     headers={
                         "Origin": "http://localhost:3000",
@@ -126,7 +114,6 @@ async def test_websocket_auth_service_401_response():
             call_args = mock_client.post.call_args
             assert "/auth/validate" in call_args[0][0]
 
-
 @pytest.mark.asyncio
 async def test_websocket_no_token_provided():
     """
@@ -138,7 +125,7 @@ async def test_websocket_no_token_provided():
         try:
             # Connect without any auth token
             with client.websocket_connect(
-                "/ws/secure",
+                "/ws",
                 headers={
                     "Origin": "http://localhost:3000"
                 }
@@ -148,7 +135,6 @@ async def test_websocket_no_token_provided():
         except (WebSocketDisconnect, Exception) as e:
             # Should get authentication required error
             assert "Authentication required" in str(e) or "No secure JWT token" in str(e)
-
 
 @pytest.mark.asyncio
 async def test_websocket_auth_token_validation_flow():
@@ -166,8 +152,8 @@ async def test_websocket_auth_token_validation_flow():
     from netra_backend.app.main import app
     
     # Capture logs to verify proper error logging
-    with patch('app.routes.websocket_secure.logger') as mock_logger:
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+    with patch('netra_backend.app.routes.websocket_unified.logger') as mock_logger:
+        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             # Auth validation returns invalid
             mock_validate.return_value = {"valid": False}
             
@@ -176,7 +162,7 @@ async def test_websocket_auth_token_validation_flow():
                 
                 try:
                     with client.websocket_connect(
-                        "/ws/secure", 
+                        "/ws", 
                         subprotocols=[jwt_token],
                         headers={
                             "Origin": "http://localhost:3000",
@@ -193,7 +179,6 @@ async def test_websocket_auth_token_validation_flow():
                 mock_logger.info.assert_any_call("WebSocket auth via Sec-WebSocket-Protocol")
                 mock_logger.error.assert_any_call("WebSocket connection denied: Invalid JWT token")
 
-
 @pytest.mark.asyncio
 async def test_websocket_successful_auth_dev_environment():
     """
@@ -206,7 +191,7 @@ async def test_websocket_successful_auth_dev_environment():
     
     # Set development environment
     with patch.dict(os.environ, {"ENVIRONMENT": "development", "DEV_MODE": "true"}):
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             # In dev mode, auth might be bypassed or always return valid
             mock_validate.return_value = {"valid": True, "user_id": "dev_user", "role": "developer"}
             
@@ -215,7 +200,7 @@ async def test_websocket_successful_auth_dev_environment():
                 
                 try:
                     with client.websocket_connect(
-                        "/ws/secure",
+                        "/ws",
                         subprotocols=[jwt_token],
                         headers={
                             "Origin": "http://localhost:3000",
@@ -235,7 +220,6 @@ async def test_websocket_successful_auth_dev_environment():
                         
                 except Exception as e:
                     pytest.fail(f"Dev environment connection should succeed: {e}")
-
 
 @pytest.mark.asyncio
 async def test_websocket_successful_valid_oauth_token():
@@ -261,7 +245,7 @@ async def test_websocket_successful_valid_oauth_token():
     }
     valid_jwt = jwt.encode(payload, secret_key, algorithm="HS256")
     
-    with patch('app.core.auth_client.auth_client.validate_token') as mock_validate:
+    with patch('netra_backend.app.core.auth_client.auth_client.validate_token') as mock_validate:
         # Auth service validates the token successfully
         mock_validate.return_value = {
             "valid": True,
@@ -276,7 +260,7 @@ async def test_websocket_successful_valid_oauth_token():
             
             try:
                 with client.websocket_connect(
-                    "/ws/secure",
+                    "/ws",
                     subprotocols=[auth_header],
                     headers={
                         "Origin": "http://localhost:3000",
@@ -304,7 +288,6 @@ async def test_websocket_successful_valid_oauth_token():
             except Exception as e:
                 pytest.fail(f"Valid OAuth token should allow connection: {e}")
 
-
 @pytest.mark.asyncio
 async def test_websocket_auth_with_authorization_header():
     """
@@ -312,7 +295,7 @@ async def test_websocket_auth_with_authorization_header():
     """
     from netra_backend.app.main import app
     
-    with patch('app.core.auth_client.auth_client.validate_token') as mock_validate:
+    with patch('netra_backend.app.core.auth_client.auth_client.validate_token') as mock_validate:
         mock_validate.return_value = {
             "valid": True,
             "user_id": "header_auth_user",
@@ -324,7 +307,7 @@ async def test_websocket_auth_with_authorization_header():
             
             try:
                 with client.websocket_connect(
-                    "/ws/secure",
+                    "/ws",
                     headers={
                         "Authorization": jwt_token,
                         "Origin": "http://localhost:3000",
@@ -344,7 +327,6 @@ async def test_websocket_auth_with_authorization_header():
             except Exception as e:
                 pytest.fail(f"Authorization header auth should work: {e}")
 
-
 @pytest.mark.asyncio
 async def test_websocket_token_refresh_during_connection():
     """
@@ -355,7 +337,7 @@ async def test_websocket_token_refresh_during_connection():
 
     from netra_backend.app.main import app
     
-    with patch('app.core.auth_client.auth_client.validate_token') as mock_validate:
+    with patch('netra_backend.app.core.auth_client.auth_client.validate_token') as mock_validate:
         # Initial valid token
         mock_validate.return_value = {
             "valid": True,
@@ -369,7 +351,7 @@ async def test_websocket_token_refresh_during_connection():
             
             try:
                 with client.websocket_connect(
-                    "/ws/secure",
+                    "/ws",
                     subprotocols=[jwt_token],
                     headers={
                         "Origin": "http://localhost:3000"
@@ -395,7 +377,6 @@ async def test_websocket_token_refresh_during_connection():
                     
             except Exception as e:
                 pytest.fail(f"Token refresh should be handled gracefully: {e}")
-
 
 if __name__ == "__main__":
     # Run the tests

@@ -7,21 +7,10 @@ concurrent operations, search, permissions, and access control.
 Business Value: Data integrity and proper thread state management
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -34,26 +23,22 @@ import sqlalchemy
 from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-from .fixtures import (
+from netra_backend.tests.fixtures import (
 
     clean_database_state,
 
     test_database,
-    # Add project root to path
 
     test_user,
 
 )
 
-
 class TestThreadLifecycle:
 
     """Test complete thread lifecycle operations"""
-
 
     async def test_thread_lifecycle(self, clean_database_state):
 
@@ -101,7 +86,6 @@ class TestThreadLifecycle:
 
         }
         
-
         thread = Thread(**thread_data)
 
         session.add(thread)
@@ -156,7 +140,6 @@ class TestThreadLifecycle:
 
         ]
         
-
         for msg_data in messages_data:
 
             message = Message(**msg_data)
@@ -248,7 +231,6 @@ class TestThreadLifecycle:
 
         assert len(remaining_messages) == 0
 
-
     async def test_concurrent_thread_updates(self, clean_database_state):
 
         """Test concurrent modifications with optimistic locking"""
@@ -307,7 +289,6 @@ class TestThreadLifecycle:
 
         concurrent_messages = []
         
-
         async def add_message(user_id: str, message_num: int):
 
             """Add message concurrently"""
@@ -416,7 +397,6 @@ class TestThreadLifecycle:
 
             assert connection.send_text.call_count == len(saved_messages)
 
-
     async def test_thread_search_and_filtering(self, clean_database_state):
 
         """Test thread search capabilities"""
@@ -501,7 +481,6 @@ class TestThreadLifecycle:
 
         ]
         
-
         for thread_data in threads_data:
 
             thread = Thread(
@@ -616,7 +595,6 @@ class TestThreadLifecycle:
 
         assert len(page_1_threads) == 2
         
-
         page_2 = await session.execute(
 
             select(Thread).limit(2).offset(2)
@@ -634,7 +612,6 @@ class TestThreadLifecycle:
         page_2_ids = {t.id for t in page_2_threads}
 
         assert page_1_ids.isdisjoint(page_2_ids)
-
 
     async def test_thread_permissions(self, clean_database_state):
 
@@ -654,7 +631,6 @@ class TestThreadLifecycle:
 
         )
         
-
         regular_user = User(
 
             id="regular-user", 
@@ -665,7 +641,6 @@ class TestThreadLifecycle:
 
         )
         
-
         admin_user = User(
 
             id="admin-user",
@@ -676,7 +651,6 @@ class TestThreadLifecycle:
 
         )
         
-
         session.add_all([owner_user, regular_user, admin_user])
 
         await session.commit()
@@ -881,7 +855,6 @@ class TestThreadLifecycle:
 
         assert audit_messages[0].content[0]["audit"]["action"] == "permission_granted"
 
-
     async def test_thread_metadata_updates(self, clean_database_state):
 
         """Test thread metadata updates and versioning"""
@@ -948,7 +921,6 @@ class TestThreadLifecycle:
 
         ]
         
-
         for update in updates:
             # Update metadata
 
@@ -962,7 +934,6 @@ class TestThreadLifecycle:
 
             thread.metadata_["last_modified"] = datetime.now(timezone.utc).isoformat()
             
-
             await session.commit()
         
         # Verify final state
@@ -971,7 +942,6 @@ class TestThreadLifecycle:
 
         final_thread = result.scalar_one_or_none()
         
-
         assert final_thread.metadata_["title"] == "Updated Metadata Test"
 
         assert final_thread.metadata_["description"] == "Updated description"
@@ -983,7 +953,6 @@ class TestThreadLifecycle:
         assert final_thread.metadata_["custom_fields"]["status"] == "active"
 
         assert final_thread.metadata_["version"] == 5  # Started at 1, 4 updates
-
 
     async def test_thread_recovery_and_restoration(self, clean_database_state):
 

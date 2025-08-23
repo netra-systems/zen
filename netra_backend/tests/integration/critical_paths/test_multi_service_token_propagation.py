@@ -19,17 +19,10 @@ Critical Path Coverage:
 Architecture Compliance: <450 lines, <25 line functions, real components (L2)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -41,21 +34,17 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
 import pytest
-from app.auth_integration.auth import get_current_user
-from clients.auth_client import auth_client
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.clients.auth_client import auth_client
 from sqlalchemy import select
 
 from netra_backend.app.db.models_postgres import User
 
-# Add project root to path
 from netra_backend.app.db.postgres import get_postgres_db
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.agent_service import get_agent_service
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class MockAuthResponse:
     """Mock authentication response for consistent testing."""
@@ -75,7 +64,6 @@ class MockAuthResponse:
             "email": self.email,
             "permissions": self.permissions
         }
-
 
 class TokenPropagationTestManager:
     """Manages multi-service token propagation testing."""
@@ -326,7 +314,6 @@ class TokenPropagationTestManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def token_propagation_manager():
     """Create token propagation test manager."""
@@ -334,7 +321,6 @@ async def token_propagation_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -383,7 +369,6 @@ async def test_multi_service_token_propagation_flow(token_propagation_manager):
     total_time = time.time() - start_time
     assert total_time < 1.0, f"Total flow took {total_time:.2f}s, expected <1s"
 
-
 @pytest.mark.asyncio
 async def test_concurrent_multi_token_propagation(token_propagation_manager):
     """Test concurrent token propagation for multiple users."""
@@ -413,7 +398,6 @@ async def test_concurrent_multi_token_propagation(token_propagation_manager):
         assert services["redis"]["cache_context_set"], "Redis cache failed in concurrent"
         assert services["agent"]["agent_context_set"], "Agent context failed in concurrent"
 
-
 @pytest.mark.asyncio
 async def test_token_propagation_audit_trail(token_propagation_manager):
     """Test audit trail preservation across service boundaries."""
@@ -442,7 +426,6 @@ async def test_token_propagation_audit_trail(token_propagation_manager):
     redis_result = await manager.test_redis_cache_user_context(token)
     assert redis_result["cached_data"]["user_id"] == user_id, "Redis audit user ID mismatch"
     assert "cached_at" in redis_result["cached_data"], "Redis audit timestamp missing"
-
 
 @pytest.mark.asyncio
 async def test_token_propagation_security_validation(token_propagation_manager):

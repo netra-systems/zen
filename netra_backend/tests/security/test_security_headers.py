@@ -3,28 +3,17 @@ Security Headers Tests
 Tests security headers middleware
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 from unittest.mock import Mock
 
 import pytest
 from fastapi import Response
 
-# Add project root to path
 from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
-
-# Add project root to path
-
 
 class TestSecurityHeaders:
     """Test security headers middleware."""
@@ -118,7 +107,6 @@ class TestSecurityHeaders:
         
         assert "Referrer-Policy" in mock_response.headers
         assert mock_response.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

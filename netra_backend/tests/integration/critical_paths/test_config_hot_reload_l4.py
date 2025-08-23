@@ -11,21 +11,10 @@ Coverage: Production configuration management, real service coordination, zero-d
 L4 Realism: Tests against real staging services, real Redis propagation, real secret management, production-like config updates
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -37,33 +26,27 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-# Add project root to path
 # from app.agents.supervisor_consolidated import SupervisorAgent
 from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
-from netra_backend.app.core.config import Settings
+from netra_backend.app.core.config import get_settings
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-
 SupervisorAgent = AsyncMock
 from netra_backend.app.services.health_check_service import HealthCheckService
-from netra_backend.app.services.secret_manager import SecretManager
-from .integration.staging_config.base import StagingConfigTestBase
-
+from netra_backend.app.core.secret_manager import SecretManager
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 logger = logging.getLogger(__name__)
-
 
 class ConfigurationHotReloadL4Manager:
 
     """Manages L4 configuration hot reload testing with real staging services."""
     
-
     def __init__(self):
 
         self.config_service = None
@@ -92,7 +75,6 @@ class ConfigurationHotReloadL4Manager:
 
         self.staging_services_health = {}
         
-
     async def initialize_services(self):
 
         """Initialize L4 configuration hot reload services with staging infrastructure."""
@@ -190,17 +172,14 @@ class ConfigurationHotReloadL4Manager:
 
             await self._verify_staging_services_health()
             
-
             logger.info("L4 configuration hot reload services initialized with staging")
             
-
         except Exception as e:
 
             logger.error(f"Failed to initialize L4 hot reload services: {e}")
 
             raise
     
-
     async def _verify_staging_services_health(self):
 
         """Verify health of all staging services before testing."""
@@ -244,15 +223,12 @@ class ConfigurationHotReloadL4Manager:
 
                     self.staging_services_health[service_name] = health
             
-
             logger.info("Staging services health verification completed for L4 testing")
             
-
         except Exception as e:
 
             raise RuntimeError(f"Staging services health verification failed: {e}")
     
-
     async def create_staging_config(self, config_name: str, config_data: Dict[str, Any]) -> str:
 
         """Create a configuration in staging storage systems."""
@@ -285,10 +261,8 @@ class ConfigurationHotReloadL4Manager:
 
         await self.redis_service.set(f"config_metadata:{config_name}", json.dumps(config_metadata))
         
-
         return config_path
     
-
     async def update_staging_config(self, config_name: str, new_config: Dict[str, Any], 
 
                                   validate: bool = True, simulate_production: bool = True) -> Dict[str, Any]:
@@ -297,7 +271,6 @@ class ConfigurationHotReloadL4Manager:
 
         start_time = time.time()
         
-
         try:
             # Step 1: Pre-validation with staging-specific checks
 
@@ -333,7 +306,6 @@ class ConfigurationHotReloadL4Manager:
 
             health_check_result = await self._verify_services_health_post_reload()
             
-
             reload_time = time.time() - start_time
             
             # Record reload history with staging context
@@ -364,10 +336,8 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
             self.reload_history.append(reload_record)
             
-
             return {
 
                 "success": True,
@@ -390,7 +360,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
         except Exception as e:
 
             reload_time = time.time() - start_time
@@ -399,7 +368,6 @@ class ConfigurationHotReloadL4Manager:
 
             rollback_result = await self._attempt_automatic_rollback(config_name)
             
-
             error_record = {
 
                 "config_name": config_name,
@@ -422,10 +390,8 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
             self.reload_history.append(error_record)
             
-
             return {
 
                 "success": False,
@@ -440,7 +406,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-
     async def validate_staging_config(self, config_name: str, config_data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Validate configuration with staging-specific requirements."""
@@ -449,7 +414,6 @@ class ConfigurationHotReloadL4Manager:
 
         warnings = []
         
-
         try:
             # Basic structure validation
 
@@ -492,7 +456,6 @@ class ConfigurationHotReloadL4Manager:
 
                         errors.append("Port must be integer >= 1024 for production")
                 
-
                 if "max_connections" in config_data:
 
                     max_conn = config_data["max_connections"]
@@ -501,7 +464,6 @@ class ConfigurationHotReloadL4Manager:
 
                         warnings.append("max_connections outside recommended range (100-10000)")
             
-
             elif config_name == "redis_config":
 
                 required_fields = ["host", "port", "db", "password", "ssl"]
@@ -518,7 +480,6 @@ class ConfigurationHotReloadL4Manager:
 
                     warnings.append("SSL disabled - not recommended for staging/production")
             
-
             elif config_name == "agent_config":
 
                 if "max_concurrent_agents" in config_data:
@@ -555,12 +516,10 @@ class ConfigurationHotReloadL4Manager:
 
                         continue
                     
-
                     if "enabled" not in flag_config:
 
                         errors.append(f"Feature flag {flag_name} missing 'enabled' field")
                     
-
                     if "rollout_percentage" in flag_config:
 
                         rollout = flag_config["rollout_percentage"]
@@ -589,7 +548,6 @@ class ConfigurationHotReloadL4Manager:
 
                         warnings.append("Timeout > 300s may cause staging test failures")
             
-
             return {
 
                 "valid": len(errors) == 0,
@@ -602,7 +560,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -615,7 +572,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-
     async def _create_config_backup(self, config_name: str) -> Dict[str, Any]:
 
         """Create backup of current configuration before update."""
@@ -625,7 +581,6 @@ class ConfigurationHotReloadL4Manager:
 
             current_config = await self.config_service.get_config(config_name)
             
-
             if current_config:
 
                 backup_key = f"config_backup:{config_name}:{int(time.time())}"
@@ -646,7 +601,6 @@ class ConfigurationHotReloadL4Manager:
 
                 await self.redis_service.set(backup_key, json.dumps(backup_data), ex=86400)  # 24h TTL
                 
-
                 return {
 
                     "success": True,
@@ -657,10 +611,8 @@ class ConfigurationHotReloadL4Manager:
 
                 }
             
-
             return {"success": True, "message": "No existing config to backup"}
             
-
         except Exception as e:
 
             return {
@@ -671,7 +623,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-
     async def trigger_staging_hot_reload(self, config_name: str, new_config: Dict[str, Any]) -> Dict[str, Any]:
 
         """Trigger hot reload across staging services with production coordination."""
@@ -751,7 +702,6 @@ class ConfigurationHotReloadL4Manager:
 
                     self.config_versions[service_name]["status"] = "updated"
                     
-
                 except Exception as e:
 
                     reload_results[service_name] = {"success": False, "error": str(e)}
@@ -762,7 +712,6 @@ class ConfigurationHotReloadL4Manager:
 
             propagation_result = await self.propagate_config_via_staging_redis(config_name, new_config)
             
-
             overall_success = (
 
                 coordination_success and 
@@ -773,7 +722,6 @@ class ConfigurationHotReloadL4Manager:
 
             )
             
-
             return {
 
                 "success": overall_success,
@@ -790,7 +738,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -803,7 +750,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-
     async def simulate_staging_config_update(self, service_name: str, config_name: str, 
 
                                            new_config: Dict[str, Any]):
@@ -829,7 +775,6 @@ class ConfigurationHotReloadL4Manager:
 
         }
         
-
         await self.redis_service.set(config_key, json.dumps(config_data))
         
         # Simulate service-specific processing
@@ -844,7 +789,6 @@ class ConfigurationHotReloadL4Manager:
 
             await asyncio.sleep(0.05)
     
-
     async def propagate_config_via_staging_redis(self, config_name: str, new_config: Dict[str, Any]) -> Dict[str, Any]:
 
         """Propagate configuration changes via staging Redis pub/sub."""
@@ -879,7 +823,6 @@ class ConfigurationHotReloadL4Manager:
 
             await self.redis_service.set(persistent_key, json.dumps(message), ex=604800)  # 7 days TTL
             
-
             return {
 
                 "success": True,
@@ -892,7 +835,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
         except Exception as e:
 
             logger.error(f"Failed to propagate config via staging Redis: {e}")
@@ -905,7 +847,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-
     async def verify_staging_config_propagation(self, config_name: str, 
 
                                               expected_config: Dict[str, Any],
@@ -916,7 +857,6 @@ class ConfigurationHotReloadL4Manager:
 
         verification_results = {}
         
-
         try:
             # Verify propagation to each service
 
@@ -929,7 +869,6 @@ class ConfigurationHotReloadL4Manager:
 
                     stored_config_str = await self.redis_service.get(config_key)
                     
-
                     if stored_config_str:
 
                         stored_data = json.loads(stored_config_str)
@@ -938,7 +877,6 @@ class ConfigurationHotReloadL4Manager:
 
                         matches = self._configs_match(stored_config, expected_config)
                         
-
                         verification_results[service_name] = {
 
                             "config_propagated": matches,
@@ -963,7 +901,6 @@ class ConfigurationHotReloadL4Manager:
 
                         }
                     
-
                 except Exception as e:
 
                     verification_results[service_name] = {
@@ -984,7 +921,6 @@ class ConfigurationHotReloadL4Manager:
 
             persistent_verified = False
             
-
             if persistent_config_str:
 
                 persistent_data = json.loads(persistent_config_str)
@@ -999,7 +935,6 @@ class ConfigurationHotReloadL4Manager:
 
                 await self._simulate_multi_instance_propagation(config_name, expected_config)
             
-
             all_propagated = all(
 
                 result["config_propagated"] 
@@ -1008,7 +943,6 @@ class ConfigurationHotReloadL4Manager:
 
             )
             
-
             return {
 
                 "success": all_propagated and persistent_verified,
@@ -1023,7 +957,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -1036,7 +969,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-
     def _configs_match(self, config1: Dict[str, Any], config2: Dict[str, Any]) -> bool:
 
         """Compare two configurations for equivalence."""
@@ -1048,15 +980,12 @@ class ConfigurationHotReloadL4Manager:
 
             clean_config2 = {k: v for k, v in config2.items() if not k.endswith('_at')}
             
-
             return clean_config1 == clean_config2
             
-
         except Exception:
 
             return False
     
-
     async def _simulate_multi_instance_propagation(self, config_name: str, expected_config: Dict[str, Any]):
 
         """Simulate configuration propagation to multiple service instances."""
@@ -1078,10 +1007,8 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
             await self.redis_service.set(instance_key, json.dumps(instance_data), ex=3600)
     
-
     async def _verify_services_health_post_reload(self) -> Dict[str, Any]:
 
         """Verify all services remain healthy after configuration reload."""
@@ -1092,7 +1019,6 @@ class ConfigurationHotReloadL4Manager:
 
             overall_healthy = True
             
-
             for service_name, service in self.services.items():
 
                 try:
@@ -1103,7 +1029,6 @@ class ConfigurationHotReloadL4Manager:
 
                         is_healthy = health_status.get("status") in ["healthy", "ok"]
                         
-
                         health_results[service_name] = {
 
                             "healthy": is_healthy,
@@ -1114,7 +1039,6 @@ class ConfigurationHotReloadL4Manager:
 
                         }
                         
-
                         if not is_healthy:
 
                             overall_healthy = False
@@ -1132,7 +1056,6 @@ class ConfigurationHotReloadL4Manager:
 
                         }
                         
-
                 except Exception as e:
 
                     health_results[service_name] = {
@@ -1147,7 +1070,6 @@ class ConfigurationHotReloadL4Manager:
 
                     overall_healthy = False
             
-
             return {
 
                 "passed": overall_healthy,
@@ -1158,7 +1080,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -1171,7 +1092,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-
     async def _attempt_automatic_rollback(self, config_name: str) -> Dict[str, Any]:
 
         """Attempt automatic rollback to previous configuration."""
@@ -1183,7 +1103,6 @@ class ConfigurationHotReloadL4Manager:
 
             backup_keys = await self.redis_service.keys(backup_pattern)
             
-
             if not backup_keys:
 
                 return {
@@ -1200,7 +1119,6 @@ class ConfigurationHotReloadL4Manager:
 
             backup_data_str = await self.redis_service.get(latest_backup_key)
             
-
             if backup_data_str:
 
                 backup_data = json.loads(backup_data_str)
@@ -1211,7 +1129,6 @@ class ConfigurationHotReloadL4Manager:
 
                 rollback_result = await self.trigger_staging_hot_reload(config_name, rollback_config)
                 
-
                 return {
 
                     "attempted": True,
@@ -1224,7 +1141,6 @@ class ConfigurationHotReloadL4Manager:
 
                 }
             
-
             return {
 
                 "attempted": False,
@@ -1233,7 +1149,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -1246,20 +1161,17 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-
     async def test_secret_rotation_hot_reload(self, secret_name: str, new_secret_value: str) -> Dict[str, Any]:
 
         """Test secret rotation with hot reload in staging."""
 
         rotation_start = time.time()
         
-
         try:
             # Step 1: Rotate secret in staging Secret Manager
 
             rotation_result = await self.secret_manager.rotate_secret(secret_name, new_secret_value)
             
-
             if not rotation_result["success"]:
 
                 raise ValueError(f"Secret rotation failed: {rotation_result.get('error')}")
@@ -1268,7 +1180,6 @@ class ConfigurationHotReloadL4Manager:
 
             secret_reload_results = {}
             
-
             for service_name, service in self.services.items():
 
                 try:
@@ -1286,7 +1197,6 @@ class ConfigurationHotReloadL4Manager:
 
                         secret_reload_results[service_name] = {"success": True, "simulated": True}
                         
-
                 except Exception as e:
 
                     secret_reload_results[service_name] = {"success": False, "error": str(e)}
@@ -1295,7 +1205,6 @@ class ConfigurationHotReloadL4Manager:
 
             verification_result = await self._verify_secret_propagation(secret_name, new_secret_value)
             
-
             rotation_time = time.time() - rotation_start
             
             # Record rotation history
@@ -1320,10 +1229,8 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
             self.secret_rotations.append(rotation_record)
             
-
             return {
 
                 "success": True,
@@ -1340,12 +1247,10 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
         except Exception as e:
 
             rotation_time = time.time() - rotation_start
             
-
             return {
 
                 "success": False,
@@ -1358,7 +1263,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-
     async def _simulate_secret_reload(self, service_name: str, secret_name: str, new_secret_value: str):
 
         """Simulate secret reload for services without explicit secret management."""
@@ -1380,10 +1284,8 @@ class ConfigurationHotReloadL4Manager:
 
         }
         
-
         await self.redis_service.set(secret_key, json.dumps(secret_metadata))
     
-
     async def _verify_secret_propagation(self, secret_name: str, expected_secret_value: str) -> Dict[str, Any]:
 
         """Verify secret propagation across staging services."""
@@ -1404,7 +1306,6 @@ class ConfigurationHotReloadL4Manager:
 
                 secret_metadata_str = await self.redis_service.get(secret_key)
                 
-
                 if secret_metadata_str:
 
                     secret_metadata = json.loads(secret_metadata_str)
@@ -1427,7 +1328,6 @@ class ConfigurationHotReloadL4Manager:
 
                     }
             
-
             all_updated = all(
 
                 result["secret_updated"] 
@@ -1436,7 +1336,6 @@ class ConfigurationHotReloadL4Manager:
 
             )
             
-
             return {
 
                 "success": secret_exists and all_updated,
@@ -1447,7 +1346,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -1458,7 +1356,6 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-
     def get_next_global_version(self) -> int:
 
         """Get next global configuration version."""
@@ -1473,7 +1370,6 @@ class ConfigurationHotReloadL4Manager:
 
         return max_version + 1
     
-
     async def get_hot_reload_metrics(self) -> Dict[str, Any]:
 
         """Get comprehensive L4 hot reload metrics."""
@@ -1482,12 +1378,10 @@ class ConfigurationHotReloadL4Manager:
 
             return {"total_reloads": 0, "staging_verified": True}
         
-
         successful_reloads = [r for r in self.reload_history if r.get("success", False)]
 
         failed_reloads = [r for r in self.reload_history if not r.get("success", False)]
         
-
         reload_times = [r["reload_time"] for r in successful_reloads if "reload_time" in r]
 
         avg_reload_time = sum(reload_times) / len(reload_times) if reload_times else 0
@@ -1504,7 +1398,6 @@ class ConfigurationHotReloadL4Manager:
 
         avg_rotation_time = sum(rotation_times) / len(rotation_times) if rotation_times else 0
         
-
         return {
 
             "total_reloads": len(self.reload_history),
@@ -1537,7 +1430,6 @@ class ConfigurationHotReloadL4Manager:
 
         }
     
-
     async def cleanup(self):
 
         """Clean up L4 resources and staging connections."""
@@ -1564,12 +1456,10 @@ class ConfigurationHotReloadL4Manager:
 
                 test_keys.extend(await self.redis_service.keys("staging_persistent_config:*"))
                 
-
                 for key in test_keys:
 
                     await self.redis_service.delete(key)
                 
-
                 await self.redis_service.disconnect()
             
             # Cleanup temporary directory
@@ -1579,11 +1469,9 @@ class ConfigurationHotReloadL4Manager:
 
                 shutil.rmtree(self.temp_config_dir)
                 
-
         except Exception as e:
 
             logger.error(f"L4 cleanup failed: {e}")
-
 
 @pytest.fixture
 
@@ -1598,7 +1486,6 @@ async def l4_hot_reload_manager():
     yield manager
 
     await manager.cleanup()
-
 
 @pytest.mark.staging
 
@@ -1706,7 +1593,6 @@ async def test_l4_websocket_config_production_hot_reload(l4_hot_reload_manager):
     assert result["health_check"]["passed"] is True
 
     assert result["health_check"]["staging_verified"] is True
-
 
 @pytest.mark.staging
 
@@ -1831,7 +1717,6 @@ async def test_l4_feature_flag_hot_reload_with_rollout(l4_hot_reload_manager):
 
     assert propagation["persistent_verified"] is True
 
-
 @pytest.mark.staging
 
 @pytest.mark.asyncio
@@ -1893,7 +1778,6 @@ async def test_l4_secret_rotation_with_zero_downtime(l4_hot_reload_manager):
 
     ]
     
-
     rotation_results = []
 
     for secret_name, secret_value in secrets_to_rotate:
@@ -1913,7 +1797,6 @@ async def test_l4_secret_rotation_with_zero_downtime(l4_hot_reload_manager):
         assert result["success"] is True
 
         assert result["staging_verified"] is True
-
 
 @pytest.mark.staging
 
@@ -1977,7 +1860,6 @@ async def test_l4_config_validation_and_error_handling(l4_hot_reload_manager):
 
     ]
     
-
     for test_case in invalid_configs:
         # Attempt to apply invalid configuration
 
@@ -2019,7 +1901,6 @@ async def test_l4_config_validation_and_error_handling(l4_hot_reload_manager):
 
     }
     
-
     result = await l4_hot_reload_manager.update_staging_config(
 
         "warning_websocket_config", warning_config
@@ -2033,7 +1914,6 @@ async def test_l4_config_validation_and_error_handling(l4_hot_reload_manager):
     assert len(result["validation"]["warnings"]) > 0
 
     assert result["validation"]["valid"] is True
-
 
 @pytest.mark.staging
 
@@ -2127,7 +2007,6 @@ async def test_l4_concurrent_config_updates_coordination(l4_hot_reload_manager):
 
     assert len(health_passed) >= num_concurrent * 0.8  # At least 80% health checks passed
 
-
 @pytest.mark.staging
 
 @pytest.mark.asyncio
@@ -2156,10 +2035,8 @@ async def test_l4_hot_reload_performance_and_sla_compliance(l4_hot_reload_manage
 
     ]
     
-
     reload_times = []
     
-
     for config_name, config_data in performance_configs:
 
         result = await l4_hot_reload_manager.update_staging_config(
@@ -2174,7 +2051,6 @@ async def test_l4_hot_reload_performance_and_sla_compliance(l4_hot_reload_manage
 
         assert result["staging_verified"] is True
         
-
         reload_time = result["reload_time"]
 
         reload_times.append(reload_time)
@@ -2223,7 +2099,6 @@ async def test_l4_hot_reload_performance_and_sla_compliance(l4_hot_reload_manage
 
     assert max(reload_times) / min(reload_times) < 3.0  # Performance variance < 3x
 
-
 @pytest.mark.staging
 
 @pytest.mark.asyncio
@@ -2245,7 +2120,6 @@ async def test_l4_disaster_recovery_and_rollback(l4_hot_reload_manager):
 
     }
     
-
     result1 = await l4_hot_reload_manager.update_staging_config("disaster_test_config", stable_config)
 
     assert result1["success"] is True
@@ -2269,12 +2143,10 @@ async def test_l4_disaster_recovery_and_rollback(l4_hot_reload_manager):
     # Patch a service to fail on this config to simulate disaster
     from unittest.mock import patch
     
-
     with patch.object(l4_hot_reload_manager.services["health_service"], 'reload_config', 
 
                      side_effect=Exception("Simulated config failure")):
         
-
         result2 = await l4_hot_reload_manager.update_staging_config(
 
             "disaster_test_config", problematic_config
@@ -2303,7 +2175,6 @@ async def test_l4_disaster_recovery_and_rollback(l4_hot_reload_manager):
 
     }
     
-
     result3 = await l4_hot_reload_manager.update_staging_config("disaster_test_config", recovery_config)
 
     assert result3["success"] is True

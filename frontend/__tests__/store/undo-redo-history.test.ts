@@ -24,13 +24,65 @@ class StateHistoryManager {
 
   push(state: any): void {
     this.history = this.history.slice(0, this.currentIndex + 1);
-    this.history.push(JSON.parse(JSON.stringify(state)));
+    // Only serialize serializable properties, excluding functions
+    const serializableState = this.extractSerializableState(state);
+    try {
+      const serialized = JSON.stringify(serializableState);
+      this.history.push(JSON.parse(serialized));
+    } catch (error) {
+      // Fallback for non-serializable objects
+      this.history.push({ ...serializableState });
+    }
     this.currentIndex = this.history.length - 1;
     
     if (this.history.length > this.maxHistorySize) {
       this.history.shift();
       this.currentIndex--;
     }
+  }
+
+  private extractSerializableState(state: any): any {
+    if (state === null || state === undefined) {
+      return null;
+    }
+    
+    // Handle primitive types
+    if (typeof state !== 'object') {
+      return state;
+    }
+    
+    // Handle arrays
+    if (Array.isArray(state)) {
+      return state.map(item => this.extractSerializableState(item));
+    }
+    
+    // If it's a zustand store state object, extract only the data properties
+    if (typeof state === 'object') {
+      const serializable: any = {};
+      for (const [key, value] of Object.entries(state)) {
+        // Skip functions and internal zustand properties
+        if (typeof value !== 'function' && 
+            key !== 'setState' && 
+            key !== 'getState' && 
+            key !== 'subscribe' && 
+            key !== 'destroy' &&
+            key !== 'rerender' &&
+            key !== 'unmount' &&
+            key !== 'result') {
+          
+          if (value === undefined) {
+            serializable[key] = null;
+          } else if (typeof value === 'object') {
+            serializable[key] = this.extractSerializableState(value);
+          } else {
+            serializable[key] = value;
+          }
+        }
+      }
+      return serializable;
+    }
+    
+    return state;
   }
 
   canUndo(): boolean {
@@ -65,6 +117,12 @@ describe('Undo/Redo History Tests', () => {
   beforeEach(() => {
     GlobalTestUtils.setupStoreTestEnvironment();
     historyManager = new StateHistoryManager();
+    
+    // Reset the store state before each test
+    const { result } = renderHook(() => useChatStore());
+    act(() => {
+      result.current.reset();
+    });
   });
 
   afterEach(() => {
@@ -73,25 +131,26 @@ describe('Undo/Redo History Tests', () => {
 
   describe('State History Management', () => {
     it('should track state changes for undo/redo', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const hookResult = ChatStoreTestUtils.initializeStore();
+      const store = hookResult.result.current;
       
       // Initial state
-      historyManager.push(result.current);
+      historyManager.push(store);
 
       const message1 = ChatStoreTestUtils.createMockMessage('hist-1');
       act(() => {
-        result.current.addMessage(message1);
+        store.addMessage(message1);
         historyManager.push({
-          messages: result.current.messages,
+          messages: store.messages,
           timestamp: Date.now()
         });
       });
 
       const message2 = ChatStoreTestUtils.createMockMessage('hist-2');
       act(() => {
-        result.current.addMessage(message2);
+        store.addMessage(message2);
         historyManager.push({
-          messages: result.current.messages,
+          messages: store.messages,
           timestamp: Date.now()
         });
       });
@@ -101,15 +160,16 @@ describe('Undo/Redo History Tests', () => {
     });
 
     it('should implement circular buffer for history size limits', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const hookResult = ChatStoreTestUtils.initializeStore();
+      const store = hookResult.result.current;
       
       // Fill history beyond limit
       for (let i = 0; i < 60; i++) {
         const message = ChatStoreTestUtils.createMockMessage(`limit-${i}`);
         act(() => {
-          result.current.addMessage(message);
+          store.addMessage(message);
           historyManager.push({
-            messages: result.current.messages,
+            messages: store.messages,
             action: `add-message-${i}`
           });
         });
@@ -120,7 +180,8 @@ describe('Undo/Redo History Tests', () => {
     });
 
     it('should preserve action context in history', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const hookResult = ChatStoreTestUtils.initializeStore();
+      const store = hookResult.result.current;
       
       const actionWithContext = {
         type: 'ADD_MESSAGE',
@@ -130,9 +191,9 @@ describe('Undo/Redo History Tests', () => {
       };
 
       act(() => {
-        result.current.addMessage(actionWithContext.payload);
+        store.addMessage(actionWithContext.payload);
         historyManager.push({
-          state: result.current.messages,
+          state: store.messages,
           action: actionWithContext
         });
       });
@@ -141,113 +202,118 @@ describe('Undo/Redo History Tests', () => {
     });
 
     it('should handle bulk operations in history', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const hookResult = ChatStoreTestUtils.initializeStore();
+      const store = hookResult.result.current;
       
       const messages = Array.from({ length: 5 }, (_, i) => 
         ChatStoreTestUtils.createMockMessage(`bulk-${i}`)
       );
 
       act(() => {
-        messages.forEach(msg => result.current.addMessage(msg));
+        messages.forEach(msg => store.addMessage(msg));
         historyManager.push({
-          state: result.current.messages,
+          state: store.messages,
           action: { type: 'BULK_ADD_MESSAGES', count: messages.length }
         });
       });
 
-      expect(result.current.messages).toHaveLength(5);
+      expect(store.messages).toHaveLength(5);
       expect(historyManager.canUndo()).toBe(true);
     });
   });
 
   describe('Undo Operations', () => {
     it('should undo single message addition', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const hookResult = ChatStoreTestUtils.initializeStore();
+      const store = hookResult.result.current;
       
       // Initial state
-      historyManager.push({ messages: result.current.messages });
+      historyManager.push({ messages: store.messages });
 
       const message = ChatStoreTestUtils.createMockMessage('undo-msg');
       act(() => {
-        result.current.addMessage(message);
-        historyManager.push({ messages: result.current.messages });
+        store.addMessage(message);
+        historyManager.push({ messages: store.messages });
       });
 
-      expect(result.current.messages).toHaveLength(1);
+      expect(store.messages).toHaveLength(1);
 
       // Undo
       const previousState = historyManager.undo();
       if (previousState) {
         act(() => {
-          result.current.loadMessages(previousState.messages);
+          store.loadMessages(previousState.messages);
         });
       }
 
-      expect(result.current.messages).toHaveLength(0);
+      expect(store.messages).toHaveLength(0);
     });
 
     it('should undo message updates', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const hookResult = ChatStoreTestUtils.initializeStore();
+      const store = hookResult.result.current;
       
       const originalMessage = ChatStoreTestUtils.createMockMessage('update-msg', 'user', 'Original');
       act(() => {
-        result.current.addMessage(originalMessage);
-        historyManager.push({ messages: result.current.messages });
+        store.addMessage(originalMessage);
+        historyManager.push({ messages: store.messages });
       });
 
       act(() => {
-        result.current.updateMessage('update-msg', { content: 'Updated' });
-        historyManager.push({ messages: result.current.messages });
+        store.updateMessage('update-msg', { content: 'Updated' });
+        historyManager.push({ messages: store.messages });
       });
 
-      expect(result.current.messages[0].content).toBe('Updated');
+      expect(store.messages[0].content).toBe('Updated');
 
       // Undo
       const previousState = historyManager.undo();
       if (previousState) {
         act(() => {
-          result.current.loadMessages(previousState.messages);
+          store.loadMessages(previousState.messages);
         });
       }
 
-      expect(result.current.messages[0].content).toBe('Original');
+      expect(store.messages[0].content).toBe('Original');
     });
 
     it('should undo state transitions', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const hookResult = ChatStoreTestUtils.initializeStore();
+      const store = hookResult.result.current;
       
       historyManager.push({ 
-        isProcessing: result.current.isProcessing,
-        subAgentName: result.current.subAgentName
+        isProcessing: store.isProcessing,
+        subAgentName: store.subAgentName
       });
 
       act(() => {
-        result.current.setProcessing(true);
-        result.current.setSubAgentName('DataSubAgent');
+        store.setProcessing(true);
+        store.setSubAgentName('DataSubAgent');
         historyManager.push({ 
-          isProcessing: result.current.isProcessing,
-          subAgentName: result.current.subAgentName
+          isProcessing: store.isProcessing,
+          subAgentName: store.subAgentName
         });
       });
 
-      expect(result.current.isProcessing).toBe(true);
-      expect(result.current.subAgentName).toBe('DataSubAgent');
+      expect(store.isProcessing).toBe(true);
+      expect(store.subAgentName).toBe('DataSubAgent');
 
       // Undo
       const previousState = historyManager.undo();
       if (previousState) {
         act(() => {
-          result.current.setProcessing(previousState.isProcessing);
-          result.current.setSubAgentName(previousState.subAgentName);
+          store.setProcessing(previousState.isProcessing);
+          store.setSubAgentName(previousState.subAgentName);
         });
       }
 
-      expect(result.current.isProcessing).toBe(false);
-      expect(result.current.subAgentName).toBe('Netra Agent');
+      expect(store.isProcessing).toBe(false);
+      expect(store.subAgentName).toBe('Netra Agent');
     });
 
     it('should handle multiple consecutive undos', () => {
-      const result = ChatStoreTestUtils.initializeStore();
+      const hookResult = ChatStoreTestUtils.initializeStore();
+      const store = hookResult.result.current;
       
       // Initial state
       historyManager.push({ messages: [] });
@@ -257,25 +323,25 @@ describe('Undo/Redo History Tests', () => {
       messages.forEach((content, index) => {
         const msg = ChatStoreTestUtils.createMockMessage(`seq-${index}`, 'user', content);
         act(() => {
-          result.current.addMessage(msg);
-          historyManager.push({ messages: [...result.current.messages] });
+          store.addMessage(msg);
+          historyManager.push({ messages: [...store.messages] });
         });
       });
 
-      expect(result.current.messages).toHaveLength(3);
+      expect(store.messages).toHaveLength(3);
 
       // Undo twice
       for (let i = 0; i < 2; i++) {
         const previousState = historyManager.undo();
         if (previousState) {
           act(() => {
-            result.current.loadMessages(previousState.messages);
+            store.loadMessages(previousState.messages);
           });
         }
       }
 
-      expect(result.current.messages).toHaveLength(1);
-      expect(result.current.messages[0].content).toBe('First');
+      expect(store.messages).toHaveLength(1);
+      expect(store.messages[0].content).toBe('First');
     });
   });
 

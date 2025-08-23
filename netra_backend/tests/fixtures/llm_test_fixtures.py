@@ -22,7 +22,7 @@ from pydantic import BaseModel
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.llm.llm_manager import LLMManager
-from .llm_fixtures_advanced import (
+from netra_backend.tests.llm_fixtures_advanced import (
     create_circuit_breaker_manager,
     create_error_simulating_manager,
     create_performance_monitoring_manager,
@@ -30,7 +30,7 @@ from .llm_fixtures_advanced import (
 )
 
 # Import specialized fixtures
-from .llm_fixtures_core import (
+from netra_backend.tests.llm_fixtures_core import (
     create_basic_llm_manager,
     create_streaming_llm_manager,
     create_structured_llm_manager,
@@ -41,14 +41,12 @@ MockResponse = Dict[str, Any]
 ProviderKey = str
 ModelName = str
 
-
 class LLMProvider(Enum):
     """LLM provider types for testing."""
     OPENAI = "openai"
     GOOGLE = "google"
     ANTHROPIC = "anthropic"
     MOCK = "mock"
-
 
 class MockResponseType(Enum):
     """Types of mock responses available."""
@@ -58,13 +56,11 @@ class MockResponseType(Enum):
     ERROR = "error"
     TIMEOUT = "timeout"
 
-
 def create_token_counting_manager() -> Mock:
     """Create LLM manager with token counting capabilities."""
     manager = create_basic_llm_manager()
     _setup_token_counting(manager)
     return manager
-
 
 def _setup_token_counting(manager: Mock) -> None:
     """Setup token counting methods."""
@@ -72,14 +68,12 @@ def _setup_token_counting(manager: Mock) -> None:
     manager.estimate_cost = Mock(return_value=0.002)
     manager.get_token_usage = AsyncMock(return_value={"prompt": 50, "completion": 50})
 
-
 def create_caching_llm_manager() -> Mock:
     """Create LLM manager with response caching."""
     manager = create_basic_llm_manager()
     cache = {}
     _setup_caching_methods(manager, cache)
     return manager
-
 
 def _setup_caching_methods(manager: Mock, cache: Dict[str, Any]) -> None:
     """Setup caching functionality."""
@@ -92,13 +86,11 @@ def _setup_caching_methods(manager: Mock, cache: Dict[str, Any]) -> None:
     
     manager.call_llm = AsyncMock(side_effect=cached_call)
 
-
 def create_model_specific_manager(model_configs: Dict[ModelName, Dict[str, Any]]) -> Mock:
     """Create LLM manager with model-specific configurations."""
     manager = create_basic_llm_manager()
     _setup_model_specific_behavior(manager, model_configs)
     return manager
-
 
 def _setup_model_specific_behavior(manager: Mock, model_configs: Dict[ModelName, Dict[str, Any]]) -> None:
     """Setup model-specific response behavior."""
@@ -108,13 +100,11 @@ def _setup_model_specific_behavior(manager: Mock, model_configs: Dict[ModelName,
     
     manager.call_llm = AsyncMock(side_effect=model_specific_call)
 
-
 def create_comprehensive_test_manager() -> Mock:
     """Create comprehensive LLM manager for integration testing."""
     manager = create_basic_llm_manager()
     _setup_comprehensive_features(manager)
     return manager
-
 
 def _setup_comprehensive_features(manager: Mock) -> None:
     """Setup all features for comprehensive testing."""
@@ -124,7 +114,6 @@ def _setup_comprehensive_features(manager: Mock) -> None:
     manager.get_available_models = AsyncMock(return_value=["gpt-4", "claude-3"])
     manager.estimate_tokens = Mock(return_value=150)
     manager.validate_request = Mock(return_value=True)
-
 
 # Factory function for common test scenarios
 def llm_manager_factory(
@@ -143,14 +132,12 @@ def llm_manager_factory(
     else:
         return create_basic_llm_manager()
 
-
 def quick_mock_responses(count: int = 3) -> List[MockResponse]:
     """Generate quick mock responses for testing."""
     return [
         {"content": f"Mock response {i}", "id": str(uuid.uuid4())}
         for i in range(count)
     ]
-
 
 def mock_triage_result() -> Dict[str, Any]:
     """Create mock triage result for agent testing."""
@@ -161,7 +148,6 @@ def mock_triage_result() -> Dict[str, Any]:
         "priority": "high",
         "analysis": "User needs AI workload optimization"
     }
-
 
 def mock_agent_state() -> Dict[str, Any]:
     """Create mock agent state for persistence testing."""

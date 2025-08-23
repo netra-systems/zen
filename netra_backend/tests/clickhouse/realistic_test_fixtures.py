@@ -18,7 +18,6 @@ from netra_backend.app.db.clickhouse_query_fixer import (
     validate_clickhouse_query,
 )
 
-
 def generate_realistic_logs(count: int) -> List[Dict]:
     """Generate realistic log entries"""
     log_types = ["INFO", "WARNING", "ERROR", "DEBUG"]
@@ -42,7 +41,6 @@ def generate_realistic_logs(count: int) -> List[Dict]:
         })
     return logs
 
-
 def generate_llm_metrics(count: int) -> List[Dict]:
     """Generate realistic LLM metrics"""
     models = ["gpt-4", "gpt-3.5-turbo", "claude-3", "gemini-pro"]
@@ -64,7 +62,6 @@ def generate_llm_metrics(count: int) -> List[Dict]:
         })
     return metrics
 
-
 def create_mock_clickhouse_client():
     """Create mock ClickHouse client for testing"""
     mock_client = AsyncMock()
@@ -72,12 +69,10 @@ def create_mock_clickhouse_client():
     mock_client.execute = AsyncMock()
     return mock_client
 
-
 def create_query_interceptor_with_mock():
     """Create query interceptor with mock client"""
     mock_client = create_mock_clickhouse_client()
     return ClickHouseQueryInterceptor(mock_client), mock_client
-
 
 def validate_array_query_syntax(query: str) -> bool:
     """Validate that query uses proper ClickHouse array syntax"""
@@ -98,7 +93,6 @@ def validate_array_query_syntax(query: str) -> bool:
     
     return has_correct_syntax or '[' not in query  # No arrays used is also valid
 
-
 def get_sample_workload_event():
     """Get sample workload event for testing"""
     return {
@@ -111,7 +105,6 @@ def get_sample_workload_event():
         "dimensions": json.dumps({"test": True}),
         "metadata": json.dumps({"test_event": True})
     }
-
 
 def get_sample_log_entry():
     """Get sample log entry for testing"""
@@ -126,7 +119,6 @@ def get_sample_log_entry():
             "latency_ms": 150.5
         }
     }
-
 
 def get_performance_test_queries():
     """Get collection of performance test queries"""
@@ -166,42 +158,35 @@ def get_performance_test_queries():
         """
     }
 
-
 @pytest.fixture
 def generate_realistic_logs_fixture():
     """Fixture for generating realistic logs"""
     return generate_realistic_logs
-
 
 @pytest.fixture
 def mock_clickhouse_client():
     """Fixture for mock ClickHouse client"""
     return create_mock_clickhouse_client()
 
-
 @pytest.fixture
 def query_interceptor_with_mock():
     """Fixture for query interceptor with mock client"""
     return create_query_interceptor_with_mock()
-
 
 @pytest.fixture
 def sample_workload_event():
     """Fixture for sample workload event"""
     return get_sample_workload_event()
 
-
 @pytest.fixture
 def sample_log_entry():
     """Fixture for sample log entry"""
     return get_sample_log_entry()
 
-
 @pytest.fixture
 def performance_queries():
     """Fixture for performance test queries"""
     return get_performance_test_queries()
-
 
 @pytest.fixture
 def llm_metrics_batch():

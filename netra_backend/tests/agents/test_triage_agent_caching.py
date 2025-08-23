@@ -4,17 +4,10 @@ Tests caching functionality, execute method, and request hashing
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 from unittest.mock import AsyncMock, Mock
@@ -24,13 +17,9 @@ import pytest
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
-
-# Add project root to path
-
 
 @pytest.fixture
 def mock_llm_manager():
@@ -40,12 +29,10 @@ def mock_llm_manager():
     mock.ask_structured_llm = AsyncMock(side_effect=Exception("Structured generation not available in test"))
     return mock
 
-
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create a mock tool dispatcher."""
     return Mock(spec=ToolDispatcher)
-
 
 @pytest.fixture
 def mock_redis_manager():
@@ -55,21 +42,20 @@ def mock_redis_manager():
     mock.set = AsyncMock(return_value=True)
     return mock
 
-
 @pytest.fixture
 def triage_agent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
     """Create a TriageSubAgent instance with mocked dependencies."""
     return TriageSubAgent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager)
-
 
 @pytest.fixture
 def sample_state():
     """Create a sample DeepAgentState."""
     return DeepAgentState(user_request="Optimize my GPT-4 costs by 30% while maintaining latency under 100ms")
 
-
 class TestCaching:
     """Test caching functionality."""
+    
+    @pytest.mark.asyncio
     
     async def test_cache_hit(self, triage_agent, sample_state, mock_redis_manager):
         """Test successful cache hit."""
@@ -93,6 +79,8 @@ class TestCaching:
         # Check result uses cached data
         assert sample_state.triage_result.category == "Cost Optimization"
         assert sample_state.triage_result.metadata.cache_hit == True
+
+    @pytest.mark.asyncio
 
     async def test_cache_miss_and_store(self, triage_agent, sample_state, mock_redis_manager):
         """Test cache miss leading to LLM call and result caching."""
@@ -120,9 +108,10 @@ class TestCaching:
         assert sample_state.triage_result.category in ["Cost Optimization", "unknown", "General Inquiry"]
         assert sample_state.triage_result.metadata.cache_hit == False
 
-
 class TestExecuteMethod:
     """Test the main execute method."""
+    
+    @pytest.mark.asyncio
     
     async def test_successful_execution(self, triage_agent, sample_state):
         """Test successful execution with valid LLM response."""
@@ -142,6 +131,8 @@ class TestExecuteMethod:
         assert "user_intent" in sample_state.triage_result
         assert "tool_recommendations" in sample_state.triage_result
 
+    @pytest.mark.asyncio
+
     async def test_execution_with_retry(self, triage_agent, sample_state):
         """Test execution with LLM failure and retry."""
         # First call fails, second succeeds
@@ -156,6 +147,8 @@ class TestExecuteMethod:
         assert triage_agent.llm_manager.ask_llm.call_count == 2
         assert sample_state.triage_result.category == "Cost Optimization"
         assert sample_state.triage_result.metadata.retry_count == 1
+
+    @pytest.mark.asyncio
 
     async def test_execution_with_fallback(self, triage_agent, sample_state):
         """Test execution falling back to simple categorization."""
@@ -172,6 +165,8 @@ class TestExecuteMethod:
         assert sample_state.triage_result.metadata.fallback_used == True
         assert sample_state.triage_result.confidence_score == 0.5
 
+    @pytest.mark.asyncio
+
     async def test_execution_with_websocket_updates(self, triage_agent, sample_state):
         """Test execution with WebSocket updates enabled."""
         triage_agent.websocket_manager = AsyncMock()
@@ -183,7 +178,6 @@ class TestExecuteMethod:
         
         # Should have sent WebSocket updates
         assert triage_agent.websocket_manager.send_message.called
-
 
 class TestRequestHashing:
     """Test request hashing for caching."""

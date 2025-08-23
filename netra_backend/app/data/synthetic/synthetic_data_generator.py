@@ -189,7 +189,7 @@ class ParallelProcessor:
     
     def _format_generation_results(self, results: list) -> list:
         """Format parallel generation results into log entries."""
-        from .log_formatter import format_log_entry
+        from netra_backend.app.data.synthetic.log_formatter import format_log_entry
         combined_df = pd.concat(results, ignore_index=True)
         return [format_log_entry(row) for _, row in combined_df.iterrows()]
     
@@ -214,7 +214,7 @@ class MultiTurnGenerator:
     
     def _generate_traces_with_progress(self, config: dict, content_corpus: dict, num_multi_turn: int, all_multi_turn_logs: list) -> list:
         """Generate traces with progress tracking."""
-        from .multi_turn_generator import generate_multi_turn_tool_trace
+        from netra_backend.app.data.synthetic.multi_turn_generator import generate_multi_turn_tool_trace
         with Progress() as progress:
             task = progress.add_task("[magenta]Generating complex traces...", total=num_multi_turn)
             for _ in range(num_multi_turn):

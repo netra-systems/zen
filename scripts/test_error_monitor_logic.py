@@ -8,7 +8,6 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Add the parent directory to sys.path to import from staging_error_monitor
-sys.path.append(str(Path(__file__).parent))
 
 try:
     # Mock the schemas that would require GCP libraries

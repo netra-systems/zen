@@ -62,7 +62,7 @@ class GenerationCoordinator(CoreServiceBase):
     ) -> Optional[List[Dict]]:
         """Load corpus content if specified"""
         if corpus_id:
-            from .corpus_manager import load_corpus
+            from netra_backend.app.services.synthetic_data.corpus_manager import load_corpus
             return await load_corpus(
                 corpus_id, db, self.corpus_cache, get_clickhouse_client, central_logger
             )

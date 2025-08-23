@@ -4,40 +4,30 @@ Tests capacity planning workflows for different scaling scenarios.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import pytest
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityGateService,
     QualityLevel,
 )
-from netra_backend.tests.scaling_test_helpers import (
-    create_gradual_scaling_state,
-    # Add project root to path
-    create_scaling_setup,
-    create_traffic_spike_state,
-    execute_scaling_workflow,
-    validate_gradual_scaling_plan,
-    validate_spike_handling_strategy,
-)
-
+# from scaling_test_helpers - using fixtures instead (
+#     create_gradual_scaling_state,
+#     create_scaling_setup,
+#     create_traffic_spike_state,
+#     execute_scaling_workflow,
+#     validate_gradual_scaling_plan,
+#     validate_spike_handling_strategy,
+# )
 
 @pytest.fixture
 def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
@@ -47,7 +37,6 @@ def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_d
         'data': DataSubAgent(real_llm_manager, real_tool_dispatcher)
     }
     return create_scaling_setup(agents, real_llm_manager, real_websocket_manager)
-
 
 class TestCapacityPlanningWorkflows:
     """Test capacity planning workflows for different scaling scenarios."""
@@ -66,7 +55,6 @@ class TestCapacityPlanningWorkflows:
         results = await execute_scaling_workflow(setup, state)
         validate_spike_handling_strategy(results)
 
-
 @pytest.mark.real_llm
 class TestExamplePromptsCapacityPlanning:
     """Test specific example prompt EP-003 with real LLM validation."""
@@ -78,7 +66,6 @@ class TestExamplePromptsCapacityPlanning:
         results = await execute_scaling_workflow(setup, state)
         await _validate_ep_003_results(results, state, setup)
 
-
 def _create_ep_003_state() -> DeepAgentState:
     """Create state for EP-003 example prompt test."""
     return DeepAgentState(
@@ -86,12 +73,10 @@ def _create_ep_003_state() -> DeepAgentState:
         metadata={'test_type': 'ep_003', 'prompt_id': 'EP-003', 'usage_increase': '50%', 'timeframe': 'next_month'}
     )
 
-
 async def _validate_ep_003_results(results, state: DeepAgentState, setup):
     """Validate EP-003 results with enhanced quality checks."""
     _validate_capacity_planning_results(results, state)
     await _validate_response_quality_ep_003(results, setup)
-
 
 def _validate_capacity_planning_results(results, state: DeepAgentState):
     """Validate capacity planning workflow results."""
@@ -99,7 +84,6 @@ def _validate_capacity_planning_results(results, state: DeepAgentState):
     assert '50%' in state.user_request
     assert any('usage' in str(result).lower() for result in results)
     assert any('cost' in str(result).lower() or 'rate limit' in str(result).lower() for result in results)
-
 
 async def _validate_response_quality_ep_003(results, setup):
     """Validate response quality for EP-003 using quality gate service."""
@@ -113,7 +97,6 @@ async def _validate_response_quality_ep_003(results, setup):
         )
         assert is_valid, f"EP-003 response quality validation failed: {feedback}"
         assert score >= 70, f"EP-003 quality score too low: {score}"
-
 
 def _extract_response_text(result) -> str:
     """Extract response text from workflow result."""

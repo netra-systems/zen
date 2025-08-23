@@ -11,17 +11,10 @@ L3 Realism: Real Redis clusters with Testcontainers, actual cache invalidation s
 Performance Requirements: Invalidation cascade < 100ms, 99.9% propagation success, zero stale data tolerance
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -37,15 +30,11 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer as NetraRedisContainer,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class InvalidationMetrics:
@@ -74,7 +63,6 @@ class InvalidationMetrics:
         if not self.cascade_times:
             return 0.0
         return sum(self.cascade_times) / len(self.cascade_times)
-
 
 class CacheInvalidationCascadeL3Manager:
     """L3 cache invalidation cascade test manager with real Redis clusters."""
@@ -508,7 +496,6 @@ class CacheInvalidationCascadeL3Manager:
         except Exception as e:
             logger.error(f"Invalidation cascade cleanup failed: {e}")
 
-
 @pytest.fixture
 async def invalidation_cascade_manager():
     """Create L3 cache invalidation cascade manager."""
@@ -516,7 +503,6 @@ async def invalidation_cascade_manager():
     await manager.setup_redis_cluster()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -532,7 +518,6 @@ async def test_single_level_invalidation_performance(invalidation_cascade_manage
     
     logger.info(f"Single-level invalidation test completed: {result['successful_invalidations']}/100 successful, avg time {result['avg_invalidation_time']*1000:.2f}ms")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -546,7 +531,6 @@ async def test_multi_level_cascade_invalidation(invalidation_cascade_manager):
     assert result["stale_data_detected"] == 0, f"{result['stale_data_detected']} stale data instances detected"
     
     logger.info(f"Multi-level cascade test completed: {result['cascade_success_rate']:.2f}% success rate, avg time {result['avg_cascade_time']*1000:.2f}ms")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -565,7 +549,6 @@ async def test_cross_service_invalidation_coordination(invalidation_cascade_mana
     
     logger.info(f"Cross-service invalidation test completed: {result['cross_service_success_rate']:.2f}% success rate")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -579,7 +562,6 @@ async def test_invalidation_under_concurrent_load(invalidation_cascade_manager):
     assert result["failed_operations"] <= 4, f"{result['failed_operations']} failed operations exceed threshold"
     
     logger.info(f"Concurrent invalidation test completed: {result['operations_per_second']:.1f} ops/s, {result['success_rate']:.2f}% success rate")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

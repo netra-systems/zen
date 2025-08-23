@@ -3,26 +3,17 @@ Tests for global error handler and decorator functionality.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Add netra_backend to path  
 
 import asyncio
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.error_handler import (
-    # Add project root to path
     AgentErrorHandler as ErrorHandler,
 )
 from netra_backend.app.agents.error_handler import (
@@ -33,7 +24,6 @@ from netra_backend.app.agents.error_handler import (
     global_error_handler,
     handle_agent_error,
 )
-
 
 class TestGlobalErrorHandler:
     """Test global error handler functionality."""
@@ -71,7 +61,6 @@ class TestGlobalErrorHandler:
         
         assert global_error_handler.total_errors >= 2
 
-
 class TestErrorHandlerDecorator:
     """Test handle_agent_error decorator functionality."""
     
@@ -81,6 +70,8 @@ class TestErrorHandlerDecorator:
         async def successful_function():
             return "success"
         return successful_function
+
+    @pytest.mark.asyncio
 
     async def test_decorator_successful_execution(self):
         """Test decorator with successful function execution."""
@@ -101,6 +92,8 @@ class TestErrorHandlerDecorator:
         
         return retryable_function, call_count
 
+    @pytest.mark.asyncio
+
     async def test_decorator_with_retries(self):
         """Test decorator with retryable errors."""
         retryable_function, call_count = await self._create_retryable_function()
@@ -115,6 +108,8 @@ class TestErrorHandlerDecorator:
             raise ValidationError("Non-retryable validation error")
         return non_retryable_function
 
+    @pytest.mark.asyncio
+
     async def test_decorator_with_non_retryable_error(self):
         """Test decorator with non-retryable error."""
         non_retryable_function = await self._create_non_retryable_function()
@@ -128,6 +123,8 @@ class TestErrorHandlerDecorator:
         async def max_retries_function():
             raise NetworkError("Persistent network issue")
         return max_retries_function
+
+    @pytest.mark.asyncio
 
     async def test_decorator_max_retries_exceeded(self):
         """Test decorator when max retries is exceeded."""
@@ -149,6 +146,8 @@ class TestErrorHandlerDecorator:
             raise ValidationError("Custom handler test")
         
         return custom_handler_function, custom_handler
+
+    @pytest.mark.asyncio
 
     async def test_decorator_with_custom_handler(self):
         """Test decorator with custom error handler."""
@@ -184,12 +183,16 @@ class TestErrorHandlerDecorator:
             raise NetworkError("Context test error")
         return context_function
 
+    @pytest.mark.asyncio
+
     async def test_decorator_context_propagation(self):
         """Test decorator context propagation."""
         context_function = await self._create_function_with_context_propagation()
         
         with pytest.raises(NetworkError):
             await context_function()
+
+    @pytest.mark.asyncio
 
     async def test_decorator_preserves_function_metadata(self):
         """Test decorator preserves original function metadata."""
@@ -220,6 +223,8 @@ class TestErrorHandlerDecorator:
             return "delayed_success"
         
         return delayed_retry_function, call_times
+
+    @pytest.mark.asyncio
 
     async def test_decorator_retry_delay(self):
         """Test decorator retry delay functionality."""

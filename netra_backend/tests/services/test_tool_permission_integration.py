@@ -3,17 +3,10 @@ Tool Permission Service - Integration Scenarios and Edge Cases Tests
 Functions refactored to ≤8 lines each using helper functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import UTC, datetime
 from unittest.mock import patch
@@ -26,13 +19,11 @@ from netra_backend.app.schemas.ToolPermission import (
 )
 from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
-# Add project root to path
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from ..helpers.shared_test_types import (
+from netra_backend.tests.services.helpers.shared_test_types import (
     TestIntegrationScenarios as SharedTestIntegrationScenarios,
 )
-from .tool_permission_helpers import (
-    # Add project root to path
+from netra_backend.tests.tool_permission_helpers import (
     MockRedisClient,
     assert_business_requirements_result,
     assert_missing_permissions,
@@ -44,24 +35,20 @@ from .tool_permission_helpers import (
     setup_redis_usage,
 )
 
-
 @pytest.fixture
 def mock_redis():
     """Create mock Redis client"""
     return MockRedisClient()
-
 
 @pytest.fixture
 def service():
     """Create ToolPermissionService without Redis"""
     return ToolPermissionService()
 
-
 @pytest.fixture
 def service_with_redis(mock_redis):
     """Create ToolPermissionService with Redis"""
     return ToolPermissionService(mock_redis)
-
 
 class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     """Test integration scenarios combining multiple features"""
@@ -108,7 +95,6 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         assert_permission_allowed(result)
         assert result.rate_limit_status["current_usage"] == 499
 
-
 class TestEdgeCases:
     """Test edge cases and boundary conditions"""
     
@@ -133,7 +119,6 @@ class TestEdgeCases:
         user_plan = create_user_plan(PlanTier.FREE, "test")
         result = service._check_business_requirements(empty_req, context, user_plan)
         assert_business_requirements_result(result, True)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

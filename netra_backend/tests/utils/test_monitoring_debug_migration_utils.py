@@ -3,17 +3,10 @@ Tests for monitoring, debug, and migration utilities (Tests 98-100).
 Each function ≤8 lines, using helper functions for setup and assertions.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -22,17 +15,14 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from .debug_migration_test_helpers import (
-    # Add project root to path
+from netra_backend.tests.debug_migration_test_helpers import (
     DebugTestHelpers,
     MigrationTestHelpers,
 )
 
-# Add project root to path
-from .rate_retry_monitoring_test_helpers import (
+from netra_backend.tests.rate_retry_monitoring_test_helpers import (
     MonitoringTestHelpers,
 )
-
 
 # Test 98: Monitoring utils metrics
 class TestMonitoringUtilsMetrics:
@@ -82,7 +72,6 @@ class TestMonitoringUtilsMetrics:
         metrics = utils.export_metrics()
         assert "cpu_usage" in metrics
         assert "api_requests" in metrics
-
 
 # Test 99: Debug utils profiling
 class TestDebugUtilsProfiling:
@@ -153,7 +142,6 @@ class TestDebugUtilsProfiling:
         assert stats["count"] == 5
         assert stats["mean"] > 0
         assert stats["max"] >= stats["min"]
-
 
 # Test 100: Migration utils scripts
 class TestMigrationUtilsScripts:

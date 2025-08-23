@@ -14,39 +14,59 @@ const mockUseWebSocket = jest.fn(() => ({
   sendMessage: mockSendMessage,
 }));
 
-const mockChatStore = {
-  activeThreadId: 'thread-1',
-  isProcessing: false,
-  setProcessing: jest.fn(),
-  addMessage: jest.fn(),
-  addOptimisticMessage: jest.fn(),
-  updateOptimisticMessage: jest.fn(),
-};
-
-const mockThreadStore = {
-  currentThreadId: 'thread-1',
-  setCurrentThread: jest.fn(),
-  addThread: jest.fn(),
-};
-
-const mockAuthStore = {
-  isAuthenticated: true,
+// Create dynamic mock state that can be updated during tests
+let dynamicMockState = {
+  chat: {
+    activeThreadId: 'thread-1',
+    isProcessing: false,
+    setProcessing: jest.fn(),
+    addMessage: jest.fn(),
+    addOptimisticMessage: jest.fn(),
+    updateOptimisticMessage: jest.fn(),
+  },
+  thread: {
+    currentThreadId: 'thread-1',
+    setCurrentThread: jest.fn(),
+    addThread: jest.fn(),
+  },
+  auth: {
+    isAuthenticated: true,
+  }
 };
 
 jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: mockUseWebSocket
 }));
 
+// Mock the utility functions to enable testing by forcing authenticated behavior
+jest.mock('@/components/chat/utils/messageInputUtils', () => ({
+  getPlaceholder: jest.fn((isAuthenticated, isProcessing, messageLength) => {
+    if (!isAuthenticated) return 'Please sign in to send messages';
+    if (isProcessing) return 'Agent is thinking...';
+    if (messageLength > 9000) return `${10000 - messageLength} characters remaining`;
+    return 'Type a message...';
+  }),
+  getTextareaClassName: jest.fn(() => 'w-full resize-none rounded-2xl px-4 py-3 pr-12 bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all duration-200 ease-in-out placeholder:text-gray-400 text-gray-900'),
+  getCharCountClassName: jest.fn(() => 'absolute bottom-2 right-2 text-xs font-medium text-gray-400'),
+  shouldShowCharCount: jest.fn((messageLength) => messageLength > 8000),
+  isMessageDisabled: jest.fn((isProcessing, isAuthenticated, isSending) => {
+    return isProcessing || !isAuthenticated || isSending;
+  }),
+  canSendMessage: jest.fn((isDisabled, message, messageLength) => {
+    return !isDisabled && !!message.trim() && messageLength <= 10000;
+  })
+}));
+
 jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn(() => mockChatStore)
+  useUnifiedChatStore: () => dynamicMockState.chat
 }));
 
 jest.mock('@/store/threadStore', () => ({
-  useThreadStore: jest.fn(() => mockThreadStore)
+  useThreadStore: () => dynamicMockState.thread
 }));
 
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn(() => mockAuthStore)
+  useAuthStore: () => dynamicMockState.auth
 }));
 
 // Mock the necessary hooks and utilities - using correct relative paths
@@ -73,6 +93,14 @@ jest.mock('../../../../components/chat/hooks/useMessageSending', () => ({
   })
 }));
 
+// Mock services and utilities
+jest.mock('@/services/threadService');
+jest.mock('@/services/threadRenameService');
+jest.mock('@/lib/utils', () => ({
+  generateUniqueId: jest.fn(() => 'mock-id-123'),
+  cn: jest.fn((...classes) => classes.filter(Boolean).join(' '))
+}));
+
 import { MessageInput } from '@/components/chat/MessageInput';
 import {
   renderMessageInput,
@@ -86,17 +114,27 @@ import {
 // Reset functions
 const resetMocks = () => {
   jest.clearAllMocks();
-  mockChatStore.isProcessing = false;
-  mockAuthStore.isAuthenticated = true;
+  dynamicMockState.chat.isProcessing = false;
+  dynamicMockState.auth.isAuthenticated = true;
   mockHandleSend.mockClear();
+  mockSendMessage.mockClear();
+  
+  // Reset handleSend to properly simulate message sending
+  mockHandleSend.mockImplementation(async (params) => {
+    // Simulate the actual behavior - call with the params
+    if (params.isAuthenticated && params.message && params.message.trim()) {
+      // Mock successful send
+      return Promise.resolve();
+    }
+  });
 };
 
 const setProcessing = (processing: boolean) => {
-  mockChatStore.isProcessing = processing;
+  dynamicMockState.chat.isProcessing = processing;
 };
 
 const setAuthenticated = (auth: boolean) => {
-  mockAuthStore.isAuthenticated = auth;
+  dynamicMockState.auth.isAuthenticated = auth;
 };
 
 describe('MessageInput - Input Validation and Sanitization', () => {

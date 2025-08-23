@@ -1,16 +1,9 @@
 """Utilities Tests - Split from test_message_flow_performance.py"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import statistics
@@ -21,13 +14,9 @@ from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .test_unified_message_flow import MessageFlowTracker
-
-# Add project root to path
-
+from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

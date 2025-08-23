@@ -3,17 +3,10 @@ ClickHouse Performance Tests
 Tests for ClickHouse performance and optimization features
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 import random
@@ -22,17 +15,13 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
-# Add project root to path
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
-from .test_clickhouse_permissions import (
+from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
     _check_table_insert_permission,
 )
-
-# Add project root to path
-
 
 class TestClickHousePerformance:
     """Test ClickHouse performance and optimization"""
@@ -209,7 +198,6 @@ class TestClickHousePerformance:
             logger.info(f"Query interceptor statistics: {stats}")
             assert stats['queries_executed'] >= 4
             assert stats['queries_fixed'] >= 2  # At least 2 queries needed fixing
-
 
 if __name__ == "__main__":
     # Run tests with pytest

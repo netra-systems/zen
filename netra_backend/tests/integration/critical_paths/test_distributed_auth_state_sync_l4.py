@@ -20,16 +20,10 @@ Mock-Real Spectrum: L4 (Multi-instance production topology)
 - Real network latency simulation
 """
 
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 
-# Add project root to path
 import sys
 from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -42,21 +36,33 @@ import redis.sentinel
 import httpx
 from unittest.mock import patch, AsyncMock
 
-# Add project root to path
-
 from netra_backend.app.schemas.auth_types import (
-
-# Add project root to path
-    Token, SessionInfo, LoginRequest, LoginResponse,
-    SessionState, ReplicationEvent, ConsistencyCheck
+    Token, SessionInfo, LoginRequest, LoginResponse
 )
+
+# Mock classes for missing types - these should be properly defined when implementing distributed auth
+from dataclasses import dataclass
+@dataclass
+class SessionState:
+    session_id: str
+    state: str
+
+@dataclass  
+class ReplicationEvent:
+    event_type: str
+    data: dict
+    timestamp: float = None
+
+@dataclass
+class ConsistencyCheck:
+    check_type: str
+    result: bool
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.db.redis_manager import get_redis_manager
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.clients.auth_client import auth_client
-# from netra_backend.app.core.distributed_cache import DistributedCache  # Class may not exist, commented out
-from netra_backend.app.core.monitoring import metrics_collector
-
+# from app.core.distributed_cache import DistributedCache  # Class may not exist, commented out
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 
 @dataclass
 class NodeStatus:
@@ -68,7 +74,6 @@ class NodeStatus:
     session_count: int
     lag_ms: float
     status: str  # "healthy", "degraded", "offline"
-
 
 @dataclass
 class SyncMetrics:
@@ -82,7 +87,6 @@ class SyncMetrics:
     max_sync_time_ms: float = 0.0
     data_inconsistencies: int = 0
     network_partitions: int = 0
-
 
 class TestDistributedAuthStateSync:
     """Test suite for distributed auth state synchronization"""

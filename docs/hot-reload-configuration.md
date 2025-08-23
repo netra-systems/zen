@@ -1,6 +1,27 @@
 # Hot Reload Configuration System
 
-## Overview
+## 🚨 CRITICAL UPDATE: This Document Needs Update
+
+**This document describes the hot reload system but should be updated to reflect the unified configuration system.**
+
+**Please also see the NEW documentation:**
+
+- **[Configuration Management Guide](./configuration/CONFIGURATION_GUIDE.md)** - Complete guide with unified system
+- **[Developer Quick Reference](./configuration/DEVELOPER_QUICK_REFERENCE.md)** - Quick patterns and examples
+
+**The information below may be partially outdated. Use the unified configuration system:**
+
+```python
+# NEW UNIFIED WAY
+from netra_backend.app.core.configuration.base import get_unified_config
+
+config = get_unified_config()
+# Hot reload capabilities are built into the unified system
+```
+
+---
+
+## Overview (Legacy Documentation)
 
 The Hot Reload Configuration System enables **zero-downtime configuration updates** for the Netra Apex platform. This enterprise-grade feature allows configuration changes without service restarts, protecting **$12K MRR** from downtime-related losses.
 

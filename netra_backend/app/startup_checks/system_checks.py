@@ -12,6 +12,8 @@ from typing import List, Tuple
 import psutil
 
 from netra_backend.app.core.configuration import unified_config_manager
+from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.core.network_constants import ServicePorts, HostConstants
 from netra_backend.app.startup_checks.models import StartupCheckResult
 
 
@@ -168,22 +170,32 @@ class SystemChecker:
             warnings.append(f"Low CPU count: {cpu_count} cores")
 
     def _get_database_endpoint(self) -> str:
-        """Get database endpoint"""
-        config = unified_config_manager.get_config()
-        database_url = getattr(config, 'database_url', '')
-        if '@' in database_url:
-            return database_url.split('@')[1].split('/')[0]
-        return "localhost:5432"
+        """Get database endpoint from unified configuration"""
+        try:
+            config = get_unified_config()
+            database_url = getattr(config, 'database_url', '')
+            if '@' in database_url:
+                return database_url.split('@')[1].split('/')[0]
+            # Use configured constants instead of hardcoded values
+            return f"{HostConstants.LOCALHOST}:{ServicePorts.POSTGRES_DEFAULT}"
+        except Exception:
+            # Graceful fallback during early startup if config is not fully loaded
+            return f"{HostConstants.LOCALHOST}:{ServicePorts.POSTGRES_DEFAULT}"
 
     def _get_redis_endpoint(self) -> str:
-        """Get Redis endpoint"""
-        config = unified_config_manager.get_config()
-        redis_config = getattr(config, 'redis', None)
-        if redis_config:
-            host = getattr(redis_config, 'host', 'localhost')
-            port = getattr(redis_config, 'port', 6379)
-            return f"{host}:{port}"
-        return "localhost:6379"
+        """Get Redis endpoint from unified configuration"""
+        try:
+            config = get_unified_config()
+            redis_config = getattr(config, 'redis', None)
+            if redis_config:
+                host = getattr(redis_config, 'host', HostConstants.LOCALHOST)
+                port = getattr(redis_config, 'port', ServicePorts.REDIS_DEFAULT)
+                return f"{host}:{port}"
+            # Use configured constants instead of hardcoded values
+            return f"{HostConstants.LOCALHOST}:{ServicePorts.REDIS_DEFAULT}"
+        except Exception:
+            # Graceful fallback during early startup if config is not fully loaded
+            return f"{HostConstants.LOCALHOST}:{ServicePorts.REDIS_DEFAULT}"
 
     def _parse_endpoint(self, endpoint: str) -> Tuple[str, int]:
         """Parse endpoint into host and port"""

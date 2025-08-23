@@ -12,7 +12,7 @@ Provides unified access to all fixture modules while maintaining modular design.
 """
 
 # Import all fixtures from split modules
-from .real_critical_core_fixtures import (
+from netra_backend.tests.e2e.first_time_user.real_critical_core_fixtures import (
     # AI Provider Connection Fixtures
     ai_provider_credentials,
     concurrent_load_config,
@@ -39,7 +39,7 @@ from .real_critical_core_fixtures import (
     # WebSocket and Real-time Communication Fixtures
     websocket_test_environment,
 )
-from .real_critical_extended_fixtures import (
+from netra_backend.tests.e2e.first_time_user.real_critical_extended_fixtures import (
     collaboration_features_config,
     compliance_validation_config,
     concurrent_testing_environment,

@@ -67,6 +67,27 @@ const createAdvancedHandlers = () => [
         },
         '/api/interceptor-test': {
           get: { summary: 'interceptor_test' }
+        },
+        '/api/cached': {
+          get: { summary: 'cached_endpoint' }
+        },
+        '/api/retry-test': {
+          get: { summary: 'retry_test' }
+        },
+        '/api/empty-response': {
+          delete: { summary: 'delete_empty' }
+        },
+        '/api/with-metadata': {
+          get: { summary: 'metadata_test' }
+        },
+        '/api/large-data': {
+          get: { summary: 'get_large_data' }
+        },
+        '/api/connection-test': {
+          get: { summary: 'connection_test' }
+        },
+        '/api/large-payload': {
+          post: { summary: 'large_payload_test' }
         }
       }
     });
@@ -110,6 +131,11 @@ const server = setupServer(...createAdvancedHandlers());
 beforeAll(() => {
   server.listen();
   process.env.NEXT_PUBLIC_API_URL = mockApiUrl;
+});
+
+beforeEach(() => {
+  // Clear the API spec cache before each test
+  (require('@/services/api').apiSpecService as any).spec = null;
 });
 
 afterEach(() => {

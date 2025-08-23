@@ -28,7 +28,7 @@ from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.schemas.Tool import ToolInput
 
 if TYPE_CHECKING:
-    from .dispatcher_core import AdminToolDispatcher
+    from netra_backend.app.agents.admin_tool_dispatcher.dispatcher_core import AdminToolDispatcher
 
 logger = central_logger.get_logger(__name__)
 
@@ -84,7 +84,7 @@ class AdminToolExecutionEngine(BaseExecutionInterface):
 
     def _validate_tool_access(self, dispatcher, tool_name: str) -> bool:
         """Validate specific tool access."""
-        from .validation import validate_admin_tool_access
+        from netra_backend.app.agents.admin_tool_dispatcher.validation import validate_admin_tool_access
         return validate_admin_tool_access(dispatcher.user, tool_name)
 
 
@@ -99,7 +99,7 @@ class AdminToolExecutionEngine(BaseExecutionInterface):
     async def _execute_tool_by_name(self, dispatcher, tool_name: str, 
                                    action: str, kwargs: Dict[str, Any]) -> Any:
         """Execute admin tool by name."""
-        from .tool_handlers import execute_admin_tool
+        from netra_backend.app.agents.admin_tool_dispatcher.tool_handlers import execute_admin_tool
         return await execute_admin_tool(
             tool_name, dispatcher.user, dispatcher.db, action, **kwargs
         )
@@ -216,7 +216,7 @@ def get_user_id_safe(dispatcher) -> str:
 
 async def validate_tool_input_safely(tool_name: str, **kwargs) -> str | None:
     """Legacy function for input validation."""
-    from .validation import validate_tool_input
+    from netra_backend.app.agents.admin_tool_dispatcher.validation import validate_tool_input
     return validate_tool_input(tool_name, **kwargs)
 
 

@@ -7,9 +7,7 @@ and maintain connection health.
 import asyncio
 from typing import Any, Dict, Optional
 
-from netra_backend.app.core.websocket_connection_manager import (
-    WebSocketConnectionManager as ConnectionManager,
-)
+from netra_backend.app.websocket.connection import ConnectionManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.synthetic_data.error_handler import (
     ErrorHandler as WebSocketErrorHandler,
@@ -17,11 +15,11 @@ from netra_backend.app.services.synthetic_data.error_handler import (
 from netra_backend.app.websocket.connection_info import ConnectionInfo
 
 # Heartbeat modules not yet implemented - commented out to fix imports
-# from netra_backend.app.heartbeat_config import HeartbeatConfig
-# from netra_backend.app.heartbeat_statistics import HeartbeatStatistics
-# from netra_backend.app.heartbeat_loop_operations import HeartbeatLoopOperations
-# from netra_backend.app.heartbeat_error_recovery import HeartbeatErrorRecovery
-# from netra_backend.app.heartbeat_cleanup import HeartbeatCleanup
+# from app.heartbeat_config import HeartbeatConfig
+# from app.heartbeat_statistics import HeartbeatStatistics
+# from app.heartbeat_loop_operations import HeartbeatLoopOperations
+# from app.heartbeat_error_recovery import HeartbeatErrorRecovery
+# from app.heartbeat_cleanup import HeartbeatCleanup
 
 logger = central_logger.get_logger(__name__)
 

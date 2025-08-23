@@ -11,9 +11,7 @@ Comprehensive test for Redis session management flow:
 8. Cluster failover handling
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -28,13 +26,9 @@ import aiohttp
 import pytest
 import redis.asyncio as redis
 
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 REDIS_CLUSTER_URLS = os.getenv("REDIS_CLUSTER_URLS", "redis://localhost:6379,redis://localhost:6380,redis://localhost:6381").split(",")
-
 
 class RedisSessionTester:
     """Test Redis session management flow."""
@@ -441,7 +435,6 @@ class RedisSessionTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -467,7 +460,6 @@ async def test_redis_session_management_flow():
         critical_tests = ["redis_health", "session_creation", "session_retrieval", "data_consistency"]
         for test in critical_tests:
             assert results.get(test, False), f"Critical test failed: {test}"
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(test_redis_session_management_flow())

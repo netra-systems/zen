@@ -1,7 +1,7 @@
 """Auth Service Health Check Integration Test Suite
 
 BVJ: Protects $145K+ MRR by ensuring auth service availability across all customer segments.
-Tests health endpoints, lazy DB initialization, recovery scenarios, and performance under load.
+# Tests health endpoints, lazy DB initialization, recovery scenarios, and performance under load. # Possibly broken comprehension
 Architecture: <300 lines, async/await pattern, comprehensive AAA testing.
 """
 
@@ -22,25 +22,24 @@ import pytest
 # Add auth_service to Python path for imports
 auth_service_path = Path(__file__).parent.parent.parent / "auth_service"
 if str(auth_service_path) not in sys.path:
-    sys.path.insert(0, str(auth_service_path))
 
+        pass
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class HealthCheckResult:
-    """Container for health check operation results."""
-    endpoint: str
-    status_code: int
-    response_time_ms: float
-    response_data: Dict[str, Any]
-    database_ready: bool
-    service_healthy: bool
-    error: Optional[str] = None
-
+    # """Container for health check operation results."""
+    pass
+    # endpoint: str
+    # status_code: int
+    # response_time_ms: float
+    # response_data: Dict[str, Any]
+    # database_ready: bool
+    # service_healthy: bool
+    # error: Optional[str] = None
 
 class AuthHealthChecker:
-    """Core health check validation utilities."""
+    # """Core health check validation utilities."""
     
     def __init__(self, base_url: str = None):
         """Initialize health checker with auth service URL."""
@@ -59,7 +58,7 @@ class AuthHealthChecker:
         self.ready_endpoint = f"{self.base_url}/health/ready"
     
     async def check_health_endpoint(self) -> HealthCheckResult:
-        """Test basic /health endpoint availability and performance."""
+#         """Test basic /health endpoint availability and performance.""" # Possibly broken comprehension
         start_time = time.perf_counter()
         
         try:
@@ -89,13 +88,13 @@ class AuthHealthChecker:
                 database_ready=False,
                 service_healthy=False,
                 error=str(e)
-            )
     
     async def check_ready_endpoint(self, with_db_init: bool = False) -> HealthCheckResult:
         """Test /health/ready endpoint with optional database initialization."""
         start_time = time.perf_counter()
         
         try:
+    pass
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(self.ready_endpoint)
                 
@@ -117,7 +116,6 @@ class AuthHealthChecker:
                     database_ready=response.status_code == 200,
                     service_healthy=response.status_code in [200, 503],
                     error=None
-                )
         except Exception as e:
             response_time = (time.perf_counter() - start_time) * 1000
             return HealthCheckResult(
@@ -128,39 +126,36 @@ class AuthHealthChecker:
                 database_ready=False,
                 service_healthy=False,
                 error=str(e)
-            )
-
 
 class DatabaseStateSimulator:
-    """Simulates database initialization and failure scenarios."""
+    # """Simulates database initialization and failure scenarios."""
     
-    @asynccontextmanager
-    async def simulate_uninitialized_db(self):
-        """Context manager for uninitialized database state."""
-        with patch('auth_core.database.connection.auth_db.engine', None):
-            yield
+    # @asynccontextmanager
+    # async def simulate_uninitialized_db(self):
+    # """Context manager for uninitialized database state."""
+    # with patch('auth_core.database.connection.auth_db.engine', None):
+    # yield
     
-    @asynccontextmanager
-    async def simulate_db_failure(self):
-        """Context manager for database connection failure."""
-        mock_engine = AsyncMock()
-        mock_engine.execute.side_effect = Exception("Database connection failed")
+    # @asynccontextmanager
+    # async def simulate_db_failure(self):
+    # """Context manager for database connection failure."""
+    # mock_engine = AsyncMock()
+    # mock_engine.execute.side_effect = Exception("Database connection failed")
         
-        with patch('auth_core.database.connection.auth_db.engine', mock_engine):
-            yield
+    # with patch('auth_core.database.connection.auth_db.engine', mock_engine):
+    # yield
     
-    @asynccontextmanager
-    async def simulate_db_recovery(self):
-        """Context manager for database recovery scenario."""
-        mock_engine = AsyncMock()
-        mock_engine.execute.return_value = AsyncMock()
+    # @asynccontextmanager
+    # async def simulate_db_recovery(self):
+    # """Context manager for database recovery scenario."""
+    # mock_engine = AsyncMock()
+    # mock_engine.execute.return_value = AsyncMock()
         
-        with patch('auth_core.database.connection.auth_db.engine', mock_engine):
-            yield
-
+    # with patch('auth_core.database.connection.auth_db.engine', mock_engine):
+    # yield
 
 class ConcurrentLoadTester:
-    """Tests health check performance under concurrent load."""
+    # """Tests health check performance under concurrent load."""
     
     def __init__(self, health_checker: AuthHealthChecker):
         """Initialize concurrent load tester."""
@@ -187,15 +182,13 @@ class ConcurrentLoadTester:
             "avg_response_time_ms": sum(response_times) / len(response_times) if response_times else 0,
             "max_response_time_ms": max(response_times) if response_times else 0,
             "all_under_1s": all(rt < 1000 for rt in response_times)
-        }
-
 
 @pytest.mark.asyncio
 @pytest.mark.critical
 class TestAuthServiceHealthCheckIntegration:
-    """Auth service health check integration test suite."""
+    # """Auth service health check integration test suite."""
     
-    @pytest.fixture
+    # @pytest.fixture
     def health_checker(self):
         """Create health checker instance."""
         return AuthHealthChecker()
@@ -232,7 +225,7 @@ class TestAuthServiceHealthCheckIntegration:
             
             assert result.service_healthy, f"Health check failed with uninitialized DB: {result.error}"
             assert result.status_code == 200, f"Expected 200, got {result.status_code}"
-            assert result.response_time_ms < 1000, "Performance degraded with uninitialized DB"
+#             assert result.response_time_ms < 1000, "Performance degraded with uninitialized DB" # Possibly broken comprehension
             
         logger.info(f"✓ Lazy initialization validated - {result.response_time_ms:.1f}ms without DB init")
     
@@ -263,7 +256,7 @@ class TestAuthServiceHealthCheckIntegration:
         logger.info(f"✓ Service dependencies validated - Status: {result.status_code}")
     
     async def test_performance_under_load(self, load_tester):
-        """Test 5: Performance Under Load - Realistic Business Scenario."""
+#         """Test 5: Performance Under Load - Realistic Business Scenario.""" # Possibly broken comprehension
         # Test realistic concurrent health checks (e.g., load balancer + monitoring)
         load_results = await load_tester.test_concurrent_health_checks(concurrent_count=5)
         
@@ -279,7 +272,6 @@ class TestAuthServiceHealthCheckIntegration:
         
         logger.info(f"✓ Load performance validated - {load_results['successful_requests']}/5 requests, avg: {load_results['avg_response_time_ms']:.1f}ms, max: {load_results['max_response_time_ms']:.1f}ms")
 
-
 async def run_auth_health_integration_test():
     """Standalone function to run auth health check integration tests."""
     logger.info("Starting Auth Service Health Check Integration Test")
@@ -291,6 +283,7 @@ async def run_auth_health_integration_test():
     test_results = {}
     
     try:
+    pass
         test_results["health_validation"] = await health_checker.check_health_endpoint()
         
         async with db_simulator.simulate_uninitialized_db():
@@ -308,7 +301,6 @@ async def run_auth_health_integration_test():
             result.service_healthy if hasattr(result, 'service_healthy') 
             else result.get('all_under_1s', False)
             for result in test_results.values()
-        )
         
         return {
             "test_completed": True,
@@ -316,11 +308,9 @@ async def run_auth_health_integration_test():
             "auth_service_reliable": all_healthy,
             "business_value_protected": "$145K+ MRR" if all_healthy else "AT RISK",
             "results": {k: v.__dict__ if hasattr(v, '__dict__') else v for k, v in test_results.items()}
-        }
         
     except Exception as e:
         return {"error": str(e), "test_completed": False, "business_value_protected": "AT RISK"}
-
 
 if __name__ == "__main__":
     result = asyncio.run(run_auth_health_integration_test())

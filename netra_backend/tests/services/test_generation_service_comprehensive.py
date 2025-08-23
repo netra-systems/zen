@@ -4,17 +4,10 @@ Comprehensive tests for Generation Service
 Covers all methods, error handling, and edge cases.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -30,14 +23,11 @@ from netra_backend.app.schemas import ContentGenParams, LogGenParams, SyntheticD
 
 from netra_backend.app.core.exceptions_base import NetraException
 
-# Add project root to path
 from netra_backend.app.services.generation_service import (
     get_corpus_from_clickhouse,
     save_corpus_to_clickhouse,
-    # Add project root to path
     update_job_status,
 )
-
 
 @pytest.fixture
 def mock_job_store():
@@ -48,7 +38,6 @@ def mock_job_store():
     store.update = AsyncMock()
     store.list = AsyncMock()
     return store
-
 
 @pytest.fixture
 def mock_clickhouse():
@@ -62,7 +51,6 @@ def mock_clickhouse():
     client.disconnect = AsyncMock()
     return client
 
-
 @pytest.fixture
 def mock_websocket_manager():
     """Mock WebSocket manager fixture"""
@@ -70,7 +58,6 @@ def mock_websocket_manager():
     manager.broadcast = AsyncMock()
     manager.send_to_connection = AsyncMock()
     return manager
-
 
 @pytest.fixture
 def sample_corpus():
@@ -89,7 +76,6 @@ def sample_corpus():
             ("Another long text...", "Summary: Short form")
         ]
     }
-
 
 class TestJobStatusManagement:
     """Test job status update functionality"""
@@ -176,7 +162,6 @@ class TestJobStatusManagement:
                 assert mock_store.update.call_args[1]["processed_items"] == 750
                 assert mock_store.update.call_args[1]["total_items"] == 1000
 
-
 class TestClickHouseOperations:
     """Test ClickHouse corpus operations"""
     async def test_get_corpus_from_clickhouse(self, mock_clickhouse):
@@ -235,7 +220,6 @@ class TestClickHouseOperations:
                 
                 assert "Database error" in str(exc.value)
 
-
 # Note: The following test classes are commented out as they test functions
 # that don't exist in the current implementation of generation_service.py
 
@@ -269,7 +253,6 @@ class TestClickHouseOperations:
 #     """Integration tests for generation service"""
 #     # Tests for functions that don't exist
 #     pass
-
 
 class TestExistingFunctions:
     """Test the actual functions that exist in generation_service"""

@@ -24,17 +24,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import base64
@@ -54,18 +47,15 @@ import redis.asyncio as aioredis
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     AuthProvider,
     LoginResponse,
     SessionInfo,
-    # Add project root to path
     TokenData,
     UserPermission,
 )
 
 logger = logging.getLogger(__name__)
-
 
 class MockIdPConnector:
     """Mock Identity Provider connector - external service simulation."""
@@ -119,7 +109,6 @@ class MockIdPConnector:
                 "valid": False,
                 "error": f"Assertion validation failed: {str(e)}"
             }
-
 
 class SAMLHandler:
     """Real SAML assertion processing component."""
@@ -210,7 +199,6 @@ class SAMLHandler:
         cache_key = f"saml_assertion:{assertion_id}"
         cached_assertion = await self.redis_client.get(cache_key)
         return cached_assertion is not None
-
 
 class UserProvisioner:
     """Real JIT (Just-In-Time) user provisioning component."""
@@ -327,7 +315,6 @@ class UserProvisioner:
         
         return existing_user
 
-
 class SessionCreator:
     """Real session creation component for SSO users."""
     
@@ -399,7 +386,6 @@ class SessionCreator:
                 "error": str(e),
                 "session_time": time.time() - session_start
             }
-
 
 class SAMLSSOTestManager:
     """Manages SAML SSO integration testing."""
@@ -725,7 +711,6 @@ class SAMLSSOTestManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def saml_sso_manager():
     """Create SAML SSO test manager."""
@@ -733,7 +718,6 @@ async def saml_sso_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -775,7 +759,6 @@ async def test_complete_saml_sso_authentication_flow(saml_sso_manager):
     total_time = time.time() - start_time
     assert total_time < 3.0, f"Total SSO test took {total_time:.2f}s, expected <3s"
 
-
 @pytest.mark.asyncio
 async def test_jit_user_provisioning_and_updates(saml_sso_manager):
     """Test Just-In-Time user provisioning and updates."""
@@ -801,7 +784,6 @@ async def test_jit_user_provisioning_and_updates(saml_sso_manager):
     assert update_result["user_data"]["role"] == "manager", "Role update not applied"
     assert "team_management" in update_result["user_data"]["permissions"], "Manager permissions not applied"
 
-
 @pytest.mark.asyncio
 async def test_saml_assertion_replay_protection(saml_sso_manager):
     """Test SAML assertion replay protection."""
@@ -816,7 +798,6 @@ async def test_saml_assertion_replay_protection(saml_sso_manager):
     assert replay_result["second_check_used"], "Assertion not marked as used after caching"
     assert replay_result["replay_protection_working"], "Replay protection not working correctly"
     assert replay_result["replay_time"] < 0.1, "Replay protection check too slow"
-
 
 @pytest.mark.asyncio
 async def test_saml_attribute_mapping_to_roles(saml_sso_manager):
@@ -836,7 +817,6 @@ async def test_saml_attribute_mapping_to_roles(saml_sso_manager):
     
     readonly_mapping = next(r for r in mapping_results if r["role"] == "readonly")
     assert admin_mapping["mapped_permissions"] == ["read"], "Readonly role has incorrect permissions"
-
 
 @pytest.mark.asyncio
 async def test_sso_session_management(saml_sso_manager):

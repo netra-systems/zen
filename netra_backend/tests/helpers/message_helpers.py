@@ -8,7 +8,6 @@ COMPLIANCE: 450-line max file, 25-line max functions
 from datetime import datetime
 from unittest.mock import AsyncMock
 
-
 # Message test helpers
 async def create_test_message(uow, thread_id, content="Test message", role="user"):
     """Create a test message with minimal setup."""
@@ -18,7 +17,6 @@ async def create_test_message(uow, thread_id, content="Test message", role="user
         "role": role
     })
 
-
 async def create_test_messages(uow, thread_id, count=5):
     """Create multiple test messages."""
     messages = []
@@ -27,13 +25,11 @@ async def create_test_messages(uow, thread_id, count=5):
         messages.append(message)
     return messages
 
-
 def setup_message_mock_behavior(mock_repo):
     """Setup mock behavior for message repository."""
     message_counter = [0]
     _setup_message_create_mock(mock_repo, message_counter)
     _setup_message_query_mocks(mock_repo)
-
 
 def _setup_message_create_mock(mock_repo, message_counter):
     """Setup message creation mock."""
@@ -43,7 +39,6 @@ def _setup_message_create_mock(mock_repo, message_counter):
         message_counter[0] += 1
         return _create_mock_message(kwargs, message_counter[0])
     mock_repo.create.side_effect = create_message
-
 
 def _create_mock_message(kwargs, counter):
     """Create a mock message object."""
@@ -55,7 +50,6 @@ def _create_mock_message(kwargs, counter):
         created_at=datetime.now()
     )
 
-
 def _setup_message_query_mocks(mock_repo):
     """Setup message query mocks."""
     mock_repo.get_by_thread.side_effect = lambda thread_id: [
@@ -65,7 +59,6 @@ def _setup_message_query_mocks(mock_repo):
     _setup_message_pagination_mock(mock_repo)
     _setup_message_latest_mock(mock_repo)
 
-
 def _setup_message_pagination_mock(mock_repo):
     """Setup paginated message retrieval mock."""
     async def get_messages_paginated(thread_id, page, page_size):
@@ -74,7 +67,6 @@ def _setup_message_pagination_mock(mock_repo):
             total=50
         )
     mock_repo.get_by_thread_paginated.side_effect = get_messages_paginated
-
 
 def _setup_message_latest_mock(mock_repo):
     """Setup latest messages mock."""

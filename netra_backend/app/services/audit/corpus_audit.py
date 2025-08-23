@@ -117,7 +117,7 @@ class CorpusAuditLogger:
     
     def _create_audit_metadata_from_log(self, audit_log: CorpusAuditLog) -> CorpusAuditMetadata:
         """Create audit metadata object from database log."""
-        from .corpus_audit_helpers import build_metadata_from_log
+        from netra_backend.app.services.audit.corpus_audit_helpers import build_metadata_from_log
         return build_metadata_from_log(audit_log)
     
     def _create_audit_record_from_log(self, audit_log: CorpusAuditLog, metadata: CorpusAuditMetadata) -> CorpusAuditRecord:
@@ -202,7 +202,7 @@ class CorpusAuditLogger:
     
     def _create_time_range_dict(self, filters: CorpusAuditSearchFilter) -> Dict[str, Any]:
         """Create time range dictionary from filters."""
-        from .corpus_audit_helpers import create_time_range_from_filters
+        from netra_backend.app.services.audit.corpus_audit_helpers import create_time_range_from_filters
         return create_time_range_from_filters(filters)
     
     def _create_audit_report_object(

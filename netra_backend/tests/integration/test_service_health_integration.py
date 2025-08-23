@@ -9,17 +9,10 @@ Tests health check functionality:
 - Health aggregation across services
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -28,18 +21,13 @@ from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from startup_checks import StartupChecker
+from netra_backend.app.startup_checks import StartupChecker
 
 from test_framework.mock_utils import mock_justified
-
-# Add project root to path
-
-
 
 class HealthMonitor:
     """Mock health monitor for integration testing."""
     pass
-
 
 class HealthCheckService:
     """Mock health check service for integration testing."""
@@ -55,7 +43,6 @@ class HealthCheckService:
     
     async def _check_all_services(self):
         return {}
-
 
 class TestServiceHealthIntegration:
     """Integration tests for service health monitoring."""
@@ -359,7 +346,6 @@ class TestServiceHealthIntegration:
                              AsyncMock(return_value={'redis': {'status': 'healthy', 'response_time_ms': 5}})):
                 health_result = await health_service.get_health_status()
                 assert health_result['status'] == 'healthy'
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

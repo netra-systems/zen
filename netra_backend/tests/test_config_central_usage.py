@@ -10,17 +10,10 @@ This test suite validates that all modules properly use the central
 configuration system and don't bypass it with direct imports.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import ast
 import os
@@ -29,7 +22,6 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
 import pytest
-
 
 class ConfigUsageAnalyzer(ast.NodeVisitor):
     """AST analyzer to detect configuration usage patterns."""
@@ -124,15 +116,16 @@ class ConfigUsageAnalyzer(ast.NodeVisitor):
             pass
         return False
 
-
 class TestCentralConfigUsage:
     """Test Suite 1: Validate Central Configuration Usage"""
     
     @pytest.fixture
     def project_root(self):
         """Get project root directory."""
-        return Path(__file__).parent.parent.parent
-        
+        current_file = Path(__file__)
+        # Navigate up to the netra-core-generation-1 directory
+        project_root = current_file.parent.parent.parent
+        return str(project_root)
     @pytest.fixture
     def python_files(self, project_root):
         """Get all Python files in the project."""
@@ -200,7 +193,7 @@ class TestCentralConfigUsage:
                         modules_needing_config.append(filepath)
                         
                         # Check if using central config
-                        if 'from netra_backend.app.config import' in content or \
+                        if 'from app.config import' in content or \
                            'get_config()' in content:
                             modules_using_central.append(filepath)
             except:
@@ -332,7 +325,7 @@ class TestCentralConfigUsage:
                 try:
                     with open(filepath, 'r', encoding='utf-8') as f:
                         content = f.read()
-                        assert ('from netra_backend.app.config import' in content or
+                        assert ('from app.config import' in content or
                                'get_config()' in content), (
                             f"File {filepath} uses config key '{key}' but doesn't import central config"
                         )

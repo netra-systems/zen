@@ -4,24 +4,16 @@ Validates agent and tool response structures for frontend consumption
 ensuring proper JSON serialization and type consistency.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 from typing import Any, Dict
 
 import pytest
 
-# Add project root to path
 # Import backend schemas
 from netra_backend.app.schemas.Agent import (
     AgentCompleted,
@@ -30,7 +22,6 @@ from netra_backend.app.schemas.Agent import (
 )
 from netra_backend.app.schemas.registry import AgentUpdate
 from netra_backend.app.schemas.Tool import ToolCompleted, ToolStarted, ToolStatus
-
 
 class TestAgentResponseSerialization:
     """Test agent response serialization for frontend consumption."""
@@ -98,7 +89,6 @@ class TestAgentResponseSerialization:
         assert json_data["run_id"] == "run123"
         assert json_data["metadata"]["step"] == "analysis"
 
-
 class TestToolResponseSerialization:
     """Test tool response serialization for frontend consumption."""
     
@@ -161,7 +151,6 @@ class TestToolResponseSerialization:
         assert json_data["status"] == "error"
         assert json_data["tool_output"]["error"] == "Connection timeout"
 
-
 class TestErrorResponseSerialization:
     """Test error response serialization."""
     
@@ -193,7 +182,6 @@ class TestErrorResponseSerialization:
         
         assert json_data["details"]["code"] == "TIMEOUT_ERROR"
         assert json_data["details"]["context"]["step"] == "data_processing"
-
 
 class TestComplexResponseSerialization:
     """Test complex nested response serialization."""
@@ -254,7 +242,6 @@ class TestComplexResponseSerialization:
         
         assert len(json_data["tool_output"]["logs"]) == 100
         assert json_data["tool_output"]["summary"]["total_entries"] == 100
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

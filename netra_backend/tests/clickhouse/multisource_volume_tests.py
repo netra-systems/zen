@@ -10,7 +10,6 @@ from netra_backend.app.db.clickhouse_query_fixer import (
     validate_clickhouse_query,
 )
 
-
 class TestMultiSourceAggregation:
     """Test aggregation across multiple data sources"""
     
@@ -94,7 +93,6 @@ class TestMultiSourceAggregation:
         fixed_query = self._fix_query_syntax(query)
         self._validate_cross_table_query(fixed_query)
 
-
 class TestRealisticDataVolumes:
     """Test with realistic data volumes"""
     
@@ -161,7 +159,6 @@ class TestRealisticDataVolumes:
         """Test creation of materialized views for performance"""
         view_query = self._get_materialized_view_query()
         self._validate_materialized_view_syntax(view_query)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

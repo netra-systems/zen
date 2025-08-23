@@ -11,17 +11,10 @@ L3 Realism: Real Redis cluster with multiple nodes, actual resharding operations
 Performance Requirements: Resharding downtime < 500ms, data consistency 100%, performance degradation < 20%
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -39,15 +32,11 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer as NetraRedisContainer,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class ReshardingMetrics:
@@ -95,7 +84,6 @@ class ReshardingMetrics:
             return 0.0
         
         return ((avg_before - avg_after) / avg_before) * 100.0
-
 
 class ClusterReshardingL3Manager:
     """L3 Redis cluster resharding test manager with real cluster operations."""
@@ -605,7 +593,6 @@ class ClusterReshardingL3Manager:
         except Exception as e:
             logger.error(f"Cluster resharding cleanup failed: {e}")
 
-
 @pytest.fixture
 async def cluster_resharding_manager():
     """Create L3 cluster resharding manager."""
@@ -613,7 +600,6 @@ async def cluster_resharding_manager():
     await manager.setup_redis_cluster()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -632,7 +618,6 @@ async def test_cluster_data_population_and_distribution(cluster_resharding_manag
     
     logger.info(f"Cluster data population completed: {result['total_keys']} keys distributed across {result['nodes_used']} nodes")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -647,7 +632,6 @@ async def test_simple_cluster_resharding_operation(cluster_resharding_manager):
     assert result["keys_remaining_on_source"] == 0, f"{result['keys_remaining_on_source']} keys remained on source after migration"
     
     logger.info(f"Simple resharding completed: {result['migration_success_rate']:.1f}% success rate, {result['resharding_time']*1000:.1f}ms")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -664,7 +648,6 @@ async def test_data_consistency_during_cluster_resharding(cluster_resharding_man
     
     logger.info(f"Consistency test completed: {result['checks_performed']} checks, {result['consistency_violations']} violations")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -679,7 +662,6 @@ async def test_performance_impact_during_resharding(cluster_resharding_manager):
     
     logger.info(f"Performance impact test completed: {result['performance_degradation']:.1f}% degradation, {result['total_downtime']*1000:.1f}ms downtime")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -693,7 +675,6 @@ async def test_cluster_node_failure_during_resharding(cluster_resharding_manager
     assert result["resharding_completed"], "Resharding should complete despite node failure"
     
     logger.info(f"Node failure test completed: {result['data_recovery_rate']:.1f}% data recovery, {result['lost_keys']} keys lost")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

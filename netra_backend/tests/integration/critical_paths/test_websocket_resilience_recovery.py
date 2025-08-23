@@ -10,21 +10,10 @@ Critical Path: Connection loss detection -> State preservation -> Reconnection -
 Coverage: Connection resilience, state persistence, automatic recovery, message integrity
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -41,20 +30,14 @@ from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.services.websocket.connection_recovery import ConnectionRecovery
 
-# Add project root to path
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-
-
 logger = logging.getLogger(__name__)
-
 
 class WebSocketResilienceManager:
 
     """Manages WebSocket resilience testing with connection simulation."""
     
-
     def __init__(self):
 
         self.ws_manager = None
@@ -81,7 +64,6 @@ class WebSocketResilienceManager:
 
         }
         
-
     async def initialize_services(self):
 
         """Initialize WebSocket resilience services."""
@@ -92,34 +74,28 @@ class WebSocketResilienceManager:
 
             await self.ws_manager.initialize()
             
-
             self.recovery_service = ConnectionRecovery()
 
             await self.recovery_service.initialize()
             
-
             self.state_service = StatePersistenceService()
 
             await self.state_service.initialize()
             
-
             logger.info("WebSocket resilience services initialized")
             
-
         except Exception as e:
 
             logger.error(f"Failed to initialize resilience services: {e}")
 
             raise
     
-
     async def create_websocket_session(self, user_id: str, session_data: Dict = None) -> str:
 
         """Create a WebSocket session with state tracking."""
 
         session_id = f"ws_session_{uuid.uuid4().hex[:12]}"
         
-
         try:
             # Create connection
 
@@ -141,24 +117,20 @@ class WebSocketResilienceManager:
 
             }
             
-
             self.active_connections[session_id] = connection_data
             
             # Initialize state persistence
 
             await self.state_service.save_session_state(session_id, connection_data["state"])
             
-
             return session_id
             
-
         except Exception as e:
 
             logger.error(f"Failed to create WebSocket session: {e}")
 
             raise
     
-
     async def simulate_connection_loss(self, session_id: str, 
 
                                      disconnection_type: str = "network_timeout") -> Dict[str, Any]:
@@ -169,12 +141,10 @@ class WebSocketResilienceManager:
 
             raise ValueError(f"Session {session_id} not found")
         
-
         connection = self.active_connections[session_id]
 
         disconnection_time = time.time()
         
-
         try:
             # Record disconnection event
 
@@ -194,7 +164,6 @@ class WebSocketResilienceManager:
 
             }
             
-
             self.disconnection_events.append(disconnection_event)
 
             self.recovery_metrics["total_disconnections"] += 1
@@ -211,7 +180,6 @@ class WebSocketResilienceManager:
 
             connection["disconnection_type"] = disconnection_type
             
-
             return {
 
                 "disconnection_successful": True,
@@ -222,7 +190,6 @@ class WebSocketResilienceManager:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -233,7 +200,6 @@ class WebSocketResilienceManager:
 
             }
     
-
     async def preserve_connection_state(self, session_id: str, connection: Dict) -> bool:
 
         """Preserve connection state before disconnection."""
@@ -256,19 +222,16 @@ class WebSocketResilienceManager:
 
             }
             
-
             await self.state_service.save_disconnection_state(session_id, state_snapshot)
 
             return True
             
-
         except Exception as e:
 
             logger.error(f"Failed to preserve state for {session_id}: {e}")
 
             return False
     
-
     async def attempt_reconnection(self, session_id: str, recovery_token: str = None) -> Dict[str, Any]:
 
         """Attempt to reconnect and recover session state."""
@@ -277,12 +240,10 @@ class WebSocketResilienceManager:
 
             return {"success": False, "error": "Session not found"}
         
-
         connection = self.active_connections[session_id]
 
         recovery_start_time = time.time()
         
-
         try:
             # Validate recovery token if provided
 
@@ -324,7 +285,6 @@ class WebSocketResilienceManager:
 
             self.update_average_recovery_time(connection["recovery_time"])
             
-
             return {
 
                 "success": True,
@@ -339,7 +299,6 @@ class WebSocketResilienceManager:
 
             }
             
-
         except Exception as e:
 
             self.recovery_metrics["failed_recoveries"] += 1
@@ -354,7 +313,6 @@ class WebSocketResilienceManager:
 
             }
     
-
     async def validate_recovery_token(self, session_id: str, recovery_token: str) -> bool:
 
         """Validate recovery token for session restoration."""
@@ -366,12 +324,10 @@ class WebSocketResilienceManager:
 
             return recovery_token == expected_token
             
-
         except Exception:
 
             return False
     
-
     async def recover_session_state(self, session_id: str) -> Dict[str, Any]:
 
         """Recover session state from persistence layer."""
@@ -380,7 +336,6 @@ class WebSocketResilienceManager:
 
             preserved_state = await self.state_service.load_disconnection_state(session_id)
             
-
             if not preserved_state:
 
                 return {"success": False, "error": "No preserved state found"}
@@ -395,7 +350,6 @@ class WebSocketResilienceManager:
 
                     return {"success": False, "error": f"Missing field: {field}"}
             
-
             return {
 
                 "success": True,
@@ -404,7 +358,6 @@ class WebSocketResilienceManager:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -415,7 +368,6 @@ class WebSocketResilienceManager:
 
             }
     
-
     async def test_message_delivery_during_reconnection(self, session_id: str) -> Dict[str, Any]:
 
         """Test message delivery and queuing during reconnection process."""
@@ -424,10 +376,8 @@ class WebSocketResilienceManager:
 
             return {"success": False, "error": "Session not found"}
         
-
         connection = self.active_connections[session_id]
         
-
         try:
             # Send messages while disconnected
 
@@ -439,13 +389,11 @@ class WebSocketResilienceManager:
 
             ]
             
-
             if connection["status"] == "disconnected":
                 # Queue messages for delivery after reconnection
 
                 connection["message_queue"].extend(test_messages)
                 
-
                 return {
 
                     "success": True,
@@ -463,7 +411,6 @@ class WebSocketResilienceManager:
 
                     await self.deliver_message(session_id, message)
                 
-
                 return {
 
                     "success": True,
@@ -474,7 +421,6 @@ class WebSocketResilienceManager:
 
                 }
             
-
         except Exception as e:
 
             return {
@@ -485,7 +431,6 @@ class WebSocketResilienceManager:
 
             }
     
-
     async def deliver_message(self, session_id: str, message: Dict[str, Any]):
 
         """Deliver message to WebSocket connection."""
@@ -503,7 +448,6 @@ class WebSocketResilienceManager:
 
         connection["delivered_messages"].append(message)
     
-
     def update_average_recovery_time(self, new_recovery_time: float):
 
         """Update running average of recovery times."""
@@ -512,7 +456,6 @@ class WebSocketResilienceManager:
 
         successful_recoveries = self.recovery_metrics["successful_recoveries"]
         
-
         if successful_recoveries == 1:
 
             self.recovery_metrics["average_recovery_time"] = new_recovery_time
@@ -525,7 +468,6 @@ class WebSocketResilienceManager:
 
             )
     
-
     async def get_resilience_metrics(self) -> Dict[str, Any]:
 
         """Get comprehensive resilience metrics."""
@@ -534,7 +476,6 @@ class WebSocketResilienceManager:
 
                          self.recovery_metrics["failed_recoveries"])
         
-
         success_rate = 0
 
         if total_attempts > 0:
@@ -551,7 +492,6 @@ class WebSocketResilienceManager:
 
             preservation_rate = (preserved_states / len(self.disconnection_events)) * 100
         
-
         return {
 
             "total_connections": len(self.active_connections),
@@ -574,7 +514,6 @@ class WebSocketResilienceManager:
 
         }
     
-
     def get_disconnection_type_breakdown(self) -> Dict[str, int]:
 
         """Get breakdown of disconnection types."""
@@ -589,7 +528,6 @@ class WebSocketResilienceManager:
 
         return breakdown
     
-
     async def cleanup(self):
 
         """Clean up resources."""
@@ -612,7 +550,6 @@ class WebSocketResilienceManager:
 
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 
 async def resilience_manager():
@@ -626,7 +563,6 @@ async def resilience_manager():
     yield manager
 
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 
@@ -650,7 +586,6 @@ async def test_network_timeout_recovery(resilience_manager):
 
     )
     
-
     assert disconnect_result["disconnection_successful"] is True
 
     assert disconnect_result["state_preserved"] is True
@@ -659,7 +594,6 @@ async def test_network_timeout_recovery(resilience_manager):
 
     recovery_result = await resilience_manager.attempt_reconnection(session_id)
     
-
     assert recovery_result["success"] is True
 
     assert recovery_result["state_recovered"] is True
@@ -673,7 +607,6 @@ async def test_network_timeout_recovery(resilience_manager):
     assert recovered_state["application_state"]["current_conversation"] == "test_conversation"
 
     assert recovered_state["application_state"]["message_count"] == 5
-
 
 @pytest.mark.asyncio
 
@@ -697,7 +630,6 @@ async def test_server_restart_recovery(resilience_manager):
 
     )
     
-
     assert disconnect_result["disconnection_successful"] is True
     
     # Wait to simulate server restart delay
@@ -710,7 +642,6 @@ async def test_server_restart_recovery(resilience_manager):
 
     recovery_result = await resilience_manager.attempt_reconnection(session_id, recovery_token)
     
-
     assert recovery_result["success"] is True
 
     assert recovery_result["state_recovered"] is True
@@ -722,7 +653,6 @@ async def test_server_restart_recovery(resilience_manager):
     assert recovered_state["application_state"]["workspace_id"] == "workspace_123"
 
     assert "search" in recovered_state["application_state"]["active_tools"]
-
 
 @pytest.mark.asyncio
 
@@ -744,7 +674,6 @@ async def test_message_queuing_during_disconnection(resilience_manager):
 
     message_result = await resilience_manager.test_message_delivery_during_reconnection(session_id)
     
-
     assert message_result["success"] is True
 
     assert message_result["messages_queued"] == 3
@@ -755,7 +684,6 @@ async def test_message_queuing_during_disconnection(resilience_manager):
 
     recovery_result = await resilience_manager.attempt_reconnection(session_id)
     
-
     assert recovery_result["success"] is True
 
     assert recovery_result["messages_restored"] >= 3
@@ -765,7 +693,6 @@ async def test_message_queuing_during_disconnection(resilience_manager):
     post_reconnection_result = await resilience_manager.test_message_delivery_during_reconnection(session_id)
 
     assert post_reconnection_result["delivery_method"] == "immediate"
-
 
 @pytest.mark.asyncio
 
@@ -803,7 +730,6 @@ async def test_concurrent_reconnection_attempts(resilience_manager):
 
     ]
     
-
     results = await asyncio.gather(*reconnection_tasks)
     
     # Verify all reconnections succeeded
@@ -817,7 +743,6 @@ async def test_concurrent_reconnection_attempts(resilience_manager):
     for result in successful_reconnections:
 
         assert result["recovery_time"] < 5.0
-
 
 @pytest.mark.asyncio
 
@@ -841,7 +766,6 @@ async def test_invalid_recovery_token_handling(resilience_manager):
 
     recovery_result = await resilience_manager.attempt_reconnection(session_id, invalid_token)
     
-
     assert recovery_result["success"] is False
 
     assert "Invalid recovery token" in recovery_result["error"]
@@ -851,7 +775,6 @@ async def test_invalid_recovery_token_handling(resilience_manager):
     recovery_result_no_token = await resilience_manager.attempt_reconnection(session_id)
 
     assert recovery_result_no_token["success"] is True
-
 
 @pytest.mark.asyncio
 
@@ -872,7 +795,6 @@ async def test_resilience_performance_metrics(resilience_manager):
 
     ]
     
-
     for disconnect_type, expected_speed in scenarios:
 
         user_id = f"perf_user_{disconnect_type}"
@@ -885,7 +807,6 @@ async def test_resilience_performance_metrics(resilience_manager):
 
         recovery_result = await resilience_manager.attempt_reconnection(session_id)
         
-
         assert recovery_result["success"] is True
         
         # Verify performance requirements
@@ -908,13 +829,11 @@ async def test_resilience_performance_metrics(resilience_manager):
 
     metrics = await resilience_manager.get_resilience_metrics()
     
-
     assert metrics["recovery_success_rate"] >= 95.0
 
     assert metrics["average_recovery_time"] < 3.0
 
     assert metrics["state_preservation_rate"] >= 95.0
-
 
 @pytest.mark.asyncio
 
@@ -978,7 +897,6 @@ async def test_state_preservation_integrity(resilience_manager):
 
     assert recovery_result["success"] is True
     
-
     recovered_state = recovery_result["recovered_state"]["application_state"]
     
     # Verify complex nested structure preserved
@@ -989,12 +907,10 @@ async def test_state_preservation_integrity(resilience_manager):
 
     assert "search" in recovered_state["workspace"]["tools"]
     
-
     assert recovered_state["conversation"]["thread_id"] == "thread_456"
 
     assert len(recovered_state["conversation"]["messages"]) == 2
     
-
     assert recovered_state["user_preferences"]["theme"] == "dark"
 
     assert recovered_state["user_preferences"]["notifications"] is True

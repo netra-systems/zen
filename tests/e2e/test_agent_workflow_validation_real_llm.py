@@ -4,13 +4,13 @@ CRITICAL E2E test for complete agent workflow validation with real LLM.
 Tests all agent lifecycle stages, state management, and data flow validation.
 
 Business Value Justification (BVJ):
-1. Segment: All customer segments ($347K+ MRR protection)
+    1. Segment: All customer segments ($347K+ MRR protection)
 2. Business Goal: Ensure reliable agent workflow execution
 3. Value Impact: Validates complete agent lifecycle preventing service failures
 4. Revenue Impact: Prevents customer churn from agent workflow failures
 
 ARCHITECTURAL COMPLIANCE:
-- File size: <500 lines (modular design)
+    - File size: <500 lines (modular design)
 - Function size: <25 lines each
 - Real LLM API calls when --real-llm flag is set
 - Complete workflow validation from input to output
@@ -19,8 +19,8 @@ ARCHITECTURAL COMPLIANCE:
 
 from dataclasses import dataclass
 from netra_backend.app.schemas.UserPlan import PlanTier
-from netra_backend.app.schemas.thread_schemas import AgentRequest
-from tests.e2e.agent_conversation_helpers import (
+# Removed unused import: AgentRequest
+from typing import Dict, Any, List, Optional
 from typing import Dict, Any, List, Optional
 from unittest.mock import patch, AsyncMock
 import asyncio
@@ -35,53 +35,48 @@ import time
 
     AgentConversationTestUtils
 
-)
-
-
 @dataclass
 
 class WorkflowStage:
 
-    """Data structure for workflow stages."""
+    # """Data structure for workflow stages."""
 
-    stage_name: str
+    # stage_name: str
 
-    entry_conditions: List[str]
+    # entry_conditions: List[str]
 
-    exit_conditions: List[str]
+    # exit_conditions: List[str]
 
-    expected_data_transformations: Dict[str, Any]
+    # expected_data_transformations: Dict[str, Any]
 
-    performance_sla_seconds: float
+    # performance_sla_seconds: float
 
-
-@dataclass 
+    # @dataclass
 
 class AgentWorkflowTestCase:
 
-    """Test case for agent workflow validation."""
+    # """Test case for agent workflow validation."""
 
-    workflow_id: str
+    # workflow_id: str
 
-    description: str
+    # description: str
 
-    input_data: Dict[str, Any]
+    # input_data: Dict[str, Any]
 
-    expected_stages: List[WorkflowStage]
+    # expected_stages: List[WorkflowStage]
 
-    expected_final_state: Dict[str, Any]
+    # expected_final_state: Dict[str, Any]
 
-    plan_tier: PlanTier
+    # plan_tier: PlanTier
 
-    complexity_level: str  # "simple", "medium", "complex"
-
+    # complexity_level: str  # "simple", "medium", "complex"
 
 class AgentWorkflowTestData:
 
-    """Test data for agent workflow validation."""
+    # """Test data for agent workflow validation."""
     
 
-    @staticmethod
+    # @staticmethod
 
     def get_workflow_test_cases() -> List[AgentWorkflowTestCase]:
 
@@ -237,10 +232,7 @@ class AgentWorkflowTestData:
 
                 complexity_level="medium"
 
-            )
-
         ]
-
 
 @pytest.mark.real_llm
 
@@ -248,25 +240,28 @@ class AgentWorkflowTestData:
 
 class TestAgentWorkflowValidationRealLLM:
 
-    """Test complete agent workflow validation with real LLM."""
+    # """Test complete agent workflow validation with real LLM."""
     
 
-    @pytest_asyncio.fixture
+    # @pytest_asyncio.fixture
 
-    async def test_core(self):
+    # async def test_core(self):
 
-        """Initialize test core with real LLM support."""
+    # """Initialize test core with real LLM support."""
 
-        core = AgentConversationTestCore()
+    # core = AgentConversationTestCore()
 
-        await core.setup_test_environment()
+    # await core.setup_test_environment()
 
-        yield core
+    # yield core
 
-        await core.teardown_test_environment()
+    # await core.teardown_test_environment()
     
 
-    @pytest.fixture
+    # @pytest.fixture
+
+class TestSyntaxFix:
+    """Generated test class"""
 
     def use_real_llm(self):
 
@@ -296,6 +291,7 @@ class TestAgentWorkflowValidationRealLLM:
         
 
         try:
+    pass
             # Execute workflow with stage validation
 
             start_time = time.time()
@@ -303,8 +299,6 @@ class TestAgentWorkflowValidationRealLLM:
             workflow_result = await self._execute_validated_workflow(
 
                 session_data, workflow_case, use_real_llm, workflow_validator
-
-            )
 
             execution_time = time.time() - start_time
             
@@ -336,6 +330,7 @@ class TestAgentWorkflowValidationRealLLM:
         
 
         try:
+    pass
 
             state_tracker = WorkflowStateTracker()
             
@@ -345,7 +340,6 @@ class TestAgentWorkflowValidationRealLLM:
 
                 session_data, workflow_case, use_real_llm, state_tracker
 
-            )
             
             # Validate all state transitions
 
@@ -377,6 +371,7 @@ class TestAgentWorkflowValidationRealLLM:
         
 
         try:
+    pass
 
             data_flow_tracker = DataFlowTracker()
             
@@ -386,7 +381,6 @@ class TestAgentWorkflowValidationRealLLM:
 
                 session_data, workflow_case, use_real_llm, data_flow_tracker
 
-            )
             
             # Validate data transformations at each stage
 
@@ -418,6 +412,7 @@ class TestAgentWorkflowValidationRealLLM:
         
 
         try:
+    pass
             # Inject controlled errors at different stages
 
             error_scenarios = [
@@ -431,13 +426,12 @@ class TestAgentWorkflowValidationRealLLM:
             ]
             
 
-            for scenario in error_scenarios:
+#             for scenario in error_scenarios: # Possibly broken comprehension
 
                 error_result = await self._execute_workflow_with_error_injection(
 
                     session_data, workflow_case, scenario, use_real_llm
 
-                )
                 
                 # Validate graceful error handling
 
@@ -468,12 +462,13 @@ class TestAgentWorkflowValidationRealLLM:
         
 
         try:
+    pass
 
             performance_results = []
             
 
-            for workflow_case in workflow_cases:
-                # Execute with performance monitoring
+#             for workflow_case in workflow_cases: # Possibly broken comprehension
+#                 # Execute with performance monitoring # Possibly broken comprehension
 
                 perf_monitor = PerformanceMonitor()
                 
@@ -483,8 +478,6 @@ class TestAgentWorkflowValidationRealLLM:
                 workflow_result = await self._execute_with_performance_monitoring(
 
                     session_data, workflow_case, True, perf_monitor
-
-                )
 
                 total_time = time.time() - start_time
                 
@@ -503,7 +496,7 @@ class TestAgentWorkflowValidationRealLLM:
             
             # Validate performance SLAs
 
-            for result in performance_results:
+#             for result in performance_results: # Possibly broken comprehension
 
                 expected_max_time = self._get_max_execution_time(result["complexity"], True)
 
@@ -529,7 +522,7 @@ class TestAgentWorkflowValidationRealLLM:
         workflow_state = WorkflowState(workflow_case.workflow_id)
         
 
-        for stage in workflow_case.expected_stages:
+#         for stage in workflow_case.expected_stages: # Possibly broken comprehension
             # Validate entry conditions
 
             entry_valid = validator.validate_entry_conditions(stage, workflow_state)
@@ -542,7 +535,6 @@ class TestAgentWorkflowValidationRealLLM:
 
                 session_data, stage, workflow_case.input_data, workflow_state, use_real_llm
 
-            )
             
             # Update workflow state
 
@@ -565,7 +557,6 @@ class TestAgentWorkflowValidationRealLLM:
 
             "stages_completed": len(workflow_case.expected_stages)
 
-        }
     
 
     async def _execute_workflow_stage(self, session_data: Dict[str, Any], stage: WorkflowStage,
@@ -578,7 +569,7 @@ class TestAgentWorkflowValidationRealLLM:
 
         if use_real_llm:
             # Real LLM execution
-            from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 
             llm_manager = LLMManager()
             
@@ -587,6 +578,7 @@ class TestAgentWorkflowValidationRealLLM:
             
 
             try:
+    pass
 
                 start_time = time.time()
 
@@ -603,8 +595,6 @@ class TestAgentWorkflowValidationRealLLM:
                     ),
 
                     timeout=stage.performance_sla_seconds
-
-                )
 
                 execution_time = time.time() - start_time
                 
@@ -625,7 +615,6 @@ class TestAgentWorkflowValidationRealLLM:
 
                     "real_llm": True
 
-                }
                 
 
             except asyncio.TimeoutError:
@@ -639,8 +628,6 @@ class TestAgentWorkflowValidationRealLLM:
                     "execution_time": stage.performance_sla_seconds,
 
                     "real_llm": True
-
-                }
 
         else:
             # Mock execution
@@ -663,8 +650,10 @@ class TestAgentWorkflowValidationRealLLM:
 
                 "real_llm": False
 
-            }
     
+
+class TestSyntaxFix:
+    """Generated test class"""
 
     def _build_stage_prompt(self, stage: WorkflowStage, input_data: Dict[str, Any],
 
@@ -674,21 +663,21 @@ class TestAgentWorkflowValidationRealLLM:
 
         return f"""Execute {stage.stage_name} stage for AI optimization workflow.
 
-
 Input Data: {input_data}
 
 Current State: {workflow_state.get_current_context()}
 
 Expected Transformations: {stage.expected_data_transformations}
 
-
 Entry Conditions Met: {stage.entry_conditions}
 
 Must Achieve Exit Conditions: {stage.exit_conditions}
 
-
 Provide structured output for this stage:"""
     
+
+class TestSyntaxFix:
+    """Generated test class"""
 
     def _get_max_execution_time(self, complexity: str, use_real_llm: bool) -> float:
 
@@ -702,13 +691,15 @@ Provide structured output for this stage:"""
 
             "complex": 25.0
 
-        }
         
 
         base_time = base_times.get(complexity, 15.0)
 
         return base_time * 2 if use_real_llm else base_time
     
+
+class TestSyntaxFix:
+    """Generated test class"""
 
     def _validate_workflow_completion(self, result: Dict[str, Any], workflow_case: AgentWorkflowTestCase):
 
@@ -731,10 +722,9 @@ Provide structured output for this stage:"""
 
                 assert final_state.get(key) is not None, f"Expected calculated value for {key}"
 
-
 class WorkflowValidator:
 
-    """Validator for workflow stages and conditions."""
+    # """Validator for workflow stages and conditions."""
     
 
     def validate_entry_conditions(self, stage: WorkflowStage, workflow_state: 'WorkflowState') -> bool:
@@ -744,7 +734,7 @@ class WorkflowValidator:
         current_state = workflow_state.get_current_state()
         
 
-        for condition in stage.entry_conditions:
+#         for condition in stage.entry_conditions: # Possibly broken comprehension
 
             if not self._check_condition(condition, current_state):
 
@@ -753,6 +743,9 @@ class WorkflowValidator:
         return True
     
 
+class TestSyntaxFix:
+    """Generated test class"""
+
     def validate_exit_conditions(self, stage: WorkflowStage, workflow_state: 'WorkflowState') -> bool:
 
         """Validate stage exit conditions are met."""
@@ -760,7 +753,7 @@ class WorkflowValidator:
         current_state = workflow_state.get_current_state()
         
 
-        for condition in stage.exit_conditions:
+#         for condition in stage.exit_conditions: # Possibly broken comprehension
 
             if not self._check_condition(condition, current_state):
 
@@ -788,17 +781,15 @@ class WorkflowValidator:
 
             "report_created": lambda s: "report" in s
 
-        }
         
 
         check_func = condition_checks.get(condition, lambda s: True)
 
         return check_func(state)
 
-
 class WorkflowState:
 
-    """Manages workflow state throughout execution."""
+    # """Manages workflow state throughout execution."""
     
 
     def __init__(self, workflow_id: str):
@@ -857,6 +848,9 @@ class WorkflowState:
                 self.state["report"] = True
     
 
+class TestSyntaxFix:
+    """Generated test class"""
+
     def get_current_state(self) -> Dict[str, Any]:
 
         """Get current workflow state."""
@@ -874,8 +868,10 @@ class WorkflowState:
 
             "current_state": self.state
 
-        }
     
+
+class TestSyntaxFix:
+    """Generated test class"""
 
     def get_final_state(self) -> Dict[str, Any]:
 
@@ -889,12 +885,9 @@ class WorkflowState:
 
             "final_state": self.state
 
-        }
-
-
 class WorkflowStateTracker:
 
-    """Tracks and validates workflow state transitions."""
+    # """Tracks and validates workflow state transitions."""
     
 
     def __init__(self):
@@ -917,10 +910,9 @@ class WorkflowStateTracker:
 
         return {"consistent": True}  # Simplified for this implementation
 
-
 class DataFlowTracker:
 
-    """Tracks data flow through workflow stages."""
+    # """Tracks data flow through workflow stages."""
     
 
     def __init__(self):
@@ -939,12 +931,11 @@ class DataFlowTracker:
 
         """Check data integrity throughout workflow."""
 
-        return {"intact": True}  # Simplified for this implementation
-
+#         return {"intact": True}  # Simplified for this implementation # Possibly broken comprehension
 
 class PerformanceMonitor:
 
-    """Monitors workflow performance."""
+    # """Monitors workflow performance."""
     
 
     def __init__(self):
@@ -954,6 +945,6 @@ class PerformanceMonitor:
 
     def get_stage_times(self) -> Dict[str, float]:
 
-        """Get timing data for all stages."""
+#         """Get timing data for all stages.""" # Possibly broken comprehension
 
         return self.stage_times.copy()

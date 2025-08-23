@@ -4,17 +4,10 @@ Tests validate artifacts at agent boundaries with real state transitions.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import uuid
@@ -34,18 +27,15 @@ from netra_backend.app.agents.data_sub_agent.models import (
     DataAnalysisResponse,
 )
 
-# Add project root to path
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
 from netra_backend.app.agents.triage_sub_agent.models import (
     Complexity,
     KeyParameters,
     Priority,
     SuggestedWorkflow,
-    # Add project root to path
     TriageResult,
     UserIntent,
 )
-
 
 @pytest.fixture
 def sample_triage_result():
@@ -60,7 +50,6 @@ def sample_triage_result():
         suggested_workflow=SuggestedWorkflow(next_agent="DataSubAgent")
     )
 
-
 @pytest.fixture  
 def sample_data_result():
     """Create valid data analysis result for testing."""
@@ -73,7 +62,6 @@ def sample_data_result():
         affected_rows=150
     )
 
-
 @pytest.fixture
 def sample_optimization_result():
     """Create valid optimization result for testing."""
@@ -85,7 +73,6 @@ def sample_optimization_result():
         confidence_score=0.8
     )
 
-
 @pytest.fixture
 def validation_context():
     """Create validation context for testing."""
@@ -95,7 +82,6 @@ def validation_context():
         artifact_type="test_artifact",
         user_request="Test optimization request"
     )
-
 
 class TestArtifactValidation:
     """Test suite for artifact validation functionality."""

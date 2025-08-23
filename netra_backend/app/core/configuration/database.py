@@ -38,6 +38,11 @@ class DatabaseConfigManager:
         self._environment = self._get_environment()
         self._validation_rules = self._load_validation_rules()
         self._connection_templates = self._load_connection_templates()
+        # Add caching to prevent repeated configuration loading and logging
+        self._postgres_url_cache: Optional[str] = None
+        self._clickhouse_config_cache: Optional[Dict[str, str]] = None
+        self._redis_url_cache: Optional[str] = None
+        self._logged_urls = set()  # Track what we've already logged
     
     def _get_environment(self) -> str:
         """Get current environment for database configuration."""
@@ -74,7 +79,8 @@ class DatabaseConfigManager:
         self._populate_postgres_config(config)
         self._populate_clickhouse_config(config)
         self._populate_redis_config(config)
-        self._logger.info(f"Populated database config for {self._environment}")
+        # Only log during initial startup or when explicitly requested
+        self._logger.debug(f"Populated database config for {self._environment}")
     
     def _populate_postgres_config(self, config: AppConfig) -> None:
         """Populate PostgreSQL configuration."""
@@ -101,20 +107,53 @@ class DatabaseConfigManager:
         
         CONFIG MANAGER: Direct env access required for database URL loading.
         """
+        # Return cached URL if available
+        if self._postgres_url_cache is not None:
+            return self._postgres_url_cache
+            
         # CONFIG BOOTSTRAP: Direct env access for database URL configuration
         url = os.environ.get("DATABASE_URL")
         if url:
-            # Mask password but show full URL structure for debugging
-            parsed = urlparse(url)
-            # Handle Unix socket URLs (Cloud SQL proxy)
-            if "/cloudsql/" in url or not parsed.hostname:
-                masked_url = f"{parsed.scheme}://***@{parsed.path}?{parsed.query}"
-            else:
-                masked_url = f"{parsed.scheme}://***@{parsed.hostname}:{parsed.port}{parsed.path}?{parsed.query}"
-            self._logger.info(f"Loading DATABASE_URL: {masked_url}")
+            # Normalize the URL to add driver if missing
+            url = self._normalize_postgres_url(url)
+            
+            # Only log once per URL to prevent spam
+            if url not in self._logged_urls:
+                # Mask password but show full URL structure for debugging
+                parsed = urlparse(url)
+                # Handle Unix socket URLs (Cloud SQL proxy)
+                if "/cloudsql/" in url or not parsed.hostname:
+                    masked_url = f"{parsed.scheme}://***@{parsed.path}?{parsed.query}"
+                else:
+                    masked_url = f"{parsed.scheme}://***@{parsed.hostname}:{parsed.port}{parsed.path}?{parsed.query}"
+                self._logger.info(f"Loading DATABASE_URL: {masked_url}")
+                self._logged_urls.add(url)
         else:
             url = self._get_default_postgres_url()
-            self._logger.info(f"Using default database URL for {self._environment}")
+            # Only log default URL once
+            if "default" not in self._logged_urls:
+                self._logger.debug(f"Using default database URL for {self._environment}")
+                self._logged_urls.add("default")
+                
+        # Cache the URL
+        self._postgres_url_cache = url
+        return url
+    
+    def _normalize_postgres_url(self, url: str) -> str:
+        """Normalize PostgreSQL URL to add driver if missing.
+        
+        Converts simple postgresql:// URLs to postgresql+asyncpg:// for async support.
+        """
+        parsed = urlparse(url)
+        
+        # If URL uses basic postgresql:// scheme, add asyncpg driver
+        if parsed.scheme == "postgresql" or parsed.scheme == "postgres":
+            # Replace scheme with postgresql+asyncpg for async operations
+            normalized = url.replace(f"{parsed.scheme}://", "postgresql+asyncpg://")
+            self._logger.debug(f"Normalized URL scheme from {parsed.scheme} to postgresql+asyncpg")
+            return normalized
+        
+        # URL already has a driver specified or is not PostgreSQL
         return url
     
     def _get_default_postgres_url(self) -> str:
@@ -128,8 +167,9 @@ class DatabaseConfigManager:
         parsed = urlparse(url)
         if parsed.scheme.startswith("sqlite"):
             return  # Skip PostgreSQL-specific validation for SQLite
-        # Accept both postgresql:// and postgresql+asyncpg:// schemes
-        if parsed.scheme not in ["postgresql", "postgresql+asyncpg", "postgres"]:
+        # Accept postgresql://, postgres://, and postgresql+driver:// schemes
+        valid_schemes = ["postgresql", "postgres", "postgresql+asyncpg", "postgresql+psycopg2", "postgresql+psycopg"]
+        if not any(parsed.scheme.startswith(scheme) for scheme in ["postgresql", "postgres"]):
             return  # Skip validation for non-PostgreSQL URLs
         
         # Skip validation for Cloud SQL Unix socket connections (like auth service)
@@ -170,16 +210,23 @@ class DatabaseConfigManager:
         
         CONFIG MANAGER: Direct env access required for ClickHouse configuration loading.
         """
+        # Return cached configuration if available
+        if self._clickhouse_config_cache is not None:
+            return self._clickhouse_config_cache
+            
         # CONFIG BOOTSTRAP: Direct env access for ClickHouse configuration
         # Ensure HTTP port 8123 is used for development
         default_port = "8123"  # Always use HTTP port for dev launcher
-        return {
+        config = {
             "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
             "port": os.environ.get("CLICKHOUSE_HTTP_PORT", default_port),
             "user": os.environ.get("CLICKHOUSE_USER", "default"),
             "password": os.environ.get("CLICKHOUSE_PASSWORD", ""),
             "database": os.environ.get("CLICKHOUSE_DB", "default")
         }
+        # Cache the configuration
+        self._clickhouse_config_cache = config
+        return config
     
     def _apply_clickhouse_config(self, config: AppConfig, ch_config: Dict[str, str]) -> None:
         """Apply ClickHouse configuration to config objects."""
@@ -234,8 +281,15 @@ class DatabaseConfigManager:
         
         CONFIG MANAGER: Direct env access required for Redis URL loading.
         """
+        # Return cached URL if available
+        if self._redis_url_cache is not None:
+            return self._redis_url_cache
+            
         # CONFIG BOOTSTRAP: Direct env access for Redis URL
-        return os.environ.get("REDIS_URL")
+        url = os.environ.get("REDIS_URL")
+        # Cache the URL
+        self._redis_url_cache = url
+        return url
     
     def _update_redis_config_object(self, config: AppConfig, redis_url: str) -> None:
         """Update Redis configuration object from URL."""
@@ -289,10 +343,13 @@ class DatabaseConfigManager:
         """Check if database URL format is valid for environment."""
         try:
             parsed = urlparse(url)
-            valid_schemes = ["postgresql", "postgresql+asyncpg"]
+            # Accept various PostgreSQL schemes including simple ones
+            valid_schemes = ["postgresql", "postgres", "postgresql+asyncpg", "postgresql+psycopg2", "postgresql+psycopg"]
             if self._environment == "testing":
                 valid_schemes.extend(["sqlite", "sqlite+aiosqlite"])
-            return parsed.scheme in valid_schemes and (bool(parsed.netloc) or parsed.scheme.startswith("sqlite"))
+            # Check if scheme is valid and has either netloc or is SQLite
+            scheme_valid = parsed.scheme in valid_schemes or parsed.scheme.startswith("postgresql")
+            return scheme_valid and (bool(parsed.netloc) or parsed.scheme.startswith("sqlite"))
         except Exception:
             return False
     

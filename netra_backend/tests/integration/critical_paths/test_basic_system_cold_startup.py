@@ -10,17 +10,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: 100% - no startup means no service, no revenue
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import os
@@ -32,21 +25,17 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
-# Add project root to path
-
-
 # Set test environment before imports
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
-from main import app
+from netra_backend.app.main import app
 
 from netra_backend.app.config import get_config
 from netra_backend.app.core.health_checkers import HealthChecker
-from netra_backend.app.db.client_clickhouse import clickhouse_client
-from netra_backend.app.db.postgres import engine as pg_engine
-
+from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from netra_backend.app.db.postgres import async_engine as pg_engine
 
 class TestBasicSystemColdStartup:
     """Test basic system cold startup sequence."""
@@ -200,6 +189,9 @@ class TestBasicSystemColdStartup:
     @pytest.mark.L3
     async def test_configuration_loading_on_startup(self):
         """Test 6: Configuration should be properly loaded on startup."""
+        # Get settings instance
+        settings = get_config()
+        
         # Verify essential settings are loaded
         assert settings.PROJECT_NAME
         assert settings.VERSION

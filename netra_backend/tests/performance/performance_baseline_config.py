@@ -39,7 +39,6 @@ class PerformanceCategory(Enum):
 
     NETWORK = "network"
 
-
 class SeverityLevel(Enum):
 
     """Severity levels for performance issues."""
@@ -53,7 +52,6 @@ class SeverityLevel(Enum):
     LOW = "low"
 
     INFO = "info"
-
 
 @dataclass
 
@@ -77,7 +75,6 @@ class PerformanceMetric:
 
     higher_is_better: bool = False  # True for metrics like throughput
     
-
     def evaluate_performance(self, actual_value: float) -> SeverityLevel:
 
         """Evaluate performance level based on actual value."""
@@ -118,17 +115,14 @@ class PerformanceMetric:
 
                 return SeverityLevel.CRITICAL
 
-
 class PerformanceBaselines:
 
     """Centralized performance baseline configuration."""
     
-
     def __init__(self):
 
         self.metrics = self._initialize_metrics()
     
-
     def _initialize_metrics(self) -> Dict[str, PerformanceMetric]:
 
         """Initialize all performance metrics and their baselines."""
@@ -155,7 +149,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['db_concurrent_reads'] = PerformanceMetric(
 
             name='Concurrent Database Reads',
@@ -174,7 +167,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['db_query_response_time'] = PerformanceMetric(
 
             name='Database Query Response Time',
@@ -215,7 +207,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['websocket_broadcast_throughput'] = PerformanceMetric(
 
             name='WebSocket Broadcast Throughput',
@@ -236,7 +227,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['websocket_connection_time'] = PerformanceMetric(
 
             name='WebSocket Connection Time',
@@ -275,7 +265,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['concurrent_agent_throughput'] = PerformanceMetric(
 
             name='Concurrent Agent Throughput',
@@ -296,7 +285,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['llm_response_time'] = PerformanceMetric(
 
             name='LLM Response Time',
@@ -335,7 +323,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['concurrent_api_load'] = PerformanceMetric(
 
             name='Concurrent API Load',
@@ -354,7 +341,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['api_throughput'] = PerformanceMetric(
 
             name='API Throughput',
@@ -395,7 +381,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['memory_cleanup_time'] = PerformanceMetric(
 
             name='Memory Cleanup Time',
@@ -414,7 +399,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['memory_peak_usage'] = PerformanceMetric(
 
             name='Peak Memory Usage',
@@ -455,7 +439,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['cache_response_time'] = PerformanceMetric(
 
             name='Cache Response Time',
@@ -494,7 +477,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['concurrent_user_success_rate'] = PerformanceMetric(
 
             name='Concurrent User Success Rate',
@@ -515,7 +497,6 @@ class PerformanceBaselines:
 
         )
         
-
         metrics['max_concurrent_users'] = PerformanceMetric(
 
             name='Maximum Concurrent Users',
@@ -536,17 +517,14 @@ class PerformanceBaselines:
 
         )
         
-
         return metrics
     
-
     def get_metric(self, name: str) -> Optional[PerformanceMetric]:
 
         """Get metric configuration by name."""
 
         return self.metrics.get(name)
     
-
     def get_metrics_by_category(self, category: PerformanceCategory) -> Dict[str, PerformanceMetric]:
 
         """Get all metrics for a specific category."""
@@ -559,13 +537,11 @@ class PerformanceBaselines:
 
         }
     
-
     def get_all_categories(self) -> List[PerformanceCategory]:
 
         """Get all performance categories."""
 
         return list(set(metric.category for metric in self.metrics.values()))
-
 
 @dataclass
 
@@ -589,24 +565,20 @@ class PerformanceTestResult:
 
     additional_data: Dict[str, Any] = None
     
-
     def __post_init__(self):
 
         if self.additional_data is None:
 
             self.additional_data = {}
 
-
 class PerformanceReporter:
 
     """Generates performance test reports and documentation."""
     
-
     def __init__(self, baselines: PerformanceBaselines):
 
         self.baselines = baselines
     
-
     def generate_baseline_report(self) -> Dict[str, Any]:
 
         """Generate comprehensive baseline configuration report."""
@@ -659,10 +631,8 @@ class PerformanceReporter:
 
             }
         
-
         return report
     
-
     def generate_test_results_report(self, results: List[PerformanceTestResult]) -> Dict[str, Any]:
 
         """Generate test results report."""
@@ -703,7 +673,6 @@ class PerformanceReporter:
 
                 by_category[category].append(result)
         
-
         report = {
 
             'generated_at': time.time(),
@@ -774,10 +743,8 @@ class PerformanceReporter:
 
         }
         
-
         return report
     
-
     def save_report(self, report: Dict[str, Any], filename: str, directory: str = "test_reports"):
 
         """Save report to file."""
@@ -786,15 +753,12 @@ class PerformanceReporter:
 
         filepath = os.path.join(directory, filename)
         
-
         with open(filepath, 'w') as f:
 
             json.dump(report, f, indent=2, default=str)
         
-
         print(f"Report saved to: {filepath}")
     
-
     def print_summary(self, report: Dict[str, Any]):
 
         """Print performance summary to console."""
@@ -819,7 +783,6 @@ class PerformanceReporter:
 
             print(f"Average Duration: {summary['avg_duration']:.3f}s")
             
-
             if 'severity_breakdown' in report:
 
                 print("\nSeverity Breakdown:")
@@ -830,7 +793,6 @@ class PerformanceReporter:
 
                         print(f"  {severity.upper()}: {count}")
             
-
             if 'category_breakdown' in report:
 
                 print("\nCategory Breakdown:")
@@ -841,10 +803,8 @@ class PerformanceReporter:
 
                     print(f"  {category.upper()}: {stats['passed']}/{stats['total']} ({pass_rate:.1f}%)")
             
-
             print("=" * 60)
         
-
         elif 'total_metrics' in report:
 
             print("\n" + "=" * 60)
@@ -855,22 +815,18 @@ class PerformanceReporter:
 
             print(f"Total Metrics Defined: {report['total_metrics']}")
             
-
             print("\nMetrics by Category:")
 
             for category, info in report['categories'].items():
 
                 print(f"  {category.upper()}: {info['count']} metrics")
             
-
             print("=" * 60)
-
 
 class PerformanceBenchmarkRunner:
 
     """Orchestrates performance benchmark execution."""
     
-
     def __init__(self):
 
         self.baselines = PerformanceBaselines()
@@ -879,7 +835,6 @@ class PerformanceBenchmarkRunner:
 
         self.results: List[PerformanceTestResult] = []
     
-
     def record_result(self, metric_name: str, actual_value: float, 
 
                      test_duration: float, additional_data: Dict[str, Any] = None):
@@ -894,12 +849,10 @@ class PerformanceBenchmarkRunner:
 
             return
         
-
         severity = metric.evaluate_performance(actual_value)
 
         passed = severity in [SeverityLevel.INFO, SeverityLevel.LOW]
         
-
         result = PerformanceTestResult(
 
             metric_name=metric_name,
@@ -920,17 +873,14 @@ class PerformanceBenchmarkRunner:
 
         )
         
-
         self.results.append(result)
     
-
     def generate_final_report(self, save_to_file: bool = True) -> Dict[str, Any]:
 
         """Generate final benchmark report."""
 
         report = self.reporter.generate_test_results_report(self.results)
         
-
         if save_to_file:
 
             timestamp = int(time.time())
@@ -939,10 +889,8 @@ class PerformanceBenchmarkRunner:
 
             self.reporter.save_report(report, filename)
         
-
         return report
     
-
     def print_results_summary(self):
 
         """Print results summary to console."""
@@ -951,13 +899,11 @@ class PerformanceBenchmarkRunner:
 
         self.reporter.print_summary(report)
     
-
     def clear_results(self):
 
         """Clear accumulated results."""
 
         self.results = []
-
 
 def get_performance_baselines() -> PerformanceBaselines:
 
@@ -965,13 +911,11 @@ def get_performance_baselines() -> PerformanceBaselines:
 
     return PerformanceBaselines()
 
-
 def get_benchmark_runner() -> PerformanceBenchmarkRunner:
 
     """Get a new benchmark runner instance."""
 
     return PerformanceBenchmarkRunner()
-
 
 if __name__ == "__main__":
     # Generate baseline configuration documentation
@@ -980,14 +924,12 @@ if __name__ == "__main__":
 
     reporter = PerformanceReporter(baselines)
     
-
     baseline_report = reporter.generate_baseline_report()
 
     reporter.save_report(baseline_report, "performance_baselines.json")
 
     reporter.print_summary(baseline_report)
     
-
     print("\nPerformance baseline configuration generated.")
 
     print("Run performance tests to generate benchmark reports.")

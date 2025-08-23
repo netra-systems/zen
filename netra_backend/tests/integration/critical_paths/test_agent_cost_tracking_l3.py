@@ -10,17 +10,10 @@ Critical Path: Cost calculation -> Real-time tracking -> Budget monitoring -> Al
 Coverage: Cost calculation accuracy, budget enforcement, real-time tracking, cost attribution, usage forecasting, alert systems
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -35,14 +28,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import TaskPriority
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class CostType(Enum):
     """Types of costs tracked in the system."""
@@ -53,14 +42,12 @@ class CostType(Enum):
     BANDWIDTH = "bandwidth"
     DATABASE_OPERATIONS = "database_operations"
 
-
 class BudgetPeriod(Enum):
     """Budget tracking periods."""
     HOURLY = "hourly"
     DAILY = "daily"
     WEEKLY = "weekly"
     MONTHLY = "monthly"
-
 
 @dataclass
 class CostEntry:
@@ -79,7 +66,6 @@ class CostEntry:
     def calculate_total_cost(self) -> Decimal:
         """Calculate total cost for this entry."""
         return self.unit_cost * Decimal(str(self.quantity))
-
 
 @dataclass
 class BudgetLimit:
@@ -105,7 +91,6 @@ class BudgetLimit:
         
         return True
 
-
 @dataclass
 class CostMetrics:
     """Cost tracking and budget metrics."""
@@ -123,7 +108,6 @@ class CostMetrics:
         self.total_tracked_costs += cost
         self.total_entries += 1
         self.real_time_updates += 1
-
 
 class CostCalculator:
     """Accurate cost calculation engine with >99% accuracy target."""
@@ -193,7 +177,6 @@ class CostCalculator:
         
         accuracy = (1 - abs(expected_cost - calculated_cost) / expected_cost) * 100
         return max(0.0, min(100.0, accuracy))
-
 
 class BudgetEnforcer:
     """Budget enforcement and monitoring system."""
@@ -314,7 +297,6 @@ class BudgetEnforcer:
         for callback in self.alert_callbacks:
             await callback(violation_alert)
 
-
 class UsageForecaster:
     """Usage and cost forecasting system."""
     
@@ -403,7 +385,6 @@ class UsageForecaster:
         
         self.forecast_accuracy_history.append(accuracy)
         return accuracy
-
 
 class AgentCostTracker:
     """Comprehensive agent cost tracking and budgeting system."""
@@ -598,13 +579,11 @@ class AgentCostTracker:
             }
         }
 
-
 @pytest.fixture
 async def agent_cost_tracker():
     """Create agent cost tracker for testing."""
     tracker = AgentCostTracker()
     yield tracker
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

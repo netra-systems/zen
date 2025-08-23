@@ -1,25 +1,14 @@
 """Test database connectivity and initialization."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncEngine
-
-# Add project root to path
-
-
 
 @pytest.mark.asyncio
 async def test_database_connectivity_check_success():
@@ -31,16 +20,21 @@ async def test_database_connectivity_check_success():
     # Create mock engine
     mock_engine = MagicMock(spec=AsyncEngine)
     mock_conn = AsyncMock()
-    mock_result = AsyncMock()
+    # Create a mock result where scalar() is NOT async (use MagicMock instead of AsyncMock)
+    mock_result = MagicMock()
     mock_result.scalar.return_value = 1
-    mock_conn.execute.return_value = mock_result
+    
+    # Mock the execute method to return the mock_result when awaited
+    mock_conn.execute = AsyncMock(return_value=mock_result)
+    
+    # Mock the async context manager properly
     mock_engine.connect.return_value.__aenter__.return_value = mock_conn
+    mock_engine.connect.return_value.__aexit__.return_value = None
     
     # Test connectivity
     result = await SchemaValidationService.check_database_connectivity(mock_engine)
     assert result is True
     mock_conn.execute.assert_called_once()
-
 
 @pytest.mark.asyncio
 async def test_database_connectivity_check_failure():
@@ -57,7 +51,6 @@ async def test_database_connectivity_check_failure():
     result = await SchemaValidationService.check_database_connectivity(mock_engine)
     assert result is False
 
-
 @pytest.mark.asyncio
 async def test_database_connectivity_with_none_engine():
     """Test database connectivity check with None engine."""
@@ -68,7 +61,6 @@ async def test_database_connectivity_with_none_engine():
     # Test with None engine should raise AttributeError
     with pytest.raises(AttributeError):
         await SchemaValidationService.check_database_connectivity(None)
-
 
 @pytest.mark.asyncio
 async def test_startup_schema_validation_with_uninitialized_engine():
@@ -85,7 +77,6 @@ async def test_startup_schema_validation_with_uninitialized_engine():
             await validate_schema(logger)
             mock_init.assert_called_once()
 
-
 @pytest.mark.asyncio
 async def test_comprehensive_validation_with_engine():
     """Test comprehensive validation with proper engine."""
@@ -96,13 +87,19 @@ async def test_comprehensive_validation_with_engine():
     # Create mock engine
     mock_engine = MagicMock(spec=AsyncEngine)
     mock_conn = AsyncMock()
-    mock_result = AsyncMock()
+    # Create a mock result where scalar() is NOT async (use MagicMock instead of AsyncMock)
+    mock_result = MagicMock()
     mock_result.scalar.return_value = 1
-    mock_conn.execute.return_value = mock_result
+    
+    # Mock the execute method to return the mock_result when awaited
+    mock_conn.execute = AsyncMock(return_value=mock_result)
+    
+    # Mock the async context manager properly
     mock_engine.connect.return_value.__aenter__.return_value = mock_conn
+    mock_engine.connect.return_value.__aexit__.return_value = None
     
     # Mock inspector for schema validation
-    with patch('app.services.schema_validation_service.inspect') as mock_inspect:
+    with patch('netra_backend.app.services.schema_validation_service.inspect') as mock_inspect:
         mock_inspector = MagicMock()
         mock_inspector.get_table_names.return_value = []
         mock_inspect.return_value = mock_inspector

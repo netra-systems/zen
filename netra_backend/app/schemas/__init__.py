@@ -56,8 +56,8 @@ from .Agent import (
     TodoItem,
     TodoStatus,
 )
-from .agent_models import AgentMetadata, AgentResult, DeepAgentState, ToolResultData
-from .agent_result_types import TypedAgentResult
+from netra_backend.app.schemas.agent_models import AgentMetadata, AgentResult, DeepAgentState, ToolResultData
+from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 from .agent_state import (
     AgentPhase,
     AgentStateMetadata,
@@ -77,7 +77,7 @@ from .agent_state import (
     StateTransactionStatus,
     StateValidationResult,
 )
-from .Analysis import AnalysisResult
+from netra_backend.app.schemas.Analysis import AnalysisResult
 from .audit_models import (
     CorpusAuditMetadata,
     CorpusAuditRecord,
@@ -247,8 +247,8 @@ from .diagnostic_types import (
     StartupPhase,
     SystemState,
 )
-from .Event import EventMetadata, TraceContext
-from .FinOps import CostComparison, DataGenerationType, FinOps, WorkloadProfile
+from netra_backend.app.schemas.Event import EventMetadata, TraceContext
+from netra_backend.app.schemas.FinOps import CostComparison, DataGenerationType, FinOps, WorkloadProfile
 from .Generation import (
     ContentCorpusGenParams,
     ContentGenParams,
@@ -354,7 +354,7 @@ from .llm_types import (
     RollbackAnalysisContext,
     ToolMigrationContext,
 )
-from .Log import UnifiedLogEntry
+from netra_backend.app.schemas.Log import UnifiedLogEntry
 from .mcp_client import (
     ClearCacheRequest,
     ClearCacheResponse,
@@ -449,9 +449,9 @@ from .monitoring_types import (
     QualityMetrics,
     SystemStats,
 )
-from .Pattern import DiscoveredPattern
-from .Performance import Performance
-from .Policy import LearnedPolicy, PredictedOutcome
+from netra_backend.app.schemas.Pattern import DiscoveredPattern
+from netra_backend.app.schemas.Performance import Performance
+from netra_backend.app.schemas.Policy import LearnedPolicy, PredictedOutcome
 from .quality_types import (
     AgentQualityProfile,
     AlertAcknowledgement,
@@ -522,7 +522,7 @@ from .Request import (
     TimeRange,
     Workload,
 )
-from .Run import RunComplete
+from netra_backend.app.schemas.Run import RunComplete
 from .service_types import (
     BatchOperationResult,
     CRUDServiceInterface,
@@ -646,7 +646,7 @@ from .unified_tools import (
     ToolExecutionRequest,
     UserPlanResponse,
 )
-from .User import UserUpdate
+from netra_backend.app.schemas.user import UserUpdate
 from .UserPlan import (
     AutoUpgradeRule,
     PlanDefinition,

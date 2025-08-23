@@ -3,17 +3,10 @@ Enhanced tests for security service authentication.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List
@@ -22,11 +15,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from cryptography.fernet import Fernet
 
-# Add project root to path
 from netra_backend.app.services.key_manager import KeyManager
-from .security_service_test_mocks import (
+from netra_backend.tests.security_service_test_mocks import (
     EnhancedSecurityService,
-    # Add project root to path
     MockUser,
     assert_authentication_failure,
     assert_authentication_success,
@@ -34,7 +25,6 @@ from .security_service_test_mocks import (
     create_locked_user,
     create_test_user,
 )
-
 
 @pytest.fixture
 def key_manager():
@@ -44,12 +34,10 @@ def key_manager():
     mock_settings.fernet_key = Fernet.generate_key()
     return KeyManager.load_from_settings(mock_settings)
 
-
 @pytest.fixture
 def enhanced_security_service(key_manager):
     """Create enhanced security service"""
     return EnhancedSecurityService(key_manager)
-
 
 @pytest.fixture
 def mock_db_session():
@@ -60,7 +48,6 @@ def mock_db_session():
     session.refresh = AsyncMock()
     session.execute = AsyncMock()
     return session
-
 
 @pytest.fixture
 def sample_users(enhanced_security_service):
@@ -80,7 +67,6 @@ def sample_users(enhanced_security_service):
     users.append(locked)
     
     return users
-
 
 class TestSecurityServiceAuthenticationEnhanced:
     """Enhanced tests for security service authentication"""
@@ -193,7 +179,6 @@ class TestSecurityServiceAuthenticationEnhanced:
         allowed = await enhanced_security_service.check_rate_limit(identifier, limit=10)
         assert allowed is True
 
-
 def _create_admin_test_user(security_service) -> MockUser:
     """Create admin test user"""
     admin = MockUser("admin_123", "admin@test.com", "Test Admin")
@@ -201,7 +186,6 @@ def _create_admin_test_user(security_service) -> MockUser:
     admin.roles = ['admin']
     admin.permissions = ['access_all_tools', 'manage_users']
     return admin
-
 
 def _create_regular_test_user(security_service) -> MockUser:
     """Create regular test user"""
@@ -211,14 +195,12 @@ def _create_regular_test_user(security_service) -> MockUser:
     _set_user_tool_permissions(user)
     return user
 
-
 def _set_user_tool_permissions(user: MockUser) -> None:
     """Set tool permissions for regular user"""
     user.tool_permissions = {
         'data_analyzer': {'allowed': True, 'rate_limit': 100},
         'premium_optimizer': {'allowed': False}
     }
-
 
 def _create_locked_test_user(security_service) -> MockUser:
     """Create locked test user"""
@@ -228,20 +210,17 @@ def _create_locked_test_user(security_service) -> MockUser:
     locked.failed_login_attempts = 5
     return locked
 
-
 def _assert_admin_permissions(result: Dict[str, Any]) -> None:
     """Assert admin permissions in result"""
     user_data = result.get('user', {})
     assert 'admin' in user_data.get('roles', [])
     assert 'access_all_tools' in user_data.get('permissions', [])
 
-
 def _assert_user_permissions(result: Dict[str, Any]) -> None:
     """Assert regular user permissions in result"""
     user_data = result.get('user', {})
     assert 'user' in user_data.get('roles', [])
     assert user_data.get('tool_permissions', {}).get('data_analyzer', {}).get('allowed') is True
-
 
 def _create_token_data(user: MockUser):
     """Create token data for user"""
@@ -252,7 +231,6 @@ def _create_token_data(user: MockUser):
         roles=user.roles,
         permissions=user.permissions
     )
-
 
 def _create_expired_token_data(user: MockUser):
     """Create expired token data"""
@@ -265,19 +243,16 @@ def _create_expired_token_data(user: MockUser):
         exp=datetime.now(UTC) - timedelta(hours=1)  # Expired 1 hour ago
     )
 
-
 def _assert_token_validation_success(validation_result: Dict[str, Any], user: MockUser) -> None:
     """Assert token validation was successful"""
     assert validation_result.get('valid') is True
     assert validation_result.get('user_id') == user.id
     assert validation_result.get('email') == user.email
 
-
 def _assert_token_validation_failure(validation_result: Dict[str, Any]) -> None:
     """Assert token validation failed"""
     assert validation_result.get('valid') is False
     assert 'error' in validation_result
-
 
 def _assert_cached_session_consistency(result1: Dict[str, Any], result2: Dict[str, Any]) -> None:
     """Assert cached session results are consistent"""

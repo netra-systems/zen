@@ -3,17 +3,10 @@ Comprehensive tests for the enhanced TriageSubAgent.
 Tests all major functionality including categorization, caching, fallback, and error handling.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 from typing import Any, Dict
@@ -29,17 +22,14 @@ from netra_backend.app.agents.triage_sub_agent import (
     ExtractedEntities,
     KeyParameters,
     Priority,
-    # Add project root to path
     TriageResult,
     UserIntent,
     ValidationStatus,
 )
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
-
 
 @pytest.fixture
 def mock_llm_manager():
@@ -50,12 +40,10 @@ def mock_llm_manager():
     mock.ask_structured_llm = AsyncMock(side_effect=Exception("Structured generation not available in test"))
     return mock
 
-
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create a mock tool dispatcher."""
     return Mock(spec=ToolDispatcher)
-
 
 @pytest.fixture
 def mock_redis_manager():
@@ -65,18 +53,15 @@ def mock_redis_manager():
     mock.set = AsyncMock(return_value=True)
     return mock
 
-
 @pytest.fixture
 def triage_agent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
     """Create a TriageSubAgent instance with mocked dependencies."""
     return TriageSubAgent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager)
 
-
 @pytest.fixture
 def sample_state():
     """Create a sample DeepAgentState."""
     return DeepAgentState(user_request="Optimize my GPT-4 costs by 30% while maintaining latency under 100ms")
-
 
 class TestTriageSubAgentInitialization:
     """Test agent initialization and configuration."""
@@ -98,7 +83,6 @@ class TestTriageSubAgentInitialization:
         
         assert agent.redis_manager == None
         assert agent.cache_ttl == 3600  # Still set even without Redis
-
 
 class TestRequestValidation:
     """Test request validation functionality."""
@@ -139,7 +123,6 @@ class TestRequestValidation:
         
         assert validation.is_valid == True  # Valid but with warnings
         assert len(validation.warnings) > 0
-
 
 class TestEntityExtraction:
     """Test entity extraction from requests."""
@@ -182,7 +165,6 @@ class TestEntityExtraction:
         
         assert len(entities.time_ranges) > 0
 
-
 class TestIntentDetermination:
     """Test user intent determination."""
     
@@ -209,7 +191,6 @@ class TestIntentDetermination:
         assert intent.primary_intent in ["analyze", "recommend"]
         assert len(intent.secondary_intents) > 0
 
-
 class TestToolRecommendation:
     """Test tool recommendation functionality."""
     
@@ -230,7 +211,6 @@ class TestToolRecommendation:
         assert len(tools) > 0
         assert any("latency" in t.tool_name or "performance" in t.tool_name for t in tools)
 
-
 class TestFallbackCategorization:
     """Test fallback categorization when LLM fails."""
     
@@ -248,7 +228,6 @@ class TestFallbackCategorization:
         
         assert result.category == "General Inquiry"
         assert result.confidence_score == 0.5
-
 
 class TestJSONExtraction:
     """Test enhanced JSON extraction and validation."""
@@ -287,9 +266,9 @@ class TestJSONExtraction:
         assert result != None
         assert result["category"] == "Test"
 
-
 class TestCaching:
     """Test caching functionality."""
+    @pytest.mark.asyncio
     async def test_cache_hit(self, triage_agent, sample_state, mock_redis_manager):
         """Test successful cache hit."""
         cached_result = {
@@ -312,6 +291,7 @@ class TestCaching:
         # Check result uses cached data
         assert sample_state.triage_result.category == "Cost Optimization"
         assert sample_state.triage_result.metadata.cache_hit == True
+    @pytest.mark.asyncio
     async def test_cache_miss_and_store(self, triage_agent, sample_state, mock_redis_manager):
         """Test cache miss leading to LLM call and result caching."""
         mock_redis_manager.get = AsyncMock(return_value=None)  # Cache miss
@@ -338,9 +318,9 @@ class TestCaching:
         assert sample_state.triage_result.category in ["Cost Optimization", "unknown", "General Inquiry"]
         assert sample_state.triage_result.metadata.cache_hit == False
 
-
 class TestExecuteMethod:
     """Test the main execute method."""
+    @pytest.mark.asyncio
     async def test_successful_execution(self, triage_agent, sample_state):
         """Test successful execution with valid LLM response."""
         llm_response = json.dumps({
@@ -359,6 +339,7 @@ class TestExecuteMethod:
         assert hasattr(sample_state.triage_result, 'extracted_entities')
         assert "user_intent" in sample_state.triage_result
         assert "tool_recommendations" in sample_state.triage_result
+    @pytest.mark.asyncio
     async def test_execution_with_retry(self, triage_agent, sample_state):
         """Test execution with LLM failure and retry."""
         # First call fails, second succeeds
@@ -373,6 +354,7 @@ class TestExecuteMethod:
         assert triage_agent.llm_manager.ask_llm.call_count == 2
         assert sample_state.triage_result.category == "Cost Optimization"
         assert sample_state.triage_result.metadata.retry_count == 1
+    @pytest.mark.asyncio
     async def test_execution_with_fallback(self, triage_agent, sample_state):
         """Test execution falling back to simple categorization."""
         # All retries fail
@@ -387,6 +369,7 @@ class TestExecuteMethod:
         assert sample_state.triage_result != None
         assert sample_state.triage_result.metadata.fallback_used == True
         assert sample_state.triage_result.confidence_score == 0.5
+    @pytest.mark.asyncio
     async def test_execution_with_websocket_updates(self, triage_agent, sample_state):
         """Test execution with WebSocket updates enabled."""
         triage_agent.websocket_manager = AsyncMock()
@@ -399,18 +382,20 @@ class TestExecuteMethod:
         # Should have sent WebSocket updates
         assert triage_agent.websocket_manager.send_message.called
 
-
 class TestEntryConditions:
     """Test entry condition validation."""
+    @pytest.mark.asyncio
     async def test_entry_conditions_met(self, triage_agent, sample_state):
         """Test when entry conditions are met."""
         result = await triage_agent.check_entry_conditions(sample_state, "test_run")
         assert result == True
+    @pytest.mark.asyncio
     async def test_entry_conditions_no_request(self, triage_agent):
         """Test when no user request is provided."""
         empty_state = DeepAgentState(user_request="")
         result = await triage_agent.check_entry_conditions(empty_state, "test_run")
         assert result == False
+    @pytest.mark.asyncio
     async def test_entry_conditions_invalid_request(self, triage_agent):
         """Test when request is invalid."""
         state = DeepAgentState(user_request="a")  # Too short
@@ -419,7 +404,6 @@ class TestEntryConditions:
         # Check validation status instead of error field
         assert hasattr(state.triage_result, 'validation_status')
         assert not state.triage_result.validation_status.is_valid
-
 
 class TestPydanticModels:
     """Test Pydantic model validation."""
@@ -462,9 +446,9 @@ class TestPydanticModels:
         assert len(intent.secondary_intents) == 2
         assert intent.action_required == True
 
-
 class TestCleanup:
     """Test cleanup functionality."""
+    @pytest.mark.asyncio
     async def test_cleanup_with_metrics(self, triage_agent, sample_state):
         """Test cleanup logs metrics when available."""
         sample_state.triage_result = {
@@ -481,7 +465,6 @@ class TestCleanup:
             
             # Should log debug metrics
             mock_logger.debug.assert_called()
-
 
 class TestRequestHashing:
     """Test request hashing for caching."""
@@ -510,7 +493,6 @@ class TestRequestHashing:
         # Should handle extra spaces and case
         expected_hash = triage_agent._generate_request_hash("optimize my costs")
         assert normalized_hash == expected_hash
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

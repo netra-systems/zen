@@ -29,6 +29,18 @@ from netra_backend.app.core.error_handlers.api.fastapi_exception_handlers import
     netra_exception_handler,
     validation_exception_handler,
 )
+
+# Route utility handlers
+from netra_backend.app.routes.utils.error_handlers import (
+    handle_access_denied_error,
+    handle_auth_error,
+    handle_circuit_breaker_error,
+    handle_database_error,
+    handle_job_error,
+    handle_not_found_error,
+    handle_service_error,
+    handle_validation_error,
+)
 from netra_backend.app.core.error_handlers.base_error_handler import BaseErrorHandler
 from netra_backend.app.core.error_handlers.error_classification import (
     ErrorClassification,
@@ -59,6 +71,16 @@ __all__ = [
     'validation_exception_handler',
     'http_exception_handler',
     'general_exception_handler',
+    
+    # Route utility handlers
+    'handle_service_error',
+    'handle_circuit_breaker_error',
+    'handle_database_error',
+    'handle_auth_error',
+    'handle_not_found_error',
+    'handle_access_denied_error',
+    'handle_validation_error',
+    'handle_job_error',
     
     # Global instances
     'global_agent_error_handler',

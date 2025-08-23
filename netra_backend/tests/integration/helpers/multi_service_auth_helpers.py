@@ -16,7 +16,6 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import MockWebSock
 
 logger = central_logger.get_logger(__name__)
 
-
 class PostgreSQLContainer:
     """Manages PostgreSQL container for auth service database."""
     
@@ -97,7 +96,6 @@ class PostgreSQLContainer:
         
         raise RuntimeError("PostgreSQL failed to become ready")
 
-
 class AuthServiceSimulator:
     """Simulates auth service for testing token generation."""
     
@@ -154,7 +152,6 @@ class AuthServiceSimulator:
             })
             return {"success": False, "error": f"Token generation failed: {str(e)}"}
 
-
 class BackendServiceSimulator:
     """Simulates main backend service for token validation testing."""
     
@@ -199,7 +196,6 @@ class BackendServiceSimulator:
             
         except Exception as e:
             return {"valid": False, "error": f"Validation error: {str(e)}"}
-
 
 class WebSocketServiceSimulator:
     """Simulates WebSocket service for real-time auth testing."""

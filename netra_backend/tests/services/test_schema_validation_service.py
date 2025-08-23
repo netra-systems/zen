@@ -1,27 +1,17 @@
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from typing import List, Optional
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 from pydantic import BaseModel, ValidationError
-from netra_backend.app.schemas import AgentMessage, WebSocketMessage
+from netra_backend.app.schemas import StartAgentMessage as AgentMessage, WebSocketMessage
 from sqlalchemy.ext.asyncio import AsyncEngine
 
-# Add project root to path
 from netra_backend.app.services.schema_validation_service import SchemaValidationService
-
-# Add project root to path
 
 class UserDataSchema(BaseModel):
     id: str

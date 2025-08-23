@@ -147,7 +147,7 @@ class SecretManager:
     
     def _detect_environment(self) -> tuple:
         """Detect environment configuration and log details."""
-        from .secret_manager_helpers import detect_environment_config
+        from netra_backend.app.core.secret_manager_helpers import detect_environment_config
         environment, is_staging = detect_environment_config()
         k_service = getattr(self._config, 'k_service', None)
         self._logger.info(f"Secret Manager environment detection - Environment: {environment}, K_SERVICE: {k_service}, Is Staging: {is_staging}")
@@ -193,14 +193,14 @@ class SecretManager:
     def _attempt_secret_fetch(self, client: secretmanager.SecretManagerServiceClient, 
                              secret_name: str, is_staging: bool) -> Optional[str]:
         """Attempt to fetch secret with proper naming."""
-        from .secret_manager_helpers import determine_actual_secret_name
+        from netra_backend.app.core.secret_manager_helpers import determine_actual_secret_name
         actual_secret_name = determine_actual_secret_name(secret_name, is_staging)
         return self._fetch_secret(client, actual_secret_name)
     
     def _track_secret_fetch_result(self, secret_name: str, secret_value: Optional[str],
                                   secrets: Dict[str, Any], successful_secrets: List[str], failed_secrets: List[str]) -> None:
         """Track the result of secret fetching operation."""
-        from .secret_manager_helpers import track_secret_result
+        from netra_backend.app.core.secret_manager_helpers import track_secret_result
         if secret_value:
             secrets[secret_name] = secret_value
             self._logger.debug(f"✓ Successfully loaded: {secret_name}")
@@ -208,7 +208,7 @@ class SecretManager:
     
     def _log_fetch_summary(self, successful_secrets: List[str], failed_secrets: List[str]) -> None:
         """Log comprehensive summary of secret fetching results."""
-        from .secret_manager_helpers import prepare_secrets_dict
+        from netra_backend.app.core.secret_manager_helpers import prepare_secrets_dict
         prepare_secrets_dict(successful_secrets, failed_secrets)
     
     def _fetch_secret(self, client: secretmanager.SecretManagerServiceClient, secret_name: str, version: str = "latest") -> Optional[str]:

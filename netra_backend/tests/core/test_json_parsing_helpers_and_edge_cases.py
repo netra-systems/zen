@@ -3,23 +3,15 @@ Tests for JSON parsing helper functions and edge cases.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.json_parsing_utils import (
     _fix_dict_data,
     _fix_tool_params_list,
@@ -29,10 +21,8 @@ from netra_backend.app.core.json_parsing_utils import (
     _parse_string_to_dict,
     _parse_string_to_list,
     _parse_string_to_string_list,
-    # Add project root to path
     _try_json_parse,
 )
-
 
 class TestHelperFunctions:
     """Test internal helper functions."""
@@ -138,7 +128,6 @@ class TestHelperFunctions:
             mock_logger.warning.assert_called_once()
             assert result == "test data"
 
-
 class TestLoggingBehavior:
     """Test logging behavior of JSON parsing functions."""
     
@@ -185,7 +174,6 @@ class TestLoggingBehavior:
             
             # Should log warnings for both invalid fields
             assert mock_logger.warning.call_count >= 1
-
 
 class TestEdgeCases:
     """Test edge cases and boundary conditions."""

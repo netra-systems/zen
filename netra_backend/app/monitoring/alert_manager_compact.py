@@ -9,7 +9,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.app.logging_config import central_logger
-from .alert_evaluator import AlertEvaluator
+from netra_backend.app.monitoring.alert_evaluator import AlertEvaluator
 from .alert_models import (
     Alert,
     AlertLevel,
@@ -21,7 +21,7 @@ from .alert_notifications import (
     NotificationDeliveryManager,
     create_default_notification_configs,
 )
-from .alert_rules import create_default_alert_rules
+from netra_backend.app.monitoring.alert_rules import create_default_alert_rules
 from netra_backend.app.services.metrics.agent_metrics import (
     AgentMetricsCollector,
     agent_metrics_collector,

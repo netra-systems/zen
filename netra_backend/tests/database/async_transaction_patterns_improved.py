@@ -9,7 +9,6 @@ import pytest
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 class AsyncTransactionManager:
     """Enhanced async transaction manager with proper isolation"""
     def __init__(self):

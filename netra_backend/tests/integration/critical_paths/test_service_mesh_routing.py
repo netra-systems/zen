@@ -11,17 +11,10 @@ Coverage: Load balancing algorithms, traffic distribution, zone affinity
 L4 Realism: Tests against staging service mesh infrastructure with real microservices
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -31,13 +24,10 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.integration.service_mesh_fixtures import (
     calculate_backoff_accuracy,
     service_mesh_l4,
 )
-
-# Add project root to path
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +38,6 @@ pytestmark = [
     pytest.mark.service_mesh,
     pytest.mark.slow
 ]
-
 
 class LoadBalancingL4Tests:
     """Load balancing specific test implementations."""
@@ -395,7 +384,6 @@ class LoadBalancingL4Tests:
         except Exception as e:
             return {"error": str(e)}
 
-
 @pytest.mark.asyncio
 async def test_load_balancing_algorithms_l4_staging(service_mesh_l4):
     """Test load balancing algorithms with L4 realism."""
@@ -428,7 +416,6 @@ async def test_load_balancing_algorithms_l4_staging(service_mesh_l4):
     successful_lb_tests = [r for r in load_balancing_results if r["success"]]
     assert len(successful_lb_tests) > 0, "No successful load balancing tests"
 
-
 @pytest.mark.asyncio
 async def test_round_robin_distribution_fairness(service_mesh_l4):
     """Test round-robin algorithm distribution fairness."""
@@ -457,7 +444,6 @@ async def test_round_robin_distribution_fairness(service_mesh_l4):
     
     logger.info(f"Round-robin fairness: evenness score {rr_result['evenness_score']:.3f}, "
                f"distribution: {requests_per_instance}")
-
 
 @pytest.mark.asyncio
 async def test_weighted_load_balancing_compliance(service_mesh_l4):
@@ -505,7 +491,6 @@ async def test_weighted_load_balancing_compliance(service_mesh_l4):
     logger.info(f"Weighted load balancing: avg compliance {weighted_result['avg_weight_compliance']:.3f}, "
                f"weights: {instance_weights}, requests: {requests_per_instance}")
 
-
 @pytest.mark.asyncio
 async def test_zone_aware_routing(service_mesh_l4):
     """Test zone-aware routing preferences."""
@@ -545,7 +530,6 @@ async def test_zone_aware_routing(service_mesh_l4):
     
     logger.info(f"Zone-aware routing: {len(zones)} zones, compliance {zone_compliance:.3f}, "
                f"distribution: {requests_per_zone}")
-
 
 @pytest.mark.asyncio
 async def test_load_balancing_under_concurrent_load(service_mesh_l4):
@@ -600,7 +584,6 @@ async def test_load_balancing_under_concurrent_load(service_mesh_l4):
     
     logger.info(f"Concurrent load balancing: {len(successful_results)}/{len(results)} clients successful, "
                f"{success_rate:.1f}% success rate, {deviation_ratio:.3f} deviation ratio")
-
 
 @pytest.mark.asyncio
 async def test_load_balancing_algorithm_performance(service_mesh_l4):

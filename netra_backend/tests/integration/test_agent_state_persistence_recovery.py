@@ -16,22 +16,14 @@ REQUIREMENTS:
 - Recovery within 10 seconds
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
 
-# Add project root to path
 # Set testing environment
 import os
 import time
@@ -45,7 +37,7 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
@@ -56,7 +48,6 @@ from netra_backend.app.redis_manager import RedisManager
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)
-
 
 class MockPersistentAgent(BaseSubAgent):
     """Mock agent with state persistence capabilities."""
@@ -99,7 +90,6 @@ class MockPersistentAgent(BaseSubAgent):
         self.crash_count += 1
         # Lose in-memory state but keep persistence-backed data
         return f"crash_{self.crash_count}"
-
 
 class TestAgentStatePersistenceRecovery:
     """BVJ: Protects $35K MRR through reliable agent state persistence and recovery."""
@@ -529,7 +519,6 @@ class TestAgentStatePersistenceRecovery:
             assert state_dict["step_value"] == i * 40, f"Value cross-contamination at agent {i}"
         
         logger.info(f"Concurrent state persistence validated: {len(concurrent_agents)} agents, {operations_per_second:.1f} ops/sec")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

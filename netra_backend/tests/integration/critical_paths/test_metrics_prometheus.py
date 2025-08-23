@@ -10,17 +10,10 @@ Critical Path: Metrics generation -> Collection -> Prometheus export -> Query va
 Coverage: Metrics collection, Prometheus integration, time series data, alerting foundation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -33,14 +26,10 @@ import requests
 
 from netra_backend.app.services.health_check_service import HealthCheckService
 
-# Add project root to path
 from netra_backend.app.services.monitoring.metrics_service import MetricsService
 from netra_backend.app.services.monitoring.prometheus_exporter import PrometheusExporter
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class MetricsPrometheusManager:
     """Manages metrics collection and Prometheus integration testing."""
@@ -282,7 +271,6 @@ class MetricsPrometheusManager:
         if self.health_service:
             await self.health_service.stop()
 
-
 @pytest.fixture
 async def metrics_prometheus_manager():
     """Create metrics Prometheus manager for testing."""
@@ -290,7 +278,6 @@ async def metrics_prometheus_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -316,7 +303,6 @@ async def test_metrics_collection_to_prometheus_export(metrics_prometheus_manage
     assert export_result["export_success"] is True
     assert export_result["metric_count"] > 0
     assert export_result["export_time"] < 1.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -344,7 +330,6 @@ async def test_prometheus_endpoint_accessibility(metrics_prometheus_manager):
         logger.info("Prometheus endpoint not accessible for testing")
         assert "error" in endpoint_result
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
 async def test_metrics_time_series_collection(metrics_prometheus_manager):
@@ -368,7 +353,6 @@ async def test_metrics_time_series_collection(metrics_prometheus_manager):
     for i in range(1, len(samples)):
         assert samples[i]["timestamp"] > samples[i-1]["timestamp"]
         assert samples[i]["value"] > samples[i-1]["value"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism

@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import aiohttp
 import yaml
 
-from ..gcp_integration.base import CloudRunService, GCPConfig
+from test_framework.gcp_integration.base import CloudRunService, GCPConfig
 from ..unified.base_interfaces import (
     BaseTestComponent,
     HealthCheckResult,

@@ -11,17 +11,10 @@ Coverage: Health check timing, dependency chain validation, cascading failure de
 L3 Realism: Tests with real health check endpoints and actual service dependency chains
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -35,12 +28,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest
-from app.routes.health import health_interface
+from netra_backend.app.routes.health import health_interface
 
-# Add project root to path
 from netra_backend.app.core.health_checkers import (
     check_clickhouse_health,
-    # Add project root to path
     check_postgres_health,
     check_redis_health,
     check_system_resources,
@@ -59,7 +50,6 @@ pytestmark = [
     pytest.mark.initialization
 ]
 
-
 class ServiceState(Enum):
     """Service initialization states."""
     NOT_STARTED = "not_started"
@@ -67,7 +57,6 @@ class ServiceState(Enum):
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     FAILED = "failed"
-
 
 @dataclass
 class ServiceDependency:
@@ -78,7 +67,6 @@ class ServiceDependency:
     initialization_timeout_seconds: float = 30.0
     health_check_timeout_seconds: float = 5.0
     required_for_startup: bool = True
-
 
 @dataclass
 class HealthCheckEvent:
@@ -91,7 +79,6 @@ class HealthCheckEvent:
     success: bool
     error_message: Optional[str] = None
     cascade_triggered: bool = False
-
 
 @dataclass
 class InitializationMetrics:
@@ -106,7 +93,6 @@ class InitializationMetrics:
     cascading_failures_detected: int
     alerts_triggered: int
     performance_overhead_percentage: float
-
 
 class HealthCheckCascadeInitializationValidator:
     """Validates health check cascade behavior during service initialization."""
@@ -627,7 +613,6 @@ class HealthCheckCascadeInitializationValidator:
         self.alert_events.clear()
         self.performance_metrics.clear()
 
-
 @pytest.fixture
 async def health_cascade_validator():
     """Create health check cascade validator for L3 testing."""
@@ -635,7 +620,6 @@ async def health_cascade_validator():
     await validator.initialize_service_dependencies()
     yield validator
     await validator.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_health_check_cascade_during_initialization_l3(health_cascade_validator):
@@ -664,7 +648,6 @@ async def test_health_check_cascade_during_initialization_l3(health_cascade_vali
             assert isinstance(cascade_event["affected_services"], list)
             assert cascade_event["cascade_depth"] >= 0
 
-
 @pytest.mark.asyncio
 async def test_dependency_chain_validation_l3(health_cascade_validator):
     """Test dependency chain validation during initialization.
@@ -689,7 +672,6 @@ async def test_dependency_chain_validation_l3(health_cascade_validator):
         assert "service_name" in chain_detail
         assert "dependencies" in chain_detail
         assert "chain_valid" in chain_detail
-
 
 @pytest.mark.asyncio
 async def test_cascading_failure_detection_l3(health_cascade_validator):
@@ -718,7 +700,6 @@ async def test_cascading_failure_detection_l3(health_cascade_validator):
     assert alert["severity"] in ["critical", "error"]
     assert alert["escalation_required"] is True
 
-
 @pytest.mark.asyncio
 async def test_health_status_aggregation_l3(health_cascade_validator):
     """Test health status aggregation across service dependencies.
@@ -745,7 +726,6 @@ async def test_health_status_aggregation_l3(health_cascade_validator):
     for service_name, timing in timing_data.items():
         assert timing["duration_ms"] <= 8000  # Health checks should complete within 8s
         assert timing["started_at"] >= 0  # Should start after initialization begins
-
 
 @pytest.mark.asyncio
 async def test_alert_triggering_on_failures_l3(health_cascade_validator):
@@ -781,7 +761,6 @@ async def test_alert_triggering_on_failures_l3(health_cascade_validator):
         assert alert["timestamp"] is not None
         assert "affected_services" in alert
 
-
 @pytest.mark.asyncio
 async def test_recovery_detection_within_30s_l3(health_cascade_validator):
     """Test recovery detection within 30 seconds.
@@ -807,7 +786,6 @@ async def test_recovery_detection_within_30s_l3(health_cascade_validator):
         # Verify cascade restoration effectiveness
         assert recovery_results["cascade_restored"] in [True, False]  # May not restore all immediately
 
-
 @pytest.mark.asyncio
 async def test_performance_overhead_less_than_1_percent_l3(health_cascade_validator):
     """Test performance overhead is less than 1% of requests.
@@ -828,7 +806,6 @@ async def test_performance_overhead_less_than_1_percent_l3(health_cascade_valida
     assert performance_results["baseline_duration"] > 0
     assert performance_results["monitoring_duration"] > 0
     assert performance_results["requests_tested"] == 50
-
 
 @pytest.mark.asyncio
 async def test_health_check_initialization_timing_l3(health_cascade_validator):

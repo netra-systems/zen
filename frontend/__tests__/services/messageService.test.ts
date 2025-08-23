@@ -1,3 +1,6 @@
+// Unmock auth service for proper service functionality
+jest.unmock('@/auth/service');
+
 import { messageService } from '@/services/messageService';
 import { Message } from '@/types/chat';
 

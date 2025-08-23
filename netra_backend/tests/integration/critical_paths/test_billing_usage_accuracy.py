@@ -10,17 +10,10 @@ Critical Path: Usage event capture -> Metering aggregation -> Billing calculatio
 Coverage: Usage tracking accuracy, billing calculations, invoice generation, payment reconciliation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -38,13 +31,9 @@ from netra_backend.app.services.billing.billing_engine import BillingEngine
 from netra_backend.app.services.billing.invoice_generator import InvoiceGenerator
 from netra_backend.app.services.billing.payment_processor import PaymentProcessor
 
-# Add project root to path
 from netra_backend.app.services.billing.usage_tracker import UsageTracker
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class BillingAccuracyManager:
     """Manages billing accuracy testing with real usage tracking."""
@@ -360,7 +349,6 @@ class BillingAccuracyManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def billing_manager():
     """Create billing accuracy manager for testing."""
@@ -368,7 +356,6 @@ async def billing_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_usage_tracking_accuracy(billing_manager):
@@ -396,7 +383,6 @@ async def test_usage_tracking_accuracy(billing_manager):
     assert validation["accuracy_rate"] >= 98.0
     assert len(validation["missing_events"]) == 0
     assert len(validation["quantity_discrepancies"]) == 0
-
 
 @pytest.mark.asyncio
 async def test_billing_calculation_accuracy(billing_manager):

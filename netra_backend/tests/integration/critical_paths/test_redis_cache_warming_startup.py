@@ -11,17 +11,10 @@ L3 Realism: Real Redis container with actual cache warming on startup, source da
 Performance Requirements: Warming completion < 30s, critical keys pre-loaded, cache hit rate > 80% after warming
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -41,15 +34,11 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer as NetraRedisContainer,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class StartupWarmingMetrics:
@@ -85,7 +74,6 @@ class StartupWarmingMetrics:
         """Calculate warming operation reliability."""
         total_ops = self.startup_operations + self.failed_warming_attempts
         return (self.startup_operations / total_ops * 100) if total_ops > 0 else 0.0
-
 
 class DatabaseSourceMock:
     """Mock database source for cache warming data."""
@@ -210,7 +198,6 @@ class DatabaseSourceMock:
             "data": metadata,
             "priority": "low"
         }
-
 
 class RedisCacheWarmingStartupL3Manager:
     """L3 Redis cache warming on startup test manager with real Redis and startup simulation."""
@@ -677,7 +664,6 @@ class RedisCacheWarmingStartupL3Manager:
         except Exception as e:
             logger.error(f"Startup warming cleanup failed: {e}")
 
-
 @pytest.fixture
 async def startup_warming_manager():
     """Create L3 Redis cache warming startup manager."""
@@ -686,7 +672,6 @@ async def startup_warming_manager():
     await manager.setup_database_sources()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -710,7 +695,6 @@ async def test_redis_cache_warming_on_startup_l3(startup_warming_manager):
     assert validation["hit_rate"] > 80.0, f"Cache hit rate {validation['hit_rate']:.1f}% below 80%"
     
     logger.info(f"Startup warming completed in {result['warming_time']:.1f}s with {validation['hit_rate']:.1f}% hit rate")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -740,7 +724,6 @@ async def test_critical_data_preloaded_startup(startup_warming_manager):
         assert "type" in config_data, "Critical config data structure invalid"
     
     logger.info(f"Critical data preloading verified: {validation['critical_keys_present']} keys accessible")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -778,7 +761,6 @@ async def test_cache_hit_rate_after_warming(startup_warming_manager):
     
     logger.info(f"Cache hit rate validation: initial {initial_hit_rate:.1f}%, extended {extended_hit_rate:.1f}%")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -806,7 +788,6 @@ async def test_warming_time_under_30_seconds(startup_warming_manager):
     
     logger.info(f"Warming time validation completed: average {avg_time:.1f}s across scenarios")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -826,7 +807,6 @@ async def test_parallel_warming_efficiency(startup_warming_manager):
     assert parallel_time < 20.0, f"Parallel warming time {parallel_time:.1f}s too high"
     
     logger.info(f"Parallel warming efficiency: {efficiency_improvement:.1f}% improvement, {parallel_time:.1f}s execution")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -853,7 +833,6 @@ async def test_incremental_warming_strategy(startup_warming_manager):
     
     logger.info(f"Incremental warming validated: {len(incremental_cycles)} cycles, avg {avg_incremental_time:.1f}s")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -876,7 +855,6 @@ async def test_cache_invalidation_recovery(startup_warming_manager):
     assert rewarm_time < 5.0, f"Cache re-warming time {rewarm_time:.1f}s too high"
     
     logger.info(f"Invalidation recovery validated: {recovery_time:.1f}s total, {rewarm_time:.1f}s rewarm")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -907,7 +885,6 @@ async def test_memory_usage_within_limits(startup_warming_manager):
     assert len(startup_warming_manager.metrics.warming_memory_usage) > 0, "No memory usage tracked"
     
     logger.info(f"Memory usage validation completed: {total_memory / (1024*1024):.1f}MB total")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

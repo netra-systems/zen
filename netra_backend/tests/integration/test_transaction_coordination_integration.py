@@ -17,17 +17,10 @@ ARCHITECTURAL COMPLIANCE:
 - Focus on transaction integrity and failure recovery
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -39,11 +32,9 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
 import pytest
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
 from netra_backend.tests.integration.helpers.user_flow_helpers import (
-    # Add project root to path
     DatabaseTestHelpers,
     MiscTestHelpers,
     RevenueTestHelpers,
@@ -51,7 +42,6 @@ from netra_backend.tests.integration.helpers.user_flow_helpers import (
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)
-
 
 class TransactionStatus(Enum):
     """Transaction status enumeration."""
@@ -61,7 +51,6 @@ class TransactionStatus(Enum):
     ABORTED = "aborted"
     COMPENSATING = "compensating"
     COMPENSATED = "compensated"
-
 
 @dataclass
 class TransactionStep:
@@ -74,7 +63,6 @@ class TransactionStep:
     status: TransactionStatus = TransactionStatus.PENDING
     executed_at: Optional[float] = None
     compensation_executed_at: Optional[float] = None
-
 
 class TransactionCoordinationMetrics:
     """Metrics collection for transaction coordination testing."""
@@ -126,12 +114,10 @@ class TransactionCoordinationMetrics:
             "detected_at": time.time()
         })
 
-
 @pytest.fixture
 def transaction_metrics():
     """Create transaction coordination metrics tracker."""
     return TransactionCoordinationMetrics()
-
 
 class TestDistributedTransactionPatterns:
     """Test distributed transaction pattern implementations."""
@@ -299,7 +285,6 @@ class TestDistributedTransactionPatterns:
         assert all(result["result"]["isolation_maintained"] for result in transaction_results), "Isolation violation detected"
         assert total_isolation_test_time < 1.0, "Isolation level testing too slow"
 
-
 class TestDeadlockDetectionResolution:
     """Test deadlock detection and resolution mechanisms."""
 
@@ -456,7 +441,6 @@ class TestDeadlockDetectionResolution:
         assert len(timeout_resolutions) >= 2, "Insufficient timeout resolutions"
         assert resolution_time < 0.5, "Timeout resolution too slow"
 
-
 class TestCrossServiceTransactionIntegrity:
     """Test transaction integrity across multiple services."""
 
@@ -593,7 +577,6 @@ class TestCrossServiceTransactionIntegrity:
         assert len(executed_steps) == 2, "Incorrect number of executed steps"
         assert len(rollback_steps) == 1, "Insufficient rollback actions"  # Only successful step rolled back
         assert total_transaction_time < 1.0, "Distributed rollback too slow"
-
 
 if __name__ == "__main__":
     async def run_transaction_coordination_tests():

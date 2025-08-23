@@ -26,7 +26,7 @@ import httpx
 import pytest
 
 from netra_backend.app.logging_config import central_logger
-from tests.health_check_core import (
+from tests.e2e.health_check_core import (
     HEALTH_STATUS,
     SERVICE_ENDPOINTS,
     HealthCheckResult,

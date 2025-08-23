@@ -13,7 +13,6 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-
 class AsyncTestIsolationManager:
     """Manager for async test isolation with automatic cleanup"""
     
@@ -85,7 +84,6 @@ class AsyncTestIsolationManager:
         gc.collect()
         self.resource_refs = [ref for ref in self.resource_refs if ref() is not None]
 
-
 class AsyncResourceTracker:
     """Track and manage async resources during tests"""
     
@@ -114,7 +112,6 @@ class AsyncResourceTracker:
         """Get tracked resource by name"""
         return self.tracked_resources.get(f"{test_name}:{resource_name}")
 
-
 class AsyncTaskManager:
     """Manage async tasks with proper cleanup"""
     
@@ -142,7 +139,6 @@ class AsyncTaskManager:
         
         # Clear task list
         self.active_tasks[test_name] = []
-
 
 class AsyncDependencyInjector:
     """Inject async dependencies with proper isolation"""
@@ -180,13 +176,11 @@ class AsyncDependencyInjector:
         if test_name in self.original_values:
             del self.original_values[test_name]
 
-
 # Global isolation manager instance
 _isolation_manager = AsyncTestIsolationManager()
 _resource_tracker = AsyncResourceTracker(_isolation_manager)
 _task_manager = AsyncTaskManager()
 _dependency_injector = AsyncDependencyInjector()
-
 
 @pytest.fixture
 async def isolated_async_test():
@@ -198,7 +192,6 @@ async def isolated_async_test():
         test_context["task_manager"] = _task_manager
         test_context["dependency_injector"] = _dependency_injector
         yield test_context
-
 
 async def test_isolated_async_operations(isolated_async_test):
     """Test isolated async operations with proper cleanup"""
@@ -215,7 +208,6 @@ async def test_isolated_async_operations(isolated_async_test):
     
     # Resources will be automatically cleaned up
 
-
 async def test_isolated_async_tasks(isolated_async_test):
     """Test isolated async task management"""
     test_ctx = isolated_async_test
@@ -231,7 +223,6 @@ async def test_isolated_async_tasks(isolated_async_test):
     assert result == "completed"
     
     # Tasks will be automatically cleaned up
-
 
 async def test_isolated_dependency_injection(isolated_async_test):
     """Test isolated dependency injection"""
@@ -253,7 +244,6 @@ async def test_isolated_dependency_injection(isolated_async_test):
         assert result == "mock response"
     
     # Dependencies automatically restored
-
 
 class AsyncTestPatternValidator:
     """Validate async test isolation patterns"""
@@ -300,7 +290,6 @@ class AsyncTestPatternValidator:
             "failed_tests": [r for r in self.validation_results if not r.get("isolated", False)]
         }
 
-
 async def test_isolation_validation():
     """Test isolation validation patterns"""
     validator = AsyncTestPatternValidator()
@@ -317,7 +306,6 @@ async def test_isolation_validation():
     # Get summary
     summary = validator.get_isolation_summary()
     assert summary["isolation_rate"] == 1.0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

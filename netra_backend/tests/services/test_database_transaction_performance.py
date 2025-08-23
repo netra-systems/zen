@@ -3,17 +3,10 @@ Tests for transaction performance under various load conditions.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -23,17 +16,12 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-from .database_transaction_test_mocks import MockRepository
-
-# Add project root to path
-
+from netra_backend.tests.database_transaction_test_mocks import MockRepository
 
 @pytest.fixture
 def performance_repository():
     """Repository for performance testing"""
     return MockRepository()
-
 
 class TestTransactionPerformanceAndScaling:
     """Test transaction performance under various load conditions"""
@@ -99,7 +87,6 @@ class TestTransactionPerformanceAndScaling:
         # Should handle stress efficiently
         assert completion_time < 5.0
 
-
 def _create_mock_sessions(count: int) -> List[AsyncMock]:
     """Create list of mock sessions"""
     sessions = []
@@ -107,7 +94,6 @@ def _create_mock_sessions(count: int) -> List[AsyncMock]:
         session = _create_single_mock_session()
         sessions.append(session)
     return sessions
-
 
 def _create_single_mock_session() -> AsyncMock:
     """Create single mock session"""
@@ -118,7 +104,6 @@ def _create_single_mock_session() -> AsyncMock:
     session.refresh = AsyncMock()
     return session
 
-
 def _create_concurrent_tasks(repository, sessions: List[AsyncMock]) -> List:
     """Create concurrent task list"""
     async def create_entity(session, index):
@@ -128,7 +113,6 @@ def _create_concurrent_tasks(repository, sessions: List[AsyncMock]) -> List:
     
     return [create_entity(sessions[i], i) for i in range(len(sessions))]
 
-
 async def _execute_concurrent_transactions(tasks: List) -> tuple:
     """Execute concurrent transactions and measure time"""
     start_time = asyncio.get_event_loop().time()
@@ -137,7 +121,6 @@ async def _execute_concurrent_transactions(tasks: List) -> tuple:
     
     execution_time = end_time - start_time
     return execution_time, results
-
 
 def _assert_performance_results(execution_time: float, results: List, num_concurrent: int, sessions: List) -> None:
     """Assert performance test results"""
@@ -153,14 +136,12 @@ def _assert_performance_results(execution_time: float, results: List, num_concur
     for session in sessions:
         session.add.assert_called_once()
 
-
 def _create_performance_session() -> AsyncMock:
     """Create session for performance testing"""
     session = AsyncMock(spec=AsyncSession)
     session.add = MagicMock()
     session.flush = AsyncMock()
     return session
-
 
 async def _measure_throughput(repository, session: AsyncMock, duration: float) -> int:
     """Measure transaction throughput"""
@@ -173,11 +154,9 @@ async def _measure_throughput(repository, session: AsyncMock, duration: float) -
     
     return transactions_completed
 
-
 def _create_batch_sessions(batch_size: int) -> List[AsyncMock]:
     """Create sessions for batch operations"""
     return [_create_single_mock_session() for _ in range(batch_size)]
-
 
 async def _execute_batch_operations(repository, sessions: List[AsyncMock]) -> None:
     """Execute batch operations"""
@@ -188,12 +167,10 @@ async def _execute_batch_operations(repository, sessions: List[AsyncMock]) -> No
     
     await asyncio.gather(*tasks)
 
-
 def _verify_session_cleanup(sessions: List[AsyncMock]) -> None:
     """Verify sessions are properly cleaned up"""
     for session in sessions:
         session.add.assert_called_once()
-
 
 async def _measure_transaction_latencies(repository, sessions: List[AsyncMock]) -> List[float]:
     """Measure individual transaction latencies"""
@@ -207,7 +184,6 @@ async def _measure_transaction_latencies(repository, sessions: List[AsyncMock]) 
     
     return latencies
 
-
 def _assert_latency_distribution(latencies: List[float]) -> None:
     """Assert latency distribution meets requirements"""
     avg_latency = sum(latencies) / len(latencies)
@@ -217,11 +193,9 @@ def _assert_latency_distribution(latencies: List[float]) -> None:
     assert avg_latency < 0.01  # Average < 10ms
     assert max_latency < 0.05  # Max < 50ms
 
-
 def _create_deadlock_sessions(count: int) -> List[AsyncMock]:
     """Create sessions for deadlock testing"""
     return [_create_single_mock_session() for _ in range(count)]
-
 
 async def _test_deadlock_scenarios(repository, sessions: List[AsyncMock]) -> List[float]:
     """Test deadlock recovery scenarios"""
@@ -235,7 +209,6 @@ async def _test_deadlock_scenarios(repository, sessions: List[AsyncMock]) -> Lis
         recovery_times.append(recovery_time)
     
     return recovery_times
-
 
 async def _simulate_deadlock_recovery(repository, session: AsyncMock, scenario_index: int) -> None:
     """Simulate deadlock scenarios and test recovery mechanisms"""
@@ -266,11 +239,9 @@ async def _simulate_deadlock_recovery(repository, session: AsyncMock, scenario_i
         await session.rollback()
         await repository.create(session, name=f'Deadlock Test {scenario_index} Retry')
 
-
 def _create_pool_sessions(pool_size: int) -> List[AsyncMock]:
     """Create sessions simulating connection pool"""
     return [_create_single_mock_session() for _ in range(pool_size)]
-
 
 async def _stress_test_pool(repository, sessions: List[AsyncMock], operations: int) -> float:
     """Stress test connection pool"""

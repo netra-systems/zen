@@ -14,17 +14,10 @@ REQUIREMENTS:
 - Storage metadata tracking for operations
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -32,10 +25,8 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.integration.metrics.shared_fixtures import (
-    # Add project root to path
     MetricEvent,
     MockMetricsAggregator,
     MockMetricsStorage,
@@ -45,7 +36,6 @@ from netra_backend.tests.integration.metrics.shared_fixtures import (
 )
 
 logger = central_logger.get_logger(__name__)
-
 
 class TestMetricStorage:
     """BVJ: Validates metrics storage ensures data persistence."""
@@ -203,7 +193,6 @@ class TestMetricStorage:
             assert before_storage <= newest_time <= after_storage, "Storage timestamp not accurate"
 
         logger.info(f"Storage verification completed: {stats['total_entries']} entries, {stats['total_size_bytes']} bytes")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

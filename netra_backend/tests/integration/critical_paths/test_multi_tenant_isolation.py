@@ -10,17 +10,10 @@ Critical Path: Tenant identification -> Data access control -> Resource isolatio
 Coverage: Data segregation, permission boundaries, resource quotas, security audit trails
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -33,11 +26,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 # Permissions service replaced with auth_integration
-from auth_integration import require_permission
+from netra_backend.app.auth_integration.auth import require_permission
 
-# Add project root to path
 from netra_backend.app.services.database.tenant_service import TenantService
 
 PermissionsService = AsyncMock
@@ -50,7 +41,6 @@ from netra_backend.app.services.database.connection_manager import (
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class TenantTestData:
     """Test data container for tenant information."""
@@ -60,7 +50,6 @@ class TenantTestData:
     users: List[str]
     resources: List[str]
     permissions: Dict[str, Set[str]]
-
 
 class MultiTenantIsolationManager:
     """Manages multi-tenant isolation testing with real security controls."""
@@ -516,7 +505,6 @@ class MultiTenantIsolationManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def isolation_manager():
     """Create multi-tenant isolation manager for testing."""
@@ -524,7 +512,6 @@ async def isolation_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_basic_tenant_data_isolation(isolation_manager):
@@ -548,7 +535,6 @@ async def test_basic_tenant_data_isolation(isolation_manager):
         assert validation_results["resource_isolation"]["isolated"] is True
         assert validation_results["user_isolation"]["isolated"] is True
         assert validation_results["permission_isolation"]["isolated"] is True
-
 
 @pytest.mark.asyncio
 async def test_cross_tenant_access_prevention(isolation_manager):
@@ -581,7 +567,6 @@ async def test_cross_tenant_access_prevention(isolation_manager):
     assert access_result_reverse["access_granted"] is False
     assert access_result_reverse["isolation_maintained"] is True
 
-
 @pytest.mark.asyncio
 async def test_same_tenant_access_allowed(isolation_manager):
     """Test that same-tenant access is properly allowed."""
@@ -607,7 +592,6 @@ async def test_same_tenant_access_allowed(isolation_manager):
             tenant.tenant_id, tenant.tenant_id, user, resource
         )
         assert same_tenant_access["access_granted"] is True
-
 
 @pytest.mark.asyncio
 async def test_multi_tenant_concurrent_access(isolation_manager):
@@ -658,7 +642,6 @@ async def test_multi_tenant_concurrent_access(isolation_manager):
         assert result["access_granted"] is False
         assert result["isolation_maintained"] is True
 
-
 @pytest.mark.asyncio
 async def test_tenant_tier_isolation_differences(isolation_manager):
     """Test isolation behavior differences across tenant tiers."""
@@ -684,7 +667,6 @@ async def test_tenant_tier_isolation_differences(isolation_manager):
     
     assert cross_tier_access["access_granted"] is False
     assert cross_tier_access["isolation_maintained"] is True
-
 
 @pytest.mark.asyncio
 async def test_audit_trail_and_compliance_tracking(isolation_manager):
@@ -724,7 +706,6 @@ async def test_audit_trail_and_compliance_tracking(isolation_manager):
     if metrics["isolation_violations"] > 0:
         assert "violations_by_type" in metrics
         assert isinstance(metrics["violations_by_type"], dict)
-
 
 @pytest.mark.asyncio
 async def test_isolation_performance_under_load(isolation_manager):

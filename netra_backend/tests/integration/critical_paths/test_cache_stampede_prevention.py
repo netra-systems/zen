@@ -11,17 +11,10 @@ L3 Realism: Real Redis with distributed locks, actual concurrent load simulation
 Performance Requirements: Lock acquisition < 10ms, computation efficiency > 95%, stampede prevention 100%
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -40,15 +33,11 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer as NetraRedisContainer,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class StampedeMetrics:
@@ -94,7 +83,6 @@ class StampedeMetrics:
         actual_computations = len(self.computation_times)
         duplicate_ratio = self.duplicate_computations / expected_computations if expected_computations > 0 else 0
         return (1 - duplicate_ratio) * 100.0
-
 
 class CacheStampedePreventionL3Manager:
     """L3 cache stampede prevention test manager with real Redis distributed locks."""
@@ -577,7 +565,6 @@ class CacheStampedePreventionL3Manager:
         except Exception as e:
             logger.error(f"Stampede prevention cleanup failed: {e}")
 
-
 @pytest.fixture
 async def stampede_prevention_manager():
     """Create L3 cache stampede prevention manager."""
@@ -585,7 +572,6 @@ async def stampede_prevention_manager():
     await manager.setup_redis_for_stampede_testing()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -601,7 +587,6 @@ async def test_basic_cache_stampede_prevention(stampede_prevention_manager):
     assert result["cache_hits"] >= 15, f"Insufficient cache hits: {result['cache_hits']}"
     
     logger.info(f"Basic stampede prevention test: {result['computations']} computation, {result['cache_hits']} cache hits")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -620,7 +605,6 @@ async def test_multiple_key_stampede_prevention(stampede_prevention_manager):
     
     logger.info(f"Multi-key stampede prevention: {result['stampede_prevention_rate']:.1f}% prevention rate across {result['total_keys']} keys")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -635,7 +619,6 @@ async def test_lock_timeout_holder_dies_scenario(stampede_prevention_manager):
     
     logger.info(f"Lock timeout (holder dies) test completed: lock expired and recovery successful")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -648,7 +631,6 @@ async def test_lock_timeout_slow_computation_scenario(stampede_prevention_manage
     assert result["concurrent_successes"] >= 3, f"Too few concurrent successes: {result['concurrent_successes']}"
     
     logger.info(f"Lock timeout (slow computation) test: {result['concurrent_successes']}/{result['concurrent_requests']} concurrent successes")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -667,7 +649,6 @@ async def test_cache_warming_stampede_prevention(stampede_prevention_manager):
     assert max_computations_per_key <= 2, f"Too many computations per key during warming: {max_computations_per_key}"
     
     logger.info(f"Cache warming test: {result['warming_efficiency']:.1f}% efficiency, {result['efficiently_warmed_keys']}/{result['warming_keys']} keys")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

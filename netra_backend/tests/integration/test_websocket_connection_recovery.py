@@ -14,21 +14,10 @@ COVERAGE TARGET: 100% for basic reconnection functionality
 All functions ≤8 lines per CLAUDE.md requirements.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import time
@@ -37,10 +26,8 @@ import pytest
 
 from netra_backend.app.websocket.reconnection_types import ReconnectionConfig
 
-# Add project root to path
 from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 from netra_backend.tests.integration.websocket_recovery_fixtures import (
-    # Add project root to path
 
     MockWebSocket,
 
@@ -54,12 +41,10 @@ from netra_backend.tests.integration.websocket_recovery_fixtures import (
 
 )
 
-
 class TestWebSocketBasicReconnection:
 
     """Basic WebSocket reconnection functionality tests."""
     
-
     @pytest.fixture
 
     async def recovery_setup(self):
@@ -68,7 +53,6 @@ class TestWebSocketBasicReconnection:
 
         return await setup_test_manager_with_helper()
     
-
     @pytest.fixture
 
     async def reconnection_config(self):
@@ -77,7 +61,6 @@ class TestWebSocketBasicReconnection:
 
         return create_standard_reconnection_config()
     
-
     async def test_basic_reconnection_cycle(self, recovery_setup):
 
         """Test basic WebSocket reconnection cycle with telemetry tracking."""
@@ -100,7 +83,6 @@ class TestWebSocketBasicReconnection:
 
         await self._test_successful_reconnection(manager, user_id)
     
-
     async def _establish_initial_connection(self, manager: UnifiedWebSocketManager, user_id: str) -> MockWebSocket:
 
         """Establish initial WebSocket connection."""
@@ -113,7 +95,6 @@ class TestWebSocketBasicReconnection:
 
         return websocket
     
-
     async def _simulate_and_verify_disconnection(self, manager: UnifiedWebSocketManager, 
 
                                                websocket: MockWebSocket, user_id: str) -> None:
@@ -126,7 +107,6 @@ class TestWebSocketBasicReconnection:
 
         assert manager.telemetry["connections_closed"] > 0, "Disconnection should be tracked"
     
-
     async def _test_successful_reconnection(self, manager: UnifiedWebSocketManager, user_id: str) -> None:
 
         """Test successful reconnection and verify tracking."""
@@ -141,7 +121,6 @@ class TestWebSocketBasicReconnection:
 
         assert manager.telemetry["connections_opened"] >= 2, "Reconnection should be tracked"
     
-
     async def test_connection_state_preservation(self, recovery_setup):
 
         """Test WebSocket connection state preservation during reconnection."""
@@ -164,7 +143,6 @@ class TestWebSocketBasicReconnection:
 
         self._assert_state_preservation_metrics(initial_state, preserved_state)
     
-
     async def _establish_connection_with_state(self, manager: UnifiedWebSocketManager, 
 
                                              helper: StateRecoveryTestHelper, user_id: str) -> dict:
@@ -175,7 +153,6 @@ class TestWebSocketBasicReconnection:
 
         conn_info = await manager.connect_user(user_id, websocket)
         
-
         state_data = helper.create_test_state_data(user_id)
 
         state_messages = create_state_building_messages(state_data)
@@ -184,10 +161,8 @@ class TestWebSocketBasicReconnection:
 
             await manager.send_message_to_user(user_id, message)
         
-
         return {"conn_info": conn_info, "websocket": websocket, "telemetry": manager.telemetry.copy()}
     
-
     async def _disconnect_and_verify_preservation(self, manager: UnifiedWebSocketManager,
 
                                                 user_id: str, initial_state: dict) -> dict:
@@ -202,7 +177,6 @@ class TestWebSocketBasicReconnection:
 
         return {"telemetry": manager.telemetry.copy(), "pending_msgs": len(manager.pending_messages)}
     
-
     def _assert_state_preservation_metrics(self, initial: dict, preserved: dict) -> None:
 
         """Assert that critical state preservation metrics are valid."""
@@ -211,12 +185,10 @@ class TestWebSocketBasicReconnection:
 
         assert preserved["telemetry"]["connections_closed"] > 0, "Disconnect should be tracked"
 
-
 class TestWebSocketMultiClientRecovery:
 
     """Multi-client WebSocket recovery coordination tests."""
     
-
     async def test_multi_client_recovery_coordination(self):
 
         """Test state recovery coordination across multiple WebSocket clients."""
@@ -237,7 +209,6 @@ class TestWebSocketMultiClientRecovery:
 
         await self._test_selective_reconnection(manager, client_ids)
     
-
     async def _establish_multiple_connections(self, manager: UnifiedWebSocketManager, 
 
                                            client_ids: list) -> dict:
@@ -256,7 +227,6 @@ class TestWebSocketMultiClientRecovery:
 
         return websockets
     
-
     async def _simulate_mass_disconnection(self, manager: UnifiedWebSocketManager,
 
                                          websockets: dict, client_ids: list) -> None:
@@ -271,7 +241,6 @@ class TestWebSocketMultiClientRecovery:
 
         assert manager.telemetry["connections_closed"] >= len(client_ids), "All disconnections should be tracked"
     
-
     async def _test_selective_reconnection(self, manager: UnifiedWebSocketManager, client_ids: list) -> None:
 
         """Test reconnection of subset of clients."""
@@ -296,7 +265,6 @@ class TestWebSocketMultiClientRecovery:
 
         assert reconnected_count > 0, "At least one client should reconnect successfully"
     
-
     async def test_concurrent_reconnection_handling(self):
 
         """Test handling of concurrent reconnection attempts."""
@@ -313,7 +281,6 @@ class TestWebSocketMultiClientRecovery:
 
         self._verify_concurrent_stability(manager, race_results)
     
-
     async def _create_concurrent_connections(self, manager: UnifiedWebSocketManager, user_id: str) -> list:
 
         """Create concurrent connection attempts."""
@@ -328,10 +295,8 @@ class TestWebSocketMultiClientRecovery:
 
             tasks.append(task)
         
-
         return await asyncio.gather(*tasks, return_exceptions=True)
     
-
     def _verify_concurrent_stability(self, manager: UnifiedWebSocketManager, race_results: list) -> None:
 
         """Verify system remains stable under concurrent load."""
@@ -342,12 +307,10 @@ class TestWebSocketMultiClientRecovery:
 
         assert connections_opened >= 0, "Connection tracking should remain consistent"
 
-
 class TestWebSocketReconnectionWithStateSync:
 
     """WebSocket reconnection with complete state synchronization tests."""
     
-
     async def test_reconnection_with_state_synchronization(self):
 
         """Test WebSocket reconnection with complete state synchronization."""
@@ -368,7 +331,6 @@ class TestWebSocketReconnectionWithStateSync:
 
         await self._test_reconnection_with_sync(manager, user_id)
     
-
     async def _establish_connection_with_session_state(self, manager: UnifiedWebSocketManager,
 
                                                      user_id: str) -> dict:
@@ -379,7 +341,6 @@ class TestWebSocketReconnectionWithStateSync:
 
         conn_info = await manager.connect_user(user_id, websocket)
         
-
         state_messages = [
 
             {"type": "agent_started", "agent": "TestAgent"},
@@ -392,10 +353,8 @@ class TestWebSocketReconnectionWithStateSync:
 
             await manager.send_message_to_user(user_id, message)
         
-
         return {"conn_info": conn_info, "websocket": websocket}
     
-
     async def _simulate_disconnection_for_sync_test(self, manager: UnifiedWebSocketManager,
 
                                                   user_id: str, initial_state: dict) -> None:
@@ -408,7 +367,6 @@ class TestWebSocketReconnectionWithStateSync:
 
         await manager.disconnect_user(user_id, websocket, 1006, "State sync test")
     
-
     async def _test_reconnection_with_sync(self, manager: UnifiedWebSocketManager, user_id: str) -> None:
 
         """Test reconnection and verify state sync success."""
@@ -421,7 +379,6 @@ class TestWebSocketReconnectionWithStateSync:
 
         assert new_conn_info is not None, "Reconnection with state sync should succeed"
         
-
         post_reconnect_message = {"type": "agent_completed", "result": "success"}
 
         result = await manager.send_message_to_user(user_id, post_reconnect_message)

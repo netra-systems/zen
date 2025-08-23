@@ -3,17 +3,10 @@ Tool Registry Discovery Tests
 Tests tool discovery and search functionality
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, call, patch
@@ -21,12 +14,8 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 import pytest
 from langchain_core.tools import BaseTool
 
-# Add project root to path
 from netra_backend.app.services.tool_registry import ToolRegistry
-from .test_tool_registry_registration_core import MockTool
-
-# Add project root to path
-
+from netra_backend.tests.test_tool_registry_registration_core import MockTool
 
 class TestToolRegistryDiscovery:
     """Test tool discovery functionality"""
@@ -202,7 +191,6 @@ class TestToolRegistryDiscovery:
         # Data category tools should be recommended higher for data_analysis task
         data_tools = [rec for rec in recommendations if rec["category"] == "data"]
         assert len(data_tools) >= 1
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

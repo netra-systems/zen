@@ -3,17 +3,10 @@ Tests 11-20: Core Infrastructure & Error Handling
 Tests for the missing core infrastructure components identified in the top 100 missing tests.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 import logging
@@ -23,9 +16,6 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from cryptography.fernet import Fernet
-
-# Add project root to path
-
 
 # Test 11: config_validator_schema_validation
 class TestConfigValidator:
@@ -72,7 +62,6 @@ class TestConfigValidator:
         assert any("✓" in line for line in report)
         assert any("Environment: production" in line for line in report)
 
-
 # Test 12: error_context_capture
 class TestErrorContext:
     """Test error context preservation - app/core/error_context.py"""
@@ -97,7 +86,6 @@ class TestErrorContext:
         assert error_context.get_trace_id() == "trace-123"
         assert error_context.get_request_id() == "req-456"
         assert error_context.get_user_id() == "user-789"
-
 
 # Test 13: error_handlers_recovery
 class TestErrorHandlers:
@@ -136,7 +124,6 @@ class TestErrorHandlers:
         assert body["error"] == True
         assert "Not found" in body["message"]
 
-
 # Test 14: exceptions_custom_types
 class TestCustomExceptions:
     """Test custom exception behaviors - app/core/exceptions.py"""
@@ -165,7 +152,6 @@ class TestCustomExceptions:
         assert "Invalid token" in str(exc)
         assert exc.error_details.code == ErrorCode.AUTHENTICATION_FAILED.value
 
-
 # Test 15: logging_manager_configuration
 class TestLoggingManager:
     """Test log level management - app/core/logging_manager.py"""
@@ -192,7 +178,6 @@ class TestLoggingManager:
         with patch.object(logger, 'info') as mock_info:
             logger.info("Test message", extra={"user_id": "123"})
             mock_info.assert_called_once()
-
 
 # Test 16: resource_manager_limits
 class TestResourceManager:
@@ -231,7 +216,6 @@ class TestResourceManager:
         info = tracker.get_resource_info()
         assert len(info) == 2
 
-
 # Test 17: schema_sync_database_migration
 class TestSchemaSync:
     """Test schema synchronization - app/core/schema_sync.py"""
@@ -257,7 +241,6 @@ class TestSchemaSync:
         
         # Unsafe migration (dropping table)
         assert not is_migration_safe("DROP TABLE users;")
-
 
 # Test 18: secret_manager_encryption
 class TestSecretManager:
@@ -286,7 +269,6 @@ class TestSecretManager:
         
         # Invalid secrets (too short)
         assert not validate_secret_format("short")
-
 
 # Test 19: unified_logging_aggregation
 class TestUnifiedLogging:
@@ -319,7 +301,6 @@ class TestUnifiedLogging:
         assert len(logs) == 2
         assert any(log["service"] == "service_a" for log in logs)
         assert any(log["service"] == "service_b" for log in logs)
-
 
 # Test 20: startup_checks_service_validation
 class TestStartupChecks:

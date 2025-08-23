@@ -1,10 +1,24 @@
 # Configuration Migration Guide
 
-## Overview
+## 🚨 CRITICAL UPDATE: This Document is Outdated
 
-This guide documents the completed migration from the legacy configuration system to the new unified configuration system in Netra Apex.
+**This document has been superseded by comprehensive configuration documentation.**
 
-## Status: COMPLETED
+**Please use the NEW documentation:**
+
+- **[Configuration Management Guide](./configuration/CONFIGURATION_GUIDE.md)** - Complete guide with unified system
+- **[Configuration Migration Guide](./configuration/CONFIGURATION_MIGRATION_GUIDE.md)** - Detailed migration information  
+- **[Developer Quick Reference](./configuration/DEVELOPER_QUICK_REFERENCE.md)** - Quick patterns and examples
+
+## ⚠️ BREAKING CHANGE NOTICE
+
+**As of August 2025, the configuration system has been completely replaced.**
+
+**The information below is OUTDATED and should not be used for new development.**
+
+---
+
+## Status: COMPLETED (Legacy Documentation Below)
 
 The legacy configuration files have been **REMOVED**:
 - ~~`config_environment.py`~~ - DELETED

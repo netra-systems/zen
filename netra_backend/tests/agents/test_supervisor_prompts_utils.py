@@ -4,17 +4,10 @@ Split from large test file for architecture compliance
 Test classes: TestAgentPromptsTemplateRendering, TestEnhancedPromptsContextBuilding, TestAgentUtilsHelperFunctions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -32,18 +25,15 @@ from netra_backend.app.schemas import (
 )
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import (
+from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    # Add project root to path
     ExecutionStrategy,
 )
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-
 
 # Mock classes for testing (would normally be imported)
 class AgentPrompts:
@@ -63,7 +53,6 @@ class AgentPrompts:
         for key, value in variables.items():
             result = result.replace(f"{{{key}}}", str(value))
         return result
-
 
 class EnhancedPrompts:
     """Mock enhanced prompts for testing"""
@@ -98,7 +87,6 @@ class EnhancedPrompts:
         if len(history) > max_messages:
             return history[-max_messages:]
         return history
-
 
 class AgentUtils:
     """Mock agent utils for testing"""
@@ -142,9 +130,9 @@ class AgentUtils:
         
         return merged
 
-
 class TestAgentPromptsTemplateRendering:
     """Test 8: Test prompt template generation"""
+    @pytest.mark.asyncio
     async def test_prompt_template_rendering(self):
         """Test rendering of prompt templates with variables"""
         prompts = AgentPrompts()
@@ -159,6 +147,7 @@ class TestAgentPromptsTemplateRendering:
         result = prompts.render_template(template, variables)
         
         assert result == "Optimize transformer for latency with constraints: memory < 8GB"
+    @pytest.mark.asyncio
     async def test_prompt_variable_substitution(self):
         """Test complex variable substitution in prompts"""
         prompts = AgentPrompts()
@@ -182,6 +171,7 @@ class TestAgentPromptsTemplateRendering:
         assert "You are an AI optimizer" in result
         assert "Improve model performance" in result
         assert str(variables["context"]) in result
+    @pytest.mark.asyncio
     async def test_prompt_template_validation(self):
         """Test validation of prompt templates"""
         prompts = AgentPrompts()
@@ -195,9 +185,9 @@ class TestAgentPromptsTemplateRendering:
         
         assert "method" in str(exc.value)
 
-
 class TestEnhancedPromptsContextBuilding:
     """Test 9: Test enhanced context construction"""
+    @pytest.mark.asyncio
     async def test_enhanced_context_construction(self):
         """Test building enhanced context for prompts"""
         enhanced_prompts = EnhancedPrompts()
@@ -217,6 +207,7 @@ class TestEnhancedPromptsContextBuilding:
         assert enhanced_context["user_query"] == "Optimize training"
         assert len(enhanced_context["conversation_history"]) == 2
         assert "model_info" in enhanced_context
+    @pytest.mark.asyncio
     async def test_prompt_optimization_logic(self):
         """Test prompt optimization for better responses"""
         enhanced_prompts = EnhancedPrompts()
@@ -231,6 +222,7 @@ class TestEnhancedPromptsContextBuilding:
         # Optimized prompt should be more specific
         assert len(optimized) > len(original_prompt)
         assert "specific" in optimized.lower() or "detailed" in optimized.lower()
+    @pytest.mark.asyncio
     async def test_context_window_management(self):
         """Test management of context window size"""
         enhanced_prompts = EnhancedPrompts()
@@ -249,9 +241,9 @@ class TestEnhancedPromptsContextBuilding:
         # Should keep most recent messages
         assert managed_context[-1] == large_history[-1]
 
-
 class TestAgentUtilsHelperFunctions:
     """Test 10: Test utility helper functions"""
+    @pytest.mark.asyncio
     async def test_retry_with_backoff(self):
         """Test retry utility with exponential backoff"""
         utils = AgentUtils()
@@ -273,6 +265,7 @@ class TestAgentUtilsHelperFunctions:
         
         assert result == "Success"
         assert call_count == 3
+    @pytest.mark.asyncio
     async def test_parallel_execution_helper(self):
         """Test parallel execution of multiple tasks"""
         utils = AgentUtils()
@@ -285,6 +278,7 @@ class TestAgentUtilsHelperFunctions:
         results = await utils.execute_parallel(tasks)
         
         assert results == [0, 2, 4, 6, 8]
+    @pytest.mark.asyncio
     async def test_timeout_wrapper(self):
         """Test timeout wrapper for long-running operations"""
         utils = AgentUtils()
@@ -295,6 +289,7 @@ class TestAgentUtilsHelperFunctions:
         
         with pytest.raises(asyncio.TimeoutError):
             await utils.with_timeout(slow_operation(), timeout=0.5)
+    @pytest.mark.asyncio
     async def test_state_merging_utility(self):
         """Test utility for merging agent states"""
         utils = AgentUtils()

@@ -25,7 +25,6 @@ def generate_test_user_data() -> Dict[str, Any]:
 
     timestamp = datetime.utcnow().isoformat()
     
-
     return {
 
         "user_id": user_id,
@@ -58,7 +57,6 @@ def generate_test_user_data() -> Dict[str, Any]:
 
     }
 
-
 def generate_test_api_key_data() -> Dict[str, str]:
 
     """Generate test API key data"""
@@ -72,7 +70,6 @@ def generate_test_api_key_data() -> Dict[str, str]:
         "description": "Test API key for integration testing"
 
     }
-
 
 def generate_test_thread_data() -> Dict[str, Any]:
 
@@ -98,14 +95,12 @@ class MockAuthService:
 
     """Mock authentication service for testing"""
     
-
     def __init__(self):
 
         self.users = {}
 
         self.sessions = {}
         
-
     async def register_user(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Mock user registration"""
@@ -114,7 +109,6 @@ class MockAuthService:
 
         self.users[user_id] = user_data.copy()
         
-
         return {
 
             "user_id": user_id,
@@ -127,7 +121,6 @@ class MockAuthService:
 
         }
         
-
     async def verify_email(self, user_id: str, token: str) -> bool:
 
         """Mock email verification"""
@@ -140,7 +133,6 @@ class MockAuthService:
 
         return False
         
-
     async def authenticate(self, email: str, password: str) -> Optional[Dict[str, Any]]:
 
         """Mock authentication"""
@@ -173,19 +165,16 @@ class MockAuthService:
 
         return None
 
-
 class MockWebSocketManager:
 
     """Mock WebSocket manager for testing"""
     
-
     def __init__(self):
 
         self.connections = {}
 
         self.messages = []
         
-
     async def connect(self, user_id: str, websocket) -> bool:
 
         """Mock WebSocket connection"""
@@ -202,7 +191,6 @@ class MockWebSocketManager:
 
         return True
         
-
     async def disconnect(self, user_id: str):
 
         """Mock WebSocket disconnection"""
@@ -211,7 +199,6 @@ class MockWebSocketManager:
 
             del self.connections[user_id]
             
-
     async def send_message(self, user_id: str, message: Dict[str, Any]):
 
         """Mock sending message to user"""
@@ -232,17 +219,14 @@ class MockWebSocketManager:
 
         return False
 
-
 class MockUsageService:
 
     """Mock usage tracking service"""
     
-
     def __init__(self):
 
         self.usage_records = defaultdict(list)
         
-
     async def track_usage(self, user_id: str, action: str, metadata: Dict[str, Any] = None):
 
         """Track user action"""
@@ -257,14 +241,12 @@ class MockUsageService:
 
         })
         
-
     async def get_usage_summary(self, user_id: str, period: str = "current_month") -> Dict[str, Any]:
 
         """Get usage summary for user"""
 
         records = self.usage_records.get(user_id, [])
         
-
         return {
 
             "user_id": user_id,
@@ -301,10 +283,8 @@ async def simulate_user_journey(steps: List[Dict[str, Any]],
 
     }
     
-
     user_context = {}
     
-
     for i, step in enumerate(steps):
 
         try:
@@ -313,7 +293,6 @@ async def simulate_user_journey(steps: List[Dict[str, Any]],
 
             results["step_results"].append(step_result)
             
-
             if step_result.get("success", False):
 
                 results["steps_completed"] += 1
@@ -329,7 +308,6 @@ async def simulate_user_journey(steps: List[Dict[str, Any]],
 
                 break
                 
-
         except Exception as e:
 
             results["success"] = False
@@ -338,9 +316,7 @@ async def simulate_user_journey(steps: List[Dict[str, Any]],
 
             break
     
-
     return results
-
 
 async def execute_journey_step(step: Dict[str, Any], 
 
@@ -354,7 +330,6 @@ async def execute_journey_step(step: Dict[str, Any],
 
     step_data = step.get("data", {})
     
-
     if step_type == "register":
 
         return await _execute_registration_step(step_data, context, services)
@@ -375,7 +350,6 @@ async def execute_journey_step(step: Dict[str, Any],
 
         return {"success": False, "error": f"Unknown step type: {step_type}"}
 
-
 async def _execute_registration_step(data: Dict[str, Any], 
 
                                    context: Dict[str, Any],
@@ -390,10 +364,8 @@ async def _execute_registration_step(data: Dict[str, Any],
 
         return {"success": False, "error": "Auth service not available"}
         
-
     user_data = data.get("user_data") or generate_test_user_data()
     
-
     try:
 
         result = await auth_service.register_user(user_data)
@@ -418,7 +390,6 @@ async def _execute_registration_step(data: Dict[str, Any],
 
         return {"success": False, "error": str(e)}
 
-
 async def _execute_verification_step(data: Dict[str, Any],
 
                                    context: Dict[str, Any], 
@@ -433,12 +404,10 @@ async def _execute_verification_step(data: Dict[str, Any],
 
     token = context.get("verification_token")
     
-
     if not all([auth_service, user_id, token]):
 
         return {"success": False, "error": "Missing verification data"}
         
-
     try:
 
         verified = await auth_service.verify_email(user_id, token)
@@ -455,7 +424,6 @@ async def _execute_verification_step(data: Dict[str, Any],
 
         return {"success": False, "error": str(e)}
 
-
 async def _execute_login_step(data: Dict[str, Any],
 
                             context: Dict[str, Any],
@@ -468,17 +436,14 @@ async def _execute_login_step(data: Dict[str, Any],
 
     user_data = context.get("user_data", {})
     
-
     email = user_data.get("email")
 
     password = user_data.get("password")
     
-
     if not all([auth_service, email, password]):
 
         return {"success": False, "error": "Missing login credentials"}
         
-
     try:
 
         session = await auth_service.authenticate(email, password)
@@ -495,7 +460,6 @@ async def _execute_login_step(data: Dict[str, Any],
 
         return {"success": False, "error": str(e)}
 
-
 async def _execute_thread_creation_step(data: Dict[str, Any],
 
                                       context: Dict[str, Any],
@@ -507,7 +471,6 @@ async def _execute_thread_creation_step(data: Dict[str, Any],
 
     thread_data = data.get("thread_data") or generate_test_thread_data()
     
-
     return {
 
         "success": True,
@@ -515,7 +478,6 @@ async def _execute_thread_creation_step(data: Dict[str, Any],
         "context": {"thread": thread_data}
 
     }
-
 
 async def setup_test_infrastructure() -> Dict[str, Any]:
 
@@ -539,9 +501,7 @@ async def setup_test_infrastructure() -> Dict[str, Any]:
 
     await asyncio.sleep(0.1)  # Simulate initialization
     
-
     return infrastructure
-
 
 async def teardown_test_infrastructure(infrastructure: Dict[str, Any]) -> None:
 

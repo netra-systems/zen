@@ -14,17 +14,48 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
+// Mock stores and hooks before importing components
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: jest.fn(),
+}));
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: jest.fn(),
+}));
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: jest.fn(),
+}));
+jest.mock('@/hooks/useEventProcessor', () => ({
+  useEventProcessor: jest.fn(),
+}));
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: jest.fn(),
+}));
+
 // Components under test
-import { MainChat } from '@/components/chat/MainChat';
+import MainChat from '@/components/chat/MainChat';
 import { ConnectionStatusIndicator } from '@/components/chat/ConnectionStatusIndicator';
-import { ErrorBoundary } from '@/components/chat/ErrorBoundary';
+import { ChatErrorBoundary as ErrorBoundary } from '@/components/chat/ErrorBoundary';
 
 // Test utilities
 import { TestProviders } from '../../../test-utils';
 import { mockWebSocketProvider, mockUnifiedChatStore } from './shared-test-setup';
 
 // Types
-import { WebSocketEvent, ConnectionStatus } from '@/types';
+import { UnifiedWebSocketEvent as WebSocketEvent, ConnectionStatus } from '@/types';
+
+// Import mocked modules
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { useLoadingState } from '@/hooks/useLoadingState';
+import { useEventProcessor } from '@/hooks/useEventProcessor';
+import { useThreadNavigation } from '@/hooks/useThreadNavigation';
+
+// Mock implementations
+const mockUseUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
+const mockUseWebSocket = useWebSocket as jest.MockedFunction<typeof useWebSocket>;
+const mockUseLoadingState = useLoadingState as jest.MockedFunction<typeof useLoadingState>;
+const mockUseEventProcessor = useEventProcessor as jest.MockedFunction<typeof useEventProcessor>;
+const mockUseThreadNavigation = useThreadNavigation as jest.MockedFunction<typeof useThreadNavigation>;
 
 describe('WebSocket & Error Handling', () => {
   let mockStore: any;
@@ -36,6 +67,50 @@ describe('WebSocket & Error Handling', () => {
     mockStore = mockUnifiedChatStore();
     mockWebSocket = mockWebSocketProvider();
     jest.clearAllMocks();
+    
+    // Set up mock implementations
+    mockUseUnifiedChatStore.mockReturnValue({
+      isProcessing: false,
+      messages: [],
+      fastLayerData: null,
+      mediumLayerData: null,
+      slowLayerData: null,
+      currentRunId: null,
+      activeThreadId: 'thread1',
+      isThreadLoading: false,
+      handleWebSocketEvent: jest.fn(),
+      ...mockStore,
+    });
+    
+    mockUseWebSocket.mockReturnValue({
+      status: 'OPEN',
+      messages: [],
+      sendMessage: jest.fn(),
+      sendOptimisticMessage: jest.fn(),
+      reconciliationStats: { optimisticCount: 0, confirmedCount: 0, rejectedCount: 0 },
+      ...mockWebSocket,
+    });
+    
+    mockUseLoadingState.mockReturnValue({
+      loadingState: 'THREAD_READY',
+      shouldShowLoading: false,
+      shouldShowEmptyState: false,
+      shouldShowExamplePrompts: true,
+      loadingMessage: '',
+      isInitialized: true,
+    });
+    
+    mockUseEventProcessor.mockReturnValue({
+      processedEvents: [],
+      isProcessing: false,
+      stats: { processed: 0, failed: 0 },
+    });
+    
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: 'thread1',
+      isNavigating: false,
+      navigateToThread: jest.fn(),
+    });
   });
 
   describe('11. WebSocket Message Handling', () => {

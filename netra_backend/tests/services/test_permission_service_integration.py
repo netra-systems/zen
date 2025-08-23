@@ -4,17 +4,10 @@ Critical security component - Real-world integration scenarios
 Split from test_permission_service.py to maintain 450-line limit
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import os
 from unittest.mock import MagicMock, Mock, patch
@@ -24,17 +17,15 @@ from sqlalchemy.orm import Session
 
 from netra_backend.app.db.models_postgres import User
 
-# Add project root to path
 # Import the module under test
 from netra_backend.app.services.permission_service import (
     ROLE_HIERARCHY,
     ROLE_PERMISSIONS,
     PermissionService,
 )
-from ..helpers.shared_test_types import (
+from netra_backend.tests.services.helpers.shared_test_types import (
     TestIntegrationScenarios as SharedTestIntegrationScenarios,
 )
-
 
 class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     """Test real-world integration scenarios"""
@@ -108,7 +99,6 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
             user.email = "dev@netrasystems.ai"
             result = PermissionService.detect_developer_status(user)
             assert result == True
-
 
 class TestRealWorldScenarios:
     """Test real-world permission scenarios"""
@@ -209,7 +199,6 @@ class TestRealWorldScenarios:
             updated_user = PermissionService.update_user_role(db, user, check_developer=True)
             assert updated_user.role == "standard_user"  # Should not elevate
             assert PermissionService.has_permission(updated_user, "debug_panel") == False
-
 
 class TestSecurityIntegration:
     """Test security integration scenarios"""

@@ -3,17 +3,10 @@ Basic Test Suite for Synthetic Data Generation Service
 Testing corpus management and basic functionality
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -24,12 +17,8 @@ import pytest
 
 from netra_backend.app import schemas
 
-# Add project root to path
 from netra_backend.app.services.corpus_service import CorpusStatus
-from .test_synthetic_data_service_fixtures import *
-
-# Add project root to path
-
+from netra_backend.tests.test_synthetic_data_service_fixtures import *
 
 # ==================== Test Suite: Corpus Management ====================
 
@@ -182,7 +171,6 @@ class TestCorpusManagement:
         
         # Should handle concurrent access without errors
         assert all(not isinstance(r, Exception) for r in results)
-
 
 # ==================== Test Runner ====================
 

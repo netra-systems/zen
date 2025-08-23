@@ -14,17 +14,10 @@ IMPORTANT: This is a critical L4 test for Enterprise customer trust and complian
 All workspace isolation must be validated in real staging environment conditions.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -39,23 +32,20 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
 # Permissions service replaced with auth_integration
-from auth_integration import require_permission
+from netra_backend.app.auth_integration.auth import require_permission
 
 from netra_backend.app.services.database.connection_manager import (
     DatabaseConnectionManager,
 )
 
-# Add project root to path
-from .integration.staging_config.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 PermissionsService = AsyncMock
 from netra_backend.app.core.security import SecurityContext
 from netra_backend.app.services.audit.audit_logger import AuditLogger
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class WorkspaceTestData:
@@ -70,7 +60,6 @@ class WorkspaceTestData:
     isolation_verified: bool = False
     billing_data: Dict[str, Any] = field(default_factory=dict)
 
-
 @dataclass
 class TenantTestData:
     """Test tenant data structure for multi-tenant testing."""
@@ -81,7 +70,6 @@ class TenantTestData:
     users: List[str] = field(default_factory=list)
     quota_limits: Dict[str, int] = field(default_factory=dict)
     billing_namespace: str = ""
-
 
 class MultiTenantWorkspaceIsolationL4Manager:
     """Manages L4 multi-tenant workspace isolation testing with real staging services."""
@@ -854,7 +842,6 @@ class MultiTenantWorkspaceIsolationL4Manager:
         except Exception as e:
             logger.error(f"L4 workspace cleanup failed: {e}")
 
-
 @pytest.fixture
 async def l4_workspace_isolation_manager():
     """Create L4 multi-tenant workspace isolation manager for staging tests."""
@@ -862,7 +849,6 @@ async def l4_workspace_isolation_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio
@@ -894,7 +880,6 @@ async def test_l4_multi_tenant_workspace_creation_isolation(l4_workspace_isolati
             assert workspace.isolation_verified is True
             assert len(workspace.resources) == 5  # Should have 5 resource types
             assert workspace.created_by in tenant.users
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio
@@ -934,7 +919,6 @@ async def test_l4_cross_tenant_workspace_access_prevention(l4_workspace_isolatio
     assert access_result_reverse["isolation_maintained"] is True
     assert access_result_reverse["staging_verified"] is True
 
-
 @pytest.mark.staging
 @pytest.mark.asyncio
 async def test_l4_same_tenant_workspace_access_control(l4_workspace_isolation_manager):
@@ -970,7 +954,6 @@ async def test_l4_same_tenant_workspace_access_control(l4_workspace_isolation_ma
     assert access_result["isolation_maintained"] is True
     assert access_result["staging_verified"] is True
 
-
 @pytest.mark.staging
 @pytest.mark.asyncio
 async def test_l4_workspace_quota_enforcement(l4_workspace_isolation_manager):
@@ -1004,7 +987,6 @@ async def test_l4_workspace_quota_enforcement(l4_workspace_isolation_manager):
     assert pro_quota["actual_workspace_count"] == 3
     assert pro_quota["quota_status"]["workspaces"]["limit"] == 10  # Pro limit
     assert pro_quota["quota_status"]["workspaces"]["within_limit"] is True
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio
@@ -1041,7 +1023,6 @@ async def test_l4_billing_separation_validation(l4_workspace_isolation_manager):
     # Verify billing namespaces are different
     assert billing_a["billing_namespace"] != billing_b["billing_namespace"]
 
-
 @pytest.mark.staging
 @pytest.mark.asyncio
 async def test_l4_concurrent_multi_tenant_operations(l4_workspace_isolation_manager):
@@ -1067,7 +1048,6 @@ async def test_l4_concurrent_multi_tenant_operations(l4_workspace_isolation_mana
     assert concurrent_results["cross_tenant_operations"] == 12  # 12 cross-tenant operations
     assert concurrent_results["cross_tenant_denial_rate"] >= 99.0  # Should deny cross-tenant access
     assert concurrent_results["avg_response_time"] < 3.0  # Should handle concurrent requests efficiently
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio

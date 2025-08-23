@@ -29,17 +29,10 @@ CRITICAL SECURITY SCENARIOS TESTED:
 Architecture: 450-line module limit, 25-line function limit enforced
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import time
 import uuid
@@ -54,12 +47,10 @@ from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.auth_integration.auth import (
     _check_password_rehash_needed,
     _validate_user_permission,
     create_access_token,
-    # Add project root to path
     get_current_user,
     get_current_user_optional,
     get_password_hash,
@@ -81,7 +72,6 @@ from netra_backend.app.schemas.auth_types import (
     TokenResponse,
     UserPermission,
 )
-
 
 class TestUserServiceAuthentication:
     """Security-critical authentication test suite for all customer segments."""

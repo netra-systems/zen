@@ -3,17 +3,10 @@ Critical authentication and session management integration tests.
 Business Value: Prevents $15K MRR loss from auth failures blocking premium features.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import uuid
 from datetime import datetime, timedelta
@@ -22,15 +15,11 @@ from unittest.mock import Mock, patch
 import pytest
 from starlette.websockets import WebSocketState
 
-# Add project root to path
-from .test_fixtures_common import (
+from netra_backend.tests.integration.test_fixtures_common import (
     create_test_user_with_oauth,
     mock_infrastructure,
     test_database,
 )
-
-# Add project root to path
-
 
 class TestAuthSessionIntegration:
     """Authentication and session management integration tests"""

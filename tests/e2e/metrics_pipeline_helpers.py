@@ -124,7 +124,7 @@ class HighVolumeEventGenerator:
     async def generate_standard_events(self, count: int) -> List[Dict]:
         return await self.generate_high_volume_events(count)
     
-    async def generate_integration_test_events(self) -> List[Dict]:
+    async def test_generate_integration_test_events(self) -> List[Dict]:
         return await self.generate_high_volume_events(5000)
 
 

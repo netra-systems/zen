@@ -1,16 +1,9 @@
 """Tests for the standardized error handling system."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
@@ -39,13 +32,11 @@ from netra_backend.app.core.error_handlers import (
 )
 from netra_backend.app.core.error_response import ErrorResponse
 
-# Add project root to path
 from netra_backend.app.core.exceptions import (
     AuthenticationError,
     AuthorizationError,
     ConfigurationError,
     DatabaseError,
-    # Add project root to path
     ErrorCode,
     ErrorDetails,
     ErrorSeverity,
@@ -57,7 +48,6 @@ from netra_backend.app.core.exceptions import (
     ValidationError,
     WebSocketError,
 )
-
 
 class TestErrorCodes:
     """Test error code definitions."""
@@ -75,7 +65,6 @@ class TestErrorCodes:
         assert ErrorSeverity.MEDIUM.value == "medium"
         assert ErrorSeverity.HIGH.value == "high"
         assert ErrorSeverity.CRITICAL.value == "critical"
-
 
 class TestErrorDetails:
     """Test ErrorDetails model."""
@@ -118,7 +107,6 @@ class TestErrorDetails:
         assert data["code"] == "SERVICE_UNAVAILABLE"
         assert data["message"] == "Service down"
         assert "timestamp" in data
-
 
 class TestNetraExceptions:
     """Test custom Netra exceptions."""
@@ -228,7 +216,6 @@ class TestNetraExceptions:
         assert exc.error_details.code == ErrorCode.WEBSOCKET_CONNECTION_FAILED.value
         assert exc.error_details.severity == ErrorSeverity.MEDIUM.value
 
-
 class TestApiErrorHandler:
     """Test ApiErrorHandler class."""
     
@@ -309,7 +296,6 @@ class TestApiErrorHandler:
         assert handler.get_http_status_code(ErrorCode.VALIDATION_ERROR) == 400
         assert handler.get_http_status_code(ErrorCode.SERVICE_UNAVAILABLE) == 503
         assert handler.get_http_status_code(ErrorCode.INTERNAL_ERROR) == 500
-
 
 class TestErrorContext:
     """Test ErrorContext utilities."""
@@ -397,7 +383,6 @@ class TestErrorContext:
         assert context["user_id"] == "user-456"
         assert context["additional"] == "data"
 
-
 class TestApiErrorHandlerFunctions:
     """Test error handler functions."""
     
@@ -460,7 +445,6 @@ class TestApiErrorHandlerFunctions:
         assert isinstance(response, JSONResponse)
         assert response.status_code == 500
 
-
 class TestErrorResponseModel:
     """Test ErrorResponse model."""
     
@@ -504,7 +488,6 @@ class TestErrorResponseModel:
         assert data["error"] == True
         assert data["error_code"] == "TEST_ERROR"
         assert data["trace_id"] == "trace-123"
-
 
 @pytest.fixture(autouse=True)
 def clear_error_context():

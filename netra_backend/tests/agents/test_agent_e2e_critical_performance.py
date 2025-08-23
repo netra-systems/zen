@@ -3,17 +3,10 @@ Performance and concurrency critical end-to-end tests.
 Tests 9-10: Concurrent request handling, performance and timeout handling.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Add netra_backend to path  
 
 import asyncio
 import uuid
@@ -22,15 +15,12 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
-# Add project root to path
-
-
 class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
     """Performance and concurrency critical tests"""
+    @pytest.mark.asyncio
     async def test_9_concurrent_request_handling(self, setup_agent_infrastructure):
         """
         Test Case 9: Concurrent Request Handling
@@ -187,6 +177,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         assert len(performance_metrics["execution_times"]) >= 0
         total_time = (performance_metrics["end_time"] - performance_metrics["start_time"]).total_seconds()
         assert total_time < 5.0  # Should complete within 5 seconds
+    @pytest.mark.asyncio
     async def test_10_performance_and_timeout_handling(self, setup_agent_infrastructure):
         """
         Test Case 10: Performance and Timeout Scenarios
@@ -206,6 +197,8 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         self._setup_performance_monitoring(supervisor, performance_metrics)
         await self._run_performance_test(supervisor, run_id, performance_metrics)
         self._verify_performance_metrics(performance_metrics)
+
+    @pytest.mark.asyncio
 
     async def test_load_balancing_and_degradation(self, setup_agent_infrastructure):
         """Test graceful degradation under different load levels"""

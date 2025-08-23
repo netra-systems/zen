@@ -36,12 +36,10 @@ import pytest
 import time
 import uuid
 
-
 class UserFlowTestBase:
 
     """Base class for user flow testing with common utilities."""
     
-
     @staticmethod
 
     async def create_verified_user(
@@ -85,7 +83,6 @@ class UserFlowTestBase:
 
         return response.json()
 
-
     @staticmethod
 
     async def simulate_chat_activity(
@@ -104,7 +101,6 @@ class UserFlowTestBase:
 
         thread_ids = []
         
-
         for i in range(num_messages):
 
             response = await async_client.post(
@@ -127,9 +123,7 @@ class UserFlowTestBase:
 
                 thread_ids.append(response.json().get("thread_id"))
         
-
         return thread_ids
-
 
     @staticmethod
 
@@ -156,7 +150,6 @@ class UserFlowTestBase:
         assert usage_data["plan"] == expected_plan
 
         return usage_data
-
 
     @staticmethod
 
@@ -193,7 +186,6 @@ class UserFlowTestBase:
 
             return ack
 
-
     @staticmethod
 
     async def verify_feature_access(
@@ -214,7 +206,6 @@ class UserFlowTestBase:
 
         response = await async_client.post(feature_endpoint, json={}, headers=headers)
         
-
         if should_have_access:
 
             assert response.status_code != status.HTTP_403_FORBIDDEN
@@ -226,7 +217,6 @@ class UserFlowTestBase:
             assert response.status_code == status.HTTP_403_FORBIDDEN
 
             return False
-
 
     @staticmethod
 
@@ -292,7 +282,6 @@ class UserFlowTestBase:
 
             return response.json()
 
-
     @staticmethod
 
     async def test_usage_tracking(
@@ -341,9 +330,7 @@ class UserFlowTestBase:
 
         assert current["messages_sent"] > baseline["messages_sent"]
         
-
         return current
-
 
     @staticmethod
 
@@ -361,7 +348,6 @@ class UserFlowTestBase:
 
         headers = {"Authorization": f"Bearer {access_token}"}
         
-
         response = await async_client.post(
 
             "/api/v1/export/usage",
@@ -380,14 +366,11 @@ class UserFlowTestBase:
 
         )
         
-
         if export_type == "basic":
 
             assert response.status_code == status.HTTP_200_OK
         
-
         return response.json() if response.status_code == 200 else {}
-
 
     @staticmethod
 
@@ -435,9 +418,7 @@ class UserFlowTestBase:
 
             assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
         
-
         return True
-
 
     @staticmethod
 
@@ -483,7 +464,6 @@ class UserFlowTestBase:
 
         new_headers = {"Authorization": f"Bearer {new_token}"}
         
-
         response = await async_client.get("/api/v1/session/restore", headers=new_headers)
 
         assert response.status_code == status.HTTP_200_OK
@@ -499,7 +479,6 @@ def assert_successful_registration(response_data: Dict[str, Any]) -> None:
     assert "user_id" in response_data
 
     assert "verification_token" in response_data
-
 
 def assert_plan_compliance(usage_data: Dict[str, Any], plan: str) -> None:
 

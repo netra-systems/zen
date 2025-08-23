@@ -6,17 +6,10 @@ Validates all critical functionality for reliable data insights.
 Business Value: Ensures 15-30% cost savings identification works reliably.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime, timedelta
@@ -32,7 +25,6 @@ from netra_backend.app.agents.base.interface import (
 )
 from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
 
-# Add project root to path
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
 from netra_backend.app.agents.data_sub_agent.performance_analyzer import (
@@ -44,9 +36,6 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
-
-# Add project root to path
-
 
 class TestDataSubAgentConsolidated:
     """Test suite for consolidated DataSubAgent implementation."""
@@ -135,11 +124,11 @@ class TestDataSubAgentConsolidated:
     @pytest.fixture
     async def data_sub_agent(self, mock_llm_manager, mock_tool_dispatcher, mock_websocket_manager):
         """Create DataSubAgent instance for testing."""
-        with patch('app.agents.data_sub_agent.data_sub_agent.ClickHouseClient') as mock_ch, \
-             patch('app.agents.data_sub_agent.data_sub_agent.SchemaCache') as mock_sc, \
-             patch('app.agents.data_sub_agent.data_sub_agent.PerformanceAnalyzer') as mock_pa, \
-             patch('app.agents.data_sub_agent.data_sub_agent.LLMCostOptimizer') as mock_co, \
-             patch('app.agents.data_sub_agent.data_sub_agent.DataValidator') as mock_dv:
+        with patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.ClickHouseClient') as mock_ch, \
+             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.SchemaCache') as mock_sc, \
+             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.PerformanceAnalyzer') as mock_pa, \
+             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.LLMCostOptimizer') as mock_co, \
+             patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.DataValidator') as mock_dv:
             
             agent = DataSubAgent(
                 llm_manager=mock_llm_manager,
@@ -191,7 +180,7 @@ class TestDataSubAgentConsolidated:
         )
         
         # Execute analysis
-        result = await data_sub_agent.execute(state)
+        result = await data_sub_agent.execute(state, "test-run-id")
         
         # Validate results
         assert result.success is True
@@ -230,7 +219,7 @@ class TestDataSubAgentConsolidated:
         )
         
         # Execute analysis
-        result = await data_sub_agent.execute(state)
+        result = await data_sub_agent.execute(state, "test-run-id")
         
         # Validate results
         assert result.success is True
@@ -258,7 +247,7 @@ class TestDataSubAgentConsolidated:
         )
         
         # Execute analysis
-        result = await data_sub_agent.execute(state)
+        result = await data_sub_agent.execute(state, "test-run-id")
         
         # Validate LLM insights were included
         assert result.success is True
@@ -333,7 +322,7 @@ class TestDataSubAgentConsolidated:
         )
         
         # Execute analysis
-        result = await data_sub_agent.execute(state)
+        result = await data_sub_agent.execute(state, "test-run-id")
         
         # Validate error handling
         assert result.success is False
@@ -455,7 +444,7 @@ class TestDataSubAgentConsolidated:
             user_id="test_user"
         )
         
-        result = await data_sub_agent.execute(state)
+        result = await data_sub_agent.execute(state, "test-run-id")
         
         assert result.success is True
         assert result.result["analysis_type"] == "trend_analysis"
@@ -463,7 +452,6 @@ class TestDataSubAgentConsolidated:
         
         # Verify trend analyzer was called
         data_sub_agent.performance_analyzer.analyze_trends.assert_called_once()
-
 
 class TestClickHouseClient:
     """Test ClickHouse client functionality."""
@@ -476,7 +464,7 @@ class TestClickHouseClient:
     async def test_connection_establishment(self, clickhouse_client):
         """Test ClickHouse connection establishment."""
         # Test connection with mock
-        with patch('app.agents.data_sub_agent.clickhouse_client.get_client', None):
+        with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_client', None):
             result = await clickhouse_client.connect()
             assert result is True  # Should succeed in mock mode
     
@@ -511,7 +499,6 @@ class TestClickHouseClient:
         # Test stale connection
         clickhouse_client._health_status["last_check"] = datetime.utcnow() - timedelta(minutes=10)
         assert clickhouse_client.is_healthy() is False
-
 
 class TestDataValidator:
     """Test data validation functionality."""

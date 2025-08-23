@@ -16,17 +16,10 @@ REGRESSION HISTORY:
 - Fix: Made connection_manager lazy-loaded with get_connection_manager_instance()
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import ast
 import importlib
@@ -35,7 +28,6 @@ import sys
 from typing import List, Set
 
 import pytest
-
 
 class TestCircularImportRegression:
     """Prevent the specific circular import regression."""
@@ -59,7 +51,7 @@ class TestCircularImportRegression:
                 content = f.read()
             
             # Check for BaseExecutionEngine import
-            assert 'from netra_backend.app.agents.base.executor import BaseExecutionEngine' not in content, \
+            assert 'from app.agents.base.executor import BaseExecutionEngine' not in content, \
                 f"{module_name} imports BaseExecutionEngine - CIRCULAR DEPENDENCY!"
             
             # Also check for any reference to BaseExecutionEngine
@@ -188,7 +180,7 @@ class TestCircularImportRegression:
         }
         
         # Process message
-        with patch('app.ws_manager.manager'):
+        with patch('netra_backend.app.ws_manager.manager'):
             await service.handle_websocket_message(
                 user_id="test_user",
                 message=message,
@@ -198,7 +190,6 @@ class TestCircularImportRegression:
         # Verify supervisor was called
         assert mock_supervisor.run.called, \
             "Message should trigger supervisor execution after circular fix"
-
 
 class TestConnectionModuleCircularImportPrevention:
     """Prevent regression of connection module circular import fixes."""
@@ -309,7 +300,6 @@ class TestConnectionModuleCircularImportPrevention:
         # Verify __all__ matches
         assert set(connection.__all__) == set(required_exports), \
             "__all__ exports don't match required exports"
-
 
 class TestIndirectCircularImportPrevention:
     """Test for indirect circular imports that manifest at runtime.
@@ -449,7 +439,7 @@ class TestIndirectCircularImportPrevention:
         
         lines = content.split('\n')
         for i, line in enumerate(lines):
-            if 'from netra_backend.app.services.websocket.ws_manager import' in line:
+            if 'from app.services.websocket.ws_manager import' in line:
                 # Check indentation to ensure it's not at module level
                 if line.startswith('from'):  # No indentation = module level
                     # Check if it's in TYPE_CHECKING block

@@ -6,17 +6,10 @@ Prevents $100K+ ARR loss from pricing errors. Direct impact on conversions.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Dict, List, Tuple
@@ -25,14 +18,11 @@ import pytest
 
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
-# Add project root to path
 from netra_backend.app.services.cost_calculator import (
-    # Add project root to path
     CostCalculatorService,
     CostTier,
     ModelCostInfo,
 )
-
 
 class TestCriticalPricingAccuracy:
     """Revenue-protecting pricing accuracy tests."""
@@ -78,7 +68,6 @@ class TestCriticalPricingAccuracy:
         percentage = (savings / expensive) * Decimal("100")
         assert savings == Decimal("1942.875000") and percentage > Decimal("99")
 
-
 class TestCriticalTokenPrecision:
     """Token precision tests for billing accuracy."""
     
@@ -120,7 +109,6 @@ class TestCriticalTokenPrecision:
         cost = calculator.calculate_cost(max_usage, LLMProvider.OPENAI, "gpt-4")
         assert isinstance(cost, Decimal) and cost == Decimal("193273.52823")
 
-
 class TestCriticalModelRecommendations:
     """Model recommendation tests for customer value."""
     
@@ -153,7 +141,6 @@ class TestCriticalModelRecommendations:
         assert openai_premium == "gpt-4"
         assert anthropic_premium == "claude-3-opus"
 
-
 class TestCriticalBudgetProjections:
     """Budget projection tests for enterprise sales."""
     
@@ -175,7 +162,6 @@ class TestCriticalBudgetProjections:
         monthly = baseline - optimized
         annual = monthly * Decimal("12")
         assert monthly == Decimal("388.575000") and annual == Decimal("4662.900000")
-
 
 class TestCriticalErrorScenarios:
     """Error scenario tests for customer trust."""
@@ -206,7 +192,6 @@ class TestCriticalErrorScenarios:
         
         # Negative inputs must be handled gracefully, return zero
         assert cost == Decimal("0")
-
 
 class TestCriticalPerformanceRequirements:
     """Performance tests for cost calculations."""

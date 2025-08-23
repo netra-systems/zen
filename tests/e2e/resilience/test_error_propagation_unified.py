@@ -35,8 +35,6 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 from tests.e2e.config import TEST_ENDPOINTS, TEST_USERS
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
@@ -72,7 +70,7 @@ class ErrorPropagationTester:
             logger.error(f"Failed to setup test environment: {e}")
             return False
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Clean up test resources."""
         if self.ws_client:
             await self.ws_client.close()

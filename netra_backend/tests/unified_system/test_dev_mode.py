@@ -19,17 +19,10 @@ CRITICAL: These tests validate developer experience optimizations
 that directly impact time-to-market and feature delivery velocity.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 import asyncio
 import json
@@ -43,13 +36,9 @@ from fastapi.testclient import TestClient
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.core.config import get_config
 
-# Add project root to path
 from netra_backend.app.main import app
 from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.schemas.core_models import User
-
-# Add project root to path
-
 
 class TestDevModeAuthentication:
     """Test development mode authentication flows"""
@@ -447,7 +436,6 @@ class TestDevModeAuthentication:
             if len(performance_metrics) > 1:
                 std_dev = statistics.stdev(performance_metrics)
                 assert std_dev < 0.05, f"Performance variance {std_dev} too high"
-
 
 class TestDevModeIntegration:
     """Integration tests for dev mode across system components"""

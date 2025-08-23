@@ -126,7 +126,7 @@ def _count_failures_by_type(recent_failures: list, failure_type) -> int:
 
 def add_failure_type_breakdown(health_status: dict, recent_failures: list) -> dict:
     """Add failure type breakdown to health status."""
-    from .fallback_handler import FailureType
+    from netra_backend.app.llm.fallback_handler import FailureType
     health_status["failure_types"] = {
         failure_type.value: _count_failures_by_type(recent_failures, failure_type)
         for failure_type in FailureType

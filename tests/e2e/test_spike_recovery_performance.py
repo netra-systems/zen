@@ -30,26 +30,24 @@ import websockets
 # Import required classes from test_spike_recovery_core
 from tests.e2e.test_spike_recovery_core import SpikeLoadGenerator, SpikeLoadMetrics
 
-
 async def test_spike_testing_performance_benchmark(load_generator: SpikeLoadGenerator,
                                                  spike_metrics: SpikeLoadMetrics):
     """
-    Performance benchmark for spike testing capabilities.
-    Establishes baseline metrics for regression testing.
+#     Performance benchmark for spike testing capabilities. # Possibly broken comprehension
+#     Establishes baseline metrics for regression testing. # Possibly broken comprehension
     """
     logger.info("Starting Spike Testing Performance Benchmark")
     
     # Benchmark various spike scenarios
     benchmark_results = {}
     
-    # Benchmark 1: Login spike performance
+#     # Benchmark 1: Login spike performance # Possibly broken comprehension
     start_time = time.perf_counter()
     spike_result = await load_generator.generate_thundering_herd_spike()
     benchmark_results['login_spike'] = {
         'duration': time.perf_counter() - start_time,
         'success_rate': spike_result['success_rate'],
         'requests_per_second': spike_result['requests_per_second']
-    }
     
     # Benchmark 2: WebSocket avalanche performance
     start_time = time.perf_counter()
@@ -58,7 +56,6 @@ async def test_spike_testing_performance_benchmark(load_generator: SpikeLoadGene
         'duration': time.perf_counter() - start_time,
         'success_rate': ws_result['success_rate'],
         'connections_per_second': ws_result['total_attempts'] / ws_result['avalanche_duration']
-    }
     
     # Benchmark 3: Recovery performance
     start_time = time.perf_counter()
@@ -66,7 +63,6 @@ async def test_spike_testing_performance_benchmark(load_generator: SpikeLoadGene
     benchmark_results['recovery'] = {
         'recovery_duration': recovery_time,
         'measurement_duration': time.perf_counter() - start_time
-    }
     
     # Generate comprehensive benchmark report
     final_summary = spike_metrics.get_performance_summary()
@@ -75,13 +71,13 @@ async def test_spike_testing_performance_benchmark(load_generator: SpikeLoadGene
     logger.info(f"Spike Testing Benchmark Results: {json.dumps(benchmark_results, indent=2)}")
     
     # Validate benchmark expectations
-    assert benchmark_results['login_spike']['success_rate'] >= 0.95, \
+    assert benchmark_results['login_spike']['success_rate'] >= 0.95, 
         "Login spike benchmark below expectations"
     
-    assert benchmark_results['websocket_avalanche']['success_rate'] >= 0.90, \
+    assert benchmark_results['websocket_avalanche']['success_rate'] >= 0.90, 
         "WebSocket avalanche benchmark below expectations"
     
-    assert benchmark_results['recovery']['recovery_duration'] <= 30.0, \
+    assert benchmark_results['recovery']['recovery_duration'] <= 30.0, 
         "Recovery time benchmark exceeded"
     
     return benchmark_results

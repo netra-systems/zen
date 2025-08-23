@@ -7,7 +7,6 @@ for testing type consistency across the full stack.
 from datetime import datetime
 from typing import Any, Dict, List
 
-
 class FrontendDataMocks:
     """Mock data representing typical frontend payloads."""
     
@@ -223,7 +222,6 @@ class FrontendDataMocks:
             }
             for i in range(3)
         ]
-
 
 class EnumValueMocks:
     """Mock enum values for testing consistency."""

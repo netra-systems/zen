@@ -12,17 +12,10 @@ Usage tracking -> Cost calculation -> Resource allocation -> Budget monitoring -
 Coverage: Real billing accuracy, usage metering, budget enforcement, cost alerts, optimization algorithms, staging validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -34,8 +27,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
 
-# Add project root to path
-from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
 import pytest
@@ -48,7 +40,6 @@ from netra_backend.app.db.models_user import User
 from netra_backend.app.schemas.UserPlan import PlanTier
 from netra_backend.app.services.llm.llm_manager import LLMManager
 
-
 # Mock cost optimization components for L4 testing
 class UsageTracker:
     """Mock usage tracker for L4 testing."""
@@ -58,7 +49,6 @@ class UsageTracker:
     
     async def track_usage_batch(self, batch_data: List[Dict]) -> Dict[str, Any]:
         return {"success": True}
-
 
 class BillingEngine:
     """Mock billing engine for L4 testing."""
@@ -70,7 +60,6 @@ class BillingEngine:
         # Mock cost calculation based on user tier
         mock_cost = random.uniform(10.0, 500.0)
         return {"success": True, "total_cost": mock_cost}
-
 
 class CostOptimizer:
     """Mock cost optimizer for L4 testing."""
@@ -94,12 +83,10 @@ class CostOptimizer:
             "recommendations": [f"optimize_{resource_type}"]
         }
 
-
 class BudgetManager:
     """Mock budget manager for L4 testing."""
     async def initialize(self): pass
     async def shutdown(self): pass
-
 
 class BillingAlertManager:
     """Mock billing alert manager for L4 testing."""
@@ -109,12 +96,10 @@ class BillingAlertManager:
     async def generate_budget_alert(self, user_id: str, alert_type: str, current_usage, budget_limit, usage_percentage: float) -> Dict[str, Any]:
         return {"success": True, "alert_id": str(uuid.uuid4())}
 
-
 class CostAnalytics:
     """Mock cost analytics for L4 testing."""
     async def initialize(self): pass
     async def shutdown(self): pass
-
 
 @dataclass
 class CostOptimizationMetrics:
@@ -125,7 +110,6 @@ class CostOptimizationMetrics:
     budget_compliance_rate: float
     alert_response_time: float
     resource_efficiency_improvement: float
-
 
 @dataclass
 class UsageRecord:
@@ -138,7 +122,6 @@ class UsageRecord:
     tier: str
     region: str
 
-
 @dataclass
 class CostAlert:
     """Cost alert data container."""
@@ -149,7 +132,6 @@ class CostAlert:
     current_usage: Decimal
     budget_limit: Decimal
     triggered_at: datetime
-
 
 class CostOptimizationWorkflowL4TestSuite:
     """L4 test suite for cost optimization workflow in staging environment."""
@@ -707,7 +689,6 @@ class CostOptimizationWorkflowL4TestSuite:
         except Exception as e:
             print(f"L4 cost optimization cleanup failed: {e}")
 
-
 @pytest.fixture
 async def cost_optimization_workflow_l4_suite():
     """Create L4 cost optimization workflow test suite."""
@@ -715,7 +696,6 @@ async def cost_optimization_workflow_l4_suite():
     await suite.initialize_l4_environment()
     yield suite
     await suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -739,7 +719,6 @@ async def test_realistic_usage_data_generation_l4(cost_optimization_workflow_l4_
     assert usage_generation_results["usage_events_generated"] >= 3000, "Insufficient usage events generated"
     assert usage_generation_results["tracking_success"] is True, "Usage tracking failed"
     assert usage_generation_results["tracking_rate"] >= 100, "Usage tracking rate too low"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -768,7 +747,6 @@ async def test_cost_calculation_accuracy_l4(cost_optimization_workflow_l4_suite)
     # Validate billing discrepancies
     assert len(cost_calculation_results["billing_discrepancies"]) <= 2, "Too many billing discrepancies detected"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
@@ -795,7 +773,6 @@ async def test_budget_monitoring_and_alerts_l4(cost_optimization_workflow_l4_sui
         if budget_monitoring_results["alert_response_times"]:
             avg_alert_time = sum(budget_monitoring_results["alert_response_times"]) / len(budget_monitoring_results["alert_response_times"])
             assert avg_alert_time < 3.0, f"Alert response time too slow: {avg_alert_time}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -824,7 +801,6 @@ async def test_cost_optimization_algorithms_l4(cost_optimization_workflow_l4_sui
         avg_optimization_time = sum(optimization_results["optimization_performance"]) / len(optimization_results["optimization_performance"])
         assert avg_optimization_time < 10.0, f"Optimization analysis too slow: {avg_optimization_time}s"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
@@ -848,7 +824,6 @@ async def test_resource_allocation_efficiency_l4(cost_optimization_workflow_l4_s
     
     # Should generate meaningful recommendations
     assert len(allocation_results["allocation_recommendations"]) >= 2, "Insufficient allocation recommendations generated"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -902,7 +877,6 @@ async def test_cost_optimization_workflow_e2e_l4(cost_optimization_workflow_l4_s
     if optimization_results["total_savings_identified"] > 0:
         savings_rate = float(optimization_results["total_savings_identified"]) / total_usage_events * 1000  # per 1000 events
         assert savings_rate >= 1.0, f"Cost optimization value too low: ${savings_rate} per 1000 events"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

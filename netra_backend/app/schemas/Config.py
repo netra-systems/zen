@@ -35,10 +35,22 @@ class SecretReference(BaseModel):
     target_field: str
     target_models: Optional[List[str]] = None
     # LEGACY: Direct env access - should migrate to unified config
-    project_id: str = Field(default_factory=lambda: os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
-                                                                   os.environ.get("SECRET_MANAGER_PROJECT_ID", 
-                                                                   "701982941522" if os.environ.get("ENVIRONMENT", "").lower() == "staging" else "304612253870")))
+    project_id: str = Field(default_factory=lambda: SecretReference._get_project_id_from_config())
     version: str = "latest"
+    
+    @staticmethod
+    def _get_project_id_from_config() -> str:
+        """Get project ID from unified config with fallback to environment variables."""
+        try:
+            from netra_backend.app.core.configuration.base import get_unified_config
+            config = get_unified_config()
+            return config.secrets.gcp_project_id or "304612253870"
+        except:
+            # Ultimate fallback to environment variables
+            import os
+            return os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
+                                 os.environ.get("SECRET_MANAGER_PROJECT_ID", 
+                                 "701982941522" if os.environ.get("ENVIRONMENT", "").lower() == "staging" else "304612253870"))
 
 
 SECRET_CONFIG: List[SecretReference] = [
@@ -349,37 +361,54 @@ class DevelopmentConfig(AppConfig):
         migration to unified configuration system.
         """
         # LEGACY: Direct env access - should migrate to unified config
-        import os
-        self._load_database_url(data, os)
-        service_modes = self._get_service_modes(os)
+        self._load_database_url_from_unified_config(data)
+        service_modes = self._get_service_modes_from_unified_config()
         self._configure_service_flags(data, service_modes)
         self._log_service_configuration(service_modes)
         super().__init__(**data)
     
-    def _load_database_url(self, data: dict, os_module) -> None:
-        """Load database URL from environment - always prefer environment over defaults.
+    def _load_database_url_from_unified_config(self, data: dict) -> None:
+        """Load database URL from unified config with fallback.
         
-        LEGACY: Direct env access - should migrate to unified config.
+        Migrated from direct env access to unified configuration.
         """
-        # LEGACY: Direct env access - should migrate to unified config
-        env_db_url = os_module.environ.get('DATABASE_URL')
-        if env_db_url:
-            data['database_url'] = env_db_url
-        elif 'database_url' not in data or data.get('database_url') is None:
-            # Fallback only if no env var and no value provided
-            data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
+        try:
+            from netra_backend.app.core.configuration.base import get_unified_config
+            config = get_unified_config()
+            if config.database.url:
+                data['database_url'] = config.database.url
+            elif 'database_url' not in data or data.get('database_url') is None:
+                data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
+        except:
+            # Fallback to direct env access if unified config not available
+            import os
+            env_db_url = os.environ.get('DATABASE_URL')
+            if env_db_url:
+                data['database_url'] = env_db_url
+            elif 'database_url' not in data or data.get('database_url') is None:
+                data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
     
-    def _get_service_modes(self, os_module) -> dict:
-        """Get service modes from environment variables.
+    def _get_service_modes_from_unified_config(self) -> dict:
+        """Get service modes from unified config with fallback.
         
-        LEGACY: Direct env access - should migrate to unified config.
+        Migrated from direct env access to unified configuration.
         """
-        # LEGACY: Direct env access - should migrate to unified config
-        return {
-            'redis': os_module.environ.get("REDIS_MODE", "shared").lower(),
-            'clickhouse': os_module.environ.get("CLICKHOUSE_MODE", "shared").lower(),
-            'llm': os_module.environ.get("LLM_MODE", "shared").lower()
-        }
+        try:
+            from netra_backend.app.core.configuration.base import get_unified_config
+            config = get_unified_config()
+            return {
+                'redis': config.services.redis_mode.lower(),
+                'clickhouse': config.services.clickhouse_mode.lower(),
+                'llm': config.services.llm_mode.lower()
+            }
+        except:
+            # Fallback to direct env access if unified config not available
+            import os
+            return {
+                'redis': os.environ.get("REDIS_MODE", "shared").lower(),
+                'clickhouse': os.environ.get("CLICKHOUSE_MODE", "shared").lower(),
+                'llm': os.environ.get("LLM_MODE", "shared").lower()
+            }
     
     def _configure_service_flags(self, data: dict, service_modes: dict) -> None:
         """Configure service enabled flags based on modes."""
@@ -431,13 +460,26 @@ class StagingConfig(AppConfig):
         LEGACY: This method uses direct os.environ access. Consider
         migration to unified configuration system.
         """
-        # LEGACY: Direct env access - should migrate to unified config
-        import os
-        # Load database URL from environment if not provided
-        if 'database_url' not in data and os.environ.get('DATABASE_URL'):
-            data['database_url'] = os.environ.get('DATABASE_URL')
+        # Migrated from direct env access to unified configuration
+        self._load_database_url_from_unified_config_staging(data)
         super().__init__(**data)
     
+    def _load_database_url_from_unified_config_staging(self, data: dict) -> None:
+        """Load database URL from unified config for staging with fallback.
+        
+        Migrated from direct env access to unified configuration.
+        """
+        try:
+            from netra_backend.app.core.configuration.base import get_unified_config
+            config = get_unified_config()
+            if 'database_url' not in data and config.database.url:
+                data['database_url'] = config.database.url
+        except:
+            # Fallback to direct env access if unified config not available
+            import os
+            if 'database_url' not in data and os.environ.get('DATABASE_URL'):
+                data['database_url'] = os.environ.get('DATABASE_URL')
+
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"

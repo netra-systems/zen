@@ -236,13 +236,13 @@ class ModernAgentDelegation(BaseExecutionInterface):
     async def _execute_analysis_operation(self, context: ExecutionContext, 
                                         operation_name: str, *args) -> Dict[str, Any]:
         """Execute analysis operation with reliability patterns."""
-        from .analysis_operations import AnalysisOperations
+        from netra_backend.app.agents.data_sub_agent.analysis_operations import AnalysisOperations
         return await self._execute_with_reliability(context, 
             lambda: self._create_and_execute_analysis_ops(operation_name, *args))
     
     async def _create_and_execute_analysis_ops(self, operation_name: str, *args) -> Dict[str, Any]:
         """Create analysis operations instance and execute method."""
-        from .analysis_operations import AnalysisOperations
+        from netra_backend.app.agents.data_sub_agent.analysis_operations import AnalysisOperations
         ops = AnalysisOperations(
             self.agent.query_builder, self.agent.analysis_engine,
             self.agent.clickhouse_ops, self.agent.redis_manager

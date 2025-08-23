@@ -1,11 +1,14 @@
 """Test framework module for Netra AI Platform."""
 
+import sys
+from pathlib import Path
+
 # Import core unified components
-from .runner import UnifiedTestRunner
-from .test_config import COMPONENT_MAPPINGS, RUNNERS, SHARD_MAPPINGS, TEST_LEVELS
+from test_framework.runner import UnifiedTestRunner
+from test_framework.test_config import COMPONENT_MAPPINGS, RUNNERS, SHARD_MAPPINGS, TEST_LEVELS
 
 # Import discovery and parsing utilities
-from .test_discovery import TestDiscovery
+from test_framework.test_discovery import TestDiscovery
 from .test_parser import (
     extract_failing_tests,
     extract_test_details,
@@ -19,15 +22,37 @@ from .report_generators import (
     generate_markdown_report,
     generate_text_report,
 )
-from .report_manager import print_summary, save_test_report
+from test_framework.report_manager import print_summary, save_test_report
 
 # Import unified quality analyzer
-from .test_quality_analyzer import TestQualityAnalyzer, TestQualityIssue
+from test_framework.test_quality_analyzer import TestQualityAnalyzer, TestQualityIssue
 
 # Import essential utilities
-from .mock_utils import mock_justified
-from .feature_flags import FeatureFlagManager, FeatureStatus
-from .decorators import feature_flag, requires_feature, tdd_test
+from test_framework.mock_utils import mock_justified
+from test_framework.feature_flags import FeatureFlagManager, FeatureStatus
+from test_framework.decorators import feature_flag, requires_feature, tdd_test
+
+
+def setup_test_path():
+    """Set up the project root in sys.path for test imports.
+    
+    This function ensures that the project root is in sys.path
+    so that all tests can import from the netra_backend module.
+    
+    Handles Windows and Unix path differences automatically.
+    
+    Returns:
+        Path: The project root path
+    """
+    # Navigate from test_framework/ -> project_root/
+    current_file = Path(__file__).resolve()
+    project_root = current_file.parent  # Go up one level from test_framework to project root
+    
+    # Add project root to sys.path (for main imports)
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+    
+    return project_root
 
 __all__ = [
     # Core runner classes
@@ -66,4 +91,5 @@ __all__ = [
     'feature_flag',
     'requires_feature',
     'tdd_test',
+    'setup_test_path',
 ]

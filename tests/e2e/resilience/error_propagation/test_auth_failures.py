@@ -25,13 +25,12 @@ from tests.e2e.integration.fixtures.error_propagation_fixtures import (
     test_user,
 )
 
-
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestAuthServiceFailures:
     """Test auth service failure propagation."""
     
-    async def test_invalid_token_propagation(self, service_orchestrator, real_websocket_client, 
+    async def test_invalid_token_propagation(self, service_orchestrator, real_websocket_client:
                                            error_correlation_context):
         """Test invalid token error propagates correctly."""
         # Use invalid token
@@ -45,7 +44,7 @@ class TestAuthServiceFailures:
         assert "authentication" in connection_result.error.lower()
         assert real_websocket_client.state == ConnectionState.DISCONNECTED
         
-    async def test_expired_token_handling(self, service_orchestrator, real_websocket_client,
+    async def test_expired_token_handling(self, service_orchestrator, real_websocket_client:
                                         error_correlation_context):
         """Test expired token error handling."""
         # Create expired token
@@ -58,7 +57,7 @@ class TestAuthServiceFailures:
         assert not connection_result.success
         assert "expired" in connection_result.error.lower() or "invalid" in connection_result.error.lower()
         
-    async def test_auth_service_unavailable(self, service_orchestrator, real_http_client,
+    async def test_auth_service_unavailable(self, service_orchestrator, real_http_client:
                                           error_correlation_context):
         """Test auth service unavailability handling."""
         # Simulate auth service down by using wrong endpoint
@@ -75,7 +74,7 @@ class TestAuthServiceFailures:
         assert not response.success
         assert response.error is not None
         
-    async def test_token_validation_failure(self, service_orchestrator, real_websocket_client,
+    async def test_token_validation_failure(self, service_orchestrator, real_websocket_client:
                                           error_correlation_context):
         """Test token validation failure handling."""
         # Use malformed token
@@ -88,7 +87,7 @@ class TestAuthServiceFailures:
         assert not connection_result.success
         assert connection_result.error is not None
         
-    async def test_permission_denied_propagation(self, service_orchestrator, real_websocket_client,
+    async def test_permission_denied_propagation(self, service_orchestrator, real_websocket_client:
                                                 error_correlation_context):
         """Test permission denied error propagation."""
         # Create token with limited permissions (simulated)
@@ -107,7 +106,7 @@ class TestAuthServiceFailures:
             # Should be denied
             assert not message_result.success or "permission" in str(message_result.response).lower()
             
-    async def test_concurrent_auth_failures(self, service_orchestrator, real_websocket_client,
+    async def test_concurrent_auth_failures(self, service_orchestrator, real_websocket_client:
                                           error_correlation_context):
         """Test handling of concurrent auth failures."""
         invalid_tokens = [f"invalid_token_{i}" for i in range(5)]

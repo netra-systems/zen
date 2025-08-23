@@ -13,14 +13,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.services.database.unit_of_work import UnitOfWork
 
-
 @pytest.fixture
 def mock_session():
     """Create a mock database session."""
     session = AsyncMock(spec=AsyncSession)
     _setup_session_methods(session)
     return session
-
 
 def _setup_session_methods(session):
     """Setup mock methods for database session."""
@@ -33,12 +31,10 @@ def _setup_session_methods(session):
     session.execute = AsyncMock()
     session.scalar = AsyncMock()
 
-
 async def _mock_refresh(entity):
     """Mock refresh to update entity with ID."""
     if hasattr(entity, 'id') and not entity.id:
         entity.id = "test_id_123"
-
 
 @pytest.fixture
 def mock_models():
@@ -50,7 +46,6 @@ def mock_models():
         'Reference': _create_reference_mock
     }
 
-
 def _create_thread_mock(**kwargs):
     """Create mock thread object."""
     return AsyncMock(
@@ -60,7 +55,6 @@ def _create_thread_mock(**kwargs):
         created_at=kwargs.get('created_at', datetime.now()),
         updated_at=kwargs.get('updated_at', datetime.now())
     )
-
 
 def _create_message_mock(**kwargs):
     """Create mock message object."""
@@ -72,7 +66,6 @@ def _create_message_mock(**kwargs):
         created_at=kwargs.get('created_at', datetime.now())
     )
 
-
 def _create_run_mock(**kwargs):
     """Create mock run object."""
     return AsyncMock(
@@ -82,7 +75,6 @@ def _create_run_mock(**kwargs):
         created_at=kwargs.get('created_at', datetime.now())
     )
 
-
 def _create_reference_mock(**kwargs):
     """Create mock reference object."""
     return AsyncMock(
@@ -91,7 +83,6 @@ def _create_reference_mock(**kwargs):
         source=kwargs.get('source'),
         content=kwargs.get('content')
     )
-
 
 @pytest.fixture
 def unit_of_work(mock_session, mock_models):
@@ -103,13 +94,19 @@ def unit_of_work(mock_session, mock_models):
         setup_thread_mock_behavior,
     )
     
-    with patch('app.services.database.unit_of_work.async_session_factory') as mock_factory:
-        mock_factory.return_value = mock_session
+    # Create a proper async context manager for the session factory
+    mock_context = AsyncMock()
+    mock_context.__aenter__ = AsyncMock(return_value=mock_session)
+    mock_context.__aexit__ = AsyncMock(return_value=None)
+    
+    with patch('netra_backend.app.services.database.unit_of_work.async_session_factory') as mock_factory, \
+         patch('netra_backend.app.services.database.unit_of_work.validate_session', return_value=True):
+        mock_factory.return_value = mock_context
         
-        with patch('app.services.database.unit_of_work.ThreadRepository') as MockThreadRepo, \
-             patch('app.services.database.unit_of_work.MessageRepository') as MockMessageRepo, \
-             patch('app.services.database.unit_of_work.RunRepository') as MockRunRepo, \
-             patch('app.services.database.unit_of_work.ReferenceRepository') as MockReferenceRepo:
+        with patch('netra_backend.app.services.database.unit_of_work.ThreadRepository') as MockThreadRepo, \
+             patch('netra_backend.app.services.database.unit_of_work.MessageRepository') as MockMessageRepo, \
+             patch('netra_backend.app.services.database.unit_of_work.RunRepository') as MockRunRepo, \
+             patch('netra_backend.app.services.database.unit_of_work.ReferenceRepository') as MockReferenceRepo:
             
             # Create mock repositories
             mock_thread_repo = AsyncMock()

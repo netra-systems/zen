@@ -99,7 +99,7 @@ class GenerationEngine:
         batch_num: int
     ) -> None:
         """Send progress update for batch completion"""
-        from .job_manager import JobManager
+        from netra_backend.app.services.synthetic_data.job_manager import JobManager
         job_manager = JobManager()
         await job_manager.send_progress_notification(job_id, active_jobs, batch_num)
 

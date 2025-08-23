@@ -67,7 +67,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
       jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
-      expectElementByText(/Failed to load threads/i).toBeInTheDocument();
+      expectElementByText(/Failed to load threads/i);
     });
 
     test('21. Should show retry button on error', () => {
@@ -80,7 +80,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
       jest.mocked(useThreadStore).mockReturnValueOnce(mockThreadStore);
       render(<ThreadSidebar />);
       
-      expectElementByRole('button', { name: /retry/i }).toBeInTheDocument();
+      expectElementByRole('button', { name: /retry/i });
     });
 
     test('22. Should handle rate limit errors', () => {
@@ -91,7 +91,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
       jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageInput />);
       
-      expectElementByText(/Too many requests/i).toBeInTheDocument();
+      expectElementByText(/Too many requests/i);
     });
 
     test('23. Should validate message before sending', async () => {
@@ -126,7 +126,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
       jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       rerender(<MessageList />);
       
-      expectElementByText('New message').toBeInTheDocument();
+      expectElementByText('New message');
     });
 
     test('25. Should sync thread selection across components', () => {
@@ -138,7 +138,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
       jest.mocked(useThreadStore).mockReturnValue(mockThreadStore);
       render(<ChatHeader />);
       
-      expectElementByText('Selected Thread').toBeInTheDocument();
+      expectElementByText('Selected Thread');
     });
 
     test('26. Should handle optimistic updates', () => {
@@ -229,7 +229,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
       });
       
       render(<MessageItem message={message} />);
-      expectElementByText(/10:00/).toBeInTheDocument();
+      expectElementByText(/10:00/);
     });
   });
 
@@ -263,7 +263,7 @@ describe('Error Handling, State Management & Advanced UI Tests', () => {
       jest.mocked(useThreadStore).mockReturnValue(mockThreadStore);
       
       render(<ChatHeader />);
-      expectElementByText('Shared Thread').toBeInTheDocument();
+      expectElementByText('Shared Thread');
     });
   });
 });

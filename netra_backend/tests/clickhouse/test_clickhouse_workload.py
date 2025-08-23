@@ -3,17 +3,10 @@ ClickHouse Workload Events Tests
 Tests for workload_events table operations and complex queries
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -22,20 +15,17 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from logging_config import central_logger as logger
+from netra_backend.app.logging_config import central_logger as logger
 
-# Add project root to path
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_init import (
     create_workload_events_table_if_missing,
-    # Add project root to path
     initialize_clickhouse_tables,
     verify_workload_events_table,
 )
-from .test_clickhouse_permissions import (
+from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
     _check_table_insert_permission,
 )
-
 
 async def _ensure_workload_table():
     """Create workload table if missing and verify access"""
@@ -45,7 +35,6 @@ async def _ensure_workload_table():
     exists = await verify_workload_events_table()
     if not exists:
         pytest.skip("workload_events table not accessible")
-
 
 class TestWorkloadEventsTable:
     """Test workload_events table operations with real data"""
@@ -269,7 +258,6 @@ class TestWorkloadEventsTable:
             logger.info(f"Latest minute: {latest['events_per_minute']} events, "
                       f"avg duration {latest['avg_duration']:.2f}ms, "
                       f"P95 {latest['p95_duration']:.2f}ms")
-
 
 if __name__ == "__main__":
     # Run tests with pytest

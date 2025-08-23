@@ -20,8 +20,6 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 # Add the project root to the Python path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
 
 from netra_backend.app.logging_config import central_logger
 
@@ -34,7 +32,7 @@ class WebSocketDevModeTest:
     def __init__(self):
         self.server_process = None
         self.server_url = "http://localhost:8000"
-        self.websocket_url = "ws://localhost:8000/ws/secure"
+        self.websocket_url = "ws://localhost:8000/ws"
         self.test_results = {
             "server_startup": False,
             "config_endpoint": False,
@@ -87,7 +85,7 @@ class WebSocketDevModeTest:
             import httpx
             
             async with httpx.AsyncClient() as client:
-                response = await client.get(f"{self.server_url}/ws/secure/config")
+                response = await client.get(f"{self.server_url}/ws/config")
                 
                 if response.status_code == 200:
                     data = response.json()
@@ -117,7 +115,7 @@ class WebSocketDevModeTest:
             import httpx
             
             async with httpx.AsyncClient() as client:
-                response = await client.get(f"{self.server_url}/ws/secure/health")
+                response = await client.get(f"{self.server_url}/ws/health")
                 
                 if response.status_code == 200:
                     data = response.json()

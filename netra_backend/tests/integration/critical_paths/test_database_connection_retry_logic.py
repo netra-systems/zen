@@ -11,17 +11,10 @@ L3 Test: Uses real PostgreSQL and ClickHouse containers with controlled network
 disruption to validate connection retry logic, backoff strategies, and recovery.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import subprocess
@@ -42,7 +35,6 @@ from testcontainers.postgres import PostgresContainer
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-
 
 class DatabaseConnectionRetryManager:
     """Manages connection retry testing with real database containers."""
@@ -553,7 +545,6 @@ class DatabaseConnectionRetryManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def retry_manager():
     """Create connection retry manager for testing."""
@@ -561,7 +552,6 @@ async def retry_manager():
     await manager.setup_database_containers()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -618,7 +608,6 @@ class TestDatabaseConnectionRetryLogicL3:
         states = [t["state"] for t in result["circuit_state_transitions"]]
         assert "OPEN" in states  # Circuit should open
         assert "HALF_OPEN" in states or result["recovery_after_timeout"] is True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

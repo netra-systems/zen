@@ -6,7 +6,7 @@ Focused module for validator script creation
 
 from pathlib import Path
 
-from .script_generator import ScriptGeneratorBase
+from scripts.metadata_tracking.script_generator import ScriptGeneratorBase
 
 
 class ValidatorGenerator(ScriptGeneratorBase):

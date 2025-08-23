@@ -11,17 +11,10 @@ Coverage: Real tenant isolation in staging, production-level security testing, c
 L4 Realism: Tests against real staging database, real multi-tenant setup, real security controls
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -34,28 +27,25 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
-
-
-# from netra_backend.app.services.database.tenant_service import TenantService
+# from app.services.database.tenant_service import TenantService
 TenantService = AsyncMock
 # Permissions service replaced with auth_integration
-# from auth_integration import require_permission
-# from netra_backend.app.auth_integration.auth import create_access_token
+# from netra_backend.app.auth_integration.auth import require_permission
+# from app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
 
 create_access_token = AsyncMock()
-# from netra_backend.app.core.unified.jwt_validator import validate_token_jwt
+# from app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock
 
 validate_token_jwt = AsyncMock()
 from unittest.mock import AsyncMock
 
 PermissionsService = AsyncMock
-# from netra_backend.app.services.audit.audit_logger import AuditLogger
-# from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
-# from netra_backend.app.schemas.tenant import Tenant, TenantResource, Permission
-# from netra_backend.app.core.security import SecurityContext
+# from app.services.audit.audit_logger import AuditLogger
+# from app.services.database.connection_manager import DatabaseConnectionManager
+# from app.schemas.tenant import Tenant, TenantResource, Permission
+# from app.core.security import SecurityContext
 # from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 AuditLogger = AsyncMock
 DatabaseConnectionManager = AsyncMock
@@ -66,7 +56,6 @@ SecurityContext = AsyncMock
 StagingConfigTestBase = AsyncMock
 
 logger = logging.getLogger(__name__)
-
 
 class MultiTenantIsolationL4Manager:
     """Manages L4 multi-tenant isolation testing with real staging services."""
@@ -665,7 +654,6 @@ class MultiTenantIsolationL4Manager:
         except Exception as e:
             logger.error(f"L4 cleanup failed: {e}")
 
-
 @pytest.fixture
 async def l4_isolation_manager():
     """Create L4 multi-tenant isolation manager for staging tests."""
@@ -673,7 +661,6 @@ async def l4_isolation_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio
@@ -700,7 +687,6 @@ async def test_l4_enterprise_organization_isolation(l4_isolation_manager):
         assert validation_results["permission_isolation"]["compliant"] is True
         assert validation_results["audit_compliance"]["compliant"] is True
         assert validation_results["encryption_compliance"]["compliant"] is True
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio
@@ -736,7 +722,6 @@ async def test_l4_cross_organization_access_prevention(l4_isolation_manager):
     assert access_result_reverse["isolation_maintained"] is True
     assert access_result_reverse["staging_verified"] is True
 
-
 @pytest.mark.staging
 @pytest.mark.asyncio
 async def test_l4_same_organization_access_control(l4_isolation_manager):
@@ -764,7 +749,6 @@ async def test_l4_same_organization_access_control(l4_isolation_manager):
         assert access_result["access_granted"] is True
         assert access_result["isolation_maintained"] is True
         assert access_result["staging_verified"] is True
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio
@@ -803,7 +787,6 @@ async def test_l4_compliance_audit_trail_validation(l4_isolation_manager):
     # Verify compliance rate
     assert compliance_metrics["compliance_rate"] >= 50.0  # Organizations should be compliant
     assert compliance_metrics["compliance_checks_performed"] >= 2
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio

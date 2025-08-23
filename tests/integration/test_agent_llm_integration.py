@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.main import app
 from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.dependencies import get_agent_supervisor, get_agent_service
 
 client = TestClient(app)
 

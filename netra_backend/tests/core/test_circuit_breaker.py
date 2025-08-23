@@ -8,17 +8,10 @@ This module tests the circuit breaker functionality including:
 - Error handling and edge cases
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -27,9 +20,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.circuit_breaker import (
-    # Add project root to path
     CircuitBreaker,
     CircuitBreakerOpenError,
     CircuitConfig,
@@ -37,7 +28,6 @@ from netra_backend.app.core.circuit_breaker import (
     CircuitState,
     circuit_registry,
 )
-
 
 class TestCircuitConfig:
     """Test circuit breaker configuration."""
@@ -88,7 +78,6 @@ class TestCircuitConfig:
         """Test config validation for half-open calls."""
         with pytest.raises(ValueError, match="half_open_max_calls must be positive"):
             CircuitConfig(name="test", half_open_max_calls=0)
-
 
 class TestCircuitBreaker:
     """Test circuit breaker core functionality."""
@@ -251,7 +240,6 @@ class TestCircuitBreaker:
         
         assert self.circuit._calculate_success_rate() == 0.8
 
-
 class TestCircuitBreakerRegistry:
     """Test circuit breaker registry functionality."""
     
@@ -283,7 +271,6 @@ class TestCircuitBreakerRegistry:
         
         assert "test1" in all_status
         assert "test2" in all_status
-
 
 class TestCircuitBreakerIntegration:
     """Integration tests for circuit breaker."""
@@ -469,7 +456,6 @@ class TestCircuitBreakerEdgeCases:
         # Should timeout
         with pytest.raises(asyncio.TimeoutError):
             await circuit.call(slow_func)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

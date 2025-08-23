@@ -36,7 +36,7 @@ from auth_service.auth_core.models.auth_models import AuthProvider
 # Add auth service to path
 auth_service_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(auth_service_dir))
-from main import app
+from auth_service.main import app
 
 # Test client
 client = TestClient(app)

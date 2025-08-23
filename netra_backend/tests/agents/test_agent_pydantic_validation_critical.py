@@ -3,21 +3,10 @@
 This addresses CRITICAL validation errors where LLM returns strings instead of dicts.
 """
 
-# Add project root to path
-
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import json
 from typing import Any, Dict, List
@@ -61,7 +50,6 @@ from netra_backend.app.agents.state import (
 )
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent.models import (
 
     Complexity,
@@ -73,7 +61,6 @@ from netra_backend.app.agents.triage_sub_agent.models import (
     ToolRecommendation,
 
     TriageMetadata,
-    # Add project root to path
 
     TriageResult,
 
@@ -82,12 +69,10 @@ from netra_backend.app.agents.triage_sub_agent.models import (
 )
 from netra_backend.app.llm.llm_manager import LLMManager
 
-
 class TestPydanticValidationCritical:
 
     """Test Pydantic validation issues seen in production"""
     
-
     @pytest.fixture
 
     def mock_llm_manager(self):
@@ -98,7 +83,6 @@ class TestPydanticValidationCritical:
 
         return llm
     
-
     @pytest.fixture
 
     def mock_tool_dispatcher(self):
@@ -107,6 +91,8 @@ class TestPydanticValidationCritical:
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
         return Mock(spec=ToolDispatcher)
+
+    @pytest.mark.asyncio
 
     async def test_triage_malformed_parameters_fallback_handling(self):
 
@@ -160,6 +146,8 @@ class TestPydanticValidationCritical:
         assert result.tool_recommendations[0].parameters == {}
 
         assert result.tool_recommendations[1].parameters == {}
+
+    @pytest.mark.asyncio
 
     async def test_triage_string_parameters_recovery(self):
 
@@ -216,6 +204,8 @@ class TestPydanticValidationCritical:
 
         assert result.tool_recommendations[0].parameters == {"key": "value"}
 
+    @pytest.mark.asyncio
+
     async def test_optimizations_result_recommendations_dict_error(self):
 
         """Test exact error: recommendations as dict instead of list of strings"""
@@ -246,6 +236,8 @@ class TestPydanticValidationCritical:
         # The validator should convert the dict to its description or string representation
 
         assert "Optimize" in result.recommendations[0] or "general" in result.recommendations[0]
+
+    @pytest.mark.asyncio
 
     async def test_optimizations_fallback_format_error(self):
 
@@ -301,6 +293,8 @@ class TestPydanticValidationCritical:
 
         assert result.recommendations == ["Optimize"]
 
+    @pytest.mark.asyncio
+
     async def test_usage_pattern_enum_validation_error(self):
 
         """Test UsagePattern enum validation with invalid values"""
@@ -318,6 +312,8 @@ class TestPydanticValidationCritical:
             UsagePattern(**invalid_pattern)
 
         assert "Input should be" in str(exc_info.value)
+
+    @pytest.mark.asyncio
 
     async def test_data_quality_metrics_range_validation(self):
 
@@ -344,6 +340,8 @@ class TestPydanticValidationCritical:
 
         assert "less than or equal to 100" in str(exc_info.value)
 
+    @pytest.mark.asyncio
+
     async def test_correlation_analysis_validation_error(self):
 
         """Test CorrelationAnalysis nested validation failures"""
@@ -362,6 +360,8 @@ class TestPydanticValidationCritical:
             CorrelationAnalysis(**invalid_correlation)
 
         assert "Input should be a valid list" in str(exc_info.value)
+
+    @pytest.mark.asyncio
 
     async def test_plan_step_dependency_validation_error(self):
 
@@ -382,6 +382,8 @@ class TestPydanticValidationCritical:
             PlanStep(**invalid_step)
 
         assert "Input should be a valid list" in str(exc_info.value)
+
+    @pytest.mark.asyncio
 
     async def test_batch_processing_nested_validation(self):
 
@@ -411,6 +413,8 @@ class TestPydanticValidationCritical:
 
         assert "Input should be a valid list" in str(exc_info.value)
 
+    @pytest.mark.asyncio
+
     async def test_data_analysis_nested_validation_error(self):
 
         """Test DataAnalysisResponse nested field validation failures"""
@@ -430,6 +434,8 @@ class TestPydanticValidationCritical:
 
         assert "Input should be a valid dictionary" in str(exc_info.value)
 
+    @pytest.mark.asyncio
+
     async def test_action_plan_nested_validation_error(self):
 
         """Test ActionPlanResult PlanStep validation failures"""
@@ -447,6 +453,8 @@ class TestPydanticValidationCritical:
 
         assert "Input should be a valid list" in str(exc_info.value)
 
+    @pytest.mark.asyncio
+
     async def test_real_llm_truncation_pattern(self):
 
         """Test LLM response truncation causing malformed JSON"""
@@ -458,7 +466,6 @@ class TestPydanticValidationCritical:
 
             json.loads(truncated_json)
     
-
     def _create_string_to_dict_recovery(self, data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Recovery function for string-to-dict conversion"""
@@ -474,6 +481,8 @@ class TestPydanticValidationCritical:
                 data["performance_metrics"] = None
 
         return data
+
+    @pytest.mark.asyncio
 
     async def test_comprehensive_nested_recovery(self):
 
@@ -496,6 +505,8 @@ class TestPydanticValidationCritical:
         assert result.performance_metrics.throughput_avg == 100.0
 
         assert result.performance_metrics.error_rate == 0.1
+
+    @pytest.mark.asyncio
 
     async def test_llm_retry_with_validation_error(self, mock_llm_manager):
 
@@ -525,12 +536,10 @@ class TestPydanticValidationCritical:
 
         state = DeepAgentState(user_request="test")
         
-
         await agent.execute(state, "test_run", False)
         # Should call at least 2 times (first fails, second succeeds)
 
         assert mock_llm_manager.ask_structured_llm.call_count >= 2
-
 
 if __name__ == "__main__":
 

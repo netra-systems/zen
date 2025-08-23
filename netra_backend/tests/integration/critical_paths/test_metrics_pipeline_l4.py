@@ -11,17 +11,10 @@ Coverage: Real Prometheus/Grafana integration, custom metrics accuracy, cardinal
 L4 Realism: Tests against staging infrastructure with real monitoring stack
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -39,13 +32,10 @@ import pytest
 from netra_backend.app.config import get_config
 from netra_backend.app.services.observability.alert_manager import AlertManager
 
-# Add project root to path
 from netra_backend.app.services.observability.metrics_collector import MetricsCollector
 from netra_backend.app.services.observability.prometheus_exporter import (
     PrometheusExporter,
 )
-
-# Add project root to path
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +46,6 @@ pytestmark = [
     pytest.mark.observability,
     pytest.mark.slow
 ]
-
 
 class MetricsPipelineL4Manager:
     """Manages L4 metrics pipeline testing with real monitoring infrastructure."""
@@ -589,7 +578,6 @@ class MetricsPipelineL4Manager:
         except Exception as e:
             logger.error(f"L4 cleanup failed: {e}")
 
-
 @pytest.fixture
 async def metrics_pipeline_l4():
     """Create L4 metrics pipeline manager for staging tests."""
@@ -597,7 +585,6 @@ async def metrics_pipeline_l4():
     await manager.initialize_staging_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_business_metrics_collection_l4_staging(metrics_pipeline_l4):
@@ -629,7 +616,6 @@ async def test_business_metrics_collection_l4_staging(metrics_pipeline_l4):
     total_metrics_count = len(metrics_pipeline_l4.test_metrics)
     assert total_metrics_count >= 5, "Test metrics not properly tracked"
 
-
 @pytest.mark.asyncio
 async def test_cardinality_management_l4_staging(metrics_pipeline_l4):
     """Test metric cardinality management in real Prometheus."""
@@ -653,7 +639,6 @@ async def test_cardinality_management_l4_staging(metrics_pipeline_l4):
         ]
         assert len(high_cardinality_warnings) < 3, "Too many high cardinality metrics detected"
 
-
 @pytest.mark.asyncio
 async def test_alerting_rules_l4_staging(metrics_pipeline_l4):
     """Test alerting rules trigger correctly in staging environment."""
@@ -676,7 +661,6 @@ async def test_alerting_rules_l4_staging(metrics_pipeline_l4):
     
     # Verify alert infrastructure is responsive
     assert total_alerts_tested > 0, "No alert scenarios were tested"
-
 
 @pytest.mark.asyncio  
 async def test_grafana_integration_l4_staging(metrics_pipeline_l4):
@@ -704,7 +688,6 @@ async def test_grafana_integration_l4_staging(metrics_pipeline_l4):
         for dashboard in successful_dashboard_tests:
             query_duration = dashboard["test_result"]["query_duration"]
             assert query_duration < 10.0, f"Dashboard query too slow: {query_duration}s"
-
 
 @pytest.mark.asyncio
 async def test_metrics_pipeline_performance_l4_staging(metrics_pipeline_l4):

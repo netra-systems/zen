@@ -13,9 +13,7 @@ Comprehensive test for complete user onboarding flow:
 This test validates the entire new user journey from signup to first AI agent deployment.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -31,10 +29,6 @@ import aiohttp
 import pytest
 import websockets
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 # Configuration
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
@@ -44,7 +38,6 @@ NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL", "http://localho
 # Test configuration
 TEST_USER_PREFIX = "onboarding_test"
 TEST_DOMAIN = "example.com"
-
 
 class UserOnboardingTester:
     """Test complete user onboarding flow."""
@@ -522,7 +515,6 @@ class UserOnboardingTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -565,7 +557,6 @@ async def test_user_onboarding_complete_flow():
         for test in critical_tests:
             assert results.get(test, False), f"Critical test failed: {test}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*60)
@@ -584,7 +575,6 @@ async def main():
         critical_passed = all(results.get(test, False) for test in critical_tests)
         
         return 0 if critical_passed else 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

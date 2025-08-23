@@ -17,11 +17,6 @@ const navItems: NavItem[] = [
     icon: <Icons.apexOptimizer className="h-4 w-4" />,
     label: 'Chat',
   },
-  {
-    href: '/enterprise-demo',
-    icon: <Icons.apexOptimizer className="h-4 w-4" />,
-    label: 'Enterprise Demo',
-  },
 ];
 
 export function NavLinks() {

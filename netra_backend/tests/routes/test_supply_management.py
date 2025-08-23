@@ -9,29 +9,19 @@ Business Value Justification (BVJ):
 - Revenue Impact: Enterprise feature for advanced supply chain management
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
-from .test_route_fixtures import (
+from netra_backend.tests.test_route_fixtures import (
     CommonResponseValidators,
-    # Add project root to path
     basic_test_client,
 )
-
 
 class TestSupplyManagement:
     """Test supply chain management and optimization functionality."""

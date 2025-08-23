@@ -21,12 +21,24 @@ Business Value Justification (BVJ):
 """
 
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
+
+# Import auth exceptions for middleware tests
+from netra_backend.app.core.exceptions_auth import AuthenticationError
+
+
+# Rate limiting exception
+class RateLimitError(Exception):
+    """Rate limit exceeded error"""
+    
+    def __init__(self, message: str = "Rate limit exceeded", retry_after: Optional[int] = None):
+        super().__init__(message)
+        self.retry_after = retry_after
 
 
 class TokenType(str, Enum):
@@ -34,6 +46,24 @@ class TokenType(str, Enum):
     ACCESS = "access"
     REFRESH = "refresh"
     SERVICE = "service"
+
+
+class TokenStatus(str, Enum):
+    """Token status enumeration for expiry handling."""
+    VALID = "valid"
+    EXPIRING_SOON = "expiring_soon"
+    EXPIRED = "expired"
+    REVOKED = "revoked"
+    INVALID = "invalid"
+
+
+class ServiceStatus(str, Enum):
+    """Service status enumeration for health checks."""
+    HEALTHY = "healthy"
+    UNHEALTHY = "unhealthy"
+    DEGRADED = "degraded"
+    STARTING = "starting"
+    STOPPING = "stopping"
 
 
 class AuthProvider(str, Enum):
@@ -109,6 +139,14 @@ class TokenResponse(BaseModel):
 class RefreshRequest(BaseModel):
     """Token refresh request."""
     refresh_token: str
+
+
+class RefreshResponse(BaseModel):
+    """Token refresh response."""
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    expires_in: int
 
 
 class LoginRequest(BaseModel):
@@ -248,13 +286,38 @@ class UserPermission(BaseModel):
     granted_by: Optional[str] = None
 
 
-class AuthError(BaseModel):
+class AuthErrorResponse(BaseModel):
     """Standardized auth error response."""
     error: str
     error_code: str
     message: str
     details: Optional[Dict[str, Any]] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
+@dataclass
+class RequestContext:
+    """Request context for middleware processing."""
+    method: str
+    path: str
+    headers: Dict[str, str]
+    body: Optional[Any] = None
+    client_ip: str = "127.0.0.1"
+    user_id: Optional[str] = None
+    authenticated: bool = False
+    permissions: List[str] = field(default_factory=list)
+
+
+@dataclass
+class MiddlewareContext:
+    """Context passed between middleware components."""
+    request: RequestContext
+    response_headers: Dict[str, str] = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+# Alias AuthError exception for middleware compatibility
+AuthError = AuthenticationError
 
 
 class DevUser(BaseModel):
@@ -303,6 +366,78 @@ class UserInfo(BaseModel):
     metadata: Dict[str, Any] = {}
 
 
+class Permission(BaseModel):
+    """Permission model for role-based access control."""
+    id: str
+    name: str
+    description: Optional[str] = None
+    resource: str
+    action: str
+    scope: Optional[str] = None
+    conditions: Optional[Dict[str, Any]] = None
+    created_at: Optional[datetime] = None
+
+
+class Role(BaseModel):
+    """Role model for role-based access control."""
+    id: str
+    name: str
+    description: Optional[str] = None
+    level: int = 0  # Higher number = more authority
+    permissions: List[str] = []
+    parent_role: Optional[str] = None
+    resource_limits: Dict[str, Any] = {}
+    is_active: bool = True
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class ResourceAccess(BaseModel):
+    """Resource access control model."""
+    resource_id: str
+    resource_type: str
+    user_id: str
+    role: str
+    permissions: List[str] = []
+    access_level: str = "read"  # read, write, delete, admin
+    granted_at: Optional[datetime] = None
+    expires_at: Optional[datetime] = None
+    conditions: Optional[Dict[str, Any]] = None
+
+
+class UserProfile(BaseModel):
+    """Enhanced user profile model for role-based access control."""
+    user_id: str
+    email: EmailStr
+    full_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+    company: Optional[str] = None
+    location: Optional[str] = None
+    role: str
+    roles: List[str] = []
+    permissions: List[str] = []
+    resource_limits: Dict[str, Any] = {}
+    is_active: bool = True
+    is_verified: bool = False
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    last_login: Optional[datetime] = None
+    metadata: Dict[str, Any] = {}
+
+
+class TokenExpiryNotification(BaseModel):
+    """Token expiry notification model for testing expiry workflows."""
+    token_id: str
+    user_id: str
+    token_type: TokenType = TokenType.ACCESS
+    expires_at: datetime
+    warning_sent: bool = False
+    notification_type: str = "expiry_warning"
+    metadata: Dict[str, Any] = {}
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
 class AuditLog(BaseModel):
     """Auth audit log entry."""
     event_id: str
@@ -317,6 +452,25 @@ class AuditLog(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
+@dataclass
+class AuditEvent:
+    """Audit event for tracking auth operations."""
+    timestamp: datetime
+    user_id: str
+    action: str
+    resource: str
+    result: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass  
+class AuthorizationResult:
+    """Result of authorization check."""
+    authorized: bool
+    reason: str = ""
+    permissions: List[str] = field(default_factory=list)
+
+
 # Backward compatibility aliases
 HealthCheck = AuthConfigResponse
 UserToken = TokenData
@@ -327,6 +481,7 @@ AuthResponse = LoginResponse
 # Export all auth types
 __all__ = [
     "TokenType",
+    "TokenStatus",
     "AuthProvider", 
     "Token",
     "TokenPayload",
@@ -344,13 +499,23 @@ __all__ = [
     "AuthConfig",
     "SessionInfo",
     "UserPermission",
+    "AuthErrorResponse",
     "AuthError",
+    "RequestContext",
+    "MiddlewareContext",
     "DevUser",
     "DevLoginRequest", 
     "GoogleUser",
     "HealthResponse",
     "UserInfo",
+    "Permission",
+    "Role",
+    "ResourceAccess",
+    "UserProfile",
+    "TokenExpiryNotification",
     "AuditLog",
+    "AuditEvent",
+    "AuthorizationResult",
     "HealthCheck",
     "UserToken",
     "AuthRequest",

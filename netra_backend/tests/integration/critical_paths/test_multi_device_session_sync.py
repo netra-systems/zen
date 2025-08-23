@@ -10,20 +10,10 @@ L3 Test: Real Redis-backed session synchronization across multiple devices.
 Tests cross-device state consistency and conflict resolution.
 """
 
-# Add project root to path
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -36,30 +26,25 @@ from unittest.mock import patch, AsyncMock
 
 import redis.asyncio as redis
 
-# Add project root to path
-
 # JWT service replaced with auth_integration
-from auth_integration import create_access_token, validate_token_jwt
+from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
 from unittest.mock import AsyncMock
 
 JWTService = AsyncMock
 # Session manager replaced with mock
 
 SessionManager = AsyncMock
-from ws_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
-
 logger = central_logger.get_logger(__name__)
-
 
 class DeviceSession:
 
     """Represents a user session on a specific device."""
     
-
     def __init__(self, user_id: str, device_id: str, device_type: str, 
 
                  session_id: str, token: str, websocket: MockWebSocketForRedis):
@@ -82,14 +67,12 @@ class DeviceSession:
 
         self.received_messages = []
     
-
     def update_activity(self):
 
         """Update last activity timestamp."""
 
         self.last_activity = time.time()
     
-
     def add_sync_event(self, event_type: str, data: Dict[str, Any]):
 
         """Record synchronization event."""
@@ -104,7 +87,6 @@ class DeviceSession:
 
         })
     
-
     def add_received_message(self, message: Dict[str, Any]):
 
         """Record received message."""
@@ -117,12 +99,10 @@ class DeviceSession:
 
         })
 
-
 class MultiDeviceSessionManager:
 
     """Manages multi-device session synchronization testing."""
     
-
     def __init__(self, jwt_service: JWTService, session_manager: SessionManager,
 
                  websocket_manager: WebSocketManager, redis_client):
@@ -139,7 +119,6 @@ class MultiDeviceSessionManager:
 
         self.sync_channels = {}  # user_id -> channel_name
     
-
     async def create_device_session(self, user_id: str, device_type: str, 
 
                                   device_metadata: Optional[Dict[str, Any]] = None) -> DeviceSession:
@@ -162,7 +141,6 @@ class MultiDeviceSessionManager:
 
         )
         
-
         if not token_result["success"]:
 
             raise ValueError(f"Token generation failed: {token_result.get('error')}")
@@ -183,7 +161,6 @@ class MultiDeviceSessionManager:
 
         }
         
-
         session_result = await self.session_manager.create_session(
 
             user_id=user_id,
@@ -194,7 +171,6 @@ class MultiDeviceSessionManager:
 
         )
         
-
         if not session_result["success"]:
 
             raise ValueError(f"Session creation failed: {session_result.get('error')}")
@@ -203,7 +179,6 @@ class MultiDeviceSessionManager:
 
         websocket = MockWebSocketForRedis(f"{user_id}_{device_id}")
         
-
         with patch('app.ws_manager.verify_jwt_token') as mock_verify:
 
             mock_verify.return_value = {
@@ -218,10 +193,8 @@ class MultiDeviceSessionManager:
 
             }
             
-
             connection_info = await self.websocket_manager.connect_user(user_id, websocket)
         
-
         if not connection_info:
 
             raise ValueError("WebSocket connection failed")
@@ -260,12 +233,10 @@ class MultiDeviceSessionManager:
 
         await self._store_device_session(device_session)
         
-
         logger.info(f"Created device session: {device_type} for user {user_id}")
 
         return device_session
     
-
     async def sync_state_across_devices(self, user_id: str, state_data: Dict[str, Any], 
 
                                       origin_device_id: Optional[str] = None):
@@ -276,7 +247,6 @@ class MultiDeviceSessionManager:
 
             return
         
-
         sync_message = {
 
             "type": "state_sync",
@@ -349,12 +319,10 @@ class MultiDeviceSessionManager:
 
         }
         
-
         await self.redis_client.lpush(sync_key, json.dumps(sync_event))
 
         await self.redis_client.expire(sync_key, 3600)  # 1 hour retention
         
-
         return {
 
             "sync_id": sync_message["data"]["sync_id"],
@@ -365,7 +333,6 @@ class MultiDeviceSessionManager:
 
         }
     
-
     async def get_user_device_sessions(self, user_id: str) -> List[Dict[str, Any]]:
 
         """Get all active device sessions for a user."""
@@ -378,17 +345,14 @@ class MultiDeviceSessionManager:
 
         device_data = await self.redis_client.hgetall(devices_key)
         
-
         for device_id, data in device_data.items():
 
             device_info = json.loads(data)
 
             device_sessions.append(device_info)
         
-
         return device_sessions
     
-
     async def handle_device_conflict(self, user_id: str, conflicting_action: str, 
 
                                    device_sessions: List[DeviceSession]) -> Dict[str, Any]:
@@ -465,10 +429,8 @@ class MultiDeviceSessionManager:
 
         await self.redis_client.expire(conflict_key, 7200)  # 2 hours retention
         
-
         return conflict_result
     
-
     async def _setup_sync_channel(self, user_id: str):
 
         """Setup Redis pub/sub channel for user synchronization."""
@@ -479,7 +441,6 @@ class MultiDeviceSessionManager:
 
             self.sync_channels[user_id] = channel_name
     
-
     async def _send_sync_message(self, device_session: DeviceSession, message: Dict[str, Any]):
 
         """Send sync message to a specific device."""
@@ -490,17 +451,14 @@ class MultiDeviceSessionManager:
 
         )
         
-
         if success:
 
             device_session.add_received_message(message)
 
             device_session.update_activity()
         
-
         return success
     
-
     async def _store_device_session(self, device_session: DeviceSession):
 
         """Store device session info in Redis."""
@@ -521,12 +479,10 @@ class MultiDeviceSessionManager:
 
         }
         
-
         await self.redis_client.hset(devices_key, device_session.device_id, json.dumps(device_data))
 
         await self.redis_client.expire(devices_key, 86400)  # 24 hours
     
-
     async def cleanup(self):
 
         """Clean up all device sessions."""
@@ -545,9 +501,7 @@ class MultiDeviceSessionManager:
 
                     logger.warning(f"Cleanup error for device {device.device_id}: {e}")
         
-
         self.user_devices.clear()
-
 
 @pytest.mark.L3
 
@@ -557,7 +511,6 @@ class TestMultiDeviceSessionSyncL3:
 
     """L3 integration test for multi-device session synchronization."""
     
-
     @pytest.fixture(scope="class")
 
     async def redis_container(self):
@@ -572,7 +525,6 @@ class TestMultiDeviceSessionSyncL3:
 
         await container.stop()
     
-
     @pytest.fixture
 
     async def redis_client(self, redis_container):
@@ -587,7 +539,6 @@ class TestMultiDeviceSessionSyncL3:
 
         await client.close()
     
-
     @pytest.fixture
 
     async def jwt_service(self, redis_client):
@@ -596,7 +547,6 @@ class TestMultiDeviceSessionSyncL3:
 
         service = JWTService()
         
-
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -607,7 +557,6 @@ class TestMultiDeviceSessionSyncL3:
 
             await service.shutdown()
     
-
     @pytest.fixture
 
     async def session_manager(self, redis_client):
@@ -616,7 +565,6 @@ class TestMultiDeviceSessionSyncL3:
 
         manager = SessionManager()
         
-
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -627,7 +575,6 @@ class TestMultiDeviceSessionSyncL3:
 
             await manager.shutdown()
     
-
     @pytest.fixture
 
     async def websocket_manager(self, redis_client):
@@ -646,12 +593,10 @@ class TestMultiDeviceSessionSyncL3:
 
             mock_redis_mgr.get_client.return_value = redis_client
             
-
             manager = WebSocketManager()
 
             yield manager
     
-
     @pytest.fixture
 
     async def multi_device_manager(self, jwt_service, session_manager, websocket_manager, redis_client):
@@ -664,7 +609,6 @@ class TestMultiDeviceSessionSyncL3:
 
         await manager.cleanup()
     
-
     async def test_create_multiple_device_sessions(self, multi_device_manager):
 
         """Test creating multiple device sessions for the same user."""
@@ -683,7 +627,6 @@ class TestMultiDeviceSessionSyncL3:
 
         ]
         
-
         device_sessions = []
 
         for device_type, metadata in devices:
@@ -724,12 +667,10 @@ class TestMultiDeviceSessionSyncL3:
 
         assert len(stored_sessions) == 3
         
-
         stored_device_ids = [session["device_id"] for session in stored_sessions]
 
         assert set(stored_device_ids) == set(device_ids)
     
-
     async def test_cross_device_state_synchronization(self, multi_device_manager):
 
         """Test state synchronization across multiple devices."""
@@ -788,7 +729,6 @@ class TestMultiDeviceSessionSyncL3:
 
         assert len(mobile_messages) > 0
         
-
         sync_message = None
 
         for msg in mobile_messages:
@@ -799,7 +739,6 @@ class TestMultiDeviceSessionSyncL3:
 
                 break
         
-
         assert sync_message is not None
 
         assert sync_message["data"]["state"]["current_thread"] == "thread_abc123"
@@ -814,7 +753,6 @@ class TestMultiDeviceSessionSyncL3:
 
         assert not sync_to_desktop
     
-
     async def test_concurrent_device_state_conflicts(self, multi_device_manager):
 
         """Test handling of concurrent state changes across devices."""
@@ -839,7 +777,6 @@ class TestMultiDeviceSessionSyncL3:
 
         }
         
-
         mobile_state = {
 
             "document_content": "Mobile edit at " + str(time.time()),
@@ -882,12 +819,10 @@ class TestMultiDeviceSessionSyncL3:
 
         assert len(conflicts) > 0
         
-
         latest_conflict = json.loads(conflicts[0])
 
         assert latest_conflict["conflict_id"] == conflict_result["conflict_id"]
     
-
     async def test_device_session_limit_enforcement(self, multi_device_manager):
 
         """Test enforcement of maximum device sessions per user."""
@@ -900,7 +835,6 @@ class TestMultiDeviceSessionSyncL3:
 
         device_types = ["desktop1", "mobile1", "tablet1", "desktop2", "mobile2"]  # 5 devices
         
-
         for device_type in device_types:
 
             session = await multi_device_manager.create_device_session(user_id, device_type)
@@ -931,7 +865,6 @@ class TestMultiDeviceSessionSyncL3:
 
         assert len(stored_sessions) == 5
     
-
     async def test_device_disconnection_and_reconnection(self, multi_device_manager):
 
         """Test device disconnection and reconnection scenarios."""
@@ -990,7 +923,6 @@ class TestMultiDeviceSessionSyncL3:
 
         )
         
-
         assert sync_result["successful_syncs"] == 1
         
         # Verify reconnected device received sync
@@ -1003,7 +935,6 @@ class TestMultiDeviceSessionSyncL3:
 
         assert sync_received
     
-
     async def test_cross_device_message_ordering(self, multi_device_manager):
 
         """Test message ordering consistency across devices."""
@@ -1022,7 +953,6 @@ class TestMultiDeviceSessionSyncL3:
 
         sync_tasks = []
         
-
         for i in range(message_count):
 
             state_data = {
@@ -1035,7 +965,6 @@ class TestMultiDeviceSessionSyncL3:
 
             }
             
-
             task = multi_device_manager.sync_state_across_devices(
 
                 user_id, state_data, origin_device_id=device1.device_id
@@ -1062,7 +991,6 @@ class TestMultiDeviceSessionSyncL3:
 
         await asyncio.sleep(0.2)  # Allow all messages to be delivered
         
-
         device2_sync_messages = [
 
             msg for msg in device2.websocket.messages 
@@ -1071,7 +999,6 @@ class TestMultiDeviceSessionSyncL3:
 
         ]
         
-
         assert len(device2_sync_messages) == message_count
         
         # Check sequence ordering
@@ -1087,7 +1014,6 @@ class TestMultiDeviceSessionSyncL3:
         # Should be in order (0, 1, 2, ..., 9)
 
         assert sequence_numbers == list(range(message_count))
-
 
 if __name__ == "__main__":
 

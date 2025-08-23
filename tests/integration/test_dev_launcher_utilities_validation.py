@@ -17,11 +17,12 @@ from unittest.mock import patch
 import pytest
 
 # Add project root to path for imports
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
 
-from dev_launcher.config import LauncherConfig
+from dev_launcher.config import LauncherConfig, find_project_root
 from dev_launcher.launcher import DevLauncher
+
+# Get project root for tests
+project_root = find_project_root()
 
 
 class TestDevLauncherUtilities:

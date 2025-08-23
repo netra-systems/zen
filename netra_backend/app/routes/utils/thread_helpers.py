@@ -1,5 +1,12 @@
 """Thread route specific utilities - Main exports."""
 
+import time
+
+# Import classes that tests need to patch
+from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.services.database.message_repository import MessageRepository
+from netra_backend.app.llm.llm_manager import LLMManager
+
 # Import all functions from focused modules
 from netra_backend.app.routes.utils.thread_builders import (
     build_messages_metadata,

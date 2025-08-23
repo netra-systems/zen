@@ -21,7 +21,7 @@ from netra_backend.app.routes.database_monitoring.control_routes import (
 )
 
 # Import auth functions (will need to be uncommented when auth is configured)
-# from netra_backend.app.auth_integration.enhanced_auth_security import get_current_user, require_admin
+# from app.auth_integration.enhanced_auth_security import get_current_user, require_admin
 from netra_backend.app.routes.database_monitoring.dashboard_routes import (
     get_connection_status_handler,
     get_current_metrics_handler,

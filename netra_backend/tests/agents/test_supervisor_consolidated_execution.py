@@ -1,16 +1,9 @@
 """Execution tests for SupervisorAgent - execution methods and hook management."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
@@ -20,16 +13,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 
-# Add project root to path
-
-
 class TestSupervisorAgentExecution:
     """Test execution methods."""
+    
+    @pytest.mark.asyncio
     
     async def test_execute_method(self):
         """Test execute method (BaseSubAgent compatibility)."""
@@ -59,6 +50,8 @@ class TestSupervisorAgentExecution:
         supervisor.run.assert_called_once_with(
             "test query", "thread-123", "user-456", "run-789"
         )
+    
+    @pytest.mark.asyncio
     
     async def test_execute_method_with_defaults(self):
         """Test execute method with default values."""
@@ -101,6 +94,8 @@ class TestSupervisorAgentExecution:
         assert context["user_id"] == "user-456"
         assert context["run_id"] == "run-789"
     
+    @pytest.mark.asyncio
+    
     async def test_run_method_with_execution_lock(self):
         """Test run method uses execution lock."""
         llm_manager = Mock(spec=LLMManager)
@@ -135,6 +130,8 @@ class TestSupervisorAgentExecution:
         assert lock_acquired
         assert isinstance(result, DeepAgentState)
     
+    @pytest.mark.asyncio
+    
     async def test_execute_with_context(self):
         """Test _execute_with_context method."""
         llm_manager = Mock(spec=LLMManager)
@@ -162,6 +159,8 @@ class TestSupervisorAgentExecution:
         )
         supervisor.pipeline_executor.finalize_state.assert_called_once_with(state, context)
     
+    @pytest.mark.asyncio
+    
     async def test_execute_with_state_merge(self):
         """Test execute method properly merges state results."""
         llm_manager = Mock(spec=LLMManager)
@@ -188,6 +187,8 @@ class TestSupervisorAgentExecution:
             
             # Verify merge was attempted
             mock_merge.assert_called_once_with(updated_state)
+    
+    @pytest.mark.asyncio
     
     async def test_run_method_component_interaction(self):
         """Test run method properly coordinates all components."""
@@ -221,9 +222,10 @@ class TestSupervisorAgentExecution:
         # Verify result
         assert result == mock_state
 
-
 class TestSupervisorAgentHooks:
     """Test hook execution."""
+    
+    @pytest.mark.asyncio
     
     async def test_run_hooks_success(self):
         """Test successful hook execution."""
@@ -251,6 +253,8 @@ class TestSupervisorAgentHooks:
         handler1.assert_called_once_with(state, extra_param="value")
         handler2.assert_called_once_with(state, extra_param="value")
     
+    @pytest.mark.asyncio
+    
     async def test_run_hooks_with_handler_failure(self):
         """Test hook execution with handler failure."""
         llm_manager = Mock(spec=LLMManager)
@@ -274,6 +278,8 @@ class TestSupervisorAgentHooks:
         # Verify first handler still called
         handler1.assert_called_once()
     
+    @pytest.mark.asyncio
+    
     async def test_run_hooks_error_event_reraises(self):
         """Test hook execution for error event re-raises exceptions."""
         llm_manager = Mock(spec=LLMManager)
@@ -292,6 +298,8 @@ class TestSupervisorAgentHooks:
         # Execute error hooks - should re-raise
         with pytest.raises(Exception, match="Error handler failed"):
             await supervisor._run_hooks("on_error", state)
+    
+    @pytest.mark.asyncio
     
     async def test_run_hooks_nonexistent_event(self):
         """Test hook execution for non-existent event."""

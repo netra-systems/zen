@@ -9,8 +9,6 @@ from pathlib import Path
 
 def check_test_file_locations():
     """Check if any test files are being counted from excluded directories"""
-    project_root = Path(__file__).parent.parent
-    sys.path.insert(0, str(project_root))
     
     from scripts.business_value_test_index import BusinessValueTestIndexer
     

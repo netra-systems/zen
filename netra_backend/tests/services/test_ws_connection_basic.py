@@ -3,21 +3,10 @@ WebSocket connection basic functionality tests
 Tests core connection management, pooling, heartbeat, and cleanup
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import time
@@ -31,7 +20,6 @@ from starlette.websockets import WebSocketDisconnect, WebSocketState
 
 from netra_backend.app.core.exceptions_base import NetraException
 
-# Add project root to path
 from netra_backend.app.services.websocket.ws_manager import (
 
     ConnectionInfo,
@@ -39,10 +27,9 @@ from netra_backend.app.services.websocket.ws_manager import (
     WebSocketManager,
 
 )
-from .test_ws_connection_mocks import (
+from netra_backend.tests.test_ws_connection_mocks import (
 
     MockConnectionPool,
-    # Add project root to path
 
     MockWebSocket,
 
@@ -50,12 +37,10 @@ from .test_ws_connection_mocks import (
 
 )
 
-
 class TestWebSocketManagerConnectionPooling:
 
     """Test WebSocket manager connection pooling and basic functionality"""
     
-
     @pytest.fixture
 
     def ws_manager(self):
@@ -66,7 +51,6 @@ class TestWebSocketManagerConnectionPooling:
 
         return WebSocketManager()
     
-
     @pytest.fixture
 
     def mock_websockets(self):
@@ -75,7 +59,6 @@ class TestWebSocketManagerConnectionPooling:
 
         return WebSocketTestHelpers.create_mock_websockets(5)
     
-
     async def test_websocket_manager_singleton_pattern(self):
 
         """Test WebSocket manager singleton pattern"""
@@ -86,14 +69,12 @@ class TestWebSocketManagerConnectionPooling:
 
         self._verify_singleton_behavior(manager1, manager2, manager3)
         
-
     def _create_multiple_managers(self):
 
         """Create multiple manager instances"""
 
         return WebSocketManager(), WebSocketManager(), WebSocketManager()
         
-
     def _verify_singleton_behavior(self, m1, m2, m3):
 
         """Verify all managers are same instance"""
@@ -104,7 +85,6 @@ class TestWebSocketManagerConnectionPooling:
 
         assert id(m1) == id(m2) == id(m3)
         
-
     async def test_connection_establishment(self, ws_manager, mock_websockets):
 
         """Test WebSocket connection establishment"""
@@ -115,14 +95,12 @@ class TestWebSocketManagerConnectionPooling:
 
         self._verify_connection_established(ws_manager, user_id, websocket, conn_info)
         
-
     def _get_test_websocket(self, mock_websockets, user_id):
 
         """Get test WebSocket for user"""
 
         return user_id, mock_websockets[user_id]
         
-
     def _verify_connection_established(self, ws_manager, user_id, websocket, conn_info):
 
         """Verify connection was properly established"""
@@ -137,7 +115,6 @@ class TestWebSocketManagerConnectionPooling:
 
         assert len(ws_manager.connection_manager.active_connections[user_id]) == 1
         
-
     async def test_multiple_connections_same_user(self, ws_manager):
 
         """Test multiple connections for same user"""
@@ -148,7 +125,6 @@ class TestWebSocketManagerConnectionPooling:
 
         self._verify_multiple_connections(ws_manager, user_id, connections)
         
-
     async def _create_multiple_connections(self, ws_manager, user_id, count):
 
         """Create multiple connections for user"""
@@ -165,7 +141,6 @@ class TestWebSocketManagerConnectionPooling:
 
         return connections
         
-
     def _verify_multiple_connections(self, ws_manager, user_id, connections):
 
         """Verify multiple connections tracked correctly"""
@@ -178,7 +153,6 @@ class TestWebSocketManagerConnectionPooling:
 
         assert len(connection_ids) == 3
         
-
     async def test_connection_limit_enforcement(self, ws_manager):
 
         """Test enforcement of connection limits per user"""
@@ -191,7 +165,6 @@ class TestWebSocketManagerConnectionPooling:
 
         await self._test_connection_limit_exceeded(ws_manager, user_id, max_connections, connections)
         
-
     async def _create_max_connections(self, ws_manager, user_id, max_connections):
 
         """Create connections up to limit"""
@@ -208,7 +181,6 @@ class TestWebSocketManagerConnectionPooling:
 
         return connections
         
-
     async def _test_connection_limit_exceeded(self, ws_manager, user_id, max_connections, connections):
 
         """Test behavior when connection limit exceeded"""
@@ -221,7 +193,6 @@ class TestWebSocketManagerConnectionPooling:
 
         self._verify_limit_enforcement(ws_manager, user_id, max_connections, connections)
         
-
     def _verify_limit_enforcement(self, ws_manager, user_id, max_connections, connections):
 
         """Verify connection limit was enforced"""
@@ -234,7 +205,6 @@ class TestWebSocketManagerConnectionPooling:
 
         assert oldest_ws.close_code == 1008
         
-
     async def test_connection_cleanup_on_disconnect(self, ws_manager, mock_websockets):
 
         """Test connection cleanup when WebSocket disconnects"""
@@ -245,7 +215,6 @@ class TestWebSocketManagerConnectionPooling:
 
         await self._disconnect_and_verify_cleanup(ws_manager, user_id, websocket, connection_id)
         
-
     async def _establish_test_connection(self, ws_manager, user_id, websocket):
 
         """Establish connection and return connection ID"""
@@ -260,7 +229,6 @@ class TestWebSocketManagerConnectionPooling:
 
         return connection_id
         
-
     async def _disconnect_and_verify_cleanup(self, ws_manager, user_id, websocket, connection_id):
 
         """Disconnect and verify proper cleanup"""
@@ -273,7 +241,6 @@ class TestWebSocketManagerConnectionPooling:
 
         assert websocket.state == WebSocketState.DISCONNECTED
         
-
     async def test_heartbeat_mechanism(self, ws_manager):
 
         """Test WebSocket heartbeat mechanism"""
@@ -288,7 +255,6 @@ class TestWebSocketManagerConnectionPooling:
 
         await ws_manager.disconnect_user(user_id, websocket)
         
-
     async def _setup_heartbeat_test(self, ws_manager, user_id, websocket):
 
         """Setup connection for heartbeat testing"""
@@ -305,7 +271,6 @@ class TestWebSocketManagerConnectionPooling:
 
         return connection_id
         
-
     async def _verify_heartbeat_functionality(self, ws_manager, websocket, connection_id):
 
         """Verify heartbeat is functioning"""
@@ -318,7 +283,6 @@ class TestWebSocketManagerConnectionPooling:
 
         assert len(system_messages) >= 1
         
-
     def _filter_system_messages(self, sent_messages):
 
         """Filter system messages from sent messages"""
@@ -331,7 +295,6 @@ class TestWebSocketManagerConnectionPooling:
 
         ]
         
-
     async def test_heartbeat_timeout_detection(self, ws_manager):
 
         """Test detection of heartbeat timeouts"""
@@ -346,7 +309,6 @@ class TestWebSocketManagerConnectionPooling:
 
         await self._test_heartbeat_timeout(ws_manager, user_id, websocket)
         
-
     async def _test_heartbeat_timeout(self, ws_manager, user_id, websocket):
 
         """Test heartbeat timeout detection behavior"""
@@ -356,7 +318,6 @@ class TestWebSocketManagerConnectionPooling:
 
         await ws_manager.disconnect_user(user_id, websocket)
         
-
     async def test_concurrent_connection_management(self, ws_manager):
 
         """Test concurrent connection establishment and cleanup"""
@@ -373,7 +334,6 @@ class TestWebSocketManagerConnectionPooling:
 
         await self._verify_and_cleanup_concurrent_connections(ws_manager, results)
         
-
     def _create_concurrent_connection_tasks(self, ws_manager, num_users, num_connections_per_user):
 
         """Create concurrent connection tasks"""
@@ -394,7 +354,6 @@ class TestWebSocketManagerConnectionPooling:
 
         return tasks
         
-
     async def _execute_concurrent_connections(self, connection_tasks):
 
         """Execute all connection tasks concurrently"""
@@ -409,7 +368,6 @@ class TestWebSocketManagerConnectionPooling:
 
         return results
         
-
     async def _verify_and_cleanup_concurrent_connections(self, ws_manager, results):
 
         """Verify concurrent connections and cleanup"""
@@ -424,7 +382,6 @@ class TestWebSocketManagerConnectionPooling:
 
         await self._cleanup_all_concurrent_connections(ws_manager, results)
         
-
     async def _cleanup_all_concurrent_connections(self, ws_manager, results):
 
         """Cleanup all concurrent connections"""
@@ -441,7 +398,6 @@ class TestWebSocketManagerConnectionPooling:
 
         assert len(ws_manager.connection_manager.connection_registry) == 0
         
-
     async def test_message_broadcasting_to_multiple_connections(self, ws_manager):
 
         """Test broadcasting messages to multiple connections"""
@@ -454,7 +410,6 @@ class TestWebSocketManagerConnectionPooling:
 
         await self._cleanup_broadcast_connections(ws_manager, user_id, websockets)
         
-
     async def _setup_multiple_connections_for_broadcast(self, ws_manager, user_id):
 
         """Setup multiple connections for broadcast testing"""
@@ -471,7 +426,6 @@ class TestWebSocketManagerConnectionPooling:
 
         return websockets
         
-
     async def _test_broadcast_delivery(self, ws_manager, user_id, websockets):
 
         """Test message broadcast delivery"""
@@ -484,7 +438,6 @@ class TestWebSocketManagerConnectionPooling:
 
             WebSocketTestHelpers.verify_connection_messages(websocket, ['broadcast'])
             
-
     async def _cleanup_broadcast_connections(self, ws_manager, user_id, websockets):
 
         """Cleanup broadcast test connections"""
@@ -493,7 +446,6 @@ class TestWebSocketManagerConnectionPooling:
 
             await ws_manager.disconnect_user(user_id, websocket)
             
-
     async def test_connection_statistics_tracking(self, ws_manager):
 
         """Test connection statistics tracking"""
@@ -508,7 +460,6 @@ class TestWebSocketManagerConnectionPooling:
 
         await self._cleanup_stats_connections(ws_manager, connections)
         
-
     async def _create_connections_for_stats(self, ws_manager):
 
         """Create connections for statistics testing"""
@@ -527,7 +478,6 @@ class TestWebSocketManagerConnectionPooling:
 
         return connections
         
-
     async def _test_statistics_updates(self, ws_manager, connections):
 
         """Test statistics are properly updated"""
@@ -542,7 +492,6 @@ class TestWebSocketManagerConnectionPooling:
 
         assert final_stats["total_messages_sent"] >= 5
         
-
     async def _send_test_messages(self, ws_manager, connections):
 
         """Send test messages to update statistics"""
@@ -551,7 +500,6 @@ class TestWebSocketManagerConnectionPooling:
 
             await ws_manager.send_message_to_user(user_id, {"test": "message"})
             
-
     async def _cleanup_stats_connections(self, ws_manager, connections):
 
         """Cleanup statistics test connections"""

@@ -55,7 +55,7 @@ class TriageResultProcessor:
     
     def _create_fallback_triage_result(self) -> TriageResult:
         """Create fallback TriageResult with default values."""
-        from .models import TriageMetadata
+        from netra_backend.app.agents.triage_sub_agent.models import TriageMetadata
         return TriageResult(
             category="unknown",
             confidence_score=0.5,
@@ -184,7 +184,7 @@ class TriageResultProcessor:
     
     def create_error_result(self, error_message: str, error_type: str = "processing_error") -> TriageResult:
         """Create standardized error result."""
-        from .models import TriageMetadata
+        from netra_backend.app.agents.triage_sub_agent.models import TriageMetadata
         return TriageResult(
             category="Error",
             confidence_score=0.0,

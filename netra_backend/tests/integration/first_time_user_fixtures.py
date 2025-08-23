@@ -36,12 +36,11 @@ import pytest
 import time
 import uuid
 
-# from netra_backend.app.utils.test_helpers import create_test_user, create_test_session  # TODO: Fix missing helper
+# from app.utils.test_helpers import create_test_user, create_test_session  # TODO: Fix missing helper
 
 # ============================================================================
 # SHARED FIXTURES
 # ============================================================================
-
 
 @pytest.fixture
 
@@ -65,7 +64,6 @@ async def test_user_data() -> Dict[str, Any]:
 
     }
 
-
 @pytest.fixture
 
 async def auth_service() -> AuthService:
@@ -78,7 +76,6 @@ async def auth_service() -> AuthService:
 
     return service
 
-
 @pytest.fixture
 
 async def user_service(async_session: AsyncSession) -> UserService:
@@ -86,7 +83,6 @@ async def user_service(async_session: AsyncSession) -> UserService:
     """Provide user service with database access."""
 
     return UserService(db=async_session)
-
 
 @pytest.fixture
 
@@ -100,7 +96,6 @@ async def websocket_manager(redis_client: Redis) -> WebSocketManager:
 
     return manager
 
-
 @pytest.fixture
 
 async def usage_service(async_session: AsyncSession, redis_client: Redis) -> UsageService:
@@ -112,7 +107,6 @@ async def usage_service(async_session: AsyncSession, redis_client: Redis) -> Usa
     await service.initialize()
 
     return service
-
 
 @pytest.fixture
 
@@ -129,7 +123,6 @@ async def agent_dispatcher() -> AgentDispatcher:
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
-
 
 async def create_verified_user(
 
@@ -182,9 +175,7 @@ async def create_verified_user(
 
     assert response.status_code == status.HTTP_200_OK
     
-
     return response.json()
-
 
 async def simulate_user_activity(
 
@@ -202,7 +193,6 @@ async def simulate_user_activity(
 
     thread_ids = []
     
-
     for i in range(num_messages):
 
         response = await async_client.post(
@@ -225,9 +215,7 @@ async def simulate_user_activity(
 
             thread_ids.append(response.json().get("thread_id"))
     
-
     return thread_ids
-
 
 async def assert_user_registration_success(response: httpx.Response) -> Dict[str, Any]:
 
@@ -242,7 +230,6 @@ async def assert_user_registration_success(response: httpx.Response) -> Dict[str
     assert "verification_token" in data
 
     return data
-
 
 async def assert_websocket_message_flow(
 
@@ -277,9 +264,7 @@ async def assert_websocket_message_flow(
 
     assert "thread_id" in ack
     
-
     return ack
-
 
 async def wait_for_agent_response(
 
@@ -293,7 +278,6 @@ async def wait_for_agent_response(
 
     start_time = time.time()
     
-
     while time.time() - start_time < timeout:
 
         try:
@@ -316,9 +300,7 @@ async def wait_for_agent_response(
 
             continue
     
-
     raise AssertionError("No agent response received within timeout")
-
 
 async def verify_user_in_database(
 
@@ -344,7 +326,6 @@ async def verify_user_in_database(
 
     return user
 
-
 async def verify_rate_limiting(
 
     async_client: httpx.AsyncClient,
@@ -365,18 +346,15 @@ async def verify_rate_limiting(
 
         requests.append(async_client.get(endpoint, headers=headers))
     
-
     responses = await asyncio.gather(*requests, return_exceptions=True)
 
     rate_limited = sum(1 for r in responses 
 
                       if hasattr(r, 'status_code') and r.status_code == 429)
     
-
     assert rate_limited > 0, "Rate limiting not working"
 
     return rate_limited
-
 
 async def simulate_oauth_callback(
 
@@ -398,7 +376,6 @@ async def simulate_oauth_callback(
 
     }
     
-
     with patch(service_map[provider]) as mock_service:
 
         mock_service.return_value = user_info
@@ -412,7 +389,6 @@ async def simulate_oauth_callback(
             "code": f"{provider}_auth_code_test"
 
         }
-
 
 async def assert_billing_metrics(
 
@@ -432,14 +408,11 @@ async def assert_billing_metrics(
 
     assert data["plan"] == expected_plan
     
-
     if should_have_limits:
 
         assert "daily_message_limit" in data or "daily_messages" in data
         
-
     return data
-
 
 async def track_usage_and_verify(
 
@@ -460,7 +433,6 @@ async def track_usage_and_verify(
     # Verify usage tracked (would check Redis or database)
     # Implementation depends on usage service internals
 
-
 async def assert_api_key_properties(
 
     key_data: Dict[str, Any],
@@ -476,7 +448,6 @@ async def assert_api_key_properties(
     assert "key_id" in key_data
 
     assert key_data["key"].startswith(expected_prefix)
-
 
 async def assert_export_response(
 
@@ -496,7 +467,6 @@ async def assert_export_response(
 
     assert "data" in export or "download_url" in export
     
-
     if "data" in export:
 
         assert len(export["data"]) > 0
@@ -505,13 +475,11 @@ async def assert_export_response(
 
         assert "expires_at" in export
         
-
     return export
 
 # ============================================================================
 # MOCK DATA PROVIDERS
 # ============================================================================
-
 
 def get_mock_optimization_request() -> Dict[str, Any]:
 
@@ -542,7 +510,6 @@ def get_mock_optimization_request() -> Dict[str, Any]:
         "detailed_analysis": True
 
     }
-
 
 def get_mock_provider_configs() -> Dict[str, Dict[str, Any]]:
 
@@ -583,7 +550,6 @@ def get_mock_provider_configs() -> Dict[str, Dict[str, Any]]:
         }
 
     }
-
 
 def get_mock_user_preferences() -> Dict[str, Any]:
 

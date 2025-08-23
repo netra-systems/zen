@@ -4,17 +4,10 @@ Tests memory usage, execution metrics, and resource management
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import tracemalloc
@@ -25,14 +18,11 @@ import pytest
 
 from netra_backend.app.agents.supply_researcher.models import ResearchType
 
-# Add project root to path
 from netra_backend.app.services.supply_research_scheduler import (
     ResearchSchedule,
     ScheduleFrequency,
-    # Add project root to path
     SupplyResearchScheduler,
 )
-
 
 class TestSupplyResearchSchedulerPerformance:
     """Test performance and resource management"""
@@ -97,7 +87,6 @@ class TestSupplyResearchSchedulerPerformance:
         # Check average performance
         avg_duration = sum(m['duration'] for m in execution_metrics) / len(execution_metrics)
         assert 0.1 <= avg_duration <= 0.2  # Should be around 0.1s
-
 
 def _create_performance_schedules(count):
     """Create multiple schedules for performance testing."""

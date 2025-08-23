@@ -5,8 +5,24 @@ exports[`Accessibility Visual Tests renders focus states correctly: focus-states
   class="responsive-container desktop"
   style="width: 1024px; height: 768px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-8 space-y-4"
+  >
+    <button
+      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg h-10 px-4 py-2 focus-visible:ring-2 focus-visible:ring-primary"
+    >
+      Focusable Button
+    </button>
+    <input
+      class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary"
+      placeholder="Focusable input"
+    />
+    <a
+      class="inline-block p-2 focus-visible:ring-2 focus-visible:ring-primary rounded"
+      href="#"
+    >
+      Focusable Link
+    </a>
   </div>
 </div>
 `;
@@ -16,8 +32,33 @@ exports[`Accessibility Visual Tests renders high contrast mode correctly: high-c
   class="responsive-container desktop"
   style="width: 1024px; height: 768px;"
 >
-  <div>
-    Loading...
+  <div
+    class="high-contrast p-8"
+  >
+    <div
+      class="space-y-4"
+    >
+      <button
+        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg h-10 px-4 py-2 contrast-enhanced"
+      >
+        High Contrast Button
+      </button>
+      <input
+        class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 contrast-enhanced"
+        placeholder="High contrast input"
+      />
+      <div
+        class="rounded-lg border bg-card text-card-foreground shadow-sm contrast-enhanced"
+      >
+        <div
+          class="p-4"
+        >
+          <p>
+            High contrast content for accessibility compliance
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -27,8 +68,27 @@ exports[`Breakpoint Transition Visual Tests renders component at mobile-to-table
   class="responsive-container tablet"
   style="width: 768px; height: 1024px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-4 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+  >
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm transition-all"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="text-2xl font-semibold leading-none tracking-tight"
+        >
+          Responsive Card
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        Adapts at breakpoints
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -38,8 +98,85 @@ exports[`Breakpoint Transition Visual Tests renders component at tablet-to-deskt
   class="responsive-container desktop"
   style="width: 1024px; height: 768px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-6 grid gap-6 md:grid-cols-2 lg:grid-cols-4"
+  >
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm transition-all"
+    >
+      <div
+        class="p-4"
+      >
+        <h3
+          class="font-semibold"
+        >
+          Item 
+          1
+        </h3>
+        <p
+          class="text-sm text-muted-foreground"
+        >
+          Breakpoint transition test
+        </p>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm transition-all"
+    >
+      <div
+        class="p-4"
+      >
+        <h3
+          class="font-semibold"
+        >
+          Item 
+          2
+        </h3>
+        <p
+          class="text-sm text-muted-foreground"
+        >
+          Breakpoint transition test
+        </p>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm transition-all"
+    >
+      <div
+        class="p-4"
+      >
+        <h3
+          class="font-semibold"
+        >
+          Item 
+          3
+        </h3>
+        <p
+          class="text-sm text-muted-foreground"
+        >
+          Breakpoint transition test
+        </p>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm transition-all"
+    >
+      <div
+        class="p-4"
+      >
+        <h3
+          class="font-semibold"
+        >
+          Item 
+          4
+        </h3>
+        <p
+          class="text-sm text-muted-foreground"
+        >
+          Breakpoint transition test
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -49,8 +186,93 @@ exports[`Desktop Responsive Visual Tests renders complex form desktop correctly:
   class="responsive-container desktop"
   style="width: 1024px; height: 768px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-8 max-w-4xl mx-auto"
+  >
+    <div
+      class="grid gap-6 lg:grid-cols-2"
+    >
+      <div
+        class="space-y-4"
+      >
+        <h2
+          class="text-xl font-semibold"
+        >
+          Personal Information
+        </h2>
+        <div
+          class="grid gap-4 sm:grid-cols-2"
+        >
+          <div>
+            <label
+              class="text-sm font-medium"
+            >
+              First Name
+            </label>
+            <input
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="First name"
+            />
+          </div>
+          <div>
+            <label
+              class="text-sm font-medium"
+            >
+              Last Name
+            </label>
+            <input
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Last name"
+            />
+          </div>
+        </div>
+        <div>
+          <label
+            class="text-sm font-medium"
+          >
+            Email
+          </label>
+          <input
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder="Email address"
+            type="email"
+          />
+        </div>
+      </div>
+      <div
+        class="space-y-4"
+      >
+        <h2
+          class="text-xl font-semibold"
+        >
+          Preferences
+        </h2>
+        <div
+          class="space-y-2"
+        >
+          <label
+            class="flex items-center space-x-2"
+          >
+            <input
+              type="checkbox"
+            />
+            <span>
+              Email notifications
+            </span>
+          </label>
+          <label
+            class="flex items-center space-x-2"
+          >
+            <input
+              type="checkbox"
+            />
+            <span>
+              SMS alerts
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -60,8 +282,115 @@ exports[`Desktop Responsive Visual Tests renders data visualization desktop corr
   class="responsive-container desktop"
   style="width: 1024px; height: 768px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-8 space-y-6"
+  >
+    <div
+      class="grid gap-6 md:grid-cols-4"
+    >
+      <div
+        class="rounded-lg border bg-card text-card-foreground shadow-sm"
+      >
+        <div
+          class="p-4"
+        >
+          <div
+            class="text-2xl font-bold"
+          >
+            1000
+          </div>
+          <p
+            class="text-sm text-muted-foreground"
+          >
+            Metric 
+            1
+          </p>
+        </div>
+      </div>
+      <div
+        class="rounded-lg border bg-card text-card-foreground shadow-sm"
+      >
+        <div
+          class="p-4"
+        >
+          <div
+            class="text-2xl font-bold"
+          >
+            2000
+          </div>
+          <p
+            class="text-sm text-muted-foreground"
+          >
+            Metric 
+            2
+          </p>
+        </div>
+      </div>
+      <div
+        class="rounded-lg border bg-card text-card-foreground shadow-sm"
+      >
+        <div
+          class="p-4"
+        >
+          <div
+            class="text-2xl font-bold"
+          >
+            3000
+          </div>
+          <p
+            class="text-sm text-muted-foreground"
+          >
+            Metric 
+            3
+          </p>
+        </div>
+      </div>
+      <div
+        class="rounded-lg border bg-card text-card-foreground shadow-sm"
+      >
+        <div
+          class="p-4"
+        >
+          <div
+            class="text-2xl font-bold"
+          >
+            4000
+          </div>
+          <p
+            class="text-sm text-muted-foreground"
+          >
+            Metric 
+            4
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="text-2xl font-semibold leading-none tracking-tight"
+        >
+          Chart Area
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="h-64 bg-muted rounded flex items-center justify-center"
+        >
+          <p
+            class="text-muted-foreground"
+          >
+            Chart visualization would go here
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -71,8 +400,76 @@ exports[`Desktop Responsive Visual Tests renders full dashboard desktop correctl
   class="responsive-container desktop"
   style="width: 1024px; height: 768px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-8 grid gap-6 lg:grid-cols-3"
+  >
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm lg:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="text-2xl font-semibold leading-none tracking-tight"
+        >
+          Main Dashboard
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="grid gap-4 md:grid-cols-2"
+        >
+          <div
+            class="p-4 bg-muted rounded"
+          >
+            <h3
+              class="font-semibold"
+            >
+              Metric 1
+            </h3>
+            <p
+              class="text-2xl font-bold"
+            >
+              1,234
+            </p>
+          </div>
+          <div
+            class="p-4 bg-muted rounded"
+          >
+            <h3
+              class="font-semibold"
+            >
+              Metric 2
+            </h3>
+            <p
+              class="text-2xl font-bold"
+            >
+              5,678
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="text-2xl font-semibold leading-none tracking-tight"
+        >
+          Sidebar Info
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        Desktop sidebar content
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -82,8 +479,91 @@ exports[`Desktop Responsive Visual Tests renders multi-column layout desktop cor
   class="responsive-container desktop"
   style="width: 1024px; height: 768px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-8 grid gap-8 lg:grid-cols-4"
+  >
+    <nav
+      class="lg:col-span-1"
+    >
+      <div
+        class="space-y-2"
+      >
+        <h3
+          class="font-semibold"
+        >
+          Navigation
+        </h3>
+        <div
+          class="space-y-1"
+        >
+          <a
+            class="block py-1 px-2 rounded text-sm"
+            href="#"
+          >
+            Home
+          </a>
+          <a
+            class="block py-1 px-2 rounded text-sm"
+            href="#"
+          >
+            Dashboard
+          </a>
+          <a
+            class="block py-1 px-2 rounded text-sm"
+            href="#"
+          >
+            Settings
+          </a>
+        </div>
+      </div>
+    </nav>
+    <main
+      class="lg:col-span-2"
+    >
+      <h1
+        class="text-2xl font-bold mb-4"
+      >
+        Main Content
+      </h1>
+      <div
+        class="rounded-lg border bg-card text-card-foreground shadow-sm"
+      >
+        <div
+          class="p-6"
+        >
+          <p>
+            Primary content area with proper desktop spacing and typography.
+          </p>
+        </div>
+      </div>
+    </main>
+    <aside
+      class="lg:col-span-1"
+    >
+      <div
+        class="space-y-4"
+      >
+        <h3
+          class="font-semibold"
+        >
+          Quick Actions
+        </h3>
+        <div
+          class="space-y-2"
+        >
+          <button
+            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg h-9 rounded-md px-3 w-full"
+          >
+            Action 1
+          </button>
+          <button
+            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-accent h-9 rounded-md px-3 w-full"
+          >
+            Action 2
+          </button>
+        </div>
+      </div>
+    </aside>
   </div>
 </div>
 `;
@@ -93,8 +573,28 @@ exports[`Mobile Responsive Visual Tests renders button layout mobile correctly: 
   class="responsive-container mobile"
   style="width: 375px; height: 667px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-4 space-y-4"
+  >
+    <button
+      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg h-10 px-4 py-2 w-full"
+    >
+      Full Width Button
+    </button>
+    <div
+      class="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2"
+    >
+      <button
+        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg h-10 px-4 py-2 flex-1"
+      >
+        Primary
+      </button>
+      <button
+        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:border-accent h-10 px-4 py-2 flex-1"
+      >
+        Secondary
+      </button>
+    </div>
   </div>
 </div>
 `;
@@ -104,8 +604,45 @@ exports[`Mobile Responsive Visual Tests renders card grid mobile correctly: card
   class="responsive-container mobile"
   style="width: 375px; height: 667px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-4 grid gap-4 grid-cols-1 sm:grid-cols-2"
+  >
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="text-2xl font-semibold leading-none tracking-tight"
+        >
+          Card 1
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        Mobile optimized content
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="text-2xl font-semibold leading-none tracking-tight"
+        >
+          Card 2
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        Responsive design
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -115,8 +652,41 @@ exports[`Mobile Responsive Visual Tests renders form layout mobile correctly: fo
   class="responsive-container mobile"
   style="width: 375px; height: 667px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-4 space-y-4"
+  >
+    <div
+      class="space-y-2"
+    >
+      <label
+        class="text-sm font-medium"
+      >
+        Email
+      </label>
+      <input
+        class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full"
+        placeholder="Enter email"
+      />
+    </div>
+    <div
+      class="space-y-2"
+    >
+      <label
+        class="text-sm font-medium"
+      >
+        Password
+      </label>
+      <input
+        class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-full"
+        placeholder="Enter password"
+        type="password"
+      />
+    </div>
+    <button
+      class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg h-10 px-4 py-2 w-full"
+    >
+      Sign In
+    </button>
   </div>
 </div>
 `;
@@ -126,9 +696,46 @@ exports[`Mobile Responsive Visual Tests renders navigation mobile correctly: nav
   class="responsive-container mobile"
   style="width: 375px; height: 667px;"
 >
-  <div>
-    Loading...
-  </div>
+  <nav
+    class="p-4 border-b"
+  >
+    <div
+      class="flex items-center justify-between"
+    >
+      <h1
+        class="text-lg font-semibold"
+      >
+        Netra
+      </h1>
+      <button
+        class="p-2"
+      >
+        ☰
+      </button>
+    </div>
+    <div
+      class="mt-4 space-y-2 sm:hidden"
+    >
+      <a
+        class="block py-2 px-3 rounded"
+        href="#"
+      >
+        Chat
+      </a>
+      <a
+        class="block py-2 px-3 rounded"
+        href="#"
+      >
+        Demo
+      </a>
+      <a
+        class="block py-2 px-3 rounded"
+        href="#"
+      >
+        Settings
+      </a>
+    </div>
+  </nav>
 </div>
 `;
 
@@ -137,8 +744,63 @@ exports[`Tablet Responsive Visual Tests renders dashboard layout tablet correctl
   class="responsive-container tablet"
   style="width: 768px; height: 1024px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-6 grid gap-6 md:grid-cols-2"
+  >
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="text-2xl font-semibold leading-none tracking-tight"
+        >
+          Analytics
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="text-2xl font-bold"
+        >
+          1,234
+        </div>
+        <p
+          class="text-muted-foreground"
+        >
+          Active users
+        </p>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="text-2xl font-semibold leading-none tracking-tight"
+        >
+          Performance
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="text-2xl font-bold"
+        >
+          99.5%
+        </div>
+        <p
+          class="text-muted-foreground"
+        >
+          Uptime
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -148,8 +810,69 @@ exports[`Tablet Responsive Visual Tests renders data table tablet correctly: dat
   class="responsive-container tablet"
   style="width: 768px; height: 1024px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-6 overflow-x-auto"
+  >
+    <table
+      class="w-full border-collapse border border-border"
+    >
+      <thead>
+        <tr
+          class="border-b"
+        >
+          <th
+            class="p-2 text-left"
+          >
+            Name
+          </th>
+          <th
+            class="p-2 text-left"
+          >
+            Status
+          </th>
+          <th
+            class="p-2 text-left"
+          >
+            Created
+          </th>
+          <th
+            class="p-2 text-left"
+          >
+            Actions
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          class="border-b"
+        >
+          <td
+            class="p-2"
+          >
+            Item 1
+          </td>
+          <td
+            class="p-2"
+          >
+            Active
+          </td>
+          <td
+            class="p-2"
+          >
+            2025-01-01
+          </td>
+          <td
+            class="p-2"
+          >
+            <button
+              class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-all duration-200 ease-in-out transform hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3"
+            >
+              Edit
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 `;
@@ -159,8 +882,47 @@ exports[`Tablet Responsive Visual Tests renders sidebar layout tablet correctly:
   class="responsive-container tablet"
   style="width: 768px; height: 1024px;"
 >
-  <div>
-    Loading...
+  <div
+    class="flex min-h-screen"
+  >
+    <aside
+      class="w-64 border-r bg-muted/50 p-4 hidden md:block"
+    >
+      <nav
+        class="space-y-2"
+      >
+        <a
+          class="block py-2 px-3 rounded bg-primary text-primary-foreground"
+          href="#"
+        >
+          Chat
+        </a>
+        <a
+          class="block py-2 px-3 rounded hover:bg-muted"
+          href="#"
+        >
+          Demo
+        </a>
+        <a
+          class="block py-2 px-3 rounded hover:bg-muted"
+          href="#"
+        >
+          Settings
+        </a>
+      </nav>
+    </aside>
+    <main
+      class="flex-1 p-6"
+    >
+      <h1
+        class="text-2xl font-bold mb-4"
+      >
+        Main Content
+      </h1>
+      <p>
+        Tablet optimized layout with sidebar
+      </p>
+    </main>
   </div>
 </div>
 `;
@@ -170,8 +932,101 @@ exports[`Tablet Responsive Visual Tests renders tabs layout tablet correctly: ta
   class="responsive-container tablet"
   style="width: 768px; height: 1024px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-6"
+  >
+    <div
+      class="flex flex-col gap-2 w-full"
+      data-orientation="horizontal"
+      data-slot="tabs"
+      dir="ltr"
+    >
+      <div
+        aria-orientation="horizontal"
+        class="bg-muted text-muted-foreground h-9 items-center justify-center rounded-lg p-[3px] grid w-full grid-cols-3"
+        data-orientation="horizontal"
+        data-slot="tabs-list"
+        role="tablist"
+        style="outline: none;"
+        tabindex="0"
+      >
+        <button
+          aria-controls="radix-«r0»-content-overview"
+          aria-selected="true"
+          class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+          data-orientation="horizontal"
+          data-radix-collection-item=""
+          data-slot="tabs-trigger"
+          data-state="active"
+          id="radix-«r0»-trigger-overview"
+          role="tab"
+          tabindex="-1"
+          type="button"
+        >
+          Overview
+        </button>
+        <button
+          aria-controls="radix-«r0»-content-analytics"
+          aria-selected="false"
+          class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+          data-orientation="horizontal"
+          data-radix-collection-item=""
+          data-slot="tabs-trigger"
+          data-state="inactive"
+          id="radix-«r0»-trigger-analytics"
+          role="tab"
+          tabindex="-1"
+          type="button"
+        >
+          Analytics
+        </button>
+        <button
+          aria-controls="radix-«r0»-content-settings"
+          aria-selected="false"
+          class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+          data-orientation="horizontal"
+          data-radix-collection-item=""
+          data-slot="tabs-trigger"
+          data-state="inactive"
+          id="radix-«r0»-trigger-settings"
+          role="tab"
+          tabindex="-1"
+          type="button"
+        >
+          Settings
+        </button>
+      </div>
+      <div
+        aria-labelledby="radix-«r0»-trigger-overview"
+        class="flex-1 outline-none mt-6"
+        data-orientation="horizontal"
+        data-slot="tabs-content"
+        data-state="active"
+        id="radix-«r0»-content-overview"
+        role="tabpanel"
+        style="animation-duration: 0s;"
+        tabindex="0"
+      >
+        <div
+          class="rounded-lg border bg-card text-card-foreground shadow-sm"
+        >
+          <div
+            class="flex flex-col space-y-1.5 p-6"
+          >
+            <h3
+              class="text-2xl font-semibold leading-none tracking-tight"
+            >
+              Overview
+            </h3>
+          </div>
+          <div
+            class="p-6 pt-0"
+          >
+            Tablet optimized overview content
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -181,8 +1036,537 @@ exports[`Ultra-Wide Responsive Visual Tests renders data center layout ultrawide
   class="responsive-container ultrawide"
   style="width: 1920px; height: 1080px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-12 grid gap-8 xl:grid-cols-6"
+  >
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          1
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              43
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              25
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          2
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              94
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              40
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          3
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              91
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              15
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          4
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              33
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              53
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          5
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              69
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              31
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          6
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              91
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              64
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          7
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              87
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              79
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          8
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              36
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              87
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          9
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              15
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              35
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          10
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              93
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              67
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          11
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              44
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              58
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="rounded-lg border bg-card text-card-foreground shadow-sm xl:col-span-2"
+    >
+      <div
+        class="flex flex-col space-y-1.5 p-6"
+      >
+        <h3
+          class="font-semibold tracking-tight text-lg"
+        >
+          Server 
+          12
+        </h3>
+      </div>
+      <div
+        class="p-6 pt-0"
+      >
+        <div
+          class="space-y-2"
+        >
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              CPU
+            </span>
+            <span>
+              84
+              %
+            </span>
+          </div>
+          <div
+            class="flex justify-between"
+          >
+            <span>
+              Memory
+            </span>
+            <span>
+              89
+              %
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;
@@ -192,8 +1576,158 @@ exports[`Ultra-Wide Responsive Visual Tests renders enterprise dashboard ultrawi
   class="responsive-container ultrawide"
   style="width: 1920px; height: 1080px;"
 >
-  <div>
-    Loading...
+  <div
+    class="p-12 grid gap-8 xl:grid-cols-5"
+  >
+    <div
+      class="xl:col-span-3 space-y-6"
+    >
+      <h1
+        class="text-3xl font-bold"
+      >
+        Enterprise Dashboard
+      </h1>
+      <div
+        class="grid gap-6 lg:grid-cols-3"
+      >
+        <div
+          class="rounded-lg border bg-card text-card-foreground shadow-sm"
+        >
+          <div
+            class="p-4"
+          >
+            <div
+              class="text-xl font-bold"
+            >
+              1500
+            </div>
+            <p
+              class="text-sm text-muted-foreground"
+            >
+              Enterprise Metric 
+              1
+            </p>
+          </div>
+        </div>
+        <div
+          class="rounded-lg border bg-card text-card-foreground shadow-sm"
+        >
+          <div
+            class="p-4"
+          >
+            <div
+              class="text-xl font-bold"
+            >
+              3000
+            </div>
+            <p
+              class="text-sm text-muted-foreground"
+            >
+              Enterprise Metric 
+              2
+            </p>
+          </div>
+        </div>
+        <div
+          class="rounded-lg border bg-card text-card-foreground shadow-sm"
+        >
+          <div
+            class="p-4"
+          >
+            <div
+              class="text-xl font-bold"
+            >
+              4500
+            </div>
+            <p
+              class="text-sm text-muted-foreground"
+            >
+              Enterprise Metric 
+              3
+            </p>
+          </div>
+        </div>
+        <div
+          class="rounded-lg border bg-card text-card-foreground shadow-sm"
+        >
+          <div
+            class="p-4"
+          >
+            <div
+              class="text-xl font-bold"
+            >
+              6000
+            </div>
+            <p
+              class="text-sm text-muted-foreground"
+            >
+              Enterprise Metric 
+              4
+            </p>
+          </div>
+        </div>
+        <div
+          class="rounded-lg border bg-card text-card-foreground shadow-sm"
+        >
+          <div
+            class="p-4"
+          >
+            <div
+              class="text-xl font-bold"
+            >
+              7500
+            </div>
+            <p
+              class="text-sm text-muted-foreground"
+            >
+              Enterprise Metric 
+              5
+            </p>
+          </div>
+        </div>
+        <div
+          class="rounded-lg border bg-card text-card-foreground shadow-sm"
+        >
+          <div
+            class="p-4"
+          >
+            <div
+              class="text-xl font-bold"
+            >
+              9000
+            </div>
+            <p
+              class="text-sm text-muted-foreground"
+            >
+              Enterprise Metric 
+              6
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="xl:col-span-2 space-y-6"
+    >
+      <div
+        class="rounded-lg border bg-card text-card-foreground shadow-sm"
+      >
+        <div
+          class="flex flex-col space-y-1.5 p-6"
+        >
+          <h3
+            class="text-2xl font-semibold leading-none tracking-tight"
+          >
+            System Status
+          </h3>
+        </div>
+        <div
+          class="p-6 pt-0"
+        >
+          Ultrawide sidebar content optimized for large screens
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 `;

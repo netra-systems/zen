@@ -16,7 +16,6 @@ Module Architecture Compliance: Under 300 lines, functions under 8 lines
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
 import asyncio
@@ -29,7 +28,7 @@ import pytest
 import pytest_asyncio
 import websockets
 
-from tests.database_sync_fixtures import create_test_user_data
+from tests.e2e.database_sync_fixtures import create_test_user_data
 from tests.e2e.harness_complete import (
     UnifiedTestHarnessComplete as TestHarness,
 )

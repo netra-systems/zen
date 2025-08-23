@@ -10,17 +10,10 @@ Critical Path: Request identification -> Rate limit check -> Quota validation ->
 Coverage: Rate limiting algorithms, quota enforcement, backpressure mechanisms, tier-based limits
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -39,13 +32,9 @@ from netra_backend.app.services.backpressure.backpressure_service import (
 )
 from netra_backend.app.services.quota.quota_manager import QuotaManager
 
-# Add project root to path
 from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class RateLimitConfig:
@@ -54,7 +43,6 @@ class RateLimitConfig:
     requests_per_hour: int
     concurrent_requests: int
     burst_allowance: int
-
 
 class RateLimitingManager:
     """Manages rate limiting testing with real quota enforcement."""
@@ -534,7 +522,6 @@ class RateLimitingManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def rate_limiting_manager():
     """Create rate limiting manager for testing."""
@@ -542,7 +529,6 @@ async def rate_limiting_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 async def test_tier_based_rate_limiting(rate_limiting_manager):
@@ -577,7 +563,6 @@ async def test_tier_based_rate_limiting(rate_limiting_manager):
                 user_id, tier, 50, 60  # 50 requests in 60 seconds
             )
             assert burst_result["success_rate"] >= 80  # Most should succeed
-
 
 @pytest.mark.asyncio
 async def test_quota_enforcement_across_tiers(rate_limiting_manager):
@@ -616,7 +601,6 @@ async def test_quota_enforcement_across_tiers(rate_limiting_manager):
     # Enterprise should have more successful requests
     assert len(enterprise_successful) > len(free_successful)
 
-
 @pytest.mark.asyncio
 async def test_backpressure_application(rate_limiting_manager):
     """Test backpressure application under high system load."""
@@ -643,7 +627,6 @@ async def test_backpressure_application(rate_limiting_manager):
                 backpressure_applied = result.get("backpressure_applied", False)
                 # This is tier-dependent, so we just verify it's tracked
                 assert "backpressure_applied" in result
-
 
 @pytest.mark.asyncio
 async def test_burst_traffic_handling(rate_limiting_manager):
@@ -673,7 +656,6 @@ async def test_burst_traffic_handling(rate_limiting_manager):
             assert burst_result["success_rate"] < 80  # Free tier should be limited
         elif test_config["tier"] == UserTier.ENTERPRISE:
             assert burst_result["success_rate"] >= 70  # Enterprise should handle more
-
 
 @pytest.mark.asyncio
 async def test_concurrent_user_rate_limiting(rate_limiting_manager):
@@ -720,7 +702,6 @@ async def test_concurrent_user_rate_limiting(rate_limiting_manager):
         # Enterprise should generally have better success rate
         assert enterprise_success_rate >= free_success_rate
 
-
 @pytest.mark.asyncio
 async def test_rate_limiting_metrics_accuracy(rate_limiting_manager):
     """Test accuracy of rate limiting metrics collection."""
@@ -758,7 +739,6 @@ async def test_rate_limiting_metrics_accuracy(rate_limiting_manager):
     
     assert free_metrics["total_requests"] == 15
     assert mid_metrics["total_requests"] == 25
-
 
 @pytest.mark.asyncio
 async def test_rate_limiting_performance_requirements(rate_limiting_manager):

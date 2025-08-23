@@ -13,17 +13,10 @@ Coverage: Real user service, subscription management, feature flags, usage meter
 WebSocket notifications, payment gateway (mocked), database transactions, audit logging
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -35,13 +28,12 @@ from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from ws_manager import get_manager
+from netra_backend.app.ws_manager import get_manager
 
 from netra_backend.app.schemas.UserPlan import (
     PLAN_DEFINITIONS,
     PlanDefinition,
     PlanFeatures,
-    # Add project root to path
     PlanTier,
     PlanUpgrade,
     UsageRecord,
@@ -49,11 +41,9 @@ from netra_backend.app.schemas.UserPlan import (
 )
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
-# Add project root to path
 from netra_backend.app.services.user_service import user_service
 
 logger = logging.getLogger(__name__)
-
 
 class ConversionFlowManager:
     """Manages the complete free-to-paid conversion flow testing."""
@@ -585,7 +575,6 @@ class ConversionFlowManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 # Mock Services for L2 Testing (Real Internal Dependencies, Mock External)
 
 class MockUser:
@@ -593,7 +582,6 @@ class MockUser:
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
-
 
 class MockSubscriptionService:
     """Mock subscription service simulating real internal subscription management."""
@@ -626,7 +614,6 @@ class MockSubscriptionService:
     async def shutdown(self):
         """Shutdown service."""
         pass
-
 
 class MockUsageMeteringService:
     """Mock usage metering service simulating real internal usage tracking."""
@@ -674,7 +661,6 @@ class MockUsageMeteringService:
         """Shutdown service."""
         pass
 
-
 class MockFeatureFlagService:
     """Mock feature flag service simulating real internal feature management."""
     
@@ -703,7 +689,6 @@ class MockFeatureFlagService:
     async def shutdown(self):
         """Shutdown service."""
         pass
-
 
 class MockPaymentProcessor:
     """Mock payment processor simulating external payment gateway."""
@@ -752,7 +737,6 @@ class MockPaymentProcessor:
         """Shutdown service."""
         pass
 
-
 # Test Fixtures
 
 @pytest.fixture
@@ -763,13 +747,11 @@ async def conversion_manager():
     yield manager
     await manager.cleanup()
 
-
 @pytest.fixture
 async def free_tier_user(conversion_manager):
     """Create a free tier user for testing."""
     result = await conversion_manager.create_test_user(tier=PlanTier.FREE)
     return result
-
 
 # L2 Integration Tests
 
@@ -806,7 +788,6 @@ async def test_complete_free_to_pro_conversion_flow(conversion_manager, free_tie
     assert validation["usage_limits_reset"] is True
     assert validation["websocket_notified"] is True
 
-
 @pytest.mark.asyncio
 async def test_free_to_enterprise_conversion_with_trial(conversion_manager, free_tier_user):
     """Test conversion to Enterprise tier with trial period."""
@@ -834,7 +815,6 @@ async def test_free_to_enterprise_conversion_with_trial(conversion_manager, free
     assert validation["new_tier"] == PlanTier.ENTERPRISE.value
     assert "unlimited_usage" in str(validation["features_enabled"])
 
-
 @pytest.mark.asyncio
 async def test_failed_payment_conversion_handling(conversion_manager, free_tier_user):
     """Test handling of failed payment during conversion."""
@@ -853,7 +833,6 @@ async def test_failed_payment_conversion_handling(conversion_manager, free_tier_
     assert failure_result["payment_failed"] is True
     assert failure_result["subscription_unchanged"] is True
     assert failure_result["error_handled"] is True
-
 
 @pytest.mark.asyncio
 async def test_conversion_audit_trail_completeness(conversion_manager, free_tier_user):
@@ -883,7 +862,6 @@ async def test_conversion_audit_trail_completeness(conversion_manager, free_tier
     assert payment["user_id"] == user_id
     assert payment["status"] == "completed"
 
-
 @pytest.mark.asyncio
 async def test_concurrent_conversion_attempts(conversion_manager):
     """Test handling of concurrent conversion attempts from same user."""
@@ -905,7 +883,6 @@ async def test_concurrent_conversion_attempts(conversion_manager):
     # Validate only one conversion succeeded
     successful_conversions = [r for r in results if isinstance(r, dict) and r.get("success")]
     assert len(successful_conversions) == 1
-
 
 @pytest.mark.asyncio
 async def test_websocket_notification_delivery(conversion_manager, free_tier_user):
@@ -931,7 +908,6 @@ async def test_websocket_notification_delivery(conversion_manager, free_tier_use
     assert "upgrade_prompt" in message_types
     assert "subscription_upgraded" in message_types
 
-
 @pytest.mark.asyncio
 async def test_feature_flag_activation_atomicity(conversion_manager, free_tier_user):
     """Test that feature flag updates are atomic with subscription changes."""
@@ -956,7 +932,6 @@ async def test_feature_flag_activation_atomicity(conversion_manager, free_tier_u
     enterprise_features = PLAN_DEFINITIONS[PlanTier.ENTERPRISE].features.feature_flags
     for feature in enterprise_features:
         assert feature in feature_validation["features"]
-
 
 @pytest.mark.asyncio
 async def test_usage_metering_reset_accuracy(conversion_manager, free_tier_user):
@@ -991,7 +966,6 @@ async def test_usage_metering_reset_accuracy(conversion_manager, free_tier_user)
     )
     
     assert new_usage_result["success"] is True
-
 
 @pytest.mark.asyncio
 async def test_conversion_rollback_on_activation_failure(conversion_manager, free_tier_user):

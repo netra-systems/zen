@@ -57,7 +57,7 @@ class AuthConfig:
     def get_jwt_service_expiry_minutes() -> int:
         """Get JWT service token expiry in minutes"""
         # @marked: JWT service token expiry configuration
-        return int(os.getenv("JWT_SERVICE_EXPIRY_MINUTES", "5"))
+        return int(os.getenv("JWT_SERVICE_EXPIRY_MINUTES", "60"))
     
     @staticmethod
     def get_frontend_url() -> str:

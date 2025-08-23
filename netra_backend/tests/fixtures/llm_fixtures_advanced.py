@@ -12,11 +12,10 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.core.exceptions_base import NetraException
-from .llm_fixtures_core import create_basic_llm_manager
+from netra_backend.tests.llm_fixtures_core import create_basic_llm_manager
 
 # Type aliases
 ProviderKey = str
-
 
 class LLMProvider(Enum):
     """LLM provider types for testing."""
@@ -25,13 +24,11 @@ class LLMProvider(Enum):
     ANTHROPIC = "anthropic"
     MOCK = "mock"
 
-
 def create_error_simulating_manager(error_rate: float = 0.5) -> Mock:
     """Create LLM manager that simulates various error conditions."""
     manager = create_basic_llm_manager()
     _setup_error_simulation(manager, error_rate)
     return manager
-
 
 def _setup_error_simulation(manager: Mock, error_rate: float) -> None:
     """Setup error simulation with configurable failure rate."""
@@ -42,13 +39,11 @@ def _setup_error_simulation(manager: Mock, error_rate: float) -> None:
     
     manager.call_llm = AsyncMock(side_effect=error_prone_call)
 
-
 def create_provider_switching_manager(providers: List[LLMProvider]) -> Mock:
     """Create LLM manager with provider switching capabilities."""
     manager = create_basic_llm_manager()
     _setup_provider_switching(manager, providers)
     return manager
-
 
 def _setup_provider_switching(manager: Mock, providers: List[LLMProvider]) -> None:
     """Setup provider switching logic."""
@@ -62,13 +57,11 @@ def _setup_provider_switching(manager: Mock, providers: List[LLMProvider]) -> No
     
     manager.call_llm = AsyncMock(side_effect=switch_provider_call)
 
-
 def create_timeout_simulating_manager(timeout_ms: int = 5000) -> Mock:
     """Create LLM manager that simulates timeouts."""
     manager = create_basic_llm_manager()
     _setup_timeout_simulation(manager, timeout_ms)
     return manager
-
 
 def _setup_timeout_simulation(manager: Mock, timeout_ms: int) -> None:
     """Setup timeout simulation."""
@@ -78,13 +71,11 @@ def _setup_timeout_simulation(manager: Mock, timeout_ms: int) -> None:
     
     manager.call_llm = AsyncMock(side_effect=timeout_call)
 
-
 def create_load_balancing_manager(weights: Dict[ProviderKey, float]) -> Mock:
     """Create LLM manager with weighted load balancing."""
     manager = create_basic_llm_manager()
     _setup_load_balancing(manager, weights)
     return manager
-
 
 def _setup_load_balancing(manager: Mock, weights: Dict[ProviderKey, float]) -> None:
     """Setup weighted load balancing logic."""
@@ -93,7 +84,6 @@ def _setup_load_balancing(manager: Mock, weights: Dict[ProviderKey, float]) -> N
         return {"content": f"Response from {provider}", "provider": provider}
     
     manager.call_llm = AsyncMock(side_effect=balanced_call)
-
 
 def _select_weighted_provider(weights: Dict[ProviderKey, float]) -> ProviderKey:
     """Select provider based on weights."""
@@ -107,14 +97,12 @@ def _select_weighted_provider(weights: Dict[ProviderKey, float]) -> ProviderKey:
             return provider
     return list(weights.keys())[0]
 
-
 def create_performance_monitoring_manager() -> Mock:
     """Create LLM manager with performance monitoring."""
     manager = create_basic_llm_manager()
     metrics = {"calls": 0, "total_time": 0, "errors": 0}
     _setup_performance_monitoring(manager, metrics)
     return manager
-
 
 def _setup_performance_monitoring(manager: Mock, metrics: Dict[str, Any]) -> None:
     """Setup performance monitoring capabilities."""
@@ -131,14 +119,12 @@ def _setup_performance_monitoring(manager: Mock, metrics: Dict[str, Any]) -> Non
     
     manager.call_llm = AsyncMock(side_effect=monitored_call)
 
-
 def create_circuit_breaker_manager(failure_threshold: int = 5) -> Mock:
     """Create LLM manager with circuit breaker pattern."""
     manager = create_basic_llm_manager()
     state = {"failures": 0, "open": False, "last_failure": None}
     _setup_circuit_breaker(manager, state, failure_threshold)
     return manager
-
 
 def _setup_circuit_breaker(manager: Mock, state: Dict[str, Any], threshold: int) -> None:
     """Setup circuit breaker functionality."""

@@ -1,0 +1,23 @@
+# Additional requirements for Chat UI/UX E2E Testing
+# Install with: pip install -r tests/e2e/requirements_ui_testing.txt
+
+# Playwright for browser automation
+playwright>=1.40.0
+pytest-playwright>=0.4.0
+
+# Async testing support
+pytest-asyncio>=0.21.0
+
+# Additional testing utilities
+pytest>=7.4.0
+pytest-html>=3.2.0
+pytest-xdist>=3.3.1
+
+# Performance monitoring
+psutil>=5.9.0
+
+# Video and screenshot utilities
+Pillow>=10.0.0
+
+# Install playwright browsers after pip install:
+# playwright install chromium firefox webkit

@@ -10,17 +10,10 @@ Critical Path: Request analysis -> Cache lookup -> Cache hit/miss -> Response ge
 Coverage: Cache strategies, TTL management, cache invalidation, cache warming, performance optimization
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -35,16 +28,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import aiohttp
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.api_gateway.cache_manager import ApiCacheManager
 from netra_backend.app.services.api_gateway.cache_strategies import CacheStrategy
 from netra_backend.app.services.metrics.cache_metrics import CacheMetricsService
 from netra_backend.app.services.redis.redis_cache import RedisCache
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class CacheRule:
@@ -56,7 +45,6 @@ class CacheRule:
     invalidation_triggers: List[str]  # Events that invalidate cache
     compression_enabled: bool
     max_cache_size_mb: float
-
 
 class ApiCacheManager:
     """Manages L3 API response caching tests with real Redis caching."""
@@ -663,7 +651,6 @@ class ApiCacheManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def api_cache_manager():
     """Create API cache manager for L3 testing."""
@@ -671,7 +658,6 @@ async def api_cache_manager():
     await manager.initialize_caching()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -694,7 +680,6 @@ async def test_time_based_caching(api_cache_manager):
     first_hit = cache_test["results"][1]
     assert first_hit["cache_status"] == "HIT"
     assert "X-Cache-TTL" in first_hit["headers"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -724,7 +709,6 @@ async def test_user_based_caching(api_cache_manager):
     # Different users should have different cache entries
     assert user1_result1["headers"]["X-Cache-Key"] != user2_result1["headers"]["X-Cache-Key"]
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -749,7 +733,6 @@ async def test_content_based_caching(api_cache_manager):
     assert result1["headers"]["X-Cache-Key"] != result2["headers"]["X-Cache-Key"]
     assert result1["headers"]["X-Cache-Key"] == result3["headers"]["X-Cache-Key"]
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -771,7 +754,6 @@ async def test_no_cache_strategy(api_cache_manager):
     timestamps = [result["body"]["timestamp"] for result in results]
     assert len(set(timestamps)) == 3  # All different timestamps
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -790,7 +772,6 @@ async def test_cache_performance_improvement(api_cache_manager):
     # Cache hits should be significantly faster than misses
     assert perf_test["average_hit_time"] < perf_test["cache_miss_time"]
     assert perf_test["performance_improvement_percent"] > 50  # At least 50% improvement
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -813,7 +794,6 @@ async def test_cache_invalidation(api_cache_manager):
     # Next request should be a cache miss
     result3 = await api_cache_manager.make_cached_request(path)
     assert result3["cache_status"] == "MISS"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -839,7 +819,6 @@ async def test_cache_ttl_expiration(api_cache_manager):
     # Next request should be a miss due to expiration
     result3 = await api_cache_manager.make_cached_request(path)
     assert result3["cache_status"] == "MISS"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -869,7 +848,6 @@ async def test_concurrent_cache_requests(api_cache_manager):
     for result in successful_results[1:]:
         assert result["body"]["resource"] == successful_results[0]["body"]["resource"]
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -897,7 +875,6 @@ async def test_cache_size_limits(api_cache_manager):
     
     assert final_size > initial_size
     assert final_size <= initial_size + len(endpoints)
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -929,7 +906,6 @@ async def test_cache_metrics_accuracy(api_cache_manager):
     assert metrics["average_miss_time"] > 0
     assert metrics["average_hit_time"] < metrics["average_miss_time"]
     assert metrics["performance_improvement"] > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

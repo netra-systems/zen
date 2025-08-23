@@ -10,17 +10,10 @@ Critical Path: Request ingress -> Route evaluation -> Service discovery -> Load 
 Coverage: Complex routing rules, path matching, header-based routing, version routing, load balancing
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -37,16 +30,12 @@ import pytest
 from netra_backend.app.services.api_gateway.load_balancer import LoadBalancer
 from netra_backend.app.services.api_gateway.route_manager import RouteManager
 
-# Add project root to path
 from netra_backend.app.services.api_gateway.router import ApiGatewayRouter
 from netra_backend.app.services.service_discovery.discovery_service import (
     ServiceDiscoveryService,
 )
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class RouteRule:
@@ -59,7 +48,6 @@ class RouteRule:
     retry_count: int
     priority: int  # Higher = more priority
 
-
 @dataclass
 class ServiceEndpoint:
     """Service endpoint configuration."""
@@ -67,7 +55,6 @@ class ServiceEndpoint:
     port: int
     weight: int  # For weighted load balancing
     health_status: str  # healthy, unhealthy, unknown
-
 
 class ApiRoutingManager:
     """Manages L3 API routing tests with real HTTP routing."""
@@ -570,7 +557,6 @@ class ApiRoutingManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def api_routing_manager():
     """Create API routing manager for L3 testing."""
@@ -578,7 +564,6 @@ async def api_routing_manager():
     await manager.initialize_routing()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -598,7 +583,6 @@ async def test_exact_path_routing(api_routing_manager):
         assert result["service_name"] == expected_service
         assert "endpoint" in result
         assert result["response_time"] < 1.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -624,7 +608,6 @@ async def test_wildcard_path_routing(api_routing_manager):
             "/api/admin/*"
         ]
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -643,7 +626,6 @@ async def test_version_based_routing(api_routing_manager):
     # Different services should be used
     assert v1_result["service_name"] != v2_result["service_name"]
     assert v1_result["endpoint"] != v2_result["endpoint"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -673,7 +655,6 @@ async def test_load_balancing_strategies(api_routing_manager):
         assert endpoint_data["ratio_compliance"] > 0.5
         assert endpoint_data["ratio_compliance"] < 2.0
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -692,7 +673,6 @@ async def test_routing_priority_handling(api_routing_manager):
     assert user_result["status_code"] == 200
     assert user_result["service_name"] == "user_service"
     assert user_result["route_pattern"] == "/api/v1/users"  # Exact match, not wildcard
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -722,7 +702,6 @@ async def test_concurrent_routing_requests(api_routing_manager):
     services_used = set(r["service_name"] for r in successful)
     assert len(services_used) >= 4  # Multiple services should be hit
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -741,7 +720,6 @@ async def test_route_not_found_handling(api_routing_manager):
         assert result["status_code"] == 404
         assert "No route found" in result["error"]
         assert result["path"] == path
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -766,7 +744,6 @@ async def test_service_health_check_integration(api_routing_manager):
     unhealthy_result = await api_routing_manager.make_routed_request("/api/v2/agents")
     assert unhealthy_result["status_code"] == 503
     assert "Service unavailable" in unhealthy_result["error"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -803,7 +780,6 @@ async def test_routing_performance_requirements(api_routing_manager):
     
     successful_concurrent = [r for r in concurrent_results if r["status_code"] == 200]
     assert len(successful_concurrent) >= 18  # Most should succeed
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

@@ -10,17 +10,10 @@ Business Value Justification:
 - Strategic Impact: Foundation reliability for all customer operations
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -39,15 +32,12 @@ from netra_backend.tests.integration.critical_missing.shared_infrastructure.cont
     ServiceOrchestrator,
 )
 
-# Add project root to path
-
 # Define test-specific exceptions
 class DatabaseTransactionError(NetraException):
     pass
 
 class DatabaseDeadlockError(NetraException):
     pass
-
 
 @pytest.fixture(scope="module")
 async def l3_database():
@@ -57,14 +47,12 @@ async def l3_database():
     yield orchestrator.postgres, connections["postgres_url"]
     await orchestrator.stop_all()
 
-
 @pytest.fixture
 async def db_session(l3_database):
     """Database session with transaction support"""
     postgres_container, postgres_url = l3_database
     async with postgres_container.transaction() as conn:
         yield conn
-
 
 @pytest.fixture
 async def test_data():
@@ -86,7 +74,6 @@ async def test_data():
             ) for i in range(3)
         ]
     }
-
 
 class TestDatabaseTransactionRollback:
     """Test multi-table transaction rollback scenarios"""

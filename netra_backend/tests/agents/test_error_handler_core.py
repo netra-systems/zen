@@ -3,17 +3,10 @@ Tests for AgentErrorHandler core functionality.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Add netra_backend to path  
 
 import asyncio
 import time
@@ -27,9 +20,7 @@ from netra_backend.app.agents.error_handler import (
     NetworkError,
 )
 
-# Add project root to path
 from netra_backend.app.agents.error_handler import (
-    # Add project root to path
     AgentErrorHandler as ErrorHandler,
 )
 from netra_backend.app.agents.error_handler import (
@@ -37,7 +28,6 @@ from netra_backend.app.agents.error_handler import (
 )
 from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.schemas.shared_types import ErrorContext
-
 
 class TestErrorHandler:
     """Test AgentErrorHandler functionality."""
@@ -73,6 +63,8 @@ class TestErrorHandler:
         result = await error_handler.handle_error(error, sample_context)
         return result, error
 
+    @pytest.mark.asyncio
+
     async def test_handle_error_with_agent_error(self, error_handler, sample_context):
         """Test handle_error with AgentError."""
         result, error = await self._test_handle_error_with_agent_error_helper(error_handler, sample_context)
@@ -84,6 +76,8 @@ class TestErrorHandler:
         original_error = ValueError("Generic error")
         result = await error_handler.handle_error(original_error, sample_context)
         return result, original_error
+
+    @pytest.mark.asyncio
 
     async def test_handle_error_with_generic_exception(self, error_handler, sample_context):
         """Test handle_error with generic exception."""
@@ -98,6 +92,8 @@ class TestErrorHandler:
             raise NetworkError("Network failure")
         return operation
 
+    @pytest.mark.asyncio
+
     async def test_handle_error_with_retry_context(self, error_handler, sample_context):
         """Test handle_error with retry context."""
         error = NetworkError("Temporary failure")
@@ -111,6 +107,8 @@ class TestErrorHandler:
         """Create WebSocket error for handling test"""
         from netra_backend.app.core.exceptions_websocket import WebSocketError
         return WebSocketError("WebSocket connection lost")
+
+    @pytest.mark.asyncio
 
     async def test_handle_websocket_error(self, error_handler, sample_context):
         """Test handling WebSocket-specific errors."""
@@ -213,7 +211,6 @@ class TestErrorHandler:
         
         # Should maintain reasonable memory usage
         assert len(error_handler.error_history) <= 1000
-
 
 def _assert_error_statistics_format(stats: dict) -> None:
     """Assert error statistics have correct format"""

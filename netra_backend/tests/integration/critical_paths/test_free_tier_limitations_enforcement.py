@@ -13,9 +13,7 @@ Comprehensive test for free tier limitations enforcement:
 This test ensures free tier users are properly limited while maintaining good UX.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -31,10 +29,6 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import pytest
 import websockets
-
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Configuration
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
@@ -54,7 +48,6 @@ FREE_TIER_LIMITS = {
     "custom_models": False,
     "enterprise_features": False
 }
-
 
 class FreeTierLimitsTester:
     """Test free tier limitations enforcement."""
@@ -653,7 +646,6 @@ class FreeTierLimitsTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -695,7 +687,6 @@ async def test_free_tier_limitations_enforcement():
         for test in critical_tests:
             assert results.get(test, False), f"Critical test failed: {test}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*60)
@@ -716,7 +707,6 @@ async def main():
         critical_passed = all(results.get(test, False) for test in critical_tests)
         
         return 0 if critical_passed else 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

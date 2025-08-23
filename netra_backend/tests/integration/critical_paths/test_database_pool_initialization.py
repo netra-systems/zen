@@ -11,17 +11,10 @@ L3 Test: Uses real PostgreSQL and ClickHouse containers to validate connection p
 initialization, configuration limits, concurrent access, and failure handling.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -43,15 +36,11 @@ from testcontainers.postgres import PostgresContainer
 
 from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
 
-# Add project root to path
 from netra_backend.app.db.postgres_core import Database
 from netra_backend.app.db.postgres_pool import close_async_db, get_pool_status
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class DatabasePoolMetrics:
     """Tracks database pool performance metrics."""
@@ -113,7 +102,6 @@ class DatabasePoolMetrics:
             "success": success,
             "timestamp": datetime.utcnow()
         })
-
 
 class DatabasePoolInitializationManager:
     """Manages database pool initialization testing with real containers."""
@@ -644,7 +632,6 @@ class DatabasePoolInitializationManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def pool_manager():
     """Create database pool manager for testing."""
@@ -652,7 +639,6 @@ async def pool_manager():
     await manager.setup_database_containers()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -785,7 +771,6 @@ class TestDatabasePoolInitializationL3:
         for conn_time in metrics.connection_acquisition_times:
             assert conn_time["duration"] >= 0
             assert isinstance(conn_time["success"], bool)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

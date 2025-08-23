@@ -8,7 +8,7 @@ preventing production incidents from misconfiguration.
 """
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type
 
 from netra_backend.app.core.environment_constants import (
     Environment,
@@ -226,3 +226,103 @@ def is_development() -> bool:
         is_development as env_is_development,
     )
     return env_is_development()
+
+
+class ConfigEnvironment:
+    """Configuration environment manager for creating environment-specific configs.
+    
+    Provides methods to detect environment and create appropriate configuration
+    objects based on the detected environment.
+    
+    Business Value: Ensures correct configuration instantiation per environment,
+    preventing misconfiguration-related incidents.
+    """
+    
+    def __init__(self):
+        """Initialize the configuration environment manager."""
+        self._logger = logger
+    
+    def get_environment(self) -> str:
+        """Get the current environment.
+        
+        Returns:
+            str: The detected environment name
+        """
+        return get_current_environment()
+    
+    def create_base_config(self, environment: str) -> 'AppConfig':
+        """Create the appropriate configuration object for the given environment.
+        
+        Args:
+            environment: The environment name
+            
+        Returns:
+            AppConfig: The configuration object for the environment
+        """
+        from netra_backend.app.schemas.Config import (
+            AppConfig,
+            DevelopmentConfig,
+            NetraTestingConfig,
+            ProductionConfig,
+            StagingConfig,
+        )
+        
+        config_classes = self._get_config_classes()
+        config = self._init_config(config_classes, environment)
+        
+        # Handle WebSocket URL updates if SERVER_PORT is set
+        self._update_websocket_url_if_needed(config)
+        
+        return config
+    
+    def _get_config_classes(self) -> Dict[str, Type['AppConfig']]:
+        """Get the mapping of environment names to configuration classes.
+        
+        Returns:
+            Dict mapping environment names to config classes
+        """
+        from netra_backend.app.schemas.Config import (
+            DevelopmentConfig,
+            NetraTestingConfig,
+            ProductionConfig,
+            StagingConfig,
+        )
+        
+        return {
+            Environment.PRODUCTION.value: ProductionConfig,
+            Environment.STAGING.value: StagingConfig,
+            Environment.TESTING.value: NetraTestingConfig,
+            Environment.DEVELOPMENT.value: DevelopmentConfig,
+        }
+    
+    def _init_config(self, config_classes: Dict[str, Type['AppConfig']], environment: str) -> 'AppConfig':
+        """Initialize the configuration object for the given environment.
+        
+        Args:
+            config_classes: Mapping of environment names to config classes
+            environment: The environment name
+            
+        Returns:
+            AppConfig: The initialized configuration object
+        """
+        from netra_backend.app.schemas.Config import DevelopmentConfig
+        
+        # Get the appropriate config class, fallback to DevelopmentConfig
+        config_class = config_classes.get(environment, DevelopmentConfig)
+        
+        # Initialize the configuration object
+        return config_class()
+    
+    def _update_websocket_url_if_needed(self, config: 'AppConfig') -> None:
+        """Update WebSocket URL if SERVER_PORT is set in environment.
+        
+        Args:
+            config: The configuration object to update
+        """
+        server_port = os.environ.get("SERVER_PORT")
+        if server_port and hasattr(config, 'ws_config'):
+            old_url = config.ws_config.ws_url
+            config.ws_config.ws_url = f"ws://localhost:{server_port}/ws"
+            self._logger.info(f"WebSocket URL updated from {old_url} to {config.ws_config.ws_url} for port {server_port}")
+        elif server_port:
+            self._logger.debug(f"SERVER_PORT={server_port} set but config has no ws_config attribute")

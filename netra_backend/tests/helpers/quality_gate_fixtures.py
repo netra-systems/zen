@@ -14,45 +14,38 @@ from netra_backend.app.services.quality_gate_service import (
     QualityMetrics,
     ValidationResult,
 )
-from .quality_gate_helpers import (
+from netra_backend.tests.helpers.quality_gate_helpers import (
     create_quality_service,
     create_redis_mock,
 )
-
 
 @pytest.fixture
 def redis_mock():
     """Mock Redis manager fixture"""
     return create_redis_mock()
 
-
 @pytest.fixture
 def quality_service(redis_mock):
     """Create QualityGateService instance with mocked dependencies"""
     return create_quality_service(redis_mock)
-
 
 def setup_novelty_mocks_fresh(quality_service, content):
     """Setup novelty mocks for fresh content"""
     quality_service.redis_manager.get_list = AsyncMock(return_value=[])
     quality_service.redis_manager.add_to_list = AsyncMock()
 
-
 def setup_novelty_mocks_duplicate(quality_service, content):
     """Setup novelty mocks for duplicate content"""
     content_hash = hashlib.md5(content.encode()).hexdigest()
     quality_service.redis_manager.get_list = AsyncMock(return_value=[content_hash])
 
-
 def setup_redis_error_mocks(quality_service):
     """Setup Redis mocks to simulate errors"""
     quality_service.redis_manager.set = AsyncMock(side_effect=Exception("Redis error"))
 
-
 def setup_validation_error_mock(quality_service):
     """Setup mock to simulate validation errors"""
     return patch.object(quality_service.metrics_calculator, 'calculate_metrics', side_effect=Exception("Test error"))
-
 
 def create_borderline_metrics():
     """Create borderline quality metrics for threshold testing"""
@@ -70,7 +63,6 @@ def create_borderline_metrics():
         hallucination_risk=0.2
     )
 
-
 def create_low_specificity_metrics():
     """Create metrics with low specificity for suggestion testing"""
     return QualityMetrics(
@@ -82,7 +74,6 @@ def create_low_specificity_metrics():
         redundancy_ratio=0.4
     )
 
-
 def create_poor_metrics():
     """Create poor quality metrics for prompt adjustment testing"""
     return QualityMetrics(
@@ -92,7 +83,6 @@ def create_poor_metrics():
         generic_phrase_count=7,
         circular_reasoning_detected=True
     )
-
 
 def create_good_metrics():
     """Create good quality metrics for threshold testing"""
@@ -110,7 +100,6 @@ def create_good_metrics():
         hallucination_risk=0.1
     )
 
-
 def create_test_quality_metrics():
     """Create test metrics for storage testing"""
     return QualityMetrics(
@@ -120,7 +109,6 @@ def create_test_quality_metrics():
         actionability_score=0.8,
         quantification_score=0.6
     )
-
 
 def create_weighted_score_metrics():
     """Create metrics for weighted score calculation testing"""
@@ -138,7 +126,6 @@ def create_weighted_score_metrics():
         redundancy_ratio=0.1
     )
 
-
 def create_optimization_weights():
     """Create optimization content type weights"""
     return {
@@ -150,7 +137,6 @@ def create_optimization_weights():
         'clarity': 0.05
     }
 
-
 def add_multiple_test_metrics(quality_service, count=10):
     """Add multiple test metrics to service for statistics testing"""
     for i in range(count):
@@ -160,12 +146,10 @@ def add_multiple_test_metrics(quality_service, count=10):
         )
         yield metrics
 
-
 def create_memory_overflow_metrics(count=1050):
     """Create metrics that exceed memory limits"""
     for i in range(count):
         yield QualityMetrics(overall_score=0.5 + (i * 0.0001))
-
 
 def setup_pattern_test_texts():
     """Setup test texts for pattern testing"""
@@ -174,7 +158,6 @@ def setup_pattern_test_texts():
         'vague': "you might want to consider optimizing",
         'circular': "optimize by optimizing the system"
     }
-
 
 def setup_domain_content_for_recognition():
     """Setup domain content for term recognition testing"""
@@ -185,7 +168,6 @@ def setup_domain_content_for_recognition():
     Throughput increased to 4,200 QPS with p95 latency under 120ms.
     """
 
-
 def setup_quality_level_test_cases():
     """Setup test cases for quality level classification"""
     return [
@@ -195,7 +177,6 @@ def setup_quality_level_test_cases():
         (0.45, QualityLevel.POOR),
         (0.25, QualityLevel.UNACCEPTABLE),
     ]
-
 
 def setup_content_type_test_cases():
     """Setup test cases for different content types"""

@@ -5,17 +5,10 @@ Provides reusable test fixtures for agent service orchestration testing,
 including mock agents, orchestrators, and service configurations.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import UTC, datetime
@@ -25,13 +18,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.core.exceptions_base import NetraException
 
-# Add project root to path
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
-
-# Add project root to path
-
 
 class AgentState(Enum):
     IDLE = "idle"
@@ -40,7 +29,6 @@ class AgentState(Enum):
     STOPPING = "stopping"
     ERROR = "error"
     TERMINATED = "terminated"
-
 
 class MockSupervisorAgent:
     """Mock supervisor agent for testing."""
@@ -114,7 +102,6 @@ class MockSupervisorAgent:
         """Complete agent stop."""
         await asyncio.sleep(0.01)
         self.state = AgentState.TERMINATED
-
 
 class AgentOrchestrator:
     """Orchestrates multiple agents for testing."""
@@ -252,6 +239,5 @@ class AgentOrchestrator:
         total = self.orchestration_metrics['total_executions']
         failed = self.orchestration_metrics['failed_executions']
         return ((total - failed) / max(total, 1)) * 100
-
 
 # Pytest fixtures are in test_agent_orchestration_pytest_fixtures.py

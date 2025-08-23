@@ -22,6 +22,7 @@ from netra_backend.app.db.postgres_events import (
     setup_async_engine_events,
     setup_sync_engine_events,
 )
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.logging_config import central_logger
 
 
@@ -160,76 +161,6 @@ async_engine: Optional[AsyncEngine] = None
 async_session_factory: Optional[async_sessionmaker] = None
 
 
-def _convert_postgresql_url(db_url: str) -> str:
-    """Convert postgresql:// URL to async format."""
-    url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    # Convert sslmode to ssl for asyncpg - asyncpg doesn't understand sslmode parameter
-    # For Cloud SQL connections, we still need to convert but handle the value differently
-    if "sslmode=" in url:
-        if "/cloudsql/" in url:
-            # For Cloud SQL Unix socket connections, remove sslmode entirely
-            # as SSL is handled by the Cloud SQL proxy
-            import re
-            url = re.sub(r'[&?]sslmode=[^&]*', '', url)
-        else:
-            # For regular connections, convert sslmode to ssl
-            url = url.replace("sslmode=", "ssl=")
-    return url
-
-def _convert_postgres_url(db_url: str) -> str:
-    """Convert postgres:// URL to async format."""
-    url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    # Convert sslmode to ssl for asyncpg - asyncpg doesn't understand sslmode parameter
-    # For Cloud SQL connections, we still need to convert but handle the value differently
-    if "sslmode=" in url:
-        if "/cloudsql/" in url:
-            # For Cloud SQL Unix socket connections, remove sslmode entirely
-            # as SSL is handled by the Cloud SQL proxy
-            import re
-            url = re.sub(r'[&?]sslmode=[^&]*', '', url)
-        else:
-            # For regular connections, convert sslmode to ssl
-            url = url.replace("sslmode=", "ssl=")
-    return url
-
-def _convert_sqlite_url(db_url: str) -> str:
-    """Convert sqlite:// URL to async format."""
-    return db_url.replace("sqlite://", "sqlite+aiosqlite://", 1)
-
-def _is_postgresql_url(db_url: str) -> bool:
-    """Check if URL is postgresql type."""
-    return db_url.startswith("postgresql://")
-
-def _is_postgres_url(db_url: str) -> bool:
-    """Check if URL is postgres type."""
-    return db_url.startswith("postgres://")
-
-def _is_sqlite_url(db_url: str) -> bool:
-    """Check if URL is sqlite type."""
-    return db_url.startswith("sqlite://")
-
-def _check_url_type(db_url: str) -> str:
-    """Determine URL type."""
-    if _is_postgresql_url(db_url): return "postgresql"
-    if _is_postgres_url(db_url): return "postgres"
-    if _is_sqlite_url(db_url): return "sqlite"
-    return "none"
-
-def _apply_url_conversion(db_url: str, url_type: str) -> str:
-    """Apply URL conversion based on type."""
-    if url_type == "postgresql": return _convert_postgresql_url(db_url)
-    if url_type == "postgres": return _convert_postgres_url(db_url)
-    if url_type == "sqlite": return _convert_sqlite_url(db_url)
-    return db_url
-
-def _convert_by_type(db_url: str, url_type: str) -> str:
-    """Convert URL based on type."""
-    return _apply_url_conversion(db_url, url_type)
-
-def _get_async_db_url(db_url: str) -> str:
-    """Convert sync database URL to async format."""
-    url_type = _check_url_type(db_url)
-    return _convert_by_type(db_url, url_type)
 
 
 def _get_pool_class_for_async(async_db_url: str):
@@ -284,20 +215,22 @@ def _create_async_session_factory(engine: AsyncEngine):
 
 
 def _validate_database_url():
-    """Validate database URL configuration."""
-    settings = get_settings()
-    db_url = settings.database_url
-    if not db_url:
-        logger.warning("Database URL not configured")
+    """Validate database URL configuration using DatabaseManager."""
+    try:
+        async_db_url = DatabaseManager.get_application_url_async()
+        if not async_db_url:
+            logger.warning("Database URL not configured")
+            return None
+        return async_db_url
+    except Exception as e:
+        logger.error(f"Failed to get database URL from DatabaseManager: {e}")
         return None
-    return db_url
 
-def _create_engine_components(db_url):
-    """Create engine components from database URL."""
-    async_db_url = _get_async_db_url(db_url)
+def _create_engine_components(async_db_url: str):
+    """Create engine components from async database URL."""
     pool_class = _get_pool_class_for_async(async_db_url)
     engine_args = _build_engine_args(pool_class)
-    return async_db_url, engine_args
+    return engine_args
 
 def _setup_global_engine_objects(engine):
     """Setup global engine and session factory objects."""
@@ -312,7 +245,7 @@ def _handle_engine_creation_error(e):
     
     # Try to set up resilience manager in degraded state
     try:
-        from .postgres_resilience import postgres_resilience
+        from netra_backend.app.db.postgres_resilience import postgres_resilience
         postgres_resilience.set_connection_health(False)
         logger.warning("PostgreSQL resilience manager set to degraded state")
     except ImportError:
@@ -322,6 +255,11 @@ def _handle_engine_creation_error(e):
 
 def _create_and_setup_engine(async_db_url: str, engine_args: dict):
     """Create engine and setup global objects with resilient configuration."""
+    # CRITICAL: Validate URL conversion to prevent sslmode regression
+    if not DatabaseManager.validate_application_url(async_db_url):
+        raise RuntimeError(f"CRITICAL: Database URL validation failed. "
+                          f"URL may contain incompatible parameters for asyncpg. URL: {async_db_url}")
+    
     # Add resilient connection arguments
     if "connect_args" not in engine_args:
         engine_args["connect_args"] = {}
@@ -339,20 +277,20 @@ def _create_and_setup_engine(async_db_url: str, engine_args: dict):
     _setup_global_engine_objects(engine)
     logger.info("PostgreSQL async engine created with resilient AsyncAdaptedQueuePool connection pooling")
 
-def _initialize_engine_with_url(db_url: str):
+def _initialize_engine_with_url(async_db_url: str):
     """Initialize engine with validated URL."""
-    async_db_url, engine_args = _create_engine_components(db_url)
+    engine_args = _create_engine_components(async_db_url)
     _create_and_setup_engine(async_db_url, engine_args)
 
 def _initialize_async_engine():
     """Initialize the async PostgreSQL engine."""
     logger.debug("_initialize_async_engine called")
     try:
-        db_url = _validate_database_url()
-        logger.debug(f"Database URL validated: {db_url is not None}")
-        if db_url:
+        async_db_url = _validate_database_url()
+        logger.debug(f"Database URL validated: {async_db_url is not None}")
+        if async_db_url:
             logger.debug(f"Initializing engine with URL...")
-            _initialize_engine_with_url(db_url)
+            _initialize_engine_with_url(async_db_url)
             logger.debug("Engine initialization completed")
         else:
             logger.error("Database URL is None or empty")
@@ -363,6 +301,19 @@ def _initialize_async_engine():
 
 # Initialize the async engine - moved to lazy initialization
 # _initialize_async_engine() is now called via initialize_postgres()
+
+def get_converted_async_db_url() -> str:
+    """
+    CRITICAL: Get properly converted async database URL with sslmode->ssl conversion.
+    
+    This function MUST be used by any component creating async engines to prevent
+    the recurring 'sslmode' parameter error with asyncpg.
+        
+    Returns:
+        Converted URL safe for use with asyncpg (sslmode converted to ssl)
+    """
+    return DatabaseManager.get_application_url_async()
+
 
 def initialize_postgres():
     """Initialize PostgreSQL connection if not already initialized."""

@@ -12,11 +12,8 @@ import sys
 import pytest
 from unittest.mock import patch, MagicMock
 
-
 # Add parent directory to path for imports
-sys.path.insert(0, str(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))))
 from dev_launcher.database_connector import DatabaseConnector, DatabaseType, ConnectionStatus
-
 
 @pytest.mark.asyncio
 async def test_redis_connection_works_with_python312():
@@ -44,7 +41,6 @@ async def test_redis_connection_works_with_python312():
     # The test should succeed with the fixed implementation
     assert result is True, "Redis connection should work with redis.asyncio on Python 3.12"
     assert redis_conn.last_error is None
-
 
 @pytest.mark.asyncio
 async def test_dev_launcher_database_validation_succeeds():
@@ -85,7 +81,6 @@ async def test_dev_launcher_database_validation_succeeds():
                 clickhouse_conn = connector.connections["main_clickhouse"]
                 assert clickhouse_conn.status == ConnectionStatus.CONNECTED
 
-
 def test_redis_asyncio_import_works():
     """
     Test that redis.asyncio can be imported successfully on Python 3.12.
@@ -106,7 +101,6 @@ def test_redis_asyncio_import_works():
     except ImportError:
         pytest.fail("redis.asyncio not available - need redis>=4.3.0")
 
-
 def test_fallback_to_aioredis_if_needed():
     """
     Test that the implementation falls back to aioredis if redis.asyncio is not available.
@@ -114,7 +108,7 @@ def test_fallback_to_aioredis_if_needed():
     This ensures backward compatibility for older environments.
     """
     # This test verifies the fallback logic exists
-    from dev_launcher.database_connector import DatabaseConnector
+    # from scripts.dev_launcher_database_connector import  # Should be mocked in tests DatabaseConnector
     
     # Read the source to verify fallback logic exists
     import inspect
@@ -124,7 +118,6 @@ def test_fallback_to_aioredis_if_needed():
     assert "import redis.asyncio" in source, "Should try redis.asyncio first"
     assert "import aioredis" in source, "Should fall back to aioredis if needed"
     assert "except ImportError" in source, "Should handle import errors gracefully"
-
 
 if __name__ == "__main__":
     # Run the tests

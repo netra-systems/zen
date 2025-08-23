@@ -4,17 +4,10 @@ Tests AsyncRateLimiter and AsyncCircuitBreaker with various scenarios
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -22,14 +15,11 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_utils import (
     AsyncCircuitBreaker,
-    # Add project root to path
     AsyncRateLimiter,
 )
 from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
-
 
 class TestAsyncRateLimiterComplete:
     """Complete tests for AsyncRateLimiter."""
@@ -125,7 +115,6 @@ class TestAsyncRateLimiterComplete:
         # First few should be fast (rate + burst)
         fast_requests = [t for t in burst_times if t < 0.1]
         assert len(fast_requests) >= 3  # rate + burst allowance
-
 
 class TestAsyncCircuitBreakerComplete:
     """Complete tests for AsyncCircuitBreaker."""

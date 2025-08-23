@@ -1,30 +1,20 @@
 """Unit tests for ToolDispatcher core operations."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import pytest
 from netra_backend.app.schemas import ToolInput
 
-# Add project root to path
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from .tool_dispatcher_helpers import (
-    # Add project root to path
+from netra_backend.tests.helpers.tool_dispatcher_helpers import (
     create_mock_tool,
     create_tool_input,
     verify_tool_result_error,
     verify_tool_result_success,
 )
-
 
 class TestToolDispatcherCoreOperations:
     """Test core dispatcher operations."""
@@ -34,16 +24,19 @@ class TestToolDispatcherCoreOperations:
         dispatcher = ToolDispatcher()
         self._verify_existing_tool_found(dispatcher)
         self._verify_nonexistent_tool_not_found(dispatcher)
+    @pytest.mark.asyncio
     async def test_dispatch_success(self):
         """Test successful tool dispatch."""
         tool, dispatcher = self._setup_successful_dispatch()
         result = await dispatcher.dispatch("test_tool", param1="value1", param2="value2")
         self._verify_successful_dispatch_result(result)
+    @pytest.mark.asyncio
     async def test_dispatch_tool_not_found(self):
         """Test dispatch with non-existent tool."""
         dispatcher = ToolDispatcher()
         result = await dispatcher.dispatch("nonexistent_tool", param="value")
         verify_tool_result_error(result, "Tool nonexistent_tool not found")
+    @pytest.mark.asyncio
     async def test_dispatch_tool_failure(self):
         """Test dispatch with failing tool."""
         failing_tool, dispatcher = self._setup_failing_dispatch()
@@ -56,11 +49,13 @@ class TestToolDispatcherCoreOperations:
         tool_input, error_message = self._setup_error_result_test()
         result = dispatcher._create_error_result(tool_input, error_message)
         self._verify_error_result(result, tool_input, error_message)
+    @pytest.mark.asyncio
     async def test_execute_tool_success(self):
         """Test _execute_tool method with success."""
         dispatcher, tool, tool_input, kwargs = self._setup_execute_tool_test()
         result = await dispatcher._execute_tool(tool_input, tool, kwargs)
         self._verify_execute_tool_success(result)
+    @pytest.mark.asyncio
     async def test_execute_tool_failure(self):
         """Test _execute_tool method with failure."""
         dispatcher, failing_tool, tool_input = self._setup_execute_tool_failure_test()
@@ -114,7 +109,7 @@ class TestToolDispatcherCoreOperations:
     def _verify_execute_tool_success(self, result) -> None:
         """Verify execute tool success result."""
         verify_tool_result_success(result, "test_tool")
-        from netra_backend.tests.helpers.tool_dispatcher_assertions import (
+        from netra_backend.tests.tool_dispatcher_assertions import (
             assert_simple_tool_payload,
         )
         assert_simple_tool_payload(result)

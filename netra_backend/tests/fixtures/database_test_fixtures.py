@@ -33,7 +33,6 @@ def async_session_mock():
     _setup_basic_session_methods(session)
     return session
 
-
 def _setup_basic_session_methods(session: AsyncMock) -> None:
     """Setup core AsyncSession methods with defaults."""
     session.add = MagicMock()
@@ -44,12 +43,10 @@ def _setup_basic_session_methods(session: AsyncMock) -> None:
     session.execute = AsyncMock()
     session.scalar = AsyncMock()
 
-
 async def _default_refresh(entity: Any) -> None:
     """Default refresh behavior - adds ID if missing."""
     if hasattr(entity, 'id') and not entity.id:
         entity.id = f"mock_id_{uuid.uuid4().hex[:8]}"
-
 
 @pytest.fixture
 def transaction_session_mock():
@@ -58,7 +55,6 @@ def transaction_session_mock():
     _setup_transaction_methods(session)
     return session
 
-
 def _setup_transaction_methods(session: AsyncMock) -> None:
     """Setup transaction-specific session methods."""
     _setup_basic_session_methods(session)
@@ -66,7 +62,6 @@ def _setup_transaction_methods(session: AsyncMock) -> None:
     session.flush = AsyncMock()
     session.merge = AsyncMock()
     session.expunge = MagicMock()
-
 
 # === Query Result Simulators ===
 
@@ -105,12 +100,10 @@ class QueryResultBuilder:
         """Build final query result mock."""
         return self._results[0] if self._results else self.with_empty_result()._results[0]
 
-
 @pytest.fixture
 def query_builder():
     """Create query result builder instance."""
     return QueryResultBuilder()
-
 
 # === Database Model Factories ===
 
@@ -124,7 +117,6 @@ def create_mock_user(**kwargs) -> Mock:
         is_active=kwargs.get('is_active', True)
     )
 
-
 def create_mock_thread(**kwargs) -> Mock:
     """Create mock Thread model instance."""
     return Mock(
@@ -135,7 +127,6 @@ def create_mock_thread(**kwargs) -> Mock:
         updated_at=kwargs.get('updated_at', datetime.now())
     )
 
-
 def create_mock_message(**kwargs) -> Mock:
     """Create mock Message model instance."""
     return Mock(
@@ -145,7 +136,6 @@ def create_mock_message(**kwargs) -> Mock:
         role=kwargs.get('role', 'user'),
         created_at=kwargs.get('created_at', datetime.now())
     )
-
 
 # === Error Simulation Utilities ===
 
@@ -170,12 +160,10 @@ class DatabaseErrorSimulator:
         import asyncio
         getattr(self.session, operation).side_effect = asyncio.TimeoutError()
 
-
 @pytest.fixture
 def error_simulator(async_session_mock):
     """Create database error simulator."""
     return DatabaseErrorSimulator(async_session_mock)
-
 
 # === Transaction Context Managers ===
 
@@ -201,12 +189,10 @@ class MockTransactionContext:
             await self.session.commit()
         self._entered = False
 
-
 @pytest.fixture
 def transaction_context(transaction_session_mock):
     """Create mock transaction context."""
     return MockTransactionContext(transaction_session_mock)
-
 
 # === Connection Pool Simulators ===
 
@@ -235,12 +221,10 @@ class MockConnectionPool:
             self._connections.remove(connection)
             self.active_connections -= 1
 
-
 @pytest.fixture
 def connection_pool():
     """Create mock connection pool."""
     return MockConnectionPool()
-
 
 # === ClickHouse Test Utilities ===
 
@@ -265,12 +249,10 @@ class ClickHouseQueryMocker:
         
         return []  # Default empty result
 
-
 @pytest.fixture
 def clickhouse_mocker():
     """Create ClickHouse query mocker."""
     return ClickHouseQueryMocker()
-
 
 # === Batch Operation Helpers ===
 
@@ -285,11 +267,9 @@ def create_batch_insert_mock(session: AsyncMock, batch_size: int = 100) -> None:
     session.flush.side_effect = mock_flush
     session.batch_committed = batches_committed
 
-
 def create_bulk_result_set(count: int, factory: Callable) -> List[Any]:
     """Create bulk result set using model factory."""
     return [factory(id=f"bulk_{i}") for i in range(count)]
-
 
 # === Migration Test Helpers ===
 
@@ -307,7 +287,6 @@ class MigrationTestHelper:
     def verify_migration_state(self, expected_changes: List[tuple]) -> bool:
         """Verify migration applied correctly."""
         return self.schema_changes == expected_changes
-
 
 @pytest.fixture
 def migration_helper(async_session_mock):

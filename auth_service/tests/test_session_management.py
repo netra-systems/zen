@@ -40,13 +40,17 @@ class TestSessionCreation:
         assert isinstance(session_id, str)
 
     def test_create_session_redis_failure(self, session_manager):
-        """Test session creation with Redis failure"""
+        """Test session creation with Redis failure falls back to memory"""
         user_data = {"email": "test@example.com"}
+        # Simulate Redis failure by setting client to None
         session_manager.redis_client = None
+        session_manager.redis_enabled = False
         
+        # Session should still be created using memory fallback
         session_id = session_manager.create_session("user123", user_data)
         
-        assert session_id is None
+        assert session_id is not None
+        assert isinstance(session_id, str)
 
 
 class TestSessionValidation:
@@ -64,7 +68,7 @@ class TestSessionValidation:
         """Test validation of valid session"""
         session_data = {
             "user_id": "user123",
-            "last_activity": datetime.utcnow().isoformat()
+            "last_activity": datetime.now(timezone.utc).isoformat()
         }
         session_manager.redis_client.get.return_value = json.dumps(session_data)
         session_manager.redis_client.setex.return_value = True
@@ -76,7 +80,7 @@ class TestSessionValidation:
     @pytest.mark.asyncio
     async def test_validate_session_expired(self, session_manager):
         """Test validation of expired session"""
-        old_time = datetime.utcnow() - timedelta(hours=25)
+        old_time = datetime.now(timezone.utc) - timedelta(hours=25)
         session_data = {
             "user_id": "user123",
             "last_activity": old_time.isoformat()
@@ -103,7 +107,7 @@ class TestSessionExpiry:
     @pytest.mark.asyncio
     async def test_session_auto_expiry(self, session_manager):
         """Test automatic session expiry via validate_session"""
-        expired_time = datetime.utcnow() - timedelta(hours=25)
+        expired_time = datetime.now(timezone.utc) - timedelta(hours=25)
         session_data = {
             "user_id": "user123",
             "last_activity": expired_time.isoformat()
@@ -120,7 +124,7 @@ class TestSessionExpiry:
         """Test session TTL refresh on activity"""
         session_data = {
             "user_id": "user123",
-            "last_activity": datetime.utcnow().isoformat()
+            "last_activity": datetime.now(timezone.utc).isoformat()
         }
         session_manager.redis_client.get.return_value = json.dumps(session_data)
         
@@ -144,7 +148,7 @@ class TestSessionRefresh:
         """Test refreshing active session before expiry"""
         session_data = {
             "user_id": "user123",
-            "last_activity": datetime.utcnow().isoformat()
+            "last_activity": datetime.now(timezone.utc).isoformat()
         }
         session_manager.redis_client.get.return_value = json.dumps(session_data)
         session_manager.redis_client.setex.return_value = True

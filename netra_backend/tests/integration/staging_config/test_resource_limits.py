@@ -5,17 +5,10 @@ Validates CPU, memory, and other resource limits
 are enforced in the staging environment.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import os
@@ -25,11 +18,7 @@ from typing import Dict, List
 import httpx
 import psutil
 
-# Add project root to path
-from .base import StagingConfigTestBase
-
-# Add project root to path
-
+from netra_backend.tests.integration.base import StagingConfigTestBase
 
 class TestResourceLimits(StagingConfigTestBase):
     """Test resource limits in staging."""

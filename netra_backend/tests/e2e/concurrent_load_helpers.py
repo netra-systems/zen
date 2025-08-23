@@ -16,7 +16,6 @@ from typing import Any, Dict, List
 import aiohttp
 import websockets
 
-
 class ConcurrentUserLoadTest:
     """Test suite for concurrent user load on demo system"""
     
@@ -337,7 +336,6 @@ class ConcurrentUserLoadTest:
         else:
             return max(self.response_times)
 
-
 def _create_priority_headers(user_id: str, priority: str) -> Dict[str, str]:
     """Create priority request headers."""
     return {
@@ -353,7 +351,6 @@ def create_priority_user_request(priority: str, user_id: str):
         'headers': _create_priority_headers(user_id, priority),
         'json_data': {'user_id': user_id, 'priority': priority}
     }
-
 
 def _extract_priority_times(results_list: List[Dict]) -> tuple:
     """Extract wait times by priority level."""
@@ -394,7 +391,6 @@ def validate_fair_queuing_results(results_list: List[Dict]) -> Dict[str, bool]:
     validation['starvation_prevented'] = _check_starvation_prevented(results_list)
     validation['fair_queuing'] = _check_fair_queuing(results_list)
     return validation
-
 
 def _analyze_connection_metrics(connections: List[int]) -> tuple:
     """Analyze connection status metrics."""

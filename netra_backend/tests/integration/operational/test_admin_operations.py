@@ -14,17 +14,10 @@ REQUIREMENTS:
 - Admin operations efficiency validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import uuid
@@ -33,11 +26,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.integration.operational.shared_fixtures import operational_infrastructure
-
-# Add project root to path
-
 
 class TestAdminOperations:
     """BVJ: Enables efficient admin operations supporting enterprise customers."""
@@ -201,7 +190,6 @@ class TestAdminOperations:
         assert invoices >= payments  # More invoices than payments is normal
         assert revenue > 0  # Revenue should be positive
         assert revenue / invoices < 200  # Average invoice shouldn't be too high
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

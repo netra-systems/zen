@@ -10,7 +10,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 
-from .core import ComplianceConfig, Violation, ViolationBuilder
+from scripts.compliance.core import ComplianceConfig, Violation, ViolationBuilder
 
 
 class TypeChecker:

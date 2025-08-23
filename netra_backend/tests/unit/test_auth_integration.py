@@ -13,17 +13,10 @@ Target Coverage:
 - Error scenarios: 401 Unauthorized, 404 User Not Found, service failures
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import uuid
 from datetime import datetime, timedelta
@@ -36,10 +29,8 @@ from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.auth_integration.auth import (
     create_access_token,
-    # Add project root to path
     get_current_user,
     get_current_user_optional,
     get_password_hash,
@@ -51,7 +42,6 @@ from netra_backend.app.auth_integration.auth import (
 )
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.db.models_postgres import User
-
 
 class TestAuthIntegration:
     """Test suite for Auth Integration functionality."""

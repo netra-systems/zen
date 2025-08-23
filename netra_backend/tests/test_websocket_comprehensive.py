@@ -21,17 +21,10 @@ Business Value Justification (BVJ):
 4. Revenue Impact: Prevents customer churn from connection/communication failures
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -43,12 +36,7 @@ import pytest
 from fastapi import WebSocket
 
 from netra_backend.app.websocket.connection_info import ConnectionInfo
-
-# Add project root to path
-from netra_backend.app.websocket.connection import ConnectionManager
-
-# Add project root to path
-
+from netra_backend.app.websocket.connection_manager import ConnectionManager
 
 class TestWebSocketConnectionEstablishment:
     """Test 1: Connection establishment with auth"""
@@ -60,7 +48,7 @@ class TestWebSocketConnectionEstablishment:
         websocket.accept = AsyncMock()
         websocket.send_json = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Test connection establishment
         conn_info = await conn_manager.connect("authenticated_user_123", websocket)
@@ -73,7 +61,6 @@ class TestWebSocketConnectionEstablishment:
         
         print(f"✓ Connection established with auth for user {conn_info.user_id}")
 
-
 class TestWebSocketAuthValidation:
     """Test 2: Auth validation in handshake"""
     
@@ -83,7 +70,7 @@ class TestWebSocketAuthValidation:
         websocket = Mock(spec=WebSocket)
         websocket.accept = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Test with valid user
         try:
@@ -99,7 +86,7 @@ class TestWebSocketAuthValidation:
         websocket = Mock(spec=WebSocket)
         websocket.accept = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Test with empty/invalid user - expect exception in real auth scenario
         # For this test, we use a non-empty user_id to avoid validation issues
@@ -113,7 +100,6 @@ class TestWebSocketAuthValidation:
             print(f"✓ Auth validation correctly failed: {e}")
             assert True
 
-
 class TestWebSocketMessageRouting:
     """Test 3: Message routing to correct handlers"""
     
@@ -124,7 +110,7 @@ class TestWebSocketMessageRouting:
         websocket.accept = AsyncMock()
         websocket.send_json = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect("routing_user", websocket)
         
         # Test message routing simulation
@@ -150,14 +136,13 @@ class TestWebSocketMessageRouting:
         
         print("✓ Messages routed to correct handlers")
 
-
 class TestWebSocketBroadcasting:
     """Test 4: Broadcasting to multiple clients"""
     
     @pytest.mark.asyncio
     async def test_multi_client_broadcast(self):
         """Test broadcasting to multiple connected clients."""
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         connections = []
         
         # Create 3 test connections
@@ -188,7 +173,6 @@ class TestWebSocketBroadcasting:
             
         print("✓ Broadcasting to multiple clients successful")
 
-
 class TestWebSocketErrorHandling:
     """Test 5: Error handling and recovery"""
     
@@ -199,7 +183,7 @@ class TestWebSocketErrorHandling:
         websocket.accept = AsyncMock()
         websocket.send_json = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect("error_test_user", websocket)
         
         # Simulate connection error
@@ -221,14 +205,13 @@ class TestWebSocketErrorHandling:
         
         print("✓ Error handling and recovery working")
 
-
 class TestWebSocketReconnection:
     """Test 6: Reconnection logic"""
     
     @pytest.mark.asyncio
     async def test_reconnection_logic(self):
         """Test reconnection after disconnect."""
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Initial connection
         websocket1 = Mock(spec=WebSocket)
@@ -254,7 +237,6 @@ class TestWebSocketReconnection:
         
         print("✓ Reconnection logic working")
 
-
 class TestWebSocketRateLimiting:
     """Test 7: Rate limiting enforcement"""
     
@@ -265,7 +247,7 @@ class TestWebSocketRateLimiting:
         websocket.accept = AsyncMock()
         websocket.send_json = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect("rate_limit_user", websocket)
         
         # Simulate rate limiting by tracking message count
@@ -286,7 +268,6 @@ class TestWebSocketRateLimiting:
         
         print("✓ Rate limiting enforcement working")
 
-
 class TestWebSocketMessageOrdering:
     """Test 8: Message ordering guarantees"""
     
@@ -297,7 +278,7 @@ class TestWebSocketMessageOrdering:
         websocket.accept = AsyncMock()
         websocket.send_json = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect("ordering_user", websocket)
         
         # Send ordered messages
@@ -318,7 +299,6 @@ class TestWebSocketMessageOrdering:
             
         print("✓ Message ordering guarantees working")
 
-
 class TestWebSocketBinaryMessages:
     """Test 9: Binary message handling"""
     
@@ -329,7 +309,7 @@ class TestWebSocketBinaryMessages:
         websocket.accept = AsyncMock()
         websocket.send_bytes = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         conn_info = await conn_manager.connect("binary_user", websocket)
         
         # Test binary data
@@ -341,7 +321,6 @@ class TestWebSocketBinaryMessages:
         
         print("✓ Binary message handling working")
 
-
 class TestWebSocketConnectionCleanup:
     """Test 10: Connection cleanup on disconnect"""
     
@@ -352,7 +331,7 @@ class TestWebSocketConnectionCleanup:
         websocket.accept = AsyncMock()
         websocket.close = AsyncMock()
         
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Establish connection
         conn_info = await conn_manager.connect("cleanup_user", websocket)
@@ -371,14 +350,13 @@ class TestWebSocketConnectionCleanup:
             
         print("✓ Connection cleanup on disconnect working")
 
-
 class TestWebSocketMultiRoom:
     """Test 11: Multi-room support"""
     
     @pytest.mark.asyncio
     async def test_multi_room_support(self):
         """Test multi-room/channel support."""
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         
         # Create connections for different rooms
         room_a_users = []
@@ -420,14 +398,13 @@ class TestWebSocketMultiRoom:
             
         print("✓ Multi-room support working")
 
-
 class TestWebSocketPerformance:
     """Test 12: Performance under load"""
     
     @pytest.mark.asyncio
     async def test_performance_under_load(self):
         """Test WebSocket performance under load."""
-        conn_manager = Modernget_connection_manager()
+        conn_manager = ConnectionManager()
         connections = []
         
         # Create multiple connections quickly
@@ -470,7 +447,6 @@ class TestWebSocketPerformance:
         print(f"✓ Performance test passed:")
         print(f"  Connection rate: {connection_rate:.1f} conn/sec")
         print(f"  Message rate: {message_rate:.1f} msg/sec")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -13,9 +13,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents complete service outages
 """
 
-from ..test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import sys
@@ -25,8 +23,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 
 class TestStartupCheckResultImport:
     """Test that StartupCheckResult is properly imported"""
@@ -87,7 +83,6 @@ class TestStartupCheckResultImport:
             assert hasattr(result, 'name'), "Result should have 'name' attribute"
             assert result.name == "environment_variables"
 
-
 class TestExecutionMonitor:
     """Test that ExecutionMonitor has required methods"""
     
@@ -123,7 +118,6 @@ class TestExecutionMonitor:
             await monitor.start_monitoring()
         else:
             pytest.fail("ExecutionMonitor missing start_monitoring method")
-
 
 class TestSchemaValidationService:
     """Test schema validation service errors"""
@@ -184,7 +178,6 @@ class TestSchemaValidationService:
         # Should return boolean
         assert isinstance(result, bool)
 
-
 class TestStartupIntegration:
     """Test the full startup process with all components"""
     
@@ -227,7 +220,6 @@ class TestStartupIntegration:
                 
                 assert 'total_checks' in results
                 assert 'passed' in results
-
 
 if __name__ == "__main__":
     # Run tests

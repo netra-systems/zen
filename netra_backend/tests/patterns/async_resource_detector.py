@@ -7,7 +7,6 @@ Maximum 300 lines, functions ≤8 lines
 import asyncio
 from typing import Any, Dict, List
 
-
 class AsyncResourceLeakDetector:
     """Detect async resource leaks in tests"""
     

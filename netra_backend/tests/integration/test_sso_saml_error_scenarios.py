@@ -10,17 +10,10 @@ Business Value Justification (BVJ):
 Architecture Requirements: File ≤300 lines, Functions ≤8 lines
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import base64
 import json
@@ -31,32 +24,26 @@ from typing import Dict
 
 import pytest
 
-# Add project root to path
-from .sso_saml_components import (
+from netra_backend.tests.integration.sso_saml_components import (
     EnterpriseTokenManager,
     MockIdPErrorGenerator,
-    # Add project root to path
     SAMLAssertionValidator,
 )
-
 
 @pytest.fixture
 async def saml_validator():
     """SAML assertion validator fixture"""
     return SAMLAssertionValidator()
 
-
 @pytest.fixture
 async def token_manager():
     """Enterprise token manager fixture"""
     return EnterpriseTokenManager()
 
-
 @pytest.fixture
 async def enterprise_tenant_id():
     """Enterprise tenant ID fixture"""
     return "enterprise_tenant_12345"
-
 
 @pytest.fixture
 async def valid_saml_assertion():
@@ -73,7 +60,6 @@ async def valid_saml_assertion():
         }
     }
     return base64.b64encode(json.dumps(assertion_data).encode()).decode()
-
 
 @pytest.mark.asyncio  
 class TestSSLSAMLErrorScenarios:

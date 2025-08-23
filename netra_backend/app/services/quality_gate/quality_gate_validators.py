@@ -74,7 +74,7 @@ class QualityValidator(QualityValidatorInterface):
         """Validate content and return detailed quality results"""
         from datetime import UTC, datetime
 
-        from ..quality_gate_service import QualityGateService
+        from netra_backend.app.services.quality_gate_service import QualityGateService
         
         # Convert string content_type to ContentType enum
         content_type_enum = self._convert_content_type(content_type)

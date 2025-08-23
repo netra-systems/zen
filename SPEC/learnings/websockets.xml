@@ -2,8 +2,10 @@
 <learnings>
   <metadata>
     <category>WebSockets</category>
-    <last_updated>2025-01-21</last_updated>
-    <last_edited>2025-08-21T08:47:29.890818</last_edited>
+    <last_updated>2025-08-22</last_updated>
+    <last_edited>2025-08-22T10:00:00</last_edited>
+    <critical>true</critical>
+    <business_impact>Critical - Real-time functionality depends on WebSocket stability</business_impact>
   </metadata>
   <learning id="websocket-jwt-subprotocol-encoding">
     <title>JWT Token Encoding for WebSocket Subprotocols</title>
@@ -74,5 +76,180 @@
             Browser WebSocket API doesn't support custom headers directly.
             Must use subprotocol or cookies for authentication.
         </browser_limitations>
+  </learning>
+  
+  <learning id="websocket-route-registration-cold-start">
+    <title>WebSocket Route Registration Critical for Cold Start</title>
+    <description>
+            WebSocket endpoints must be properly registered during application startup.
+            Missing route registration causes complete WebSocket functionality failure.
+        </description>
+    <problem>
+            Backend starts successfully but WebSocket connections fail with 404 errors.
+            Frontend cannot establish real-time connections to backend.
+        </problem>
+    <root_cause>
+            WebSocket routes not registered in FastAPI application factory.
+            Route modules not imported during app initialization.
+        </root_cause>
+    <solution>
+            1. Create comprehensive WebSocket route module
+            2. Register routes in app factory configuration
+            3. Implement multiple WebSocket endpoint patterns for compatibility
+        </solution>
+    <implementation>
+            Files created/modified:
+            - netra_backend/app/routes/websocket.py: Main WebSocket endpoints
+            - netra_backend/app/core/app_factory_route_imports.py: Route imports
+            - netra_backend/app/core/app_factory_route_configs.py: Route configuration
+            
+            Endpoints implemented:
+            - /ws: Main WebSocket endpoint
+            - /ws/{user_id}: User-specific WebSocket
+            - /ws/v1/{user_id}: Versioned WebSocket API
+            - /ws/config: WebSocket configuration endpoint
+            - /ws/info: WebSocket information endpoint
+        </implementation>
+    <testing>
+            - Test WebSocket connection to /ws endpoint
+            - Verify authentication protection (403 without valid token)
+            - Check all WebSocket endpoints respond correctly
+            - Validate WebSocket upgrade headers
+        </testing>
+    <prevention>
+            - Always register WebSocket routes in app factory
+            - Test WebSocket connectivity in cold start validation
+            - Include WebSocket endpoints in health checks
+            - Document WebSocket endpoint patterns clearly
+        </prevention>
+  </learning>
+  
+  <learning id="websocket-authentication-protection">
+    <title>WebSocket Authentication Protection in Cold Start</title>
+    <description>
+            WebSocket endpoints must be properly protected with authentication.
+            Unauthenticated connections should be rejected with clear error messages.
+        </description>
+    <problem>
+            WebSocket connections were accessible without authentication.
+            Security vulnerability allowing unauthorized real-time access.
+        </problem>
+    <solution>
+            1. Implement JWT token validation for WebSocket connections
+            2. Return 403 Forbidden for unauthenticated connections
+            3. Support multiple authentication methods (header, subprotocol)
+        </solution>
+    <implementation>
+            Authentication methods supported:
+            - Authorization header with Bearer token
+            - Subprotocol with base64URL-encoded JWT
+            - Fallback to query parameter (development only)
+            
+            Error handling:
+            - 403 Forbidden for missing/invalid tokens
+            - Clear error messages for debugging
+            - Proper WebSocket close codes
+        </implementation>
+    <verification>
+            - Unauthenticated connections rejected with 403
+            - Valid tokens allow successful connections
+            - Invalid tokens properly rejected
+            - Error messages provide clear feedback
+        </verification>
+  </learning>
+  
+  <learning id="websocket-cors-dynamic-ports">
+    <title>WebSocket CORS Configuration for Dynamic Development Ports</title>
+    <description>
+            WebSocket connections require proper CORS configuration that supports
+            dynamic port allocation during development.
+        </description>
+    <problem>
+            WebSocket connections blocked by CORS policies in development.
+            Dynamic port allocation not supported by static CORS configuration.
+        </problem>
+    <solution>
+            Enhanced DynamicCORSMiddleware with:
+            - Service discovery integration
+            - Dynamic localhost port pattern matching
+            - Cached regex patterns for performance
+            - Environment-specific CORS rules
+        </solution>
+    <implementation>
+            File: auth_service/main.py (lines 246-350)
+            Features:
+            - Automatic port discovery from .service_discovery/*.json
+            - Cached pattern compilation for performance
+            - Support for localhost:* patterns
+            - WebSocket-specific headers (Upgrade, Connection)
+        </implementation>
+    <testing>
+            - Test WebSocket connections from dynamic frontend ports
+            - Verify CORS headers include WebSocket-specific values
+            - Check pattern caching works correctly
+            - Validate environment-specific behavior
+        </testing>
+  </learning>
+  
+  <learning id="websocket-frontend-configuration">
+    <title>Frontend WebSocket Configuration Alignment</title>
+    <description>
+            Frontend WebSocket configuration must align with backend endpoint patterns
+            and authentication requirements.
+        </description>
+    <problem>
+            Frontend WebSocket URLs not matching backend endpoint configuration.
+            Authentication token passing not working correctly.
+        </problem>
+    <solution>
+            1. Simplified WebSocket URL to /ws for consistency
+            2. Updated authentication token handling
+            3. Aligned with service discovery port allocation
+        </solution>
+    <implementation>
+            File: frontend/.env.local
+            Changes:
+            - WebSocket URL simplified to /ws
+            - Removed complex versioned URL patterns
+            - Aligned with backend port configuration
+            
+            Authentication:
+            - Base64URL encode JWT tokens for subprotocol
+            - Support Authorization header when available
+            - Graceful fallback for different auth methods
+        </implementation>
+    <verification>
+            - Frontend can establish WebSocket connections
+            - Authentication tokens passed correctly
+            - Dynamic port changes handled automatically
+            - Connection persistence works across page reloads
+        </verification>
+  </learning>
+  
+  <learning id="websocket-cold-start-testing">
+    <title>WebSocket Testing in Cold Start Validation</title>
+    <description>
+            WebSocket functionality must be validated as part of cold start testing
+            to ensure real-time features work correctly.
+        </description>
+    <test_scenarios>
+            1. WebSocket endpoint accessibility
+            2. Authentication protection verification
+            3. Connection establishment and persistence
+            4. Message exchange functionality
+            5. Graceful connection closure
+        </test_scenarios>
+    <implementation>
+            Test scripts:
+            - test_websocket_simple.py: Basic connectivity test
+            - test_websocket_auth.py: Authentication flow test
+            - Integration with e2e test suite
+        </implementation>
+    <critical_validation>
+            - WebSocket upgrade succeeds with valid auth
+            - Unauthenticated connections properly rejected
+            - Real-time message exchange works
+            - Connection handling is stable
+        </critical_validation>
   </learning>
 </learnings>

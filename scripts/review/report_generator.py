@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-from .core import ReviewConfig, ReviewData
+from scripts.review.core import ReviewConfig, ReviewData
 
 
 class ReportGenerator:

@@ -4,17 +4,10 @@ Testing database operations with mocked connections for reliability.
 Each function ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -28,7 +21,6 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession
-
 
 class TestComprehensiveDatabaseOperations:
     """Comprehensive database tests covering all 12 requirements."""
@@ -475,7 +467,6 @@ class TestComprehensiveDatabaseOperations:
         assert mock_user.updated_at >= original_time
         assert mock_user.full_name == "Updated Name"
 
-
 # Helper functions ≤8 lines each
 async def cleanup_test_data(session: AsyncSession, username_pattern: str) -> None:
     """Clean up test data matching pattern."""
@@ -483,7 +474,6 @@ async def cleanup_test_data(session: AsyncSession, username_pattern: str) -> Non
         text(f"DELETE FROM users WHERE username LIKE '{username_pattern}%'")
     )
     await session.commit()
-
 
 async def verify_data_consistency(session: AsyncSession) -> bool:
     """Verify database data consistency."""

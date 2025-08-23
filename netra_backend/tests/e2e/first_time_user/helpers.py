@@ -21,7 +21,6 @@ from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.services.demo_service import DemoService
 
-
 @dataclass
 class FirstTimeUserMetrics:
     """Track first-time user conversion metrics"""
@@ -31,7 +30,6 @@ class FirstTimeUserMetrics:
     upgrade_prompt_time: Optional[datetime] = None
     conversion_time: Optional[datetime] = None
     abandonment_time: Optional[datetime] = None
-
 
 class FirstTimeUserTestHelpers:
     """Shared helper methods for first-time user E2E tests"""
@@ -89,19 +87,16 @@ class FirstTimeUserTestHelpers:
         simulator.analyze_current_usage = AsyncMock()
         return simulator
 
-
 # Shared fixtures
 @pytest.fixture
 async def conversion_environment():
     """Setup complete conversion test environment"""
     return await FirstTimeUserTestHelpers.create_conversion_environment()
 
-
 @pytest.fixture
 def cost_savings_calculator():
     """Setup cost savings calculator for value demonstration"""
     return FirstTimeUserTestHelpers.init_cost_savings_calculator()
-
 
 @pytest.fixture
 def ai_provider_simulator():

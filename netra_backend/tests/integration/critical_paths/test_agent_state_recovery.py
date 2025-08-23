@@ -11,17 +11,10 @@ L3 Test: Uses real state persistence with recovery mechanisms.
 Recovery target: <30 seconds recovery time with full context preservation.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -43,7 +36,6 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.exceptions_base import (
     NetraException,
@@ -52,10 +44,7 @@ from netra_backend.app.core.exceptions_base import (
 from netra_backend.app.redis_manager import RedisManager
 from test_framework.mock_utils import mock_justified
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class AgentStateType(Enum):
     """Types of agent state for recovery testing."""
@@ -64,7 +53,6 @@ class AgentStateType(Enum):
     MEMORY_STATE = "memory_state"
     TOOL_STATE = "tool_state"
     WORKFLOW_STATE = "workflow_state"
-
 
 class StateCheckpoint:
     """Represents a state checkpoint for recovery."""
@@ -101,7 +89,6 @@ class StateCheckpoint:
         checkpoint.created_at = datetime.fromisoformat(data["created_at"])
         checkpoint.version = data.get("version", 1)
         return checkpoint
-
 
 class AgentStateRecoveryManager:
     """Manager for agent state persistence and recovery."""
@@ -279,7 +266,6 @@ class AgentStateRecoveryManager:
             "max_recovery_time": max(recovery_times) if recovery_times else 0,
             "under_30s_recoveries": len([t for t in recovery_times if t < 30.0])
         }
-
 
 class RecoverableAgent(BaseSubAgent):
     """Agent with state recovery capabilities."""
@@ -464,7 +450,6 @@ class RecoverableAgent(BaseSubAgent):
             "memory_entries": len(self.memory_state),
             "last_heartbeat": self.last_heartbeat
         }
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -715,7 +700,6 @@ class TestAgentStateRecoveryL3:
         metrics = recovery_manager.get_recovery_metrics()
         assert metrics["success_rate"] == 1.0
         assert metrics["average_recovery_time"] < 30.0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

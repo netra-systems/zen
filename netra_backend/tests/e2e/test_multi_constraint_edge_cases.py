@@ -4,27 +4,18 @@ Tests edge cases in multi-constraint optimization.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from typing import Dict, List
 
 import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
 
-# Add project root to path
-from netra_backend.tests.multi_constraint_test_helpers import (
+from netra_backend.tests.e2e.multi_constraint_test_helpers import (
     build_multi_constraint_setup,
-    # Add project root to path
     create_agent_instances,
     create_impossible_constraints_state,
     create_minimal_constraint_state,
@@ -34,13 +25,11 @@ from netra_backend.tests.multi_constraint_test_helpers import (
     validate_impossible_constraints_handling,
 )
 
-
 @pytest.fixture(scope="function")
 def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for multi-constraint optimization testing."""
     agents = create_agent_instances(real_llm_manager, real_tool_dispatcher)
     return build_multi_constraint_setup(agents, real_llm_manager, real_websocket_manager)
-
 
 class TestMultiConstraintEdgeCases:
     """Test edge cases in multi-constraint optimization."""
@@ -101,12 +90,10 @@ class TestMultiConstraintEdgeCases:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_constraint_overflow_results(results, state)
 
-
 def validate_minimal_constraint_results(results: List[Dict]) -> None:
     """Validate minimal constraint optimization results."""
     validate_basic_workflow_execution(results)
     validate_completed_or_fallback_states(results)
-
 
 def validate_contradictory_constraint_results(results: List[Dict], state) -> None:
     """Validate contradictory constraint handling results."""
@@ -117,7 +104,6 @@ def validate_contradictory_constraint_results(results: List[Dict], state) -> Non
     valid_states = [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED]
     assert triage_result['agent_state'] in valid_states
 
-
 def validate_boundary_condition_results(results: List[Dict], state) -> None:
     """Validate boundary condition test results."""
     validate_basic_workflow_execution(results)
@@ -127,13 +113,11 @@ def validate_boundary_condition_results(results: List[Dict], state) -> None:
     assert 'quality' in constraints
     validate_completed_or_fallback_states(results)
 
-
 def validate_zero_constraint_results(results: List[Dict], state) -> None:
     """Validate zero constraint scenario results."""
     validate_basic_workflow_execution(results)
     assert state.metadata.get('explicit_constraints') == 0
     validate_completed_or_fallback_states(results)
-
 
 def validate_constraint_overflow_results(results: List[Dict], state) -> None:
     """Validate constraint overflow handling results."""

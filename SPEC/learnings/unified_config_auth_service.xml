@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Unified Configuration for Auth Service</name>
+        <type>Learning</type>
+        <version>1.0</version>
+        <created>2025-08-23</created>
+        <description>Learning from implementing unified configuration in auth service while maintaining service independence</description>
+    </metadata>
+
+    <context>
+        <problem>
+            Auth service had its own configuration system instead of using the unified configuration,
+            violating the principle that all services should use unified config while remaining independent.
+        </problem>
+        <solution>
+            Implemented unified configuration import in auth service with proper fallback handling
+            for standalone operation, maintaining service independence while using unified settings.
+        </solution>
+    </context>
+
+    <learnings>
+        <learning id="unified-config-with-independence">
+            <title>Unified Configuration with Service Independence</title>
+            <description>
+                Services must use unified configuration for runtime settings while maintaining
+                their own service-specific optimizations and logic. This ensures consistency
+                while preserving independence per the independent services rule.
+            </description>
+            <implementation>
+                Auth service now imports unified config with graceful fallback:
+                - Try to import from netra_backend.app.config
+                - Handle ImportError for standalone operation
+                - Maintain auth-specific database constants
+            </implementation>
+            <benefit>
+                Achieves configuration consistency without creating service dependencies,
+                enabling both unified management and independent deployment.
+            </benefit>
+        </learning>
+
+        <learning id="lazy-loading-pattern">
+            <title>Lazy Loading Pattern for Cross-Service Config</title>
+            <description>
+                Use lazy loading pattern with get_settings() function to avoid circular imports
+                when services need to access unified configuration from the main backend.
+            </description>
+            <implementation>
+                ```python
+                def get_settings():
+                    """Get settings lazily to avoid circular import."""
+                    try:
+                        from netra_backend.app.config import get_config
+                        return get_config()
+                    except ImportError:
+                        # Handle standalone operation
+                        return None
+                
+                settings = get_settings()
+                ```
+            </implementation>
+            <benefit>
+                Prevents circular import issues while allowing configuration sharing.
+            </benefit>
+        </learning>
+
+        <learning id="service-specific-constants">
+            <title>Preserve Service-Specific Configuration Constants</title>
+            <description>
+                While using unified config for runtime settings, services should maintain
+                their own optimized constants for service-specific behavior like database
+                pool sizes and timeouts.
+            </description>
+            <implementation>
+                Auth service maintains AuthDatabaseConfig with:
+                - Smaller pool size (5 vs backend's 20)
+                - Shorter timeouts (15s vs backend's 30s)
+                - Conservative overflow (10 vs backend's 30)
+                These are optimized for auth workload characteristics.
+            </implementation>
+            <rationale>
+                Auth service handles authentication with lighter but critical workloads,
+                requiring different optimization parameters than the main backend.
+            </rationale>
+        </learning>
+
+        <learning id="graceful-config-fallback">
+            <title>Graceful Configuration Fallback Strategy</title>
+            <description>
+                Services accessing unified config must handle cases where the main backend
+                is not available, enabling standalone testing and deployment scenarios.
+            </description>
+            <implementation>
+                - Try to get setting from unified config
+                - Catch AttributeError/ImportError gracefully
+                - Fall back to service defaults or debug logging
+                - Log configuration source for debugging
+            </implementation>
+            <example>
+                ```python
+                try:
+                    should_log = getattr(settings, 'log_async_checkout', False) if settings else False
+                except Exception:
+                    should_log = False
+                ```
+            </example>
+        </learning>
+
+        <learning id="logging-control-unification">
+            <title>Unified Logging Control Across Services</title>
+            <description>
+                Runtime logging behavior should be controlled through unified configuration
+                to ensure consistent observability across all services.
+            </description>
+            <implementation>
+                Both backend and auth service now check settings.log_async_checkout
+                for consistent connection logging behavior across services.
+            </implementation>
+            <benefit>
+                Single point of control for logging verbosity across entire platform.
+            </benefit>
+        </learning>
+    </learnings>
+
+    <implementation-checklist>
+        <item>✅ Backend uses unified config with get_settings() pattern</item>
+        <item>✅ Auth service imports unified config with fallback</item>
+        <item>✅ Service-specific constants preserved</item>
+        <item>✅ Graceful handling of missing config</item>
+        <item>✅ Consistent logging control</item>
+        <item>✅ No circular import issues</item>
+        <item>✅ Service independence maintained</item>
+    </implementation-checklist>
+
+    <technical-details>
+        <files-modified>
+            <file>auth_service/auth_core/database/connection_events.py</file>
+        </files-modified>
+        
+        <functions-added>
+            <function>
+                <name>get_settings</name>
+                <location>auth_service/auth_core/database/connection_events.py:17-25</location>
+                <purpose>Lazy load unified configuration with fallback</purpose>
+            </function>
+        </functions-added>
+
+        <functions-modified>
+            <function>
+                <name>_log_auth_connection_established</name>
+                <location>auth_service/auth_core/database/connection_events.py:100-110</location>
+                <change>Added unified settings check for log control</change>
+            </function>
+            <function>
+                <name>_log_auth_checkout_if_enabled</name>
+                <location>auth_service/auth_core/database/connection_events.py:150-161</location>
+                <change>Added unified settings check for log control</change>
+            </function>
+        </functions-modified>
+    </technical-details>
+
+    <testing>
+        <verification>
+            Settings import verified successfully:
+            - Settings loaded: True
+            - Settings type: DevelopmentConfig
+            - No circular import errors
+            - Fallback handling works correctly
+        </verification>
+    </testing>
+
+    <recommendations>
+        <recommendation>
+            Apply this pattern to any other services that need configuration consistency
+            while maintaining independence.
+        </recommendation>
+        <recommendation>
+            Document the unified configuration requirement in service development guides
+            to ensure new services follow this pattern from the start.
+        </recommendation>
+        <recommendation>
+            Consider creating a shared configuration client library that encapsulates
+            the lazy loading and fallback patterns for reuse across services.
+        </recommendation>
+    </recommendations>
+
+    <related-learnings>
+        <reference>SPEC/independent_services.xml</reference>
+        <reference>SPEC/learnings/postgres_settings_regression.xml</reference>
+        <reference>SPEC/unified_configuration.xml</reference>
+    </related-learnings>
+</specification>

@@ -3,27 +3,17 @@ Realistic Data Volumes Tests
 Test with realistic data volumes
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.db.clickhouse_query_fixer import (
-    # Add project root to path
     fix_clickhouse_array_syntax,
     validate_clickhouse_query,
 )
-
 
 class TestRealisticDataVolumes:
     """Test with realistic data volumes"""

@@ -135,7 +135,7 @@ class StructuredFallbackBuilder:
     
     def _get_type_default(self, annotation):
         """Get default value based on type annotation."""
-        from .fallback_responses import TypeDefaultProvider
+        from netra_backend.app.llm.fallback_responses import TypeDefaultProvider
         return TypeDefaultProvider.get_default(annotation)
     
     

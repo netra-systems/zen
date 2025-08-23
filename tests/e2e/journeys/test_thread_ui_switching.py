@@ -210,7 +210,7 @@ class ThreadOperationExecutor:
 
 
 @pytest.fixture
-async def switching_executor(test_users):
+async def test_switching_executor(test_users):
     """Thread operation executor fixture for switching tests."""
     user = test_users["mid"]
     return ThreadOperationExecutor(user.id)

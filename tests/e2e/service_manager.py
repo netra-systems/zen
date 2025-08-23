@@ -204,7 +204,7 @@ class TestDataSeeder:
         self.logger = logging.getLogger(f"{__name__}.TestDataSeeder")
         self.test_users = []
     
-    async def seed_test_data(self) -> None:
+    async def test_seed_test_data(self) -> None:
         """Seed all test data."""
         await self._create_test_users()
         await self._create_test_conversations() 
@@ -263,7 +263,7 @@ class TestDataSeeder:
             return self.test_users[index]
         return None
     
-    async def cleanup_test_data(self) -> None:
+    async def test_cleanup_test_data(self) -> None:
         """Cleanup all test data."""
         self.test_users.clear()
         self.logger.info("Test data cleaned up")
@@ -365,3 +365,153 @@ class HealthMonitor:
             }
         
         return health_status
+
+
+class RealServicesManager:
+    """Manages real service instances for integration testing."""
+    
+    def __init__(self, project_root: Path):
+        """Initialize real services manager.
+        
+        Args:
+            project_root: Path to project root directory
+        """
+        self.project_root = project_root
+        self.logger = logging.getLogger(f"{__name__}.RealServicesManager")
+        self.service_processes: Dict[str, subprocess.Popen] = {}
+        self.service_ports = {
+            "auth_service": 8001,
+            "backend": 8000
+        }
+        
+    async def start_all_services(self) -> None:
+        """Start all real services for testing."""
+        await self.start_auth_service()
+        await self.start_backend_service()
+        self.logger.info("All real services started")
+        
+    async def start_auth_service(self) -> None:
+        """Start the real auth service."""
+        if "auth_service" in self.service_processes:
+            self.logger.warning("Auth service already running")
+            return
+            
+        port = self.service_ports["auth_service"]
+        if await self._is_port_in_use(port):
+            self.logger.warning(f"Port {port} already in use for auth service")
+            return
+            
+        auth_main_path = self.project_root / "auth_service" / "main.py"
+        env = self._get_auth_service_env()
+        
+        process = subprocess.Popen(
+            [sys.executable, str(auth_main_path)],
+            cwd=str(self.project_root),
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        
+        self.service_processes["auth_service"] = process
+        await self._wait_for_service_ready("auth_service", port, "/health")
+        
+    async def start_backend_service(self) -> None:
+        """Start the real backend service."""
+        if "backend" in self.service_processes:
+            self.logger.warning("Backend service already running")
+            return
+            
+        port = self.service_ports["backend"]
+        if await self._is_port_in_use(port):
+            self.logger.warning(f"Port {port} already in use for backend service")
+            return
+            
+        env = self._get_backend_service_env()
+        
+        process = subprocess.Popen(
+            [sys.executable, "-m", "uvicorn", "app.main:app", 
+             "--host", "0.0.0.0", "--port", str(port), "--log-level", "warning"],
+            cwd=str(self.project_root / "netra_backend"),
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        
+        self.service_processes["backend"] = process
+        await self._wait_for_service_ready("backend", port, "/health")
+        
+    def _get_auth_service_env(self) -> Dict[str, str]:
+        """Get environment for auth service."""
+        env = os.environ.copy()
+        env.update({
+            "PORT": str(self.service_ports["auth_service"]),
+            "ENVIRONMENT": "test",
+            "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
+            "JWT_SECRET_KEY": "test-jwt-secret-key-unified-testing-32chars",
+            "FERNET_KEY": "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao="
+        })
+        return env
+        
+    def _get_backend_service_env(self) -> Dict[str, str]:
+        """Get environment for backend service."""
+        env = os.environ.copy()
+        env.update({
+            "ENVIRONMENT": "test",
+            "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
+            "AUTH_SERVICE_URL": f"http://localhost:{self.service_ports['auth_service']}",
+            "REDIS_HOST": "localhost",
+            "CLICKHOUSE_HOST": "localhost"
+        })
+        return env
+        
+    async def _is_port_in_use(self, port: int) -> bool:
+        """Check if a port is in use."""
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(1)
+                result = sock.connect_ex(('localhost', port))
+                return result == 0
+        except Exception:
+            return False
+            
+    async def _wait_for_service_ready(self, service_name: str, port: int, health_path: str) -> None:
+        """Wait for service to be ready."""
+        max_retries = 60  # 30 seconds
+        retry_count = 0
+        
+        while retry_count < max_retries:
+            try:
+                async with httpx.AsyncClient(timeout=2.0) as client:
+                    response = await client.get(f"http://localhost:{port}{health_path}")
+                    if response.status_code == 200:
+                        self.logger.info(f"{service_name} is ready on port {port}")
+                        return
+            except Exception:
+                pass
+                
+            await asyncio.sleep(0.5)
+            retry_count += 1
+            
+        raise RuntimeError(f"{service_name} failed to start within 30 seconds")
+        
+    async def stop_all_services(self) -> None:
+        """Stop all real services."""
+        for service_name, process in self.service_processes.items():
+            try:
+                process.terminate()
+                process.wait(timeout=5)
+                self.logger.info(f"Stopped {service_name}")
+            except subprocess.TimeoutExpired:
+                process.kill()
+                self.logger.warning(f"Forcibly killed {service_name}")
+            except Exception as e:
+                self.logger.error(f"Error stopping {service_name}: {e}")
+                
+        self.service_processes.clear()
+        
+    def is_service_running(self, service_name: str) -> bool:
+        """Check if a service is running."""
+        if service_name not in self.service_processes:
+            return False
+        process = self.service_processes[service_name]
+        return process.poll() is None

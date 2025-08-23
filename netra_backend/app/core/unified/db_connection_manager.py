@@ -278,7 +278,11 @@ class UnifiedDatabaseManager:
                 "pool_pre_ping": config.pool_pre_ping
             })
         
-        return create_async_engine(config.database_url, **engine_kwargs)
+        # CRITICAL: Convert URL to prevent sslmode->ssl issues with asyncpg
+        from netra_backend.app.db.postgres_core import get_converted_async_db_url
+        converted_url = get_converted_async_db_url(config.database_url)
+        
+        return create_async_engine(converted_url, **engine_kwargs)
     
     def _create_sync_engine(self, config: ConnectionConfig) -> Any:
         """Create sync SQLAlchemy engine with optimized configuration."""

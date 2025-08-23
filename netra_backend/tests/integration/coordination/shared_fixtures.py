@@ -34,15 +34,12 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
-
 logger = central_logger.get_logger(__name__)
-
 
 class MockCoordinationAgent(BaseSubAgent):
 
     """Mock agent with coordination capabilities."""
     
-
     def __init__(self, name: str, llm_manager=None):
 
         super().__init__(llm_manager, name=name)
@@ -61,19 +58,16 @@ class MockCoordinationAgent(BaseSubAgent):
 
         self.last_heartbeat = None
     
-
     async def execute(self, request: Dict[str, Any], state: DeepAgentState) -> Dict[str, Any]:
 
         """Execute with coordination tracking."""
 
         execution_id = str(uuid.uuid4())
         
-
         if "coordination_action" in request:
 
             return await self._handle_coordination_action(request, execution_id)
         
-
         return {
 
             "status": "success",
@@ -88,14 +82,12 @@ class MockCoordinationAgent(BaseSubAgent):
 
         }
     
-
     async def _handle_coordination_action(self, request: Dict[str, Any], execution_id: str) -> Dict[str, Any]:
 
         """Handle coordination-specific actions."""
 
         action = request["coordination_action"]
         
-
         if action == "register_peer":
 
             peer_name = request["peer_name"]
@@ -104,7 +96,6 @@ class MockCoordinationAgent(BaseSubAgent):
 
             await self.register_peer(peer_name, peer_agent)
             
-
         elif action == "send_message":
 
             target = request["target"]
@@ -113,19 +104,16 @@ class MockCoordinationAgent(BaseSubAgent):
 
             await self.send_message(target, message)
             
-
         elif action == "broadcast":
 
             message = request["message"]
 
             await self.broadcast_message(message)
             
-
         elif action == "heartbeat":
 
             await self.send_heartbeat()
         
-
         return {
 
             "status": "success",
@@ -138,7 +126,6 @@ class MockCoordinationAgent(BaseSubAgent):
 
         }
     
-
     async def register_peer(self, peer_name: str, peer_agent: 'MockCoordinationAgent'):
 
         """Register a peer agent for coordination."""
@@ -147,7 +134,6 @@ class MockCoordinationAgent(BaseSubAgent):
 
         self.coordination_channels[peer_name] = {"status": "active", "last_contact": datetime.now(timezone.utc)}
     
-
     async def send_message(self, target: str, message: Dict[str, Any]):
 
         """Send message to specific peer agent."""
@@ -168,19 +154,16 @@ class MockCoordinationAgent(BaseSubAgent):
 
             }
             
-
             self.message_outbox.append(message_envelope)
 
             await self.peer_agents[target].receive_message(message_envelope)
     
-
     async def receive_message(self, message_envelope: Dict[str, Any]):
 
         """Receive message from peer agent."""
 
         self.message_inbox.append(message_envelope)
     
-
     async def broadcast_message(self, message: Dict[str, Any]):
 
         """Broadcast message to all peer agents."""
@@ -189,7 +172,6 @@ class MockCoordinationAgent(BaseSubAgent):
 
             await self.send_message(peer_name, message)
     
-
     async def send_heartbeat(self):
 
         """Send heartbeat to all peers."""
@@ -200,12 +182,10 @@ class MockCoordinationAgent(BaseSubAgent):
 
         self.last_heartbeat = datetime.now(timezone.utc)
 
-
 class MockAgentRegistry:
 
     """Mock agent registry for coordination testing."""
     
-
     def __init__(self):
 
         self.registered_agents = {}
@@ -214,7 +194,6 @@ class MockAgentRegistry:
 
         self.initialization_order = []
         
-
     async def register_agent(self, agent_name: str, agent: MockCoordinationAgent):
 
         """Register agent in the coordination system."""
@@ -225,7 +204,6 @@ class MockAgentRegistry:
 
         agent.coordination_status = "registered"
     
-
     async def create_coordination_group(self, group_name: str, agent_names: List[str]):
 
         """Create coordination group with specified agents."""
@@ -248,12 +226,10 @@ class MockAgentRegistry:
 
                         await agent.register_peer(other_agent_name, other_agent)
 
-
 class MockCoordinationInfrastructure:
 
     """Mock coordination infrastructure for testing."""
     
-
     def __init__(self):
 
         self.agent_registry = MockAgentRegistry()
@@ -276,7 +252,6 @@ class MockCoordinationInfrastructure:
 
         }
     
-
     async def create_agent_coordination_scenario(self, agent_count: int = 3):
 
         """Create multi-agent coordination scenario."""
@@ -305,9 +280,7 @@ class MockCoordinationInfrastructure:
 
         self.coordination_metrics["coordination_groups"] += 1
         
-
         return agents
-
 
 @pytest.fixture
 
@@ -316,7 +289,6 @@ async def coordination_infrastructure():
     """Setup coordination infrastructure."""
 
     return MockCoordinationInfrastructure()
-
 
 @pytest.fixture
 

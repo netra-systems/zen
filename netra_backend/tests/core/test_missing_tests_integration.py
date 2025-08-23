@@ -13,26 +13,15 @@ Tests 21-30 from original missing tests covering:
 - Threads route conversation management
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-
-# Add project root to path
-
-
 
 class TestAdminRouteIntegration:
     """Test admin endpoint security integration."""
@@ -54,7 +43,6 @@ class TestAdminRouteIntegration:
             mock_verify.return_value = {"user_id": "123", "role": "user"}
             response = client.get("/api/admin/users", headers={"Authorization": user_token})
             assert response.status_code == 403
-
 
 class TestAgentRouteIntegration:
     """Test agent API message processing integration."""
@@ -80,7 +68,6 @@ class TestAgentRouteIntegration:
             assert response.status_code == 500
             assert "error" in response.json()
 
-
 class TestConfigRouteIntegration:
     """Test configuration API updates integration."""
     
@@ -102,7 +89,6 @@ class TestConfigRouteIntegration:
             response = client.get("/api/config")
             assert response.status_code == 200
             assert response.json()["log_level"] == "INFO"
-
 
 class TestCorpusRouteIntegration:
     """Test corpus CRUD operations integration."""
@@ -130,7 +116,6 @@ class TestCorpusRouteIntegration:
             results = response.json()
             assert len(results) == 1
 
-
 class TestLLMCacheRouteIntegration:
     """Test cache invalidation and metrics integration."""
     
@@ -146,7 +131,6 @@ class TestLLMCacheRouteIntegration:
             response = client.delete("/api/llm-cache")
             assert response.status_code == 200
             assert response.json()["cleared"] == 10
-
 
 class TestMCPRouteIntegration:
     """Test MCP protocol implementation integration."""
@@ -165,7 +149,6 @@ class TestMCPRouteIntegration:
             assert response.status_code == 200
             assert response.json()["status"] == "success"
 
-
 class TestQualityRouteIntegration:
     """Test quality metric endpoints integration."""
     
@@ -182,7 +165,6 @@ class TestQualityRouteIntegration:
             assert response.status_code == 200
             metrics = response.json()
             assert metrics["accuracy"] > 0.9
-
 
 class TestSupplyRouteIntegration:
     """Test supply chain endpoints integration."""
@@ -201,7 +183,6 @@ class TestSupplyRouteIntegration:
             assert response.status_code == 200
             assert len(response.json()["suppliers"]) == 1
 
-
 class TestSyntheticDataRouteIntegration:
     """Test synthetic data creation integration."""
     
@@ -217,7 +198,6 @@ class TestSyntheticDataRouteIntegration:
             mock_generate.return_value = {"data": [{"user_id": "123", "name": "John"}] * 100}
             response = client.post("/api/synthetic-data/generate", json=generation_request)
             assert response.status_code == 200
-
 
 class TestThreadsRouteIntegration:
     """Test thread conversation management integration."""
@@ -235,7 +215,6 @@ class TestThreadsRouteIntegration:
             assert response.status_code == 200
             data = response.json()
             assert len(data["threads"]) == 10
-
 
 class TestCrossServiceIntegration:
     """Test cross-service integration scenarios."""
@@ -262,7 +241,6 @@ class TestCrossServiceIntegration:
             assert response.status_code == 200
             metrics = response.json()
             assert "agent_accuracy" in metrics
-
 
 # Run integration tests
 if __name__ == "__main__":

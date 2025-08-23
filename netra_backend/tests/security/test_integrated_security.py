@@ -3,17 +3,10 @@ Integrated Security Tests
 Tests integrated security across all components
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 import asyncio
 import time
@@ -24,11 +17,7 @@ from fastapi.testclient import TestClient
 
 from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
 
-# Add project root to path
 from netra_backend.app.middleware.security_middleware import SecurityMiddleware
-
-# Add project root to path
-
 
 class TestIntegratedSecurity:
     """Test integrated security across all components."""
@@ -148,7 +137,6 @@ class TestIntegratedSecurity:
             response = client.post("/api/test", json=attack)
             # All attacks should be blocked
             assert response.status_code in [400, 403, 422]
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

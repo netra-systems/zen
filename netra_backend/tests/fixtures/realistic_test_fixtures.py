@@ -15,21 +15,21 @@ from netra_backend.app.services.realistic_test_data_service import (
 
 # Import all fixture modules
 # Import all fixture functions
-from .fixtures_core import (
+from netra_backend.tests.fixtures.fixtures_core import (
     CoreTestFixtures,
     core_fixtures,
     large_core_data,
     medium_core_data,
     small_core_data,
 )
-from .fixtures_metrics import (
+from netra_backend.tests.fixtures.fixtures_metrics import (
     MetricsFixtures,
     error_cascade_logs,
     memory_leak_logs,
     metrics_fixtures,
     performance_metrics,
 )
-from .fixtures_workloads import (
+from netra_backend.tests.fixtures.fixtures_workloads import (
     WorkloadFixtures,
     batch_jobs,
     inference_endpoints,
@@ -37,6 +37,14 @@ from .fixtures_workloads import (
     workload_fixtures,
 )
 
+# Import ClickHouse-specific functions from the clickhouse fixtures module
+from netra_backend.tests.clickhouse.realistic_test_fixtures import (
+    create_query_interceptor_with_mock,
+    validate_array_query_syntax,
+    create_mock_clickhouse_client,
+    generate_realistic_logs,
+    generate_llm_metrics,
+)
 
 class RealisticTestFixtures:
     """Main generator combining all fixture modules"""
@@ -81,31 +89,26 @@ class RealisticTestFixtures:
         """Generate metrics data using the metrics fixtures"""
         return self.metrics_fixtures.generate_metrics_data(config["workload_days"])
 
-
 # Main fixtures
 @pytest.fixture
 def realistic_fixtures():
     """Provide realistic test fixtures"""
     return RealisticTestFixtures()
 
-
 @pytest.fixture
 def small_seed_data(realistic_fixtures):
     """Small-scale seed data for development"""
     return realistic_fixtures.generate_production_seed_data("small")
-
 
 @pytest.fixture
 def medium_seed_data(realistic_fixtures):
     """Medium-scale seed data for staging"""
     return realistic_fixtures.generate_production_seed_data("medium")
 
-
 @pytest.fixture
 def large_seed_data(realistic_fixtures):
     """Large-scale seed data for production-like testing"""
     return realistic_fixtures.generate_production_seed_data("large")
-
 
 @pytest.fixture
 async def realistic_llm_responses(realistic_fixtures):
@@ -122,7 +125,6 @@ async def realistic_llm_responses(realistic_fixtures):
             responses.append(response)
     
     return responses
-
 
 # Re-export all fixture functions
 __all__ = [
@@ -146,5 +148,11 @@ __all__ = [
     "metrics_fixtures",
     "error_cascade_logs",
     "memory_leak_logs",
-    "performance_metrics"
+    "performance_metrics",
+    # ClickHouse-specific functions
+    "create_query_interceptor_with_mock",
+    "validate_array_query_syntax",
+    "create_mock_clickhouse_client",
+    "generate_realistic_logs",
+    "generate_llm_metrics"
 ]

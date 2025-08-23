@@ -15,10 +15,10 @@ from typing import Dict, List, Optional, Tuple
 
 import psutil
 
-from .comprehensive_reporter import ComprehensiveTestReporter
-from .memory_optimized_executor import MemoryMonitor, MemoryOptimizedExecutor
-from .priority_engine import PriorityEngine
-from .smart_cache import SmartCache
+from test_framework.archived.duplicates.comprehensive_reporter import ComprehensiveTestReporter
+from test_framework.archived.duplicates.memory_optimized_executor import MemoryMonitor, MemoryOptimizedExecutor
+from test_framework.archived.duplicates.priority_engine import PriorityEngine
+from test_framework.archived.duplicates.smart_cache import SmartCache
 
 
 class TestProfileBuilder:

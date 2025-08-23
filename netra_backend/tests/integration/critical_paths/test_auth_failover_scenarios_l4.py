@@ -20,17 +20,10 @@ Mock-Real Spectrum: L4 (Multi-region production topology)
 - Real DNS/load balancer switching
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -48,19 +41,16 @@ from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.redis_manager import redis_manager as get_redis_manager
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     LoginRequest,
     LoginResponse,
     SessionInfo,
-    # Add project root to path
     Token,
 )
 
-# from netra_backend.app.core.monitoring import metrics_collector  # May not exist
-# from netra_backend.app.core.failover_coordinator import FailoverCoordinator  # Does not exist
+# from app.core.monitoring import metrics_collector  # May not exist
+# from app.core.failover_coordinator import FailoverCoordinator  # Does not exist
 FailoverCoordinator = type('FailoverCoordinator', (), {})  # Mock class
-
 
 @dataclass
 class AuthNode:
@@ -74,7 +64,6 @@ class AuthNode:
     session_count: int
     replication_lag_ms: float
     priority: int  # Lower number = higher priority for failover
-
 
 @dataclass
 class FailoverMetrics:
@@ -101,7 +90,6 @@ class FailoverMetrics:
         if self.total_failovers == 0:
             return 0
         return (self.successful_failovers / self.total_failovers) * 100
-
 
 class TestAuthFailoverScenarios:
     """Test suite for auth failover scenarios"""

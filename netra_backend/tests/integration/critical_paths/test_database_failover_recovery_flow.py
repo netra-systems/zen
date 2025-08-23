@@ -13,9 +13,7 @@ Comprehensive test for database failover and recovery flow:
 This test validates database high availability and disaster recovery.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -33,10 +31,6 @@ import asyncpg
 import psutil
 import pytest
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 # Configuration
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 PRIMARY_DB_URL = os.getenv("PRIMARY_DB_URL", "postgresql://localhost:5432/netra_primary")
@@ -47,7 +41,6 @@ CLICKHOUSE_URL = os.getenv("CLICKHOUSE_URL", "http://localhost:8123")
 REPLICATION_LAG_THRESHOLD = 5  # seconds
 FAILOVER_TIMEOUT = 30  # seconds
 DATA_CONSISTENCY_CHECKS = 10
-
 
 class DatabaseFailoverTester:
     """Test database failover and recovery flow."""
@@ -686,7 +679,6 @@ class DatabaseFailoverTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -734,7 +726,6 @@ async def test_database_failover_recovery_flow():
         for test in critical_tests:
             assert results.get(test, False), f"Critical test failed: {test}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*60)
@@ -754,7 +745,6 @@ async def main():
         critical_passed = all(results.get(test, False) for test in critical_tests)
         
         return 0 if critical_passed else 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

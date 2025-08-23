@@ -3,17 +3,10 @@ Error Recovery Test Suite for Synthetic Data Service
 Testing error handling and recovery mechanisms
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -21,17 +14,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from .test_synthetic_data_service_basic import GenerationConfig
-
-# Add project root to path
-
+from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig
 
 @pytest.fixture
 def recovery_service():
     return SyntheticDataService()
-
 
 # ==================== Test Suite: Error Recovery ====================
 
@@ -215,7 +203,6 @@ class TestErrorRecovery:
         assert result["completed"] == True
         assert "clustering" in result["disabled_features"]
         assert len(result["records"]) == 1000
-
 
 # ==================== Test Runner ====================
 

@@ -16,18 +16,15 @@ import uuid
 
 )
 
-
 class TestLLMMetricsAggregation:
 
     """Test LLM-specific metrics and optimizations"""
     
-
     def _get_llm_models(self) -> List[str]:
 
         """Get list of LLM models for testing"""
 
         return ["gpt-4", "gpt-3.5-turbo", "claude-3", "gemini-pro"]
-
 
     def _get_workload_types(self) -> List[str]:
 
@@ -35,13 +32,11 @@ class TestLLMMetricsAggregation:
 
         return ["chat", "completion", "embedding", "analysis"]
 
-
     def _get_temperature_options(self) -> List[float]:
 
         """Get temperature options for testing"""
 
         return [0.0, 0.3, 0.7, 1.0]
-
 
     def _create_single_metric(self, i: int, count: int, models: List[str]) -> Dict:
 
@@ -77,7 +72,6 @@ class TestLLMMetricsAggregation:
 
         }
 
-
     def generate_llm_metrics(self, count: int) -> List[Dict]:
 
         """Generate realistic LLM metrics"""
@@ -94,7 +88,6 @@ class TestLLMMetricsAggregation:
 
         return metrics
     
-
     def _create_model_costs_cte(self):
 
         """Create model costs CTE portion of optimization query"""
@@ -130,7 +123,6 @@ class TestLLMMetricsAggregation:
             GROUP BY model, workload_type
 
         )"""
-
 
     def _create_optimization_opportunities_cte(self):
 
@@ -180,7 +172,6 @@ class TestLLMMetricsAggregation:
 
         )"""
 
-
     def _create_final_select_query(self):
 
         """Create final SELECT for optimization query"""
@@ -195,7 +186,6 @@ class TestLLMMetricsAggregation:
 
         """
 
-
     def _build_complete_optimization_query(self):
 
         """Build complete LLM cost optimization query"""
@@ -208,7 +198,6 @@ class TestLLMMetricsAggregation:
 
         return model_costs + opportunities + final_select
 
-
     def _validate_optimization_query(self, query):
 
         """Validate the LLM optimization query"""
@@ -217,7 +206,6 @@ class TestLLMMetricsAggregation:
 
         assert is_valid, f"LLM optimization query failed: {error}"
 
-
     def test_llm_cost_optimization_query(self):
 
         """Test query for LLM cost optimization analysis"""
@@ -225,7 +213,6 @@ class TestLLMMetricsAggregation:
         query = self._build_complete_optimization_query()
 
         self._validate_optimization_query(query)
-
 
     def _get_usage_patterns_query(self):
 
@@ -263,7 +250,6 @@ class TestLLMMetricsAggregation:
 
         """
 
-
     def _validate_usage_patterns_query(self, query):
 
         """Validate usage patterns query"""
@@ -271,7 +257,6 @@ class TestLLMMetricsAggregation:
         is_valid, error = validate_clickhouse_query(query)
 
         assert is_valid
-
 
     async def test_llm_usage_patterns(self):
 
@@ -281,12 +266,10 @@ class TestLLMMetricsAggregation:
 
         self._validate_usage_patterns_query(query)
 
-
 class TestPerformanceMetricsWithClickHouse:
 
     """Test performance metrics extraction from ClickHouse"""
     
-
     def test_metrics_extraction_with_arrays(self):
 
         """Test extracting metrics from nested arrays"""

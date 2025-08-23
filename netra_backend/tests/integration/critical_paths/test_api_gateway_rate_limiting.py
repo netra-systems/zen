@@ -10,17 +10,10 @@ Critical Path: Request identification -> Rate limit check -> Gateway enforcement
 Coverage: API gateway rate limiting, per-endpoint limits, burst handling, tier-based enforcement
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -37,14 +30,10 @@ import pytest
 from netra_backend.app.schemas.user import UserTier
 from netra_backend.app.services.api_gateway.gateway_manager import ApiGatewayManager
 
-# Add project root to path
 from netra_backend.app.services.api_gateway.rate_limiter import ApiGatewayRateLimiter
 from netra_backend.app.services.metrics.gateway_metrics import GatewayMetricsService
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class EndpointConfig:
@@ -53,7 +42,6 @@ class EndpointConfig:
     requests_per_hour: int
     burst_allowance: int
     priority_level: int  # 1-5, higher = more important
-
 
 class ApiGatewayRateLimitingManager:
     """Manages L3 API gateway rate limiting tests with real HTTP clients."""
@@ -462,7 +450,6 @@ class ApiGatewayRateLimitingManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def api_gateway_manager():
     """Create API gateway manager for L3 testing."""
@@ -470,7 +457,6 @@ async def api_gateway_manager():
     await manager.initialize_gateway()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -503,7 +489,6 @@ async def test_endpoint_rate_limiting_enforcement(api_gateway_manager):
     for result in failed_results[:3]:  # Check first few failures
         assert result["status_code"] == 429
         assert "Retry-After" in result["headers"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -542,7 +527,6 @@ async def test_tier_based_rate_limit_differentiation(api_gateway_manager):
     
     assert enterprise_limited <= free_limited
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
@@ -567,7 +551,6 @@ async def test_concurrent_endpoint_rate_limiting(api_gateway_manager):
         # High-priority endpoints should have better success rates
         if endpoint == "/api/v1/chat":  # Highest priority
             assert endpoint_stats["success_rate"] >= 70
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -595,7 +578,6 @@ async def test_burst_traffic_circuit_breaking(api_gateway_manager):
     )
     assert recovery_result["status_code"] == 200
     assert recovery_result["allowed"] is True
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -625,7 +607,6 @@ async def test_rate_limit_header_accuracy(api_gateway_manager):
     # Remaining count should decrease
     assert remaining_after == initial_remaining - 1
     assert limit > remaining_after
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -659,7 +640,6 @@ async def test_gateway_metrics_collection(api_gateway_manager):
     assert metrics["tier_breakdown"]["free"] == 10
     assert metrics["tier_breakdown"]["mid"] == 15
     assert metrics["tier_breakdown"]["enterprise"] == 20
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

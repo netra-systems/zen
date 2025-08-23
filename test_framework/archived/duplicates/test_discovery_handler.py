@@ -18,8 +18,8 @@ import json
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from .test_config import TEST_LEVELS
-from .test_discovery import TestDiscovery
+from test_framework.archived.duplicates.test_config import TEST_LEVELS
+from test_framework.archived.duplicates.test_discovery import TestDiscovery
 
 PROJECT_ROOT = Path(__file__).parent.parent
 

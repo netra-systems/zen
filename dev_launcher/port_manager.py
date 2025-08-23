@@ -57,20 +57,51 @@ class PortManager:
             logger.info("Unix lsof-based port verification enabled")
     
     def allocate_port(self, service_name: str, preferred_port: Optional[int] = None, 
-                     port_range: Optional[Tuple[int, int]] = None) -> Optional[int]:
+                     port_range: Optional[Tuple[int, int]] = None, max_retries: int = 3) -> Optional[int]:
         """
-        Allocate an available port for a service.
+        Allocate an available port for a service with retry logic for race conditions.
         
         Args:
             service_name: Name of the service requesting the port
             preferred_port: Preferred port number (will be tested first)
             port_range: Range of ports to search (min, max)
+            max_retries: Maximum retries for race condition handling
             
         Returns:
             Allocated port number or None if no ports available
         """
         logger.info(f"Allocating port for service: {service_name}")
         
+        # Check if service already has an allocated port
+        if service_name in self.allocated_ports:
+            existing_port = self.allocated_ports[service_name]
+            if self._is_port_available(existing_port):
+                logger.info(f"Service {service_name} already has port {existing_port}")
+                return existing_port
+            else:
+                logger.warning(f"Previously allocated port {existing_port} no longer available, reallocating")
+                self.release_port(service_name)
+        
+        for retry in range(max_retries + 1):
+            if retry > 0:
+                logger.debug(f"Port allocation retry {retry} for {service_name}")
+                time.sleep(0.1 * retry)  # Exponential backoff
+            
+            port = self._attempt_port_allocation(service_name, preferred_port, port_range)
+            if port is not None:
+                # Double-check with race condition protection
+                if self._verify_port_allocation(port, service_name):
+                    return port
+                else:
+                    logger.warning(f"Port {port} allocation race condition detected, retrying...")
+                    continue
+        
+        logger.error(f"Failed to allocate port for {service_name} after {max_retries} retries")
+        return None
+    
+    def _attempt_port_allocation(self, service_name: str, preferred_port: Optional[int], 
+                                port_range: Optional[Tuple[int, int]]) -> Optional[int]:
+        """Attempt to allocate a port without retry logic."""
         # Determine search range
         if port_range:
             start_port, end_port = port_range
@@ -80,7 +111,7 @@ class PortManager:
             start_port, end_port = self.reserved_ranges['dynamic']
         
         # Try preferred port first if specified
-        if preferred_port and self._is_port_available(preferred_port):
+        if preferred_port and self._is_port_available_with_retry(preferred_port):
             self.allocated_ports[service_name] = preferred_port
             self.port_processes[preferred_port] = service_name
             logger.info(f"Allocated preferred port {preferred_port} to {service_name}")
@@ -88,14 +119,47 @@ class PortManager:
         
         # Search for available port in range
         for port in range(start_port, end_port + 1):
-            if self._is_port_available(port):
+            if self._is_port_available_with_retry(port):
                 self.allocated_ports[service_name] = port
                 self.port_processes[port] = service_name
                 logger.info(f"Allocated port {port} to {service_name}")
                 return port
         
-        logger.error(f"No available ports found for {service_name} in range {start_port}-{end_port}")
         return None
+    
+    def _is_port_available_with_retry(self, port: int, retries: int = 2) -> bool:
+        """Check port availability with retry for race conditions."""
+        for attempt in range(retries + 1):
+            if attempt > 0:
+                time.sleep(0.05)  # Short delay between retries
+            
+            if self._is_port_available(port):
+                return True
+        return False
+    
+    def _verify_port_allocation(self, port: int, service_name: str) -> bool:
+        """Verify that port allocation was successful and handle race conditions."""
+        # Wait a brief moment to allow any race conditions to manifest
+        time.sleep(0.1)
+        
+        # Re-check port availability
+        if not self._is_port_available(port):
+            # Port is no longer available, check if it's our process
+            process_info = self.find_process_using_port(port)
+            if process_info and service_name.lower() in process_info.lower():
+                logger.debug(f"Port {port} correctly allocated to {service_name}")
+                return True
+            else:
+                logger.warning(f"Port {port} taken by another process: {process_info}")
+                # Clean up our allocation record
+                if service_name in self.allocated_ports and self.allocated_ports[service_name] == port:
+                    del self.allocated_ports[service_name]
+                if port in self.port_processes:
+                    del self.port_processes[port]
+                return False
+        
+        # Port is still available, which means we haven't started the service yet
+        return True
     
     def _is_port_available(self, port: int) -> bool:
         """

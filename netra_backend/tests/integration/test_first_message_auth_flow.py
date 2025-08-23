@@ -4,21 +4,10 @@ Components: AuthService → JWT Validation → WebSocket Middleware → Message 
 Critical: First user message must seamlessly authenticate and process
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -36,14 +25,10 @@ from starlette.websockets import WebSocketState
 from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.services.agent_service_core import AgentService
 
-# Add project root to path
-from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
-
-# Add project root to path
-
 
 @pytest.mark.asyncio
 
@@ -51,7 +36,6 @@ class TestFirstMessageAuthenticationFlow:
 
     """Test complete authentication flow for first user message."""
     
-
     @pytest.fixture
 
     async def test_user(self):
@@ -72,7 +56,6 @@ class TestFirstMessageAuthenticationFlow:
 
         )
     
-
     @pytest.fixture
 
     async def mock_websocket(self):
@@ -101,7 +84,6 @@ class TestFirstMessageAuthenticationFlow:
 
         return websocket
     
-
     @pytest.fixture
 
     async def auth_service(self):
@@ -110,7 +92,6 @@ class TestFirstMessageAuthenticationFlow:
 
         return AuthService()
     
-
     @pytest.fixture
 
     async def ws_manager(self):
@@ -119,7 +100,6 @@ class TestFirstMessageAuthenticationFlow:
 
         return WebSocketManager()
     
-
     async def test_unauthenticated_to_authenticated_flow(
 
         self, auth_service, ws_manager, mock_websocket, test_user
@@ -136,12 +116,10 @@ class TestFirstMessageAuthenticationFlow:
 
         no_auth_ws.close = AsyncMock()
         
-
         with pytest.raises(ValueError, match="No authorization header"):
 
             await ws_manager.connect_with_auth(no_auth_ws, None)
         
-
         no_auth_ws.close.assert_called_once()
         
         # Step 2: Extract JWT from headers
@@ -150,7 +128,6 @@ class TestFirstMessageAuthenticationFlow:
 
         assert auth_header == "Bearer test.jwt.token"
         
-
         token = auth_header.split(" ")[1]
 
         assert token == "test.jwt.token"
@@ -170,7 +147,6 @@ class TestFirstMessageAuthenticationFlow:
 
             }
             
-
             jwt_payload = await auth_service.validate_jwt_token(token)
 
             assert jwt_payload["user_id"] == test_user.id
@@ -191,7 +167,6 @@ class TestFirstMessageAuthenticationFlow:
 
         assert connection.authenticated is True
     
-
     async def test_jwt_validation_with_expiry(self, auth_service):
 
         """Test JWT validation including expiry checks."""
@@ -234,7 +209,6 @@ class TestFirstMessageAuthenticationFlow:
 
         assert decoded["user_id"] == "test_user"
     
-
     async def test_websocket_auth_middleware_integration(
 
         self, ws_manager, mock_websocket, test_user
@@ -274,12 +248,10 @@ class TestFirstMessageAuthenticationFlow:
 
         no_auth_ws.headers = {}
         
-
         authenticated_user = await auth_middleware(no_auth_ws)
 
         assert authenticated_user is None
     
-
     async def test_first_message_after_authentication(
 
         self, ws_manager, mock_websocket, test_user
@@ -339,7 +311,6 @@ class TestFirstMessageAuthenticationFlow:
 
         )
     
-
     async def test_auth_failure_scenarios(self, auth_service, ws_manager):
 
         """Test various authentication failure scenarios."""
@@ -352,7 +323,6 @@ class TestFirstMessageAuthenticationFlow:
 
         invalid_ws.close = AsyncMock()
         
-
         with pytest.raises(ValueError, match="Invalid authorization format"):
 
             token = invalid_ws.headers["Authorization"].split(" ")[1]
@@ -371,7 +341,6 @@ class TestFirstMessageAuthenticationFlow:
 
             mock_decode.side_effect = jwt.InvalidTokenError("Invalid token")
             
-
             with pytest.raises(jwt.InvalidTokenError):
 
                 jwt.decode("not.a.jwt", "secret", algorithms=["HS256"])
@@ -383,12 +352,10 @@ class TestFirstMessageAuthenticationFlow:
 
             mock_get_user.return_value = None
             
-
             user = await auth_service.get_user_by_id("nonexistent_user")
 
             assert user is None
     
-
     async def test_concurrent_auth_requests(self, ws_manager, test_user):
 
         """Test handling of concurrent authentication requests."""
@@ -419,7 +386,6 @@ class TestFirstMessageAuthenticationFlow:
 
             tasks.append(ws_manager.connect(ws, user_id))
         
-
         await asyncio.gather(*tasks)
         
         # Verify all connections authenticated
@@ -430,7 +396,6 @@ class TestFirstMessageAuthenticationFlow:
 
             assert user_id in ws_manager.active_connections
     
-
     async def test_auth_token_refresh_during_session(
 
         self, ws_manager, mock_websocket, test_user

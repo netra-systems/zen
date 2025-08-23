@@ -10,17 +10,10 @@ Critical Path: Load spike detection -> Circuit activation <5s -> Graceful degrad
 Coverage: Agent pipeline overload scenarios, circuit breaker coordination, load shedding strategies, cascade prevention
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -38,16 +31,12 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
-# Add project root to path
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import AgentMessage, TaskPriority
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class AgentPipelineMetrics:
@@ -67,7 +56,6 @@ class AgentPipelineMetrics:
             return 0.0
         return (self.successful_requests / self.total_requests) * 100
 
-
 @dataclass
 class LoadTestConfig:
     """Configuration for load testing scenarios."""
@@ -76,7 +64,6 @@ class LoadTestConfig:
     duration_seconds: int
     failure_injection_rate: float = 0.0
     target_circuit_activation_time: float = 5.0
-
 
 class MockAgentPipeline:
     """Mock agent pipeline for circuit breaking tests."""
@@ -118,7 +105,6 @@ class MockAgentPipeline:
             }
         finally:
             self.active_agents -= 1
-
 
 class AgentPipelineCircuitManager:
     """Manages circuit breaker for agent pipeline with load shedding."""
@@ -272,7 +258,6 @@ class AgentPipelineCircuitManager:
             }
         }
 
-
 class AgentPipelineLoadTester:
     """Load tester for agent pipeline circuit breaking scenarios."""
     
@@ -392,20 +377,17 @@ class AgentPipelineLoadTester:
             }
         }
 
-
 @pytest.fixture
 async def agent_pipeline_circuit_manager():
     """Create agent pipeline circuit manager for testing."""
     manager = AgentPipelineCircuitManager()
     yield manager
 
-
 @pytest.fixture
 async def agent_pipeline_load_tester(agent_pipeline_circuit_manager):
     """Create load tester for agent pipeline."""
     tester = AgentPipelineLoadTester(agent_pipeline_circuit_manager)
     yield tester
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

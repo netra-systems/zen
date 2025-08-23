@@ -1,314 +1,363 @@
 #!/usr/bin/env python3
 """
-Comprehensive Import Issue Fixer for Netra Backend
-Systematically fixes all import path issues between services and agents
+Comprehensive script to fix all import issues in the codebase.
+Converts relative imports to absolute imports and removes sys.path manipulations.
 """
 
+import argparse
 import ast
-import json
-import logging
 import os
 import re
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
-# Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-class ComprehensiveImportFixer:
-    """Systematically fixes all import issues between services and agents."""
+class ImportFixer(ast.NodeTransformer):
+    """AST transformer to convert relative imports to absolute imports."""
     
-    def __init__(self, dry_run: bool = False):
-        self.dry_run = dry_run
-        self.fixes_applied = 0
-        self.files_modified = set()
-        self.import_errors: Dict[str, List[str]] = {}
-        self.fix_patterns: List[Tuple[re.Pattern, str, str]] = []
+    def __init__(self, module_path: str, package_root: str):
+        self.module_path = module_path
+        self.package_root = package_root
+        self.changes = []
         
-        # Load known import errors from test reports
-        self._load_import_errors()
-        
-        # Build comprehensive fix patterns
-        self._build_fix_patterns()
-    
-    def _load_import_errors(self) -> None:
-        """Load import errors from test results."""
-        # Load from test report JSON if available
-        test_report_path = PROJECT_ROOT / 'test_reports' / 'import_test_results.json'
-        if test_report_path.exists():
-            try:
-                with open(test_report_path, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    for module_name, result in data.get('results', {}).items():
-                        if result.get('status') == 'error' and result.get('error_type') == 'ImportError':
-                            error_msg = result.get('error_message', '')
-                            if module_name not in self.import_errors:
-                                self.import_errors[module_name] = []
-                            self.import_errors[module_name].append(error_msg)
-                logger.info(f"Loaded {len(self.import_errors)} import errors from test results")
-            except Exception as e:
-                logger.warning(f"Could not load test results: {e}")
-    
-    def _build_fix_patterns(self) -> None:
-        """Build comprehensive fix patterns based on known issues."""
-        # Pattern 1: Fix factory_status imports
-        self.fix_patterns.append((
-            re.compile(r'from netra_backend\.app\.services\.apex_optimizer_agent\.models import (.*?)(?:ReportResponse|MetricResponse|GenerateReportRequest)(.*?)'),
-            r'from netra_backend.app.routes.factory_status.models import \1ReportResponse, MetricResponse, GenerateReportRequest\2',
-            "Fix factory_status model imports"
-        ))
-        
-        # Pattern 2: Fix missing classes from apex_optimizer_agent.models
-        missing_classes = [
-            'CorpusOperation', 'QualityTrend', 'MCPClientCreateRequest',
-            'SubAgentUpdate', 'SubAgentLifecycle'
-        ]
-        for cls in missing_classes:
-            self.fix_patterns.append((
-                re.compile(rf'from netra_backend\.app\.services\.apex_optimizer_agent\.models import (.*?){cls}(.*?)'),
-                f'# TODO: Fix import - {cls} not found in apex_optimizer_agent.models\n# \\g<0>',
-                f"Comment out missing {cls} import"
-            ))
-        
-        # Pattern 3: Fix DataSubAgentClickHouseOperations
-        self.fix_patterns.append((
-            re.compile(r'from netra_backend\.app\.services\.corpus\.clickhouse_operations import DataSubAgentClickHouseOperations'),
-            r'from netra_backend.app.services.corpus.clickhouse_operations import ClickHouseOperations as DataSubAgentClickHouseOperations',
-            "Alias ClickHouseOperations as DataSubAgentClickHouseOperations"
-        ))
-        
-        # Pattern 4: Fix ExecutionEngine import
-        self.fix_patterns.append((
-            re.compile(r'from netra_backend\.app\.services\.unified_tool_registry\.execution_engine import ExecutionEngine'),
-            r'from netra_backend.app.services.unified_tool_registry.tool_execution_engine import ToolExecutionEngine as ExecutionEngine',
-            "Fix ExecutionEngine import path"
-        ))
-        
-        # Pattern 5: Fix Metric import from metrics_collector
-        self.fix_patterns.append((
-            re.compile(r'from netra_backend\.app\.monitoring\.metrics_collector import (.*?)Metric(.*?)'),
-            r'from netra_backend.app.monitoring.models import \1Metric\2',
-            "Fix Metric import path"
-        ))
-        
-        # Pattern 6: Fix ClickHouseQueryError import
-        self.fix_patterns.append((
-            re.compile(r'from netra_backend\.app\.core\.error_types import (.*?)ClickHouseQueryError(.*?)'),
-            r'from netra_backend.app.core.exceptions import \1ClickHouseQueryError\2',
-            "Fix ClickHouseQueryError import path"
-        ))
-        
-        # Pattern 7: Fix map_content_type import
-        self.fix_patterns.append((
-            re.compile(r'from netra_backend\.app\.services\.quality\.quality_validators import (.*?)map_content_type(.*?)'),
-            r'from netra_backend.app.services.quality.content_mappers import \1map_content_type\2',
-            "Fix map_content_type import path"
-        ))
-        
-        # Pattern 8: Fix unified_tools.schemas imports
-        self.fix_patterns.append((
-            re.compile(r'from netra_backend\.app\.routes\.unified_tools\.schemas import (.*?)'),
-            r'from netra_backend.app.routes.unified_tools.models import \1',
-            "Fix unified_tools schemas import path"
-        ))
-        
-        # Pattern 9: Fix relative imports in value_based_corpus
-        self.fix_patterns.append((
-            re.compile(r'^from value_corpus_to_xml import', re.MULTILINE),
-            r'from netra_backend.app.agents.corpus_admin.value_based_corpus.value_corpus_to_xml import',
-            "Fix relative import in value_based_corpus"
-        ))
-        
-        self.fix_patterns.append((
-            re.compile(r'^from value_corpus_validation import', re.MULTILINE),
-            r'from netra_backend.app.agents.corpus_admin.value_based_corpus.value_corpus_validation import',
-            "Fix relative import in value_based_corpus"
-        ))
-        
-        logger.info(f"Built {len(self.fix_patterns)} fix patterns")
-    
-    def fix_file(self, filepath: Path) -> bool:
-        """Fix imports in a single file."""
-        try:
-            content = filepath.read_text(encoding='utf-8')
-            original_content = content
-            fixes_in_file = []
+    def visit_ImportFrom(self, node):
+        """Transform relative imports to absolute imports."""
+        if node.level > 0:  # Relative import
+            # Calculate the absolute module path
+            parts = self.module_path.split('.')
             
-            # Apply all fix patterns
-            for pattern, replacement, description in self.fix_patterns:
-                matches = pattern.findall(content)
-                if matches:
-                    new_content = pattern.sub(replacement, content)
-                    if new_content != content:
-                        content = new_content
-                        fixes_in_file.append(description)
-                        self.fixes_applied += 1
-            
-            # Check if we made any changes
-            if content != original_content:
-                if not self.dry_run:
-                    filepath.write_text(content, encoding='utf-8')
-                    logger.info(f"Fixed {len(fixes_in_file)} issues in {filepath.relative_to(PROJECT_ROOT)}:")
-                    for fix in fixes_in_file:
-                        logger.info(f"  - {fix}")
-                else:
-                    logger.info(f"Would fix {len(fixes_in_file)} issues in {filepath.relative_to(PROJECT_ROOT)}")
-                self.files_modified.add(str(filepath))
-                return True
+            # Go up 'level' directories
+            if node.level <= len(parts):
+                base_parts = parts[:-node.level]
                 
-        except Exception as e:
-            logger.error(f"Error fixing {filepath}: {e}")
-            
-        return False
+                # Add the module if specified
+                if node.module:
+                    base_parts.append(node.module)
+                
+                # Create absolute import
+                absolute_module = '.'.join(base_parts) if base_parts else None
+                
+                if absolute_module:
+                    old_import = self._format_import(node)
+                    node.level = 0
+                    node.module = absolute_module
+                    new_import = self._format_import(node)
+                    self.changes.append((old_import, new_import))
+        
+        return node
     
-    def fix_all_imports(self) -> Dict[str, any]:
-        """Fix all import issues systematically."""
-        logger.info("Starting systematic import fix...")
-        logger.info(f"Found {len(self.import_errors)} modules with import errors")
-        
-        results = {
-            'files_checked': 0,
-            'files_modified': 0,
-            'fixes_applied': 0,
-            'errors': []
-        }
-        
-        # Get all Python files that need fixing
-        target_dirs = [
-            'netra_backend/app/agents',
-            'netra_backend/app/services',
-            'netra_backend/app/routes',
-            'netra_backend/app/core',
-            'netra_backend/app/monitoring',
-            'netra_backend/tests'
-        ]
-        
-        all_files = set()
-        for dir_path in target_dirs:
-            full_dir = PROJECT_ROOT / dir_path
-            if full_dir.exists():
-                all_files.update(full_dir.rglob('*.py'))
-        
-        logger.info(f"Scanning {len(all_files)} Python files for import issues...")
-        
-        # Process all files
-        for filepath in sorted(all_files):
-            results['files_checked'] += 1
-            if self.fix_file(filepath):
-                results['files_modified'] += 1
-        
-        results['fixes_applied'] = self.fixes_applied
-        results['modified_files'] = list(self.files_modified)
-        
-        return results
+    def _format_import(self, node):
+        """Format an import node as a string."""
+        if node.level > 0:
+            dots = '.' * node.level
+            module = node.module if node.module else ''
+            return f"from {dots}{module} import ..."
+        else:
+            return f"from {node.module} import ..."
+
+
+def get_module_path(file_path: Path, root_path: Path) -> str:
+    """Get the module path for a Python file."""
+    try:
+        rel_path = file_path.relative_to(root_path)
+        parts = list(rel_path.parts[:-1])  # Remove the file name
+        parts.append(rel_path.stem)  # Add the module name without .py
+        return '.'.join(parts)
+    except ValueError:
+        return ''
+
+
+def fix_imports_in_file(file_path: Path, root_path: Path, dry_run: bool = False) -> List[str]:
+    """Fix imports in a single file."""
+    changes = []
     
-    def verify_fixes(self) -> bool:
-        """Verify that imports can be resolved after fixes."""
-        logger.info("Verifying import fixes...")
-        
-        verification_passed = True
-        test_imports = [
-            "netra_backend.app.main",
-            "netra_backend.app.agents.supervisor.agent",
-            "netra_backend.app.agents.corpus_admin.agent",
-            "netra_backend.app.services.thread_service",
-            "netra_backend.app.routes.factory_status"
-        ]
-        
-        for module_path in test_imports:
-            try:
-                __import__(module_path)
-                logger.info(f"✓ {module_path} import successful")
-            except ImportError as e:
-                logger.error(f"✗ {module_path} import failed: {e}")
-                verification_passed = False
-        
-        return verification_passed
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except Exception as e:
+        return [f"Error reading {file_path}: {e}"]
     
-    def generate_report(self) -> None:
-        """Generate a detailed report of import issues and fixes."""
-        report_path = PROJECT_ROOT / 'test_reports' / 'import_fix_report.md'
+    # Check for relative imports
+    if 'from .' not in content and 'from ..' not in content:
+        return []
+    
+    # Parse the AST
+    try:
+        tree = ast.parse(content)
+    except SyntaxError as e:
+        return [f"Syntax error in {file_path}: {e}"]
+    
+    # Get module path
+    module_path = get_module_path(file_path, root_path)
+    
+    # Transform the AST
+    fixer = ImportFixer(module_path, str(root_path))
+    fixer.visit(tree)
+    
+    if not fixer.changes:
+        return []
+    
+    # Apply changes to the content
+    new_content = content
+    for old_import, new_import in fixer.changes:
+        # Use regex to replace the actual import statements
+        old_pattern = re.escape(old_import.replace('...', '.*'))
+        old_pattern = old_pattern.replace(r'\.\*', r'[^)]+')
         
-        with open(report_path, 'w', encoding='utf-8') as f:
-            f.write("# Import Fix Report\n\n")
-            f.write(f"## Summary\n\n")
-            f.write(f"- Total files modified: {len(self.files_modified)}\n")
-            f.write(f"- Total fixes applied: {self.fixes_applied}\n\n")
-            
-            if self.files_modified:
-                f.write("## Modified Files\n\n")
-                for file_path in sorted(self.files_modified):
-                    rel_path = Path(file_path).relative_to(PROJECT_ROOT)
-                    f.write(f"- {rel_path}\n")
-                f.write("\n")
-            
-            if self.import_errors:
-                f.write("## Known Import Errors\n\n")
-                for module, errors in self.import_errors.items():
-                    f.write(f"### {module}\n")
-                    for error in errors:
-                        f.write(f"- {error}\n")
-                    f.write("\n")
+        # Find the actual import statement
+        import_pattern = r'from\s+\.+(?:\w+(?:\.\w+)*)?\s+import\s+[^(\n]+(?:\([^)]+\))?'
+        for match in re.finditer(import_pattern, content):
+            matched_text = match.group()
+            if matched_text.startswith('from .'):
+                # Extract the imports part
+                import_parts = matched_text.split(' import ', 1)
+                if len(import_parts) == 2:
+                    from_part, imports = import_parts
+                    
+                    # Count dots
+                    dots = len(from_part.split()[1]) - len(from_part.split()[1].lstrip('.'))
+                    
+                    # Build the new import statement
+                    if '.' * dots in from_part:
+                        # Calculate absolute path
+                        parts = module_path.split('.')
+                        if dots <= len(parts):
+                            base_parts = parts[:-dots]
+                            
+                            # Get the module part after dots
+                            module_after_dots = from_part.split()[1][dots:]
+                            if module_after_dots:
+                                base_parts.append(module_after_dots)
+                            
+                            if base_parts:
+                                new_from = f"from {'.'.join(base_parts)}"
+                                new_statement = f"{new_from} import {imports}"
+                                new_content = new_content.replace(matched_text, new_statement)
+                                changes.append(f"{file_path}: {matched_text} -> {new_statement}")
+    
+    if not dry_run and new_content != content:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(new_content)
+    
+    return changes
+
+
+def remove_sys_path_manipulation(file_path: Path, dry_run: bool = False) -> List[str]:
+    """Remove sys.path manipulations from files."""
+    changes = []
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+    except Exception as e:
+        return [f"Error reading {file_path}: {e}"]
+    
+    new_lines = []
+    skip_next = 0
+    removed_lines = []
+    in_path_block = False
+    
+    for i, line in enumerate(lines):
+        if skip_next > 0:
+            skip_next -= 1
+            removed_lines.append(line.rstrip())
+            continue
         
-        logger.info(f"Report saved to {report_path}")
+        # Check for start of path manipulation block
+        if 'project_root' in line.lower() or 'PROJECT_ROOT' in line:
+            # Look ahead to see if this is part of sys.path manipulation
+            if i + 1 < len(lines) and 'sys.path' in lines[i + 1]:
+                in_path_block = True
+                removed_lines.append(line.rstrip())
+                continue
+            elif i + 2 < len(lines) and 'sys.path' in lines[i + 2]:
+                in_path_block = True
+                removed_lines.append(line.rstrip())
+                continue
+        
+        # Check for sys.path manipulations
+        if 'sys.path' in line and ('append' in line or 'insert' in line):
+            removed_lines.append(line.rstrip())
+            in_path_block = False
+            
+            # Check if it's part of a multi-line statement
+            if line.rstrip().endswith('\\') or '(' in line and ')' not in line:
+                # Find the end of the statement
+                for j in range(i + 1, len(lines)):
+                    removed_lines.append(lines[j].rstrip())
+                    skip_next += 1
+                    if ')' in lines[j] or not lines[j].rstrip().endswith('\\'):
+                        break
+            continue
+        
+        # Check for path checking conditions
+        if in_path_block and ('not in sys.path' in line or 'in sys.path' in line):
+            removed_lines.append(line.rstrip())
+            in_path_block = False
+            continue
+        
+        # Keep the line
+        new_lines.append(line)
+        in_path_block = False
+    
+    if removed_lines:
+        changes.append(f"{file_path}: Removed sys.path manipulations:")
+        for line in removed_lines:
+            changes.append(f"  - {line}")
+        
+        if not dry_run:
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.writelines(new_lines)
+    
+    return changes
+
+
+def fix_pytest_config(dry_run: bool = False) -> List[str]:
+    """Fix pytest configuration files to remove relative path support."""
+    changes = []
+    
+    pytest_files = [
+        'pytest.ini',
+        'netra_backend/pytest.ini',
+        'auth_service/pytest.ini',
+    ]
+    
+    for pytest_file in pytest_files:
+        if not os.path.exists(pytest_file):
+            continue
+            
+        with open(pytest_file, 'r') as f:
+            lines = f.readlines()
+        
+        new_lines = []
+        for line in lines:
+            # Remove pythonpath configuration that enables relative imports
+            if line.strip().startswith('pythonpath'):
+                changes.append(f"{pytest_file}: Removed line: {line.strip()}")
+                continue
+            new_lines.append(line)
+        
+        if new_lines != lines and not dry_run:
+            with open(pytest_file, 'w') as f:
+                f.writelines(new_lines)
+    
+    return changes
 
 
 def main():
-    """Main entry point."""
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='Fix all import issues in Netra Backend')
-    parser.add_argument('--dry-run', action='store_true', help='Show what would be fixed without modifying files')
-    parser.add_argument('--verify', action='store_true', help='Verify fixes after applying')
-    parser.add_argument('--report', action='store_true', help='Generate detailed report')
+    parser = argparse.ArgumentParser(description='Fix import issues in the codebase')
+    parser.add_argument('--dry-run', action='store_true', help='Show what would be changed without modifying files')
+    parser.add_argument('--absolute-only', action='store_true', help='Only fix relative imports, keep sys.path for compatibility')
+    parser.add_argument('--verify', action='store_true', help='Verify all imports after fixing')
+    parser.add_argument('--path', default='.', help='Path to scan (default: current directory)')
     
     args = parser.parse_args()
     
-    fixer = ComprehensiveImportFixer(dry_run=args.dry_run)
-    results = fixer.fix_all_imports()
+    root_path = Path(args.path).resolve()
+    all_changes = []
     
-    # Print summary
-    print("\n" + "="*60)
-    print("IMPORT FIX SUMMARY")
-    print("="*60)
-    print(f"Files checked: {results['files_checked']}")
-    print(f"Files modified: {results['files_modified']}")
-    print(f"Fixes applied: {results['fixes_applied']}")
+    print("=" * 80)
+    print("Import Issue Fixer")
+    print("=" * 80)
     
-    if results['modified_files']:
-        print(f"\nModified {len(results['modified_files'])} files")
-        if len(results['modified_files']) <= 20:
-            for file in sorted(results['modified_files'])[:20]:
-                rel_path = Path(file).relative_to(PROJECT_ROOT)
-                print(f"  - {rel_path}")
+    # Step 1: Fix pytest configuration
+    if not args.absolute_only:
+        print("\n1. Fixing pytest configuration files...")
+        changes = fix_pytest_config(args.dry_run)
+        all_changes.extend(changes)
+        print(f"   Fixed {len(changes)} configuration issues")
+    
+    # Step 2: Find all Python files
+    print("\n2. Scanning for Python files...")
+    python_files = []
+    for root, dirs, files in os.walk(root_path):
+        # Skip virtual environments and other non-code directories
+        dirs[:] = [d for d in dirs if d not in {'.git', '__pycache__', 'venv', '.venv', 'node_modules', '.pytest_cache'}]
+        
+        for file in files:
+            if file.endswith('.py'):
+                python_files.append(Path(root) / file)
+    
+    print(f"   Found {len(python_files)} Python files")
+    
+    # Step 3: Fix relative imports
+    print("\n3. Fixing relative imports...")
+    import_changes = []
+    for file_path in python_files:
+        changes = fix_imports_in_file(file_path, root_path, args.dry_run)
+        import_changes.extend(changes)
+    
+    all_changes.extend(import_changes)
+    print(f"   Fixed {len(import_changes)} import issues")
+    
+    # Step 4: Remove sys.path manipulations (optional)
+    if not args.absolute_only:
+        print("\n4. Removing sys.path manipulations...")
+        sys_path_changes = []
+        for file_path in python_files:
+            if 'conftest.py' in str(file_path) or 'test_' in file_path.name or '__init__.py' in file_path.name:
+                changes = remove_sys_path_manipulation(file_path, args.dry_run)
+                sys_path_changes.extend(changes)
+        
+        all_changes.extend(sys_path_changes)
+        print(f"   Removed {len(sys_path_changes)} sys.path manipulations")
+    
+    # Step 5: Summary
+    print("\n" + "=" * 80)
+    print("Summary")
+    print("=" * 80)
+    
+    if all_changes:
+        print(f"\nTotal changes: {len(all_changes)}")
+        if args.dry_run:
+            print("\nChanges that would be made:")
+            for change in all_changes[:20]:  # Show first 20 changes
+                print(f"  {change}")
+            if len(all_changes) > 20:
+                print(f"  ... and {len(all_changes) - 20} more")
+            print("\nRun without --dry-run to apply these changes")
         else:
-            print(f"  (showing first 20 of {len(results['modified_files'])} files)")
-            for file in sorted(results['modified_files'])[:20]:
-                rel_path = Path(file).relative_to(PROJECT_ROOT)
-                print(f"  - {rel_path}")
+            print("\nAll changes have been applied successfully!")
+            print("Next steps:")
+            print("1. Run tests to verify everything still works:")
+            print("   python unified_test_runner.py --level integration --no-coverage --fast-fail")
+            print("2. Commit the changes")
+    else:
+        print("\nNo changes needed - all imports are already absolute!")
     
-    if args.report:
-        fixer.generate_report()
-        print("\nDetailed report saved to test_reports/import_fix_report.md")
-    
+    # Step 6: Verification (optional)
     if args.verify and not args.dry_run:
-        print("\nVerifying fixes...")
-        if fixer.verify_fixes():
-            print("✓ Core imports verified successfully!")
+        print("\n" + "=" * 80)
+        print("Verification")
+        print("=" * 80)
+        
+        print("\nChecking for remaining relative imports...")
+        remaining = 0
+        for file_path in python_files:
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    if 'from .' in content or 'from ..' in content:
+                        # Check if it's in a string or comment
+                        for line in content.split('\n'):
+                            stripped = line.strip()
+                            if stripped.startswith('#'):
+                                continue
+                            if 'from .' in line or 'from ..' in line:
+                                if '"' not in line and "'" not in line:  # Not in a string
+                                    print(f"  WARNING: {file_path} still has relative imports")
+                                    remaining += 1
+                                    break
+            except:
+                pass
+        
+        if remaining == 0:
+            print("  ✓ All relative imports have been successfully converted!")
         else:
-            print("✗ Some imports still have issues")
-            sys.exit(1)
-    
-    if args.dry_run:
-        print("\n[DRY RUN] No files were actually modified")
-    
-    return 0 if results['files_modified'] > 0 or args.dry_run else 1
+            print(f"  ✗ {remaining} files still have relative imports")
+            print("    These may need manual intervention")
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()

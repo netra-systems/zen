@@ -11,17 +11,10 @@ L3 Realism: Real Redis with actual TTL mechanisms, precision timing tests, memor
 Performance Requirements: TTL accuracy > 99.5%, expiration variance < 50ms, memory recovery > 95%
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -39,15 +32,11 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer as NetraRedisContainer,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class TTLAccuracyMetrics:
@@ -96,7 +85,6 @@ class TTLAccuracyMetrics:
             return 100.0
         
         return ((avg_before - avg_after) / avg_before) * 100.0
-
 
 class CacheTTLExpirationAccuracyL3Manager:
     """L3 cache TTL expiration accuracy test manager with real Redis TTL mechanisms."""
@@ -521,7 +509,6 @@ class CacheTTLExpirationAccuracyL3Manager:
         except Exception as e:
             logger.error(f"TTL accuracy cleanup failed: {e}")
 
-
 @pytest.fixture
 async def ttl_accuracy_manager():
     """Create L3 TTL accuracy manager."""
@@ -529,7 +516,6 @@ async def ttl_accuracy_manager():
     await manager.setup_redis_for_ttl_testing()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -548,7 +534,6 @@ async def test_short_ttl_expiration_accuracy(ttl_accuracy_manager):
     
     logger.info(f"Short TTL test: {result['accuracy_rate']:.1f}% accuracy, {result['accurate_expirations']}/20 accurate")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -563,7 +548,6 @@ async def test_ttl_precision_under_concurrent_load(ttl_accuracy_manager):
     
     logger.info(f"Concurrent TTL precision: {result['precision_rate']:.1f}% precision, max variance {result['max_variance']*1000:.1f}ms")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -577,7 +561,6 @@ async def test_memory_recovery_after_ttl_expiration(ttl_accuracy_manager):
     assert result["memory_recovered"] > 0, f"No memory recovered: {result['memory_recovered']}"
     
     logger.info(f"Memory recovery: {result['recovery_rate']:.1f}% recovered, {result['expiration_rate']:.1f}% expired")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -602,7 +585,6 @@ async def test_bulk_ttl_accuracy_mixed_values(ttl_accuracy_manager):
     
     logger.info(f"Bulk TTL accuracy: {result['overall_accuracy']:.1f}% overall accuracy across {len(ttl_distribution)} categories")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -622,7 +604,6 @@ async def test_ttl_edge_cases_handling(ttl_accuracy_manager):
     assert result["large_ttl"]["ttl_set_correctly"], "Large TTL should be set correctly"
     
     logger.info(f"TTL edge cases: short={result['short_ttl']['expired_correctly']}, update={result['ttl_update']['expired_correctly']}, large={result['large_ttl']['ttl_set_correctly']}")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

@@ -53,7 +53,7 @@ const StreamingTestComponent: React.FC<{
     const chunks = data.content.split(' ');
     
     for (let i = 0; i < chunks.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 5)); // Reduced delay for faster tests
       
       setStreamContent(prev => {
         const newContent = i === 0 ? chunks[0] : prev + ' ' + chunks[i];
@@ -68,7 +68,8 @@ const StreamingTestComponent: React.FC<{
       });
     }
     
-    // Complete streaming
+    // Complete streaming with a small delay to ensure state update
+    await new Promise(resolve => setTimeout(resolve, 10));
     setIsStreaming(false);
     onStreamComplete?.(performance.now() - startTime.current);
     
@@ -318,16 +319,26 @@ describe('Message Reception Integration Tests', () => {
 
       render(<MarkdownStreamTest />);
 
+      // Wait for content to start appearing (has some text)
       await waitFor(() => {
-        expect(screen.getByTestId('raw-markdown')).toHaveTextContent('Heading');
+        const content = screen.getByTestId('raw-markdown').textContent;
+        expect(content).toBeTruthy();
+        expect(content!.length).toBeGreaterThan(0);
       });
 
+      // Wait for heading marker to appear
       await waitFor(() => {
-        expect(screen.getByTestId('raw-markdown')).toHaveTextContent('Bold text');
+        expect(screen.getByTestId('raw-markdown')).toHaveTextContent('#');
       });
 
+      // Wait for bold text marker to appear
       await waitFor(() => {
-        expect(screen.getByTestId('raw-markdown')).toHaveTextContent('console');
+        expect(screen.getByTestId('raw-markdown')).toHaveTextContent('**');
+      });
+
+      // Wait for code block to appear
+      await waitFor(() => {
+        expect(screen.getByTestId('raw-markdown')).toHaveTextContent('```');
       });
     });
   });

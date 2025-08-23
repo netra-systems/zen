@@ -45,5 +45,18 @@
       <instruction>Use individual selectors only.</instruction>
       <reference>SPEC/conventions.xml#FE-001</reference>
     </pattern>
+    <pattern id="DATACLASS-DECORATOR" context="Backend" priority="CRITICAL">
+      <title>Dataclass Decorator Requirement</title>
+      <instruction>ALL dataclass definitions MUST include @dataclass decorator.</instruction>
+      <example>@dataclass\nclass HealthCheckResult:\n    service: str\n    healthy: bool\n    response_time_ms: float</example>
+      <reference>SPEC/learnings/cross_system_test_fixes_comprehensive.xml#health-check-result-dataclass-decorator</reference>
+    </pattern>
+    <pattern id="ABSOLUTE-IMPORTS-ONLY" context="All" priority="CRITICAL">
+      <title>Absolute Import Requirement</title>
+      <instruction>ALL Python files MUST use absolute imports starting from package root. Relative imports are FORBIDDEN.</instruction>
+      <correct_example>from netra_backend.app.services.user_auth_service import UserAuthService</correct_example>
+      <incorrect_example>from ..services.user_auth_service import UserAuthService</incorrect_example>
+      <reference>SPEC/learnings/cross_system_test_fixes_comprehensive.xml#import-resolution-massive-fixes</reference>
+    </pattern>
   </section>
 </specification>

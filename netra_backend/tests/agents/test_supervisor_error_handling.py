@@ -3,17 +3,10 @@ Priority: P0 - CRITICAL
 Coverage: Error handling, recovery mechanisms, and resilience patterns
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime, timezone
@@ -23,20 +16,18 @@ import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import (
-    # Add project root to path
+from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
 )
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from .supervisor_extensions import (
+from netra_backend.tests.helpers.supervisor_extensions import (
     install_supervisor_extensions,
 )
-from .supervisor_test_helpers import (
+from netra_backend.tests.supervisor_test_helpers import (
     create_agent_state,
     create_execution_context,
     create_supervisor_agent,
@@ -49,9 +40,9 @@ from .supervisor_test_helpers import (
 # Install extension methods for testing
 install_supervisor_extensions()
 
-
 class TestSupervisorErrorHandling:
     """Test supervisor handles agent initialization errors gracefully"""
+    @pytest.mark.asyncio
     async def test_supervisor_error_handling(self):
         """Test supervisor handles agent initialization errors gracefully"""
         mocks = create_supervisor_mocks()
@@ -71,6 +62,7 @@ class TestSupervisorErrorHandling:
         # Verify error was handled
         assert not result.success
         assert "Agent failed" in str(result.error)
+    @pytest.mark.asyncio
     async def test_supervisor_state_management(self):
         """Test supervisor properly manages agent states"""
         mocks = create_supervisor_mocks()
@@ -89,9 +81,9 @@ class TestSupervisorErrorHandling:
         # Note: Cannot transition back to PENDING from COMPLETED
         # This is valid supervisor behavior
 
-
 class TestSupervisorConcurrentRequests:
     """Test supervisor handles multiple concurrent requests"""
+    @pytest.mark.asyncio
     async def test_supervisor_concurrent_requests(self):
         """Test supervisor handles multiple concurrent requests"""
         mocks = create_supervisor_mocks()
@@ -136,9 +128,9 @@ class TestSupervisorConcurrentRequests:
                 pytest.fail(f"Request {i} failed with: {result}")
             assert result.success is True
 
-
 class TestRetryMechanisms:
     """Test retry and circuit breaker patterns"""
+    @pytest.mark.asyncio
     async def test_retry_with_exponential_backoff(self):
         """Test retry mechanism with exponential backoff"""
         mocks = create_supervisor_mocks()
@@ -160,6 +152,7 @@ class TestRetryMechanisms:
         assert result.state.triage_result.category == "success"
         # Should have taken some time due to backoff
         assert end_time - start_time > 0.1
+    @pytest.mark.asyncio
     async def test_circuit_breaker_recovery(self):
         """Test circuit breaker can recover after cooldown"""
         mocks = create_supervisor_mocks()
@@ -200,9 +193,9 @@ class TestRetryMechanisms:
         )
         assert result.success
 
-
 class TestErrorPropagation:
     """Test error propagation and isolation"""
+    @pytest.mark.asyncio
     async def test_error_isolation_between_agents(self):
         """Test that errors in one agent don't affect others"""
         mocks = create_supervisor_mocks()
@@ -227,6 +220,7 @@ class TestErrorPropagation:
         data_result = await supervisor._route_to_agent(state, context, "data")
         assert data_result.success
         assert data_result.state.data_result["status"] == "healthy"
+    @pytest.mark.asyncio
     async def test_partial_pipeline_failure_recovery(self):
         """Test recovery when part of pipeline fails"""
         mocks = create_supervisor_mocks()
@@ -260,9 +254,9 @@ class TestErrorPropagation:
         assert opt_result.success
         assert opt_result.state.optimizations_result["fallback"]
 
-
 class TestErrorRecoveryStrategies:
     """Test different error recovery strategies"""
+    @pytest.mark.asyncio
     async def test_graceful_degradation(self):
         """Test graceful degradation when services are unavailable"""
         mocks = create_supervisor_mocks()
@@ -290,6 +284,7 @@ class TestErrorRecoveryStrategies:
         assert result.success
         assert result.state.triage_result["degraded_mode"]
         assert "basic_response" in result.state.triage_result["available_features"]
+    @pytest.mark.asyncio
     async def test_fallback_agent_selection(self):
         """Test fallback to alternative agents when primary fails"""
         mocks = create_supervisor_mocks()

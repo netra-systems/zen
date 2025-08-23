@@ -7,14 +7,14 @@
 
 import { waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
-import.*from '@/__tests__/helpers/websocket-test-manager';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
 
 describe('WebSocket Stress Testing', () => {
   let wsManager: WebSocketTestManager;
 
   beforeEach(() => {
     // Use real WebSocket simulation instead of mocks
-    wsManager = createWebSocketManager(undefined, true);
+    wsManager = WebSocketTestManager.createWebSocketManager(undefined, true);
     wsManager.setup();
   });
 
@@ -29,7 +29,7 @@ describe('WebSocket Stress Testing', () => {
       
       for (let i = 0; i < cycles; i++) {
         // Connect
-        const manager = createWebSocketManager(undefined, true);
+        const manager = WebSocketTestManager.createWebSocketManager(undefined, true);
         manager.setup();
         await manager.waitForConnection();
         expect(manager.isReady()).toBe(true);
@@ -56,7 +56,7 @@ describe('WebSocket Stress Testing', () => {
       
       // Create multiple managers simultaneously
       for (let i = 0; i < connectionCount; i++) {
-        const manager = createWebSocketManager(undefined, true);
+        const manager = WebSocketTestManager.createWebSocketManager(undefined, true);
         managers.push(manager);
         manager.setup();
       }
@@ -79,7 +79,7 @@ describe('WebSocket Stress Testing', () => {
       
       // Create and destroy multiple managers
       for (let i = 0; i < 10; i++) {
-        const manager = createWebSocketManager(undefined, true);
+        const manager = WebSocketTestManager.createWebSocketManager(undefined, true);
         manager.setup();
         await manager.waitForConnection();
         

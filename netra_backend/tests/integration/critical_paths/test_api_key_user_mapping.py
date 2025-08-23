@@ -24,17 +24,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -51,19 +44,16 @@ import redis.asyncio as aioredis
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 
-# Add project root to path
 from netra_backend.app.schemas.auth_types import (
     AuditLog,
     AuthProvider,
     SessionInfo,
-    # Add project root to path
     TokenData,
     UserPermission,
 )
 from netra_backend.app.services.database.session_manager import SessionManager
 
 logger = logging.getLogger(__name__)
-
 
 class MockAPIKeyStore:
     """Mock API key storage for testing - external service simulation."""
@@ -97,7 +87,6 @@ class MockAPIKeyStore:
         self.rate_limits[api_key] = 1000
         return api_key
 
-
 class APIKeyValidator:
     """Real API key validator component."""
     
@@ -126,7 +115,6 @@ class APIKeyValidator:
             }
         
         return result
-
 
 class UserResolver:
     """Real user context resolver component."""
@@ -164,7 +152,6 @@ class UserResolver:
         
         return user_context
 
-
 class AuditLogger:
     """Real audit logging component."""
     
@@ -195,7 +182,6 @@ class AuditLogger:
         except Exception as e:
             logger.error(f"Audit logging failed: {e}")
             return False
-
 
 class RateLimiter:
     """Real rate limiting component per API key."""
@@ -236,7 +222,6 @@ class RateLimiter:
             "limit": user_limit,
             "remaining": user_limit - (current_count + 1)
         }
-
 
 class APIKeyUserMappingTestManager:
     """Manages API key to user mapping testing."""
@@ -536,7 +521,6 @@ class APIKeyUserMappingTestManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def api_key_mapping_manager():
     """Create API key mapping test manager."""
@@ -544,7 +528,6 @@ async def api_key_mapping_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.critical
@@ -580,7 +563,6 @@ async def test_complete_api_key_user_mapping_flow(api_key_mapping_manager):
     total_time = time.time() - start_time
     assert total_time < 0.25, f"Total flow took {total_time:.2f}s, expected <0.25s"
 
-
 @pytest.mark.asyncio
 async def test_api_key_rate_limiting_per_key(api_key_mapping_manager):
     """Test rate limiting behavior per API key."""
@@ -600,7 +582,6 @@ async def test_api_key_rate_limiting_per_key(api_key_mapping_manager):
     assert rate_result["denied_requests"] >= 2, "Rate limit denial not working"
     assert rate_result["rate_test_time"] < 1.0, "Rate limiting test too slow"
 
-
 @pytest.mark.asyncio
 async def test_api_key_user_context_caching(api_key_mapping_manager):
     """Test user context caching performance."""
@@ -615,7 +596,6 @@ async def test_api_key_user_context_caching(api_key_mapping_manager):
     assert cache_result["cache_hit"], "Cache not working - second call not faster"
     assert cache_result["context_matches"], "Cached context doesn't match original"
     assert cache_result["second_call_time"] < cache_result["first_call_time"], "Cache performance not improved"
-
 
 @pytest.mark.asyncio
 async def test_api_key_audit_trail_integrity(api_key_mapping_manager):
@@ -634,7 +614,6 @@ async def test_api_key_audit_trail_integrity(api_key_mapping_manager):
         assert "event_id" in event, "Missing event ID"
         assert "timestamp" in event, "Missing timestamp"
         assert "event_type" in event, "Missing event type"
-
 
 @pytest.mark.asyncio
 async def test_api_key_mapping_error_handling(api_key_mapping_manager):

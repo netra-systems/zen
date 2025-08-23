@@ -142,6 +142,69 @@ class BaseExecutionInterface(ABC):
         except Exception:
             # Fail silently for WebSocket errors to not break execution
             pass
+    
+    async def send_agent_thinking(self, context: ExecutionContext, 
+                                 thought: str, step_number: int = None) -> None:
+        """Send agent thinking notification via WebSocket."""
+        if not self.websocket_manager or not context.stream_updates:
+            return
+        update = {
+            "type": "agent_thinking",
+            "payload": {
+                "thought": thought,
+                "agent_name": context.agent_name,
+                "step_number": step_number,
+                "timestamp": datetime.utcnow().timestamp()
+            }
+        }
+        await self._send_websocket_update(context, update)
+    
+    async def send_partial_result(self, context: ExecutionContext,
+                                 content: str, is_complete: bool = False) -> None:
+        """Send partial result notification via WebSocket."""
+        if not self.websocket_manager or not context.stream_updates:
+            return
+        update = {
+            "type": "partial_result", 
+            "payload": {
+                "content": content,
+                "agent_name": context.agent_name,
+                "is_complete": is_complete,
+                "timestamp": datetime.utcnow().timestamp()
+            }
+        }
+        await self._send_websocket_update(context, update)
+    
+    async def send_tool_executing(self, context: ExecutionContext,
+                                 tool_name: str) -> None:
+        """Send tool executing notification via WebSocket."""
+        if not self.websocket_manager or not context.stream_updates:
+            return
+        update = {
+            "type": "tool_executing",
+            "payload": {
+                "tool_name": tool_name,
+                "agent_name": context.agent_name,
+                "timestamp": datetime.utcnow().timestamp()
+            }
+        }
+        await self._send_websocket_update(context, update)
+    
+    async def send_final_report(self, context: ExecutionContext,
+                               report: dict, duration_ms: float) -> None:
+        """Send final report notification via WebSocket."""
+        if not self.websocket_manager or not context.stream_updates:
+            return
+        update = {
+            "type": "final_report",
+            "payload": {
+                "report": report,
+                "total_duration_ms": duration_ms,
+                "agent_name": context.agent_name,
+                "timestamp": datetime.utcnow().timestamp()
+            }
+        }
+        await self._send_websocket_update(context, update)
 
 
 class AgentExecutionMixin:

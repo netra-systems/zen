@@ -71,7 +71,7 @@ class UnifiedE2ETestHarness:
         finally:
             await self.cleanup_test_environment()
     
-    async def start_test_environment(self) -> None:
+    async def test_start_test_environment(self) -> None:
         """Start complete test environment."""
         logger.info("Starting unified E2E test environment")
         
@@ -144,7 +144,7 @@ class UnifiedE2ETestHarness:
         })
         return status
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Cleanup complete test environment."""
         logger.info("Cleaning up E2E test environment")
         

@@ -15,29 +15,22 @@ Real Critical User Journey E2E Tests - First-time user experience validation wit
 Each test follows 25-line function limit through delegation to specialized helper classes.
 """
 
-from ..test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-
 import pytest
 
-# Add project root to path
-from .test_helpers import (
+from netra_backend.tests.e2e.first_time_user.real_critical_helpers import (
     AIProviderHelpers,
     ConcurrentTestHelpers,
-    # Add project root to path
+    CriticalUserJourneyHelpers,
     OAuthFlowHelpers,
     OptimizationHelpers,
     WebSocketHelpers,
 )
-from .real_critical_fixtures import *
-
+from netra_backend.tests.e2e.first_time_user.real_critical_fixtures import *
 
 @pytest.mark.real_e2e
 class TestRealCriticalUserJourney:
@@ -245,7 +238,7 @@ class TestRealCriticalUserJourney:
 
     async def _simulate_real_error_scenarios(self):
         """Simulate real error scenarios"""
-        from netra_backend.real_critical_helpers import CriticalUserJourneyHelpers
+        # CriticalUserJourneyHelpers already imported at top of file
         scenarios = CriticalUserJourneyHelpers.setup_error_simulation_scenarios()
         return [{"scenario": name, "simulated": True} for name in scenarios.keys()]
 

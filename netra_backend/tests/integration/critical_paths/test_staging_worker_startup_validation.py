@@ -12,17 +12,10 @@ and error handling to catch issues like worker exits with code 3.
 L3 Realism Level: Real staging configuration, containerized services, production-like errors
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -39,12 +32,8 @@ import httpx
 import pytest
 from loguru import logger
 
-# Add project root to path
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.health_check_service import HealthCheckService
-
-# Add project root to path
-
 
 @dataclass
 class WorkerStartupMetrics:
@@ -67,7 +56,6 @@ class WorkerStartupMetrics:
     @property
     def failed(self) -> bool:
         return self.exit_code is not None and self.exit_code != 0
-
 
 class StagingWorkerValidator:
     """Validates staging worker startup and configuration."""
@@ -298,7 +286,6 @@ class StagingWorkerValidator:
         sorted_errors = sorted(error_counts.items(), key=lambda x: x[1], reverse=True)
         return [f"{error} ({count} occurrences)" for error, count in sorted_errors[:5]]
 
-
 @pytest.mark.l3
 @pytest.mark.staging
 @pytest.mark.asyncio
@@ -440,7 +427,6 @@ class TestStagingWorkerStartup:
         # Should identify repeated configuration errors
         assert len(common_errors) > 0
         assert any("Missing" in error and "occurrences" in error for error in common_errors)
-
 
 @pytest.mark.l3
 @pytest.mark.staging

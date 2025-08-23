@@ -4,26 +4,17 @@ Tests workflows with constraint prioritization.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from typing import Dict, List
 
 import pytest
 
-# Add project root to path
-from netra_backend.tests.multi_constraint_test_helpers import (
+from netra_backend.tests.e2e.multi_constraint_test_helpers import (
     build_multi_constraint_setup,
-    # Add project root to path
     create_agent_instances,
     create_dynamic_constraint_state,
     create_priority_optimization_state,
@@ -33,13 +24,11 @@ from netra_backend.tests.multi_constraint_test_helpers import (
     validate_priority_optimization_results,
 )
 
-
 @pytest.fixture(scope="function")
 def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for multi-constraint optimization testing."""
     agents = create_agent_instances(real_llm_manager, real_tool_dispatcher)
     return build_multi_constraint_setup(agents, real_llm_manager, real_websocket_manager)
-
 
 class TestConstraintPriorityWorkflows:
     """Test workflows with constraint prioritization."""
@@ -91,12 +80,10 @@ class TestConstraintPriorityWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_deadline_prioritization_results(results, state)
 
-
 def validate_dynamic_constraint_results(results: List[Dict]) -> None:
     """Validate dynamic constraint adjustment results."""
     validate_basic_workflow_execution(results)
     validate_completed_or_fallback_states(results)
-
 
 def validate_hierarchical_results(results: List[Dict], state) -> None:
     """Validate hierarchical constraint resolution results."""
@@ -107,7 +94,6 @@ def validate_hierarchical_results(results: List[Dict], state) -> None:
     assert 'nice_to_have' in hierarchy
     validate_completed_or_fallback_states(results)
 
-
 def validate_adaptive_adjustment_results(results: List[Dict], state) -> None:
     """Validate adaptive priority adjustment results."""
     validate_basic_workflow_execution(results)
@@ -115,7 +101,6 @@ def validate_adaptive_adjustment_results(results: List[Dict], state) -> None:
     assert state.metadata.get('feedback_loop') is True
     assert state.metadata.get('adjustment_threshold') == 0.1
     validate_completed_or_fallback_states(results)
-
 
 def validate_deadline_prioritization_results(results: List[Dict], state) -> None:
     """Validate deadline-based prioritization results."""

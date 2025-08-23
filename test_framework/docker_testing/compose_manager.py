@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import aiofiles
+import test_framework.aiofiles_mock as aiofiles
 import yaml
 
 from ..unified.base_interfaces import (

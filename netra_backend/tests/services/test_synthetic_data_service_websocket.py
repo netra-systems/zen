@@ -3,17 +3,10 @@ WebSocket Updates Test Suite for Synthetic Data Service
 Testing WebSocket real-time updates during generation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -21,16 +14,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
-
-# Add project root to path
-
 
 @pytest.fixture
 def ws_service():
     return ws_manager
-
 
 @pytest.fixture
 def mock_websocket():
@@ -38,7 +26,6 @@ def mock_websocket():
     ws.send_json = AsyncMock()
     ws.receive_json = AsyncMock()
     return ws
-
 
 # ==================== Test Suite: WebSocket Updates ====================
 
@@ -229,7 +216,6 @@ class TestWebSocketUpdates:
         
         # Should take at least 9 seconds (100 messages / 10 per second)
         assert (end_time - start_time) >= 9
-
 
 # ==================== Test Runner ====================
 

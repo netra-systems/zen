@@ -11,9 +11,7 @@ Comprehensive test for Prometheus metrics collection:
 8. Metrics aggregation
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import os
@@ -26,12 +24,8 @@ import aiohttp
 import pytest
 from prometheus_client.parser import text_string_to_metric_families
 
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 METRICS_URL = os.getenv("METRICS_URL", f"{BACKEND_URL}/metrics")
-
 
 class PrometheusMetricsTester:
     """Test Prometheus metrics collection."""
@@ -321,7 +315,6 @@ class PrometheusMetricsTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -347,7 +340,6 @@ async def test_prometheus_metrics_collection():
         critical_tests = ["metrics_endpoint", "counter_metrics", "gauge_metrics"]
         for test in critical_tests:
             assert results.get(test, False), f"Critical test failed: {test}"
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(test_prometheus_metrics_collection())

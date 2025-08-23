@@ -10,17 +10,10 @@ Critical Path: Message ingestion -> Processing attempt -> Retry mechanisms -> DL
 Coverage: Message reliability patterns, error handling, retry strategies, poison message detection, DLQ monitoring
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -35,14 +28,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import AgentMessage, TaskPriority
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class MessageStatus(Enum):
     """Message processing status enumeration."""
@@ -53,7 +42,6 @@ class MessageStatus(Enum):
     RETRYING = "retrying"
     DLQ = "dlq"
     POISON = "poison"
-
 
 @dataclass
 class ProcessingMessage:
@@ -72,7 +60,6 @@ class ProcessingMessage:
         """Check if message should be considered poison."""
         return self.attempt_count >= self.max_retries and self.status == MessageStatus.FAILED
 
-
 @dataclass 
 class DLQMetrics:
     """Dead Letter Queue metrics tracking."""
@@ -89,7 +76,6 @@ class DLQMetrics:
         if self.total_messages_processed == 0:
             return 0.0
         return (self.successful_completions / self.total_messages_processed) * 100.0
-
 
 class MessageProcessor:
     """Mock message processor with configurable failure patterns."""
@@ -122,7 +108,6 @@ class MessageProcessor:
         
         self.processed_messages.append(message.id)
         return True
-
 
 class DeadLetterQueueManager:
     """Manages dead letter queue operations and message reliability."""
@@ -340,7 +325,6 @@ class DeadLetterQueueManager:
             }
         }
 
-
 class MessageProcessingLoadTester:
     """Load tester for message processing and DLQ scenarios."""
     
@@ -431,20 +415,17 @@ class MessageProcessingLoadTester:
         
         return scenarios
 
-
 @pytest.fixture
 async def dlq_manager():
     """Create DLQ manager for testing."""
     manager = DeadLetterQueueManager()
     yield manager
 
-
 @pytest.fixture 
 async def message_load_tester(dlq_manager):
     """Create message processing load tester."""
     tester = MessageProcessingLoadTester(dlq_manager)
     yield tester
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

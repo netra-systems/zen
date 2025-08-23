@@ -25,8 +25,14 @@ export function setupFetchMock(response?: any) {
   
   if (response) {
     if (typeof response.json === 'function') {
-      // Response object with json method
+      // Response object with json method - use as is
       mockFetch.mockResolvedValue(response);
+    } else if (response.ok !== undefined) {
+      // Response-like object - already has ok, status etc.
+      mockFetch.mockResolvedValue({
+        ...response,
+        json: () => Promise.resolve(response.data || response),
+      });
     } else {
       // Data object - wrap in response
       mockFetch.mockResolvedValue({
@@ -107,4 +113,30 @@ export function setupInfrastructureMonitoring() {
     stopMonitoring: jest.fn(),
     getMetrics: jest.fn().mockReturnValue(createMockMetrics()),
   };
+}
+
+export async function waitForAsyncOperation(delay: number = 100): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, delay));
+}
+
+export function createRetryableOperation(maxRetries: number = 3) {
+  let attempts = 0;
+  
+  return async () => {
+    attempts++;
+    
+    if (attempts < maxRetries) {
+      throw new Error(`Attempt ${attempts} failed`);
+    }
+    
+    return { attempts, success: true };
+  };
+}
+
+export function createExponentialBackoff(baseDelay: number = 100) {
+  return (attempt: number) => baseDelay * Math.pow(2, attempt);
+}
+
+export function createJitterFunction(maxJitter: number = 100) {
+  return () => Math.random() * maxJitter;
 }

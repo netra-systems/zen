@@ -10,21 +10,10 @@ Business Value Justification (BVJ):
 This test validates WebSocket connection lifecycle for users.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -35,22 +24,18 @@ from unittest.mock import AsyncMock
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-from .integration.helpers.user_flow_helpers import (
+from netra_backend.tests.integration.integration.helpers.user_flow_helpers import (
 
     MockWebSocketManager,
-    # Add project root to path
 
     generate_test_user_data,
 
 )
 
-
 class TestUserWebSocketLifecycle:
 
     """Test user WebSocket connection lifecycle"""
     
-
     @pytest.mark.asyncio
 
     async def test_websocket_connection_establishment(self, test_session: AsyncSession):
@@ -61,21 +46,18 @@ class TestUserWebSocketLifecycle:
 
         user_data["verified"] = True
         
-
         mock_ws = MockWebSocketManager()
         
         # Test connection establishment
 
         connection_result = await self._test_websocket_connection(user_data, mock_ws)
         
-
         assert connection_result["connected"] is True
 
         assert connection_result["authentication_verified"] is True
 
         assert connection_result["connection_time"] < 5.0  # Should connect quickly
     
-
     @pytest.mark.asyncio
 
     async def test_websocket_message_flow(self, test_session: AsyncSession):
@@ -106,7 +88,6 @@ class TestUserWebSocketLifecycle:
 
         }
         
-
         send_result = await mock_ws.send_message(user_id, test_message)
 
         assert send_result is True
@@ -117,7 +98,6 @@ class TestUserWebSocketLifecycle:
 
         assert mock_ws.messages[0]["user_id"] == user_id
     
-
     @pytest.mark.asyncio
 
     async def test_websocket_reconnection_handling(self, test_session: AsyncSession):
@@ -128,7 +108,6 @@ class TestUserWebSocketLifecycle:
 
         mock_ws = MockWebSocketManager()
         
-
         user_id = user_data["user_id"]
         
         # Initial connection
@@ -153,7 +132,6 @@ class TestUserWebSocketLifecycle:
 
         assert user_id in mock_ws.connections
     
-
     @pytest.mark.asyncio
 
     async def test_websocket_error_handling(self, test_session: AsyncSession):
@@ -164,7 +142,6 @@ class TestUserWebSocketLifecycle:
 
         mock_ws = MockWebSocketManager()
         
-
         user_id = user_data["user_id"]
         
         # Test sending to non-connected user
@@ -191,7 +168,6 @@ class TestUserWebSocketLifecycle:
 
             pytest.fail("WebSocket should handle malformed messages gracefully")
     
-
     async def _test_websocket_connection(self, user_data: Dict[str, Any], 
 
                                         mock_ws: MockWebSocketManager) -> Dict[str, Any]:
@@ -200,7 +176,6 @@ class TestUserWebSocketLifecycle:
 
         user_id = user_data["user_id"]
         
-
         start_time = time.time()
 
         connected = await mock_ws.connect(user_id, None)
@@ -211,7 +186,6 @@ class TestUserWebSocketLifecycle:
 
         auth_verified = user_data.get("verified", False)
         
-
         return {
 
             "connected": connected,

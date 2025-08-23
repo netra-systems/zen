@@ -9,17 +9,10 @@ Business Value Justification (BVJ):
 L3 Test: Uses real local services to validate agent resource pool management.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -38,18 +31,14 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.database.postgres_service import PostgresService
 from netra_backend.app.services.metrics.resource_monitor import ResourceMonitor
 from netra_backend.app.services.resource_pool import AgentResourcePool
-from test_framework.testcontainers_utils import TestcontainerHelper
-
-# Add project root to path
+from test_framework.testcontainers_utils import ContainerHelper
 
 logger = logging.getLogger(__name__)
-
 
 class L3ResourcePoolManager:
     """Manages L3 resource pool testing with real infrastructure."""
@@ -566,11 +555,10 @@ class L3ResourcePoolManager:
         except Exception as e:
             logger.warning(f"Cleanup warning: {e}")
 
-
 @pytest.fixture
 async def testcontainer_infrastructure():
     """Setup real Redis and Postgres containers for L3 testing."""
-    helper = TestcontainerHelper()
+    helper = ContainerHelper()
     
     # Start Redis container
     redis_container_instance = RedisContainer("redis:7-alpine")
@@ -588,7 +576,6 @@ async def testcontainer_infrastructure():
     redis_container_instance.stop()
     postgres_container_instance.stop()
 
-
 @pytest.fixture
 async def l3_resource_manager(testcontainer_infrastructure):
     """Create L3 resource manager with real infrastructure."""
@@ -600,7 +587,6 @@ async def l3_resource_manager(testcontainer_infrastructure):
     yield manager
     
     await manager.cleanup_l3_resources()
-
 
 @pytest.mark.L3
 @pytest.mark.integration

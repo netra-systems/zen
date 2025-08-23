@@ -84,7 +84,7 @@ class BusinessValueTestIndexer:
             'unit': r'test_.*_unit|unit_test_|TestUnit',
             'integration': r'test_.*_integration|integration_test_|TestIntegration',
             'e2e': r'test_.*_e2e|e2e_test_|TestE2E|test_end_to_end',
-            'real_llm': r'test_.*_real_llm|real_llm_test_|with_real_llm|@real_llm',
+            'real_llm': r'test_.*_real_llm|real_llm_test_|with_real_llm|@real_llm|@pytest\.mark\.real_llm',
             'performance': r'test_.*_performance|performance_test_|TestPerformance|test_.*_perf',
             'security': r'test_.*_security|security_test_|TestSecurity',
             'load': r'test_.*_load|load_test_|TestLoad'
@@ -206,35 +206,60 @@ class BusinessValueTestIndexer:
                 tree = ast.parse(content)
                 
             for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef) and node.name.startswith('test_'):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith('test_'):
                     metadata = self._extract_python_test_metadata(node, file_path, content)
                     self.tests.append(metadata)
                 elif isinstance(node, ast.ClassDef) and node.name.startswith('Test'):
+                    # Extract class decorators to inherit by test methods
+                    class_decorators = self._extract_decorators_from_node(node)
                     for item in node.body:
-                        if isinstance(item, ast.FunctionDef) and item.name.startswith('test_'):
-                            metadata = self._extract_python_test_metadata(item, file_path, content, node.name)
+                        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) and item.name.startswith('test_'):
+                            metadata = self._extract_python_test_metadata(item, file_path, content, node.name, class_decorators)
                             self.tests.append(metadata)
         except Exception as e:
             print(f"Error scanning {file_path}: {e}")
 
-    def _extract_python_test_metadata(self, node: ast.FunctionDef, file_path: Path, 
-                                     content: str, class_name: str = None) -> TestMetadata:
-        """Extract metadata from a Python test function"""
-        rel_path = str(file_path.relative_to(self.project_root))
-        full_name = f"{class_name}.{node.name}" if class_name else node.name
-        
-        # Extract decorators
+    def _extract_decorators_from_node(self, node) -> List[str]:
+        """Extract decorators from an AST node (class or function)"""
         decorators = []
         for decorator in node.decorator_list:
             if isinstance(decorator, ast.Name):
                 decorators.append(decorator.id)
             elif isinstance(decorator, ast.Attribute):
-                decorators.append(decorator.attr)
+                # Handle pytest.mark.* pattern
+                if (isinstance(decorator.value, ast.Attribute) and
+                    isinstance(decorator.value.value, ast.Name) and
+                    decorator.value.value.id == 'pytest' and
+                    decorator.value.attr == 'mark'):
+                    decorators.append(f'pytest.mark.{decorator.attr}')
+                else:
+                    decorators.append(decorator.attr)
             elif isinstance(decorator, ast.Call):
                 if isinstance(decorator.func, ast.Name):
                     decorators.append(decorator.func.id)
                 elif isinstance(decorator.func, ast.Attribute):
-                    decorators.append(decorator.func.attr)
+                    # Handle pytest.mark.* pattern in calls
+                    if (isinstance(decorator.func.value, ast.Attribute) and
+                        isinstance(decorator.func.value.value, ast.Name) and
+                        decorator.func.value.value.id == 'pytest' and
+                        decorator.func.value.attr == 'mark'):
+                        decorators.append(f'pytest.mark.{decorator.func.attr}')
+                    else:
+                        decorators.append(decorator.func.attr)
+        return decorators
+
+    def _extract_python_test_metadata(self, node, file_path: Path, 
+                                     content: str, class_name: str = None, 
+                                     class_decorators: List[str] = None) -> TestMetadata:
+        """Extract metadata from a Python test function"""
+        rel_path = str(file_path.relative_to(self.project_root))
+        full_name = f"{class_name}.{node.name}" if class_name else node.name
+        
+        # Extract decorators from the method itself
+        method_decorators = self._extract_decorators_from_node(node)
+        
+        # Combine class decorators (if any) with method decorators
+        decorators = (class_decorators or []) + method_decorators
         
         # Determine test type
         test_type = self._determine_test_type(full_name, decorators, content)
@@ -248,10 +273,16 @@ class BusinessValueTestIndexer:
         # Determine category
         category = self._determine_category(component)
         
-        # Check for real services
+        # Check for real services and LLM usage
         real_services = self._detect_real_services(content)
-        uses_real_llm = 'real_llm' in decorators or 'real_llm' in test_type
-        is_e2e = test_type == 'e2e' or 'e2e' in decorators or '/e2e/' in str(rel_path).replace('\\', '/')
+        uses_real_llm = ('pytest.mark.real_llm' in decorators or 
+                        'real_llm' in decorators or 
+                        'real_llm' in test_type or
+                        any('real_llm' in dec for dec in decorators))
+        is_e2e = (test_type == 'e2e' or 
+                 'e2e' in decorators or 
+                 '/e2e/' in str(rel_path).replace('\\', '/') or
+                 any('e2e' in dec for dec in decorators))
         is_multi_service = len(real_services) > 1
         
         # Calculate business value score
@@ -498,7 +529,7 @@ class BusinessValueTestIndexer:
                 comp_coverage.integration_tests += 1
             elif test.test_type == 'e2e':
                 comp_coverage.e2e_tests += 1
-            elif test.uses_real_llm:
+            if test.uses_real_llm:
                 comp_coverage.real_llm_tests += 1
             elif test.test_type == 'performance':
                 comp_coverage.performance_tests += 1

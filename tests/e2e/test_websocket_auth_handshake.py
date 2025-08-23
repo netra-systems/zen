@@ -52,7 +52,6 @@ def create_invalid_token(user_id: str) -> str:
     """Create an invalid test token."""
     return f"invalid_token_{user_id}"
 
-
 class WebSocketAuthHandshakeTester:
     """Real WebSocket auth handshake tester with connection validation."""
     
@@ -92,7 +91,6 @@ class WebSocketAuthHandshakeTester:
         """Get count of failed authentications."""
         return sum(1 for r in self.auth_results if not r["success"])
 
-
 class TestWebSocketAuthHandshake:
     """Real WebSocket authentication handshake tests."""
 
@@ -119,7 +117,7 @@ class TestWebSocketAuthHandshake:
         return service
 
     @pytest.mark.asyncio
-    async def test_valid_token_handshake_success(self, auth_tester, 
+    async def test_valid_token_handshake_success(self, auth_tester:
                                                mock_security_service):
         """Test successful handshake with valid JWT token."""
         # Create valid token for user
@@ -142,7 +140,7 @@ class TestWebSocketAuthHandshake:
         assert ws.connection_state == "connected"
 
     @pytest.mark.asyncio
-    async def test_expired_token_handshake_rejection(self, auth_tester,
+    async def test_expired_token_handshake_rejection(self, auth_tester:
                                                    mock_security_service):
         """Test handshake rejection with expired JWT token."""
         # Create expired token
@@ -164,7 +162,7 @@ class TestWebSocketAuthHandshake:
         assert ws.connection_state == "disconnected"
 
     @pytest.mark.asyncio
-    async def test_invalid_token_handshake_rejection(self, auth_tester,
+    async def test_invalid_token_handshake_rejection(self, auth_tester:
                                                    mock_security_service):
         """Test handshake rejection with invalid JWT token."""
         # Create invalid token
@@ -186,7 +184,7 @@ class TestWebSocketAuthHandshake:
         assert ws.connection_state == "disconnected"
 
     @pytest.mark.asyncio
-    async def test_missing_token_handshake_rejection(self, auth_tester,
+    async def test_missing_token_handshake_rejection(self, auth_tester:
                                                    mock_security_service):
         """Test handshake rejection when no token provided."""
         user_id = "user_no_token"
@@ -208,7 +206,7 @@ class TestWebSocketAuthHandshake:
         assert ws.connection_state == "disconnected"
 
     @pytest.mark.asyncio
-    async def test_connection_drop_during_handshake(self, auth_tester,
+    async def test_connection_drop_during_handshake(self, auth_tester:
                                                   mock_security_service):
         """Test connection drop during auth handshake."""
         user_id = "user_connection_drop"
@@ -229,7 +227,7 @@ class TestWebSocketAuthHandshake:
         assert ws.connection_state == "disconnected"
 
     @pytest.mark.asyncio
-    async def test_reconnection_with_expired_token(self, auth_tester,
+    async def test_reconnection_with_expired_token(self, auth_tester:
                                                  mock_security_service):
         """Test reconnection scenario with expired token."""
         user_id = "user_reconnect"
@@ -261,7 +259,7 @@ class TestWebSocketAuthHandshake:
         assert auth_tester.reconnection_attempts == 1
 
     @pytest.mark.asyncio
-    async def test_concurrent_auth_handshakes(self, auth_tester,
+    async def test_concurrent_auth_handshakes(self, auth_tester:
                                             mock_security_service):
         """Test concurrent authentication handshakes."""
         user_ids = ["user_concurrent_1", "user_concurrent_2", "user_concurrent_3"]
@@ -293,7 +291,7 @@ class TestWebSocketAuthHandshake:
         assert len([ws for ws, _, _ in connections if ws.connection_state == "connected"]) == 3
 
     @pytest.mark.asyncio
-    async def test_handshake_timeout_handling(self, auth_tester,
+    async def test_handshake_timeout_handling(self, auth_tester:
                                             mock_security_service):
         """Test handshake timeout scenarios."""
         user_id = "user_timeout"

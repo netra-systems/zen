@@ -9,9 +9,9 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
-import.*from '@/__tests__/helpers/websocket-test-manager';
-import.*from '@/__tests__/helpers/websocket-test-utilities';
-import.*from '@/__tests__/helpers/streaming-test-utilities';
+import { WebSocketTestManager } from '@/__tests__/helpers/websocket-test-manager';
+import * as WebSocketTestUtilities from '@/__tests__/helpers/websocket-test-utilities';
+import * as StreamingTestUtilities from '@/__tests__/helpers/streaming-test-utilities';
 
 // Core streaming test component
 const StreamingCoreTest: React.FC = () => {

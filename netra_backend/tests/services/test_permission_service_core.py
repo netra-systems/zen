@@ -3,17 +3,10 @@ Permission Service Core Tests - Constants, Detection, Role Updates, Permissions
 Split from test_permission_service.py to maintain 450-line limit
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import os
 from unittest.mock import Mock, patch
@@ -23,15 +16,11 @@ from sqlalchemy.orm import Session
 
 from netra_backend.app.db.models_postgres import User
 
-# Add project root to path
 from netra_backend.app.services.permission_service import (
     ROLE_HIERARCHY,
     ROLE_PERMISSIONS,
     PermissionService,
 )
-
-# Add project root to path
-
 
 class TestPermissionServiceConstants:
     """Test permission service constants and configuration"""
@@ -62,7 +51,6 @@ class TestPermissionServiceConstants:
         assert critical_perms.isdisjoint(ROLE_PERMISSIONS["standard_user"])
         assert critical_perms.isdisjoint(ROLE_PERMISSIONS["power_user"])
         assert critical_perms.issubset(ROLE_PERMISSIONS["admin"])
-
 
 class TestDetectDeveloperStatus:
     """Test developer status detection logic"""
@@ -137,7 +125,6 @@ class TestDetectDeveloperStatus:
         with patch.dict(os.environ, {"DEV_MODE": "true"}):
             result = PermissionService.detect_developer_status(user)
             assert result == True
-
 
 class TestUpdateUserRole:
     """Test user role update functionality"""
@@ -229,7 +216,6 @@ class TestUpdateUserRole:
         db.commit.assert_called_once()
         assert result == user
 
-
 class TestCheckPermission:
     """Test permission checking functionality"""
     
@@ -287,7 +273,6 @@ class TestCheckPermission:
         
         result = PermissionService.has_permission(user, "chat")
         assert result == False
-
 
 class TestGetUserPermissions:
     """Test getting user permissions"""

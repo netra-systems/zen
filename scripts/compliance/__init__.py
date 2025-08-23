@@ -4,10 +4,10 @@ Architecture Compliance Checker Package
 Enforces CLAUDE.md architectural rules with modular design.
 """
 
-from .cli import CLIHandler, OutputHandler
-from .core import ComplianceConfig, ComplianceResults, Violation
-from .orchestrator import ArchitectureEnforcer
-from .reporter import ComplianceReporter
+from scripts.compliance.cli import CLIHandler, OutputHandler
+from scripts.compliance.core import ComplianceConfig, ComplianceResults, Violation
+from scripts.compliance.orchestrator import ArchitectureEnforcer
+from scripts.compliance.reporter import ComplianceReporter
 
 __all__ = [
     'Violation',

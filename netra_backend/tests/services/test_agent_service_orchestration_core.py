@@ -17,17 +17,10 @@ PERFORMANCE REQUIREMENTS:
 - Concurrent tests: < 1s for multiple parallel operations
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -39,20 +32,17 @@ from starlette.websockets import WebSocketDisconnect
 from netra_backend.app import schemas
 from netra_backend.app.core.exceptions_base import NetraException
 
-# Add project root to path
 from netra_backend.app.services.agent_service import AgentService
-from .test_agent_service_fixtures import (
+from netra_backend.tests.test_agent_service_fixtures import (
     agent_service,
     create_concurrent_request_models,
     create_mock_request_model,
     create_websocket_message,
     mock_message_handler,
-    # Add project root to path
     mock_supervisor,
     mock_thread_service,
     verify_agent_execution_result,
 )
-
 
 class TestAgentServiceOrchestrationCore:
     """Test agent service core orchestration functionality."""
@@ -240,7 +230,6 @@ class TestAgentServiceOrchestrationCore:
         
         assert parsed["type"] == "user_message"
         assert parsed["payload"]["content"] == "hello"
-
 
 class TestAgentServiceBasic:
     """Basic agent service tests for core functionality."""

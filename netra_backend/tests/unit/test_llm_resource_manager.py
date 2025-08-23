@@ -1,31 +1,21 @@
 """Tests for LLM resource manager."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import datetime, timedelta
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.llm.resource_manager import (
     CacheManager,
     RequestBatcher,
-    # Add project root to path
     RequestPool,
     ResourceMonitor,
 )
-
 
 class TestRequestPool:
     """Test request pool functionality."""
@@ -64,7 +54,6 @@ class TestRequestPool:
         gap = (requests[2] - requests[0]).total_seconds()
         assert gap >= 60.0  # Should wait a minute
 
-
 class TestRequestBatcher:
     """Test request batching functionality."""
     
@@ -98,7 +87,6 @@ class TestRequestBatcher:
         await asyncio.sleep(0.15)
         batch = await batcher._get_batch()
         assert len(batch) == 2
-
 
 class TestCacheManager:
     """Test cache manager functionality."""
@@ -151,7 +139,6 @@ class TestCacheManager:
         stats = await cache.get_stats()
         assert stats['size'] == 2
         assert stats['max_size'] == 10
-
 
 class TestResourceMonitor:
     """Test resource monitor functionality."""

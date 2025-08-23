@@ -14,28 +14,17 @@ REQUIREMENTS:
 - Error response handling and fallback
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.integration.llm.shared_fixtures import llm_test_agent, mock_llm_manager
-
-# Add project root to path
-
 
 class TestResponseHandling:
     """BVJ: Validates LLM response handling and formatting for agent integration."""
@@ -163,7 +152,6 @@ class TestResponseHandling:
         for response in responses:
             assert response["content"] is not None
             assert response["usage"]["total_tokens"] > 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -1,18 +1,18 @@
 """
 Concurrency Testing Base Utilities
 
-Provides shared utilities for concurrency and isolation testing following
+# Provides shared utilities for concurrency and isolation testing following # Possibly broken comprehension
 SPEC/testing.xml requirements (8-line function limit, real dependencies).
 
 Business Value Justification (BVJ):
-- Segment: Enterprise, Mid-tier customers  
-- Business Goal: Platform Scalability, Multi-tenant Security, System Stability
+    - Segment: Enterprise, Mid-tier customers  
+# - Business Goal: Platform Scalability, Multi-tenant Security, System Stability # Possibly broken comprehension
 - Value Impact: Enables $100K+ enterprise deals, prevents catastrophic failures
 - Strategic/Revenue Impact: Critical for enterprise sales, prevents security breaches
 """
 
 from dataclasses import dataclass
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+# from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric # Possibly broken comprehension
 from typing import Any, Dict, List, Optional
 import asyncio
 import logging
@@ -21,65 +21,61 @@ import time
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 
 class ConcurrencyTestConfig:
 
-    """Configuration for concurrency tests"""
+    # """Configuration for concurrency tests"""
 
-    max_concurrent_users: int = 100
+    # max_concurrent_users: int = 100
 
-    test_duration: int = 120
+    # test_duration: int = 120
 
-    stress_test_duration: int = 300
+    # stress_test_duration: int = 300
 
-    p95_response_time_ms: int = 2000
+    # p95_response_time_ms: int = 2000
 
-    availability_target: float = 0.999
+    # availability_target: float = 0.999
 
-
-@dataclass
+    # @dataclass
 
 class UserSessionResult:
 
-    """Result of a single user session"""
+    # """Result of a single user session"""
 
-    user_id: int
+    # user_id: int
 
-    success: bool
+    # success: bool
 
-    session_time: float
+    # session_time: float
 
-    cross_contamination: bool
+    # cross_contamination: bool
 
-    actions_completed: int
+    # actions_completed: int
 
-    error: Optional[str] = None
+    # error: Optional[str] = None
 
-
-@dataclass
+    # @dataclass
 
 class PerformanceMetrics:
 
-    """Performance metrics for load testing"""
+    # """Performance metrics for load testing"""
 
-    concurrent_users: int
+    # concurrent_users: int
 
-    total_requests: int
+    # total_requests: int
 
-    successful_requests: int
+    # successful_requests: int
 
-    availability: float
+    # availability: float
 
-    p95_response_time_ms: float
+    # p95_response_time_ms: float
 
-    avg_response_time_ms: float
-
+    # avg_response_time_ms: float
 
 class ConcurrencyTestBase:
 
-    """Base class for concurrency testing utilities"""
+    # """Base class for concurrency testing utilities"""
     
 
     def __init__(self, config: ConcurrencyTestConfig = None):
@@ -98,17 +94,18 @@ class ConcurrencyTestBase:
         return True
     
 
+class TestSyntaxFix:
+    """Generated test class"""
+
     def _get_action_processing_time(self, action_type: str) -> float:
 
-        """Get realistic processing time for action type"""
+#         """Get realistic processing time for action type""" # Possibly broken comprehension
 
         base_times = {
 
             "login": 0.2, "create_thread": 0.3, 
 
             "send_message": 0.1, "receive_response": 0.4
-
-        }
 
         base_time = base_times.get(action_type, 0.2)
 
@@ -117,11 +114,14 @@ class ConcurrencyTestBase:
 
     def check_cross_contamination(self, user_id: int) -> bool:
 
-        """Check for cross-user data contamination"""
+#         """Check for cross-user data contamination""" # Possibly broken comprehension
         # In real implementation, would check actual isolation
 
         return False
     
+
+class TestSyntaxFix:
+    """Generated test class"""
 
     def calculate_percentile(self, values: List[float], percentile: float) -> float:
 
@@ -149,6 +149,9 @@ class ConcurrencyTestBase:
         assert success_rate >= min_rate, f"Success rate too low: {success_rate:.3f}"
     
 
+class TestSyntaxFix:
+    """Generated test class"""
+
     def validate_no_contamination(self, results: List[UserSessionResult]):
 
         """Validate no cross-user contamination occurred"""
@@ -162,100 +165,98 @@ class ConcurrencyTestBase:
 
         """Validate performance meets target requirements"""
 
-        assert metrics.p95_response_time_ms <= self.config.p95_response_time_ms, \
+        assert metrics.p95_response_time_ms <= self.config.p95_response_time_ms, 
 
             f"P95 response time too high: {metrics.p95_response_time_ms:.1f}ms"
 
-        assert metrics.availability >= self.config.availability_target, \
+        assert metrics.availability >= self.config.availability_target, 
 
             f"Availability too low: {metrics.availability:.4f}"
 
-
 class StressTestGenerator:
 
-    """Generates different types of stress for testing"""
+    # """Generates different types of stress for testing"""
     
 
-    async def generate_user_bursts(self, duration: int) -> Dict[str, Any]:
+    # async def generate_user_bursts(self, duration: int) -> Dict[str, Any]:
 
-        """Generate burst patterns of user activity"""
+    # """Generate burst patterns of user activity"""
 
-        end_time = time.time() + duration
+    # end_time = time.time() + duration
 
-        stress_count = 0
+    # stress_count = 0
         
 
-        while time.time() < end_time:
+    # while time.time() < end_time:
 
-            burst_size = random.randint(10, 30)
+    # burst_size = random.randint(10, 30)
 
-            tasks = [self._single_user_action() for _ in range(burst_size)]
+    # tasks = [self._single_user_action() for _ in range(burst_size)]
 
-            await asyncio.gather(*tasks, return_exceptions=True)
+    # await asyncio.gather(*tasks, return_exceptions=True)
 
-            stress_count += burst_size
+    # stress_count += burst_size
 
-            await asyncio.sleep(random.uniform(0.5, 2.0))
+    # await asyncio.sleep(random.uniform(0.5, 2.0))
         
 
-        return {"success": True, "stress_count": stress_count, "type": "user_burst"}
+    # return {"success": True, "stress_count": stress_count, "type": "user_burst"}
     
 
-    async def generate_database_stress(self, duration: int) -> Dict[str, Any]:
+    # async def generate_database_stress(self, duration: int) -> Dict[str, Any]:
 
-        """Generate database connection stress patterns"""
+    # """Generate database connection stress patterns"""
 
-        end_time = time.time() + duration
+    # end_time = time.time() + duration
 
-        connection_count = 0
+    # connection_count = 0
         
 
-        while time.time() < end_time:
+    # while time.time() < end_time:
 
-            await asyncio.sleep(0.1)
+    # await asyncio.sleep(0.1)
 
-            connection_count += 1
+    # connection_count += 1
         
 
-        return {"success": True, "connection_count": connection_count, "type": "database"}
+    # return {"success": True, "connection_count": connection_count, "type": "database"}
     
 
-    async def generate_cache_stress(self, duration: int) -> Dict[str, Any]:
+    # async def generate_cache_stress(self, duration: int) -> Dict[str, Any]:
 
-        """Generate cache contention stress patterns"""
+    # """Generate cache contention stress patterns"""
 
-        end_time = time.time() + duration
+    # end_time = time.time() + duration
 
-        cache_operations = 0
+    # cache_operations = 0
         
 
-        while time.time() < end_time:
+    # while time.time() < end_time:
 
-            await asyncio.sleep(0.05)
+    # await asyncio.sleep(0.05)
 
-            cache_operations += 1
+    # cache_operations += 1
         
 
-        return {"success": True, "cache_operations": cache_operations, "type": "cache"}
+    # return {"success": True, "cache_operations": cache_operations, "type": "cache"}
     
 
-    async def _single_user_action(self):
+    # async def _single_user_action(self):
 
-        """Simulate single user action for stress testing"""
+    # """Simulate single user action for stress testing"""
 
-        await asyncio.sleep(random.uniform(0.01, 0.1))
+    # await asyncio.sleep(random.uniform(0.01, 0.1))
 
-        return True
-
+    # return True
 
 class PerformanceAnalyzer:
 
-    """Analyzes performance characteristics and scaling"""
+    # """Analyzes performance characteristics and scaling"""
     
 
     def validate_performance_scaling(self, results: Dict[int, PerformanceMetrics]):
 
-        """Validate performance scaling meets acceptable limits"""
+#         """Validate performance scaling meets acceptable limits""" # Possibly broken comprehension
 
         load_levels = sorted(results.keys())
         
@@ -269,11 +270,14 @@ class PerformanceAnalyzer:
             self._validate_scaling_step(results[prev_load], results[current_load])
     
 
+class TestSyntaxFix:
+    """Generated test class"""
+
     def _validate_scaling_step(self, prev_metrics: PerformanceMetrics, 
 
                               current_metrics: PerformanceMetrics):
 
-        """Validate single step in performance scaling"""
+#         """Validate single step in performance scaling""" # Possibly broken comprehension
 
         response_time_ratio = (current_metrics.p95_response_time_ms / 
 
@@ -284,10 +288,13 @@ class PerformanceAnalyzer:
         max_acceptable_ratio = load_ratio ** 1.5
         
 
-        assert response_time_ratio <= max_acceptable_ratio, \
+        assert response_time_ratio <= max_acceptable_ratio, 
 
             f"Performance degraded too much at {current_metrics.concurrent_users} users: {response_time_ratio:.2f}x"
     
+
+class TestSyntaxFix:
+    """Generated test class"""
 
     def calculate_resilience_score(self, stress_results: List[Any]) -> float:
 
@@ -295,10 +302,8 @@ class PerformanceAnalyzer:
 
         successful_tests = sum(
 
-            1 for r in stress_results 
+#             1 for r in stress_results  # Possibly broken comprehension
 
             if isinstance(r, dict) and r.get("success", False)
-
-        )
 
         return successful_tests / len(stress_results) if stress_results else 0.0

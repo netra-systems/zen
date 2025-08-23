@@ -3,17 +3,10 @@ Tests for TriageSubAgent edge cases, performance, and Pydantic model validation
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from datetime import datetime
 
@@ -21,25 +14,22 @@ import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent import (
     Complexity,
     ExtractedEntities,
     KeyParameters,
     Priority,
-    # Add project root to path
     TriageResult,
     UserIntent,
 )
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from .triage_test_helpers import (
+from netra_backend.tests.helpers.triage_test_helpers import (
     EdgeCaseHelpers,
     EntityExtractionHelpers,
     IntentHelpers,
     PerformanceHelpers,
     TriageMockHelpers,
 )
-
 
 @pytest.fixture
 def triage_agent():
@@ -49,9 +39,9 @@ def triage_agent():
     mock_redis = TriageMockHelpers.create_mock_redis()
     return TriageSubAgent(mock_llm, mock_tool, mock_redis)
 
-
 class TestEdgeCasesAndBoundaryConditions:
     """Test edge cases and boundary conditions"""
+    @pytest.mark.asyncio
     async def test_empty_and_whitespace_requests(self, triage_agent):
         """Test handling of empty and whitespace-only requests"""
         edge_cases = EdgeCaseHelpers.get_empty_requests()
@@ -64,6 +54,7 @@ class TestEdgeCasesAndBoundaryConditions:
             assert result is not None
             if state.triage_result:
                 assert "error" in state.triage_result
+    @pytest.mark.asyncio
     async def test_unicode_and_special_characters(self, triage_agent):
         """Test handling of Unicode and special characters"""
         unicode_requests = EdgeCaseHelpers.get_unicode_requests()
@@ -83,6 +74,7 @@ class TestEdgeCasesAndBoundaryConditions:
         
         assert state.triage_result != None
         assert "category" in state.triage_result
+    @pytest.mark.asyncio
     async def test_extremely_long_requests(self, triage_agent):
         """Test handling of extremely long requests"""
         boundary_request = "Optimize AI costs " * 588
@@ -102,6 +94,7 @@ class TestEdgeCasesAndBoundaryConditions:
         validation = agent.triage_core.validator.validate_request(request)
         # Basic test - actual validation behavior may vary
         assert validation is not None
+    @pytest.mark.asyncio
     async def test_malformed_json_responses(self, triage_agent):
         """Test handling of malformed JSON responses from LLM"""
         malformed_responses = EdgeCaseHelpers.get_malformed_json_responses()
@@ -119,9 +112,9 @@ class TestEdgeCasesAndBoundaryConditions:
         # Basic assertion that processing completed
         assert state.triage_result is not None
 
-
 class TestPerformanceOptimization:
     """Test performance optimization features"""
+    @pytest.mark.asyncio
     async def test_request_processing_performance(self, triage_agent):
         """Test request processing performance"""
         request_sizes = PerformanceHelpers.get_request_sizes()
@@ -146,6 +139,7 @@ class TestPerformanceOptimization:
         
         assert execution_time < 5000  # 5 seconds max
         assert state.triage_result != None
+    @pytest.mark.asyncio
     async def test_memory_efficiency(self, triage_agent):
         """Test memory efficiency with large datasets"""
         large_request = PerformanceHelpers.create_large_request()
@@ -197,7 +191,6 @@ class TestPerformanceOptimization:
         # Hash length may vary based on implementation (MD5=32, SHA256=64)
         assert len(hash_result) >= 32
         assert hash_result.isalnum()
-
 
 class TestPydanticModelValidation:
     """Test Pydantic model validation and serialization"""
@@ -298,7 +291,6 @@ class TestPydanticModelValidation:
         assert intent.primary_intent == "optimize"
         assert len(intent.secondary_intents) == 3
         assert intent.action_required == True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

@@ -10,7 +10,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-
 class StandardAsyncMockFactory:
     """Factory for creating standardized AsyncMock objects"""
     
@@ -52,7 +51,6 @@ class StandardAsyncMockFactory:
         mock.get_available_tools = MagicMock(return_value=[])
         return mock
 
-
 class AsyncMockBehaviorManager:
     """Manager for defining consistent async mock behaviors"""
     
@@ -69,7 +67,6 @@ class AsyncMockBehaviorManager:
             return self.behaviors[behavior_name](mock, **kwargs)
         return mock
 
-
 # Standard behavior patterns
 def llm_success_behavior(mock: AsyncMock, response: str = "Success") -> AsyncMock:
     """Apply successful LLM interaction behavior"""
@@ -77,13 +74,11 @@ def llm_success_behavior(mock: AsyncMock, response: str = "Success") -> AsyncMoc
     mock.ask_llm.return_value = {"content": response, "success": True}
     return mock
 
-
 def llm_error_behavior(mock: AsyncMock, error_msg: str = "LLM Error") -> AsyncMock:
     """Apply LLM error behavior"""
     mock.generate.side_effect = Exception(error_msg)
     mock.ask_llm.side_effect = Exception(error_msg)
     return mock
-
 
 def database_success_behavior(mock: AsyncMock) -> AsyncMock:
     """Apply successful database operation behavior"""
@@ -92,13 +87,11 @@ def database_success_behavior(mock: AsyncMock) -> AsyncMock:
     mock.rollback.return_value = None
     return mock
 
-
 def database_error_behavior(mock: AsyncMock, error_type: Exception = Exception) -> AsyncMock:
     """Apply database error behavior"""
     mock.commit.side_effect = error_type("Database error")
     mock.flush.side_effect = error_type("Database error")
     return mock
-
 
 class RealImplementationTester:
     """Helper for testing with real implementations instead of stubs"""
@@ -126,7 +119,6 @@ class RealImplementationTester:
             self.real_calls.append({"type": "database", "success": False, "error": str(e)})
             return {"success": False, "error": str(e)}
 
-
 # Standard test patterns replacing stubs with real implementations
 async def test_llm_interaction_real():
     """Test LLM interaction with proper async patterns (no stubs)"""
@@ -138,7 +130,6 @@ async def test_llm_interaction_real():
     assert result == "Mock LLM response"
     mock_manager.generate.assert_called_once_with("Test prompt")
 
-
 async def test_websocket_communication_real():
     """Test WebSocket communication with proper patterns (no stubs)"""
     mock_ws = StandardAsyncMockFactory.create_websocket_manager()
@@ -147,7 +138,6 @@ async def test_websocket_communication_real():
     success = await mock_ws.send_message("user123", "test message")
     assert success is True
     mock_ws.send_message.assert_called_once()
-
 
 async def test_database_operations_real():
     """Test database operations with proper patterns (no stubs)"""
@@ -161,7 +151,6 @@ async def test_database_operations_real():
     # Test operation
     await mock_session.commit()
     mock_session.commit.assert_called_once()
-
 
 async def test_error_handling_patterns():
     """Test error handling with proper async patterns"""
@@ -177,7 +166,6 @@ async def test_error_handling_patterns():
     # Test error handling
     with pytest.raises(Exception, match="Connection timeout"):
         await mock_manager.generate("test prompt")
-
 
 class AsyncTestPatternValidator:
     """Validator for async test patterns"""
@@ -221,7 +209,6 @@ class AsyncTestPatternValidator:
             "pass_rate": passed_tests / total_tests if total_tests > 0 else 0
         }
 
-
 async def test_pattern_validation():
     """Test async pattern validation"""
     validator = AsyncTestPatternValidator()
@@ -235,7 +222,6 @@ async def test_pattern_validation():
     summary = validator.get_validation_summary()
     assert summary["total_tests"] == 1
     assert summary["passed_tests"] == 1
-
 
 class AsyncIntegrationTestHelper:
     """Helper for async integration testing without stubs"""
@@ -269,7 +255,6 @@ class AsyncIntegrationTestHelper:
             self.integration_results.append(integration_result)
             return integration_result
 
-
 async def test_integration_patterns():
     """Test integration patterns without stubs"""
     helper = AsyncIntegrationTestHelper()
@@ -282,7 +267,6 @@ async def test_integration_patterns():
     result = await helper.test_agent_integration(mock_agent, "test request")
     assert result["success"] is True
     assert len(helper.integration_results) == 1
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -73,7 +73,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         self.data_validator = DataValidator()
     
     @agent_type_safe
-    async def execute(self, state: DeepAgentState, stream_updates: bool = False) -> TypedAgentResult:
+    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> TypedAgentResult:
         """Execute data analysis workflow."""
         start_time = time.time()
         

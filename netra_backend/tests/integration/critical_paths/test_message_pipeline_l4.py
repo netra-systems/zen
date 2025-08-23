@@ -11,21 +11,10 @@ L4 Realism: Real message queues, real WebSocket connections, real agent processi
 Performance Requirements: p99 < 500ms, 99.9% delivery success, message ordering guarantees, DLQ < 0.1%
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -38,7 +27,6 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
-# Add project root to path
 # from app.agents.supervisor_consolidated import SupervisorAgent
 from unittest.mock import AsyncMock
 
@@ -48,21 +36,17 @@ import websockets
 
 from netra_backend.app.services.messaging.dead_letter_queue import DeadLetterQueue
 
-# Add project root to path
 from netra_backend.app.services.messaging.message_queue import MessageQueue
 from netra_backend.app.services.messaging.queue_manager import QueueManager
 from netra_backend.app.services.websocket.message_router import MessageRouter
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-
 SupervisorAgent = AsyncMock
 from netra_backend.app.schemas.registry import QueueMessage, WebSocketMessage
-from ..config import TEST_CONFIG
-from ..e2e.real_websocket_client import RealWebSocketClient
-
+from netra_backend.tests.integration.config import TEST_CONFIG
+from netra_backend.tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
-
 
 class MessagePriority(Enum):
 
@@ -75,7 +59,6 @@ class MessagePriority(Enum):
     HIGH = "high"
 
     CRITICAL = "critical"
-
 
 @dataclass
 
@@ -103,7 +86,6 @@ class PipelineMetrics:
 
     queue_depths: List[int] = None
     
-
     def __post_init__(self):
 
         if self.processing_times is None:
@@ -122,7 +104,6 @@ class PipelineMetrics:
 
             self.queue_depths = []
     
-
     @property
 
     def success_rate(self) -> float:
@@ -131,7 +112,6 @@ class PipelineMetrics:
 
         return (self.messages_processed / self.messages_sent * 100) if self.messages_sent > 0 else 0.0
     
-
     @property
 
     def dlq_rate(self) -> float:
@@ -140,7 +120,6 @@ class PipelineMetrics:
 
         return (self.messages_in_dlq / self.messages_sent * 100) if self.messages_sent > 0 else 0.0
     
-
     @property
 
     def p99_processing_time(self) -> float:
@@ -153,7 +132,6 @@ class PipelineMetrics:
 
         return statistics.quantiles(self.processing_times, n=100)[98]
     
-
     @property
 
     def avg_processing_time(self) -> float:
@@ -162,7 +140,6 @@ class PipelineMetrics:
 
         return statistics.mean(self.processing_times) if self.processing_times else 0.0
     
-
     @property
 
     def avg_queue_depth(self) -> float:
@@ -171,12 +148,10 @@ class PipelineMetrics:
 
         return statistics.mean(self.queue_depths) if self.queue_depths else 0.0
 
-
 class MessagePipelineL4Manager:
 
     """L4 message pipeline test manager with real queues and WebSocket connections."""
     
-
     def __init__(self):
 
         self.queue_manager = None
@@ -197,7 +172,6 @@ class MessagePipelineL4Manager:
 
         self.test_agents = {}
         
-
     async def initialize_services(self):
 
         """Initialize real message pipeline services for L4 testing."""
@@ -209,12 +183,10 @@ class MessagePipelineL4Manager:
 
             await self.queue_manager.initialize()
             
-
             self.message_queue = MessageQueue()
 
             await self.message_queue.initialize()
             
-
             self.dead_letter_queue = DeadLetterQueue()
 
             await self.dead_letter_queue.initialize()
@@ -225,7 +197,6 @@ class MessagePipelineL4Manager:
 
             await self.ws_manager.initialize()
             
-
             self.message_router = MessageRouter()
 
             await self.message_router.initialize()
@@ -234,17 +205,14 @@ class MessagePipelineL4Manager:
 
             await self._initialize_test_agents()
             
-
             logger.info("L4 message pipeline services initialized with real components")
             
-
         except Exception as e:
 
             logger.error(f"Failed to initialize L4 message pipeline services: {e}")
 
             raise
     
-
     async def _initialize_test_agents(self):
 
         """Initialize test agents for message processing."""
@@ -257,14 +225,12 @@ class MessagePipelineL4Manager:
 
             self.test_agents[agent_id] = agent
     
-
     async def setup_websocket_connections(self, connection_count: int) -> List[str]:
 
         """Setup multiple WebSocket connections for testing."""
 
         connection_ids = []
         
-
         for i in range(connection_count):
 
             try:
@@ -283,20 +249,16 @@ class MessagePipelineL4Manager:
 
                 })
                 
-
                 self.websocket_clients[client_id] = ws_client
 
                 connection_ids.append(client_id)
                 
-
             except Exception as e:
 
                 logger.warning(f"Failed to create WebSocket connection {i}: {e}")
         
-
         return connection_ids
     
-
     async def send_message_batch(self, batch_size: int, priority: MessagePriority = MessagePriority.NORMAL) -> Dict[str, Any]:
 
         """Send a batch of messages through the pipeline."""
@@ -307,7 +269,6 @@ class MessagePipelineL4Manager:
 
         send_times = []
         
-
         for i in range(batch_size):
 
             message_id = f"{batch_id}_msg_{i}"
@@ -328,10 +289,8 @@ class MessagePipelineL4Manager:
 
             }
             
-
             start_time = time.time()
             
-
             try:
                 # Send message to queue
 
@@ -349,10 +308,8 @@ class MessagePipelineL4Manager:
 
                 )
                 
-
                 await self.message_queue.enqueue(queue_message)
                 
-
                 send_time = time.time() - start_time
 
                 send_times.append(send_time)
@@ -375,15 +332,12 @@ class MessagePipelineL4Manager:
 
                 }
                 
-
             except Exception as e:
 
                 logger.error(f"Failed to send message {message_id}: {e}")
         
-
         self.metrics.messages_sent += len(message_ids)
         
-
         return {
 
             "batch_id": batch_id,
@@ -396,7 +350,6 @@ class MessagePipelineL4Manager:
 
         }
     
-
     async def process_message_queue(self, max_messages: int = None) -> Dict[str, Any]:
 
         """Process messages from the queue with performance tracking."""
@@ -407,15 +360,12 @@ class MessagePipelineL4Manager:
 
         queue_depths = []
         
-
         messages_to_process = max_messages or 1000
         
-
         for _ in range(messages_to_process):
 
             start_time = time.time()
             
-
             try:
                 # Get queue depth
 
@@ -423,7 +373,6 @@ class MessagePipelineL4Manager:
 
                 queue_depths.append(queue_depth)
                 
-
                 if queue_depth == 0:
 
                     break
@@ -436,7 +385,6 @@ class MessagePipelineL4Manager:
 
                     break
                 
-
                 queue_wait_time = time.time() - start_time
 
                 self.metrics.queue_wait_times.append(queue_wait_time)
@@ -445,12 +393,10 @@ class MessagePipelineL4Manager:
 
                 processing_result = await self._process_single_message(message)
                 
-
                 processing_time = time.time() - start_time
 
                 processing_times.append(processing_time)
                 
-
                 if processing_result["success"]:
 
                     processed_messages.append(message.id)
@@ -464,19 +410,16 @@ class MessagePipelineL4Manager:
 
                     self.metrics.messages_failed += 1
                 
-
             except Exception as e:
 
                 logger.error(f"Queue processing error: {e}")
 
                 self.metrics.messages_failed += 1
         
-
         self.metrics.processing_times.extend(processing_times)
 
         self.metrics.queue_depths.extend(queue_depths)
         
-
         return {
 
             "messages_processed": len(processed_messages),
@@ -489,7 +432,6 @@ class MessagePipelineL4Manager:
 
         }
     
-
     async def _process_single_message(self, message: QueueMessage) -> Dict[str, Any]:
 
         """Process a single message through the agent pipeline."""
@@ -504,7 +446,6 @@ class MessagePipelineL4Manager:
 
             agent = self.test_agents.get(agent_id)
             
-
             if not agent:
 
                 raise Exception(f"Agent {agent_id} not available")
@@ -523,7 +464,6 @@ class MessagePipelineL4Manager:
 
                 self.message_tracking[message.id]["result"] = processing_result
             
-
             return {
 
                 "success": True,
@@ -534,7 +474,6 @@ class MessagePipelineL4Manager:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -545,7 +484,6 @@ class MessagePipelineL4Manager:
 
             }
     
-
     async def _route_message_to_agent(self, message_content: Dict[str, Any]) -> str:
 
         """Route message to appropriate agent based on content."""
@@ -553,7 +491,6 @@ class MessagePipelineL4Manager:
 
         content = message_content.get("content", "").lower()
         
-
         if "urgent" in content or message_content.get("priority") == "critical":
 
             return "test_agent_0"  # High priority agent
@@ -566,7 +503,6 @@ class MessagePipelineL4Manager:
 
             return "test_agent_2"  # General purpose agent
     
-
     async def _mock_agent_processing(self, agent: SupervisorAgent, message_content: Dict[str, Any]) -> Dict[str, Any]:
 
         """Mock agent processing for L4 performance testing."""
@@ -576,7 +512,6 @@ class MessagePipelineL4Manager:
 
         await asyncio.sleep(processing_delay)
         
-
         return {
 
             "response": f"Processed: {message_content['content'][:50]}...",
@@ -587,7 +522,6 @@ class MessagePipelineL4Manager:
 
         }
     
-
     async def _handle_failed_message(self, message: QueueMessage, error: str):
 
         """Handle failed message by sending to dead letter queue."""
@@ -610,17 +544,14 @@ class MessagePipelineL4Manager:
 
             )
             
-
             await self.dead_letter_queue.enqueue(dlq_message)
 
             self.metrics.messages_in_dlq += 1
             
-
         except Exception as e:
 
             logger.error(f"Failed to send message to DLQ: {e}")
     
-
     async def verify_message_ordering(self, batch_id: str) -> Dict[str, Any]:
 
         """Verify message ordering within a batch."""
@@ -633,7 +564,6 @@ class MessagePipelineL4Manager:
 
         }
         
-
         if not batch_messages:
 
             return {"error": f"No messages found for batch {batch_id}"}
@@ -648,12 +578,10 @@ class MessagePipelineL4Manager:
 
         )
         
-
         ordering_violations = 0
 
         processed_sequences = []
         
-
         for msg_id, data in sorted_messages:
 
             if "processed_time" in data:
@@ -668,10 +596,8 @@ class MessagePipelineL4Manager:
 
                 ordering_violations += 1
         
-
         self.metrics.ordering_violations += ordering_violations
         
-
         return {
 
             "batch_id": batch_id,
@@ -686,7 +612,6 @@ class MessagePipelineL4Manager:
 
         }
     
-
     async def test_throughput_performance(self, duration_seconds: int, target_rps: int) -> Dict[str, Any]:
 
         """Test message pipeline throughput performance."""
@@ -697,7 +622,6 @@ class MessagePipelineL4Manager:
 
         throughput_measurements = []
         
-
         while time.time() - start_time < duration_seconds:
 
             batch_start = time.time()
@@ -720,7 +644,6 @@ class MessagePipelineL4Manager:
 
             await processing_task
             
-
             batch_time = time.time() - batch_start
 
             batch_rps = batch_result["messages_sent"] / batch_time if batch_time > 0 else 0
@@ -733,15 +656,12 @@ class MessagePipelineL4Manager:
 
             await asyncio.sleep(sleep_time)
         
-
         total_time = time.time() - start_time
 
         actual_rps = messages_sent / total_time if total_time > 0 else 0
         
-
         self.metrics.total_throughput = actual_rps
         
-
         return {
 
             "duration_seconds": total_time,
@@ -758,7 +678,6 @@ class MessagePipelineL4Manager:
 
         }
     
-
     async def test_dead_letter_queue_handling(self) -> Dict[str, Any]:
 
         """Test dead letter queue functionality and recovery."""
@@ -766,7 +685,6 @@ class MessagePipelineL4Manager:
 
         failing_messages = []
         
-
         for i in range(10):
 
             message_content = {
@@ -781,7 +699,6 @@ class MessagePipelineL4Manager:
 
             }
             
-
             message_id = f"error_test_{i}"
 
             queue_message = QueueMessage(
@@ -798,7 +715,6 @@ class MessagePipelineL4Manager:
 
             )
             
-
             await self.message_queue.enqueue(queue_message)
 
             failing_messages.append(message_id)
@@ -807,10 +723,8 @@ class MessagePipelineL4Manager:
 
         initial_dlq_count = await self.dead_letter_queue.get_queue_depth()
         
-
         await self.process_message_queue(max_messages=20)
         
-
         final_dlq_count = await self.dead_letter_queue.get_queue_depth()
 
         messages_in_dlq = final_dlq_count - initial_dlq_count
@@ -827,7 +741,6 @@ class MessagePipelineL4Manager:
 
                 dlq_messages.append(dlq_message)
         
-
         return {
 
             "failing_messages_sent": len(failing_messages),
@@ -840,7 +753,6 @@ class MessagePipelineL4Manager:
 
         }
     
-
     async def test_websocket_delivery_performance(self, connection_count: int, messages_per_connection: int) -> Dict[str, Any]:
 
         """Test WebSocket message delivery performance."""
@@ -850,7 +762,6 @@ class MessagePipelineL4Manager:
 
         successful_connections = len(connection_ids)
         
-
         delivery_times = []
 
         successful_deliveries = 0
@@ -863,12 +774,10 @@ class MessagePipelineL4Manager:
 
             ws_client = self.websocket_clients[connection_id]
             
-
             for i in range(messages_per_connection):
 
                 start_time = time.time()
                 
-
                 try:
 
                     message = {
@@ -883,7 +792,6 @@ class MessagePipelineL4Manager:
 
                     }
                     
-
                     await ws_client.send_message(json.dumps(message))
                     
                     # Wait for acknowledgment or timeout
@@ -896,14 +804,12 @@ class MessagePipelineL4Manager:
 
                     )
                     
-
                     delivery_time = time.time() - start_time
 
                     delivery_times.append(delivery_time)
 
                     successful_deliveries += 1
                     
-
                 except asyncio.TimeoutError:
 
                     failed_deliveries += 1
@@ -914,10 +820,8 @@ class MessagePipelineL4Manager:
 
                     logger.error(f"WebSocket delivery failed: {e}")
         
-
         self.metrics.delivery_times.extend(delivery_times)
         
-
         return {
 
             "connections_established": successful_connections,
@@ -934,7 +838,6 @@ class MessagePipelineL4Manager:
 
         }
     
-
     def get_performance_summary(self) -> Dict[str, Any]:
 
         """Get comprehensive pipeline performance summary."""
@@ -961,47 +864,38 @@ class MessagePipelineL4Manager:
 
         }
     
-
     def _generate_pipeline_recommendations(self) -> List[str]:
 
         """Generate pipeline performance recommendations."""
 
         recommendations = []
         
-
         if self.metrics.success_rate < 99.9:
 
             recommendations.append(f"Success rate {self.metrics.success_rate:.2f}% below 99.9% - investigate failures")
         
-
         if self.metrics.p99_processing_time > 0.5:
 
             recommendations.append(f"P99 processing time {self.metrics.p99_processing_time:.3f}s exceeds 500ms")
         
-
         if self.metrics.dlq_rate > 0.1:
 
             recommendations.append(f"DLQ rate {self.metrics.dlq_rate:.2f}% exceeds 0.1% - review error patterns")
         
-
         if self.metrics.ordering_violations > 0:
 
             recommendations.append(f"{self.metrics.ordering_violations} ordering violations detected")
         
-
         if self.metrics.avg_queue_depth > 100:
 
             recommendations.append("High average queue depth - consider scaling")
         
-
         if not recommendations:
 
             recommendations.append("All pipeline performance metrics meet SLA requirements")
         
-
         return recommendations
     
-
     async def cleanup(self):
 
         """Clean up L4 pipeline test resources."""
@@ -1021,7 +915,6 @@ class MessagePipelineL4Manager:
 
                 await self.message_queue.shutdown()
             
-
             if self.dead_letter_queue:
 
                 await self.dead_letter_queue.clear()
@@ -1042,11 +935,9 @@ class MessagePipelineL4Manager:
 
                 await self.message_router.shutdown()
                 
-
         except Exception as e:
 
             logger.error(f"L4 pipeline cleanup failed: {e}")
-
 
 @pytest.fixture
 
@@ -1061,7 +952,6 @@ async def pipeline_l4_manager():
     yield manager
 
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 
@@ -1094,9 +984,7 @@ async def test_message_processing_throughput_performance(pipeline_l4_manager):
 
     assert performance["sla_compliance"]["p99_under_500ms"], "P99 processing time exceeds 500ms"
     
-
     logger.info(f"Throughput test completed: {throughput_result['actual_rps']:.1f} RPS achieved")
-
 
 @pytest.mark.asyncio
 
@@ -1109,7 +997,6 @@ async def test_message_ordering_guarantees(pipeline_l4_manager):
 
     batch_results = []
     
-
     for priority in [MessagePriority.HIGH, MessagePriority.NORMAL, MessagePriority.LOW]:
 
         batch_result = await pipeline_l4_manager.send_message_batch(
@@ -1130,12 +1017,10 @@ async def test_message_ordering_guarantees(pipeline_l4_manager):
 
     ordering_violations = 0
     
-
     for batch_id, priority in batch_results:
 
         ordering_result = await pipeline_l4_manager.verify_message_ordering(batch_id)
         
-
         assert ordering_result["ordering_preserved"], f"Ordering violated in batch {batch_id} ({priority.value})"
 
         ordering_violations += ordering_result["ordering_violations"]
@@ -1146,9 +1031,7 @@ async def test_message_ordering_guarantees(pipeline_l4_manager):
 
     assert performance["sla_compliance"]["ordering_preserved"], f"Total ordering violations: {ordering_violations}"
     
-
     logger.info(f"Message ordering test completed: {len(batch_results)} batches processed with ordering preserved")
-
 
 @pytest.mark.asyncio
 
@@ -1175,9 +1058,7 @@ async def test_dead_letter_queue_handling(pipeline_l4_manager):
 
     assert performance["sla_compliance"]["dlq_rate_under_0_1"], f"DLQ rate {performance['pipeline_metrics']['dlq_rate']:.2f}% exceeds 0.1%"
     
-
     logger.info(f"DLQ test completed: {dlq_result['messages_in_dlq']} messages properly handled in DLQ")
-
 
 @pytest.mark.asyncio
 
@@ -1204,9 +1085,7 @@ async def test_websocket_delivery_performance(pipeline_l4_manager):
 
     assert delivery_result["connections_established"] >= 18, "Could not establish required WebSocket connections"
     
-
     logger.info(f"WebSocket delivery test completed: {delivery_result['delivery_success_rate']:.2f}% success rate")
-
 
 @pytest.mark.asyncio
 
@@ -1247,7 +1126,6 @@ async def test_pipeline_performance_under_sustained_load(pipeline_l4_manager):
 
     )
     
-
     assert delivery_result["delivery_success_rate"] > 99.0, "WebSocket delivery degraded under load"
     
     # Verify overall performance compliance
@@ -1266,9 +1144,7 @@ async def test_pipeline_performance_under_sustained_load(pipeline_l4_manager):
 
     assert sla_compliance["ordering_preserved"], "Message ordering violated under sustained load"
     
-
     logger.info(f"Sustained load test completed: {sustained_result['actual_rps']:.1f} RPS for {load_duration}s")
-
 
 @pytest.mark.asyncio
 
@@ -1291,7 +1167,6 @@ async def test_pipeline_sla_compliance_comprehensive(pipeline_l4_manager):
 
         await pipeline_l4_manager.send_message_batch(100, priority)
     
-
     await pipeline_l4_manager.process_message_queue(max_messages=400)
     
     # 3. Test error handling
@@ -1310,7 +1185,6 @@ async def test_pipeline_sla_compliance_comprehensive(pipeline_l4_manager):
 
     sla_compliance = performance["sla_compliance"]
     
-
     assert sla_compliance["success_rate_above_99_9"], f"Success rate SLA violation: {performance['pipeline_metrics']['success_rate']:.2f}%"
 
     assert sla_compliance["p99_under_500ms"], f"P99 processing time SLA violation: {performance['pipeline_metrics']['p99_processing_time']:.3f}s"
@@ -1325,7 +1199,6 @@ async def test_pipeline_sla_compliance_comprehensive(pipeline_l4_manager):
 
     assert len(critical_recommendations) == 0, f"Critical performance issues detected: {critical_recommendations}"
     
-
     logger.info("Comprehensive SLA compliance test completed successfully")
 
     logger.info(f"Performance summary: {performance}")

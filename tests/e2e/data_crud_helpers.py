@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from tests.database_sync_fixtures import DatabaseSyncValidator
+from tests.e2e.database_sync_fixtures import DatabaseSyncValidator
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.service_manager import RealServicesManager
 from tests.e2e.real_websocket_client import RealWebSocketClient
@@ -235,7 +235,7 @@ class DataCRUDManager:
         """Create billing data for testing."""
         return True
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Cleanup test environment and connections."""
         if self.websocket_client:
             await self.websocket_client.disconnect()

@@ -15,15 +15,45 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-# Default allowed origins for WebSocket connections
-DEFAULT_WEBSOCKET_ORIGINS = [
-    "http://localhost:3000",
-    "https://localhost:3000", 
-    "http://127.0.0.1:3000",
-    "https://127.0.0.1:3000",
-    "http://localhost:3001",
-    "https://localhost:3001"
-]
+def _get_default_websocket_origins():
+    """Get default WebSocket origins from unified configuration."""
+    try:
+        from netra_backend.app.core.configuration.base import get_unified_config
+        config = get_unified_config()
+        
+        # Start with configured frontend URL
+        default_origins = []
+        if hasattr(config, 'frontend_url') and config.frontend_url:
+            default_origins.append(config.frontend_url)
+            # Add HTTPS variant
+            if config.frontend_url.startswith("http://"):
+                https_url = config.frontend_url.replace("http://", "https://", 1)
+                default_origins.append(https_url)
+        
+        # Add common development ports if in development
+        environment = getattr(config, 'environment', 'development').lower()
+        if environment in ['development', 'testing']:
+            dev_ports = [3000, 3001, 3002, 3003, 4000, 4001, 4200, 5173, 5174]
+            for port in dev_ports:
+                default_origins.extend([
+                    f"http://localhost:{port}",
+                    f"https://localhost:{port}",
+                    f"http://127.0.0.1:{port}",
+                    f"https://127.0.0.1:{port}"
+                ])
+        
+        return default_origins
+    except Exception:
+        # Fallback to minimal origins if config fails
+        return [
+            "http://localhost:3000",
+            "https://localhost:3000",
+            "http://localhost:3010"  # Common frontend port
+        ]
+
+
+# Default allowed origins for WebSocket connections - loaded from configuration
+DEFAULT_WEBSOCKET_ORIGINS = _get_default_websocket_origins()
 
 # Production origins (should be configured via environment variables)
 PRODUCTION_ORIGINS = [
@@ -42,9 +72,10 @@ SECURITY_CONFIG = {
     "rate_limit_violations": True,  # Rate limit origins with violations
 }
 
-# Suspicious patterns to block
+# Suspicious patterns to block - relaxed for development
 SUSPICIOUS_PATTERNS = [
-    r".*localhost.*:(?!3000|3001).*",  # Block unexpected localhost ports
+    # Allow more localhost ports in development - only block very unusual ones
+    r".*localhost.*:(?!3000|3001|3002|3003|4000|4001|4200|5173|5174|8000|8001|8002|8003|8080|8081|8082|8083)\d+.*",  # Block only unexpected localhost ports
     r".*\d+\.\d+\.\d+\.\d+.*",  # Block direct IP addresses in production
     r".*\.ngrok\.io.*",  # Block ngrok tunnels in production
     r".*\.localtunnel\.me.*",  # Block localtunnel in production
@@ -169,7 +200,11 @@ class WebSocketCORSHandler:
         Returns:
             True if origin is allowed, False otherwise
         """
+        # TESTING ENVIRONMENT: Allow connections without origin (e.g., TestClient)
         if not origin:
+            if self.environment in ['development', 'testing']:
+                logger.debug("WebSocket origin allowed: None (test environment bypass)")
+                return True
             self._record_violation("", "WebSocket connection attempted without Origin header")
             return False
         
@@ -202,7 +237,8 @@ class WebSocketCORSHandler:
             "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "GET",
-            "Access-Control-Allow-Headers": "Authorization, Content-Type, Origin, Accept",
+            "Access-Control-Allow-Headers": "Authorization, Content-Type, Origin, Accept, X-Request-ID, X-Trace-ID, X-Service-ID, X-Cross-Service-Auth",
+            "Access-Control-Expose-Headers": "X-Trace-ID, X-Request-ID, X-Service-Name, X-Service-Version",
             "Vary": "Origin"
         }
         
@@ -276,16 +312,22 @@ def validate_websocket_origin(websocket: WebSocket, cors_handler: WebSocketCORSH
 
 
 def get_environment_origins() -> List[str]:
-    """Get allowed origins based on environment configuration."""
-    from netra_backend.app.core.configuration import unified_config_manager
-    config = unified_config_manager.get_config()
+    """Get allowed origins based on environment configuration and service discovery."""
+    from netra_backend.app.core.configuration.base import get_unified_config
+    config = get_unified_config()
     
     env = getattr(config, 'environment', 'development').lower()
     
-    # Get custom origins from unified config
-    custom_origins = getattr(config, 'websocket_allowed_origins', '')
-    if custom_origins:
-        custom_list = [origin.strip() for origin in custom_origins.split(",") if origin.strip()]
+    # Get CORS origins from unified config
+    cors_origins = getattr(config, 'cors_origins', None)
+    if cors_origins:
+        # Handle both list and comma-separated string formats
+        if isinstance(cors_origins, str):
+            custom_list = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
+        elif isinstance(cors_origins, list):
+            custom_list = [str(origin).strip() for origin in cors_origins if origin]
+        else:
+            custom_list = []
     else:
         custom_list = []
     
@@ -297,14 +339,27 @@ def get_environment_origins() -> List[str]:
         staging_origins = [origin for origin in PRODUCTION_ORIGINS if "staging" in origin]
         allowed_origins = staging_origins + DEFAULT_WEBSOCKET_ORIGINS + custom_list
     else:
-        # Development/test environment: use development origins + custom
+        # Development/test environment: use development origins + custom + service discovery
         allowed_origins = DEFAULT_WEBSOCKET_ORIGINS + custom_list
+        
+        # Add service discovery origins if available
+        try:
+            from pathlib import Path
+            from dev_launcher.service_discovery import ServiceDiscovery
+            
+            service_discovery = ServiceDiscovery(Path.cwd())
+            discovered_origins = service_discovery.get_all_service_origins()
+            allowed_origins.extend(discovered_origins)
+            
+            logger.debug(f"Added {len(discovered_origins)} service discovery origins for WebSocket CORS")
+        except (ImportError, Exception) as e:
+            logger.debug(f"Service discovery not available for WebSocket CORS: {e}")
     
     # Remove duplicates while preserving order
     unique_origins = []
     seen = set()
     for origin in allowed_origins:
-        if origin not in seen:
+        if origin and origin not in seen:
             unique_origins.append(origin)
             seen.add(origin)
     
@@ -383,8 +438,8 @@ def get_websocket_cors_handler() -> WebSocketCORSHandler:
     global _global_cors_handler
     
     if _global_cors_handler is None:
-        from netra_backend.app.core.configuration import unified_config_manager
-        config = unified_config_manager.get_config()
+        from netra_backend.app.core.configuration.base import get_unified_config
+        config = get_unified_config()
         environment = getattr(config, 'environment', 'development').lower()
         _global_cors_handler = WebSocketCORSHandler(
             get_environment_origins(), 

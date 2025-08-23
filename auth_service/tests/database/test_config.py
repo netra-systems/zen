@@ -17,7 +17,7 @@ from auth_service.auth_core.database.models import Base
 logger = logging.getLogger(__name__)
 
 
-class TestDatabaseConfig:
+class AuthTestDatabaseConfig:
     """Test database configuration and management"""
     
     def __init__(self, db_url: str = "sqlite+aiosqlite:///:memory:"):
@@ -94,7 +94,7 @@ class TestDatabaseConfig:
         logger.debug("Database tables reset")
 
 
-class PostgresTestConfig(TestDatabaseConfig):
+class PostgresTestConfig(AuthTestDatabaseConfig):
     """PostgreSQL-specific test configuration"""
     
     def __init__(self, test_db_name: str = "test_auth_service"):
@@ -154,14 +154,14 @@ class PostgresTestConfig(TestDatabaseConfig):
         await admin_engine.dispose()
 
 
-def get_test_db_config(use_postgres: bool = False) -> TestDatabaseConfig:
+def get_test_db_config(use_postgres: bool = False) -> AuthTestDatabaseConfig:
     """Get test database configuration"""
     if use_postgres:
         return PostgresTestConfig()
-    return TestDatabaseConfig()
+    return AuthTestDatabaseConfig()
 
 
-async def setup_test_database(config: Optional[TestDatabaseConfig] = None) -> TestDatabaseConfig:
+async def setup_test_database(config: Optional[AuthTestDatabaseConfig] = None) -> AuthTestDatabaseConfig:
     """Setup test database with proper configuration"""
     if config is None:
         config = get_test_db_config()

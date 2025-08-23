@@ -333,7 +333,7 @@ class SessionSyncTestHelper:
         
         return results
     
-    async def cleanup_test_users(self) -> None:
+    async def test_cleanup_test_users(self) -> None:
         """Clean up all test users and their WebSocket connections."""
         for user in self.test_users.values():
             if user.websocket_client:

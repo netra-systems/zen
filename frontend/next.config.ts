@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
     // Disable TypeScript checking during builds (for staging)
     ignoreBuildErrors: true,
   },
+  swcMinify: false,
   async rewrites() {
     // Proxy API routes to backend service
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';

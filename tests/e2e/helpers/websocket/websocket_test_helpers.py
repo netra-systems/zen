@@ -254,7 +254,7 @@ class WebSocketTestManager:
         """Setup test environment"""
         self.test_session_data.clear()
     
-    async def teardown_test_environment(self) -> None:
+    async def test_teardown_test_environment(self) -> None:
         """Cleanup test environment"""
         self.test_session_data.clear()
     

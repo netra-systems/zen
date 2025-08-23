@@ -173,7 +173,7 @@ class AuthTestMixin:
     ) -> Dict[str, str]:
         """Simulate complete login flow and return tokens"""
         # This would typically call the actual auth service
-        from ..factories import TokenFactory
+        from auth_service.tests.factories import TokenFactory
         
         access_token = TokenFactory.create_access_token(
             user_id=user_data["id"],
@@ -197,7 +197,7 @@ class AuthTestMixin:
         user_data: Dict[str, Any] = None
     ) -> Dict[str, Any]:
         """Simulate OAuth authentication flow"""
-        from ..factories import OAuthTokenFactory, TokenFactory
+        from auth_service.tests.factories import OAuthTokenFactory, TokenFactory
         
         # Simulate OAuth provider response
         if provider == "google":
@@ -250,7 +250,7 @@ class AuthTestMixin:
         expected_email: str = None
     ):
         """Assert JWT token claims are valid"""
-        from ..factories import TokenFactory
+        from auth_service.tests.factories import TokenFactory
         
         claims = TokenFactory.decode_token(token, verify=False)
         

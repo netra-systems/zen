@@ -11,28 +11,17 @@ AI Provider Connection & Optimization E2E Tests
 These tests validate Tests 3, 4, and 6 from the critical conversion paths.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timezone
 
 import pytest
 
-# Add project root to path
-from ..e2e.conftest import *
-from .helpers import FirstTimeUserTestHelpers
-
-# Add project root to path
-
+from netra_backend.tests.conftest import *
+from netra_backend.tests.e2e.first_time_user.helpers import FirstTimeUserTestHelpers
 
 class TestProviderConnectionE2E:
     """AI provider connection and optimization E2E tests"""

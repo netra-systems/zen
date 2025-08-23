@@ -1,29 +1,18 @@
 """Test integration between different system components."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.json_parsing_utils import comprehensive_json_fix
 from netra_backend.app.services.external_api_client import ResilientHTTPClient
-
-# Add project root to path
-
 
 class MockReliableAgent(AgentReliabilityMixin):
     """Mock agent with reliability mixin for integration testing."""
@@ -37,7 +26,6 @@ class MockReliableAgent(AgentReliabilityMixin):
         if should_fail:
             raise ValueError("Mock operation failed")
         return response_data or {"success": True, "agent": self.name}
-
 
 class TestSystemComponentIntegration:
     """Test integration between different system components."""

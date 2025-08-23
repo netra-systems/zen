@@ -10,17 +10,10 @@ Critical Path: Workflow definition -> Agent coordination -> State management -> 
 Coverage: Real workflow engine, agent orchestration, conditional routing, parallel execution
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -37,12 +30,10 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 from netra_backend.app.services.llm.llm_manager import LLMManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class WorkflowStepType(Enum):
     """Types of workflow steps."""
@@ -50,7 +41,6 @@ class WorkflowStepType(Enum):
     PARALLEL = "parallel"
     CONDITIONAL = "conditional"
     LOOP = "loop"
-
 
 class WorkflowStep:
     """Individual step in a workflow."""
@@ -68,7 +58,6 @@ class WorkflowStep:
         self.result = None
         self.execution_time = 0
         self.error = None
-
 
 class WorkflowDefinition:
     """Defines a complete workflow."""
@@ -102,7 +91,6 @@ class WorkflowDefinition:
                 if deps_completed:
                     ready_steps.append(step)
         return ready_steps
-
 
 class AgentCoordinator:
     """Coordinates agent execution in workflows."""
@@ -154,7 +142,6 @@ class AgentCoordinator:
             return {"success": False, "error": str(e), "execution_time": step.execution_time}
         finally:
             self.execution_stats["total_executions"] += 1
-
 
 class WorkflowEngine:
     """Executes multi-agent workflows."""
@@ -257,7 +244,6 @@ class WorkflowEngine:
                     "result": "skipped"
                 })
 
-
 class MultiAgentWorkflowManager:
     """Manages multi-agent workflow testing."""
     
@@ -333,7 +319,6 @@ class MultiAgentWorkflowManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def workflow_manager():
     """Create workflow manager for testing."""
@@ -341,7 +326,6 @@ async def workflow_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -364,7 +348,6 @@ async def test_simple_sequential_workflow(workflow_manager):
     assert execution_log[0]["step_id"] == "step1"
     assert execution_log[1]["step_id"] == "step2"
     assert execution_log[2]["step_id"] == "step3"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -389,7 +372,6 @@ async def test_parallel_workflow_execution(workflow_manager):
     parallel_executions = [log for log in result["execution_log"] 
                           if log.get("execution_type") == "parallel"]
     assert len(parallel_executions) == 3
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -417,7 +399,6 @@ async def test_conditional_workflow_routing(workflow_manager):
     
     assert len(executed_conditionals) == 1
     assert len(skipped_conditionals) == 1
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -453,7 +434,6 @@ async def test_workflow_dependency_resolution(workflow_manager):
     assert execution_order.index("c") < execution_order.index("d")
     assert execution_order.index("d") < execution_order.index("e")
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_workflow_error_handling(workflow_manager):
@@ -485,7 +465,6 @@ async def test_workflow_error_handling(workflow_manager):
     step3 = workflow.get_step("step3")
     assert step3.status == "pending"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_workflow_state_persistence(workflow_manager):
@@ -503,7 +482,6 @@ async def test_workflow_state_persistence(workflow_manager):
     
     # State should be cached
     assert cached_state is not None
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -536,7 +514,6 @@ async def test_concurrent_workflow_execution(workflow_manager):
     
     # Concurrent execution should be efficient
     assert total_time < 3.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

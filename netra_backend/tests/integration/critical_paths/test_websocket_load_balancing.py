@@ -11,21 +11,10 @@ L2 Test: Real internal load balancing components with mocked external services.
 Performance target: <5ms routing decisions, 95% connection distribution accuracy.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -45,7 +34,6 @@ from netra_backend.app.schemas import User
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
-
 class LoadBalancingStrategy(Enum):
 
     """Load balancing strategies."""
@@ -62,7 +50,6 @@ class LoadBalancingStrategy(Enum):
 
     GEOGRAPHIC = "geographic"
 
-
 class ServerState(Enum):
 
     """Server health states."""
@@ -74,7 +61,6 @@ class ServerState(Enum):
     UNHEALTHY = "unhealthy"
 
     MAINTENANCE = "maintenance"
-
 
 @dataclass
 
@@ -104,7 +90,6 @@ class ServerInstance:
 
     last_health_check: float = field(default_factory=time.time)
 
-
 @dataclass
 
 class ConnectionSession:
@@ -125,12 +110,10 @@ class ConnectionSession:
 
     affinity_score: float = 1.0
 
-
 class WebSocketLoadBalancer:
 
     """Load balancer for WebSocket connections."""
     
-
     def __init__(self, strategy: LoadBalancingStrategy = LoadBalancingStrategy.LEAST_CONNECTIONS):
 
         self.strategy = strategy
@@ -147,7 +130,6 @@ class WebSocketLoadBalancer:
 
         self.session_affinity_timeout = 3600.0  # 1 hour
         
-
         self.metrics = {
 
             "total_connections_routed": 0,
@@ -166,10 +148,8 @@ class WebSocketLoadBalancer:
 
         }
         
-
         self.routing_history = []  # For analysis
     
-
     def add_server(self, server_id: str, host: str, port: int, capacity: int = 1000, 
 
                    weight: float = 1.0, region: str = "us-east-1") -> ServerInstance:
@@ -192,12 +172,10 @@ class WebSocketLoadBalancer:
 
         )
         
-
         self.servers[server_id] = server
 
         return server
     
-
     def remove_server(self, server_id: str) -> bool:
 
         """Remove a server from the load balancer."""
@@ -214,12 +192,10 @@ class WebSocketLoadBalancer:
 
             self._migrate_connections_from_server(server_id)
         
-
         del self.servers[server_id]
 
         return True
     
-
     def update_server_health(self, server_id: str, state: ServerState, 
 
                            response_time: float = None) -> bool:
@@ -230,7 +206,6 @@ class WebSocketLoadBalancer:
 
             return False
         
-
         server = self.servers[server_id]
 
         old_state = server.state
@@ -239,7 +214,6 @@ class WebSocketLoadBalancer:
 
         server.last_health_check = time.time()
         
-
         if response_time is not None:
             # Update rolling average response time
 
@@ -261,10 +235,8 @@ class WebSocketLoadBalancer:
 
             self._handle_server_recovery(server_id)
         
-
         return True
     
-
     async def route_connection(self, user_id: str, client_region: str = "us-east-1", 
 
                               session_affinity: str = None) -> Optional[Dict[str, Any]]:
@@ -275,7 +247,6 @@ class WebSocketLoadBalancer:
 
         self.metrics["routing_decisions"] += 1
         
-
         try:
             # Check for existing session affinity
 
@@ -307,7 +278,6 @@ class WebSocketLoadBalancer:
 
             selected_server = await self._select_server(available_servers, user_id, client_region)
             
-
             if not selected_server:
 
                 self.metrics["routing_errors"] += 1
@@ -334,7 +304,6 @@ class WebSocketLoadBalancer:
 
             self._record_routing_decision(user_id, selected_server, routing_time)
             
-
             return {
 
                 "server_id": selected_server.server_id,
@@ -353,14 +322,12 @@ class WebSocketLoadBalancer:
 
             }
         
-
         except Exception as e:
 
             self.metrics["routing_errors"] += 1
 
             return None
     
-
     def _check_session_affinity(self, user_id: str, session_id: str) -> Optional[Dict[str, Any]]:
 
         """Check if session affinity should be honored."""
@@ -369,7 +336,6 @@ class WebSocketLoadBalancer:
 
             return None
         
-
         session = self.sessions[session_id]
         
         # Check if session is still valid
@@ -390,7 +356,6 @@ class WebSocketLoadBalancer:
 
             return None
         
-
         server = self.servers[server_id]
 
         if server.state != ServerState.HEALTHY or server.current_connections >= server.capacity:
@@ -403,7 +368,6 @@ class WebSocketLoadBalancer:
 
         session.connection_count += 1
         
-
         return {
 
             "server_id": server.server_id,
@@ -422,14 +386,12 @@ class WebSocketLoadBalancer:
 
         }
     
-
     def _get_available_servers(self) -> List[ServerInstance]:
 
         """Get list of available servers for routing."""
 
         available = []
         
-
         for server in self.servers.values():
 
             if (server.state == ServerState.HEALTHY and 
@@ -438,10 +400,8 @@ class WebSocketLoadBalancer:
 
                 available.append(server)
         
-
         return available
     
-
     async def _select_server(self, available_servers: List[ServerInstance], 
 
                            user_id: str, client_region: str) -> Optional[ServerInstance]:
@@ -452,43 +412,35 @@ class WebSocketLoadBalancer:
 
             return None
         
-
         if self.strategy == LoadBalancingStrategy.ROUND_ROBIN:
 
             return self._round_robin_selection(available_servers)
         
-
         elif self.strategy == LoadBalancingStrategy.LEAST_CONNECTIONS:
 
             return self._least_connections_selection(available_servers)
         
-
         elif self.strategy == LoadBalancingStrategy.WEIGHTED_ROUND_ROBIN:
 
             return self._weighted_round_robin_selection(available_servers)
         
-
         elif self.strategy == LoadBalancingStrategy.LEAST_RESPONSE_TIME:
 
             return self._least_response_time_selection(available_servers)
         
-
         elif self.strategy == LoadBalancingStrategy.HASH_BASED:
 
             return self._hash_based_selection(available_servers, user_id)
         
-
         elif self.strategy == LoadBalancingStrategy.GEOGRAPHIC:
 
             return self._geographic_selection(available_servers, client_region)
         
-
         else:
             # Default to least connections
 
             return self._least_connections_selection(available_servers)
     
-
     def _round_robin_selection(self, servers: List[ServerInstance]) -> ServerInstance:
 
         """Select server using round-robin strategy."""
@@ -497,21 +449,18 @@ class WebSocketLoadBalancer:
 
             return None
         
-
         selected = servers[self.round_robin_index % len(servers)]
 
         self.round_robin_index += 1
 
         return selected
     
-
     def _least_connections_selection(self, servers: List[ServerInstance]) -> ServerInstance:
 
         """Select server with least connections."""
 
         return min(servers, key=lambda s: s.current_connections)
     
-
     def _weighted_round_robin_selection(self, servers: List[ServerInstance]) -> ServerInstance:
 
         """Select server using weighted round-robin."""
@@ -525,19 +474,16 @@ class WebSocketLoadBalancer:
 
             weighted_servers.extend([server] * weight_factor)
         
-
         if not weighted_servers:
 
             return servers[0] if servers else None
         
-
         selected = weighted_servers[self.round_robin_index % len(weighted_servers)]
 
         self.round_robin_index += 1
 
         return selected
     
-
     def _least_response_time_selection(self, servers: List[ServerInstance]) -> ServerInstance:
 
         """Select server with least response time."""
@@ -545,7 +491,6 @@ class WebSocketLoadBalancer:
 
         servers_with_rt = [s for s in servers if s.avg_response_time > 0]
         
-
         if servers_with_rt:
 
             return min(servers_with_rt, key=lambda s: s.avg_response_time)
@@ -555,7 +500,6 @@ class WebSocketLoadBalancer:
 
             return self._least_connections_selection(servers)
     
-
     def _hash_based_selection(self, servers: List[ServerInstance], user_id: str) -> ServerInstance:
 
         """Select server using consistent hashing."""
@@ -570,7 +514,6 @@ class WebSocketLoadBalancer:
 
         return servers[hash_value]
     
-
     def _geographic_selection(self, servers: List[ServerInstance], client_region: str) -> ServerInstance:
 
         """Select server based on geographic proximity."""
@@ -578,7 +521,6 @@ class WebSocketLoadBalancer:
 
         same_region_servers = [s for s in servers if s.region == client_region]
         
-
         if same_region_servers:
             # Use least connections within same region
 
@@ -589,14 +531,12 @@ class WebSocketLoadBalancer:
 
             return self._least_connections_selection(servers)
     
-
     def _create_or_update_session(self, session_id: str, user_id: str, server_id: str) -> None:
 
         """Create or update session information."""
 
         current_time = time.time()
         
-
         if session_id in self.sessions:
 
             session = self.sessions[session_id]
@@ -625,7 +565,6 @@ class WebSocketLoadBalancer:
 
             self.user_sessions[user_id].add(session_id)
     
-
     def _cleanup_session(self, session_id: str) -> None:
 
         """Clean up expired session."""
@@ -634,17 +573,14 @@ class WebSocketLoadBalancer:
 
             return
         
-
         session = self.sessions.pop(session_id)
 
         self.user_sessions[session.user_id].discard(session_id)
         
-
         if not self.user_sessions[session.user_id]:
 
             del self.user_sessions[session.user_id]
     
-
     def disconnect_connection(self, session_id: str) -> bool:
 
         """Handle connection disconnection."""
@@ -653,7 +589,6 @@ class WebSocketLoadBalancer:
 
             return False
         
-
         session = self.sessions[session_id]
 
         server_id = session.server_id
@@ -674,7 +609,6 @@ class WebSocketLoadBalancer:
 
         return True
     
-
     def _handle_server_degradation(self, server_id: str) -> None:
 
         """Handle server becoming unhealthy."""
@@ -682,7 +616,6 @@ class WebSocketLoadBalancer:
         self.metrics["failover_events"] += 1
         # In real implementation, would trigger connection migration
     
-
     def _handle_server_recovery(self, server_id: str) -> None:
 
         """Handle server recovery."""
@@ -690,7 +623,6 @@ class WebSocketLoadBalancer:
 
         pass
     
-
     def _migrate_connections_from_server(self, server_id: str) -> None:
 
         """Migrate connections from failing server."""
@@ -704,13 +636,11 @@ class WebSocketLoadBalancer:
 
         ]
         
-
         for session in sessions_to_migrate:
             # In real implementation, would handle graceful migration
 
             self._cleanup_session(session.session_id)
     
-
     def _update_avg_routing_time(self, routing_time_ms: float) -> None:
 
         """Update average routing time metric."""
@@ -719,7 +649,6 @@ class WebSocketLoadBalancer:
 
         total_decisions = self.metrics["routing_decisions"]
         
-
         if total_decisions == 1:
 
             self.metrics["avg_routing_time_ms"] = routing_time_ms
@@ -732,7 +661,6 @@ class WebSocketLoadBalancer:
 
             ) / total_decisions
     
-
     def _record_routing_decision(self, user_id: str, server: ServerInstance, routing_time: float) -> None:
 
         """Record routing decision for analysis."""
@@ -755,7 +683,6 @@ class WebSocketLoadBalancer:
 
         }
         
-
         self.routing_history.append(decision_record)
         
         # Keep only recent history
@@ -764,7 +691,6 @@ class WebSocketLoadBalancer:
 
             self.routing_history = self.routing_history[-5000:]
     
-
     def get_load_balancer_stats(self) -> Dict[str, Any]:
 
         """Get comprehensive load balancer statistics."""
@@ -781,7 +707,6 @@ class WebSocketLoadBalancer:
 
         total_connections = sum(s.current_connections for s in self.servers.values())
         
-
         stats.update({
 
             "total_servers": total_servers,
@@ -816,17 +741,14 @@ class WebSocketLoadBalancer:
 
             stats["routing_success_rate"] = 0.0
         
-
         return stats
     
-
     def get_server_distribution(self) -> Dict[str, Any]:
 
         """Get connection distribution across servers."""
 
         distribution = {}
         
-
         for server_id, server in self.servers.items():
 
             distribution[server_id] = {
@@ -847,10 +769,8 @@ class WebSocketLoadBalancer:
 
             }
         
-
         return distribution
     
-
     def analyze_load_distribution(self) -> Dict[str, Any]:
 
         """Analyze load distribution quality."""
@@ -859,7 +779,6 @@ class WebSocketLoadBalancer:
 
             return {"error": "No servers configured"}
         
-
         healthy_servers = [s for s in self.servers.values() if s.state == ServerState.HEALTHY]
 
         if not healthy_servers:
@@ -888,7 +807,6 @@ class WebSocketLoadBalancer:
 
             distribution_quality = 100
         
-
         return {
 
             "avg_utilization": avg_utilization * 100,
@@ -907,12 +825,10 @@ class WebSocketLoadBalancer:
 
         }
 
-
 class HealthChecker:
 
     """Monitor server health for load balancer."""
     
-
     def __init__(self, load_balancer: WebSocketLoadBalancer):
 
         self.load_balancer = load_balancer
@@ -925,14 +841,12 @@ class HealthChecker:
 
         self.health_history = defaultdict(list)
     
-
     async def start_health_monitoring(self) -> None:
 
         """Start continuous health monitoring."""
 
         self.running = True
         
-
         while self.running:
 
             try:
@@ -949,33 +863,28 @@ class HealthChecker:
 
                 await asyncio.sleep(5.0)  # Short delay on error
     
-
     def stop_health_monitoring(self) -> None:
 
         """Stop health monitoring."""
 
         self.running = False
     
-
     async def _perform_health_checks(self) -> None:
 
         """Perform health checks on all servers."""
 
         health_tasks = []
         
-
         for server_id, server in self.load_balancer.servers.items():
 
             task = self._check_server_health(server_id, server)
 
             health_tasks.append(task)
         
-
         if health_tasks:
 
             await asyncio.gather(*health_tasks, return_exceptions=True)
     
-
     async def _check_server_health(self, server_id: str, server: ServerInstance) -> None:
 
         """Check health of a specific server."""
@@ -995,7 +904,6 @@ class HealthChecker:
 
                 raise Exception("Health check failed")
             
-
             response_time = (time.time() - start_time) * 1000  # Convert to ms
             
             # Update server health
@@ -1006,7 +914,6 @@ class HealthChecker:
 
             self._record_health_check(server_id, True, response_time)
         
-
         except Exception as e:
             # Handle health check failure
 
@@ -1014,7 +921,6 @@ class HealthChecker:
 
             self._record_health_check(server_id, False, 0.0)
     
-
     def _record_health_check(self, server_id: str, success: bool, response_time: float) -> None:
 
         """Record health check result."""
@@ -1029,7 +935,6 @@ class HealthChecker:
 
         }
         
-
         self.health_history[server_id].append(health_record)
         
         # Keep only recent history
@@ -1038,7 +943,6 @@ class HealthChecker:
 
             self.health_history[server_id] = self.health_history[server_id][-100:]
     
-
     def get_health_statistics(self) -> Dict[str, Any]:
 
         """Get health check statistics."""
@@ -1057,17 +961,14 @@ class HealthChecker:
 
         }
         
-
         total_response_time = 0.0
 
         successful_responses = 0
         
-
         for server_id, history in self.health_history.items():
 
             stats["total_health_checks"] += len(history)
             
-
             for record in history:
 
                 if record["success"]:
@@ -1082,12 +983,10 @@ class HealthChecker:
 
                     stats["failed_checks"] += 1
         
-
         if successful_responses > 0:
 
             stats["avg_response_time_ms"] = total_response_time / successful_responses
         
-
         if stats["total_health_checks"] > 0:
 
             stats["health_check_success_rate"] = (
@@ -1100,9 +999,7 @@ class HealthChecker:
 
             stats["health_check_success_rate"] = 0.0
         
-
         return stats
-
 
 @pytest.mark.L2
 
@@ -1112,7 +1009,6 @@ class TestWebSocketLoadBalancing:
 
     """L2 integration tests for WebSocket load balancing."""
     
-
     @pytest.fixture
 
     def load_balancer(self):
@@ -1121,7 +1017,6 @@ class TestWebSocketLoadBalancing:
 
         return WebSocketLoadBalancer(LoadBalancingStrategy.LEAST_CONNECTIONS)
     
-
     @pytest.fixture
 
     def health_checker(self, load_balancer):
@@ -1130,7 +1025,6 @@ class TestWebSocketLoadBalancing:
 
         return HealthChecker(load_balancer)
     
-
     @pytest.fixture
 
     def test_servers(self, load_balancer):
@@ -1149,10 +1043,8 @@ class TestWebSocketLoadBalancing:
 
         servers.append(load_balancer.add_server("server-4", "10.0.2.2", 8080, capacity=200, weight=2.0, region="us-west-1"))
         
-
         return servers
     
-
     @pytest.fixture
 
     def test_users(self):
@@ -1179,7 +1071,6 @@ class TestWebSocketLoadBalancing:
 
         ]
     
-
     async def test_basic_load_balancing_functionality(self, load_balancer, test_servers, test_users):
 
         """Test basic load balancing routing."""
@@ -1190,7 +1081,6 @@ class TestWebSocketLoadBalancing:
 
         routing_result = await load_balancer.route_connection(user.id, "us-east-1")
         
-
         assert routing_result is not None
 
         assert "server_id" in routing_result
@@ -1217,7 +1107,6 @@ class TestWebSocketLoadBalancing:
 
         assert stats["routing_success_rate"] == 100.0
     
-
     async def test_least_connections_strategy(self, load_balancer, test_servers, test_users):
 
         """Test least connections load balancing strategy."""
@@ -1225,7 +1114,6 @@ class TestWebSocketLoadBalancing:
 
         routing_results = []
         
-
         for i in range(10):
 
             user = test_users[i]
@@ -1260,7 +1148,6 @@ class TestWebSocketLoadBalancing:
 
                 assert info["current_connections"] == server_connections[server_id]
     
-
     async def test_round_robin_strategy(self, test_servers, test_users):
 
         """Test round robin load balancing strategy."""
@@ -1297,7 +1184,6 @@ class TestWebSocketLoadBalancing:
 
         assert len(unique_servers) > 1
     
-
     async def test_geographic_strategy(self, test_users):
 
         """Test geographic load balancing strategy."""
@@ -1328,7 +1214,6 @@ class TestWebSocketLoadBalancing:
 
         assert unknown_result is not None  # Should fall back to available server
     
-
     async def test_session_affinity(self, load_balancer, test_servers, test_users):
 
         """Test sticky session functionality."""
@@ -1341,7 +1226,6 @@ class TestWebSocketLoadBalancing:
 
         assert first_result is not None
         
-
         first_server = first_result["server_id"]
 
         session_id = first_result["session_id"]
@@ -1354,7 +1238,6 @@ class TestWebSocketLoadBalancing:
 
         )
         
-
         assert second_result is not None
 
         assert second_result["server_id"] == first_server  # Should stick to same server
@@ -1367,7 +1250,6 @@ class TestWebSocketLoadBalancing:
 
         assert stats["session_affinity_hits"] == 1
     
-
     async def test_server_failure_handling(self, load_balancer, test_servers, test_users):
 
         """Test handling of server failures."""
@@ -1401,7 +1283,6 @@ class TestWebSocketLoadBalancing:
 
         assert stats["healthy_servers"] == len(test_servers) - 1
     
-
     async def test_capacity_enforcement(self, load_balancer, test_servers, test_users):
 
         """Test server capacity enforcement."""
@@ -1441,7 +1322,6 @@ class TestWebSocketLoadBalancing:
 
             assert server_connections[small_server.server_id] <= small_capacity
     
-
     async def test_connection_disconnection(self, load_balancer, test_servers, test_users):
 
         """Test connection disconnection handling."""
@@ -1454,7 +1334,6 @@ class TestWebSocketLoadBalancing:
 
         assert result is not None
         
-
         session_id = result["session_id"]
 
         server_id = result["server_id"]
@@ -1481,7 +1360,6 @@ class TestWebSocketLoadBalancing:
 
         assert session_id not in load_balancer.sessions
     
-
     async def test_health_monitoring_integration(self, load_balancer, health_checker, test_servers):
 
         """Test health monitoring integration."""
@@ -1499,7 +1377,6 @@ class TestWebSocketLoadBalancing:
 
         monitoring_task.cancel()
         
-
         try:
 
             await monitoring_task
@@ -1516,7 +1393,6 @@ class TestWebSocketLoadBalancing:
 
         assert health_stats["total_health_checks"] >= 0
     
-
     async def test_load_distribution_analysis(self, load_balancer, test_servers, test_users):
 
         """Test load distribution quality analysis."""
@@ -1532,7 +1408,6 @@ class TestWebSocketLoadBalancing:
 
         analysis = load_balancer.analyze_load_distribution()
         
-
         assert "avg_utilization" in analysis
 
         assert "distribution_quality_score" in analysis
@@ -1547,7 +1422,6 @@ class TestWebSocketLoadBalancing:
 
         assert 0 <= analysis["distribution_quality_score"] <= 100
     
-
     @mock_justified("L2: Load balancing with real internal components")
 
     async def test_websocket_integration_with_load_balancing(self, load_balancer, test_servers, test_users):
@@ -1619,7 +1493,6 @@ class TestWebSocketLoadBalancing:
 
         )
         
-
         assert affinity_result["server_id"] == existing_session["server_id"]
 
         assert affinity_result["strategy_used"] == "session_affinity"
@@ -1640,7 +1513,6 @@ class TestWebSocketLoadBalancing:
 
         assert final_stats["routing_success_rate"] > 90  # Should have high success rate
     
-
     async def test_concurrent_routing_performance(self, load_balancer, test_servers, test_users):
 
         """Test concurrent routing performance."""
@@ -1653,7 +1525,6 @@ class TestWebSocketLoadBalancing:
 
         start_time = time.time()
         
-
         for i in range(concurrent_connections):
 
             user = test_users[i % len(test_users)]
@@ -1696,7 +1567,6 @@ class TestWebSocketLoadBalancing:
 
         assert analysis["distribution_quality_score"] >= 60  # Reasonable distribution
     
-
     async def test_load_balancing_strategies_comparison(self, test_servers, test_users):
 
         """Test comparison of different load balancing strategies."""
@@ -1711,10 +1581,8 @@ class TestWebSocketLoadBalancing:
 
         ]
         
-
         strategy_results = {}
         
-
         for strategy in strategies:
 
             lb = WebSocketLoadBalancer(strategy)
@@ -1733,7 +1601,6 @@ class TestWebSocketLoadBalancing:
 
             routing_count = 0
             
-
             for i in range(20):
 
                 user = test_users[i % len(test_users)]
@@ -1744,7 +1611,6 @@ class TestWebSocketLoadBalancing:
 
                     routing_count += 1
             
-
             total_time = time.time() - start_time
             
             # Analyze performance
@@ -1753,7 +1619,6 @@ class TestWebSocketLoadBalancing:
 
             analysis = lb.analyze_load_distribution()
             
-
             strategy_results[strategy.value] = {
 
                 "routing_time": total_time,
@@ -1783,7 +1648,6 @@ class TestWebSocketLoadBalancing:
         geo_results = strategy_results["geographic"]
 
         assert geo_results["distribution_quality"] >= 50
-
 
 if __name__ == "__main__":
 

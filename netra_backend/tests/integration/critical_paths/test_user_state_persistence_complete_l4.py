@@ -3,17 +3,10 @@ L4 Integration Test: User State Persistence Complete
 Tests user state persistence across services, restarts, and failures
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -27,15 +20,11 @@ import pytest
 
 from netra_backend.app.config import get_config
 from netra_backend.app.models.user import User, UserPreferences, UserState
-from netra_backend.app.services.database_service import DatabaseService
+from netra_backend.app.services.database_operations_service import DatabaseOperationsService as DatabaseService
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.session_service import SessionService
 
-# Add project root to path
 from netra_backend.app.services.user_service import UserService
-
-# Add project root to path
-
 
 class TestUserStatePersistenceCompleteL4:
     """Complete user state persistence testing"""

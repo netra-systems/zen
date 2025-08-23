@@ -20,7 +20,6 @@ import traceback
 from typing import Any, Dict, List, Optional
 
 # Add parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from performance_baseline_config import (
     PerformanceBenchmarkRunner,
@@ -36,7 +35,6 @@ from test_comprehensive_backend_performance import (
     WebSocketPerformanceTester,
 )
 from test_concurrent_user_performance import ConcurrentUserSimulator, ScalabilityTester
-
 
 class PerformanceTestOrchestrator:
     """Orchestrates comprehensive performance testing."""
@@ -526,7 +524,6 @@ class PerformanceTestOrchestrator:
         
         return benchmark_report
 
-
 async def main():
     """Main entry point for performance testing."""
     parser = argparse.ArgumentParser(description="Run comprehensive performance tests")
@@ -577,7 +574,6 @@ async def main():
         if not args.quiet:
             traceback.print_exc()
         return 1
-
 
 if __name__ == "__main__":
     # Run the performance test suite

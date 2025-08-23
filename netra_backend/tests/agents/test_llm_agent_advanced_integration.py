@@ -3,17 +3,10 @@ Advanced LLM Agent Integration Tests
 Complex integration tests with ≤8 line functions for architectural compliance
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -22,19 +15,17 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
-from .test_fixtures import (
+from netra_backend.tests.agents.test_fixtures import (
     mock_db_session,
     mock_llm_manager,
     mock_tool_dispatcher,
     mock_websocket_manager,
 )
-from .test_helpers import (
+from netra_backend.tests.agents.test_helpers import (
     create_concurrent_tasks,
     create_llm_response_with_tools,
-    # Add project root to path
     create_mock_infrastructure,
     create_mock_persistence,
     create_multiple_supervisors,
@@ -50,19 +41,18 @@ from .test_helpers import (
     verify_tool_execution,
 )
 
-
 def _setup_concurrent_infrastructure():
     """Setup infrastructure for concurrent testing"""
     db_session, llm_manager, ws_manager = create_mock_infrastructure()
     mock_persistence = create_mock_persistence()
     return db_session, llm_manager, ws_manager, mock_persistence
 
-
 async def _run_concurrent_requests(supervisors):
     """Run concurrent requests and return results"""
     tasks = create_concurrent_tasks(supervisors)
     return await asyncio.gather(*tasks, return_exceptions=True)
 
+@pytest.mark.asyncio
 
 async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
                                           mock_websocket_manager, mock_tool_dispatcher):
@@ -74,13 +64,11 @@ async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
         results = await _run_concurrent_requests(supervisors)
         verify_concurrent_results(results, 5)
 
-
 def _setup_performance_test(supervisor_agent):
     """Setup performance test timing"""
     start_time = time.time()
     run_id = str(uuid.uuid4())
     return start_time, run_id
-
 
 async def _run_performance_test(supervisor_agent, run_id):
     """Run performance test"""
@@ -91,19 +79,18 @@ async def _run_performance_test(supervisor_agent, run_id):
         run_id
     )
 
-
 def _verify_performance_timing(start_time, max_expected_time=2.0):
     """Verify performance timing meets expectations"""
     execution_time = time.time() - start_time
     assert execution_time < max_expected_time, f"Execution took {execution_time}s, expected < {max_expected_time}s"
 
+@pytest.mark.asyncio
 
 async def test_performance_metrics(supervisor_agent):
     """Test performance metric collection"""
     start_time, run_id = _setup_performance_test(supervisor_agent)
     await _run_performance_test(supervisor_agent, run_id)
     _verify_performance_timing(start_time)
-
 
 async def _test_llm_retry_mechanism(llm_manager):
     """Test LLM retry mechanism"""
@@ -113,12 +100,12 @@ async def _test_llm_retry_mechanism(llm_manager):
         result = await llm_manager.call_llm("Test prompt")
     return result
 
-
 def _verify_retry_result(result, call_counter):
     """Verify retry mechanism worked correctly"""
     assert result["content"] == "Successful response after retry"
     assert call_counter["count"] == 2
 
+@pytest.mark.asyncio
 
 async def test_real_llm_interaction():
     """Test real LLM interaction with proper error handling"""
@@ -126,12 +113,12 @@ async def test_real_llm_interaction():
     result = await _test_llm_retry_mechanism(llm_manager)
     _verify_retry_result(result, call_counter)
 
-
 async def _execute_llm_tool_flow(dispatcher, llm_response):
     """Execute LLM tool flow"""
     for tool_call in llm_response["tool_calls"]:
         await dispatcher.dispatch_tool(tool_call["name"], tool_call["parameters"])
 
+@pytest.mark.asyncio
 
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
@@ -140,7 +127,6 @@ async def test_tool_execution_with_llm():
     await _execute_llm_tool_flow(dispatcher, llm_response)
     verify_tool_execution(tool_results, ["analyze_workload", "optimize_batch_size"])
 
-
 def _setup_end_to_end_infrastructure():
     """Setup infrastructure for end-to-end test"""
     db_session, llm_manager, ws_manager = create_mock_infrastructure()
@@ -148,12 +134,10 @@ def _setup_end_to_end_infrastructure():
     setup_websocket_manager(ws_manager)
     return db_session, llm_manager, ws_manager
 
-
 def _setup_end_to_end_persistence():
     """Setup persistence for end-to-end test"""
     mock_persistence = create_mock_persistence()
     return mock_persistence
-
 
 async def _run_end_to_end_flow(supervisor):
     """Run complete end-to-end optimization flow"""
@@ -161,6 +145,7 @@ async def _run_end_to_end_flow(supervisor):
     verify_optimization_flow(state, supervisor)
     return state
 
+@pytest.mark.asyncio
 
 async def test_end_to_end_optimization_flow():
     """Test complete end-to-end optimization flow"""

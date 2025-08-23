@@ -36,7 +36,7 @@ class PerformanceTestOrchestrator:
         self.scenario_runner = scenario_runner
         self.performance_analyzer = performance_analyzer
     
-    async def run_load_test_sequence(self, load_levels: List[int]) -> Dict[int, Any]:
+    async def test_run_load_test_sequence(self, load_levels: List[int]) -> Dict[int, Any]:
         """Run performance tests across multiple load levels"""
         performance_results = {}
         

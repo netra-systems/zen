@@ -3,17 +3,10 @@ Unit tests for Fallback Response Service
 Tests context-aware fallback response generation for various failure scenarios
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import json
 import re
@@ -22,19 +15,16 @@ from unittest.mock import Mock, patch
 import pytest
 
 from netra_backend.app.services.fallback_response.models import (
-    # Add project root to path
     FailureReason,
     FallbackContext,
 )
 
-# Add project root to path
 from netra_backend.app.services.fallback_response_service import FallbackResponseService
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityLevel,
     QualityMetrics,
 )
-
 
 class TestFallbackResponseService:
     """Test suite for Fallback Response Service"""
@@ -468,7 +458,6 @@ class TestFallbackResponseService:
             assert isinstance(templates, list)
             assert len(templates) > 0
             assert all(isinstance(t, str) for t in templates)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

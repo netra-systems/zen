@@ -13,21 +13,10 @@ Automatic reconnection -> State recovery -> Session continuity validation
 Coverage: WebSocket resilience, state persistence, automatic recovery, cross-service coordination
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -42,17 +31,13 @@ import websockets
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-from .l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
 
     CriticalPathMetrics,
 
     L4StagingCriticalPathTestBase,
 
 )
-
-# Add project root to path
-
 
 @dataclass
 
@@ -74,12 +59,10 @@ class WebSocketStateData:
 
     state_checksum: str
 
-
 class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
     """L4 test for WebSocket state recovery after service restart."""
     
-
     def __init__(self):
 
         super().__init__("WebSocket State Recovery After Service Restart")
@@ -92,7 +75,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
         self.post_restart_states: Dict[str, WebSocketStateData] = {}
         
-
     async def setup_test_specific_environment(self) -> None:
 
         """Setup WebSocket-specific test environment."""
@@ -108,12 +90,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
         response = await self.test_client.get(ws_health_url)
         
-
         if response.status_code != 200:
 
             raise RuntimeError(f"WebSocket service unavailable: {response.status_code}")
     
-
     async def execute_critical_path_test(self) -> Dict[str, Any]:
 
         """Execute WebSocket state recovery critical path test."""
@@ -134,7 +114,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
         }
         
-
         try:
             # Phase 1: Establish multiple WebSocket connections
 
@@ -144,7 +123,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             test_results["service_calls"] += connections_result.get("service_calls", 0)
             
-
             if not connections_result["success"]:
 
                 return test_results
@@ -157,7 +135,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             test_results["service_calls"] += state_result.get("service_calls", 0)
             
-
             if not state_result["success"]:
 
                 return test_results
@@ -178,7 +155,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             test_results["service_calls"] += reconnection_result.get("service_calls", 0)
             
-
             if not reconnection_result["success"]:
 
                 return test_results
@@ -191,15 +167,12 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             test_results["service_calls"] += validation_result.get("service_calls", 0)
             
-
             return test_results
             
-
         except Exception as e:
 
             return {"success": False, "error": str(e), "test_results": test_results}
     
-
     async def _establish_test_websocket_connections(self) -> Dict[str, Any]:
 
         """Establish multiple WebSocket connections for testing."""
@@ -218,7 +191,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             ]
             
-
             for i, scenario in enumerate(user_scenarios):
                 # Create test user
 
@@ -240,17 +212,14 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                 )
                 
-
                 if ws_connection["success"]:
 
                     connection_results.append(ws_connection)
 
                     self.test_websockets.append(ws_connection["websocket"])
             
-
             successful_connections = len(connection_results)
             
-
             return {
 
                 "success": successful_connections >= 2,  # Need at least 2 connections
@@ -265,12 +234,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             }
             
-
         except Exception as e:
 
             return {"success": False, "error": str(e), "service_calls": 0}
     
-
     async def _create_authenticated_websocket_connection(self, access_token: str, 
 
                                                        user_id: str, scenario: Dict) -> Dict[str, Any]:
@@ -319,7 +286,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             }
             
-
             await websocket.send(json.dumps(auth_message))
             
             # Wait for authentication confirmation
@@ -328,15 +294,12 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             auth_data = json.loads(auth_response)
             
-
             if auth_data.get("type") != "auth_success":
 
                 raise Exception(f"Authentication failed: {auth_data}")
             
-
             connection_id = auth_data.get("connection_id", f"conn_{uuid.uuid4().hex[:8]}")
             
-
             return {
 
                 "success": True,
@@ -353,12 +316,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             }
             
-
         except Exception as e:
 
             return {"success": False, "error": str(e)}
     
-
     async def _establish_complex_websocket_state(self) -> Dict[str, Any]:
 
         """Establish complex state across WebSocket connections."""
@@ -367,14 +328,12 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             state_operations = 0
             
-
             for ws_connection in self.test_websockets:
 
                 if not ws_connection:
 
                     continue
                     
-
                 user_id = ws_connection.get("user_id")
 
                 websocket = ws_connection.get("websocket")
@@ -441,10 +400,8 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                 )
                 
-
                 self.pre_restart_states[user_id] = state_data
             
-
             return {
 
                 "success": len(self.pre_restart_states) >= 2,
@@ -457,12 +414,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             }
             
-
         except Exception as e:
 
             return {"success": False, "error": str(e), "service_calls": 0}
     
-
     async def _create_thread_via_websocket(self, websocket, user_id: str, 
 
                                          thread_name: str) -> Dict[str, Any]:
@@ -483,7 +438,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             }
             
-
             await websocket.send(json.dumps(thread_message))
             
             # Wait for thread creation response
@@ -492,7 +446,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             thread_data = json.loads(response)
             
-
             if thread_data.get("type") == "thread_created":
 
                 return {
@@ -509,12 +462,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                 return {"success": False, "error": f"Unexpected response: {thread_data}"}
                 
-
         except Exception as e:
 
             return {"success": False, "error": str(e)}
     
-
     async def _send_message_via_websocket(self, websocket, user_id: str, 
 
                                         thread_id: str, content: str) -> Dict[str, Any]:
@@ -537,7 +488,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             }
             
-
             await websocket.send(json.dumps(message_data))
             
             # Wait for message confirmation
@@ -546,7 +496,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             response_data = json.loads(response)
             
-
             if response_data.get("type") == "message_sent":
 
                 return {
@@ -563,12 +512,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                 return {"success": False, "error": f"Unexpected response: {response_data}"}
                 
-
         except Exception as e:
 
             return {"success": False, "error": str(e)}
     
-
     def _calculate_state_checksum(self, threads: List[str], 
 
                                 messages: List[Dict]) -> str:
@@ -576,7 +523,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
         """Calculate checksum for state validation."""
         import hashlib
         
-
         state_string = json.dumps({
 
             "threads": sorted(threads),
@@ -587,10 +533,8 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
         }, sort_keys=True)
         
-
         return hashlib.md5(state_string.encode()).hexdigest()
     
-
     async def _simulate_service_restart(self) -> Dict[str, Any]:
 
         """Simulate WebSocket service restart."""
@@ -617,7 +561,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             )
             
-
             restart_success = restart_response.status_code in [200, 202]
             
             # Wait for restart to complete (simulated)
@@ -632,7 +575,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             service_online = health_check.status_code == 200
             
-
             return {
 
                 "success": restart_success and service_online,
@@ -647,12 +589,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             }
             
-
         except Exception as e:
 
             return {"success": False, "error": str(e), "service_calls": 0}
     
-
     async def _verify_automatic_reconnection(self) -> Dict[str, Any]:
 
         """Verify automatic WebSocket reconnection after restart."""
@@ -668,7 +608,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                 session_data = await self.redis_session.get_session(pre_state.session_id)
                 
-
                 if not session_data:
 
                     reconnection_results.append({
@@ -683,12 +622,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                     continue
                 
-
                 session_info = json.loads(session_data)
 
                 access_token = session_info.get("access_token")
                 
-
                 if not access_token:
 
                     reconnection_results.append({
@@ -713,10 +650,8 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                 reconnection_results.append(reconnection_result)
             
-
             successful_reconnections = [r for r in reconnection_results if r.get("success", False)]
             
-
             return {
 
                 "success": len(successful_reconnections) >= 2,
@@ -731,12 +666,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             }
             
-
         except Exception as e:
 
             return {"success": False, "error": str(e), "service_calls": 0}
     
-
     async def _attempt_websocket_reconnection(self, access_token: str, user_id: str, 
 
                                             pre_state: WebSocketStateData) -> Dict[str, Any]:
@@ -779,7 +712,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             }
             
-
             await websocket.send(json.dumps(auth_message))
             
             # Wait for authentication and state recovery response
@@ -788,7 +720,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             recovery_data = json.loads(recovery_response)
             
-
             if recovery_data.get("type") == "auth_success_with_recovery":
 
                 return {
@@ -817,12 +748,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                 }
                 
-
         except Exception as e:
 
             return {"user_id": user_id, "success": False, "error": str(e)}
     
-
     async def _validate_state_recovery_continuity(self) -> Dict[str, Any]:
 
         """Validate that WebSocket state was properly recovered."""
@@ -831,13 +760,11 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             validation_results = []
             
-
             for user_id, pre_state in self.pre_restart_states.items():
                 # Query current state from WebSocket service
 
                 state_query_result = await self._query_websocket_state(user_id)
                 
-
                 if not state_query_result["success"]:
 
                     validation_results.append({
@@ -852,7 +779,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                     continue
                 
-
                 post_state = state_query_result["state_data"]
                 
                 # Validate thread continuity
@@ -871,7 +797,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                 consistency_score = self._calculate_state_consistency(pre_state, post_state)
                 
-
                 validation_result = {
 
                     "user_id": user_id,
@@ -894,13 +819,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                 }
                 
-
                 validation_results.append(validation_result)
             
-
             successful_validations = [r for r in validation_results if r.get("success", False)]
             
-
             return {
 
                 "success": len(successful_validations) >= 2,
@@ -915,12 +837,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             }
             
-
         except Exception as e:
 
             return {"success": False, "error": str(e), "service_calls": 0}
     
-
     async def _query_websocket_state(self, user_id: str) -> Dict[str, Any]:
 
         """Query current WebSocket state for a user."""
@@ -931,7 +851,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             response = await self.test_client.get(state_endpoint)
             
-
             if response.status_code == 200:
 
                 return {"success": True, "state_data": response.json()}
@@ -940,12 +859,10 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
                 return {"success": False, "error": f"State query failed: {response.status_code}"}
                 
-
         except Exception as e:
 
             return {"success": False, "error": str(e)}
     
-
     def _calculate_state_consistency(self, pre_state: WebSocketStateData, 
 
                                    post_state: Dict[str, Any]) -> float:
@@ -980,10 +897,8 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
         consistency_factors.append(1.0 if session_consistent else 0.0)
         
-
         return sum(consistency_factors) / len(consistency_factors)
     
-
     async def validate_critical_path_results(self, results: Dict[str, Any]) -> bool:
 
         """Validate WebSocket state recovery meets business requirements."""
@@ -1005,7 +920,6 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             ]
             
-
             if not all(phase_results):
 
                 failed_phases = [f"phase_{i+1}" for i, success in enumerate(phase_results) if not success]
@@ -1026,17 +940,14 @@ class WebSocketStateRecoveryL4Test(L4StagingCriticalPathTestBase):
 
             }
             
-
             return await self.validate_business_metrics(business_requirements)
             
-
         except Exception as e:
 
             self.test_metrics.errors.append(f"Result validation failed: {str(e)}")
 
             return False
     
-
     async def cleanup_test_specific_resources(self) -> None:
 
         """Clean up WebSocket connections and test data."""
@@ -1082,7 +993,6 @@ async def websocket_state_recovery_test():
 
     await test.cleanup_l4_resources()
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.staging
@@ -1122,7 +1032,6 @@ async def test_websocket_state_recovery_after_restart_l4(websocket_state_recover
 
     print(f"  Errors: {metrics.error_count}")
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.staging
@@ -1144,7 +1053,6 @@ async def test_websocket_connection_resilience_l4(websocket_state_recovery_test)
 
     assert recovery_results.get("successful_reconnections", 0) >= 2, "Insufficient reconnection success"
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.staging  
@@ -1158,7 +1066,6 @@ async def test_websocket_state_consistency_validation_l4(websocket_state_recover
 
     state_result = await websocket_state_recovery_test._establish_complex_websocket_state()
     
-
     assert state_result["success"] is True, "Failed to establish complex state"
 
     assert len(websocket_state_recovery_test.pre_restart_states) >= 2, "Insufficient state complexity"

@@ -19,9 +19,7 @@ BVJ:
 - Strategic Impact: Core platform capability for live agent responses
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -38,10 +36,6 @@ import aiohttp
 import pytest
 import websockets
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 # Service URLs
 AUTH_SERVICE_URL = "http://localhost:8081"
 BACKEND_URL = "http://localhost:8000"
@@ -52,7 +46,6 @@ MAX_CONNECTIONS = 10
 MESSAGE_BATCH_SIZE = 100
 HEARTBEAT_INTERVAL = 30  # seconds
 RECONNECT_ATTEMPTS = 3
-
 
 class WebSocketConnectionTester:
     """Test WebSocket connection establishment and management."""
@@ -442,7 +435,6 @@ class WebSocketConnectionTester:
         
         return all_results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.level_4
@@ -482,7 +474,6 @@ async def test_dev_environment_websocket_connection():
         
         print("\n[SUCCESS] WebSocket connection tests completed!")
 
-
 async def main():
     """Run the test standalone."""
     if sys.platform == "win32":
@@ -492,7 +483,6 @@ async def main():
     async with WebSocketConnectionTester() as tester:
         results = await tester.run_all_tests()
         return 0 if results["basic_connection"]["connected"] else 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

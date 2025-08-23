@@ -402,7 +402,7 @@ def register_api_service(
     environment: EnvironmentType = EnvironmentType.PRODUCTION
 ) -> ServiceResilienceComponents:
     """Register API service with appropriate policy."""
-    from .policy import create_api_service_policy
+    from netra_backend.app.core.resilience.policy import create_api_service_policy
     policy = create_api_service_policy(service_name, environment)
     return resilience_registry.register_service(service_name, policy)
 
@@ -412,7 +412,7 @@ def register_database_service(
     environment: EnvironmentType = EnvironmentType.PRODUCTION
 ) -> ServiceResilienceComponents:
     """Register database service with appropriate policy."""
-    from .policy import create_database_service_policy
+    from netra_backend.app.core.resilience.policy import create_database_service_policy
     policy = create_database_service_policy(service_name, environment)
     return resilience_registry.register_service(service_name, policy)
 
@@ -422,6 +422,6 @@ def register_llm_service(
     environment: EnvironmentType = EnvironmentType.PRODUCTION
 ) -> ServiceResilienceComponents:
     """Register LLM service with appropriate policy."""
-    from .policy import create_llm_service_policy
+    from netra_backend.app.core.resilience.policy import create_llm_service_policy
     policy = create_llm_service_policy(service_name, environment)
     return resilience_registry.register_service(service_name, policy)

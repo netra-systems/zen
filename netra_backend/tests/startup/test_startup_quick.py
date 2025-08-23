@@ -10,9 +10,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents broken deployments
 """
 
-from ..test_utils import setup_test_path
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 import os
 import sys
@@ -21,8 +19,6 @@ from pathlib import Path
 import pytest
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
 
 @pytest.mark.asyncio
 async def test_clickhouse_configuration():
@@ -46,7 +42,6 @@ async def test_clickhouse_configuration():
         assert config.user, "ClickHouse user not configured"
         assert config.password, "ClickHouse password not configured"
 
-
 @pytest.mark.asyncio
 async def test_clickhouse_service_initialization():
     """Test ClickHouse service can initialize"""
@@ -65,7 +60,6 @@ async def test_clickhouse_service_initialization():
     finally:
         await service.close()
 
-
 @pytest.mark.asyncio
 async def test_auth_service_config():
     """Test auth service configuration is accessible"""
@@ -75,7 +69,6 @@ async def test_auth_service_config():
     # Validate URL format
     assert auth_url.startswith("http"), "Auth URL should be valid HTTP(S)"
 
-
 @pytest.mark.asyncio
 async def test_redis_configuration():
     """Test Redis configuration"""
@@ -84,7 +77,6 @@ async def test_redis_configuration():
     # Redis is optional but if configured, should be valid
     if redis_url:
         assert "redis://" in redis_url or "rediss://" in redis_url, "Invalid Redis URL format"
-
 
 @pytest.mark.asyncio
 async def test_critical_imports():
@@ -108,7 +100,6 @@ async def test_critical_imports():
     
     assert len(failed_imports) == 0, f"Failed imports: {failed_imports}"
 
-
 @pytest.mark.asyncio
 async def test_environment_variables():
     """Test critical environment variables are set"""
@@ -125,7 +116,6 @@ async def test_environment_variables():
             missing_vars.append(var)
     
     assert len(missing_vars) == 0, f"Missing environment variables: {missing_vars}"
-
 
 @pytest.mark.asyncio
 async def test_websocket_types_exist():
@@ -149,7 +139,6 @@ async def test_websocket_types_exist():
         
     except ImportError as e:
         pytest.fail(f"WebSocket type import failed: {str(e)}")
-
 
 @pytest.mark.asyncio
 async def test_startup_module_loads():

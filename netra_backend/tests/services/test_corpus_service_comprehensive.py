@@ -1,16 +1,9 @@
 """Comprehensive test suite for corpus service - document indexing pipeline and search relevance."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import hashlib
 import json
@@ -23,14 +16,10 @@ from netra_backend.app.schemas import Corpus, CorpusCreate, CorpusUpdate
 
 from netra_backend.app.core.exceptions_base import NetraException
 
-# Add project root to path
 from netra_backend.app.services.corpus_service import CorpusService, CorpusStatus
-from ..helpers.shared_test_types import (
+from netra_backend.tests.services.helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
-
-# Add project root to path
-
 
 @pytest.fixture
 def mock_db():
@@ -52,7 +41,6 @@ def mock_db():
     db.query.return_value = query_mock
     return db
 
-
 @pytest.fixture
 def mock_vector_store():
     """Mock vector store for embeddings."""
@@ -66,7 +54,6 @@ def mock_vector_store():
     store.update_document = AsyncMock()
     return store
 
-
 @pytest.fixture
 def mock_llm_manager():
     """Mock LLM manager for document processing."""
@@ -75,7 +62,6 @@ def mock_llm_manager():
     llm.extract_keywords = AsyncMock(return_value=["keyword1", "keyword2"])
     llm.summarize = AsyncMock(return_value="Document summary")
     return llm
-
 
 @pytest.fixture
 def corpus_service(mock_db, mock_vector_store, mock_llm_manager):
@@ -130,12 +116,10 @@ def corpus_service(mock_db, mock_vector_store, mock_llm_manager):
     ])
     return service
 
-
 @pytest.fixture
 def service(corpus_service):
     """Alias fixture for shared test compatibility."""
     return corpus_service
-
 
 @pytest.fixture
 def agent_or_service(corpus_service):

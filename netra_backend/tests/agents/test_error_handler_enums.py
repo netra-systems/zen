@@ -3,30 +3,19 @@ Tests for error handler enumerations and context.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Add netra_backend to path  
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.error_handler import ErrorCategory, ErrorRecoveryStrategy
 from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.schemas.shared_types import ErrorContext
-from ..helpers.shared_test_types import (
-    TestErrorContext as SharedTestErrorContext,
+from netra_backend.tests.agents.helpers.shared_test_types import (
+    TestErrorContext as SharedTestErrorContext
 )
-
-# Add project root to path
-
 
 class TestErrorEnums:
     """Test error enumerations."""
@@ -51,57 +40,54 @@ class TestErrorEnums:
     
     def test_error_recovery_strategy_values(self):
         """Test ErrorRecoveryStrategy enum values."""
-        assert ErrorRecoveryStrategy.RETRY.value == "retry"
-        assert ErrorRecoveryStrategy.FALLBACK.value == "fallback"
-        assert ErrorRecoveryStrategy.ABORT.value == "abort"
-        assert ErrorRecoveryStrategy.IGNORE.value == "ignore"
+        assert ErrorRecoveryStrategy.RETRY == "retry"
+        assert ErrorRecoveryStrategy.FALLBACK == "fallback"
+        assert ErrorRecoveryStrategy.ABORT == "abort"
 
-
-class TestErrorContext(SharedTestErrorContext):
+class TestErrorContext:
     """Test error context functionality with inheritance."""
     
     def test_error_context_creation(self):
         """Test creation of ErrorContext."""
         context = ErrorContext(
-            agent_id="test_agent",
+            trace_id="test_agent",
             operation="test_operation",
-            timestamp=1234567890,
-            metadata={"key": "value"}
+            details={"key": "value"}
         )
         
-        assert context.agent_id == "test_agent"
+        assert context.trace_id == "test_agent"
         assert context.operation == "test_operation"
-        assert context.timestamp == 1234567890
-        assert context.metadata == {"key": "value"}
+        assert context.timestamp is not None
+        assert context.details == {"key": "value"}
     
     def test_error_context_with_defaults(self):
         """Test ErrorContext with default values."""
-        context = ErrorContext(agent_id="test", operation="test")
+        context = ErrorContext(trace_id="test", operation="test")
         
-        assert context.agent_id == "test"
+        assert context.trace_id == "test"
         assert context.operation == "test"
         assert context.timestamp is not None
-        assert context.metadata == {}
+        assert context.details == {}
     
     def test_error_context_serialization(self):
         """Test ErrorContext serialization."""
         context = ErrorContext(
-            agent_id="serialize_test",
+            trace_id="serialize_test",
             operation="serialize_op",
-            metadata={"serializable": True}
+            details={"serializable": True}
         )
         
         # Test dict conversion
         context_dict = context.dict()
-        assert "agent_id" in context_dict
+        assert "trace_id" in context_dict
         assert "operation" in context_dict
-        assert "metadata" in context_dict
+        assert "details" in context_dict
     
     def test_error_context_validation(self):
         """Test ErrorContext validation."""
         # Valid context
-        valid_context = ErrorContext(agent_id="valid", operation="valid")
-        assert valid_context.agent_id == "valid"
+        valid_context = ErrorContext(trace_id="valid", operation="valid")
+        assert valid_context.trace_id == "valid"
         
         # Test required fields
         with pytest.raises(ValueError):
@@ -110,51 +96,51 @@ class TestErrorContext(SharedTestErrorContext):
     def test_error_context_metadata_operations(self):
         """Test ErrorContext metadata operations."""
         context = ErrorContext(
-            agent_id="meta_test",
+            trace_id="meta_test",
             operation="meta_op",
-            metadata={"initial": "value"}
+            details={"initial": "value"}
         )
         
         # Test metadata access
-        assert context.metadata["initial"] == "value"
+        assert context.details["initial"] == "value"
         
         # Test metadata modification
-        context.metadata["added"] = "new_value"
-        assert context.metadata["added"] == "new_value"
+        context.details["added"] = "new_value"
+        assert context.details["added"] == "new_value"
     
     def test_error_context_immutability(self):
         """Test ErrorContext immutability for core fields."""
-        context = ErrorContext(agent_id="immutable", operation="test")
-        original_agent_id = context.agent_id
+        context = ErrorContext(trace_id="immutable", operation="test")
+        original_trace_id = context.trace_id
         original_operation = context.operation
         
         # Core fields should remain unchanged
-        assert context.agent_id == original_agent_id
+        assert context.trace_id == original_trace_id
         assert context.operation == original_operation
     
     def test_error_context_inheritance_compatibility(self):
         """Test inheritance compatibility with SharedTestErrorContext."""
         # Test that we can use inherited methods
-        test_context = self.create_test_context("inheritance_test")
+        test_context = ErrorContext(trace_id="inheritance_test", operation="test_operation")
         
-        assert test_context.agent_id == "inheritance_test"
+        assert test_context.trace_id == "inheritance_test"
         assert test_context.operation == "test_operation"
     
     def test_error_context_edge_cases(self):
         """Test ErrorContext edge cases."""
         # Empty metadata
         context_empty = ErrorContext(
-            agent_id="edge", 
+            trace_id="edge", 
             operation="edge",
-            metadata={}
+            details={}
         )
-        assert context_empty.metadata == {}
+        assert context_empty.details == {}
         
         # Large metadata
-        large_metadata = {f"key_{i}": f"value_{i}" for i in range(100)}
+        large_details = {f"key_{i}": f"value_{i}" for i in range(100)}
         context_large = ErrorContext(
-            agent_id="large",
+            trace_id="large",
             operation="large",
-            metadata=large_metadata
+            details=large_details
         )
-        assert len(context_large.metadata) == 100
+        assert len(context_large.details) == 100

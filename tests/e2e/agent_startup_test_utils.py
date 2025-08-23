@@ -18,10 +18,10 @@ Architecture:
 """
 
 from dataclasses import dataclass
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
 from tests.load_test_utilities import SystemResourceMonitor
 from tests.real_client_factory import create_real_client_factory
-from tests.e2e.service_manager import create_real_services_manager
+from tests.e2e.real_services_manager import create_real_services_manager
 from typing import Any, Dict
 import asyncio
 import logging

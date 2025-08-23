@@ -10,7 +10,6 @@ from unittest.mock import Mock, patch, MagicMock
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.pool import ConnectionPoolEntry
 
-
 def test_postgres_events_settings_not_defined():
     """Test that postgres_events references undefined settings variable."""
     # This will fail with NameError: name 'settings' is not defined
@@ -47,7 +46,6 @@ def test_postgres_events_settings_not_defined():
         for handler in connect_handlers:
             handler.fn(mock_dbapi_conn, mock_connection_record)
 
-
 def test_postgres_events_checkout_handler_settings_error():
     """Test checkout handler fails with undefined settings."""
     from netra_backend.app.db import postgres_events
@@ -75,7 +73,6 @@ def test_postgres_events_checkout_handler_settings_error():
         for handler in checkout_handlers:
             handler.fn(mock_dbapi_conn, mock_connection_record, mock_connection_proxy)
 
-
 @pytest.mark.asyncio
 async def test_postgres_session_integration_with_events():
     """Test that postgres_session fails when postgres_events has undefined settings."""
@@ -96,7 +93,6 @@ async def test_postgres_session_integration_with_events():
             # This is the bug we're testing for
             assert "settings" in str(e)
             pytest.fail(f"Settings not defined error occurred: {e}")
-
 
 def test_all_settings_references_need_initialization():
     """Verify all places in postgres_events that reference settings."""

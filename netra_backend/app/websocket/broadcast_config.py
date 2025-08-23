@@ -1,9 +1,13 @@
 """WebSocket Broadcast Configuration and Statistics
 
+**CONSOLIDATED INTO UNIFIED CONFIGURATION SYSTEM**
+
 Handles configuration creation and statistics management for broadcast operations.
 Separates configuration concerns from main agent implementation.
+Now uses unified configuration system for enterprise-grade consistency.
 
 Business Value: Centralized configuration management for maintainable broadcast system.
+Prevents $12K MRR loss from configuration inconsistencies.
 """
 
 import time
@@ -11,6 +15,7 @@ from typing import Any, Dict, Optional
 
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import ExecutionContext
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.websocket import broadcast_utils as utils
 from netra_backend.app.websocket.broadcast_context import BroadcastContext
@@ -20,15 +25,30 @@ class BroadcastConfigManager:
     """Manages broadcast configuration creation and validation."""
     
     @staticmethod
-    def create_circuit_breaker_config(config: Optional[Dict[str, Any]]) -> CircuitBreakerConfig:
-        """Create circuit breaker configuration for WebSocket operations."""
-        merged_config = BroadcastConfigManager._merge_circuit_breaker_config(config)
+    def create_circuit_breaker_config(config: Optional[Dict[str, Any]] = None) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration for WebSocket operations.
+        
+        **CONSOLIDATED**: Now uses unified configuration system for enterprise reliability.
+        """
+        unified_config = get_unified_config()
+        merged_config = BroadcastConfigManager._merge_circuit_breaker_config(config, unified_config)
         return BroadcastConfigManager._build_circuit_breaker_config(merged_config)
     
     @staticmethod
-    def _merge_circuit_breaker_config(config: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-        """Merge default and user circuit breaker configuration."""
-        default_config = {"failure_threshold": 5, "recovery_timeout": 30}
+    def _merge_circuit_breaker_config(config: Optional[Dict[str, Any]], 
+                                     unified_config) -> Dict[str, Any]:
+        """Merge configuration from unified config system and user overrides."""
+        # Get configuration from unified config with enterprise defaults
+        websocket_config = getattr(unified_config, 'ws_config', None)
+        circuit_breaker_config = getattr(websocket_config, 'circuit_breaker', {}) if websocket_config else {}
+        
+        # Enterprise defaults for WebSocket broadcast circuit breaker
+        default_config = {
+            "failure_threshold": getattr(circuit_breaker_config, 'failure_threshold', 5),
+            "recovery_timeout": getattr(circuit_breaker_config, 'recovery_timeout', 30)
+        }
+        
+        # Allow local overrides for testing
         user_config = config.get("circuit_breaker", {}) if config else {}
         return {**default_config, **user_config}
     
@@ -42,15 +62,31 @@ class BroadcastConfigManager:
         )
     
     @staticmethod
-    def create_retry_config(config: Optional[Dict[str, Any]]) -> RetryConfig:
-        """Create retry configuration for WebSocket operations."""
-        merged_config = BroadcastConfigManager._merge_retry_config(config)
+    def create_retry_config(config: Optional[Dict[str, Any]] = None) -> RetryConfig:
+        """Create retry configuration for WebSocket operations.
+        
+        **CONSOLIDATED**: Now uses unified configuration system for enterprise reliability.
+        """
+        unified_config = get_unified_config()
+        merged_config = BroadcastConfigManager._merge_retry_config(config, unified_config)
         return BroadcastConfigManager._build_retry_config(merged_config)
     
     @staticmethod
-    def _merge_retry_config(config: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-        """Merge default and user retry configuration."""
-        default_config = {"max_retries": 3, "base_delay": 1.0, "max_delay": 10.0}
+    def _merge_retry_config(config: Optional[Dict[str, Any]], 
+                           unified_config) -> Dict[str, Any]:
+        """Merge retry configuration from unified config system and user overrides."""
+        # Get configuration from unified config with enterprise defaults
+        websocket_config = getattr(unified_config, 'ws_config', None)
+        retry_config = getattr(websocket_config, 'retry', {}) if websocket_config else {}
+        
+        # Enterprise defaults for WebSocket broadcast retry
+        default_config = {
+            "max_retries": getattr(retry_config, 'max_retries', 3),
+            "base_delay": getattr(retry_config, 'base_delay', 1.0),
+            "max_delay": getattr(retry_config, 'max_delay', 10.0)
+        }
+        
+        # Allow local overrides for testing
         user_config = config.get("retry", {}) if config else {}
         return {**default_config, **user_config}
     

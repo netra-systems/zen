@@ -5,17 +5,10 @@ Tests comprehensive error handling, recovery mechanisms, and resilience patterns
 across different system components.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -26,12 +19,8 @@ from typing import Any, Dict
 import aiohttp
 import pytest
 
-# Add project root to path
 from netra_backend.app.redis_manager import RedisManager
 from test_framework.test_patterns import L3IntegrationTest
-
-# Add project root to path
-
 
 class TestErrorHandlingRecovery(L3IntegrationTest):
     """Test error handling and recovery from multiple angles."""
@@ -300,7 +289,6 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
                     if "Item" in t["title"]
                 )
                 assert item_count == 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

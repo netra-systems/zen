@@ -4,17 +4,10 @@ Tests the heartbeat logging integration for long-running LLM calls.
 Each test must be concise and focused as per architecture requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -22,16 +15,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.llm.observability import (
     HeartbeatLogger,
     generate_llm_correlation_id,
     get_heartbeat_logger,
 )
 from netra_backend.app.schemas.Config import AppConfig
-
-# Add project root to path
-
 
 class TestHeartbeatLogger:
     """Test cases for HeartbeatLogger functionality."""
@@ -116,7 +105,6 @@ class TestHeartbeatLogger:
         assert data["status"] == "processing"
         assert "timestamp" in data
 
-
 class TestHeartbeatIntegration:
     """Test cases for heartbeat integration with LLM operations."""
     async def test_heartbeat_with_app_config(self):
@@ -166,7 +154,6 @@ class TestHeartbeatIntegration:
         # Verify the operations instance was created successfully
         assert operations.settings is config
         assert operations.settings.llm_heartbeat_enabled is True
-
 
 class TestSupervisorHeartbeatScenarios:
     """Test heartbeat logging for supervisor-specific scenarios."""

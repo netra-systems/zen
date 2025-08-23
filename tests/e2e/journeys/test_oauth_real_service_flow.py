@@ -37,12 +37,11 @@ try:
         get_enterprise_config,
     )
     from tests.e2e.real_http_client import RealHTTPClient
-    from tests.e2e.service_manager import create_real_services_manager
+    from tests.e2e.real_services_manager import create_real_services_manager
 except ImportError:
     # Standalone execution - add parent directories to path
     import sys
     from pathlib import Path
-    sys.path.insert(0, str(Path(__file__).parent.parent))
     from oauth_test_providers import (
         GoogleOAuthProvider,
         OAuthUserFactory,
@@ -303,7 +302,7 @@ class OAuthRealServiceFlowRunner:
             logger.error(f"Cross-service token validation failed: {e}")
             return {"valid": False, "error": str(e)}
     
-    async def cleanup_test_resources(self) -> None:
+    async def test_cleanup_test_resources(self) -> None:
         """Clean up all test resources and real services"""
         try:
             # Close HTTP clients

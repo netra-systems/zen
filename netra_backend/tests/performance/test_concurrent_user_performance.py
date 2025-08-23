@@ -11,17 +11,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: Supports 10x user growth (+$50K MRR)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -34,7 +27,6 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 
 @dataclass
 class UserSession:
@@ -62,7 +54,6 @@ class UserSession:
             self.error_count += 1
         else:
             self.messages_received += 1
-
 
 @dataclass
 class LoadTestResults:
@@ -93,7 +84,6 @@ class LoadTestResults:
             self.p95_response_time <= 5.0 and
             self.error_rate <= 0.01
         )
-
 
 class ConcurrentUserSimulator:
     """Simulates concurrent user behavior for performance testing."""
@@ -312,7 +302,6 @@ class ConcurrentUserSimulator:
         index = min(index, len(sorted_values) - 1)
         return sorted_values[index]
 
-
 class ScalabilityTester:
     """Tests system scalability under increasing load."""
     
@@ -396,7 +385,6 @@ class ScalabilityTester:
         )
         
         return result
-
 
 @pytest.mark.performance
 class TestConcurrentUserPerformance:
@@ -600,7 +588,6 @@ class TestConcurrentUserPerformance:
         for users, result in results.items():
             degradation = result.avg_response_time / baseline.avg_response_time
             print(f"  {users:3d} users: {result.avg_response_time:.3f}s ({degradation:.2f}x degradation)")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--asyncio-mode=auto", "-m", "performance"])

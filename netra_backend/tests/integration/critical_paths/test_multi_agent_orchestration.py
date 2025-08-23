@@ -10,17 +10,10 @@ Critical Path: Supervisor spawns sub-agents → Shared Redis state → Context p
 Coverage: Real Agent Registry, Redis state management, PostgreSQL metadata, real message passing (L3 Realism)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -34,17 +27,13 @@ import pytest
 
 from netra_backend.app.agents.base import BaseSubAgent
 
-# Add project root to path
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.db.postgres import get_postgres_session
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.services.state.state_manager import StateManager, StateStorage
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class MultiAgentOrchestrationTestManager:
     """Manages L3 multi-agent orchestration testing with real services."""
@@ -336,7 +325,6 @@ class MultiAgentOrchestrationTestManager:
         self.active_agents.clear()
         self.orchestration_state.clear()
 
-
 @pytest.fixture
 async def multi_agent_manager():
     """Create multi-agent orchestration test manager."""
@@ -344,7 +332,6 @@ async def multi_agent_manager():
     await manager.setup_real_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -365,7 +352,6 @@ async def test_supervisor_spawns_multiple_sub_agents(multi_agent_manager):
     # Verify supervisor state updated
     supervisor_state = await multi_agent_manager.state_manager.get(f"supervisor:{run_id}")
     assert len(supervisor_state["spawned_agents"]) == 3
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration  
@@ -390,7 +376,6 @@ async def test_agents_share_state_through_redis(multi_agent_manager):
     shared_context_key = f"shared_context:{run_id}"
     retrieved_context = await multi_agent_manager.state_manager.get(shared_context_key)
     assert retrieved_context == shared_context
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -418,7 +403,6 @@ async def test_agent_handoff_with_context_preservation(multi_agent_manager):
     assert "analysis_results" in opt_state["context"]
     assert opt_state["received_handoff"]["handoff_from"] == triage_agent
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism
@@ -442,7 +426,6 @@ async def test_parallel_agent_execution_with_result_aggregation(multi_agent_mana
     for agent_id in agents:
         assert agent_id in results["agent_results"]
         assert results["agent_results"][agent_id]["status"] == "completed"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -469,7 +452,6 @@ async def test_agent_failure_recovery_with_state_preservation(multi_agent_manage
     )
     assert replacement_state["recovered_from"] == recovery_result["failed_agent_id"]
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism
@@ -492,7 +474,6 @@ async def test_multi_agent_state_consistency_validation(multi_agent_manager):
     assert consistency["agent_states_consistent"] == 4
     assert consistency["consistency_rate"] == 1.0
     assert len(consistency["inconsistent_agents"]) == 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

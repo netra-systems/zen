@@ -8,8 +8,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from .generator_base import DataGeneratorBase
-
+from netra_backend.tests.clickhouse.generator_base import DataGeneratorBase
 
 class CorpusGenerator(DataGeneratorBase):
     """Generate realistic corpus data"""

@@ -52,7 +52,7 @@ class ToolExecutionEngine(ToolExecutionEngineInterface):
         parameters: Dict[str, Any]
     ) -> ToolExecuteResponse:
         """Execute a tool by name with parameters - implements ToolExecutionEngineInterface"""
-        from .unified_tool_registry import UnifiedToolRegistry
+        from netra_backend.app.services.unified_tool_registry.unified_tool_registry import UnifiedToolRegistry
         
         # Get tool from registry  
         registry = UnifiedToolRegistry(self.permission_service)

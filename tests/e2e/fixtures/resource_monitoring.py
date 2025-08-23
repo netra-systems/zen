@@ -89,7 +89,7 @@ def isolation_test_config():
     }
 
 @pytest.fixture
-async def performance_baseline(resource_monitor, isolation_test_config):
+async def test_performance_baseline(resource_monitor, isolation_test_config):
     """Establish performance baseline before tests."""
     config = isolation_test_config
     
@@ -113,7 +113,7 @@ async def performance_baseline(resource_monitor, isolation_test_config):
     return baseline
 
 @asynccontextmanager
-async def resource_monitoring_session(test_name: str, monitoring_config: Optional[Dict] = None):
+async def test_resource_monitoring_session(test_name: str, monitoring_config: Optional[Dict] = None):
     """Context manager for a resource monitoring session."""
     config = monitoring_config or {"interval": 0.5, "max_samples": 1000}
     

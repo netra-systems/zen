@@ -11,21 +11,10 @@ L2 Test: Real internal auth handshake components with mocked external auth servi
 Performance target: <200ms handshake completion, 99.9% auth accuracy.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -43,7 +32,6 @@ from netra_backend.app.schemas import User
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
-
 class HandshakeState(Enum):
 
     """WebSocket handshake states."""
@@ -60,7 +48,6 @@ class HandshakeState(Enum):
 
     REJECTED = "rejected"
 
-
 class AuthTokenType(Enum):
 
     """Types of authentication tokens."""
@@ -73,12 +60,10 @@ class AuthTokenType(Enum):
 
     OAUTH = "oauth"
 
-
 class WebSocketAuthHandshake:
 
     """Handle WebSocket authentication handshake process."""
     
-
     def __init__(self):
 
         self.secret_key = "test_secret_key_for_jwt"
@@ -107,7 +92,6 @@ class WebSocketAuthHandshake:
 
         }
     
-
     async def initiate_handshake(self, websocket: Any, headers: Dict[str, str]) -> Dict[str, Any]:
 
         """Initiate WebSocket authentication handshake."""
@@ -116,7 +100,6 @@ class WebSocketAuthHandshake:
 
         handshake_id = str(uuid4())
         
-
         handshake_context = {
 
             "handshake_id": handshake_id,
@@ -135,7 +118,6 @@ class WebSocketAuthHandshake:
 
         }
         
-
         try:
             # Validate protocol
 
@@ -165,7 +147,6 @@ class WebSocketAuthHandshake:
 
                 return handshake_context
             
-
             handshake_context["auth_data"] = token_result["data"]
             
             # Validate token
@@ -188,7 +169,6 @@ class WebSocketAuthHandshake:
 
                 return handshake_context
             
-
             handshake_context["state"] = HandshakeState.TOKEN_VALIDATED
 
             handshake_context["auth_data"].update(validation_result["data"])
@@ -207,7 +187,6 @@ class WebSocketAuthHandshake:
 
                 return handshake_context
             
-
             handshake_context["state"] = HandshakeState.USER_AUTHORIZED
 
             handshake_context["auth_data"]["user"] = auth_result["user_data"]
@@ -230,7 +209,6 @@ class WebSocketAuthHandshake:
 
                 self.auth_stats["failed_auth"] += 1
             
-
         except Exception as e:
 
             handshake_context["state"] = HandshakeState.FAILED
@@ -239,22 +217,18 @@ class WebSocketAuthHandshake:
 
             self.auth_stats["failed_auth"] += 1
         
-
         handshake_context["completed_at"] = time.time()
 
         handshake_context["duration"] = handshake_context["completed_at"] - handshake_context["started_at"]
         
-
         return handshake_context
     
-
     def _validate_protocol(self, headers: Dict[str, str]) -> Dict[str, Any]:
 
         """Validate WebSocket protocol version."""
 
         protocol = headers.get("Sec-WebSocket-Protocol", "")
         
-
         if not protocol:
 
             return {
@@ -271,7 +245,6 @@ class WebSocketAuthHandshake:
 
         supported_protocol = None
         
-
         for proto in protocols:
 
             if proto in self.supported_protocols:
@@ -280,7 +253,6 @@ class WebSocketAuthHandshake:
 
                 break
         
-
         if not supported_protocol:
 
             return {
@@ -291,7 +263,6 @@ class WebSocketAuthHandshake:
 
             }
         
-
         return {
 
             "valid": True,
@@ -300,7 +271,6 @@ class WebSocketAuthHandshake:
 
         }
     
-
     def _extract_auth_token(self, headers: Dict[str, str]) -> Dict[str, Any]:
 
         """Extract authentication token from headers."""
@@ -401,7 +371,6 @@ class WebSocketAuthHandshake:
 
                     }
         
-
         return {
 
             "success": False,
@@ -410,7 +379,6 @@ class WebSocketAuthHandshake:
 
         }
     
-
     async def _validate_token_jwt(self, auth_data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Validate authentication token."""
@@ -419,7 +387,6 @@ class WebSocketAuthHandshake:
 
         token_type = auth_data["type"]
         
-
         if token_type == AuthTokenType.JWT:
 
             return await self._validate_jwt_token(token)
@@ -442,7 +409,6 @@ class WebSocketAuthHandshake:
 
             }
     
-
     async def _validate_jwt_token(self, token: str) -> Dict[str, Any]:
 
         """Validate JWT token."""
@@ -482,7 +448,6 @@ class WebSocketAuthHandshake:
 
                     }
             
-
             return {
 
                 "valid": True,
@@ -503,7 +468,6 @@ class WebSocketAuthHandshake:
 
             }
         
-
         except jwt.ExpiredSignatureError:
 
             return {
@@ -524,7 +488,6 @@ class WebSocketAuthHandshake:
 
             }
     
-
     async def _validate_api_key(self, api_key: str) -> Dict[str, Any]:
 
         """Validate API key."""
@@ -563,7 +526,6 @@ class WebSocketAuthHandshake:
 
             }
         
-
         return {
 
             "valid": False,
@@ -572,7 +534,6 @@ class WebSocketAuthHandshake:
 
         }
     
-
     async def _validate_session_token(self, session_token: str) -> Dict[str, Any]:
 
         """Validate session token."""
@@ -611,7 +572,6 @@ class WebSocketAuthHandshake:
 
             }
         
-
         return {
 
             "valid": False,
@@ -620,14 +580,12 @@ class WebSocketAuthHandshake:
 
         }
     
-
     async def _authorize_user(self, token_data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Authorize user for WebSocket access."""
 
         user_id = token_data.get("user_id")
         
-
         if not user_id:
 
             return {
@@ -643,7 +601,6 @@ class WebSocketAuthHandshake:
 
         user_data = await self._get_user_data(user_id)
         
-
         if not user_data:
 
             return {
@@ -654,7 +611,6 @@ class WebSocketAuthHandshake:
 
             }
         
-
         if not user_data.get("is_active", False):
 
             return {
@@ -679,7 +635,6 @@ class WebSocketAuthHandshake:
 
             }
         
-
         return {
 
             "authorized": True,
@@ -688,7 +643,6 @@ class WebSocketAuthHandshake:
 
         }
     
-
     async def _get_user_data(self, user_id: str) -> Optional[Dict[str, Any]]:
 
         """Get user data for authorization."""
@@ -738,10 +692,8 @@ class WebSocketAuthHandshake:
 
             }
         
-
         return None  # User not found
     
-
     async def _complete_handshake(self, handshake_context: Dict[str, Any]) -> Dict[str, Any]:
 
         """Complete the authentication handshake."""
@@ -753,7 +705,6 @@ class WebSocketAuthHandshake:
 
             user_data = handshake_context["auth_data"]["user"]
             
-
             completion_message = {
 
                 "type": "auth_complete",
@@ -774,12 +725,10 @@ class WebSocketAuthHandshake:
 
             }
             
-
             if hasattr(websocket, "send"):
 
                 await websocket.send(json.dumps(completion_message))
             
-
             return {
 
                 "success": True,
@@ -788,7 +737,6 @@ class WebSocketAuthHandshake:
 
             }
         
-
         except Exception as e:
 
             return {
@@ -799,7 +747,6 @@ class WebSocketAuthHandshake:
 
             }
     
-
     def create_test_jwt_token(self, user_id: str, expires_in: int = None) -> str:
 
         """Create test JWT token for testing."""
@@ -808,7 +755,6 @@ class WebSocketAuthHandshake:
 
             expires_in = self.token_expiry
         
-
         payload = {
 
             "user_id": user_id,
@@ -825,17 +771,14 @@ class WebSocketAuthHandshake:
 
         }
         
-
         return jwt.encode(payload, self.secret_key, algorithm="HS256")
     
-
     def get_auth_stats(self) -> Dict[str, Any]:
 
         """Get authentication statistics."""
 
         stats = self.auth_stats.copy()
         
-
         if stats["total_handshakes"] > 0:
 
             stats["success_rate"] = (stats["successful_auth"] / stats["total_handshakes"]) * 100
@@ -848,15 +791,12 @@ class WebSocketAuthHandshake:
 
             stats["failure_rate"] = 0.0
         
-
         return stats
-
 
 class TokenVerifier:
 
     """Verify and refresh authentication tokens."""
     
-
     def __init__(self, auth_handshake: WebSocketAuthHandshake):
 
         self.auth_handshake = auth_handshake
@@ -871,7 +811,6 @@ class TokenVerifier:
 
         }
     
-
     async def verify_token_validity(self, token: str, token_type: AuthTokenType) -> Dict[str, Any]:
 
         """Verify if token is still valid."""
@@ -884,10 +823,8 @@ class TokenVerifier:
 
         }
         
-
         validation_result = await self.auth_handshake._validate_token_jwt(auth_data)
         
-
         return {
 
             "valid": validation_result["valid"],
@@ -900,7 +837,6 @@ class TokenVerifier:
 
         }
     
-
     def _check_expiration_warning(self, validation_result: Dict[str, Any]) -> bool:
 
         """Check if token expires soon (within 5 minutes)."""
@@ -909,35 +845,29 @@ class TokenVerifier:
 
             return False
         
-
         data = validation_result.get("data", {})
 
         expires_at = data.get("expires_at", 0)
         
-
         if expires_at:
 
             time_to_expiry = expires_at - time.time()
 
             return time_to_expiry < 300  # Less than 5 minutes
         
-
         return False
     
-
     async def refresh_token(self, current_token: str, token_type: AuthTokenType) -> Dict[str, Any]:
 
         """Refresh authentication token."""
 
         self.refresh_stats["refresh_requests"] += 1
         
-
         try:
             # Verify current token first
 
             verification = await self.verify_token_validity(current_token, token_type)
             
-
             if not verification["valid"]:
 
                 self.refresh_stats["refresh_failures"] += 1
@@ -958,7 +888,6 @@ class TokenVerifier:
 
                 new_token = self.auth_handshake.create_test_jwt_token(user_id)
                 
-
                 self.refresh_stats["tokens_refreshed"] += 1
 
                 return {
@@ -973,7 +902,6 @@ class TokenVerifier:
 
                 }
             
-
             else:
                 # For API keys and sessions, refreshing may not be applicable
 
@@ -985,7 +913,6 @@ class TokenVerifier:
 
                 }
         
-
         except Exception as e:
 
             self.refresh_stats["refresh_failures"] += 1
@@ -998,19 +925,16 @@ class TokenVerifier:
 
             }
     
-
     def get_refresh_stats(self) -> Dict[str, Any]:
 
         """Get token refresh statistics."""
 
         return self.refresh_stats.copy()
 
-
 class UpgradeHandler:
 
     """Handle WebSocket protocol upgrade."""
     
-
     def __init__(self):
 
         self.upgrade_stats = {
@@ -1025,14 +949,12 @@ class UpgradeHandler:
 
         }
     
-
     def validate_upgrade_request(self, headers: Dict[str, str]) -> Dict[str, Any]:
 
         """Validate WebSocket upgrade request headers."""
 
         self.upgrade_stats["upgrade_requests"] += 1
         
-
         required_headers = {
 
             "Connection": "upgrade",
@@ -1043,17 +965,14 @@ class UpgradeHandler:
 
         }
         
-
         missing_headers = []
 
         invalid_headers = []
         
-
         for header, expected_value in required_headers.items():
 
             actual_value = headers.get(header, "").lower()
             
-
             if not actual_value:
 
                 missing_headers.append(header)
@@ -1070,7 +989,6 @@ class UpgradeHandler:
 
             missing_headers.append("Sec-WebSocket-Key")
         
-
         if missing_headers or invalid_headers:
 
             self.upgrade_stats["upgrade_failures"] += 1
@@ -1085,7 +1003,6 @@ class UpgradeHandler:
 
             }
         
-
         self.upgrade_stats["successful_upgrades"] += 1
 
         return {
@@ -1096,7 +1013,6 @@ class UpgradeHandler:
 
         }
     
-
     def negotiate_protocol(self, requested_protocols: str, supported_protocols: List[str]) -> Dict[str, Any]:
 
         """Negotiate WebSocket subprotocol."""
@@ -1111,7 +1027,6 @@ class UpgradeHandler:
 
             }
         
-
         protocols = [p.strip() for p in requested_protocols.split(",")]
         
         # Find first supported protocol
@@ -1128,7 +1043,6 @@ class UpgradeHandler:
 
                 }
         
-
         self.upgrade_stats["protocol_negotiation_failures"] += 1
 
         return {
@@ -1139,13 +1053,11 @@ class UpgradeHandler:
 
         }
     
-
     def get_upgrade_stats(self) -> Dict[str, Any]:
 
         """Get upgrade statistics."""
 
         return self.upgrade_stats.copy()
-
 
 @pytest.mark.L2
 
@@ -1155,7 +1067,6 @@ class TestWebSocketAuthHandshake:
 
     """L2 integration tests for WebSocket authentication handshake."""
     
-
     @pytest.fixture
 
     def auth_handshake(self):
@@ -1164,7 +1075,6 @@ class TestWebSocketAuthHandshake:
 
         return WebSocketAuthHandshake()
     
-
     @pytest.fixture
 
     def token_verifier(self, auth_handshake):
@@ -1173,7 +1083,6 @@ class TestWebSocketAuthHandshake:
 
         return TokenVerifier(auth_handshake)
     
-
     @pytest.fixture
 
     def upgrade_handler(self):
@@ -1182,7 +1091,6 @@ class TestWebSocketAuthHandshake:
 
         return UpgradeHandler()
     
-
     @pytest.fixture
 
     def test_users(self):
@@ -1235,7 +1143,6 @@ class TestWebSocketAuthHandshake:
 
         ]
     
-
     def create_mock_websocket(self):
 
         """Create mock WebSocket for testing."""
@@ -1246,17 +1153,14 @@ class TestWebSocketAuthHandshake:
 
         websocket.messages_sent = []
         
-
         async def mock_send(message):
 
             websocket.messages_sent.append(message)
         
-
         websocket.send.side_effect = mock_send
 
         return websocket
     
-
     def create_test_headers(self, auth_type: str = "jwt", user_id: str = "auth_user_1") -> Dict[str, str]:
 
         """Create test headers for handshake."""
@@ -1275,7 +1179,6 @@ class TestWebSocketAuthHandshake:
 
         }
         
-
         if auth_type == "jwt":
 
             token = jwt.encode(
@@ -1302,20 +1205,16 @@ class TestWebSocketAuthHandshake:
 
             base_headers["Authorization"] = f"Bearer {token}"
         
-
         elif auth_type == "api_key":
 
             base_headers["Authorization"] = f"ApiKey test_{user_id}_key"
         
-
         elif auth_type == "session":
 
             base_headers["X-Auth-Token"] = f"sess_{user_id}_active"
         
-
         return base_headers
     
-
     async def test_successful_jwt_handshake(self, auth_handshake, test_users):
 
         """Test successful JWT authentication handshake."""
@@ -1356,7 +1255,6 @@ class TestWebSocketAuthHandshake:
 
         assert result["duration"] < 0.2  # Less than 200ms
     
-
     async def test_api_key_authentication(self, auth_handshake, test_users):
 
         """Test API key authentication."""
@@ -1367,17 +1265,14 @@ class TestWebSocketAuthHandshake:
 
         headers = self.create_test_headers("api_key", user.id)
         
-
         result = await auth_handshake.initiate_handshake(websocket, headers)
         
-
         assert result["state"] == HandshakeState.COMPLETED
 
         assert result["auth_data"]["user"]["user_id"] == user.id
 
         assert result["auth_data"]["token"].endswith("_key")
     
-
     async def test_session_token_authentication(self, auth_handshake, test_users):
 
         """Test session token authentication."""
@@ -1388,17 +1283,14 @@ class TestWebSocketAuthHandshake:
 
         headers = self.create_test_headers("session", user.id)
         
-
         result = await auth_handshake.initiate_handshake(websocket, headers)
         
-
         assert result["state"] == HandshakeState.COMPLETED
 
         assert result["auth_data"]["user"]["user_id"] == user.id
 
         assert result["auth_data"]["session_id"].startswith("sess_")
     
-
     async def test_expired_token_rejection(self, auth_handshake):
 
         """Test rejection of expired tokens."""
@@ -1429,15 +1321,12 @@ class TestWebSocketAuthHandshake:
 
         )
         
-
         headers = self.create_test_headers("jwt")
 
         headers["Authorization"] = f"Bearer {expired_token}"
         
-
         result = await auth_handshake.initiate_handshake(websocket, headers)
         
-
         assert result["state"] == HandshakeState.FAILED
 
         assert any("expired" in error.lower() for error in result["errors"])
@@ -1448,7 +1337,6 @@ class TestWebSocketAuthHandshake:
 
         assert stats["token_expired"] > 0
     
-
     async def test_inactive_user_rejection(self, auth_handshake, test_users):
 
         """Test rejection of inactive users."""
@@ -1459,10 +1347,8 @@ class TestWebSocketAuthHandshake:
 
         headers = self.create_test_headers("jwt", inactive_user.id)
         
-
         result = await auth_handshake.initiate_handshake(websocket, headers)
         
-
         assert result["state"] == HandshakeState.REJECTED
 
         assert any("inactive" in error.lower() for error in result["errors"])
@@ -1473,7 +1359,6 @@ class TestWebSocketAuthHandshake:
 
         assert stats["unauthorized_users"] > 0
     
-
     async def test_insufficient_permissions_rejection(self, auth_handshake, test_users):
 
         """Test rejection of users without WebSocket permissions."""
@@ -1484,15 +1369,12 @@ class TestWebSocketAuthHandshake:
 
         headers = self.create_test_headers("jwt", limited_user.id)
         
-
         result = await auth_handshake.initiate_handshake(websocket, headers)
         
-
         assert result["state"] == HandshakeState.REJECTED
 
         assert any("not authorized" in error for error in result["errors"])
     
-
     async def test_missing_auth_token_failure(self, auth_handshake):
 
         """Test failure when no auth token is provided."""
@@ -1514,15 +1396,12 @@ class TestWebSocketAuthHandshake:
 
         }
         
-
         result = await auth_handshake.initiate_handshake(websocket, headers)
         
-
         assert result["state"] == HandshakeState.FAILED
 
         assert any("no authentication token" in error.lower() for error in result["errors"])
     
-
     async def test_protocol_validation(self, auth_handshake):
 
         """Test WebSocket protocol validation."""
@@ -1535,10 +1414,8 @@ class TestWebSocketAuthHandshake:
 
         headers["Sec-WebSocket-Protocol"] = "unsupported-protocol"
         
-
         result = await auth_handshake.initiate_handshake(websocket, headers)
         
-
         assert result["state"] == HandshakeState.REJECTED
 
         assert any("unsupported protocol" in error.lower() for error in result["errors"])
@@ -1549,7 +1426,6 @@ class TestWebSocketAuthHandshake:
 
         assert stats["protocol_mismatches"] > 0
     
-
     async def test_token_verification_and_refresh(self, token_verifier, auth_handshake):
 
         """Test token verification and refresh functionality."""
@@ -1564,7 +1440,6 @@ class TestWebSocketAuthHandshake:
 
         verification = await token_verifier.verify_token_validity(token, AuthTokenType.JWT)
         
-
         assert verification["valid"] is True
 
         assert verification["data"]["user_id"] == user_id
@@ -1575,7 +1450,6 @@ class TestWebSocketAuthHandshake:
 
         refresh_result = await token_verifier.refresh_token(token, AuthTokenType.JWT)
         
-
         assert refresh_result["success"] is True
 
         assert refresh_result["new_token"] != token  # Should be different
@@ -1592,7 +1466,6 @@ class TestWebSocketAuthHandshake:
 
         assert new_verification["valid"] is True
     
-
     async def test_token_expiration_warning(self, token_verifier, auth_handshake):
 
         """Test token expiration warning."""
@@ -1603,15 +1476,12 @@ class TestWebSocketAuthHandshake:
 
         token = auth_handshake.create_test_jwt_token(user_id, expires_in=120)
         
-
         verification = await token_verifier.verify_token_validity(token, AuthTokenType.JWT)
         
-
         assert verification["valid"] is True
 
         assert verification["expires_soon"] is True
     
-
     async def test_upgrade_request_validation(self, upgrade_handler):
 
         """Test WebSocket upgrade request validation."""
@@ -1629,10 +1499,8 @@ class TestWebSocketAuthHandshake:
 
         }
         
-
         result = upgrade_handler.validate_upgrade_request(valid_headers)
         
-
         assert result["valid"] is True
 
         assert result["websocket_key"] == "dGhlIHNhbXBsZSBub25jZQ=="
@@ -1648,17 +1516,14 @@ class TestWebSocketAuthHandshake:
 
         }
         
-
         result = upgrade_handler.validate_upgrade_request(invalid_headers)
         
-
         assert result["valid"] is False
 
         assert len(result["missing_headers"]) > 0
 
         assert len(result["invalid_headers"]) > 0
     
-
     async def test_protocol_negotiation(self, upgrade_handler):
 
         """Test WebSocket protocol negotiation."""
@@ -1669,7 +1534,6 @@ class TestWebSocketAuthHandshake:
 
         result = upgrade_handler.negotiate_protocol("netra-v1, other-protocol", supported_protocols)
         
-
         assert result["success"] is True
 
         assert result["protocol"] == "netra-v1"
@@ -1678,12 +1542,10 @@ class TestWebSocketAuthHandshake:
 
         result = upgrade_handler.negotiate_protocol("unsupported-v1, unsupported-v2", supported_protocols)
         
-
         assert result["success"] is False
 
         assert "no supported protocol" in result["error"].lower()
     
-
     @mock_justified("L2: WebSocket auth handshake with real internal components")
 
     async def test_complete_handshake_flow_integration(self, auth_handshake, upgrade_handler, test_users):
@@ -1700,7 +1562,6 @@ class TestWebSocketAuthHandshake:
 
         upgrade_result = upgrade_handler.validate_upgrade_request(headers)
         
-
         assert upgrade_result["valid"] is True
         
         # Step 2: Negotiate protocol
@@ -1713,14 +1574,12 @@ class TestWebSocketAuthHandshake:
 
         )
         
-
         assert protocol_result["success"] is True
         
         # Step 3: Perform authentication handshake
 
         auth_result = await auth_handshake.initiate_handshake(websocket, headers)
         
-
         assert auth_result["state"] == HandshakeState.COMPLETED
         
         # Verify complete flow timing
@@ -1733,14 +1592,12 @@ class TestWebSocketAuthHandshake:
 
         upgrade_stats = upgrade_handler.get_upgrade_stats()
         
-
         assert auth_stats["successful_auth"] > 0
 
         assert auth_stats["success_rate"] > 0
 
         assert upgrade_stats["successful_upgrades"] > 0
     
-
     async def test_concurrent_handshake_performance(self, auth_handshake, test_users):
 
         """Test concurrent handshake performance."""
@@ -1761,7 +1618,6 @@ class TestWebSocketAuthHandshake:
 
                 headers = self.create_test_headers("jwt", user.id)
                 
-
                 task = auth_handshake.initiate_handshake(websocket, headers)
 
                 handshake_tasks.append(task)
@@ -1807,7 +1663,6 @@ class TestWebSocketAuthHandshake:
         stats = auth_handshake.get_auth_stats()
 
         assert stats["success_rate"] >= 80.0  # 80% overall success rate
-
 
 if __name__ == "__main__":
 

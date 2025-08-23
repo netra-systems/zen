@@ -8,17 +8,10 @@ Comprehensive tests covering error flow from system components to user-facing
 error messages, including recovery mechanisms and notification channels.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 import asyncio
 import json
@@ -34,24 +27,21 @@ import websockets
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.core.error_handlers import get_http_status_code, handle_exception
 
-# Add project root to path
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.websocket.error_recovery_handler import (
     ErrorContext,
     ErrorType,
-    # Add project root to path
     WebSocketErrorRecoveryHandler,
 )
-from .fixtures import TestUser, WebSocketClient, unified_services
-from .mock_services import (
+from netra_backend.tests.fixtures import TestUser, WebSocketClient, unified_services
+from netra_backend.tests.mock_services import (
     MockLLMService,
     MockOAuthProvider,
     ServiceRegistry,
 )
 
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass 
 class ErrorScenario:
@@ -63,7 +53,6 @@ class ErrorScenario:
     should_retry: bool = False
     recovery_options: List[str] = None
 
-
 @dataclass
 class NotificationChannel:
     """Test notification channel tracking."""
@@ -71,7 +60,6 @@ class NotificationChannel:
     message_sent: bool = False
     message_content: str = ""
     timestamp: Optional[datetime] = None
-
 
 class MockCircuitBreaker:
     """Mock circuit breaker for testing error scenarios."""
@@ -103,7 +91,6 @@ class MockCircuitBreaker:
                 self.state = "OPEN"
             raise e
 
-
 class MockAgentService:
     """Mock agent service for error testing."""
     
@@ -131,7 +118,6 @@ class MockAgentService:
                 raise Exception("Generic processing error")
         
         return {"status": "success", "response": "Message processed successfully"}
-
 
 class MockNotificationService:
     """Mock notification service for tracking error notifications."""
@@ -204,7 +190,6 @@ class MockNotificationService:
         }
         self.notifications_sent.append(notification)
 
-
 @pytest.fixture
 async def error_test_services():
     """Setup mock services for error propagation testing."""
@@ -218,7 +203,6 @@ async def error_test_services():
     }
     return services
 
-
 @pytest.fixture
 async def test_user():
     """Create test user for error scenarios."""
@@ -230,7 +214,6 @@ async def test_user():
         is_authenticated=True
     )
 
-
 @pytest.fixture
 async def websocket_connection():
     """Mock WebSocket connection for testing."""
@@ -239,7 +222,6 @@ async def websocket_connection():
     mock_websocket.send = AsyncMock()
     mock_websocket.receive = AsyncMock()
     return mock_websocket
-
 
 async def test_agent_error_to_user_flow(error_test_services, test_user, websocket_connection):
     """
@@ -312,7 +294,6 @@ async def test_agent_error_to_user_flow(error_test_services, test_user, websocke
     assert "connection_id" in websocket_notification
     assert "message" in websocket_notification
 
-
 async def test_error_message_formatting(error_test_services, test_user):
     """
     Test user-friendly error message formatting.
@@ -379,7 +360,6 @@ async def test_error_message_formatting(error_test_services, test_user):
         if case["error_type"] in [ErrorType.AGENT_ERROR, ErrorType.UNKNOWN_ERROR]:
             assert "support" in user_message.lower()
 
-
 async def test_error_recovery_options(error_test_services, test_user, websocket_connection):
     """
     Test error recovery mechanisms and user options.
@@ -435,7 +415,6 @@ async def test_error_recovery_options(error_test_services, test_user, websocket_
     support_option = next(opt for opt in sent_message["recovery_options"] if opt["action"] == "support")
     assert support_option["enabled"] is True
 
-
 async def test_cascading_error_prevention(error_test_services, test_user):
     """
     Test prevention of cascading failures through circuit breakers.
@@ -483,7 +462,6 @@ async def test_cascading_error_prevention(error_test_services, test_user):
     degraded_notifications = [n for n in notification_service.notifications_sent 
                              if "service_degraded" in json.loads(n.get("message", "{}")).get("type", "")]
     assert len(degraded_notifications) > 0
-
 
 async def test_error_notification_channels(error_test_services, test_user):
     """
@@ -553,7 +531,6 @@ async def test_error_notification_channels(error_test_services, test_user):
     
     slack_notification = next(n for n in notification_service.notifications_sent if n["type"] == "slack")
     assert "CRITICAL" in slack_notification["error_summary"]
-
 
 async def test_error_context_preservation(error_test_services, test_user):
     """
@@ -634,7 +611,6 @@ async def test_error_context_preservation(error_test_services, test_user):
     assert trace_data["user_id"] == test_user.user_id
     assert trace_data["request_id"] == request_id
 
-
 def _format_user_error_message(error_context: ErrorContext) -> str:
     """
     Format technical errors into user-friendly messages.
@@ -677,7 +653,6 @@ def _format_user_error_message(error_context: ErrorContext) -> str:
         error_context.error_type,
         error_messages[ErrorType.UNKNOWN_ERROR]
     )
-
 
 # Test Data Generation Helpers
 
@@ -725,7 +700,6 @@ def create_error_scenarios() -> List[ErrorScenario]:
             recovery_options=["retry", "simplify", "support"]
         )
     ]
-
 
 async def test_comprehensive_error_scenarios():
     """

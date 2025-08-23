@@ -8,17 +8,10 @@ ULTRA DEEP THINKING APPLIED: Each test designed for maximum enterprise security 
 All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import os
 from typing import Any, Dict, List, Tuple
@@ -26,13 +19,11 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 # Core config secrets components  
-from config_secrets_manager import ConfigSecretsManager
+from netra_backend.app.core.configuration.secrets import SecretManager as ConfigSecretsManager
 
 from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError
 from netra_backend.app.schemas.Config import AppConfig
-
 
 @pytest.mark.critical
 class TestSecretManagerInitialization:
@@ -76,7 +67,6 @@ class TestSecretManagerInitialization:
         # Assert - Logger is properly initialized
         assert manager._logger is not None
         assert hasattr(manager, '_logger')
-
 
 @pytest.mark.critical  
 class TestSecretLoadingCore:
@@ -163,7 +153,6 @@ class TestSecretLoadingCore:
         # Assert - Decode errors handled gracefully
         assert isinstance(secrets, dict)
 
-
 @pytest.mark.critical
 class TestConfigSecretsManagerCore:
     """Business Value: Ensures secrets properly applied to application configuration"""
@@ -245,7 +234,6 @@ class TestConfigSecretsManagerCore:
         # Assert - Nested field mapping attempted
         # Test passes if no exception is raised
 
-
 @pytest.mark.critical
 class TestSecretSecurityCompliance:
     """Business Value: Ensures security compliance for enterprise customers"""
@@ -302,7 +290,6 @@ class TestSecretSecurityCompliance:
         # Error should be logged but not contain sensitive details
         error_call = mock_log_error.call_args[0][0]
         assert "Failed to load secrets" in error_call
-
 
 @pytest.mark.critical  
 class TestSecretManagerResilience:

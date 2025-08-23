@@ -25,7 +25,6 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-
 class AdvancedAnalyticsExportInfrastructure:
     """Manages advanced analytics export testing infrastructure."""
     
@@ -89,7 +88,6 @@ class AdvancedAnalyticsExportInfrastructure:
         self.test_data.clear()
         logger.info("Analytics export test infrastructure cleaned up")
 
-
 class AnalyticsDataGenerator:
     """Generates test analytics data for export testing."""
     
@@ -147,7 +145,6 @@ class AnalyticsDataGenerator:
     def clear_generated_data(self) -> None:
         """Clear all generated test data."""
         self.generated_data.clear()
-
 
 class ExportConfigFactory:
     """Factory for creating export configurations."""

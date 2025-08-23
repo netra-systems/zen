@@ -1,17 +1,8 @@
 
-# Add project root to path
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 """Simple health test without complex imports"""
 
@@ -40,7 +31,6 @@ def test_basic_import():
         print(f"Unexpected error: {e}")
         assert False, f"Unexpected error during import: {e}"
 
-
 def test_health_endpoint_direct():
     """Test health endpoint directly without pytest fixtures"""
     import os
@@ -58,7 +48,6 @@ def test_health_endpoint_direct():
     data = response.json()
     assert data["status"] == "healthy"
     assert data["service"] == "netra-ai-platform"
-
 
 def test_live_endpoint():
     """Test the live health endpoint"""

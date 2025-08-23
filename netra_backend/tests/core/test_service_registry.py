@@ -1,30 +1,19 @@
 """Tests for ServiceRegistry functionality."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.service_interfaces import (
     BaseService,
     ServiceRegistry,
     service_registry,
 )
-
-# Add project root to path
-
 
 class TestServiceRegistry:
     """Test ServiceRegistry functionality."""
@@ -151,7 +140,6 @@ class TestServiceRegistry:
             
             self._verify_unhealthy_result(health_results, "faulty-service", "Health check failed")
 
-
 class TestGlobalServiceRegistry:
     """Test global service registry."""
     
@@ -181,7 +169,6 @@ class TestGlobalServiceRegistry:
         
         # Clean up
         self._clear_registry()
-
 
 @pytest.fixture(autouse=True)
 def clean_global_registry():

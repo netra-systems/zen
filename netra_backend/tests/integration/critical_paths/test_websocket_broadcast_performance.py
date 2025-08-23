@@ -11,20 +11,10 @@ L3 Test: Uses real Redis for broadcast performance validation.
 Performance target: 1000+ concurrent connections with <100ms broadcast latency.
 """
 
-# Add project root to path
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import pytest
 import asyncio
@@ -38,16 +28,12 @@ from uuid import uuid4
 from concurrent.futures import ThreadPoolExecutor
 
 import redis.asyncio as redis
-from ws_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified
 
-# Add project root to path
-
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
-
-# Add project root to path
 
     RedisContainer, 
 
@@ -57,12 +43,10 @@ from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
 )
 
-
 class BroadcastPerformanceTracker:
 
     """Track broadcast performance metrics."""
     
-
     def __init__(self):
 
         self.broadcast_times: List[float] = []
@@ -75,7 +59,6 @@ class BroadcastPerformanceTracker:
 
         self.memory_usage: List[int] = []
     
-
     def record_broadcast(self, duration: float, successes: int, errors: int) -> None:
 
         """Record broadcast performance metrics."""
@@ -86,21 +69,18 @@ class BroadcastPerformanceTracker:
 
         self.error_counts.append(errors)
     
-
     def record_delivery(self, duration: float) -> None:
 
         """Record individual delivery time."""
 
         self.delivery_times.append(duration)
     
-
     def record_memory(self, usage: int) -> None:
 
         """Record memory usage."""
 
         self.memory_usage.append(usage)
     
-
     def get_performance_summary(self) -> Dict[str, Any]:
 
         """Get performance summary statistics."""
@@ -123,7 +103,6 @@ class BroadcastPerformanceTracker:
 
         }
 
-
 @pytest.mark.L3
 
 @pytest.mark.integration
@@ -132,7 +111,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
     """L3 integration tests for WebSocket broadcast performance."""
     
-
     @pytest.fixture(scope="class")
 
     async def redis_container(self):
@@ -147,7 +125,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
         await container.stop()
     
-
     @pytest.fixture
 
     async def redis_client(self, redis_container):
@@ -162,7 +139,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
         await client.close()
     
-
     @pytest.fixture
 
     async def ws_manager(self, redis_container):
@@ -171,8 +147,7 @@ class TestWebSocketBroadcastPerformanceL3:
 
         _, redis_url = redis_container
         
-
-        with patch('app.ws_manager.redis_manager') as mock_redis_mgr:
+        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
 
@@ -184,15 +159,12 @@ class TestWebSocketBroadcastPerformanceL3:
 
             mock_redis_mgr.get_client.return_value = test_redis_mgr.redis_client
             
-
             manager = WebSocketManager()
 
             yield manager
             
-
             await test_redis_mgr.redis_client.close()
     
-
     @pytest.fixture
 
     def large_user_pool(self):
@@ -219,7 +191,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
         ]
     
-
     @pytest.fixture
 
     def performance_tracker(self):
@@ -228,7 +199,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
         return BroadcastPerformanceTracker()
     
-
     async def test_small_scale_broadcast_baseline(self, ws_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance baseline with small user count."""
@@ -253,12 +223,10 @@ class TestWebSocketBroadcastPerformanceL3:
 
                 connections.append((user, websocket))
         
-
         connection_time = time.time() - connection_start
 
         actual_connections = len(connections)
         
-
         assert actual_connections >= user_count * 0.9  # 90% connection success
         
         # Perform broadcast
@@ -281,7 +249,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
         )
         
-
         broadcast_start = time.time()
 
         success_count = 0
@@ -300,10 +267,8 @@ class TestWebSocketBroadcastPerformanceL3:
 
             tasks.append(task)
         
-
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
-
         for result in results:
 
             if isinstance(result, Exception):
@@ -314,7 +279,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
                 success_count += 1
         
-
         broadcast_time = time.time() - broadcast_start
         
         # Record performance
@@ -333,7 +297,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
             await ws_manager.disconnect_user(user.id, websocket)
     
-
     async def test_medium_scale_broadcast_performance(self, ws_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance with medium user count."""
@@ -354,7 +317,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
             batch_tasks = []
             
-
             for user in batch:
 
                 websocket = MockWebSocketForRedis(user.id)
@@ -379,7 +341,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
                     pass
         
-
         actual_connections = len(connections)
 
         assert actual_connections >= user_count * 0.85  # 85% connection success for medium scale
@@ -406,7 +367,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
         )
         
-
         broadcast_start = time.time()
         
         # Use pipeline for better Redis performance
@@ -419,17 +379,14 @@ class TestWebSocketBroadcastPerformanceL3:
 
             pipe.publish(channel, json.dumps(broadcast_message))
         
-
         results = await pipe.execute()
 
         broadcast_time = time.time() - broadcast_start
         
-
         success_count = len([r for r in results if r > 0])  # Redis publish returns subscriber count
 
         error_count = actual_connections - success_count
         
-
         performance_tracker.record_broadcast(broadcast_time, success_count, error_count)
         
         # Performance assertions
@@ -448,10 +405,8 @@ class TestWebSocketBroadcastPerformanceL3:
 
             cleanup_tasks.append(task)
         
-
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     
-
     async def test_large_scale_broadcast_performance(self, ws_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance with large user count."""
@@ -468,7 +423,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
         batch_size = 100
         
-
         for i in range(0, len(users), batch_size):
 
             batch = users[i:i + batch_size]
@@ -499,7 +453,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
                 )
                 
-
                 for i, result in enumerate(results):
 
                     if not isinstance(result, Exception) and result is not None:
@@ -508,18 +461,15 @@ class TestWebSocketBroadcastPerformanceL3:
 
                         batch_connections.append((user, websocket))
                 
-
                 connection_batches.append(batch_connections)
 
                 connections.extend(batch_connections)
                 
-
             except asyncio.TimeoutError:
                 # Handle partial batch success
 
                 pass
         
-
         actual_connections = len(connections)
 
         assert actual_connections >= user_count * 0.8  # 80% success for large scale
@@ -554,21 +504,18 @@ class TestWebSocketBroadcastPerformanceL3:
 
         success_count = 0
         
-
         for i in range(0, len(connections), batch_size):
 
             batch = connections[i:i + batch_size]
 
             pipe = redis_client.pipeline()
             
-
             for user, _ in batch:
 
                 channel = f"user:{user.id}"
 
                 pipe.publish(channel, json.dumps(broadcast_message))
             
-
             try:
 
                 results = await pipe.execute()
@@ -579,12 +526,10 @@ class TestWebSocketBroadcastPerformanceL3:
 
                 pass
         
-
         broadcast_time = time.time() - broadcast_start
 
         error_count = actual_connections - success_count
         
-
         performance_tracker.record_broadcast(broadcast_time, success_count, error_count)
         
         # Performance assertions for large scale
@@ -605,10 +550,8 @@ class TestWebSocketBroadcastPerformanceL3:
 
                 cleanup_tasks.append(task)
             
-
             await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     
-
     async def test_broadcast_latency_measurement(self, ws_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast latency with timing measurements."""
@@ -663,14 +606,12 @@ class TestWebSocketBroadcastPerformanceL3:
 
                 channel = f"user:{user.id}"
                 
-
                 delivery_start = time.time()
 
                 await redis_client.publish(channel, json.dumps(test_message))
 
                 delivery_time = time.time() - delivery_start
                 
-
                 delivery_times.append(delivery_time)
 
                 performance_tracker.record_delivery(delivery_time)
@@ -685,7 +626,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
         max_latency = max(performance_tracker.delivery_times)
         
-
         assert avg_latency < 0.1  # Average latency under 100ms
 
         assert max_latency < 0.5   # Max latency under 500ms
@@ -696,7 +636,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
             await ws_manager.disconnect_user(user.id, websocket)
     
-
     async def test_concurrent_broadcast_handling(self, ws_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test handling of concurrent broadcast operations."""
@@ -725,7 +664,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
         broadcast_tasks = []
         
-
         for broadcast_id in range(concurrent_broadcasts):
 
             broadcast_message = create_test_message(
@@ -754,7 +692,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
                 success_count = 0
                 
-
                 pipe = redis_client.pipeline()
 
                 for user, _ in connections:
@@ -763,7 +700,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
                     pipe.publish(channel, json.dumps(msg))
                 
-
                 try:
 
                     results = await pipe.execute()
@@ -774,12 +710,10 @@ class TestWebSocketBroadcastPerformanceL3:
 
                     pass
                 
-
                 duration = time.time() - start_time
 
                 return duration, success_count, b_id
             
-
             task = execute_broadcast(broadcast_message, broadcast_id)
 
             broadcast_tasks.append(task)
@@ -798,7 +732,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
         total_successes = 0
         
-
         for result in results:
 
             if not isinstance(result, Exception):
@@ -825,7 +758,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
             await ws_manager.disconnect_user(user.id, websocket)
     
-
     @mock_justified("L3: Broadcast performance testing with real Redis infrastructure")
 
     async def test_broadcast_memory_efficiency(self, ws_manager, redis_client, large_user_pool, performance_tracker):
@@ -901,7 +833,6 @@ class TestWebSocketBroadcastPerformanceL3:
 
                 pipe.publish(channel, json.dumps(large_message))
             
-
             await pipe.execute()
             
             # Monitor memory usage
@@ -949,7 +880,6 @@ class TestWebSocketBroadcastPerformanceL3:
         summary = performance_tracker.get_performance_summary()
 
         assert summary["success_rate"] >= 0.8  # Overall 80% success rate
-
 
 if __name__ == "__main__":
 

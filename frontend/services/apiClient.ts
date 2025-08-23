@@ -32,7 +32,19 @@ class ApiClient {
       throw error;
     }
     
-    return response.json();
+    // Handle empty responses (204 No Content, etc.)
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return null;
+    }
+    
+    // Try to parse as JSON, but handle cases where response is not JSON
+    try {
+      return await response.json();
+    } catch (error) {
+      // If it's not JSON, return the response text
+      const text = await response.text();
+      return text || null;
+    }
   }
 
   async get(endpointName: string, token?: string | null) {

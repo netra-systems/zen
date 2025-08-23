@@ -78,7 +78,7 @@ class MessageHandler:
     
     async def handle_ping_message(self, websocket: WebSocket) -> None:
         """Handle ping message with pong response."""
-        pong_response = {"type": "pong", "timestamp": time.time()}
+        pong_response = {"type": "pong", "payload": {"timestamp": time.time()}}
         await websocket.send_json(pong_response)
     
     async def handle_state_sync_message(self, user_id: str, connection_id: str, 
@@ -180,8 +180,11 @@ class MessageBuilder:
         """Create rate limit error message."""
         return {
             "type": "error",
-            "payload": {"error": "Rate limit exceeded", "code": "RATE_LIMIT_EXCEEDED"},
-            "timestamp": time.time(), "system": True
+            "payload": {
+                "error": "Rate limit exceeded", 
+                "code": "RATE_LIMIT_EXCEEDED",
+                "timestamp": time.time()
+            }
         }
 
 
@@ -295,7 +298,10 @@ class MessageProcessor:
     
     async def _send_system_message(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> None:
         """Send system message to connection."""
-        message["system"] = True
+        # Ensure the message follows the type/payload structure and add system flag to payload
+        if "payload" not in message:
+            message["payload"] = {}
+        message["payload"]["system"] = True
         await self.handler.send_to_single_connection(conn_info, message)
     
     def update_send_stats(self, success: bool) -> None:
@@ -315,12 +321,14 @@ class MessageProcessor:
         validation_error = self._last_validation_error
         error_details = {
             "type": "error",
-            "error": validation_error.message if validation_error else "Validation failed",
-            "error_type": validation_error.error_type if validation_error else "validation_error",
-            "code": "VALIDATION_ERROR",
-            "timestamp": time.time(),
-            "recoverable": True,
-            "details": self._get_validation_error_details(validation_error, message)
+            "payload": {
+                "error": validation_error.message if validation_error else "Validation failed",
+                "error_type": validation_error.error_type if validation_error else "validation_error",
+                "code": "VALIDATION_ERROR",
+                "timestamp": time.time(),
+                "recoverable": True,
+                "details": self._get_validation_error_details(validation_error, message)
+            }
         }
         return error_details
     

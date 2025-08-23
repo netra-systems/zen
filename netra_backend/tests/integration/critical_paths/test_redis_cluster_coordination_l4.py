@@ -13,16 +13,13 @@ Comprehensive test for Redis cluster coordination:
 This test validates Redis cluster coordination at scale.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
 import json
 import random
 
-# Add project root to path
 import sys
 import time
 from datetime import datetime, timedelta
@@ -32,9 +29,6 @@ from typing import Any, Dict, List, Optional, Set
 import aiohttp
 import pytest
 import redis.asyncio as redis
-
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Configuration
 REDIS_NODES = [
@@ -54,7 +48,6 @@ NUM_TEST_KEYS = 10000
 NUM_TEST_OPERATIONS = 50000
 REPLICATION_LAG_THRESHOLD = 100  # milliseconds
 FAILOVER_TIME_THRESHOLD = 5000  # milliseconds
-
 
 class RedisClusterTester:
     """Test Redis cluster coordination."""
@@ -534,7 +527,6 @@ class RedisClusterTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l4
@@ -579,7 +571,6 @@ async def test_redis_cluster_coordination():
             
         assert passed_tests >= total_tests * 0.8, f"Too many tests failed: {results}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*80)
@@ -595,7 +586,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

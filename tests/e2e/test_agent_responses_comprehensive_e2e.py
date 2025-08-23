@@ -1,13 +1,13 @@
 """Comprehensive Agent Response E2E Tests for Final Implementation Agent
 
 Business Value Justification (BVJ):
-1. Segment: All customer segments (Free, Early, Mid, Enterprise)
+    1. Segment: All customer segments (Free, Early, Mid, Enterprise)
 2. Business Goal: Ensure agent response system works correctly end-to-end
 3. Value Impact: Core AI agent functionality that delivers primary platform value
 4. Revenue Impact: Critical for value delivery and customer retention
 
 Test Coverage:
-- Agent initialization and startup
+    - Agent initialization and startup
 - Request routing to appropriate agents
 - Response generation and formatting
 - Error handling in agent responses
@@ -28,7 +28,6 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 
 class AgentResponseTester:
     """Helper class for agent response testing."""
@@ -130,7 +129,7 @@ class AgentResponseTester:
             "fallback_available": True
         }
     
-    async def test_agent_tool_execution(self, agent_type: str, 
+    async def test_agent_tool_execution(self, agent_type: str,
                                       tool_name: str) -> Dict[str, Any]:
         """Test agent tool execution."""
         start_time = time.time()
@@ -176,12 +175,10 @@ class AgentResponseTester:
             "agent_types_used": list(set(r.get("agent_type") for r in self.conversation_history))
         }
 
-
 @pytest.fixture
 def agent_response_tester():
     """Create agent response tester fixture."""
     return AgentResponseTester()
-
 
 class TestAgentResponsesComprehensiveE2E:
     """Comprehensive E2E tests for agent responses."""
@@ -194,7 +191,6 @@ class TestAgentResponsesComprehensiveE2E:
             "supervisor", 
             "I need help optimizing my database queries"
         )
-        
         assert response["success"], f"Supervisor agent failed: {response}"
         assert response["agent_type"] == "supervisor"
         assert "response" in response
@@ -209,7 +205,6 @@ class TestAgentResponsesComprehensiveE2E:
             "optimization", 
             "Analyze performance metrics and suggest improvements"
         )
-        
         assert response["success"], f"Optimization agent failed: {response}"
         assert response["agent_type"] == "optimization"
         assert "optimization" in response["response"].lower() or "performance" in response["response"].lower()
@@ -223,7 +218,6 @@ class TestAgentResponsesComprehensiveE2E:
             "analysis", 
             "What patterns do you see in the user behavior data?"
         )
-        
         assert response["success"], f"Analysis agent failed: {response}"
         assert response["agent_type"] == "analysis"
         assert "data" in response["response"].lower() or "pattern" in response["response"].lower()
@@ -237,7 +231,6 @@ class TestAgentResponsesComprehensiveE2E:
             "nonexistent_agent", 
             "This should fail gracefully"
         )
-        
         assert not response["success"], "Should fail for unknown agent type"
         assert "error" in response
         assert "unknown" in response["error"].lower() or "nonexistent" in response["error"].lower()
@@ -371,7 +364,6 @@ class TestAgentResponsesComprehensiveE2E:
             "Start a new analysis session",
             initial_context
         )
-        
         # Send follow-up request that should maintain context
         follow_up_context = initial_context.copy()
         follow_up_context["previous_request"] = response1["request_id"]
@@ -381,7 +373,6 @@ class TestAgentResponsesComprehensiveE2E:
             "Continue the analysis",
             follow_up_context
         )
-        
         assert response1["success"] and response2["success"], "Both requests should succeed"
         assert response1["context"]["user_id"] == response2["context"]["user_id"]
         assert response2["context"]["previous_request"] == response1["request_id"]
@@ -398,7 +389,6 @@ class TestAgentResponsesComprehensiveE2E:
                 agent_type, 
                 "Test response formatting"
             )
-            
             # Check required fields are present
             for field in required_fields:
                 assert field in response, f"Required field '{field}' missing from {agent_type} response"

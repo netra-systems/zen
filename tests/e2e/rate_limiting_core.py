@@ -60,7 +60,7 @@ class RedisManager:
         
         return {"reset_after_seconds": time.time() - start_time}
     
-    async def cleanup_test_keys(self, redis_client: redis.Redis) -> None:
+    async def test_cleanup_test_keys(self, redis_client: redis.Redis) -> None:
         """Clean up test Redis keys."""
         pattern = f"{self.redis_key_prefix}:*"
         keys = await redis_client.keys(pattern)

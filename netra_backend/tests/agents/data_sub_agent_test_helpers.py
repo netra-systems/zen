@@ -8,14 +8,12 @@ from netra_backend.app.logging_config import central_logger as logger
 
 # Test compatibility methods extracted from main agent
 
-
 async def process_data(data: Dict[str, Any]) -> Dict[str, Any]:
     """Process data with validation (test compatibility method)"""
     if data.get("valid", True):
         return {"status": "success", "processed": True}
     else:
         return {"status": "error", "message": "Invalid data"}
-
 
 async def process_and_persist(data: Dict[str, Any]) -> Dict[str, Any]:
     """Process data and persist to database"""
@@ -42,11 +40,9 @@ async def process_and_persist(data: Dict[str, Any]) -> Dict[str, Any]:
             "data": data
         }
 
-
 async def process_internal(data: Dict[str, Any]) -> Dict[str, Any]:
     """Internal processing method (test compatibility)"""
     return {"success": True, "data": data}
-
 
 async def process_with_retry(data: Dict[str, Any], config: Dict[str, Any] = None) -> Dict[str, Any]:
     """Process data with retry logic (test compatibility method)"""
@@ -62,7 +58,6 @@ async def process_with_retry(data: Dict[str, Any], config: Dict[str, Any] = None
                 raise
     return {"success": False, "error": "Max retries exceeded"}
 
-
 async def analyze_performance_metrics(user_id: int, workload_id: Optional[str], 
                                      time_range: Tuple[datetime, datetime],
                                      clickhouse_ops) -> Dict[str, Any]:
@@ -76,14 +71,12 @@ async def analyze_performance_metrics(user_id: int, workload_id: Optional[str],
     _add_optional_analysis(result, data, aggregation_level)
     return result
 
-
 async def _fetch_performance_data(user_id: int, workload_id: Optional[str], clickhouse_ops) -> List[Dict[str, Any]]:
     """Fetch performance data from ClickHouse."""
     return await clickhouse_ops.fetch_data(
         f"SELECT * FROM workload_events WHERE user_id = {user_id}", 
         f"perf_metrics_{user_id}_{workload_id}"
     )
-
 
 def _determine_aggregation_level(time_range: Tuple[datetime, datetime]) -> str:
     """Determine aggregation level based on time range duration."""
@@ -93,7 +86,6 @@ def _determine_aggregation_level(time_range: Tuple[datetime, datetime]) -> str:
     elif duration.total_seconds() < 86400:
         return "hour"
     return "day"
-
 
 def _build_base_metrics(data: List[Dict[str, Any]], time_range: Tuple[datetime, datetime], 
                        aggregation_level: str) -> Dict[str, Any]:
@@ -106,7 +98,6 @@ def _build_base_metrics(data: List[Dict[str, Any]], time_range: Tuple[datetime, 
         "throughput": _build_throughput_metrics(data)
     }
 
-
 def _build_time_range_info(time_range: Tuple[datetime, datetime], aggregation_level: str) -> Dict[str, str]:
     """Build time range information."""
     return {
@@ -114,7 +105,6 @@ def _build_time_range_info(time_range: Tuple[datetime, datetime], aggregation_le
         "end": time_range[1].isoformat(),
         "aggregation_level": aggregation_level
     }
-
 
 def _build_latency_metrics(data: List[Dict[str, Any]]) -> Dict[str, float]:
     """Build latency metrics from data."""
@@ -124,7 +114,6 @@ def _build_latency_metrics(data: List[Dict[str, Any]]) -> Dict[str, float]:
         "p99": data[0].get('latency_p99', 0) if data else 0
     }
 
-
 def _build_throughput_metrics(data: List[Dict[str, Any]]) -> Dict[str, float]:
     """Build throughput metrics from data."""
     return {
@@ -132,13 +121,11 @@ def _build_throughput_metrics(data: List[Dict[str, Any]]) -> Dict[str, float]:
         "peak": data[0].get('peak_throughput', 0) if data else 0
     }
 
-
 def _add_optional_analysis(result: Dict[str, Any], data: List[Dict[str, Any]], aggregation_level: str) -> None:
     """Add optional analysis sections to result."""
     _add_trends_if_applicable(result, data, aggregation_level)
     _add_seasonality_if_applicable(result, data, aggregation_level)
     _add_outliers_if_applicable(result, data)
-
 
 def _add_trends_if_applicable(result: Dict[str, Any], data: List[Dict[str, Any]], aggregation_level: str) -> None:
     """Add trends analysis if data is sufficient."""
@@ -148,7 +135,6 @@ def _add_trends_if_applicable(result: Dict[str, Any], data: List[Dict[str, Any]]
             "throughput_trend": "increasing",
             "error_rate_trend": "decreasing"
         }
-
 
 def _add_seasonality_if_applicable(result: Dict[str, Any], data: List[Dict[str, Any]], aggregation_level: str) -> None:
     """Add seasonality analysis if data is sufficient."""
@@ -160,7 +146,6 @@ def _add_seasonality_if_applicable(result: Dict[str, Any], data: List[Dict[str, 
             "confidence": 0.85
         }
 
-
 def _add_outliers_if_applicable(result: Dict[str, Any], data: List[Dict[str, Any]]) -> None:
     """Add outliers analysis if data is sufficient."""
     if len(data) >= 10:
@@ -171,7 +156,6 @@ def _add_outliers_if_applicable(result: Dict[str, Any], data: List[Dict[str, Any
             "latency_outliers": outlier_data["latency_outliers"]
         }
 
-
 def _build_outlier_data(data: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Build outlier data structure."""
     indices = [5, 12] if len(data) > 12 else [2]
@@ -180,7 +164,6 @@ def _build_outlier_data(data: List[Dict[str, Any]]) -> Dict[str, Any]:
         {"index": 2, "value": 120.0, "z_score": 2.8}
     ]
     return {"indices": indices, "latency_outliers": latency_outliers}
-
 
 async def process_batch_safe(batch: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Process batch of data items safely (test compatibility method)"""
@@ -193,13 +176,11 @@ async def process_batch_safe(batch: List[Dict[str, Any]]) -> List[Dict[str, Any]
             results.append({"status": "error", "message": str(e), "item": item})
     return results
 
-
 class TestCacheManager:
     """Test cache manager for compatibility methods."""
     
     def __init__(self):
         self._cache = {}
-
 
 async def process_with_cache(data: Dict[str, Any], cache_manager: TestCacheManager = None) -> Dict[str, Any]:
     """Process data with caching support (test compatibility method)"""
@@ -216,7 +197,6 @@ async def process_with_cache(data: Dict[str, Any], cache_manager: TestCacheManag
     
     return result
 
-
 async def process_batch(batch: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Process batch of data items (test compatibility method)"""
     results = []
@@ -224,7 +204,6 @@ async def process_batch(batch: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         result = await process_data(item)
         results.append(result)
     return results
-
 
 def validate_data(data: Dict[str, Any]) -> bool:
     """Validate data structure (test compatibility method)"""
@@ -235,7 +214,6 @@ def validate_data(data: Dict[str, Any]) -> bool:
     has_required = any(field in data for field in common_fields)
     
     return has_required
-
 
 async def detect_anomalies(user_id: int, metric: str, time_range: Tuple[datetime, datetime], 
                           threshold: float = 2.5, clickhouse_ops = None) -> Dict[str, Any]:
@@ -259,7 +237,6 @@ async def detect_anomalies(user_id: int, metric: str, time_range: Tuple[datetime
         ],
         "threshold": threshold
     }
-
 
 async def process_and_stream(data: Dict[str, Any], websocket_connection) -> None:
     """Process data and stream updates via WebSocket (test compatibility method)"""

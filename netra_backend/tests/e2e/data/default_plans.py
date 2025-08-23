@@ -15,7 +15,7 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design: Composable plan components
 
 Usage:
-    from tests.e2e.data.default_plans import (
+    from netra_backend.tests.e2e.data.default_plans import (
         get_cost_optimization_plan,
         get_performance_tuning_plan,
         get_capacity_planning_plan
@@ -27,7 +27,6 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-
 class PlanStepType(Enum):
     """Types of plan steps."""
     ANALYSIS = "analysis"
@@ -36,14 +35,12 @@ class PlanStepType(Enum):
     IMPLEMENTATION = "implementation"
     MONITORING = "monitoring"
 
-
 class PlanPriority(Enum):
     """Plan step priorities."""
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
-
 
 @dataclass
 class ValidationCriteria:
@@ -52,7 +49,6 @@ class ValidationCriteria:
     measurement_unit: str
     measurement_method: str
     validation_timeout_hours: int = 24
-
 
 @dataclass
 class PlanStep:
@@ -68,7 +64,6 @@ class PlanStep:
     tools_required: List[str] = field(default_factory=list)
     expected_outcome: str = ""
 
-
 @dataclass 
 class OptimizationPlan:
     """Complete optimization plan."""
@@ -79,7 +74,6 @@ class OptimizationPlan:
     steps: List[PlanStep]
     success_metrics: Dict[str, Any]
     risk_factors: List[str] = field(default_factory=list)
-
 
 def get_cost_optimization_plan() -> OptimizationPlan:
     """Get comprehensive cost optimization plan (20 steps)."""
@@ -96,7 +90,6 @@ def get_cost_optimization_plan() -> OptimizationPlan:
         risk_factors=risks
     )
 
-
 def get_performance_tuning_plan() -> OptimizationPlan:
     """Get comprehensive performance tuning plan (15 steps)."""
     steps = _create_performance_tuning_steps()
@@ -111,7 +104,6 @@ def get_performance_tuning_plan() -> OptimizationPlan:
         success_metrics=metrics,
         risk_factors=risks
     )
-
 
 def get_capacity_planning_plan() -> OptimizationPlan:
     """Get comprehensive capacity planning plan (25 steps)."""
@@ -128,10 +120,9 @@ def get_capacity_planning_plan() -> OptimizationPlan:
         risk_factors=risks
     )
 
-
 def _create_cost_optimization_steps() -> List[PlanStep]:
     """Create cost optimization plan steps."""
-    from tests.e2e.data.plan_step_definitions import (
+    from netra_backend.tests.e2e.data.plan_step_definitions import (
         create_remaining_cost_steps,
     )
     base_steps = [
@@ -140,22 +131,19 @@ def _create_cost_optimization_steps() -> List[PlanStep]:
     ]
     return base_steps + create_remaining_cost_steps()
 
-
 def _create_performance_tuning_steps() -> List[PlanStep]:
     """Create performance tuning plan steps.""" 
-    from tests.e2e.data.plan_step_definitions import (
+    from netra_backend.tests.e2e.data.plan_step_definitions import (
         create_all_performance_steps,
     )
     return create_all_performance_steps()
 
-
 def _create_capacity_planning_steps() -> List[PlanStep]:
     """Create capacity planning plan steps."""
-    from tests.e2e.data.plan_step_definitions import (
+    from netra_backend.tests.e2e.data.plan_step_definitions import (
         create_all_capacity_steps,
     )
     return create_all_capacity_steps()
-
 
 # Cost Optimization Step Creators (1-10)
 def _create_cost_step_1() -> PlanStep:
@@ -172,7 +160,6 @@ def _create_cost_step_1() -> PlanStep:
         expected_outcome="Complete cost breakdown by service and region"
     )
 
-
 def _create_cost_step_2() -> PlanStep:
     """Create cost optimization step 2."""
     return PlanStep(
@@ -187,7 +174,6 @@ def _create_cost_step_2() -> PlanStep:
         expected_outcome="Usage pattern classification and recommendations"
     )
 
-
 def _create_cost_step_3() -> PlanStep:
     """Create cost optimization step 3."""
     return PlanStep(
@@ -201,7 +187,6 @@ def _create_cost_step_3() -> PlanStep:
         dependencies=["cost_001"], tools_required=["resource_monitor"],
         expected_outcome="Resource utilization efficiency report"
     )
-
 
 def _create_cost_step_4() -> PlanStep:
     """Create cost optimization step 4.""" 
@@ -218,7 +203,6 @@ def _create_cost_step_4() -> PlanStep:
         expected_outcome="Prioritized optimization opportunity list"
     )
 
-
 def _create_cost_step_5() -> PlanStep:
     """Create cost optimization step 5."""
     return PlanStep(
@@ -233,10 +217,8 @@ def _create_cost_step_5() -> PlanStep:
         expected_outcome="Right-sizing recommendations with impact estimates"
     )
 
-
 # Continuing with remaining cost steps and other plan steps...
 # (Additional step creators would continue here following the same pattern)
-
 
 def _create_cost_optimization_metrics() -> Dict[str, Any]:
     """Create cost optimization success metrics."""
@@ -248,7 +230,6 @@ def _create_cost_optimization_metrics() -> Dict[str, Any]:
         "risk_tolerance": "medium"
     }
 
-
 def _create_performance_tuning_metrics() -> Dict[str, Any]:
     """Create performance tuning success metrics."""
     return {
@@ -258,7 +239,6 @@ def _create_performance_tuning_metrics() -> Dict[str, Any]:
         "performance_stability": 99.5,
         "regression_tolerance": 0.0
     }
-
 
 def _create_capacity_planning_metrics() -> Dict[str, Any]:
     """Create capacity planning success metrics."""
@@ -270,7 +250,6 @@ def _create_capacity_planning_metrics() -> Dict[str, Any]:
         "growth_accommodation": 50.0
     }
 
-
 def _create_cost_optimization_risks() -> List[str]:
     """Create cost optimization risk factors."""
     return [
@@ -280,7 +259,6 @@ def _create_cost_optimization_risks() -> List[str]:
         "Vendor lock-in limiting optimization options"
     ]
 
-
 def _create_performance_tuning_risks() -> List[str]:
     """Create performance tuning risk factors."""
     return [
@@ -289,7 +267,6 @@ def _create_performance_tuning_risks() -> List[str]:
         "Cascading performance impacts across services"
     ]
 
-
 def _create_capacity_planning_risks() -> List[str]:
     """Create capacity planning risk factors."""
     return [
@@ -297,7 +274,6 @@ def _create_capacity_planning_risks() -> List[str]:
         "Sudden demand spikes exceeding planned capacity",
         "Resource provisioning delays impacting service"
     ]
-
 
 # Additional step creators are implemented in plan_step_definitions.py
 # This maintains the 450-line module limit and provides modular expansion

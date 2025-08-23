@@ -10,17 +10,10 @@ Critical Path: Context tracking -> Window management -> Compression -> Retrieval
 Coverage: Real context handling, memory optimization, conversation continuity
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -40,12 +33,10 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class ContextPriority(Enum):
     """Priority levels for context segments."""
@@ -55,7 +46,6 @@ class ContextPriority(Enum):
     LOW = "low"
     ARCHIVE = "archive"
 
-
 class CompressionStrategy(Enum):
     """Strategies for context compression."""
     SUMMARIZATION = "summarization"
@@ -63,7 +53,6 @@ class CompressionStrategy(Enum):
     SEMANTIC_CLUSTERING = "semantic_clustering"
     SLIDING_WINDOW = "sliding_window"
     HIERARCHICAL = "hierarchical"
-
 
 @dataclass
 class ContextSegment:
@@ -106,7 +95,6 @@ class ContextSegment:
         data["timestamp"] = datetime.fromisoformat(data["timestamp"])
         return cls(**data)
 
-
 @dataclass
 class ContextWindow:
     """Represents the current context window for an agent."""
@@ -143,7 +131,6 @@ class ContextWindow:
                 self.segments.pop(i)
                 return True
         return False
-
 
 class ContextCompressor:
     """Handles compression of context segments."""
@@ -411,7 +398,6 @@ class ContextCompressor:
         
         return clusters
 
-
 class ContextWindowManager:
     """Manages context windows for agents."""
     
@@ -636,7 +622,6 @@ class ContextWindowManager:
         cache_key = f"context_window:{agent_id}:{session_id}"
         await self.redis_service.client.delete(cache_key)
 
-
 class ContextWindowTestManager:
     """Manages context window testing."""
     
@@ -662,7 +647,6 @@ class ContextWindowTestManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def context_manager():
     """Create context window test manager."""
@@ -670,7 +654,6 @@ async def context_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -686,7 +669,6 @@ async def test_context_window_creation(context_manager):
     assert window.current_tokens == 0
     assert len(window.segments) == 0
     assert window.max_tokens > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -714,7 +696,6 @@ async def test_message_addition(context_manager):
     window = await manager.context_manager.get_or_create_window("test_agent", "session_002")
     assert len(window.segments) == 2
     assert window.current_tokens > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -749,7 +730,6 @@ async def test_context_compression_summarization(context_manager):
     original_tokens = sum(seg.token_count for seg in segments)
     compressed_tokens = sum(seg.token_count for seg in compressed)
     assert compressed_tokens < original_tokens
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -795,7 +775,6 @@ async def test_context_compression_keywords(context_manager):
     keyword_segment = next(seg for seg in compressed if seg.segment_id.startswith("keywords_"))
     assert "Keywords:" in keyword_segment.content
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_sliding_window_compression(context_manager):
@@ -829,7 +808,6 @@ async def test_sliding_window_compression(context_manager):
     # Should contain recent segments and a summary of old ones
     has_summary = any("summary" in seg.content.lower() for seg in compressed)
     assert has_summary
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -871,7 +849,6 @@ async def test_automatic_compression_on_capacity(context_manager):
     compressed_segments = [seg for seg in window.segments if seg.compressed]
     assert len(compressed_segments) > 0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_context_prompt_generation(context_manager):
@@ -899,7 +876,6 @@ async def test_context_prompt_generation(context_manager):
     assert "machine learning" in context.lower()
     assert "user:" in context
     assert "assistant:" in context
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -933,7 +909,6 @@ async def test_window_statistics(context_manager):
     assert stats["role_distribution"]["user"] == 2
     assert stats["role_distribution"]["assistant"] == 1
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_window_persistence_and_recovery(context_manager):
@@ -959,7 +934,6 @@ async def test_window_persistence_and_recovery(context_manager):
     assert len(recovered_window.segments) == original_segment_count
     assert recovered_window.agent_id == "persist_test"
     assert recovered_window.session_id == "session_001"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -994,7 +968,6 @@ async def test_concurrent_context_operations(context_manager):
             )
             # Each window should have some messages
             assert len(window.segments) > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

@@ -15,17 +15,10 @@ REQUIREMENTS:
 - End-to-end processing within 30 seconds
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -33,10 +26,8 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.integration.metrics.shared_fixtures import (
-    # Add project root to path
     MetricEvent,
     MockMetricsAggregator,
     MockMetricsStorage,
@@ -48,7 +39,6 @@ from netra_backend.tests.integration.metrics.shared_fixtures import (
 )
 
 logger = central_logger.get_logger(__name__)
-
 
 class TestMetricsPipeline:
     """BVJ: Validates complete end-to-end metrics pipeline performance."""
@@ -279,7 +269,6 @@ class TestMetricsPipeline:
             assert request_count >= len(concurrent_users), "Concurrent data not aggregated correctly"
 
         logger.info(f"Concurrent pipeline operations validated: {successful_concurrent} successful operations")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

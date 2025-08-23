@@ -3,31 +3,23 @@ Advanced features tests for Quality Gate Service
 Tests caching, batch processing, statistics, and system behavior
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import hashlib
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.quality_gate_service import ContentType, QualityLevel
-from .quality_gate_content import (
+from netra_backend.tests.quality_gate_content import (
     get_batch_validation_contents,
     get_batch_validation_context,
     get_brief_optimization_contents,
 )
-from .quality_gate_fixtures import (
+from netra_backend.tests.quality_gate_fixtures import (
     add_multiple_test_metrics,
     create_borderline_metrics,
     create_memory_overflow_metrics,
@@ -35,14 +27,13 @@ from .quality_gate_fixtures import (
     create_test_quality_metrics,
     create_weighted_score_metrics,
     quality_service,
-    # Add project root to path
     redis_mock,
     setup_content_type_test_cases,
     setup_domain_content_for_recognition,
     setup_pattern_test_texts,
     setup_redis_error_mocks,
 )
-from .quality_gate_helpers import (
+from netra_backend.tests.quality_gate_helpers import (
     assert_batch_validation_results,
     assert_cache_key_format,
     assert_caching_identical_results,
@@ -57,7 +48,6 @@ from .quality_gate_helpers import (
     assert_threshold_check_result,
     assert_weighted_score_range,
 )
-
 
 class TestQualityGateAdvanced:
     """Test suite for advanced QualityGateService features"""

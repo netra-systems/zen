@@ -11,17 +11,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents churn from performance issues (+$25K MRR)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -34,14 +27,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.db.postgres import Database as PostgresDatabase
 from netra_backend.app.services.generation_service import save_corpus_to_clickhouse
 from netra_backend.app.websocket.performance_monitor import PerformanceMonitor
-
-# Add project root to path
-
 
 class PerformanceTestMetrics:
     """Tracks performance test metrics and baselines."""
@@ -91,7 +80,6 @@ class PerformanceTestMetrics:
         
         stats = self.get_statistics(name)
         return stats.get('mean', float('inf')) <= self.baselines[name]
-
 
 class DatabasePerformanceTester:
     """Tests database performance under load."""
@@ -159,7 +147,6 @@ class DatabasePerformanceTester:
             self.metrics.record_metric('db_concurrent_reads', duration)
             return duration
 
-
 class WebSocketPerformanceTester:
     """Tests WebSocket performance and throughput."""
     
@@ -221,7 +208,6 @@ class WebSocketPerformanceTester:
         throughput = total_messages / duration if duration > 0 else 0
         self.metrics.record_metric('websocket_broadcast_throughput', throughput)
         return throughput
-
 
 class AgentPerformanceTester:
     """Tests agent processing performance."""
@@ -285,7 +271,6 @@ class AgentPerformanceTester:
         self.metrics.record_metric('concurrent_agent_throughput', throughput)
         return throughput
 
-
 class APIPerformanceTester:
     """Tests API endpoint performance."""
     
@@ -336,7 +321,6 @@ class APIPerformanceTester:
         
         self.metrics.record_metric('concurrent_api_load', duration)
         return duration
-
 
 class MemoryPerformanceTester:
     """Tests memory usage patterns."""
@@ -419,7 +403,6 @@ class MemoryPerformanceTester:
             await asyncio.sleep(0.001)
         
         return cleanup_times
-
 
 class CachePerformanceTester:
     """Tests cache effectiveness and performance."""
@@ -511,7 +494,6 @@ class CachePerformanceTester:
         self.metrics.record_metric('concurrent_cache_hit_rate', hit_rate)
         
         return duration
-
 
 @pytest.mark.performance
 class TestComprehensiveBackendPerformance:
@@ -684,7 +666,6 @@ class TestComprehensiveBackendPerformance:
         }
         
         return report
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--asyncio-mode=auto", "-m", "performance"])

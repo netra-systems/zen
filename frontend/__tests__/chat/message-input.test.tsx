@@ -115,8 +115,8 @@ describe('Message Display & Input Tests', () => {
       jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageList />);
       
-      expectElementByText('Hello').toBeInTheDocument();
-      expectElementByText('Hi there!').toBeInTheDocument();
+      expectElementByText('Hello');
+      expectElementByText('Hi there!');
     });
 
     test('9. Should display message roles correctly', () => {
@@ -132,10 +132,10 @@ describe('Message Display & Input Tests', () => {
       });
       
       const { rerender } = render(<MessageItem message={userMessage} />);
-      expectElementByTestId('message-user').toBeInTheDocument();
+      expectElementByTestId('message-user');
       
       rerender(<MessageItem message={assistantMessage} />);
-      expectElementByTestId('message-assistant').toBeInTheDocument();
+      expectElementByTestId('message-assistant');
     });
 
     test('10. Should copy message to clipboard', async () => {
@@ -156,8 +156,8 @@ describe('Message Display & Input Tests', () => {
     test('11. Should show thinking indicator when processing', () => {
       render(<ThinkingIndicator isThinking={true} agent="supervisor" />);
       
-      expectElementByTestId('thinking-indicator').toBeInTheDocument();
-      expectElementByText(/supervisor/i).toBeInTheDocument();
+      expectElementByTestId('thinking-indicator');
+      expectElementByText(/supervisor/i);
     });
   });
 
@@ -235,7 +235,7 @@ describe('Message Display & Input Tests', () => {
       jest.mocked(useChatStore).mockReturnValueOnce(mockChatStore);
       render(<MessageList />);
       
-      expectElementByText(/No messages yet/i).toBeInTheDocument();
+      expectElementByText(/No messages yet/i);
     });
 
     test('Should validate message content before sending', async () => {
@@ -262,7 +262,7 @@ describe('Message Display & Input Tests', () => {
       });
       
       render(<MessageItem message={message} />);
-      expectElementByText(/10:00/).toBeInTheDocument();
+      expectElementByText(/10:00/);
     });
 
     test('Should handle optimistic message updates', () => {

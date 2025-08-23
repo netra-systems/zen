@@ -9,29 +9,20 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical for Enterprise tier security requirements
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
-from .test_route_fixtures import (
+from netra_backend.tests.test_route_fixtures import (
     TEST_USER_DATA,
     CommonResponseValidators,
     basic_test_client,
 )
-
 
 class TestAdminRoute:
     """Test admin endpoint security and functionality."""

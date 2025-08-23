@@ -200,6 +200,20 @@ class WebSocketMessageIn(TypedDict):
     payload: Optional[Dict[str, Any]]
 
 
+class QueueMessage(BaseModel):
+    """Message queued for processing in the message pipeline."""
+    message_id: str
+    thread_id: str
+    user_id: str
+    content: str
+    message_type: str = "user"
+    priority: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    scheduled_for: Optional[datetime] = None
+    retry_count: int = 0
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
 class MessageData(BaseModel):
     """Strongly typed message data"""
     id: str
@@ -317,6 +331,7 @@ __all__ = [
     "WebSocketError",
     "WebSocketMessage",
     "WebSocketMessageIn",
+    "QueueMessage",
     "MessageData",
     "ThreadHistoryResponse",
     "AgentResponseData",

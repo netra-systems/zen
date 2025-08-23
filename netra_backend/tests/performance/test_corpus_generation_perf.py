@@ -5,17 +5,10 @@ Tests performance, scalability, and resource usage of corpus generation.
 All functions maintain 25-line limit with single responsibility.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -29,12 +22,8 @@ from netra_backend.app.agents.corpus_admin import CorpusAdminSubAgent
 from netra_backend.app.agents.corpus_admin.models import CorpusMetadata
 from netra_backend.app.schemas.Corpus import Corpus
 
-# Add project root to path
 from netra_backend.app.services.corpus_service import CorpusService
 from netra_backend.app.services.synthetic_data.core_service import SyntheticDataService
-
-# Add project root to path
-
 
 class TestCorpusGenerationPerformance:
     """Performance tests for corpus generation"""
@@ -212,7 +201,6 @@ class TestCorpusGenerationPerformance:
             except Exception:
                 pass  # Expected errors
         return successes
-
 
 class TestScalabilityMetrics:
     """Test scalability metrics"""

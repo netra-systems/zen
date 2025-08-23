@@ -4,24 +4,17 @@ Tests adaptive monitoring rules, service status, and health check factories
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
 import pytest
 
-from dev_launcher.staged_health_monitor import (
+# from scripts.dev_launcher_staged_health_monitor import  # Should be mocked in tests (
     HealthCheckResult,
     HealthStage,
     ServiceConfig,
@@ -30,12 +23,10 @@ from dev_launcher.staged_health_monitor import (
     create_url_health_check,
 )
 
-
 @pytest.fixture
 def health_monitor() -> StagedHealthMonitor:
     """Create staged health monitor instance."""
     return StagedHealthMonitor()
-
 
 @pytest.fixture
 def mock_service_config() -> ServiceConfig:
@@ -48,14 +39,12 @@ def mock_service_config() -> ServiceConfig:
         full_health_check=lambda: True
     )
 
-
 @pytest.fixture
 def mock_process() -> Mock:
     """Create mock process for testing."""
     process = Mock()
     process.poll.return_value = None  # Running process
     return process
-
 
 class TestAdaptiveRules:
     """Test adaptive monitoring rules."""
@@ -127,7 +116,6 @@ class TestAdaptiveRules:
             base_interval = health_monitor._stage_configs[HealthStage.OPERATIONAL].check_interval
             assert interval == base_interval * 2  # Doubled for stable operation
 
-
 class TestServiceStatus:
     """Test service status retrieval."""
     
@@ -146,7 +134,6 @@ class TestServiceStatus:
         """Test getting status for non-existent service."""
         status = health_monitor.get_service_status("nonexistent")
         assert status is None
-
 
 class TestHealthCheckFactories:
     """Test health check factory functions."""

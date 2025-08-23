@@ -7,7 +7,7 @@ Keeps file under 300 lines as required by architecture standards.
 # Import all classes and functions from focused modules for backward compatibility
 from netra_backend.app.broadcast_core import BroadcastManager
 
-from . import broadcast_utils
+from netra_backend.app.websocket import broadcast_utils
 
 # Re-export all classes and functions for backward compatibility
 __all__ = [

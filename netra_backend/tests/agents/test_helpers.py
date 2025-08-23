@@ -3,29 +3,18 @@ E2E Test Helpers - Modular Support Functions
 All helper functions broken into ≤8 line functions for architectural compliance
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import uuid
 from unittest.mock import AsyncMock, Mock
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-
-# Add project root to path
-
 
 def create_mock_infrastructure():
     """Create mock infrastructure for e2e testing"""
@@ -34,7 +23,6 @@ def create_mock_infrastructure():
     ws_manager = Mock()
     return db_session, llm_manager, ws_manager
 
-
 def _create_optimization_responses():
     """Create responses for optimization flow"""
     return [
@@ -42,7 +30,6 @@ def _create_optimization_responses():
         {"bottleneck": "memory", "utilization": 0.95},
         {"recommendations": ["Use gradient checkpointing", "Reduce batch size"]}
     ]
-
 
 def _setup_structured_llm_responses(llm_manager, responses):
     """Setup structured LLM responses with cycling"""
@@ -54,18 +41,15 @@ def _setup_structured_llm_responses(llm_manager, responses):
         return result
     llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_structured_llm)
 
-
 def setup_llm_responses(llm_manager):
     """Setup LLM responses for full optimization flow"""
     responses = _create_optimization_responses()
     _setup_structured_llm_responses(llm_manager, responses)
     llm_manager.call_llm = AsyncMock(return_value={"content": "Optimization complete"})
 
-
 def setup_websocket_manager(ws_manager):
     """Setup websocket manager for testing"""
     ws_manager.send_message = AsyncMock()
-
 
 def create_mock_persistence():
     """Create mock persistence service"""
@@ -73,7 +57,6 @@ def create_mock_persistence():
     mock_persistence.save_agent_state = AsyncMock(side_effect=_mock_save_agent_state)
     _setup_persistence_methods(mock_persistence)
     return mock_persistence
-
 
 async def _mock_save_agent_state(*args, **kwargs):
     """Handle different save_agent_state signatures"""
@@ -84,13 +67,11 @@ async def _mock_save_agent_state(*args, **kwargs):
     else:
         return (True, "test_id")
 
-
 def _setup_persistence_methods(mock_persistence):
     """Setup persistence service methods"""
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
     mock_persistence.get_thread_context = AsyncMock(return_value=None)
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
-
 
 def _create_tool_dispatcher():
     """Create mock tool dispatcher"""
@@ -99,17 +80,15 @@ def _create_tool_dispatcher():
     dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
     return dispatcher
 
-
 def _setup_supervisor_ids(supervisor):
     """Setup supervisor agent IDs"""
     supervisor.thread_id = str(uuid.uuid4())
     supervisor.user_id = str(uuid.uuid4())
 
-
 def _setup_supervisor_mocks(supervisor, mock_persistence):
     """Setup supervisor agent mocks"""
     supervisor.state_persistence = mock_persistence
-    from netra_backend.app.agents.supervisor.execution_context import (
+    from netra_backend.app.agents.base.execution_context import (
         AgentExecutionResult,
     )
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[
@@ -118,7 +97,6 @@ def _setup_supervisor_mocks(supervisor, mock_persistence):
         AgentExecutionResult(success=True, state=None)
     ])
 
-
 def create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence):
     """Create supervisor with all mocked dependencies"""
     dispatcher = _create_tool_dispatcher()
@@ -126,7 +104,6 @@ def create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persi
     _setup_supervisor_ids(supervisor)
     _setup_supervisor_mocks(supervisor, mock_persistence)
     return supervisor
-
 
 async def execute_optimization_flow(supervisor):
     """Execute the optimization flow and return result"""
@@ -137,12 +114,10 @@ async def execute_optimization_flow(supervisor):
         str(uuid.uuid4())
     )
 
-
 def verify_optimization_flow(state, supervisor):
     """Verify the optimization flow completed successfully"""
     assert state is not None
     assert supervisor.engine.execute_pipeline.called
-
 
 def create_multiple_supervisors(db_session, llm_manager, ws_manager, mock_persistence, count):
     """Create multiple supervisor agents for concurrent testing"""
@@ -151,7 +126,6 @@ def create_multiple_supervisors(db_session, llm_manager, ws_manager, mock_persis
         supervisor = create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
         supervisors.append(supervisor)
     return supervisors
-
 
 def create_concurrent_tasks(supervisors):
     """Create concurrent tasks for multiple supervisors"""
@@ -166,7 +140,6 @@ def create_concurrent_tasks(supervisors):
     ]
     return tasks
 
-
 def verify_concurrent_results(results, expected_count):
     """Verify concurrent execution results"""
     from netra_backend.app.agents.state import DeepAgentState
@@ -174,7 +147,6 @@ def verify_concurrent_results(results, expected_count):
     for result in results:
         if not isinstance(result, Exception):
             assert isinstance(result, DeepAgentState)
-
 
 def setup_mock_llm_with_retry():
     """Setup mock LLM with retry behavior"""
@@ -187,7 +159,6 @@ def setup_mock_llm_with_retry():
         return {"content": "Successful response after retry", "tool_calls": []}
     llm_manager.call_llm = AsyncMock(side_effect=mock_llm_call)
     return llm_manager, call_counter
-
 
 def create_tool_execution_mocks():
     """Create mocks for tool execution testing"""
@@ -206,7 +177,6 @@ def create_tool_execution_mocks():
     dispatcher.dispatch_tool = AsyncMock(side_effect=mock_dispatch)
     return dispatcher, tool_results
 
-
 def create_llm_response_with_tools():
     """Create LLM response with tool calls"""
     return {
@@ -217,12 +187,10 @@ def create_llm_response_with_tools():
         ]
     }
 
-
 async def execute_tool_calls(dispatcher, tool_calls):
     """Execute all tool calls from LLM response"""
     for tool_call in tool_calls:
         await dispatcher.dispatch_tool(tool_call["name"], tool_call["parameters"])
-
 
 def verify_tool_execution(tool_results, expected_tools):
     """Verify tool execution results"""

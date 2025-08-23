@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Dict, Any
 
-
 class ConnectionState(Enum):
     """WebSocket connection state enumeration."""
     DISCONNECTED = "disconnected"
@@ -15,7 +14,6 @@ class ConnectionState(Enum):
     CONNECTED = "connected"
     RECONNECTING = "reconnecting"
     ERROR = "error"
-
 
 @dataclass
 class ClientConfig:

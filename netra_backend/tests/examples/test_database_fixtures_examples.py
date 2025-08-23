@@ -7,25 +7,16 @@ to replace 70+ duplicated AsyncSession mock patterns across the codebase.
 Shows real-world usage patterns that can replace existing test code.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import Mock
 
 import pytest
 
-# Add project root to path
-from .database_test_fixtures import (
-    # Add project root to path
+from netra_backend.tests.fixtures.database_test_fixtures import (
     async_session_mock,
     clickhouse_mocker,
     connection_pool,
@@ -38,7 +29,6 @@ from .database_test_fixtures import (
     transaction_context,
     transaction_session_mock,
 )
-
 
 class TestDatabaseFixtureExamples:
     """Examples showing how to use the new database fixtures."""
@@ -62,7 +52,6 @@ class TestDatabaseFixtureExamples:
         async_session_mock.add.assert_called_once_with(user)
         async_session_mock.commit.assert_called_once()
 
-
     async def test_query_result_building(self, async_session_mock, query_builder):
         """Example: Replace complex query result mocking."""
         # OLD WAY (complex mock setup):
@@ -81,7 +70,6 @@ class TestDatabaseFixtureExamples:
         
         assert found_user.email == "user@example.com"
 
-
     async def test_transaction_management(self, transaction_context):
         """Example: Replace transaction context mock setup."""
         # OLD WAY (manual transaction mocking):
@@ -94,7 +82,6 @@ class TestDatabaseFixtureExamples:
         
         # Transaction context properly handled commit/rollback
 
-
     async def test_error_simulation(self, async_session_mock, error_simulator):
         """Example: Replace error condition setup."""
         # OLD WAY (manual error configuration):
@@ -106,7 +93,6 @@ class TestDatabaseFixtureExamples:
         
         with pytest.raises(Exception):
             await async_session_mock.commit()
-
 
     async def test_connection_pool_usage(self, connection_pool):
         """Example: Replace connection pool mocking."""
@@ -121,7 +107,6 @@ class TestDatabaseFixtureExamples:
         
         await connection_pool.release(conn1)
         assert connection_pool.active_connections == 1
-
 
     def test_bulk_model_creation(self):
         """Example: Replace bulk model factory patterns."""
@@ -138,7 +123,6 @@ class TestDatabaseFixtureExamples:
         assert users[0].email == "user0@test.com"
         assert users[9].email == "user9@test.com"
 
-
     async def test_clickhouse_query_mocking(self, clickhouse_mocker):
         """Example: Replace ClickHouse query mocking."""
         # OLD WAY (manual ClickHouse mock setup):
@@ -152,7 +136,6 @@ class TestDatabaseFixtureExamples:
         assert result == expected_result
         assert len(clickhouse_mocker.query_log) == 1
 
-
     async def test_migration_testing(self, migration_helper):
         """Example: Replace migration test patterns."""
         # OLD WAY (manual migration simulation):
@@ -164,7 +147,6 @@ class TestDatabaseFixtureExamples:
         
         expected_changes = [("users", "ADD_COLUMN"), ("threads", "ALTER_COLUMN")]
         assert migration_helper.verify_migration_state(expected_changes)
-
 
 class TestRealWorldReplacementExamples:
     """Real examples showing how to replace existing test patterns."""
@@ -188,7 +170,6 @@ class TestRealWorldReplacementExamples:
         found_user = await async_session_mock.execute("SELECT * FROM users")
         assert found_user.scalars().first().email == "test@example.com"
 
-
     async def test_thread_repository_patterns(self, transaction_session_mock, transaction_context):
         """Replace thread repository test patterns."""
         # This replaces patterns from thread repository tests
@@ -205,7 +186,6 @@ class TestRealWorldReplacementExamples:
         # Verify transaction operations
         transaction_session_mock.add.assert_called_with(thread)
         transaction_session_mock.flush.assert_called_once()
-
 
     async def test_message_processing_patterns(self, async_session_mock, query_builder):
         """Replace message processing test patterns."""

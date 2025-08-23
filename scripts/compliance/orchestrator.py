@@ -7,20 +7,20 @@ Coordinates all compliance checking modules and aggregates results.
 from collections import defaultdict
 from typing import Dict, List
 
-from .core import (
+from scripts.compliance.core import (
     ComplianceConfig,
     ComplianceResults,
     Violation,
     create_compliance_results,
 )
-from .file_checker import FileChecker, count_total_files
-from .function_checker import FunctionChecker
-from .mock_justification_checker import MockJustificationChecker
-from .reporter import ComplianceReporter
-from .ssot_checker import SSOTChecker
-from .stub_checker import StubChecker
-from .test_limits_checker import TestLimitsChecker
-from .type_checker import TypeChecker
+from scripts.compliance.file_checker import FileChecker, count_total_files
+from scripts.compliance.function_checker import FunctionChecker
+from scripts.compliance.mock_justification_checker import MockJustificationChecker
+from scripts.compliance.reporter import ComplianceReporter
+from scripts.compliance.ssot_checker import SSOTChecker
+from scripts.compliance.stub_checker import StubChecker
+from scripts.compliance.test_limits_checker import TestLimitsChecker
+from scripts.compliance.type_checker import TypeChecker
 
 
 class ArchitectureEnforcer:

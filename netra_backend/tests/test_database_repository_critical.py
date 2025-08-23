@@ -1,14 +1,7 @@
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import uuid
@@ -20,7 +13,6 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-
 @dataclass
 class MockUser:
     id: int
@@ -28,7 +20,6 @@ class MockUser:
     username: str
     is_active: bool
     created_at: datetime
-
 
 @dataclass
 class MockThread:
@@ -38,7 +29,6 @@ class MockThread:
     created_at: datetime
     updated_at: datetime
 
-
 @dataclass
 class MockMessage:
     id: str
@@ -46,7 +36,6 @@ class MockMessage:
     content: str
     role: str
     created_at: datetime
-
 
 class TestDatabaseRepositoryCritical:
     """Critical database repository tests"""

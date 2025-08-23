@@ -406,7 +406,7 @@ class DevLauncherTestContext:
             await self.cleanup_test_environment()
             raise
             
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Cleanup test environment."""
         if self.services:
             await self.services.stop_all_services()

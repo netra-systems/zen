@@ -3,14 +3,14 @@ AI Agent Metadata Tracking System - Modular Components
 Focused modules for metadata tracking enablement and management
 """
 
-from .archiver_generator import ArchiverGenerator
-from .config_manager import ConfigurationManager
-from .database_manager import DatabaseManager
-from .enabler import MetadataTrackingEnabler
-from .hooks_manager import GitHooksManager
-from .script_generator import ScriptGeneratorBase
-from .status_manager import StatusManager
-from .validator_generator import ValidatorGenerator
+from scripts.metadata_tracking.archiver_generator import ArchiverGenerator
+from scripts.metadata_tracking.config_manager import ConfigurationManager
+from scripts.metadata_tracking.database_manager import DatabaseManager
+from scripts.metadata_tracking.enabler import MetadataTrackingEnabler
+from scripts.metadata_tracking.hooks_manager import GitHooksManager
+from scripts.metadata_tracking.script_generator import ScriptGeneratorBase
+from scripts.metadata_tracking.status_manager import StatusManager
+from scripts.metadata_tracking.validator_generator import ValidatorGenerator
 
 __all__ = [
     "GitHooksManager",

@@ -23,6 +23,10 @@ export const ExamplePrompts: React.FC = () => {
       logger.error('User must be authenticated to send messages');
       return;
     }
+    
+    // Provide immediate feedback that the prompt was clicked
+    logger.info('Starting new conversation with prompt:', prompt);
+    
     // Add user message to chat immediately
     const userMessage = {
       id: generateUniqueId('msg'),
@@ -71,10 +75,15 @@ export const ExamplePrompts: React.FC = () => {
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full px-6 py-6" style={{
-      background: 'linear-gradient(180deg, rgba(250, 250, 250, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%)',
-      backdropFilter: 'blur(8px)'
-    }}>
+    <Collapsible 
+      open={isOpen} 
+      onOpenChange={setIsOpen} 
+      className="w-full px-6 py-6" 
+      data-testid="example-prompts"
+      style={{
+        background: 'linear-gradient(180deg, rgba(250, 250, 250, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%)',
+        backdropFilter: 'blur(8px)'
+      }}>
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -143,15 +152,20 @@ export const ExamplePrompts: React.FC = () => {
                       </p>
                       
                       <div className="mt-3 pt-3 border-t border-gray-200/50">
-                        <span className="text-xs text-gray-500 flex items-center">
-                          <span className="mr-1">Click to send</span>
-                          <motion.span
-                            animate={{ x: [0, 2, 0] }}
-                            transition={{ duration: 1, repeat: Infinity }}
-                          >
-                            →
-                          </motion.span>
-                        </span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-500 flex items-center">
+                            <span className="mr-1">Click to start conversation</span>
+                            <motion.span
+                              animate={{ x: [0, 2, 0] }}
+                              transition={{ duration: 1, repeat: Infinity }}
+                            >
+                              →
+                            </motion.span>
+                          </span>
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                            New Thread
+                          </span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

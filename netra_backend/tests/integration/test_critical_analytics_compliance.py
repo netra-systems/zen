@@ -3,17 +3,10 @@ Critical analytics and compliance integration tests.
 Business Value: Powers $17K MRR from analytics features and quality assurance.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import time
 import uuid
@@ -22,11 +15,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-# Add project root to path
-from .test_fixtures_common import mock_infrastructure, test_database
-
-# Add project root to path
-
+from netra_backend.tests.integration.test_fixtures_common import mock_infrastructure, test_database
 
 class TestAnalyticsComplianceIntegration:
     """Analytics and compliance integration tests"""

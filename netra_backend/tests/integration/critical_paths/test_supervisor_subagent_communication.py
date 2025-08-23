@@ -10,21 +10,10 @@ L2 Test: Uses real internal components within same process but mocks external LL
 Validates agent communication patterns, tool execution, state management, and error propagation.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -42,7 +31,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.base import BaseSubAgent
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
@@ -53,17 +41,12 @@ from netra_backend.app.schemas.registry import AgentResult, DeepAgentState
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-
-
 logger = logging.getLogger(__name__)
-
 
 class MockLLMResponse:
 
     """Mock LLM response for testing."""
     
-
     def __init__(self, content: str, token_count: int = 100):
 
         self.content = content
@@ -80,12 +63,10 @@ class MockLLMResponse:
 
         }
 
-
 class MockWebSocketManager:
 
     """Mock WebSocket manager for testing agent communication."""
     
-
     def __init__(self):
 
         self.sent_messages = []
@@ -94,7 +75,6 @@ class MockWebSocketManager:
 
         self.message_history = []
         
-
     async def send_agent_update(self, run_id: str, agent_name: str, update: Dict[str, Any]):
 
         """Mock sending agent update via WebSocket."""
@@ -117,7 +97,6 @@ class MockWebSocketManager:
 
         self.message_history.append(message)
         
-
     async def send_agent_started(self, run_id: str, agent_name: str):
 
         """Mock sending agent started notification."""
@@ -136,7 +115,6 @@ class MockWebSocketManager:
 
         self.sent_messages.append(message)
         
-
     async def send_agent_completed(self, run_id: str, agent_name: str, result: Dict[str, Any]):
 
         """Mock sending agent completed notification."""
@@ -157,14 +135,12 @@ class MockWebSocketManager:
 
         self.sent_messages.append(message)
         
-
     def get_messages_for_run(self, run_id: str) -> List[Dict[str, Any]]:
 
         """Get all messages for a specific run ID."""
 
         return [msg for msg in self.message_history if msg.get("run_id") == run_id]
         
-
     def clear_messages(self):
 
         """Clear message history."""
@@ -173,12 +149,10 @@ class MockWebSocketManager:
 
         self.message_history.clear()
 
-
 class MockToolDispatcher:
 
     """Mock tool dispatcher for testing tool execution."""
     
-
     def __init__(self):
 
         self.tool_executions = []
@@ -195,7 +169,6 @@ class MockToolDispatcher:
 
         ]
         
-
     async def execute_tool(self, tool_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
 
         """Mock tool execution."""
@@ -228,26 +201,22 @@ class MockToolDispatcher:
 
         }
         
-
     def get_available_tools(self) -> List[str]:
 
         """Get list of available tools."""
 
         return self.available_tools.copy()
         
-
     def get_tool_executions(self) -> List[Dict[str, Any]]:
 
         """Get history of tool executions."""
 
         return self.tool_executions.copy()
 
-
 class SupervisorSubAgentCommunicationTester:
 
     """Comprehensive L2 tester for supervisor-subagent communication."""
     
-
     def __init__(self):
 
         self.supervisor_agent: Optional[SupervisorAgent] = None
@@ -282,7 +251,6 @@ class SupervisorSubAgentCommunicationTester:
 
         }
         
-
     async def initialize(self):
 
         """Initialize all components for L2 testing."""
@@ -297,19 +265,16 @@ class SupervisorSubAgentCommunicationTester:
 
             await self._setup_sub_agents()
             
-
             logger.info("L2 supervisor-subagent communication tester initialized")
 
             return True
             
-
         except Exception as e:
 
             logger.error(f"Failed to initialize L2 tester: {e}")
 
             return False
     
-
     async def _setup_mock_llm_manager(self):
 
         """Setup mock LLM manager with realistic responses."""
@@ -362,19 +327,16 @@ class SupervisorSubAgentCommunicationTester:
 
                 return MockLLMResponse("Mock response for general request")
         
-
         self.mock_llm_manager.generate_response = mock_generate_response
 
         self.mock_llm_manager.get_model_config = MagicMock(return_value={"model": "mock-model"})
         
-
     async def _setup_mock_database(self):
 
         """Setup mock database session."""
 
         self.mock_db_session = AsyncMock(spec=AsyncSession)
         
-
     async def _setup_supervisor_agent(self):
 
         """Setup supervisor agent with real components and mocked dependencies."""
@@ -391,7 +353,6 @@ class SupervisorSubAgentCommunicationTester:
 
         )
         
-
     async def _setup_sub_agents(self):
 
         """Setup sub-agents for testing."""
@@ -413,7 +374,6 @@ class SupervisorSubAgentCommunicationTester:
 
         self.sub_agents["triage"] = triage_agent
         
-
     async def test_basic_delegation_flow(self, user_request: str) -> Dict[str, Any]:
 
         """Test basic supervisor to sub-agent delegation flow."""
@@ -422,7 +382,6 @@ class SupervisorSubAgentCommunicationTester:
 
         start_time = time.time()
         
-
         try:
 
             self.communication_metrics["total_delegations"] += 1
@@ -465,12 +424,10 @@ class SupervisorSubAgentCommunicationTester:
 
             assert len(messages) > 0
             
-
             self.communication_metrics["successful_delegations"] += 1
 
             self.communication_metrics["websocket_messages"] += len(messages)
             
-
             return {
 
                 "success": True,
@@ -487,7 +444,6 @@ class SupervisorSubAgentCommunicationTester:
 
             }
             
-
         except Exception as e:
 
             self.communication_metrics["failed_delegations"] += 1
@@ -504,7 +460,6 @@ class SupervisorSubAgentCommunicationTester:
 
             }
     
-
     async def test_sub_agent_tool_execution(self, agent_name: str, 
 
                                           tool_name: str) -> Dict[str, Any]:
@@ -515,7 +470,6 @@ class SupervisorSubAgentCommunicationTester:
 
             return {"success": False, "error": f"Agent {agent_name} not found"}
             
-
         try:
 
             sub_agent = self.sub_agents[agent_name]
@@ -550,10 +504,8 @@ class SupervisorSubAgentCommunicationTester:
 
             ]
             
-
             self.communication_metrics["tool_executions"] += len(relevant_executions)
             
-
             return {
 
                 "success": True,
@@ -566,7 +518,6 @@ class SupervisorSubAgentCommunicationTester:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -579,7 +530,6 @@ class SupervisorSubAgentCommunicationTester:
 
             }
     
-
     async def test_parallel_sub_agent_execution(self, 
 
                                               requests: List[str]) -> Dict[str, Any]:
@@ -588,7 +538,6 @@ class SupervisorSubAgentCommunicationTester:
 
         start_time = time.time()
         
-
         try:
             # Create tasks for parallel execution
 
@@ -630,7 +579,6 @@ class SupervisorSubAgentCommunicationTester:
 
             ]
             
-
             if len(execution_times) >= 2:
 
                 time_spread = max(execution_times) - min(execution_times)
@@ -641,7 +589,6 @@ class SupervisorSubAgentCommunicationTester:
 
                 concurrent_execution = True  # Single execution always concurrent
             
-
             return {
 
                 "success": True,
@@ -658,7 +605,6 @@ class SupervisorSubAgentCommunicationTester:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -671,14 +617,12 @@ class SupervisorSubAgentCommunicationTester:
 
             }
     
-
     async def test_state_persistence_across_agents(self) -> Dict[str, Any]:
 
         """Test state persistence and sharing across agent interactions."""
 
         test_id = str(uuid.uuid4())
         
-
         try:
             # Step 1: Initial state with supervisor
 
@@ -724,7 +668,6 @@ class SupervisorSubAgentCommunicationTester:
 
             state_modifications = []
             
-
             if final_state.triage_result:
 
                 state_modifications.append("triage_result")
@@ -737,10 +680,8 @@ class SupervisorSubAgentCommunicationTester:
 
                 state_modifications.append("optimizations_result")
             
-
             self.communication_metrics["state_transitions"] += len(state_modifications)
             
-
             return {
 
                 "success": True,
@@ -757,7 +698,6 @@ class SupervisorSubAgentCommunicationTester:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -770,30 +710,25 @@ class SupervisorSubAgentCommunicationTester:
 
             }
     
-
     async def test_error_propagation_from_subagent(self) -> Dict[str, Any]:
 
         """Test error propagation from sub-agent to supervisor."""
 
         test_id = str(uuid.uuid4())
         
-
         try:
             # Simulate sub-agent error by breaking tool dispatcher
 
             original_execute = self.mock_tool_dispatcher.execute_tool
             
-
             async def failing_execute_tool(tool_name: str, params: Dict[str, Any]):
 
                 raise NetraException("Simulated tool execution failure", 
 
                                    error_code="TOOL_EXECUTION_ERROR")
             
-
             self.mock_tool_dispatcher.execute_tool = failing_execute_tool
             
-
             try:
                 # Execute delegation that should trigger tool error
 
@@ -833,10 +768,8 @@ class SupervisorSubAgentCommunicationTester:
 
                 ]
                 
-
                 self.communication_metrics["error_recoveries"] += 1
                 
-
                 return {
 
                     "success": True,
@@ -851,13 +784,11 @@ class SupervisorSubAgentCommunicationTester:
 
                 }
                 
-
             finally:
                 # Restore original function
 
                 self.mock_tool_dispatcher.execute_tool = original_execute
                 
-
         except Exception as e:
 
             return {
@@ -870,14 +801,12 @@ class SupervisorSubAgentCommunicationTester:
 
             }
     
-
     async def test_quality_gates_integration(self) -> Dict[str, Any]:
 
         """Test quality gate integration in agent communication."""
 
         test_id = str(uuid.uuid4())
         
-
         try:
             # Test with high-quality request
 
@@ -889,7 +818,6 @@ class SupervisorSubAgentCommunicationTester:
 
             )
             
-
             quality_state = DeepAgentState(
 
                 user_request=quality_request,
@@ -928,7 +856,6 @@ class SupervisorSubAgentCommunicationTester:
 
             quality_indicators = []
             
-
             for message in messages:
 
                 update = message.get("update", {})
@@ -943,7 +870,6 @@ class SupervisorSubAgentCommunicationTester:
 
                         quality_indicators.append("quality_score")
             
-
             return {
 
                 "success": True,
@@ -960,7 +886,6 @@ class SupervisorSubAgentCommunicationTester:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -973,7 +898,6 @@ class SupervisorSubAgentCommunicationTester:
 
             }
     
-
     def get_performance_metrics(self) -> Dict[str, Any]:
 
         """Get comprehensive performance metrics."""
@@ -984,7 +908,6 @@ class SupervisorSubAgentCommunicationTester:
 
                        total_delegations * 100)
         
-
         return {
 
             "communication_metrics": self.communication_metrics,
@@ -1017,7 +940,6 @@ class SupervisorSubAgentCommunicationTester:
 
         }
     
-
     async def cleanup(self):
 
         """Clean up test resources."""
@@ -1037,11 +959,9 @@ class SupervisorSubAgentCommunicationTester:
 
                 self.communication_metrics[key] = 0
                 
-
         except Exception as e:
 
             logger.error(f"Cleanup failed: {e}")
-
 
 @pytest.fixture
 
@@ -1053,16 +973,13 @@ async def communication_tester():
 
     initialized = await tester.initialize()
     
-
     if not initialized:
 
         pytest.fail("Failed to initialize communication tester")
     
-
     yield tester
 
     await tester.cleanup()
-
 
 @pytest.mark.asyncio
 
@@ -1074,7 +991,6 @@ class TestSupervisorSubAgentCommunication:
 
     """L2 integration tests for supervisor-subagent communication."""
     
-
     async def test_basic_supervisor_delegation(self, communication_tester):
 
         """Test basic supervisor to sub-agent delegation."""
@@ -1097,7 +1013,6 @@ class TestSupervisorSubAgentCommunication:
 
         assert result["execution_time"] < 30.0  # More generous timeout
         
-
         if result["success"]:
 
             assert result["final_state"] is not None
@@ -1109,7 +1024,6 @@ class TestSupervisorSubAgentCommunication:
 
             print(f"Test failed with error: {result.get('error', 'No error message')}")
     
-
     async def test_triage_agent_tool_execution(self, communication_tester):
 
         """Test triage agent tool execution through supervisor."""
@@ -1120,7 +1034,6 @@ class TestSupervisorSubAgentCommunication:
 
         )
         
-
         assert result["success"] is True
 
         assert result["agent_name"] == "triage"
@@ -1129,7 +1042,6 @@ class TestSupervisorSubAgentCommunication:
 
         assert result["final_state"] is not None
     
-
     async def test_parallel_agent_execution(self, communication_tester):
 
         """Test parallel execution of multiple agent requests."""
@@ -1144,10 +1056,8 @@ class TestSupervisorSubAgentCommunication:
 
         ]
         
-
         result = await communication_tester.test_parallel_sub_agent_execution(test_requests)
         
-
         assert result["success"] is True
 
         assert result["successful_executions"] >= 2  # At least 2 should succeed
@@ -1156,14 +1066,12 @@ class TestSupervisorSubAgentCommunication:
 
         assert result["concurrent_execution"] is True
     
-
     async def test_state_persistence_flow(self, communication_tester):
 
         """Test state persistence across agent interactions."""
 
         result = await communication_tester.test_state_persistence_across_agents()
         
-
         assert result["success"] is True
 
         assert result["final_step_count"] >= result["initial_step_count"]
@@ -1172,14 +1080,12 @@ class TestSupervisorSubAgentCommunication:
 
         assert result["metadata_preserved"] is True
     
-
     async def test_error_handling_propagation(self, communication_tester):
 
         """Test error propagation from sub-agent to supervisor."""
 
         result = await communication_tester.test_error_propagation_from_subagent()
         
-
         assert result["success"] is True
 
         assert result["error_handled"] is True
@@ -1187,21 +1093,18 @@ class TestSupervisorSubAgentCommunication:
         assert result["final_state_exists"] is True
         # Error messages may or may not be present depending on implementation
     
-
     async def test_quality_gates_integration(self, communication_tester):
 
         """Test quality gate integration in agent communication."""
 
         result = await communication_tester.test_quality_gates_integration()
         
-
         assert result["success"] is True
 
         assert result["execution_time"] < 10.0
         # Quality gates may not be fully implemented yet
         # assert result["quality_gates_active"] is True
     
-
     async def test_websocket_message_flow(self, communication_tester):
 
         """Test WebSocket message flow during agent execution."""
@@ -1213,10 +1116,8 @@ class TestSupervisorSubAgentCommunication:
 
         )
         
-
         assert result["success"] is True
         
-
         messages = result["websocket_messages"]
 
         assert len(messages) > 0
@@ -1235,7 +1136,6 @@ class TestSupervisorSubAgentCommunication:
 
             assert "run_id" in message or "type" in message
     
-
     async def test_tool_dispatcher_integration(self, communication_tester):
 
         """Test tool dispatcher integration across agents."""
@@ -1253,7 +1153,6 @@ class TestSupervisorSubAgentCommunication:
 
         )
         
-
         assert result["success"] is True
         
         # Verify tool executions occurred
@@ -1264,7 +1163,6 @@ class TestSupervisorSubAgentCommunication:
 
         assert isinstance(tool_executions, list)
     
-
     async def test_agent_lifecycle_management(self, communication_tester):
 
         """Test complete agent lifecycle through supervisor."""
@@ -1278,7 +1176,6 @@ class TestSupervisorSubAgentCommunication:
 
         ]
         
-
         results = []
 
         for request in requests:
@@ -1301,7 +1198,6 @@ class TestSupervisorSubAgentCommunication:
 
             assert result["execution_time"] < 10.0
     
-
     async def test_performance_benchmarks(self, communication_tester):
 
         """Test performance benchmarks for agent orchestration."""
@@ -1317,7 +1213,6 @@ class TestSupervisorSubAgentCommunication:
 
         ]
         
-
         execution_times = []
 
         for test_request in performance_tests:
@@ -1350,7 +1245,6 @@ class TestSupervisorSubAgentCommunication:
 
         assert metrics["websocket_efficiency"] > 0  # Some WebSocket messages
     
-
     async def test_comprehensive_integration_scenario(self, communication_tester):
 
         """Test comprehensive integration scenario covering all components."""
@@ -1392,7 +1286,6 @@ class TestSupervisorSubAgentCommunication:
 
         )
         
-
         assert result["success"] is True
 
         assert result["final_state"] is not None

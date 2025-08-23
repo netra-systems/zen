@@ -16,17 +16,10 @@ L3 Integration Test Level:
 - Measures actual performance metrics and limits
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -41,7 +34,6 @@ import pytest
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 
-# Add project root to path
 from netra_backend.app.services.websocket.message_queue import (
     MessagePriority,
     MessageQueue,
@@ -49,10 +41,7 @@ from netra_backend.app.services.websocket.message_queue import (
     QueuedMessage,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class ConcurrencyMetrics:
@@ -64,7 +53,6 @@ class ConcurrencyMetrics:
     average_queue_time: float = 0.0
     average_processing_time: float = 0.0
     throughput_per_second: float = 0.0
-
 
 class JobConcurrencyLimitsL3Manager:
     """Manages L3 job concurrency limits tests with real infrastructure."""
@@ -501,7 +489,6 @@ class JobConcurrencyLimitsL3Manager:
         except Exception as e:
             logger.error(f"Concurrency test cleanup failed: {e}")
 
-
 @pytest.fixture
 async def concurrency_limits_manager():
     """Create concurrency limits manager for L3 testing."""
@@ -509,7 +496,6 @@ async def concurrency_limits_manager():
     await manager.initialize_test_infrastructure()
     yield manager
     await manager.cleanup_test_infrastructure()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -540,7 +526,6 @@ async def test_basic_worker_concurrency_limits_l3(concurrency_limits_manager):
     assert metrics.max_concurrent_jobs <= concurrency_limits_manager.max_concurrent_workers, \
         f"Worker limit exceeded: {metrics.max_concurrent_jobs}"
     assert metrics.total_jobs_processed >= 5, "Insufficient job processing"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -600,7 +585,6 @@ async def test_per_user_job_limits_l3(concurrency_limits_manager):
     assert heavy_user_completed <= concurrency_limits_manager.max_jobs_per_user, \
         f"Heavy user exceeded limit: {heavy_user_completed}"
     assert other_users_completed >= 2, "Other users should process normally"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -678,7 +662,6 @@ async def test_mixed_workload_concurrency_l3(concurrency_limits_manager):
     assert quick_completed >= 6, f"Quick jobs should complete faster: {quick_completed}"
     assert cpu_completed >= 1, f"Some CPU jobs should complete: {cpu_completed}"
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_concurrency_under_high_load_l3(concurrency_limits_manager):
@@ -736,7 +719,6 @@ async def test_concurrency_under_high_load_l3(concurrency_limits_manager):
     # Some rejections are expected under high load, but should be controlled
     assert rejection_rate < 0.4, f"Too many job rejections under load: {rejection_rate * 100}%"
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 async def test_dynamic_concurrency_adjustment_l3(concurrency_limits_manager):
@@ -783,7 +765,6 @@ async def test_dynamic_concurrency_adjustment_l3(concurrency_limits_manager):
     if later_events:
         max_later_concurrent = max(e["active_jobs"] for e in later_events)
         assert max_later_concurrent > 5, "Should achieve higher concurrency after limit increase"
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

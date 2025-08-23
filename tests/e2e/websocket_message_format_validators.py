@@ -31,7 +31,7 @@ class BaseValidator:
 class MessageFormatValidator(BaseValidator):
     """Core validator for WebSocket message formats."""
     
-    async def establish_test_connection(self, user_id: str) -> RealWebSocketClient:
+    async def test_establish_test_connection(self, user_id: str) -> RealWebSocketClient:
         return await self.establish_connection(user_id)
     
     async def collect_and_validate_agent_events(self, client: RealWebSocketClient, 
@@ -163,7 +163,7 @@ class MessageFormatValidator(BaseValidator):
 class FieldConsistencyChecker(BaseValidator):
     """Specialized validator for field name consistency."""
     
-    async def establish_field_test_connection(self, user_id: str) -> RealWebSocketClient:
+    async def test_establish_field_test_connection(self, user_id: str) -> RealWebSocketClient:
         return await self.establish_connection(user_id)
     
     async def validate_content_field_mapping(self, client: RealWebSocketClient,

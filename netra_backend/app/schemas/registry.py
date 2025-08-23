@@ -60,6 +60,7 @@ from netra_backend.app.schemas.core_enums import (
 from netra_backend.app.schemas.core_models import (
     Message,
     MessageMetadata,
+    Optimization,
     Thread,
     ThreadMetadata,
     User,
@@ -87,6 +88,7 @@ from netra_backend.app.schemas.websocket_models import (
     DeleteThreadPayload,
     MessageData,
     MessageToUser,
+    QueueMessage,
     RateLimitInfo,
     ServerMessage,
     StartAgentPayload,
@@ -132,7 +134,7 @@ __all__ = [
     "CorpusAuditAction", "CorpusAuditStatus", "TaskPriority", "MessageTypeLiteral",
     
     # Core models  
-    "UserBase", "UserCreate", "UserCreateOAuth", "User", "Message", "Thread", 
+    "UserBase", "UserCreate", "UserCreateOAuth", "User", "Message", "Thread", "Optimization",
     "MessageMetadata", "ThreadMetadata",
     
     # Agent models
@@ -144,7 +146,7 @@ __all__ = [
     "UserMessage", "AgentMessage", "StopAgent", "StopAgentPayload", "StreamEvent",
     "AgentStarted", "SubAgentUpdate", "AgentCompleted", "StartAgentPayload",
     "WebSocketMessageIn", "CreateThreadPayload", "SwitchThreadPayload", 
-    "DeleteThreadPayload", "MessageData", "ThreadHistoryResponse",
+    "DeleteThreadPayload", "QueueMessage", "MessageData", "ThreadHistoryResponse",
     "AgentResponseData", "AgentResponse", "AgentCompletedPayload", "AgentStoppedPayload",
     "AgentUpdate", "AgentLog", "ToolCall", "ToolResult", "StreamChunk", "StreamComplete",
     "BaseWebSocketMessage", "ClientToServerMessage", "ServerToClientMessage", "ServerMessage",
@@ -164,6 +166,7 @@ TYPE_REGISTRY = {
     "User": User,
     "Message": Message, 
     "Thread": Thread,
+    "Optimization": Optimization,
     "MessageMetadata": MessageMetadata,
     "ThreadMetadata": ThreadMetadata,
     
@@ -185,6 +188,7 @@ TYPE_REGISTRY = {
     "SwitchThreadPayload": SwitchThreadPayload,
     "DeleteThreadPayload": DeleteThreadPayload,
     "WebSocketMessageIn": WebSocketMessageIn,
+    "QueueMessage": QueueMessage,
     "MessageData": MessageData,
     "ThreadHistoryResponse": ThreadHistoryResponse,
     "AgentResponseData": AgentResponseData,

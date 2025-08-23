@@ -3,17 +3,10 @@ Integration and performance tests for Data Sub Agent
 Focuses on integration with other components and performance
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime
@@ -23,16 +16,13 @@ import pytest
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
-# Add project root to path
-from ..helpers.shared_test_types import (
+from netra_backend.tests.agents.helpers.shared_test_types import (
     TestIntegration as SharedTestIntegration,
 )
 
-# Add project root to path
-
-
 class TestIntegration(SharedTestIntegration):
     """Integration tests with other components"""
+    @pytest.mark.asyncio
     async def test_integration_with_websocket(self):
         """Test integration with WebSocket for real-time updates"""
         mock_llm_manager = Mock()
@@ -46,6 +36,8 @@ class TestIntegration(SharedTestIntegration):
         await agent.process_and_stream(data, mock_ws)
         
         mock_ws.send.assert_called()
+
+    @pytest.mark.asyncio
 
     async def test_integration_with_database(self):
         """Test integration with database persistence"""
@@ -74,6 +66,8 @@ class TestIntegration(SharedTestIntegration):
         assert result["id"] == "saved_123"
         assert result["status"] == "processed"
 
+    @pytest.mark.asyncio
+
     async def test_integration_with_supervisor(self):
         """Test integration with supervisor agent"""
         mock_llm_manager = Mock()
@@ -91,9 +85,9 @@ class TestIntegration(SharedTestIntegration):
         assert result["status"] == "completed"
         supervisor_request["callback"].assert_called_once()
 
-
 class TestPerformance:
     """Performance and optimization tests"""
+    @pytest.mark.asyncio
     async def test_concurrent_processing(self):
         """Test concurrent data processing"""
         mock_llm_manager = Mock()
@@ -109,6 +103,8 @@ class TestPerformance:
         
         assert len(results) == 100
         assert duration < 5.0  # Should complete within 5 seconds
+
+    @pytest.mark.asyncio
 
     async def test_memory_efficiency(self):
         """Test memory efficiency with large datasets"""
@@ -128,11 +124,11 @@ class TestPerformance:
             
         assert len(results) == 10000
 
-
 class TestStateManagement:
     """Test state management and persistence"""
     
     @pytest.mark.skip(reason="State persistence implementation conflicts with enum state")
+    @pytest.mark.asyncio
     async def test_state_persistence(self):
         """Test agent state persistence"""
         mock_llm_manager = Mock()
@@ -173,6 +169,7 @@ class TestStateManagement:
         assert new_agent.context["last_processed"] == "item_123"
         
     @pytest.mark.skip(reason="State persistence implementation conflicts with enum state")
+    @pytest.mark.asyncio
     async def test_state_recovery(self):
         """Test state recovery after failure"""
         mock_llm_manager = Mock()

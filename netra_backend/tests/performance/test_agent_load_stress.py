@@ -5,22 +5,11 @@ Comprehensive testing for agent system under load conditions.
 Tests concurrent agent requests, resource isolation, and performance degradation.
 """
 
-# Add project root to path
-
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from ..test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import gc
@@ -32,23 +21,18 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import psutil
 import pytest
-from ws_manager import WebSocketManager
+from netra_backend.app.ws_manager import WebSocketManager
 
-# Add project root to path
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
-# Add project root to path
-
-
 class AgentLoadTestFixtures:
 
     """Fixtures for agent load testing with ≤8 line functions."""
     
-
     @staticmethod
 
     def create_mock_dependencies() -> Dict[str, Any]:
@@ -67,7 +51,6 @@ class AgentLoadTestFixtures:
 
         }
     
-
     @staticmethod
 
     def create_load_test_params(concurrent_users: int) -> Dict[str, Any]:
@@ -86,12 +69,10 @@ class AgentLoadTestFixtures:
 
         }
 
-
 class PerformanceMetricsCollector:
 
     """Collects performance metrics during load tests."""
     
-
     def __init__(self):
 
         self.response_times: List[float] = []
@@ -102,28 +83,24 @@ class PerformanceMetricsCollector:
 
         self.resource_usage: List[Dict[str, float]] = []
     
-
     def record_response_time(self, duration: float) -> None:
 
         """Record response time for request."""
 
         self.response_times.append(duration)
     
-
     def record_error(self, error_type: str) -> None:
 
         """Record error occurrence by type."""
 
         self.error_counts[error_type] = self.error_counts.get(error_type, 0) + 1
     
-
     def record_throughput(self, requests_per_second: float) -> None:
 
         """Record throughput measurement."""
 
         self.throughput_samples.append(requests_per_second)
     
-
     def record_resource_usage(self) -> None:
 
         """Record current resource usage snapshot."""
@@ -142,7 +119,6 @@ class PerformanceMetricsCollector:
 
         })
     
-
     def get_percentiles(self) -> Dict[str, float]:
 
         """Calculate response time percentiles."""
@@ -163,12 +139,10 @@ class PerformanceMetricsCollector:
 
         }
 
-
 class AgentLoadSimulator:
 
     """Simulates load patterns for agent testing."""
     
-
     def __init__(self, metrics: PerformanceMetricsCollector):
 
         self.metrics = metrics
@@ -177,7 +151,6 @@ class AgentLoadSimulator:
 
         self.failed_requests = 0
     
-
     async def simulate_agent_request(self, agent: SupervisorAgent, 
 
                                    request_data: Dict[str, Any]) -> bool:
@@ -202,7 +175,6 @@ class AgentLoadSimulator:
 
             return False
     
-
     async def _execute_mock_agent_operation(self, agent: SupervisorAgent,
 
                                           request_data: Dict[str, Any]) -> None:
@@ -211,7 +183,6 @@ class AgentLoadSimulator:
         # Simulate realistic agent processing time (reduced for testing)
 
         await asyncio.sleep(0.01 + (0.02 * len(request_data.get('tools', []))))
-
 
 class TestAgentLoadScenarios:
 
@@ -229,12 +200,10 @@ class TestAgentLoadScenarios:
 
         metrics = PerformanceMetricsCollector()
         
-
         registry = AgentRegistry(mocks['llm_manager'], mocks['tool_dispatcher'])
 
         simulator = AgentLoadSimulator(metrics)
         
-
         await self._execute_ramp_up_test(registry, simulator, metrics)
         
         # Validate performance degradation is gradual
@@ -257,10 +226,8 @@ class TestAgentLoadScenarios:
 
         mocks = fixtures.create_mock_dependencies()
         
-
         metrics = PerformanceMetricsCollector()
         
-
         await self._execute_sustained_load_test(mocks, metrics, params)
         
         # Validate sustained performance (adjusted expectations)
@@ -289,7 +256,6 @@ class TestAgentLoadScenarios:
 
         burst_phases = [5, 20, 5]  # User counts per phase
         
-
         for phase_users in burst_phases:
 
             await self._execute_burst_phase(mocks, metrics, phase_users)
@@ -314,12 +280,10 @@ class TestAgentLoadScenarios:
 
         mocks = fixtures.create_mock_dependencies()
         
-
         agent_types = ['triage', 'data', 'optimization', 'actions', 'reporting']
 
         workload_results = {}
         
-
         for agent_type in agent_types:
 
             metrics = PerformanceMetricsCollector()
@@ -334,7 +298,6 @@ class TestAgentLoadScenarios:
 
             assert percentiles['p95'] < 2000  # Under 2 seconds for 95th percentile
     
-
     async def _execute_ramp_up_test(self, registry: AgentRegistry,
 
                                   simulator: AgentLoadSimulator,
@@ -353,7 +316,6 @@ class TestAgentLoadScenarios:
 
             await asyncio.sleep(2)  # Reduced stabilization period
     
-
     async def _execute_sustained_load_test(self, mocks: Dict[str, Any],
 
                                          metrics: PerformanceMetricsCollector,
@@ -366,7 +328,6 @@ class TestAgentLoadScenarios:
 
         concurrent_users = params['concurrent_users']
         
-
         start_time = time.perf_counter()
 
         while time.perf_counter() - start_time < duration:
@@ -381,7 +342,6 @@ class TestAgentLoadScenarios:
 
                 metrics.record_throughput(concurrent_users / throughput_duration)
     
-
     async def _execute_burst_phase(self, mocks: Dict[str, Any],
 
                                  metrics: PerformanceMetricsCollector,
@@ -400,7 +360,6 @@ class TestAgentLoadScenarios:
 
         await asyncio.gather(*tasks, return_exceptions=True)
     
-
     async def _test_agent_type_load(self, mocks: Dict[str, Any],
 
                                   metrics: PerformanceMetricsCollector,
@@ -419,7 +378,6 @@ class TestAgentLoadScenarios:
 
         await asyncio.gather(*tasks, return_exceptions=True)
     
-
     async def _simulate_concurrent_users(self, registry: AgentRegistry,
 
                                        simulator: AgentLoadSimulator,
@@ -432,7 +390,6 @@ class TestAgentLoadScenarios:
 
             registry.register_default_agents()
             
-
         tasks = []
 
         for _ in range(user_count):
@@ -451,10 +408,8 @@ class TestAgentLoadScenarios:
 
             tasks.append(task)
         
-
         await asyncio.gather(*tasks, return_exceptions=True)
     
-
     async def _simulate_request_batch(self, mocks: Dict[str, Any],
 
                                     metrics: PerformanceMetricsCollector,
@@ -473,7 +428,6 @@ class TestAgentLoadScenarios:
 
         await asyncio.gather(*tasks, return_exceptions=True)
     
-
     async def _simulate_user_session(self, mocks: Dict[str, Any],
 
                                    metrics: PerformanceMetricsCollector) -> None:
@@ -495,7 +449,6 @@ class TestAgentLoadScenarios:
 
             metrics.record_error(type(e).__name__)
     
-
     async def _simulate_agent_type_request(self, mocks: Dict[str, Any],
 
                                          metrics: PerformanceMetricsCollector,
@@ -515,7 +468,6 @@ class TestAgentLoadScenarios:
 
             await asyncio.sleep(processing_time)
             
-
             duration = time.perf_counter() - start_time
 
             metrics.record_response_time(duration)
@@ -523,7 +475,6 @@ class TestAgentLoadScenarios:
         except Exception as e:
 
             metrics.record_error(type(e).__name__)
-
 
 class TestAgentStressScenarios:
 
@@ -555,7 +506,6 @@ class TestAgentStressScenarios:
 
         assert sum(metrics.error_counts.values()) < stress_users * 0.5  # <50% failure
     
-
     async def _execute_capacity_stress_test(self, mocks: Dict[str, Any],
 
                                           metrics: PerformanceMetricsCollector,
@@ -574,7 +524,6 @@ class TestAgentStressScenarios:
 
         await asyncio.gather(*tasks, return_exceptions=True)
     
-
     async def _simulate_stress_request(self, mocks: Dict[str, Any],
 
                                      metrics: PerformanceMetricsCollector) -> None:
@@ -594,7 +543,6 @@ class TestAgentStressScenarios:
         except Exception as e:
 
             metrics.record_error(type(e).__name__)
-
 
 if __name__ == "__main__":
 

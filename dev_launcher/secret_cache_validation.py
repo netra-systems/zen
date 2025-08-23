@@ -11,8 +11,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Set, Tuple
 
 try:
-    from .cache_entry import CacheEntry, ContentHasher
-    from .cache_manager import CacheManager
+    from dev_launcher.cache_entry import CacheEntry, ContentHasher
+    from dev_launcher.cache_manager import CacheManager
 except ImportError:
     # Support standalone execution
     from cache_entry import CacheEntry, ContentHasher

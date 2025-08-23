@@ -1,17 +1,17 @@
 """Unified Message Flow Testing - Phase 3 Implementation
 
-Complete message lifecycle testing for core chat functionality that delivers customer value.
+# Complete message lifecycle testing for core chat functionality that delivers customer value. # Possibly broken comprehension
 Tests the complete flow: User input → Backend routing → Agent processing → Response streaming.
 
 Business Value Justification (BVJ):
-- Segment: All customer tiers (Free, Early, Mid, Enterprise) 
+    - Segment: All customer tiers (Free, Early, Mid, Enterprise) 
 - Business Goal: Ensure reliable chat functionality that drives user engagement and conversion
 - Value Impact: Chat reliability directly impacts user satisfaction and paid tier conversion
 - Revenue Impact: Prevents chat failures that could lose customers, protecting 100% of revenue
 
 Architecture:
-- 450-line file limit enforced through focused test modules
-- 25-line function limit for all functions
+#     - 450-line file limit enforced through focused test modules # Possibly broken comprehension
+# - 25-line function limit for all functions # Possibly broken comprehension
 - Tests real message flow end-to-end with all persistence layers
 - Validates both success and failure scenarios for comprehensive coverage
 """
@@ -49,36 +49,30 @@ from tests.e2e.message_flow_validators import (
     validate_persistence_consistency,
 )
 
-
 @pytest_asyncio.fixture
 async def message_flow_config():
     """Setup message flow test configuration"""
     config = TEST_CONFIG
     return config
 
-
 @pytest_asyncio.fixture
 async def flow_validator():
     """Setup message flow validator"""
     return MessageFlowValidator()
-
 
 @pytest_asyncio.fixture
 async def persistence_validator():
     """Setup persistence validator"""
     return MessagePersistenceValidator()
 
-
 @pytest_asyncio.fixture
 async def interruption_handler():
     """Setup stream interruption handler"""
     return StreamInterruptionHandler()
 
-
 # BVJ: Core value delivery - Complete message lifecycle ensures customer satisfaction
 @pytest.mark.asyncio
-async def test_complete_message_lifecycle(
-    message_flow_config, flow_validator
+async def test_complete_message_lifecycle(message_flow_config, flow_validator
 ):
     """Test complete message lifecycle: Send → Process → Stream → Display
     
@@ -102,8 +96,7 @@ async def test_complete_message_lifecycle(
         flow_complete = await validate_complete_flow(flow_validator)
         assert flow_complete, "Complete message flow validation failed"
 
-
-# BVJ: Concurrent handling ensures enterprise-grade reliability for high-value customers
+# # BVJ: Concurrent handling ensures enterprise-grade reliability for high-value customers # Possibly broken comprehension
 @pytest.mark.asyncio
 async def test_message_ordering_concurrent(message_flow_config, flow_validator):
     """Test correct message ordering under concurrent load
@@ -126,11 +119,9 @@ async def test_message_ordering_concurrent(message_flow_config, flow_validator):
         assert ordering_valid, "Message ordering was not maintained"
         assert success_count == len(concurrent_messages), "Not all messages processed"
 
-
 # BVJ: Data persistence ensures customer data is never lost, critical for trust
 @pytest.mark.asyncio 
-async def test_message_persistence(
-    message_flow_config, persistence_validator
+async def test_message_persistence(message_flow_config, persistence_validator
 ):
     """Test messages saved across all databases correctly
     
@@ -141,7 +132,6 @@ async def test_message_persistence(
         message_data = TestDataFactory.create_message_data(
             user.id, "Test persistence message"
         )
-        
         postgres_saved = await test_postgres_persistence(
             message_data, persistence_validator
         )
@@ -157,11 +147,9 @@ async def test_message_persistence(
         )
         assert consistency_valid, "Persistence consistency validation failed"
 
-
 # BVJ: Stream interruption handling prevents customer frustration and support tickets
 @pytest.mark.asyncio
-async def test_streaming_interruption(
-    message_flow_config, interruption_handler
+async def test_streaming_interruption(message_flow_config, interruption_handler
 ):
     """Test graceful handling of stream interrupts
     
@@ -172,7 +160,6 @@ async def test_streaming_interruption(
         message_data = TestDataFactory.create_message_data(
             user.id, "Test stream interruption"
         )
-        
         interruption_handled = await test_mid_stream_interruption(
             harness, message_data, interruption_handler
         )

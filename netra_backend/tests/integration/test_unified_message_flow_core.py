@@ -1,16 +1,9 @@
 """Core Tests - Split from test_unified_message_flow.py"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -22,19 +15,15 @@ from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from logging_config import central_logger
-from app.routes.utils.websocket_helpers import decode_token_payload
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.routes.utils.websocket_helpers import decode_token_payload
 from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.schemas.core_enums import AgentStatus, WebSocketMessageType
-from .test_ws_connection_mocks import MockWebSocket
+from netra_backend.tests.integration.test_ws_connection_mocks import MockWebSocket
 
-# Add project root to path
-from netra_backend.tests.jwt_token_helpers import JWTTestHelper
-
-# Add project root to path
-
+from netra_backend.tests.integration.jwt_token_helpers import JWTTestHelper
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""

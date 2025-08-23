@@ -128,15 +128,24 @@ class DatabaseIndexManager:
         """Run optimization on all databases."""
         logger.info("Starting database optimization across all databases")
         
-        results = await self.optimization_runner.run_all_optimizations()
-        
-        # Log summary
-        postgres_success = "error" not in results.get("postgres", {})
-        clickhouse_success = "error" not in results.get("clickhouse", {})
-        
-        logger.info(f"Database optimization completed - PostgreSQL: {postgres_success}, ClickHouse: {clickhouse_success}")
-        
-        return results
+        try:
+            results = await self.optimization_runner.run_all_optimizations()
+            
+            # Log summary
+            postgres_success = "error" not in results.get("postgres", {})
+            clickhouse_success = "error" not in results.get("clickhouse", {})
+            
+            logger.info(f"Database optimization completed - PostgreSQL: {postgres_success}, ClickHouse: {clickhouse_success}")
+            
+            return results
+        except Exception as e:
+            logger.error(f"Critical error in database optimization: {e}")
+            # Return graceful fallback instead of crashing
+            return {
+                "postgres": {"error": f"Optimization failed: {e}"},
+                "clickhouse": {"error": f"Optimization failed: {e}"},
+                "recommendations": []
+            }
     
     async def get_optimization_report(self) -> Dict[str, Any]:
         """Generate comprehensive optimization report."""

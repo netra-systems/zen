@@ -18,9 +18,19 @@ def _get_alembic_ini_path() -> str:
 
 
 def get_sync_database_url(database_url: str) -> str:
-    """Convert async database URL to sync for Alembic."""
+    """Convert async database URL to sync for Alembic.
+    
+    Handles various PostgreSQL URL formats:
+    - postgresql:// -> postgresql+psycopg2://
+    - postgres:// -> postgresql+psycopg2://
+    - postgresql+asyncpg:// -> postgresql+psycopg2://
+    """
     if database_url.startswith("postgresql+asyncpg://"):
         return database_url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
+    elif database_url.startswith("postgresql://"):
+        return database_url.replace("postgresql://", "postgresql+psycopg2://")
+    elif database_url.startswith("postgres://"):
+        return database_url.replace("postgres://", "postgresql+psycopg2://")
     return database_url
 
 

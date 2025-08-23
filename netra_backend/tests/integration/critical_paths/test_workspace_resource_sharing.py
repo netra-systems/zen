@@ -10,31 +10,21 @@ Critical Path: Workspace creation -> Access control -> Resource sharing -> Permi
 Coverage: Workspace management, sharing permissions, access isolation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import uuid
 
 import pytest
 
-# Add project root to path
-from .integration.test_helpers.team_collaboration_base import (
+from netra_backend.tests.integration.test_helpers.team_collaboration_base import (
     PermissionType,
-    # Add project root to path
     TeamCollaborationManager,
     TeamRole,
     validate_audit_trail,
 )
-
 
 @pytest.fixture
 async def team_with_multiple_roles():
@@ -71,7 +61,6 @@ async def team_with_multiple_roles():
             "viewer": viewer_id
         }
     }
-
 
 class TestWorkspaceResourceSharing:
     """Critical path tests for workspace management and resource sharing."""

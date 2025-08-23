@@ -13,15 +13,12 @@ Comprehensive test for agent failover and recovery:
 This test validates the complete agent failover and recovery system.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
 import random
 
-# Add project root to path
 import sys
 import time
 import uuid
@@ -32,9 +29,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import aiohttp
 import pytest
 import websockets
-
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Configuration
 BASE_URL = "http://localhost:8000"
@@ -61,7 +55,6 @@ RTO_TARGETS = {
     "data_sync_time": 15      # 15 seconds to sync state
 }
 
-
 class AgentInstance:
     """Represents an agent instance for testing."""
     
@@ -76,7 +69,6 @@ class AgentInstance:
         self.failure_count = 0
         self.circuit_breaker_open = False
         
-
 class AgentFailoverTester:
     """Test agent failover and recovery mechanisms."""
     
@@ -611,7 +603,6 @@ class AgentFailoverTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l4
@@ -681,7 +672,6 @@ async def test_agent_failover_recovery():
             
         assert critical_passed, f"Critical failover tests failed: {results}"
 
-
 async def main():
     """Run the test standalone."""
     print("="*80)
@@ -699,7 +689,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

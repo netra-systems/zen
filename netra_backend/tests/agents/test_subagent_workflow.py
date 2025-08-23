@@ -1,28 +1,18 @@
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-
-# Add project root to path
 
 @pytest.fixture
 def mock_db_session():
@@ -63,6 +53,7 @@ def mock_tool_dispatcher():
     return AsyncMock()
 
 # @pytest.mark.skip(reason="Complex mock setup issues with coroutines - needs refactoring")
+@pytest.mark.asyncio
 async def test_subagent_workflow_end_to_end(mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher):
     # Arrange
     # Mock the state persistence to avoid the coroutine issue

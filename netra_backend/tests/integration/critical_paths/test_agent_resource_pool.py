@@ -10,17 +10,10 @@ Critical Path: Resource allocation -> Pool sizing -> Utilization monitoring -> F
 Coverage: Resource pool strategies, allocation algorithms, utilization optimization, leak detection, scaling policies
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -34,14 +27,10 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import TaskPriority
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class ResourceType(Enum):
     """Types of resources in the pool."""
@@ -51,7 +40,6 @@ class ResourceType(Enum):
     LLM_CONNECTION = "llm_connection"
     DATABASE_CONNECTION = "database_connection"
 
-
 class ResourceState(Enum):
     """Resource allocation states."""
     AVAILABLE = "available"
@@ -59,7 +47,6 @@ class ResourceState(Enum):
     BUSY = "busy"
     MAINTENANCE = "maintenance"
     FAILED = "failed"
-
 
 @dataclass
 class ResourceMetrics:
@@ -78,7 +65,6 @@ class ResourceMetrics:
         if self.total_allocations == 0:
             return 0.0
         return (self.successful_allocations / self.total_allocations) * 100.0
-
 
 @dataclass
 class PooledResource:
@@ -117,7 +103,6 @@ class PooledResource:
         self.state = ResourceState.AVAILABLE
         self.allocated_at = None
         self.allocated_to = None
-
 
 class ResourcePool:
     """Manages a pool of resources with allocation and scaling."""
@@ -339,7 +324,6 @@ class ResourcePool:
             }
         }
 
-
 class AgentResourcePoolManager:
     """Manages multiple resource pools for different agent resource types."""
     
@@ -517,7 +501,6 @@ class AgentResourcePoolManager:
             "fair_scheduler_metrics": self.fair_scheduler.get_metrics()
         }
 
-
 class FairResourceScheduler:
     """Implements fair scheduling for resource allocation."""
     
@@ -576,13 +559,11 @@ class FairResourceScheduler:
             "total_usage": total_usage
         }
 
-
 @pytest.fixture
 async def agent_resource_pool_manager():
     """Create agent resource pool manager for testing."""
     manager = AgentResourcePoolManager()
     yield manager
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

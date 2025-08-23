@@ -8,17 +8,10 @@ ULTRA DEEP THINKING APPLIED: Each test designed for maximum agent reliability pr
 All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from typing import Any, Dict, Optional
@@ -28,7 +21,6 @@ import pytest
 
 from netra_backend.app.core.agent_recovery_base import BaseAgentRecoveryStrategy
 
-# Add project root to path
 # Core agent recovery components
 from netra_backend.app.core.agent_recovery_strategies import (
     DataAnalysisRecoveryStrategy,
@@ -36,7 +28,6 @@ from netra_backend.app.core.agent_recovery_strategies import (
 )
 from netra_backend.app.core.agent_recovery_types import AgentRecoveryConfig
 from netra_backend.app.core.error_recovery import RecoveryContext
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio
@@ -102,7 +93,6 @@ class TestTriageAgentRecoveryStrategy:
         # Assert - Timeout sets recovery time
         assert assessment['failure_type'] == 'timeout'
         assert assessment['estimated_recovery_time'] == 60
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio  
@@ -172,7 +162,6 @@ class TestTriageRecoveryExecution:
         # Assert - Exception handled gracefully
         assert result is None  # Should return None on failure
 
-
 @pytest.mark.critical  
 @pytest.mark.asyncio
 class TestDataAnalysisRecoveryStrategy:
@@ -238,7 +227,6 @@ class TestDataAnalysisRecoveryStrategy:
         assert assessment['estimated_recovery_time'] == 120
         assert 'data_availability' in assessment
 
-
 @pytest.mark.critical
 @pytest.mark.asyncio
 class TestAgentRecoveryErrorEscalation:
@@ -299,7 +287,6 @@ class TestAgentRecoveryErrorEscalation:
         assert context.error == original_error
         assert hasattr(context, 'timestamp')
         assert isinstance(assessment, dict)
-
 
 @pytest.mark.critical
 @pytest.mark.asyncio  

@@ -4,17 +4,10 @@ Tests the mandatory patterns from SPEC/websocket_reliability.xml to ensure
 zero message loss under all failure scenarios.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -23,17 +16,14 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.websocket.batch_message_core import MessageBatcher
 from netra_backend.app.websocket.batch_message_types import (
-    # Add project root to path
     BatchConfig,
     BatchingStrategy,
     MessageState,
     PendingMessage,
 )
 from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
-
 
 class TestNetworkFailureZeroMessageLoss:
     """Test zero message loss during network failures."""
@@ -152,7 +142,6 @@ class TestNetworkFailureZeroMessageLoss:
         sent_messages = [msg for msg in messages if msg.state == MessageState.SENT]
         assert len(sent_messages) == 0, "SENT messages not properly cleaned up"
 
-
 class TestTransactionalStateManagement:
     """Test atomic state management during failures."""
     
@@ -241,7 +230,6 @@ class TestTransactionalStateManagement:
         assert metrics["failed_messages"] == 1
         assert metrics["total_messages"] == 3
 
-
 class TestRetryMechanism:
     """Test exponential backoff retry mechanism."""
     
@@ -302,7 +290,6 @@ class TestRetryMechanism:
         should_retry = retry_manager.should_retry(msg)
         
         assert should_retry is False, "Retry limit not enforced"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

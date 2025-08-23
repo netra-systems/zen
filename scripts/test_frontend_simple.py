@@ -10,9 +10,6 @@ import sys
 from pathlib import Path
 
 # Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent
-FRONTEND_DIR = PROJECT_ROOT / "frontend"
-sys.path.insert(0, str(PROJECT_ROOT))
 
 
 def run_frontend_tests(test_level="smoke", args=None):

@@ -9,12 +9,10 @@ import pytest
 
 from netra_backend.app.core.fallback_handler import FallbackHandler, FallbackMetadata
 
-
 @pytest.fixture
 def fallback_handler():
     """Create FallbackHandler instance"""
     return FallbackHandler()
-
 
 @pytest.fixture
 def sample_metadata():
@@ -33,7 +31,6 @@ def sample_metadata():
         stacktrace="File test.py, line 42, in optimize_gpu"
     )
 
-
 @pytest.fixture
 def data_failure_metadata():
     """Create metadata for data failure tests"""
@@ -48,7 +45,6 @@ def data_failure_metadata():
             "tables": ["metrics", "logs"]
         }
     )
-
 
 @pytest.fixture
 def report_failure_metadata():
@@ -65,7 +61,6 @@ def report_failure_metadata():
         }
     )
 
-
 @pytest.fixture
 def llm_failure_metadata():
     """Create metadata for LLM failure tests"""
@@ -80,7 +75,6 @@ def llm_failure_metadata():
             "tokens": 450
         }
     )
-
 
 @pytest.fixture
 def validation_failure_metadata():
@@ -97,7 +91,6 @@ def validation_failure_metadata():
         }
     )
 
-
 @pytest.fixture
 def domain_detection_test_cases():
     """Test cases for domain detection"""
@@ -112,7 +105,6 @@ def domain_detection_test_cases():
         ("process large dataset", "data")
     ]
 
-
 @pytest.fixture
 def error_reason_test_cases():
     """Test cases for error reason extraction"""
@@ -122,7 +114,6 @@ def error_reason_test_cases():
         ("Very long error message " + "x" * 200, "Very long error message " + "x" * 77 + "..."),
         ("TimeoutError: Operation timed out", "Operation timed out"),
     ]
-
 
 @pytest.fixture
 def partial_data_test_cases():
@@ -137,7 +128,6 @@ def partial_data_test_cases():
          "- mixed: value\n- list: 2 items collected\n- dict: Data structure with 1 fields")
     ]
 
-
 @pytest.fixture
 def summarize_data_test_cases():
     """Test cases for data summarization"""
@@ -148,7 +138,6 @@ def summarize_data_test_cases():
         ({"single": "value"}, "Some preliminary data was collected"),
         ({"empty_list": [], "empty_dict": {}}, "Some preliminary data was collected")
     ]
-
 
 @pytest.fixture
 def data_source_test_cases():
@@ -161,7 +150,6 @@ def data_source_test_cases():
         (FallbackMetadata("", "Unknown error", partial_data=None), "data source")
     ]
 
-
 @pytest.fixture
 def alternative_sources_test_cases():
     """Test cases for alternative source suggestions"""
@@ -171,7 +159,6 @@ def alternative_sources_test_cases():
         ("file system", ["Object storage", "Database export", "API data"]),
         ("unknown_source", ["Manual data export", "Alternative API", "Cached results"])
     ]
-
 
 @pytest.fixture
 def limitation_test_cases():
@@ -185,7 +172,6 @@ def limitation_test_cases():
         ("Unknown error occurred", "technical constraints")
     ]
 
-
 @pytest.fixture
 def optimization_results_test_cases():
     """Test cases for optimization results formatting"""
@@ -196,7 +182,6 @@ def optimization_results_test_cases():
         ({"bottlenecks": ["cpu", "memory"]}, "Bottlenecks identified: ['cpu', 'memory']"),
         ({"recommendations": ["cache", "batch", "parallel"]}, "Recommendations generated: 3"),
     ]
-
 
 @pytest.fixture
 def comprehensive_test_scenarios():

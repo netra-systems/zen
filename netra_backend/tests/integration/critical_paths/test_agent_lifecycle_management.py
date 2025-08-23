@@ -10,17 +10,10 @@ Critical Path: Agent creation -> State initialization -> Task execution -> State
 Coverage: Full agent lifecycle, state preservation, error recovery, resource management
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -36,7 +29,6 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.schemas.registry import (
@@ -48,10 +40,7 @@ from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.llm.llm_manager import LLMManager
 from netra_backend.app.services.state_persistence import StatePersistenceService
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class AgentLifecycleManager:
     """Manages agent lifecycle testing with real state persistence."""
@@ -223,7 +212,6 @@ class AgentLifecycleManager:
             "execution_history_length": len(self.execution_history)
         }
 
-
 @pytest.fixture
 async def lifecycle_manager():
     """Create agent lifecycle manager for testing."""
@@ -233,7 +221,6 @@ async def lifecycle_manager():
     # Cleanup all agents
     for agent_id in list(manager.active_agents.keys()):
         await manager.cleanup_agent(agent_id)
-
 
 @pytest.mark.asyncio
 async def test_agent_creation_and_initialization(lifecycle_manager):
@@ -260,7 +247,6 @@ async def test_agent_creation_and_initialization(lifecycle_manager):
         if event["action"] == "agent_created" and event["agent_id"] == agent_id
     ]
     assert len(creation_events) == 1
-
 
 @pytest.mark.asyncio
 async def test_agent_task_execution_lifecycle(lifecycle_manager):
@@ -306,7 +292,6 @@ async def test_agent_task_execution_lifecycle(lifecycle_manager):
     ]
     assert len(state_updates) >= 2  # running -> completed
 
-
 @pytest.mark.asyncio
 async def test_agent_state_persistence_and_recovery(lifecycle_manager):
     """Test that agent state persists and can be recovered."""
@@ -333,7 +318,6 @@ async def test_agent_state_persistence_and_recovery(lifecycle_manager):
     # Verify metadata preservation
     assert "result" in recovered_state.metadata
     assert "execution_time" in recovered_state.metadata
-
 
 @pytest.mark.asyncio
 async def test_agent_error_handling_and_recovery(lifecycle_manager):
@@ -367,7 +351,6 @@ async def test_agent_error_handling_and_recovery(lifecycle_manager):
     with patch.object(BaseSubAgent, 'process_message', return_value={"status": "recovered"}):
         result = await lifecycle_manager.execute_agent_task(agent_id, recovery_task)
         assert result["status"] == "recovered"
-
 
 @pytest.mark.asyncio
 async def test_concurrent_agent_management(lifecycle_manager):
@@ -410,7 +393,6 @@ async def test_concurrent_agent_management(lifecycle_manager):
     
     # Verify agents cleaned up
     assert len(lifecycle_manager.active_agents) == 0
-
 
 @pytest.mark.asyncio
 async def test_agent_performance_metrics(lifecycle_manager):

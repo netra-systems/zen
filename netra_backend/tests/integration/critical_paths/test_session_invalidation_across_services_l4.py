@@ -12,17 +12,10 @@ Critical scenarios: Single logout invalidates all sessions, WebSocket terminatio
 Redis sessions removed, JWT tokens blacklisted, API calls rejected, multi-device invalidation.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -36,7 +29,6 @@ import pytest
 import websockets
 from l4_staging_critical_base import L4StagingCriticalPathTestBase
 
-
 @dataclass
 class SessionData:
     """Container for session information."""
@@ -44,7 +36,6 @@ class SessionData:
     user_id: str
     access_token: str
     device_id: str = ""
-
 
 class SessionInvalidationL4TestSuite(L4StagingCriticalPathTestBase):
     """L4 test suite for session invalidation across services in staging."""
@@ -391,7 +382,6 @@ class SessionInvalidationL4TestSuite(L4StagingCriticalPathTestBase):
             except Exception:
                 pass
 
-
 # Test fixtures and cases
 
 @pytest.fixture
@@ -401,7 +391,6 @@ async def session_invalidation_l4_suite():
     await suite.initialize_l4_environment()
     yield suite
     await suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.L4
@@ -414,7 +403,6 @@ async def test_single_session_logout_invalidation_l4(session_invalidation_l4_sui
     test_scenarios = test_results.details.get("test_scenarios", {})
     single_session = test_scenarios.get("single_session", {})
     assert single_session.get("success", False) is True, "Single session invalidation failed"
-
 
 @pytest.mark.asyncio
 @pytest.mark.L4
@@ -431,7 +419,6 @@ async def test_multi_device_session_invalidation_l4(session_invalidation_l4_suit
     assert devices_tested >= 2, f"Insufficient devices tested: {devices_tested}"
     assert successful_invalidations == devices_tested, f"Not all devices invalidated"
 
-
 @pytest.mark.asyncio
 @pytest.mark.L4
 @pytest.mark.staging
@@ -445,7 +432,6 @@ async def test_websocket_termination_on_logout_l4(session_invalidation_l4_suite)
     assert websocket_result.get("websocket_active_before", False) is True, "WebSocket not active before"
     assert websocket_result.get("websocket_disconnected_after", False) is True, "WebSocket not disconnected"
 
-
 @pytest.mark.asyncio
 @pytest.mark.L4
 @pytest.mark.staging
@@ -454,7 +440,6 @@ async def test_session_invalidation_performance_l4(session_invalidation_l4_suite
     test_results = await session_invalidation_l4_suite.run_complete_critical_path_test()
     assert test_results.average_response_time < 5.0, f"Response time too high: {test_results.average_response_time}s"
     assert test_results.success_rate >= 80.0, f"Success rate too low: {test_results.success_rate}%"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

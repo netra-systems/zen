@@ -4,21 +4,13 @@ This test ensures that AgentCompleted and related models can be properly
 instantiated with all their forward references resolved.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 # Import all required types
 from netra_backend.app.agents.triage_sub_agent.models import (
     TriageMetadata,
@@ -31,7 +23,6 @@ from netra_backend.app.schemas.unified_tools import (
     AgentState,
 )
 
-
 # Helper functions for 25-line compliance
 def create_basic_agent_result():
     """Create a basic AgentResult for testing."""
@@ -41,7 +32,6 @@ def create_basic_agent_result():
         execution_time_ms=100.0
     )
 
-
 def create_agent_completed_instance(result, run_id="test-run-123"):
     """Create AgentCompleted instance for testing."""
     return AgentCompleted(
@@ -50,13 +40,11 @@ def create_agent_completed_instance(result, run_id="test-run-123"):
         execution_time_ms=100.0
     )
 
-
 def assert_agent_completed_basic(completed):
     """Assert basic AgentCompleted properties."""
     assert completed.run_id == "test-run-123"
     assert completed.result.success is True
     assert completed.execution_time_ms == 100.0
-
 
 def create_triage_metadata():
     """Create TriageMetadata for testing."""
@@ -68,7 +56,6 @@ def create_triage_metadata():
         retry_count=0
     )
 
-
 def create_triage_result(metadata, category="optimization", confidence=0.95):
     """Create TriageResult for testing."""
     return TriageResult(
@@ -77,7 +64,6 @@ def create_triage_result(metadata, category="optimization", confidence=0.95):
         metadata=metadata
     )
 
-
 def create_deep_agent_state(triage_result, request="Optimize my workload"):
     """Create DeepAgentState for testing."""
     return DeepAgentState(
@@ -85,13 +71,11 @@ def create_deep_agent_state(triage_result, request="Optimize my workload"):
         triage_result=triage_result
     )
 
-
 def assert_deep_agent_state_basic(state):
     """Assert basic DeepAgentState properties."""
     assert state.user_request == "Optimize my workload"
     assert state.triage_result.category == "optimization"
     assert state.triage_result.confidence_score == 0.95
-
 
 def create_complete_test_metadata():
     """Create complete metadata for complex testing."""
@@ -103,7 +87,6 @@ def create_complete_test_metadata():
         retry_count=1
     )
 
-
 def create_complete_agent_result(final_state):
     """Create complete AgentResult with final state."""
     return AgentResult(
@@ -113,14 +96,12 @@ def create_complete_agent_result(final_state):
         metrics={"tokens": 150, "steps": 5}
     )
 
-
 def assert_completed_with_final_state(completed):
     """Assert AgentCompleted with final state properties."""
     assert completed.run_id == "test-456"
     assert completed.result.success is True
     assert completed.final_state.triage_result.category == "analysis"
     assert completed.final_state.step_count == 5
-
 
 def create_complete_final_state():
     """Create complete final state for complex testing."""
@@ -132,7 +113,6 @@ def create_complete_final_state():
         step_count=5
     )
 
-
 def create_completed_with_final_state(final_state):
     """Create AgentCompleted with final state."""
     result = create_complete_agent_result(final_state)
@@ -143,13 +123,11 @@ def create_completed_with_final_state(final_state):
         final_state=final_state
     )
 
-
 def test_agent_completed_model_rebuild():
     """Test that AgentCompleted can be instantiated after model rebuild."""
     result = create_basic_agent_result()
     completed = create_agent_completed_instance(result)
     assert_agent_completed_basic(completed)
-
 
 def test_deep_agent_state_with_triage_result():
     """Test that DeepAgentState can be created with TriageResult."""
@@ -158,13 +136,11 @@ def test_deep_agent_state_with_triage_result():
     state = create_deep_agent_state(triage_result)
     assert_deep_agent_state_basic(state)
 
-
 def test_agent_completed_with_final_state():
     """Test AgentCompleted with final_state containing TriageResult."""
     final_state = create_complete_final_state()
     completed = create_completed_with_final_state(final_state)
     assert_completed_with_final_state(completed)
-
 
 def test_model_handles_circular_dependencies():
     """Test that models properly handle circular dependencies."""
@@ -175,7 +151,6 @@ def test_model_handles_circular_dependencies():
         execution_time_ms=10.0
     )
     assert completed.run_id == "rebuild-test"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

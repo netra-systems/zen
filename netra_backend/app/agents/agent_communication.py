@@ -222,3 +222,38 @@ class AgentCommunicationMixin:
             "timestamp": time.time(),
             "error": str(error)
         }
+    
+    async def send_direct_websocket_event(self, run_id: str, event_type: str, payload: Dict[str, Any]) -> None:
+        """Send direct WebSocket event with standardized format."""
+        if not self.websocket_manager:
+            return
+        try:
+            ws_user_id = self._get_websocket_user_id(run_id)
+            event_data = {
+                "type": event_type,
+                "payload": {**payload, "agent_name": self.name, "timestamp": time.time()}
+            }
+            await self.websocket_manager.send_message(ws_user_id, event_data)
+        except Exception as e:
+            self.logger.debug(f"Failed to send {event_type} event: {e}")
+            
+    async def notify_tool_execution(self, run_id: str, tool_name: str) -> None:
+        """Notify that a tool is being executed."""
+        await self.send_direct_websocket_event(run_id, "tool_executing", {"tool_name": tool_name})
+    
+    async def notify_agent_thinking(self, run_id: str, thought: str, step_number: int = None) -> None:
+        """Notify that the agent is thinking/processing."""
+        payload = {"thought": thought}
+        if step_number is not None:
+            payload["step_number"] = step_number
+        await self.send_direct_websocket_event(run_id, "agent_thinking", payload)
+    
+    async def notify_partial_result(self, run_id: str, content: str, is_complete: bool = False) -> None:
+        """Notify of partial results during processing."""
+        await self.send_direct_websocket_event(run_id, "partial_result", 
+                                             {"content": content, "is_complete": is_complete})
+    
+    async def notify_final_report(self, run_id: str, report: dict, duration_ms: float) -> None:
+        """Notify of final report/results."""
+        await self.send_direct_websocket_event(run_id, "final_report", 
+                                             {"report": report, "total_duration_ms": duration_ms})

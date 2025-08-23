@@ -3,17 +3,10 @@ Admin Visibility Test Suite for Synthetic Data Service
 Testing admin monitoring and visibility features
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -22,17 +15,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from .test_synthetic_data_service_basic import GenerationConfig
-
-# Add project root to path
-
+from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig
 
 @pytest.fixture
 def admin_service():
     return SyntheticDataService()
-
 
 # ==================== Test Suite: Admin Visibility ====================
 
@@ -184,7 +172,6 @@ class TestAdminVisibility:
         
         # Cancel batch
         await admin_service.cancel_batch(job_ids)
-
 
 # ==================== Test Runner ====================
 

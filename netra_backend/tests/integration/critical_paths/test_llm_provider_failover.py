@@ -10,17 +10,10 @@ Critical Path: Provider health -> Circuit breaker -> Failover -> Recovery -> Loa
 Coverage: Real provider switching, health monitoring, graceful degradation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -40,12 +33,10 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class ProviderStatus(Enum):
     """LLM Provider status states."""
@@ -55,14 +46,12 @@ class ProviderStatus(Enum):
     OFFLINE = "offline"
     MAINTENANCE = "maintenance"
 
-
 class FailoverStrategy(Enum):
     """Failover strategies."""
     ROUND_ROBIN = "round_robin"
     PRIORITY = "priority"
     LOAD_BALANCED = "load_balanced"
     COST_OPTIMIZED = "cost_optimized"
-
 
 @dataclass
 class ProviderConfig:
@@ -83,7 +72,6 @@ class ProviderConfig:
     circuit_breaker_config: Dict[str, Any] = field(default_factory=dict)
     enabled: bool = True
 
-
 @dataclass
 class LLMRequest:
     """Represents an LLM request."""
@@ -95,7 +83,6 @@ class LLMRequest:
     timeout: Optional[int] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
-
 
 @dataclass
 class LLMResponse:
@@ -110,7 +97,6 @@ class LLMResponse:
     success: bool
     error_message: Optional[str] = None
     created_at: datetime = field(default_factory=datetime.now)
-
 
 class ProviderHealthChecker:
     """Monitors health of LLM providers."""
@@ -197,7 +183,6 @@ class ProviderHealthChecker:
                 logger.error(f"Health monitoring error for {config.name}: {e}")
                 await asyncio.sleep(30)  # Retry after 30 seconds on error
 
-
 class ProviderCircuitBreaker:
     """Circuit breaker for LLM providers."""
     
@@ -264,7 +249,6 @@ class ProviderCircuitBreaker:
             "can_execute": self.state != "open" or self._should_attempt_reset()
         }
 
-
 class MockLLMProvider:
     """Mock LLM provider for testing."""
     
@@ -307,7 +291,6 @@ class MockLLMProvider:
             latency_ms=latency_ms,
             success=True
         )
-
 
 class LLMProviderManager:
     """Manages multiple LLM providers with failover."""
@@ -414,7 +397,6 @@ class LLMProviderManager:
         
         return stats
 
-
 class FailoverTestManager:
     """Manages LLM provider failover testing."""
     
@@ -513,7 +495,6 @@ class FailoverTestManager:
         if self.redis_service:
             await self.redis_service.shutdown()
 
-
 @pytest.fixture
 async def failover_manager():
     """Create failover test manager."""
@@ -521,7 +502,6 @@ async def failover_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -543,7 +523,6 @@ async def test_provider_registration_and_health(failover_manager):
     cached_health = await manager.health_checker.get_cached_health("primary_openai")
     assert cached_health == ProviderStatus.HEALTHY
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_basic_request_execution(failover_manager):
@@ -561,7 +540,6 @@ async def test_basic_request_execution(failover_manager):
     assert response.provider_name == "primary_openai"  # Should use highest priority
     assert response.tokens_used > 0
     assert response.cost > 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -593,7 +571,6 @@ async def test_provider_failover_on_circuit_breaker(failover_manager):
     assert response.success is True
     assert response.provider_name != "unreliable_provider"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_provider_priority_ordering(failover_manager):
@@ -606,7 +583,6 @@ async def test_provider_priority_ordering(failover_manager):
     # Should be ordered by priority (lower number = higher priority)
     priorities = [manager.provider_manager.configs[name].priority for name in available]
     assert priorities == sorted(priorities)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -629,7 +605,6 @@ async def test_round_robin_strategy(failover_manager):
     unique_providers = set(used_providers)
     assert len(unique_providers) > 1
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_cost_optimized_strategy(failover_manager):
@@ -645,7 +620,6 @@ async def test_cost_optimized_strategy(failover_manager):
     # Should be ordered by cost (lowest first)
     costs = [manager.provider_manager.configs[name].cost_per_1k_tokens for name in available]
     assert costs == sorted(costs)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -677,7 +651,6 @@ async def test_circuit_breaker_recovery(failover_manager):
     # Verify state changed from open
     assert cb.state != "open" or cb._should_attempt_reset()
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_no_available_providers_error(failover_manager):
@@ -695,7 +668,6 @@ async def test_no_available_providers_error(failover_manager):
         await manager.provider_manager.execute_request(request)
     
     assert "No available providers" in str(exc_info.value)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -718,7 +690,6 @@ async def test_provider_statistics_tracking(failover_manager):
     assert primary_stats["total_tokens"] > 0
     assert "circuit_breaker_state" in primary_stats
     assert "health_status" in primary_stats
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -746,7 +717,6 @@ async def test_concurrent_requests_with_failover(failover_manager):
         assert response.tokens_used > 0
         assert response.latency_ms > 0
         assert response.provider_name in manager.provider_manager.configs
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

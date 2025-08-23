@@ -4,29 +4,21 @@ Re-exports all test classes from focused modules for backwards compatibility.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import pytest
 
-from .chat_optimization_tests import TestRealTimeChatOptimization
-from .example_prompts_tests import TestExamplePromptsModelSelection
-from .gpt5_migration_tests import TestGPT5MigrationWorkflows
-from .model_effectiveness_tests import TestModelEffectivenessAnalysis
+from netra_backend.tests.e2e.chat_optimization_tests import TestRealTimeChatOptimization
+from netra_backend.tests.e2e.example_prompts_tests import TestExamplePromptsModelSelection
+from netra_backend.tests.e2e.gpt5_migration_tests import TestGPT5MigrationWorkflows
+from netra_backend.tests.e2e.model_effectiveness_tests import TestModelEffectivenessAnalysis
 
-# Add project root to path
 # Import all test classes and fixtures from focused modules
-from .model_setup_helpers import model_selection_setup
-from .workflow_integrity_tests import (
+from netra_backend.tests.e2e.model_setup_helpers import model_selection_setup
+from netra_backend.tests.e2e.workflow_integrity_tests import (
     TestModelSelectionDataFlow,
     TestModelSelectionEdgeCases,
     TestWorkflowIntegrity,
@@ -43,7 +35,6 @@ __all__ = [
     'TestExamplePromptsModelSelection',
     'model_selection_setup'
 ]
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

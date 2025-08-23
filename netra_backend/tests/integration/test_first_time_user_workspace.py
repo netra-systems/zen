@@ -8,17 +8,10 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Foundation for premium feature adoption
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import uuid
@@ -30,15 +23,12 @@ from fastapi import status
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.tests.integration.first_time_user_fixtures import (
-    # Add project root to path
     assert_api_key_properties,
     assert_export_response,
     get_mock_user_preferences,
     verify_rate_limiting,
 )
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -71,7 +61,6 @@ async def test_user_profile_setup_and_update(
     updated_profile = response.json()
     assert updated_profile["full_name"] == profile_update["full_name"]
     assert updated_profile["company"] == profile_update["company"]
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -115,7 +104,6 @@ async def test_user_preferences_management(
                 break
         assert response_found
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
@@ -148,7 +136,6 @@ async def test_privacy_settings_enforcement(
         headers=headers
     )
     assert response.status_code == status.HTTP_200_OK
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -185,7 +172,6 @@ async def test_api_key_generation_and_usage(
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["user_id"] == user_id
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
@@ -210,7 +196,6 @@ async def test_api_key_rate_limiting(
         async_client, "/api/v1/usage/current", {"X-API-Key": api_key}, limit=100
     )
     assert rate_limited > 0
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -253,7 +238,6 @@ async def test_api_key_management_operations(
     response = await async_client.delete(f"/api/v1/api-keys/{key_id}", headers=headers)
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
@@ -295,7 +279,6 @@ async def test_data_export_capabilities(
     conversations = response.json()
     assert "threads" in conversations
     assert len(conversations["threads"]) > 0
-
 
 @pytest.mark.integration
 @pytest.mark.asyncio

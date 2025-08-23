@@ -13,17 +13,10 @@ Test Level: L3 (Real Local Services)
 - Real rollback mechanisms
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -38,14 +31,10 @@ import pytest
 
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 
-# Add project root to path
 from netra_backend.app.db.postgres import get_postgres_session, initialize_postgres
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class TransactionCoordinationData:
@@ -54,7 +43,6 @@ class TransactionCoordinationData:
     user_id: str
     metrics_data: Dict[str, Any]
     billing_data: Dict[str, Any]
-
 
 class ClickHousePostgresCoordinator:
     """L3 coordinator for ClickHouse → PostgreSQL transaction testing."""
@@ -249,7 +237,6 @@ class ClickHousePostgresCoordinator:
         except Exception as e:
             logger.warning(f"Cleanup warning: {e}")
 
-
 @pytest.fixture
 async def coordinator():
     """Fixture for transaction coordinator."""
@@ -257,7 +244,6 @@ async def coordinator():
     await coord.setup_databases()
     yield coord
     await coord.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -271,7 +257,6 @@ async def test_coordinated_write_commit(coordinator):
     assert consistency["cross_consistent"] and consistency["postgres_exists"]
     assert consistency["clickhouse_exists"]
 
-
 @pytest.mark.asyncio 
 @pytest.mark.integration
 @pytest.mark.l3_realism
@@ -283,7 +268,6 @@ async def test_clickhouse_failure_rollback(coordinator):
     assert not result["success"] and result["rollback_performed"]
     consistency = await coordinator.validate_consistency(data)
     assert not consistency["postgres_exists"] and not consistency["clickhouse_exists"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration  
@@ -297,7 +281,6 @@ async def test_postgres_failure_rollback(coordinator):
     consistency = await coordinator.validate_consistency(data)
     assert not consistency["postgres_exists"] and not consistency["clickhouse_exists"]
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism  
@@ -309,7 +292,6 @@ async def test_read_consistency(coordinator):
     consistency = await coordinator.validate_consistency(data)
     assert consistency["cross_consistent"] and consistency["postgres_amount"] == 29.99
     assert consistency["clickhouse_value"] == 100.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

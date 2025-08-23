@@ -18,17 +18,10 @@ Key validations:
 - Cross-service consistency
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 import asyncio
 import time
@@ -38,7 +31,6 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.health import HealthInterface, HealthLevel
 from netra_backend.app.core.health.checks import (
     DependencyHealthChecker,
@@ -46,10 +38,9 @@ from netra_backend.app.core.health.checks import (
 )
 from netra_backend.app.db.postgres import async_engine
 from netra_backend.app.logging_config import central_logger
-from .mock_services import (
+from netra_backend.tests.mock_services import (
     MockHTTPService,
     ServiceRegistry,
-    # Add project root to path
     setup_unified_mock_services,
 )
 
@@ -127,7 +118,6 @@ async def mock_services():
     
     # Cleanup: stop all services
     await registry.stop_all_services()
-
 
 @pytest.fixture
 async def health_coordinator(mock_services):
@@ -426,7 +416,6 @@ async def test_health_monitoring_business_metrics():
     
     logger.info(f"Business metrics validation completed: {business_metrics}")
 
-
 @pytest.mark.asyncio
 async def test_mock_services_health_endpoints():
     """
@@ -474,7 +463,6 @@ async def test_mock_services_health_endpoints():
         # Clean up
         await registry.stop_all_services()
 
-
 @pytest.mark.asyncio
 async def test_mock_websocket_service():
     """
@@ -488,7 +476,7 @@ async def test_mock_websocket_service():
     """
     import websockets
 
-    from tests.unified_system.mock_services import (
+    from netra_backend.tests.unified_system.mock_services import (
         create_mock_websocket_service,
     )
     

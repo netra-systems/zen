@@ -14,12 +14,11 @@ from netra_backend.app.agents.triage_sub_agent.models import (
     UserIntent,
 )
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
-from ..e2e.validators import (
+from netra_backend.tests.e2e.validators.e2e.validators import (
     DataIntegrityValidator,
     PerformanceValidator,
     StageValidator,
 )
-
 
 class ValidationFrameworkExample:
     """Example demonstrating the validation framework integration."""
@@ -234,7 +233,6 @@ class ValidationFrameworkExample:
             }
         }
 
-
 async def main():
     """Main function to run the validation framework example."""
     example = ValidationFrameworkExample()
@@ -247,7 +245,6 @@ async def main():
     print(f"Architecture compliance: PASS (<=300 lines, <=8 lines per function)")
     
     return results
-
 
 if __name__ == "__main__":
     asyncio.run(main())

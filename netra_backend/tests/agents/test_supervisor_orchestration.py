@@ -6,24 +6,14 @@ Compliance: <300 lines, 25-line max functions, modular design.
 
 # Import all supervisor orchestration test modules
 
-# Add project root to path
-
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
-from .test_supervisor_basic import TestSupervisorOrchestration
-from .test_supervisor_patterns import (
+from netra_backend.tests.agents.test_supervisor_basic import TestSupervisorOrchestration
+from netra_backend.tests.agents.test_supervisor_patterns import (
     TestResourceManagement,
-    # Add project root to path
     TestWorkflowPatterns,
 )
 

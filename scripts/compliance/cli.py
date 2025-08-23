@@ -10,7 +10,7 @@ import sys
 from dataclasses import asdict
 from typing import Any
 
-from .core import ComplianceResults
+from scripts.compliance.core import ComplianceResults
 
 
 class CLIHandler:

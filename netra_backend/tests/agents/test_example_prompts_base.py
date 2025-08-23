@@ -3,21 +3,10 @@ Base infrastructure and utilities for Example Prompts E2E Tests
 Provides shared fixtures and helper methods for test execution
 """
 
-# Add project root to path
-
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -37,7 +26,6 @@ from netra_backend.app.ws_manager import WebSocketManager
 from netra_backend.app.config import get_config
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import (
 
     SupervisorAgent as Supervisor,
@@ -70,8 +58,6 @@ from netra_backend.app.services.synthetic_data_service import (
 
 )
 
-# Add project root to path
-
 # The 9 example prompts from frontend/lib/examplePrompts.ts
 
 EXAMPLE_PROMPTS = [
@@ -96,7 +82,6 @@ EXAMPLE_PROMPTS = [
 
 ]
 
-
 def _create_mock_db_session():
 
     """Create mock database session for testing"""
@@ -110,7 +95,6 @@ def _create_mock_db_session():
     db_session.close = AsyncMock()
 
     return db_session
-
 
 def _create_mock_llm_manager():
 
@@ -128,7 +112,6 @@ def _create_mock_llm_manager():
 
     return llm_manager
 
-
 def _get_mock_call_llm():
 
     """Get mock call_llm async function"""
@@ -138,7 +121,6 @@ def _get_mock_call_llm():
         return {"content": "Based on analysis, reduce costs by switching to efficient models.", "tool_calls": []}
 
     return mock_call_llm
-
 
 def _get_mock_ask_llm():
 
@@ -155,7 +137,6 @@ def _get_mock_ask_llm():
         })
 
     return mock_ask_llm
-
 
 def _get_mock_ask_structured_llm():
 
@@ -186,7 +167,6 @@ def _get_mock_ask_structured_llm():
 
     return mock_ask_structured_llm
 
-
 def _create_mock_services():
 
     """Create mock services for testing infrastructure"""
@@ -201,21 +181,17 @@ def _create_mock_services():
 
     })
     
-
     quality_gate_service = Mock(spec=QualityGateService)
 
     quality_gate_service.validate_content = AsyncMock(return_value=(True, 95.0, ["Content meets quality standards"]))
     
-
     corpus_service = Mock(spec=CorpusService)
 
     corpus_service.search = AsyncMock(return_value=[])
 
     corpus_service.ingest = AsyncMock(return_value={"success": True})
     
-
     return synthetic_data_service, quality_gate_service, corpus_service
-
 
 def _create_additional_mocks():
 
@@ -225,26 +201,21 @@ def _create_additional_mocks():
 
     agent_service.process_message = AsyncMock(return_value={"response": "Test response", "tool_calls": []})
     
-
     apex_tool_selector = Mock(spec=ApexToolSelector)
 
     apex_tool_selector.select_best_tool = AsyncMock(return_value="cost_analyzer")
     
-
     state_persistence_service_mock = Mock(spec=state_persistence_service)
 
     state_persistence_service_mock.save_state = AsyncMock()
 
     state_persistence_service_mock.load_state = AsyncMock(return_value=None)
     
-
     tool_dispatcher = Mock(spec=ToolDispatcher)
 
     tool_dispatcher.dispatch = AsyncMock(return_value={"response": "Tool executed successfully", "success": True})
     
-
     return agent_service, apex_tool_selector, state_persistence_service_mock, tool_dispatcher
-
 
 def setup_real_infrastructure():
 
@@ -258,12 +229,10 @@ def setup_real_infrastructure():
 
     websocket_manager = WebSocketManager()
     
-
     synthetic_data_service, quality_gate_service, corpus_service = _create_mock_services()
 
     agent_service, apex_tool_selector, state_persistence_service_mock, tool_dispatcher = _create_additional_mocks()
     
-
     return {
 
         "config": config, "db_session": db_session, "llm_manager": llm_manager,
@@ -278,12 +247,10 @@ def setup_real_infrastructure():
 
     }
 
-
 class ExamplePromptsTestBase:
 
     """Base class with shared functionality for example prompts testing"""
     
-
     def create_prompt_variation(self, base_prompt: str, variation_num: int, context: Dict[str, Any]) -> str:
 
         """Create variations of a base prompt for testing different scenarios"""
@@ -324,10 +291,8 @@ class ExamplePromptsTestBase:
 
             varied_prompt = f"{varied_prompt} (Budget: ${context['metadata']['budget_constraint']})"
             
-
         return varied_prompt
     
-
     async def validate_response_quality(
 
         self, 
@@ -364,7 +329,6 @@ class ExamplePromptsTestBase:
 
                 return False
                 
-
             return is_valid
 
         except Exception as e:
@@ -373,7 +337,6 @@ class ExamplePromptsTestBase:
 
             return False
     
-
     async def generate_corpus_if_needed(self, corpus_service: CorpusService, context: Dict[str, Any]):
 
         """Generate corpus data if needed for the test"""

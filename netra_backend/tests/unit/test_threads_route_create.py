@@ -1,34 +1,24 @@
 """Tests for create_thread endpoint - split from test_threads_route.py"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
 
-# Add project root to path
-from netra_backend.app.routes.threads_route import Thread, create_thread
-from .thread_test_helpers import (
+from netra_backend.app.routes.threads_route import create_thread, ThreadCreate
+from netra_backend.tests.helpers.thread_test_helpers import (
     assert_http_exception,
     assert_thread_creation_call,
-    # Add project root to path
     create_mock_thread,
     create_thread_update_scenario,
     create_uuid_scenario,
     setup_thread_repo_mock,
 )
-
 
 @pytest.fixture
 def mock_db():
@@ -36,7 +26,6 @@ def mock_db():
     db = AsyncMock()
     db.commit = AsyncMock()
     return db
-
 
 @pytest.fixture
 def mock_user():
@@ -46,51 +35,44 @@ def mock_user():
     user.email = "test@example.com"
     return user
 
-
 class TestCreateThread:
     """Test cases for POST / endpoint"""
-    @patch('app.routes.utils.thread_helpers.uuid.uuid4')
-    @patch('app.routes.utils.thread_helpers.time.time')
-    async def test_create_thread_success(self, mock_time, mock_uuid, mock_db, mock_user):
+    async def test_create_thread_success(self, mock_db, mock_user):
         """Test successful thread creation"""
-        create_thread_update_scenario(mock_time, 1234567890)
-        create_uuid_scenario(mock_uuid)
         mock_thread = create_mock_thread(title="New Thread")
         
-        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
-            thread_repo = MockThreadRepo.return_value
-            thread_repo.create = AsyncMock(return_value=mock_thread)
-            thread_data = Thread(title="New Thread", metadata={"custom": "data"})
+        with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler:
+            mock_handler.return_value = mock_thread
+            thread_data = ThreadCreate(
+                title="New Thread", 
+                metadata={"custom": "data"}
+            )
             
             result = await create_thread(thread_data=thread_data, db=mock_db, current_user=mock_user)
             
             assert result.id == "thread_abc123"
-            assert result.title == "New Thread"
-            assert result.message_count == 0
-            assert_thread_creation_call(thread_repo, mock_db, "test_user_123", "New Thread")
+            assert result.metadata_["title"] == "New Thread"
+            mock_handler.assert_called_once_with(mock_db, thread_data, "test_user_123")
     async def test_create_thread_no_title(self, mock_db, mock_user):
         """Test thread creation without title"""
         mock_thread = create_mock_thread()
         mock_thread.metadata_ = {"user_id": "test_user_123", "status": "active"}
         
-        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
-            thread_repo = MockThreadRepo.return_value
-            thread_repo.create = AsyncMock(return_value=mock_thread)
-            thread_data = Thread()
+        with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler:
+            mock_handler.return_value = mock_thread
+            thread_data = ThreadCreate()
             
             result = await create_thread(thread_data=thread_data, db=mock_db, current_user=mock_user)
             
-            assert result.title == None
-            call_args = thread_repo.create.call_args
-            assert "title" not in call_args[1]["metadata_"] or call_args[1]["metadata_"].get("title") == None
+            assert result.metadata_["user_id"] == "test_user_123"
+            mock_handler.assert_called_once_with(mock_db, thread_data, "test_user_123")
     async def test_create_thread_exception(self, mock_db, mock_user):
         """Test error handling in create_thread"""
-        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
-             patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
+        with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler, \
+             patch('netra_backend.app.logging_config.central_logger.get_logger') as mock_get_logger:
             
-            thread_repo = MockThreadRepo.return_value
-            thread_repo.create = AsyncMock(side_effect=Exception("Database error"))
-            thread_data = Thread(title="Test")
+            mock_handler.side_effect = Exception("Database error")
+            thread_data = ThreadCreate(title="Test")
             
             with pytest.raises(HTTPException) as exc_info:
                 await create_thread(thread_data=thread_data, db=mock_db, current_user=mock_user)

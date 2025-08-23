@@ -4,9 +4,36 @@
  */
 
 import WS from 'jest-websocket-mock';
+import { act } from '@testing-library/react';
+
+/**
+ * Creates a WebSocket event handler wrapper that properly wraps state updates in act()
+ * This prevents React act() warnings in tests when WebSocket event handlers update component state
+ * 
+ * @example
+ * // Instead of:
+ * ws.onopen = () => setConnected(true);
+ * 
+ * // Use:
+ * ws.onopen = createActWrapper(() => setConnected(true));
+ * 
+ * // For handlers with parameters:
+ * ws.onmessage = createActWrapper((event) => {
+ *   const data = JSON.parse(event.data);
+ *   setMessage(data.content);
+ * });
+ */
+export function createActWrapper<T extends (...args: any[]) => void>(callback: T): T {
+  return ((...args: any[]) => {
+    act(() => {
+      callback(...args);
+    });
+  }) as T;
+}
 
 export async function waitForConnection(server: WS): Promise<void> {
-  await expect(server).toReceiveMessage(expect.any(Object));
+  // Wait for WebSocket connection to be established
+  await server.connected;
 }
 
 export function sendMessage(server: WS, content: string, threadId: string = 'test-thread'): void {
@@ -22,7 +49,7 @@ export function sendMessage(server: WS, content: string, threadId: string = 'tes
   }));
 }
 
-export function sendStreamChunk(server: WS, chunk: string, messageId: string, threadId: string = 'test-thread'): void {
+export function sendStreamChunk(server: WS, chunk: string, messageId: string = `msg-${Date.now()}`, threadId: string = 'test-thread'): void {
   server.send(JSON.stringify({
     type: 'stream_chunk',
     data: {
@@ -34,9 +61,9 @@ export function sendStreamChunk(server: WS, chunk: string, messageId: string, th
   }));
 }
 
-export function sendAgentStart(server: WS, agentType: string, threadId: string = 'test-thread'): void {
+export function sendAgentStart(server: WS, agentType: string = 'analyzer', threadId: string = 'test-thread'): void {
   server.send(JSON.stringify({
-    type: 'agent_start',
+    type: 'agent_started',
     data: {
       agentType,
       threadId,
@@ -46,7 +73,7 @@ export function sendAgentStart(server: WS, agentType: string, threadId: string =
   }));
 }
 
-export function sendAgentMessage(server: WS, content: string, agentType: string, threadId: string = 'test-thread'): void {
+export function sendAgentMessage(server: WS, content: string, agentType: string = 'analyzer', threadId: string = 'test-thread'): void {
   server.send(JSON.stringify({
     type: 'agent_message',
     data: {
@@ -60,9 +87,9 @@ export function sendAgentMessage(server: WS, content: string, agentType: string,
   }));
 }
 
-export function sendAgentComplete(server: WS, agentType: string, threadId: string = 'test-thread'): void {
+export function sendAgentComplete(server: WS, agentType: string = 'analyzer', threadId: string = 'test-thread'): void {
   server.send(JSON.stringify({
-    type: 'agent_complete',
+    type: 'agent_completed',
     data: {
       agentType,
       threadId,

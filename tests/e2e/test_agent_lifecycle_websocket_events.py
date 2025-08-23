@@ -295,7 +295,7 @@ class AgentLifecycleEventTestCore:
             logger.debug(f"Services health check failed: {e}")
         self.test_session_data.clear()
     
-    async def teardown_test_environment(self) -> None:
+    async def test_teardown_test_environment(self) -> None:
         """Cleanup test environment."""
         await self.conversation_core.teardown_test_environment()
         self.test_session_data.clear()
@@ -385,7 +385,7 @@ class AgentLifecycleEventTestCore:
 
 
 @pytest_asyncio.fixture
-async def agent_lifecycle_test_core():
+async def test_agent_lifecycle_test_core():
     """Create agent lifecycle test core fixture."""
     core = AgentLifecycleEventTestCore()
     

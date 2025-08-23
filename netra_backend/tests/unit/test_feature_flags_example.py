@@ -4,23 +4,15 @@ This file shows best practices for using feature flags in tests,
 enabling TDD workflow while maintaining 100% pass rate for CI/CD.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
 from test_framework.decorators import (
     experimental_test,
-    # Add project root to path
     feature_flag,
     flaky_test,
     integration_only,
@@ -31,7 +23,6 @@ from test_framework.decorators import (
     tdd_test,
     unit_only,
 )
-
 
 # Example 1: Basic feature flag usage
 @feature_flag("roi_calculator")
@@ -49,7 +40,6 @@ def test_roi_calculator_basic():
     )
     assert result["savings"] == 2000
     assert result["roi_percentage"] == 20
-
 
 # Example 2: TDD test expected to fail initially
 @tdd_test("first_time_user_flow", expected_to_fail=True)
@@ -69,7 +59,6 @@ def test_first_time_user_onboarding():
     assert user.trial_credits == 1000
     assert user.guided_tour_enabled is True
 
-
 # Example 3: Test requiring multiple features
 @requires_feature("auth_integration", "usage_tracking")
 def test_authenticated_usage_tracking():
@@ -86,7 +75,6 @@ def test_authenticated_usage_tracking():
     assert usage.user_id == user.id
     assert usage.event_type == "api_call"
 
-
 # Example 4: Experimental test
 @experimental_test("Testing new ML-based rate limiting algorithm")
 def test_ml_rate_limiter():
@@ -101,7 +89,6 @@ def test_ml_rate_limiter():
     
     assert pattern.is_exponential is True
     assert pattern.should_throttle is True
-
 
 # Example 5: Performance test with threshold
 @performance_test(threshold_ms=100)
@@ -121,7 +108,6 @@ def test_api_response_time():
     assert response["status"] == "healthy"
     # Performance assertion handled by decorator
 
-
 # Example 6: Integration-only test
 @integration_only()
 @feature_flag("websocket_streaming")
@@ -140,7 +126,6 @@ def test_websocket_integration():
     assert response["type"] == "pong"
     conn.close()
 
-
 # Example 7: Unit-only test
 @unit_only()
 def test_utility_function():
@@ -149,7 +134,6 @@ def test_utility_function():
     
     assert format_currency(1000) == "$1,000.00"
     assert format_currency(0) == "$0.00"
-
 
 # Example 8: Test requiring environment variables
 @requires_env("GEMINI_API_KEY", "OPENAI_API_KEY")
@@ -163,7 +147,6 @@ def test_multi_llm_orchestration():
     
     assert "gemini" in result
     assert "openai" in result
-
 
 # Example 9: Flaky test with retries
 @flaky_test(max_retries=3, reason="External API dependency")
@@ -180,7 +163,6 @@ def test_github_api_integration():
     
     assert repo_data is not None
     assert "stars" in repo_data
-
 
 # Example 10: Conditional skip based on environment
 @skip_if_fast_mode
@@ -201,7 +183,6 @@ def test_clickhouse_analytics_pipeline():
     count = client.count_events()
     assert count >= 2
 
-
 # Example 11: Complex feature with dependencies
 @requires_feature("enterprise_sso")
 def test_enterprise_sso_flow():
@@ -209,7 +190,7 @@ def test_enterprise_sso_flow():
     
     Currently disabled as enterprise_sso depends on features not yet launched.
     """
-    # from netra_backend.app.auth.enterprise_sso import SSOProvider  # DEPRECATED: Use auth_integration
+    # from app.auth.enterprise_sso import SSOProvider  # DEPRECATED: Use auth_integration
     pytest.skip("enterprise_sso module not available - use auth_integration")
     return
     
@@ -218,7 +199,6 @@ def test_enterprise_sso_flow():
     
     assert "okta" in auth_url
     assert "client_id=client_123" in auth_url
-
 
 # Example 12: Combined decorators for complex requirements
 @integration_only()
@@ -248,7 +228,6 @@ def test_authenticated_websocket_performance():
     
     assert response["status"] == "subscribed"
     ws.close()
-
 
 if __name__ == "__main__":
     # Run this file directly to see which tests would be skipped

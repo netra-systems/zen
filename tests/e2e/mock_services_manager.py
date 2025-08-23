@@ -179,13 +179,13 @@ class MockE2EServiceOrchestrator:
         self.services_manager = MockServicesManager()
         self.ready = False
     
-    async def start_test_environment(self, db_name: str) -> None:
+    async def test_start_test_environment(self, db_name: str) -> None:
         """Mock starting test environment."""
         await self.services_manager.start_all_services()
         await asyncio.sleep(0.01)  # Minimal setup delay
         self.ready = True
     
-    async def stop_test_environment(self, db_name: str) -> None:
+    async def test_stop_test_environment(self, db_name: str) -> None:
         """Mock stopping test environment."""
         await self.services_manager.stop_all_services()
         self.ready = False

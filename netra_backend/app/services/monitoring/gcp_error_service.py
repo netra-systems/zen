@@ -80,12 +80,16 @@ class GCPErrorService:
     
     def _parse_time_range(self, time_range_str: str, end_time: datetime) -> datetime:
         """Parse time range string to datetime."""
-        if time_range_str.endswith('h'):
-            hours = int(time_range_str[:-1])
-            return end_time - timedelta(hours=hours)
-        elif time_range_str.endswith('d'):
-            days = int(time_range_str[:-1])
-            return end_time - timedelta(days=days)
+        try:
+            if time_range_str.endswith('h'):
+                hours = int(time_range_str[:-1])
+                return end_time - timedelta(hours=hours)
+            elif time_range_str.endswith('d'):
+                days = int(time_range_str[:-1])
+                return end_time - timedelta(days=days)
+        except (ValueError, TypeError):
+            # Invalid format, fall through to default
+            pass
         return end_time - timedelta(hours=24)
     
     def _build_list_request(self, project_name: str, time_range: Dict[str, Any], 

@@ -179,42 +179,74 @@ const MainChat: React.FC = () => {
         {/* Main Content Area */}
         <div className="flex-grow overflow-hidden relative">
           <div className="h-full overflow-y-auto">
-            {/* Empty State - shown when no thread is selected */}
+            {/* Empty State with Example Prompts - shown when no thread is selected OR thread selected but no messages */}
             <AnimatePresence mode="wait">
-              {shouldShowEmptyState && (
+              {(shouldShowEmptyState || shouldShowExamplePrompts) && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="flex flex-col items-center justify-center h-full text-center px-6"
+                  className="flex flex-col h-full px-6 py-6"
                 >
-                  <div className="max-w-md">
-                    <div className="mb-6">
-                      <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  {/* Welcome Header - only show for empty state (no thread) */}
+                  {shouldShowEmptyState && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="text-center mb-8"
+                    >
+                      <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-6">
+                        <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Welcome to Netra AI</h3>
-                      <p className="text-gray-600 mb-4">
-                        Create a new conversation or select an existing one from the sidebar to get started with AI-powered optimization.
+                      <h1 className="text-3xl font-bold text-gray-900 mb-3">Welcome to Netra AI</h1>
+                      <p className="text-xl text-gray-600 mb-6">
+                        Your AI-powered optimization platform for reducing costs and improving performance
                       </p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            
-            {/* Example Prompts - shown when thread selected but no messages */}
-            <AnimatePresence mode="wait">
-              {shouldShowExamplePrompts && (
-                <motion.div
-                  initial={{ opacity: 1 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ExamplePrompts />
+                      <div className="bg-blue-50 rounded-lg p-6 mb-6 max-w-2xl mx-auto">
+                        <h3 className="text-lg font-semibold text-blue-900 mb-3">Get Started in 3 Easy Steps:</h3>
+                        <div className="space-y-3 text-left">
+                          <div className="flex items-center text-blue-800">
+                            <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3">1</span>
+                            <span>Choose an example prompt below or type your own optimization request</span>
+                          </div>
+                          <div className="flex items-center text-blue-800">
+                            <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3">2</span>
+                            <span>Describe your current setup, performance requirements, and budget constraints</span>
+                          </div>
+                          <div className="flex items-center text-blue-800">
+                            <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3">3</span>
+                            <span>Get AI-powered recommendations to optimize your infrastructure</span>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                  
+                  {/* Example Prompts Section */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: shouldShowEmptyState ? 0.2 : 0 }}
+                    className="flex-grow"
+                  >
+                    <ExamplePrompts />
+                  </motion.div>
+                  
+                  {/* Quick tip */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: shouldShowEmptyState ? 0.4 : 0.2 }}
+                    className="text-center mt-6"
+                  >
+                    <p className="text-gray-500 text-sm">
+                      💡 Try typing something like: "I need to reduce my AI costs by 30% while maintaining quality"
+                    </p>
+                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>

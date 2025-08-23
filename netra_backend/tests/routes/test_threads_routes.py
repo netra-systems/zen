@@ -3,28 +3,17 @@ Test 30: Threads Route Conversation
 Tests for thread conversation management - app/routes/threads_route.py
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime
 from unittest.mock import patch
 
 import pytest
 
-# Add project root to path
-from .test_utilities import base_client
-
-# Add project root to path
-
+from netra_backend.tests.test_utilities import base_client
 
 class TestThreadsRoute:
     """Test thread conversation management."""

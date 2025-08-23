@@ -3,17 +3,10 @@ Tool Permission Service - Main Permission Checking Tests
 Functions refactored to ≤8 lines each using helper functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import UTC, datetime
 from unittest.mock import patch
@@ -23,10 +16,8 @@ import pytest
 from netra_backend.app.schemas.ToolPermission import ToolExecutionContext
 from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
-# Add project root to path
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from .tool_permission_helpers import (
-    # Add project root to path
+from netra_backend.tests.tool_permission_helpers import (
     MockRedisClient,
     assert_missing_permissions,
     assert_permission_allowed,
@@ -37,18 +28,15 @@ from .tool_permission_helpers import (
     setup_redis_usage,
 )
 
-
 @pytest.fixture
 def mock_redis():
     """Create mock Redis client"""
     return MockRedisClient()
 
-
 @pytest.fixture
 def service():
     """Create ToolPermissionService without Redis"""
     return ToolPermissionService()
-
 
 @pytest.fixture
 def service_with_redis(mock_redis):
@@ -135,7 +123,6 @@ class TestCheckToolPermission:
             result = await service.check_tool_permission(context)
         assert_permission_denied(result)
         assert "Permission check failed" in result.reason
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

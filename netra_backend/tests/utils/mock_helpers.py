@@ -9,7 +9,6 @@ from pydantic import BaseModel
 
 T = TypeVar('T', bound=BaseModel)
 
-
 def create_mock_structured_response(schema: Type[T]) -> T:
     """Create mock structured response for testing."""
     mock_data = {}
@@ -17,7 +16,6 @@ def create_mock_structured_response(schema: Type[T]) -> T:
         if field_info.is_required():
             mock_data[field_name] = get_mock_value_for_field(field_info)
     return schema(**mock_data)
-
 
 def get_mock_value_for_field(field_info: Any) -> Any:
     """Get mock value based on field type annotation."""
@@ -32,7 +30,6 @@ def get_mock_value_for_field(field_info: Any) -> Any:
         return False
     return get_complex_mock_value(annotation)
 
-
 def get_complex_mock_value(annotation: Any) -> Any:
     """Handle complex field types for mock values."""
     if annotation == dict:
@@ -42,7 +39,6 @@ def get_complex_mock_value(annotation: Any) -> Any:
     elif hasattr(annotation, '__origin__'):
         return handle_generic_type(annotation)
     return {}
-
 
 def handle_generic_type(annotation: Any) -> Any:
     """Handle generic types like List, Dict, Optional."""

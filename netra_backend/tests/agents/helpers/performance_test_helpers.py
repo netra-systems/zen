@@ -11,10 +11,9 @@ from unittest.mock import AsyncMock, Mock
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
-
 def create_benchmark_supervisor(infrastructure, index):
     """Create supervisor for benchmarking"""
-    from ..fixtures.llm_agent_fixtures import (
+    from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
         create_supervisor_with_mocks,
         setup_llm_responses,
     )
@@ -28,15 +27,13 @@ def create_benchmark_supervisor(infrastructure, index):
     
     return create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
 
-
 def create_lightweight_supervisor(infrastructure):
     """Create lightweight supervisor for high load testing"""
-    from ..fixtures.llm_agent_fixtures import create_supervisor_with_mocks
+    from netra_backend.tests.agents.fixtures.llm_agent_fixtures import create_supervisor_with_mocks
     
     db_session, llm_manager, ws_manager = infrastructure
     mock_persistence = create_flow_persistence_mock()
     return create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
-
 
 async def execute_lightweight_flow(supervisor):
     """Execute lightweight flow for high load testing"""
@@ -44,7 +41,6 @@ async def execute_lightweight_flow(supervisor):
         "Light test", supervisor.thread_id,
         supervisor.user_id, str(uuid.uuid4())
     )
-
 
 def setup_e2e_responses(llm_manager):
     """Setup end-to-end LLM responses"""
@@ -66,7 +62,6 @@ def setup_e2e_responses(llm_manager):
     llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_structured_llm)
     llm_manager.call_llm = AsyncMock(return_value={"content": "Optimization complete"})
 
-
 def create_e2e_persistence_mock():
     """Create persistence mock for e2e testing"""
     mock_persistence = AsyncMock()
@@ -86,7 +81,6 @@ def create_e2e_persistence_mock():
     
     return mock_persistence
 
-
 def create_flow_persistence_mock():
     """Create persistence mock for flow testing"""
     mock_persistence = AsyncMock()
@@ -96,10 +90,9 @@ def create_flow_persistence_mock():
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     return mock_persistence
 
-
 async def run_concurrency_benchmark(concurrency_level):
     """Run concurrency benchmark for given level"""
-    from ..fixtures.llm_agent_fixtures import (
+    from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
         create_mock_infrastructure,
         create_supervisor_with_mocks,
         setup_llm_responses,
@@ -128,7 +121,6 @@ async def run_concurrency_benchmark(concurrency_level):
         "success_rate": len([r for r in results if not isinstance(r, Exception)]) / len(results)
     }
 
-
 async def execute_optimization_flow(supervisor):
     """Execute optimization flow and return result"""
     return await supervisor.run(
@@ -137,7 +129,6 @@ async def execute_optimization_flow(supervisor):
         supervisor.user_id,
         str(uuid.uuid4())
     )
-
 
 def verify_performance_requirements(performance_metrics):
     """Verify performance metrics meet requirements"""

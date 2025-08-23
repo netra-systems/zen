@@ -215,7 +215,7 @@ class PoolExhaustionTestHarness:
 
 
 @pytest.fixture
-async def pool_test_harness():
+async def test_pool_test_harness():
     """Provide pool exhaustion test harness with cleanup."""
     harness = PoolExhaustionTestHarness()
     yield harness

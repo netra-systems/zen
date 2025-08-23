@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 try:
-    from .cache_entry import TTL_PRESETS, CacheEntry, ContentHasher
+    from dev_launcher.cache_entry import TTL_PRESETS, CacheEntry, ContentHasher
 except ImportError:
     from cache_entry import TTL_PRESETS, CacheEntry, ContentHasher
 

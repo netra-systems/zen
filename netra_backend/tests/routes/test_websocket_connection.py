@@ -1,14 +1,7 @@
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -16,12 +9,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import WebSocket
-from routes.utils.websocket_helpers import (
+from netra_backend.app.routes.utils.websocket_helpers import (
     accept_websocket_connection,
     authenticate_websocket_user,
     extract_app_services,
 )
-
 
 class TestWebSocketConnection:
     
@@ -42,8 +34,8 @@ class TestWebSocketConnection:
         ))
         
         # Mock auth client (now used for token validation)
-        with patch('app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
-            mock_auth_client.validate_token = AsyncMock(return_value={
+        with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "test-user-123",
                 "email": "test@example.com",
@@ -51,7 +43,7 @@ class TestWebSocketConnection:
             })
             
             # Mock database session
-            with patch('app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+            with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
                 mock_db_session = MagicMock()
                 mock_db.__aenter__ = AsyncMock(return_value=mock_db_session)
                 mock_db.__aexit__ = AsyncMock(return_value=None)
@@ -62,7 +54,7 @@ class TestWebSocketConnection:
                 )
                 
                 assert result == "test-user-123"
-                mock_auth_client.validate_token.assert_called_once_with("valid-token")
+                mock_auth_client.validate_token_jwt.assert_called_once_with("valid-token")
                 mock_security_service.get_user_by_id.assert_called_once()
     
     @pytest.mark.asyncio 
@@ -78,8 +70,8 @@ class TestWebSocketConnection:
         mock_security_service = MagicMock()
         
         # Mock auth client to return invalid token response
-        with patch('app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
-            mock_auth_client.validate_token = AsyncMock(return_value={
+        with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": False,
                 "error": "Invalid token"
             })
@@ -103,8 +95,8 @@ class TestWebSocketConnection:
         mock_websocket.accept = AsyncMock()
         
         # Mock auth client (now used for token validation)
-        with patch('app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
-            mock_auth_client.validate_token = AsyncMock(return_value={
+        with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "test-user"
             })
@@ -114,7 +106,7 @@ class TestWebSocketConnection:
             
             assert result == "valid-token"
             mock_websocket.accept.assert_called_once()
-            mock_auth_client.validate_token.assert_called_once_with("valid-token")
+            mock_auth_client.validate_token_jwt.assert_called_once_with("valid-token")
     
     @pytest.mark.asyncio
     async def test_accept_websocket_connection_no_token(self):
@@ -165,8 +157,8 @@ class TestWebSocketConnection:
         mock_security_service.get_user_by_id = AsyncMock(return_value=None)
         
         # Mock auth client to return valid token for nonexistent user
-        with patch('app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
-            mock_auth_client.validate_token = AsyncMock(return_value={
+        with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "nonexistent-user",
                 "email": "nonexistent@example.com",
@@ -174,14 +166,14 @@ class TestWebSocketConnection:
             })
             
             # Mock database session
-            with patch('app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+            with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
                 mock_db_session = MagicMock()
                 mock_db.__aenter__ = AsyncMock(return_value=mock_db_session)
                 mock_db.__aexit__ = AsyncMock(return_value=None)
                 
                 # Mock user count query
-                with patch('app.routes.utils.websocket_helpers.select') as mock_select, \
-                     patch('app.routes.utils.websocket_helpers.func') as mock_func:
+                with patch('netra_backend.app.routes.utils.websocket_helpers.select') as mock_select, \
+                     patch('netra_backend.app.routes.utils.websocket_helpers.func') as mock_func:
                     
                     mock_result = MagicMock()
                     mock_result.scalar.return_value = 1  # Database has users
@@ -215,8 +207,8 @@ class TestWebSocketConnection:
         mock_security_service.get_user_by_id = AsyncMock(return_value=mock_user)
         
         # Mock auth client to return valid token for inactive user
-        with patch('app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
-            mock_auth_client.validate_token = AsyncMock(return_value={
+        with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "test-user-123",
                 "email": "test@example.com",
@@ -224,7 +216,7 @@ class TestWebSocketConnection:
             })
             
             # Mock database session
-            with patch('app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+            with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
                 mock_db_session = MagicMock()
                 mock_db.__aenter__ = AsyncMock(return_value=mock_db_session)
                 mock_db.__aexit__ = AsyncMock(return_value=None)

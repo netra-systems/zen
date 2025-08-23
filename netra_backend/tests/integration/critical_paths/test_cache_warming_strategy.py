@@ -11,17 +11,10 @@ L3 Realism: Real Redis with actual warming algorithms, cold cache scenarios, war
 Performance Requirements: Warming time < 2s, hit rate improvement > 80%, warming efficiency > 90%
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -40,15 +33,11 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer as NetraRedisContainer,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class WarmingMetrics:
@@ -113,7 +102,6 @@ class WarmingMetrics:
             return 0.0
         
         return ((cold_avg - warm_avg) / cold_avg) * 100.0
-
 
 class CacheWarmingStrategyL3Manager:
     """L3 cache warming strategy test manager with real Redis and warming algorithms."""
@@ -716,7 +704,6 @@ class CacheWarmingStrategyL3Manager:
         except Exception as e:
             logger.error(f"Cache warming cleanup failed: {e}")
 
-
 @pytest.fixture
 async def cache_warming_manager():
     """Create L3 cache warming strategy manager."""
@@ -724,7 +711,6 @@ async def cache_warming_manager():
     await manager.setup_redis_for_warming_testing()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -740,7 +726,6 @@ async def test_priority_based_warming_strategy(cache_warming_manager):
     
     logger.info(f"Priority-based warming: {result['improvement']:.1f}% improvement, {result['warm_hit_rate']:.1f}% warm hit rate")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -753,7 +738,6 @@ async def test_frequency_based_warming_strategy(cache_warming_manager):
     assert result["warm_hit_rate"] > 65.0, f"Warm hit rate {result['warm_hit_rate']:.1f}% too low for frequency-based strategy"
     
     logger.info(f"Frequency-based warming: {result['improvement']:.1f}% improvement, {result['warm_hit_rate']:.1f}% warm hit rate")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -768,7 +752,6 @@ async def test_predictive_warming_strategy(cache_warming_manager):
     
     logger.info(f"Predictive warming: {result['improvement']:.1f}% improvement, {result['warm_hit_rate']:.1f}% warm hit rate")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -782,7 +765,6 @@ async def test_cold_vs_warm_latency_improvement(cache_warming_manager):
     assert result["warm_avg_latency"] < 0.02, f"Warm cache latency {result['warm_avg_latency']*1000:.1f}ms too high"
     
     logger.info(f"Latency improvement: {result['latency_improvement']:.1f}%, cold: {result['cold_avg_latency']*1000:.1f}ms, warm: {result['warm_avg_latency']*1000:.1f}ms")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -808,7 +790,6 @@ async def test_warming_efficiency_across_strategies(cache_warming_manager):
     assert best_efficiency > 85.0, f"Best strategy efficiency {best_efficiency:.1f}% below 85%"
     
     logger.info(f"Warming efficiency test: best strategy {best_strategy} with {best_efficiency:.1f}% efficiency")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

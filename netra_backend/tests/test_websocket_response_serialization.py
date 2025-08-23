@@ -4,24 +4,16 @@ Validates WebSocket message structures and streaming response serialization
 for real-time frontend communication.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 from typing import Any, Dict
 
 import pytest
 
-# Add project root to path
 # Import backend schemas
 from netra_backend.app.schemas.registry import (
     StreamChunk,
@@ -29,7 +21,6 @@ from netra_backend.app.schemas.registry import (
     WebSocketMessage,
     WebSocketMessageType,
 )
-
 
 class TestWebSocketMessageSerialization:
     """Test WebSocket message serialization."""
@@ -116,7 +107,6 @@ class TestWebSocketMessageSerialization:
         assert ping_json["type"] == "ping"
         assert pong_json["type"] == "pong"
 
-
 class TestStreamingResponseSerialization:
     """Test streaming response serialization."""
     
@@ -199,7 +189,6 @@ class TestStreamingResponseSerialization:
         
         assert json_data["metadata"]["error"] is True
         assert json_data["metadata"]["error_code"] == "PROCESSING_ERROR"
-
 
 class TestRealtimeMessageFlow:
     """Test realistic real-time message flow scenarios."""
@@ -290,7 +279,6 @@ class TestRealtimeMessageFlow:
             json_data = msg.model_dump()
             assert json_data["payload"]["run_id"] == f"run{i}"
             assert json_data["payload"]["metadata"]["agent_id"] == i
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

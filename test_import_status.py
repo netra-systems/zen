@@ -7,7 +7,6 @@ import traceback
 from pathlib import Path
 
 # Add project to path
-sys.path.insert(0, r'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1')
 os.chdir(r'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1')
 
 def test_imports():

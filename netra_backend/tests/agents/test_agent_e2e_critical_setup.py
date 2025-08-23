@@ -3,17 +3,10 @@ Setup fixtures and base test class for critical end-to-end agent tests.
 Provides shared infrastructure and mocks for agent testing.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 import uuid
@@ -26,7 +19,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
@@ -45,7 +37,6 @@ from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher impor
 )
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-
 
 class AgentE2ETestBase:
     """Base class for critical end-to-end agent tests"""

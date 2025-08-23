@@ -18,17 +18,10 @@ Coverage: OAuth failover, fallback mechanisms, user notification, recovery handl
 session preservation during provider issues
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -43,15 +36,11 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class OAuthProviderFailoverL4Test(L4StagingCriticalPathTestBase):
     """L4 test for OAuth provider failover and fallback authentication."""
@@ -389,7 +378,6 @@ class OAuthProviderFailoverL4Test(L4StagingCriticalPathTestBase):
             except Exception:
                 pass
 
-
 @pytest.fixture
 async def oauth_provider_failover_l4_test():
     """Create OAuth provider failover L4 test instance."""
@@ -397,7 +385,6 @@ async def oauth_provider_failover_l4_test():
     await test_instance.initialize_l4_environment()
     yield test_instance
     await test_instance.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -408,7 +395,6 @@ async def test_oauth_provider_complete_failover_l4(oauth_provider_failover_l4_te
     assert test_metrics.success is True, f"OAuth failover failed: {test_metrics.errors}"
     assert test_metrics.duration < 120.0, f"Test took too long: {test_metrics.duration:.2f}s"
     assert test_metrics.service_calls >= 10, "Expected at least 10 service calls"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -422,7 +408,6 @@ async def test_oauth_provider_outage_fallback_l4(oauth_provider_failover_l4_test
     assert outage_result["fallback_worked"] is True
     assert outage_result["user_notified"] is True
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.L4
@@ -434,7 +419,6 @@ async def test_oauth_rate_limiting_cached_auth_l4(oauth_provider_failover_l4_tes
     assert rate_limit_result["rate_limit_detected"] is True
     assert rate_limit_result["cached_auth_used"] is True
     assert rate_limit_result["backoff_working"] is True
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -448,7 +432,6 @@ async def test_oauth_provider_recovery_session_preservation_l4(oauth_provider_fa
     assert recovery_result["recovery_successful"] is True
     assert recovery_result["session_preserved"] is True
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.L4
@@ -461,7 +444,6 @@ async def test_oauth_user_notification_system_l4(oauth_provider_failover_l4_test
     assert notification_result["outage_notified"] is True
     assert notification_result["fallback_notified"] is True
     assert notification_result["recovery_notified"] is True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

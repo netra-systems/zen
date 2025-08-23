@@ -4,17 +4,10 @@ Tests for basic agent coordination, sequential/parallel execution, and state man
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime, timezone
@@ -24,20 +17,18 @@ import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import (
-    # Add project root to path
+from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
 )
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from .supervisor_extensions import (
+from netra_backend.tests.helpers.supervisor_extensions import (
     install_supervisor_extensions,
 )
-from .supervisor_test_helpers import (
+from netra_backend.tests.supervisor_test_helpers import (
     assert_agent_called,
     create_agent_state,
     create_execution_context,
@@ -51,9 +42,10 @@ from .supervisor_test_helpers import (
 # Install extension methods for testing
 install_supervisor_extensions()
 
-
 class TestSupervisorOrchestration:
     """Test agent coordination and workflow orchestration"""
+    
+    @pytest.mark.asyncio
     
     async def test_sequential_agent_execution(self):
         """Test sequential execution of multiple agents"""
@@ -98,6 +90,8 @@ class TestSupervisorOrchestration:
         assert final_state.data_result.confidence_score == 0.85
         assert len(final_state.optimizations_result.recommendations) == 2
         
+    @pytest.mark.asyncio
+        
     async def test_parallel_agent_execution(self):
         """Test parallel execution of independent agents"""
         mocks = create_supervisor_mocks()
@@ -111,10 +105,10 @@ class TestSupervisorOrchestration:
         
         async def mock_opt_execute(state, run_id, stream_updates=True):
             await asyncio.sleep(0.03)  # Different duration
-            state.optimizations_result = DeepAgentState(
-                optimization_type="parallel_test",
-                recommendations=["Parallel optimization complete"]
-            ).__dict__
+            state.optimizations_result = {
+                "optimization_type": "parallel_test",
+                "recommendations": ["Parallel optimization complete"]
+            }
             return state
         
         supervisor.agents["data"].execute = mock_data_execute
@@ -141,6 +135,8 @@ class TestSupervisorOrchestration:
         assert all(result.success for result in results)
         assert results[0].state.data_result["analysis"] == "complete"
         assert results[1].state.optimizations_result["optimization_type"] == "parallel_test"
+        
+    @pytest.mark.asyncio
         
     async def test_conditional_workflow_branching(self):
         """Test conditional workflow based on intermediate results"""
@@ -182,7 +178,7 @@ class TestSupervisorOrchestration:
         assert triage_result.success
         
         # Branch 1: If requires_data, run data agent
-        if triage_result.state.triage_result.get("requires_data"):
+        if triage_result.state.triage_result.suggested_workflow.next_agent == "DataSubAgent":
             data_result = await supervisor._route_to_agent(triage_result.state, context, "data")
             assert data_result.success
             current_state = data_result.state
@@ -190,10 +186,12 @@ class TestSupervisorOrchestration:
             current_state = triage_result.state
         
         # Branch 2: If requires specialized optimization, use specialized path
-        if triage_result.state.triage_result.get("requires_specialized_optimization"):
+        if len(triage_result.state.triage_result.suggested_workflow.required_data_sources) > 0:
             opt_result = await supervisor._route_to_agent(current_state, context, "optimization")
             assert opt_result.success
             assert opt_result.state.optimizations_result["optimization_type"] == "specialized"
+            
+    @pytest.mark.asyncio
             
     async def test_state_accumulation_across_agents(self):
         """Test that state accumulates properly across multiple agents"""
@@ -203,20 +201,18 @@ class TestSupervisorOrchestration:
         # Each agent adds to the state
         triage_agent = supervisor.agents["triage"]
         triage_agent.execute = AsyncMock()
-        triage_agent.execute.return_value = create_agent_state("State test",
-                                                             triage_result={"step": 1, "agent": "triage"})
+        # Create state with triage_result manually to avoid type conversion
+        triage_state = create_agent_state("State test")
+        triage_state.triage_result = {"step": 1, "agent": "triage"}
+        triage_agent.execute.return_value = triage_state
         
         data_agent = supervisor.agents["data"]
         data_agent.execute = AsyncMock()
         
         def mock_data_execute(state, run_id, stream_updates=True):
-            # Preserve existing state and add new data
-            result_state = DeepAgentState(
-                user_request=state.user_request,
-                triage_result=state.triage_result,  # Preserve from triage
-                data_result={"step": 2, "agent": "data", "previous_steps": [1]}
-            )
-            return result_state
+            # Modify state in place to avoid type conversion
+            state.data_result = {"step": 2, "agent": "data", "previous_steps": [1]}
+            return state
         
         data_agent.execute.side_effect = mock_data_execute
         
@@ -224,18 +220,14 @@ class TestSupervisorOrchestration:
         opt_agent.execute = AsyncMock()
         
         def mock_opt_execute(state, run_id, stream_updates=True):
-            result_state = DeepAgentState(
-                user_request=state.user_request,
-                triage_result=state.triage_result,  # Preserve
-                data_result=state.data_result,  # Preserve
-                optimizations_result={
-                    "optimization_type": "accumulated",
-                    "step": 3,
-                    "agent": "optimization",
-                    "previous_steps": [1, 2]
-                }
-            )
-            return result_state
+            # Modify state in place to avoid type conversion
+            state.optimizations_result = {
+                "optimization_type": "accumulated",
+                "step": 3,
+                "agent": "optimization",
+                "previous_steps": [1, 2]
+            }
+            return state
         
         opt_agent.execute.side_effect = mock_opt_execute
         
@@ -256,7 +248,6 @@ class TestSupervisorOrchestration:
         # Verify state references previous steps
         assert final_state.data_result["previous_steps"] == [1]
         assert final_state.optimizations_result["previous_steps"] == [1, 2]
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

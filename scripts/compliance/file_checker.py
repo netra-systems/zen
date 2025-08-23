@@ -9,7 +9,7 @@ import glob
 from pathlib import Path
 from typing import List
 
-from .core import ComplianceConfig, Violation, ViolationBuilder
+from scripts.compliance.core import ComplianceConfig, Violation, ViolationBuilder
 
 
 class FileChecker:

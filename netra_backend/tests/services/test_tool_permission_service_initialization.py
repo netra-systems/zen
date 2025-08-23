@@ -3,51 +3,38 @@ Tool Permission Service - Service Initialization Tests
 Functions refactored to ≤8 lines each using helper functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import pytest
 
 from netra_backend.app.schemas.ToolPermission import PermissionLevel
 from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier
 
-# Add project root to path
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from .tool_permission_helpers import (
-    # Add project root to path
+from netra_backend.tests.tool_permission_helpers import (
     MockRedisClient,
     assert_permission_definition_properties,
     assert_service_initialization,
     get_permission_test_data,
 )
 
-
 @pytest.fixture
 def mock_redis():
     """Create mock Redis client"""
     return MockRedisClient()
-
 
 @pytest.fixture
 def service():
     """Create ToolPermissionService without Redis"""
     return ToolPermissionService()
 
-
 @pytest.fixture
 def service_with_redis(mock_redis):
     """Create ToolPermissionService with Redis"""
     return ToolPermissionService(mock_redis)
-
 
 class TestServiceInitialization:
     """Test service initialization and configuration"""
@@ -131,7 +118,6 @@ class TestServiceInitialization:
         )
         assert dev_perm.business_requirements.developer_status == True
         assert "development" in dev_perm.business_requirements.environment
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

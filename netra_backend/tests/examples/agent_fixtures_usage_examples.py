@@ -9,14 +9,13 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from .agent_fixtures import (
+from netra_backend.tests.fixtures.agent_fixtures import (
     AgentBuilder,
     AgentOrchestrator,
     create_agent_state,
     create_mock_supervisor,
     create_mock_triage_agent,
 )
-
 
 # Example 1: Simple Agent Mock Creation
 def test_simple_agent_creation():
@@ -27,7 +26,6 @@ def test_simple_agent_creation():
     # Use mocks in test
     assert supervisor.thread_id is not None
     assert hasattr(triage, 'execute')
-
 
 # Example 2: Agent Builder Pattern
 def test_agent_builder_pattern():
@@ -44,7 +42,6 @@ def test_agent_builder_pattern():
     assert 'llm_manager' in mocks
     assert 'db_session' in mocks
 
-
 # Example 3: Custom Agent Configuration
 def test_custom_agent_configuration():
     """Example: Customize agent behavior"""
@@ -59,7 +56,6 @@ def test_custom_agent_configuration():
     
     # Verify customization
     assert 'triage' in mocks
-
 
 # Example 4: Agent State Management
 def test_agent_state_management():
@@ -76,7 +72,6 @@ def test_agent_state_management():
     )
     assert custom_state.chat_thread_id == "test_thread_123"
     assert custom_state.user_id == "test_user_456"
-
 
 # Example 5: Agent Orchestration
 @pytest.mark.asyncio
@@ -99,7 +94,6 @@ async def test_agent_orchestration():
     assert mocks['triage'].execute.called
     assert mocks['data'].execute.called
 
-
 # Example 6: Error Scenario Testing
 @pytest.mark.asyncio
 async def test_error_scenarios():
@@ -121,7 +115,6 @@ async def test_error_scenarios():
         await orchestrator.execute_sequence(['triage'], state)
     except Exception as e:
         assert "Triage failed" in str(e)
-
 
 # Example 7: Retry Testing
 @pytest.mark.asyncio
@@ -146,7 +139,6 @@ async def test_retry_scenarios():
     # Verify retries were attempted
     assert mocks['data'].execute.call_count == 3  # 2 failures + 1 success
 
-
 # Example 8: Pytest Fixture Usage
 @pytest.fixture
 def complete_agent_environment():
@@ -158,7 +150,6 @@ def complete_agent_environment():
            .with_infrastructure()
            .build())
 
-
 def test_using_fixture(complete_agent_environment):
     """Example: Use the complete environment fixture"""
     mocks = complete_agent_environment
@@ -167,7 +158,6 @@ def test_using_fixture(complete_agent_environment):
     assert len(mocks) >= 7  # supervisor, triage, data, + 4 infrastructure
     assert 'supervisor' in mocks
     assert 'llm_manager' in mocks
-
 
 # Example 9: Integration Testing Pattern
 @pytest.mark.asyncio
@@ -194,7 +184,6 @@ async def test_integration_pattern():
     assert mocks['triage'].execute.called
     assert mocks['data'].execute.called
     assert mocks['llm_manager'].call_llm.return_value is not None
-
 
 # Example 10: Performance Testing Setup
 def test_performance_testing_setup():

@@ -10,17 +10,10 @@ Critical Path: Lock acquisition -> Conflict prevention -> Performance validation
 Coverage: Concurrent editing protection, performance benchmarks, audit trails
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -28,16 +21,13 @@ import uuid
 
 import pytest
 
-# Add project root to path
-from .integration.test_helpers.team_collaboration_base import (
+from netra_backend.tests.integration.test_helpers.team_collaboration_base import (
     PermissionType,
-    # Add project root to path
     TeamCollaborationManager,
     TeamRole,
     assert_performance_benchmark,
     validate_audit_trail,
 )
-
 
 @pytest.fixture
 async def collaboration_workspace():
@@ -71,7 +61,6 @@ async def collaboration_workspace():
         "owner_id": owner_id,
         "user_ids": user_ids
     }
-
 
 class TestConcurrentEditingPerformance:
     """Critical path tests for concurrent editing and performance validation."""

@@ -3,17 +3,10 @@ Tool Permission Service - User Plans and Permissions Tests
 Functions refactored to ≤8 lines each using helper functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import pytest
 
@@ -24,28 +17,23 @@ from netra_backend.app.schemas.UserPlan import (
     UserPlan,
 )
 
-# Add project root to path
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from .tool_permission_helpers import (
-    # Add project root to path
+from netra_backend.tests.tool_permission_helpers import (
     MockRedisClient,
     create_developer_context,
     create_sample_context,
     create_user_plan,
 )
 
-
 @pytest.fixture
 def service():
     """Create ToolPermissionService without Redis"""
     return ToolPermissionService()
 
-
 @pytest.fixture
 def sample_context():
     """Create sample tool execution context"""
     return create_sample_context()
-
 
 @pytest.fixture
 def developer_context():
@@ -61,7 +49,6 @@ class TestGetUserPlan:
         assert user_plan.user_id == "test_user"
         assert user_plan.tier == PlanTier.FREE
         assert user_plan.features == PLAN_DEFINITIONS[PlanTier.FREE].features
-
 
 class TestGetUserPermissions:
     """Test user permissions retrieval"""
@@ -92,7 +79,6 @@ class TestGetUserPermissions:
         permissions = service._get_user_permissions(developer_context, user_plan)
         assert "developer_tools" in permissions
 
-
 class TestToolRequiredPermissions:
     """Test tool required permissions lookup"""
     
@@ -119,7 +105,6 @@ class TestToolRequiredPermissions:
         required = service._get_tool_required_permissions("unknown_tool")
         assert len(required) == 0
 
-
 class TestHasPermission:
     """Test permission checking logic"""
     
@@ -145,7 +130,6 @@ class TestHasPermission:
         sample_context.user_plan = "free"
         result = service._has_permission("analytics", user_permissions, sample_context, user_plan)
         assert result == False
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

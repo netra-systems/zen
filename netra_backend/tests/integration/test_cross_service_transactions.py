@@ -4,17 +4,10 @@ Tests atomic transactions across Auth Service and Backend
 BVJ: Protects $40K MRR from data inconsistency
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import tempfile
@@ -29,12 +22,8 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-# Add project root to path
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_postgres import Message, Thread, User
-
-# Add project root to path
-
 
 class CrossServiceTransactionManager:
     """Manages atomic transactions across Auth Service and Backend"""
@@ -109,7 +98,6 @@ class CrossServiceTransactionManager:
         if transaction_id in sessions:
             await sessions[transaction_id].close()
             del sessions[transaction_id]
-
 
 @pytest.fixture
 async def transaction_manager():
@@ -204,7 +192,6 @@ def _verify_failed_transaction_rollback(manager: CrossServiceTransactionManager,
     assert log["status"] == "failed"
     assert log["rollback_completed"] is True
 
-
 class DatabaseConnectionPoolManager:
     """Manages database connection pool testing"""
     
@@ -238,7 +225,6 @@ class DatabaseConnectionPoolManager:
         assert self.connection_stats["created"] == self.connection_stats["closed"]
         assert len(self.active_connections) == 0
 
-
 class TransactionIsolationTester:
     """Tests transaction isolation levels"""
     
@@ -264,7 +250,6 @@ class TransactionIsolationTester:
         """Verify isolation levels work correctly"""
         assert self.isolation_results.get("read_committed") is True
         assert self.isolation_results.get("serializable") is True
-
 
 # Add cleanup method to CrossServiceTransactionManager
 CrossServiceTransactionManager._cleanup_all_sessions = lambda self: asyncio.gather(

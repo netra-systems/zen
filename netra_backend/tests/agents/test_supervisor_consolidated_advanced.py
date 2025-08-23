@@ -1,16 +1,9 @@
 """Advanced tests for SupervisorAgent - statistics, edge cases, and concurrent execution."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from unittest.mock import AsyncMock, Mock
@@ -20,13 +13,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-
-# Add project root to path
-
 
 class TestSupervisorAgentStats:
     """Test statistics and monitoring."""
@@ -60,9 +49,10 @@ class TestSupervisorAgentStats:
         assert stats["hooks_registered"]["after_agent"] == 1
         assert stats["hooks_registered"]["on_error"] == 0
 
-
 class TestSupervisorAgentEdgeCases:
     """Test edge cases and error scenarios."""
+    
+    @pytest.mark.asyncio
     
     async def test_concurrent_execution_locking(self):
         """Test that execution lock prevents concurrent runs."""

@@ -11,17 +11,10 @@ Coverage: Production-scale rate limiting, real traffic patterns, tier-based fair
 L4 Realism: Tests against real staging infrastructure, real Redis, real rate limiting algorithms, real traffic patterns
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -42,14 +35,10 @@ from netra_backend.app.services.backpressure.backpressure_service import (
 )
 from netra_backend.app.services.quota.quota_manager import QuotaManager
 
-# Add project root to path
 from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
-from .integration.staging_config.base import StagingConfigTestBase
-
-# Add project root to path
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class L4RateLimitConfig:
@@ -61,7 +50,6 @@ class L4RateLimitConfig:
     burst_allowance: int
     priority_multiplier: float
     backpressure_threshold: float
-
 
 class RateLimitingL4Manager:
     """Manages L4 rate limiting testing with real staging infrastructure."""
@@ -569,7 +557,6 @@ class RateLimitingL4Manager:
         except Exception as e:
             logger.error(f"L4 cleanup failed: {e}")
 
-
 @pytest.fixture
 async def l4_rate_limiting_manager():
     """Create L4 rate limiting manager for staging tests."""
@@ -577,7 +564,6 @@ async def l4_rate_limiting_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio
@@ -603,7 +589,6 @@ async def test_l4_production_tier_rate_limiting(l4_rate_limiting_manager):
             assert result["allowed"] is True
             assert result["staging_verified"] is True
 
-
 @pytest.mark.staging
 @pytest.mark.asyncio
 async def test_l4_quota_enforcement_production_scale(l4_rate_limiting_manager):
@@ -625,7 +610,6 @@ async def test_l4_quota_enforcement_production_scale(l4_rate_limiting_manager):
     # Verify quota was enforced with staging data
     quota_limited = [r for r in llm_requests if not r["allowed"] and r.get("reason") == "quota_exceeded"]
     assert len(quota_limited) >= 0  # May or may not hit quota depending on staging config
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio  
@@ -658,7 +642,6 @@ async def test_l4_backpressure_under_production_load(l4_rate_limiting_manager):
         enterprise_time = results[UserTier.ENTERPRISE]["response_time"]
         free_time = results[UserTier.FREE]["response_time"]
         assert enterprise_time <= free_time * 1.5  # Enterprise should be reasonably faster
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio

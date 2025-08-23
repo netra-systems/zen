@@ -6,7 +6,6 @@ from netra_backend.app.services.quality_gate_service import (
     QualityMetrics,
 )
 
-
 def create_all_penalties_metrics():
     """Create metrics with all penalties applied"""
     return QualityMetrics(
@@ -17,7 +16,6 @@ def create_all_penalties_metrics():
         hallucination_risk=0.8,  # -0.15
         redundancy_ratio=0.5  # -0.1
     )
-
 
 def create_all_specific_checks_metrics():
     """Create metrics that fail all specific threshold checks"""
@@ -33,7 +31,6 @@ def create_all_specific_checks_metrics():
         generic_phrase_count=10
     )
 
-
 def create_all_issues_metrics():
     """Create metrics with all possible issues"""
     return QualityMetrics(
@@ -46,7 +43,6 @@ def create_all_issues_metrics():
         completeness_score=0.3
     )
 
-
 def create_prompt_adjustment_metrics():
     """Create metrics for prompt adjustment testing"""
     return QualityMetrics(
@@ -57,14 +53,12 @@ def create_prompt_adjustment_metrics():
         circular_reasoning_detected=True
     )
 
-
 def create_borderline_optimization_metrics():
     """Create borderline metrics for optimization suggestions"""
     return QualityMetrics(
         quantification_score=0.3,
         completeness_score=0.8
     )
-
 
 def create_borderline_action_plan_metrics():
     """Create borderline metrics for action plan suggestions"""
@@ -73,14 +67,12 @@ def create_borderline_action_plan_metrics():
         actionability_score=0.8
     )
 
-
 def create_high_hallucination_metrics():
     """Create metrics with high hallucination risk"""
     return QualityMetrics(
         overall_score=0.9,
         hallucination_risk=0.8  # Above 0.7 threshold
     )
-
 
 def add_quality_distribution_metrics(quality_service):
     """Add metrics with different quality levels for distribution testing"""
@@ -98,7 +90,6 @@ def add_quality_distribution_metrics(quality_service):
             'quality_level': level.value
         })
 
-
 def add_recent_metrics_overflow(quality_service, count=150):
     """Add metrics that exceed recent entry limits"""
     for i in range(count):
@@ -107,7 +98,6 @@ def add_recent_metrics_overflow(quality_service, count=150):
             'overall_score': 0.5 + (i * 0.001),
             'quality_level': 'acceptable'
         })
-
 
 def add_metrics_to_memory_limit(quality_service, count=1000):
     """Add metrics up to memory limit"""

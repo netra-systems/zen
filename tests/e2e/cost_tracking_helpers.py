@@ -42,7 +42,7 @@ class CostTrackingTestCore:
         await self.billing_helper.setup_billing_environment()
         self.test_session_data.clear()
     
-    async def teardown_test_environment(self) -> None:
+    async def test_teardown_test_environment(self) -> None:
         """Cleanup cost tracking test environment."""
         await self.billing_helper.teardown_billing_environment()
         self.test_session_data.clear()

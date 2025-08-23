@@ -26,16 +26,12 @@ from typing import Any, Dict, List, Optional
 import pytest
 import pytest_asyncio
 
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 from tests.e2e.config import TEST_USERS
 from tests.e2e.integration.service_orchestrator import E2EServiceOrchestrator
 from tests.e2e.real_client_types import ClientConfig
 from tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
-
 
 class ClickHouseFailureSimulator:
     """Simulates ClickHouse service failures for degraded mode testing."""
@@ -77,7 +73,6 @@ class ClickHouseFailureSimulator:
         if 'CLICKHOUSE_DISABLED' in os.environ:
             del os.environ['CLICKHOUSE_DISABLED']
         await asyncio.sleep(2)  # Allow service recovery time
-
 
 class DegradedModeValidator:
     """Validates system behavior in degraded mode when ClickHouse is unavailable."""
@@ -134,7 +129,6 @@ class DegradedModeValidator:
             "no_analytics_errors": "analytics" not in response.get("error", "").lower()
         }
 
-
 class HealthCheckCascadeValidator:
     """Validates health check cascade reporting degraded status correctly."""
     
@@ -187,7 +181,6 @@ class HealthCheckCascadeValidator:
         status = data.get("status", "").lower()
         return status in ["degraded", "unhealthy"] or "degraded" in str(data).lower()
 
-
 class RecoveryValidator:
     """Validates system recovery when ClickHouse comes back online."""
     
@@ -230,7 +223,6 @@ class RecoveryValidator:
             "no_data_loss": True  # Assuming no data operations during test
         }
 
-
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestHealthCheckCascade:
@@ -266,7 +258,7 @@ class TestHealthCheckCascade:
         """Initialize recovery validator."""
         return RecoveryValidator()
     
-    async def test_clickhouse_failure_triggers_degraded_mode(self, orchestrator, clickhouse_simulator,
+    async def test_clickhouse_failure_triggers_degraded_mode(self, orchestrator, clickhouse_simulator:
                                                            health_cascade_validator):
         """Test that ClickHouse failure triggers degraded mode."""
         try:
@@ -289,7 +281,7 @@ class TestHealthCheckCascade:
         except Exception as e:
             pytest.skip(f"Service orchestrator not available: {e}")
     
-    async def test_core_functions_work_in_degraded_mode(self, orchestrator, clickhouse_simulator,
+    async def test_core_functions_work_in_degraded_mode(self, orchestrator, clickhouse_simulator:
                                                       degraded_validator):
         """Test core functions still work when ClickHouse is unavailable."""
         # Disable ClickHouse
@@ -313,7 +305,7 @@ class TestHealthCheckCascade:
         finally:
             await ws_client.close()
     
-    async def test_system_recovery_when_service_returns(self, orchestrator, clickhouse_simulator,
+    async def test_system_recovery_when_service_returns(self, orchestrator, clickhouse_simulator:
                                                       recovery_validator):
         """Test system recovery when ClickHouse comes back online."""
         # Simulate failure and recovery cycle
@@ -329,7 +321,7 @@ class TestHealthCheckCascade:
         assert recovery_result["fast_recovery"], "Recovery took too long"
         assert recovery_result["no_data_loss"], "Data loss detected during degradation"
     
-    async def test_complete_health_cascade_flow(self, orchestrator, clickhouse_simulator,
+    async def test_complete_health_cascade_flow(self, orchestrator, clickhouse_simulator:
                                               degraded_validator, health_cascade_validator,
                                               recovery_validator):
         """Complete health check cascade test flow within time limit."""
@@ -369,12 +361,10 @@ class TestHealthCheckCascade:
         assert cascade_works["cascade_working"], "Health check cascade not working"
         assert full_recovery["full_recovery"], "System did not fully recover"
 
-
 # Test execution helper functions
 def create_health_cascade_test_suite() -> TestHealthCheckCascade:
     """Create health check cascade test suite instance."""
     return TestHealthCheckCascade()
-
 
 async def run_health_cascade_validation() -> Dict[str, Any]:
     """Run health check cascade validation and return results."""

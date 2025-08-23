@@ -3,17 +3,10 @@ Tests for database repository transaction management.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from typing import Any, Dict
@@ -24,22 +17,19 @@ from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
 
 from netra_backend.app.core.exceptions import DatabaseError
 
-# Add project root to path
 from netra_backend.app.db.transaction_core import with_deadlock_retry
-from .database_transaction_test_helpers import (
+from netra_backend.tests.database_transaction_test_helpers import (
     MockDatabaseModel,
     assert_all_sessions_closed,
     configure_mock_query_results,
-    # Add project root to path
     create_mock_session,
     create_tracked_session_factory,
     run_multiple_transaction_cycles,
 )
-from .database_transaction_test_mocks import (
+from netra_backend.tests.database_transaction_test_mocks import (
     MockRepository,
     TransactionTestManager,
 )
-
 
 @pytest.fixture
 def mock_session():
@@ -48,18 +38,15 @@ def mock_session():
     configure_mock_query_results(session)
     return session
 
-
 @pytest.fixture
 def mock_repository():
     """Create mock repository for testing"""
     return MockRepository()
 
-
 @pytest.fixture
 def transaction_manager():
     """Create transaction test manager"""
     return TransactionTestManager()
-
 
 class TestDatabaseRepositoryTransactions:
     """Test database repository transaction management"""
@@ -142,14 +129,12 @@ class TestDatabaseRepositoryTransactions:
         
         _assert_operation_logging(mock_repository)
 
-
 def _setup_successful_creation(mock_session: AsyncMock, create_data: Dict[str, Any]) -> None:
     """Setup mock session for successful creation"""
     created_entity = MockDatabaseModel(**create_data)
     mock_session.refresh = AsyncMock(
         side_effect=lambda entity: setattr(entity, 'id', 'test_123')
     )
-
 
 def _assert_successful_transaction(result, mock_session: AsyncMock, mock_repository) -> None:
     """Assert successful transaction completion"""
@@ -162,11 +147,9 @@ def _assert_successful_transaction(result, mock_session: AsyncMock, mock_reposit
     assert len(mock_repository.operation_log) == 1
     assert mock_repository.operation_log[0][0] == 'create'
 
-
 def _setup_integrity_error(mock_session: AsyncMock) -> None:
     """Setup mock session to simulate integrity error"""
     mock_session.flush.side_effect = IntegrityError("duplicate key", None, None, None)
-
 
 def _assert_rollback_on_error(result, mock_session: AsyncMock) -> None:
     """Assert rollback behavior on error"""
@@ -174,16 +157,13 @@ def _assert_rollback_on_error(result, mock_session: AsyncMock) -> None:
     mock_session.add.assert_called_once()
     mock_session.rollback.assert_called()
 
-
 def _setup_sql_error(mock_session: AsyncMock) -> None:
     """Setup mock session to simulate SQL error"""
     mock_session.flush.side_effect = SQLAlchemyError("database error")
 
-
 def _setup_connection_loss(mock_session: AsyncMock) -> None:
     """Setup mock session to simulate connection loss"""
     mock_session.flush.side_effect = DisconnectionError("connection lost", None, None)
-
 
 def _assert_operation_logging(mock_repository) -> None:
     """Assert operation logging functionality"""

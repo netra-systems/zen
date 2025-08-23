@@ -1,16 +1,9 @@
 """Tests for Quality Gate Service completeness and novelty calculations"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import re
 from unittest.mock import patch
@@ -19,20 +12,17 @@ import pytest
 
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
-    # Add project root to path
     QualityGateService,
     QualityMetrics,
 )
-from .quality_gate_comprehensive_helpers import (
+from netra_backend.tests.quality_gate_comprehensive_helpers import (
     setup_completeness_general_content,
     setup_completeness_report_content,
     setup_redis_mock_with_error,
     setup_redis_mock_with_large_cache,
 )
-
 
 class TestCompletenessCalculation:
     """Test completeness calculation for all content types"""
@@ -58,7 +48,6 @@ class TestCompletenessCalculation:
             ContentType.GENERAL
         )
         assert score > 0  # Should calculate based on general criteria
-
 
 class TestNoveltyCalculation:
     """Test novelty calculation with Redis integration"""

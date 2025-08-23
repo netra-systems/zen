@@ -3,30 +3,19 @@ Secret Manager Tests
 Tests enhanced secret management functionality
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.enhanced_secret_manager import (
     EnhancedSecretManager,
     EnvironmentType,
     SecretAccessLevel,
 )
 from netra_backend.app.core.exceptions import NetraSecurityException
-
-# Add project root to path
-
 
 class TestSecretManager:
     """Test enhanced secret manager."""
@@ -168,7 +157,6 @@ class TestSecretManager:
         # Should raise exception when expired
         with pytest.raises(NetraSecurityException):
             secret_manager.get_secret(secret_name, "test-component")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

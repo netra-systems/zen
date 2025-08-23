@@ -64,7 +64,7 @@ class MetricAggregator:
     
     def calculate_agent_stats(self) -> Dict[str, Any]:
         """Calculate agent-related statistics."""
-        from .metric_reader import MetricReader
+        from netra_backend.app.services.metrics.metric_reader import MetricReader
         reader = MetricReader(deque(), self._agent_metrics)
         active_agents = reader.count_active_agents()
         unhealthy_agents = reader.count_unhealthy_agents()

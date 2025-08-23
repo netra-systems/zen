@@ -10,17 +10,10 @@ L3 Test: Real Redis Streams with producer/consumer patterns, acknowledgments,
 retries, dead letter queue, and stream processing validation.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -33,20 +26,16 @@ from unittest.mock import patch
 
 import pytest
 import redis.asyncio as redis
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer,
     verify_redis_connection,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class StreamMessage:
@@ -61,7 +50,6 @@ class StreamMessage:
     consumer_group: Optional[str] = None
     consumer_id: Optional[str] = None
 
-
 @dataclass
 class StreamProcessingStats:
     """Statistics for stream processing operations."""
@@ -74,7 +62,6 @@ class StreamProcessingStats:
     processing_errors: int = 0
     consumer_groups_created: int = 0
     streams_created: int = 0
-
 
 class MessageQueueRedisStreamsManager:
     """Manages message queue testing with Redis Streams."""
@@ -710,7 +697,6 @@ class MessageQueueRedisStreamsManager:
             }
         }
 
-
 @pytest.mark.L3
 @pytest.mark.integration
 class TestMessageQueueRedisStreamsL3:
@@ -874,7 +860,6 @@ class TestMessageQueueRedisStreamsL3:
         assert infra_stats["consumer_groups_created"] >= 3, "Insufficient consumer groups created"
         
         logger.info(f"Comprehensive stream processing test completed in {total_time:.2f}s: {summary}")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

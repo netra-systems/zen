@@ -1,20 +1,9 @@
 """Fixtures Tests - Split from test_critical_integration.py"""
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -36,7 +25,6 @@ from starlette.websockets import WebSocketState
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import (
 
     SupervisorAgent as Supervisor,
@@ -53,9 +41,6 @@ from netra_backend.app.services.database.thread_repository import ThreadReposito
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.services.websocket_manager import WebSocketManager
-
-# Add project root to path
-
 
 @pytest.fixture
 
@@ -90,7 +75,6 @@ def setup_real_database():
 
             session = async_session()
             
-
             return {
 
                 "session": session,
@@ -102,7 +86,6 @@ def setup_real_database():
             }
 
         return _setup
-
 
 @pytest.fixture
 
@@ -125,7 +108,6 @@ def setup_integration_infrastructure():
 
         state_service = StatePersistenceService()
         
-
         return {
 
             "websocket_manager": websocket_manager,

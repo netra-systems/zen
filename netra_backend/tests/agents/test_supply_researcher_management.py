@@ -3,32 +3,22 @@ Scheduling and management tests for SupplyResearcherAgent
 Modular design with ≤300 lines, ≤8 lines per function
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
-from .supply_researcher_fixtures import (
-    # Add project root to path
+from netra_backend.tests.agents.supply_researcher_fixtures import (
     agent,
     mock_supply_service,
     research_query_test_cases,
 )
-
 
 class TestSupplyResearcherManagement:
     """Scheduling and notification management tests"""
@@ -153,6 +143,8 @@ class TestSupplyResearcherManagement:
         query_lower = query.lower()
         for keyword in expected_keywords:
             assert keyword in query_lower, f"Expected '{keyword}' in query"
+
+    @pytest.mark.asyncio
 
     async def test_change_notification_triggers(self, agent, mock_supply_service):
         """Test notification triggers for significant changes"""
@@ -279,6 +271,8 @@ class TestSupplyResearcherManagement:
         assert "anthropic" in batches
         assert len(batches["openai"]) == 2
         assert len(batches["anthropic"]) == 2
+
+    @pytest.mark.asyncio
 
     async def test_schedule_health_monitoring(self):
         """Test schedule health and failure monitoring"""

@@ -117,7 +117,13 @@ export const MessageList: React.FC = () => {
       ? msg.content 
       : (msg.content?.text || JSON.stringify(msg.content)),
     sub_agent_name: msg.metadata?.agentName || null,
-    created_at: new Date(msg.timestamp).toISOString(),
+    created_at: (() => {
+      try {
+        return msg.timestamp ? new Date(msg.timestamp).toISOString() : new Date().toISOString();
+      } catch {
+        return new Date().toISOString();
+      }
+    })(),
     displayed_to_user: true,
     tool_info: null,
     raw_data: msg.metadata || null,

@@ -3,17 +3,10 @@ Core SupplyResearcherAgent tests - LLM, WebSocket, State, Multi-provider
 Modular design with ≤300 lines, ≤8 lines per function
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -23,22 +16,21 @@ import pytest
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
-from .supply_researcher_fixtures import (
+from netra_backend.tests.agents.supply_researcher_fixtures import (
     agent,
     assert_api_response_structure,
     assert_websocket_updates_sent,
-    # Add project root to path
     mock_db,
     mock_llm_manager,
     mock_supply_service,
     sample_state,
 )
 
-
 class TestSupplyResearcherCore:
     """Core agent functionality tests"""
+
+    @pytest.mark.asyncio
 
     async def test_llm_prompt_template_usage(self, agent, mock_llm_manager):
         """Test that agent uses LLM prompt templates correctly"""
@@ -62,6 +54,8 @@ class TestSupplyResearcherCore:
         assert parsed["research_type"] == ResearchType.PRICING
         assert parsed["provider"] == "anthropic"
         assert "claude" in parsed["model_name"].lower()
+
+    @pytest.mark.asyncio
 
     async def test_websocket_event_streaming(self, agent):
         """Test WebSocket event streaming during research"""
@@ -107,6 +101,8 @@ class TestSupplyResearcherCore:
                         statuses.append(status)
         return statuses
 
+    @pytest.mark.asyncio
+
     async def test_state_persistence_redis(self, agent):
         """Test agent state persistence in Redis"""
         _setup_redis_mock()
@@ -146,6 +142,8 @@ class TestSupplyResearcherCore:
         mock_redis = Mock()
         agent.redis_manager = mock_redis
         assert hasattr(agent, 'redis_manager')
+
+    @pytest.mark.asyncio
 
     async def test_multi_provider_parallel_research(self, agent):
         """Test parallel research execution for multiple providers"""

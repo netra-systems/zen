@@ -4,17 +4,10 @@ Tests simple chains, complex chains, and parallel tool orchestration
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime
@@ -27,11 +20,7 @@ from langchain_core.tools import BaseTool
 
 from netra_backend.app.core.exceptions_base import NetraException
 
-# Add project root to path
 from netra_backend.app.services.tool_registry import ToolRegistry
-
-# Add project root to path
-
 
 class MockAdvancedTool(BaseTool):
     """Advanced mock tool with lifecycle management"""
@@ -49,7 +38,6 @@ class MockAdvancedTool(BaseTool):
     
     async def _arun(self, query: str) -> str:
         return self._run(query)
-
 
 class ToolOrchestrator:
     """Orchestrates tool execution and coordination"""
@@ -100,7 +88,6 @@ class ToolOrchestrator:
             'execution_time': datetime.now(UTC)
         }
 
-
 class UnifiedToolRegistry:
     """Unified registry with orchestration support"""
     
@@ -119,7 +106,6 @@ class UnifiedToolRegistry:
     async def orchestrate_parallel_tools(self, parallel_config: Dict[str, Any]) -> Any:
         """Orchestrate parallel tool execution"""
         return await self.tool_orchestrator.execute_parallel_chain(parallel_config)
-
 
 class TestToolOrchestration:
     """Test tool orchestration functionality"""

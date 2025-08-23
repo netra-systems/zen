@@ -2,17 +2,10 @@
 Tests for structured generation functionality in LLM Manager.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 from typing import List, Optional
@@ -24,11 +17,7 @@ from netra_backend.app.schemas import AppConfig, LLMConfig
 
 from netra_backend.app.llm.llm_manager import LLMManager
 
-# Add project root to path
-from .llm_mocks import MockLLM, MockStructuredLLM
-
-# Add project root to path
-
+from netra_backend.tests.llm_mocks import MockLLM, MockStructuredLLM
 
 class SampleResponseModel(BaseModel):
     """Sample model for structured generation testing."""
@@ -37,7 +26,6 @@ class SampleResponseModel(BaseModel):
     tags: List[str] = Field(default_factory=list)
     metadata: Optional[dict] = None
 
-
 class SampleComplexModel(BaseModel):
     """Complex model with nested structures for testing."""
     id: int
@@ -45,7 +33,6 @@ class SampleComplexModel(BaseModel):
     details: dict
     items: List[dict]
     score: float = Field(ge=0.0, le=100.0)
-
 
 @pytest.fixture
 def test_config():
@@ -82,12 +69,10 @@ def test_config():
         }
     )
 
-
 @pytest.fixture
 def llm_manager(test_config):
     """Create LLM manager instance."""
     return LLMManager(test_config)
-
 
 class TestMockStructuredLLM:
     """Test MockStructuredLLM functionality."""
@@ -123,7 +108,6 @@ class TestMockStructuredLLM:
         assert isinstance(result.name, str)
         assert isinstance(result.details, dict)
         assert isinstance(result.items, list)
-
 
 class TestLLMManagerStructuredGeneration:
     """Test LLMManager structured generation methods."""
@@ -263,7 +247,6 @@ class TestLLMManagerStructuredGeneration:
                 
                 assert "Structured generation failed" in str(exc_info.value)
 
-
 class TestNestedJSONParsing:
     """Test nested JSON parsing functionality."""
     async def test_parse_nested_json_with_tool_recommendations(self, llm_manager):
@@ -309,7 +292,6 @@ class TestNestedJSONParsing:
         assert isinstance(parsed["outer"]["middle"], dict)
         assert isinstance(parsed["outer"]["middle"]["inner"], dict)
         assert parsed["outer"]["middle"]["inner"]["value"] == 42
-
 
 class TestIntegrationWithAgents:
     """Test integration of structured generation with agents."""
@@ -372,7 +354,6 @@ class TestIntegrationWithAgents:
         assert response.query == "SELECT * FROM test"
         assert len(response.results) == 1
         assert response.execution_time_ms == 125.5
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

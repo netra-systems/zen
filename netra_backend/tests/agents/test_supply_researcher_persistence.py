@@ -3,38 +3,30 @@ Database and persistence tests for SupplyResearcherAgent
 Modular design with ≤300 lines, ≤8 lines per function
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from decimal import Decimal
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.db.models_postgres import SupplyUpdateLog
 from netra_backend.app.services.supply_research_service import SupplyResearchService
-from .supply_researcher_fixtures import (
-    # Add project root to path
+from netra_backend.tests.agents.supply_researcher_fixtures import (
     agent,
     anomaly_test_data,
     mock_db,
     mock_supply_service,
 )
 
-
 class TestSupplyResearcherPersistence:
     """Database and persistence tests"""
+
+    @pytest.mark.asyncio
 
     async def test_database_transaction_rollback(self, agent, mock_db):
         """Test database transaction rollback on failure"""
@@ -101,6 +93,8 @@ class TestSupplyResearcherPersistence:
         """Verify anomaly detection results (≤8 lines)"""
         assert len(anomalies) > 0
         assert anomalies[0]["percent_change"] == 150
+
+    @pytest.mark.asyncio
 
     async def test_audit_trail_generation(self, agent, mock_db):
         """Test comprehensive audit trail generation"""
@@ -221,6 +215,8 @@ class TestSupplyResearcherPersistence:
         """Verify performance metrics (≤8 lines)"""
         # Performance should be acceptable for large datasets
         assert result is not None
+
+    @pytest.mark.asyncio
 
     async def test_backup_and_recovery(self, agent, mock_db):
         """Test backup and recovery functionality"""

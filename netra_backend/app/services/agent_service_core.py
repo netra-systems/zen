@@ -258,5 +258,5 @@ class AgentService(IAgentService):
     
     def _create_response_processor(self, message: str, thread_id: Optional[str]):
         """Create response processor for streaming."""
-        from .agent_service_streaming import AgentResponseProcessor
+        from netra_backend.app.services.agent_service_streaming import AgentResponseProcessor
         return AgentResponseProcessor(self.supervisor, message, thread_id)

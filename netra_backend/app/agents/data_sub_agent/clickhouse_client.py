@@ -7,7 +7,7 @@ Business Value: Reliable data access for performance analysis.
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.config import get_config
@@ -35,6 +35,7 @@ class ClickHouseClient:
         try:
             if get_client is None:
                 self.logger.warning("ClickHouse client not available, using mock mode")
+                self._health_status = {"healthy": True, "last_check": datetime.now(timezone.utc)}
                 return True
                 
             config = get_config()
@@ -48,14 +49,14 @@ class ClickHouseClient:
             
             # Test connection
             await self._test_connection()
-            self._health_status = {"healthy": True, "last_check": datetime.utcnow()}
+            self._health_status = {"healthy": True, "last_check": datetime.now(timezone.utc)}
             
             self.logger.info("ClickHouse connection established")
             return True
             
         except Exception as e:
             self.logger.error(f"ClickHouse connection failed: {e}")
-            self._health_status = {"healthy": False, "last_check": datetime.utcnow()}
+            self._health_status = {"healthy": False, "last_check": datetime.now(timezone.utc)}
             return False
     
     async def execute_query(self, query: str, parameters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
@@ -156,7 +157,7 @@ class ClickHouseClient:
         # Return sample data structure
         return [
             {
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(timezone.utc),
                 "user_id": "test_user",
                 "workload_id": "test_workload",
                 "latency_ms": 150.5,
@@ -171,7 +172,7 @@ class ClickHouseClient:
             return False
             
         # Consider connection stale after 5 minutes
-        time_since_check = datetime.utcnow() - self._health_status["last_check"]
+        time_since_check = datetime.now(timezone.utc) - self._health_status["last_check"]
         if time_since_check > timedelta(minutes=5):
             return False
             

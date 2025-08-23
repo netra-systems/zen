@@ -11,17 +11,10 @@ ensuring proper boundaries between services and preventing
 configuration leakage across service boundaries.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import ast
 import json
@@ -31,7 +24,6 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 import pytest
-
 
 class ConfigIsolationAnalyzer:
     """Analyzer for configuration isolation patterns."""
@@ -153,14 +145,12 @@ class ConfigIsolationAnalyzer:
                             return True
         return False
 
-
 class TestConfigIsolationPatterns:
     """Test Suite 3: Validate Configuration Isolation Patterns"""
     
     @pytest.fixture
     def project_root(self):
         """Get project root directory."""
-        return Path(__file__).parent.parent.parent
         
     @pytest.fixture
     def analyzer(self, project_root):

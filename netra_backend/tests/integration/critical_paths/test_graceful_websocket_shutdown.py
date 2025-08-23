@@ -11,21 +11,10 @@ L2 Test: Real internal shutdown components with mocked external services.
 Performance target: <30s graceful shutdown, 100% message preservation.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -45,7 +34,6 @@ from netra_backend.app.schemas import User
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
-
 class ShutdownPhase(Enum):
 
     """Graceful shutdown phases."""
@@ -62,7 +50,6 @@ class ShutdownPhase(Enum):
 
     STOPPED = "stopped"
 
-
 class ConnectionState(Enum):
 
     """Connection states during shutdown."""
@@ -74,7 +61,6 @@ class ConnectionState(Enum):
     CLOSED = "closed"
 
     FORCE_CLOSED = "force_closed"
-
 
 @dataclass
 
@@ -93,7 +79,6 @@ class ShutdownConfig:
     save_state_on_shutdown: bool = True  # Save connection state to disk
 
     notify_clients: bool = True          # Send shutdown notifications
-
 
 @dataclass
 
@@ -119,12 +104,10 @@ class ConnectionContext:
 
     created_at: float = field(default_factory=time.time)
 
-
 class GracefulShutdownManager:
 
     """Manage graceful shutdown of WebSocket connections."""
     
-
     def __init__(self, config: ShutdownConfig = None):
 
         self.config = config or ShutdownConfig()
@@ -145,7 +128,6 @@ class GracefulShutdownManager:
 
         self.drain_complete_event = asyncio.Event()
         
-
         self.metrics = {
 
             "total_connections_at_shutdown": 0,
@@ -166,12 +148,10 @@ class GracefulShutdownManager:
 
         }
         
-
         self.shutdown_callbacks = []
 
         self.state_persistence = {}
     
-
     def register_connection(self, connection_id: str, user_id: str, websocket: Any) -> ConnectionContext:
 
         """Register a connection for shutdown management."""
@@ -186,15 +166,12 @@ class GracefulShutdownManager:
 
         )
         
-
         self.connections[connection_id] = context
 
         self.user_connections[user_id].add(connection_id)
         
-
         return context
     
-
     def unregister_connection(self, connection_id: str) -> bool:
 
         """Unregister a connection."""
@@ -203,27 +180,22 @@ class GracefulShutdownManager:
 
             return False
         
-
         context = self.connections.pop(connection_id)
 
         self.user_connections[context.user_id].discard(connection_id)
         
-
         if not self.user_connections[context.user_id]:
 
             del self.user_connections[context.user_id]
         
-
         return True
     
-
     def add_shutdown_callback(self, callback: Callable) -> None:
 
         """Add callback to be executed during shutdown."""
 
         self.shutdown_callbacks.append(callback)
     
-
     async def initiate_graceful_shutdown(self, signal_name: str = "SIGTERM") -> Dict[str, Any]:
 
         """Initiate graceful shutdown process."""
@@ -232,12 +204,10 @@ class GracefulShutdownManager:
 
             return {"error": "Shutdown already in progress"}
         
-
         self.shutdown_start_time = time.time()
 
         self.metrics["total_connections_at_shutdown"] = len(self.connections)
         
-
         shutdown_result = {
 
             "signal": signal_name,
@@ -250,7 +220,6 @@ class GracefulShutdownManager:
 
         }
         
-
         try:
             # Phase 1: Stop accepting new connections
 
@@ -276,14 +245,12 @@ class GracefulShutdownManager:
 
             shutdown_result["phases_completed"].append("cleanup")
             
-
             self.phase = ShutdownPhase.STOPPED
 
             self.shutdown_complete_time = time.time()
 
             self.metrics["shutdown_duration"] = self.shutdown_complete_time - self.shutdown_start_time
             
-
             shutdown_result.update({
 
                 "completed_at": self.shutdown_complete_time,
@@ -294,7 +261,6 @@ class GracefulShutdownManager:
 
             })
             
-
         except Exception as e:
 
             shutdown_result.update({
@@ -307,12 +273,10 @@ class GracefulShutdownManager:
 
             })
         
-
         self.shutdown_event.set()
 
         return shutdown_result
     
-
     async def _phase_stop_accepting_connections(self) -> None:
 
         """Phase 1: Stop accepting new connections."""
@@ -343,7 +307,6 @@ class GracefulShutdownManager:
 
                 pass  # Continue with other callbacks
     
-
     async def _phase_drain_connections(self) -> None:
 
         """Phase 2: Drain existing connections gracefully."""
@@ -360,7 +323,6 @@ class GracefulShutdownManager:
 
         drain_deadline = time.time() + self.config.drain_timeout
         
-
         while time.time() < drain_deadline and self._has_active_connections():
             # Process pending messages during drain
 
@@ -370,15 +332,12 @@ class GracefulShutdownManager:
 
             await self._check_natural_closures()
             
-
             await asyncio.sleep(self.config.health_check_interval)
         
-
         self.drain_complete_event.set()
 
         self.metrics["drain_duration"] = time.time() - drain_start
     
-
     async def _phase_force_close_connections(self) -> None:
 
         """Phase 3: Force close remaining connections."""
@@ -395,7 +354,6 @@ class GracefulShutdownManager:
 
         ]
         
-
         for context in remaining_connections:
 
             await self._force_close_connection(context)
@@ -404,7 +362,6 @@ class GracefulShutdownManager:
 
         await asyncio.sleep(1.0)
     
-
     async def _phase_cleanup(self) -> None:
 
         """Phase 4: Final cleanup and state persistence."""
@@ -441,10 +398,8 @@ class GracefulShutdownManager:
 
                 pass
         
-
         self.metrics["cleanup_duration"] = time.time() - cleanup_start
     
-
     async def _notify_shutdown_start(self) -> None:
 
         """Notify external systems about shutdown start."""
@@ -466,14 +421,12 @@ class GracefulShutdownManager:
 
         pass
     
-
     async def _send_graceful_close_notifications(self) -> None:
 
         """Send graceful close notifications to all connections."""
 
         notification_tasks = []
         
-
         for context in self.connections.values():
 
             if context.state == ConnectionState.ACTIVE:
@@ -482,12 +435,10 @@ class GracefulShutdownManager:
 
                 notification_tasks.append(task)
         
-
         if notification_tasks:
 
             await asyncio.gather(*notification_tasks, return_exceptions=True)
     
-
     async def _send_close_notification(self, context: ConnectionContext) -> None:
 
         """Send close notification to a specific connection."""
@@ -508,23 +459,19 @@ class GracefulShutdownManager:
 
             }
             
-
             if hasattr(context.websocket, 'send'):
 
                 await context.websocket.send(json.dumps(close_message))
             
-
             context.graceful_close_sent = True
 
             context.state = ConnectionState.DRAINING
             
-
         except Exception:
             # If we can't send notification, mark for force close
 
             context.state = ConnectionState.DRAINING
     
-
     def _has_active_connections(self) -> bool:
 
         """Check if there are still active connections."""
@@ -537,14 +484,12 @@ class GracefulShutdownManager:
 
         )
     
-
     async def _process_pending_messages(self) -> None:
 
         """Process pending messages during drain."""
 
         processed_count = 0
         
-
         for context in self.connections.values():
 
             if context.state == ConnectionState.DRAINING:
@@ -576,7 +521,6 @@ class GracefulShutdownManager:
 
                         break
     
-
     async def _check_natural_closures(self) -> None:
 
         """Check for connections that closed naturally."""
@@ -598,7 +542,6 @@ class GracefulShutdownManager:
 
                     self.metrics["gracefully_closed_connections"] += 1
     
-
     async def _force_close_connection(self, context: ConnectionContext) -> None:
 
         """Force close a connection."""
@@ -619,7 +562,6 @@ class GracefulShutdownManager:
 
                 )
             
-
             context.state = ConnectionState.FORCE_CLOSED
 
             self.metrics["force_closed_connections"] += 1
@@ -632,14 +574,12 @@ class GracefulShutdownManager:
 
             context.pending_messages.clear()
             
-
         except Exception:
 
             context.state = ConnectionState.FORCE_CLOSED
 
             self.metrics["force_closed_connections"] += 1
     
-
     async def _save_shutdown_state(self) -> None:
 
         """Save connection state for potential recovery."""
@@ -682,15 +622,12 @@ class GracefulShutdownManager:
 
                     })
             
-
             if active_connections:
 
                 shutdown_state["user_sessions"][user_id] = active_connections
         
-
         self.state_persistence = shutdown_state
     
-
     async def _flush_remaining_messages(self) -> None:
 
         """Flush any remaining messages in the queue."""
@@ -720,7 +657,6 @@ class GracefulShutdownManager:
 
             pass
     
-
     def queue_message_for_connection(self, connection_id: str, message: Dict[str, Any]) -> bool:
 
         """Queue message for connection during shutdown."""
@@ -729,7 +665,6 @@ class GracefulShutdownManager:
 
             return False
         
-
         context = self.connections[connection_id]
 
         if context.state in [ConnectionState.ACTIVE, ConnectionState.DRAINING]:
@@ -738,17 +673,14 @@ class GracefulShutdownManager:
 
             return True
         
-
         return False
     
-
     def get_shutdown_status(self) -> Dict[str, Any]:
 
         """Get current shutdown status."""
 
         current_time = time.time()
         
-
         status = {
 
             "phase": self.phase.value,
@@ -761,7 +693,6 @@ class GracefulShutdownManager:
 
         }
         
-
         if self.shutdown_start_time:
 
             status["elapsed_time"] = current_time - self.shutdown_start_time
@@ -788,15 +719,12 @@ class GracefulShutdownManager:
 
             )
         
-
         status["connection_states"] = state_counts
 
         status["active_connections"] = len(self.connections)
         
-
         return status
     
-
     def get_shutdown_metrics(self) -> Dict[str, Any]:
 
         """Get comprehensive shutdown metrics."""
@@ -823,7 +751,6 @@ class GracefulShutdownManager:
 
             )
         
-
         total_messages = metrics["messages_preserved"] + metrics["messages_lost"]
 
         if total_messages > 0:
@@ -838,15 +765,12 @@ class GracefulShutdownManager:
 
             metrics["message_preservation_rate"] = 100.0
         
-
         return metrics
-
 
 class ShutdownCoordinator:
 
     """Coordinate shutdown across multiple services."""
     
-
     def __init__(self):
 
         self.shutdown_managers = {}  # service_name -> GracefulShutdownManager
@@ -855,7 +779,6 @@ class ShutdownCoordinator:
 
         self.shutdown_order = []  # Ordered list of services for shutdown
     
-
     def register_service(self, service_name: str, shutdown_manager: GracefulShutdownManager, 
 
                         priority: int = 0) -> None:
@@ -878,10 +801,8 @@ class ShutdownCoordinator:
 
             insert_pos = i + 1
         
-
         self.shutdown_order.insert(insert_pos, (service_name, priority))
     
-
     async def coordinate_shutdown(self, signal_name: str = "SIGTERM") -> Dict[str, Any]:
 
         """Coordinate shutdown across all registered services."""
@@ -890,7 +811,6 @@ class ShutdownCoordinator:
 
         shutdown_results = {}
         
-
         try:
             # Shutdown services in priority order
 
@@ -900,7 +820,6 @@ class ShutdownCoordinator:
 
                     manager = self.shutdown_managers[service_name]
                     
-
                     service_result = await manager.initiate_graceful_shutdown(signal_name)
 
                     shutdown_results[service_name] = service_result
@@ -909,10 +828,8 @@ class ShutdownCoordinator:
 
                     await asyncio.sleep(1.0)
             
-
             coordination_time = time.time() - coordination_start
             
-
             return {
 
                 "coordination_success": True,
@@ -925,7 +842,6 @@ class ShutdownCoordinator:
 
             }
         
-
         except Exception as e:
 
             return {
@@ -940,28 +856,24 @@ class ShutdownCoordinator:
 
             }
     
-
     def get_coordination_status(self) -> Dict[str, Any]:
 
         """Get status of all services in coordination."""
 
         service_statuses = {}
         
-
         for service_name in self.shutdown_managers:
 
             manager = self.shutdown_managers[service_name]
 
             service_statuses[service_name] = manager.get_shutdown_status()
         
-
         overall_shutting_down = any(
 
             status["is_shutting_down"] for status in service_statuses.values()
 
         )
         
-
         return {
 
             "services": service_statuses,
@@ -972,12 +884,10 @@ class ShutdownCoordinator:
 
         }
 
-
 class DrainHandler:
 
     """Handle connection draining with different strategies."""
     
-
     def __init__(self, shutdown_manager: GracefulShutdownManager):
 
         self.shutdown_manager = shutdown_manager
@@ -992,7 +902,6 @@ class DrainHandler:
 
         }
     
-
     async def execute_drain_strategy(self, strategy: str = "gradual") -> Dict[str, Any]:
 
         """Execute specific drain strategy."""
@@ -1001,29 +910,24 @@ class DrainHandler:
 
             strategy = "gradual"
         
-
         drain_start = time.time()
 
         strategy_func = self.drain_strategies[strategy]
         
-
         result = await strategy_func()
 
         result["strategy_used"] = strategy
 
         result["drain_time"] = time.time() - drain_start
         
-
         return result
     
-
     async def _immediate_drain(self) -> Dict[str, Any]:
 
         """Immediately stop all new connections and close existing ones."""
 
         connections_drained = 0
         
-
         for context in self.shutdown_manager.connections.values():
 
             if context.state == ConnectionState.ACTIVE:
@@ -1032,7 +936,6 @@ class DrainHandler:
 
                 connections_drained += 1
         
-
         return {
 
             "connections_drained": connections_drained,
@@ -1041,7 +944,6 @@ class DrainHandler:
 
         }
     
-
     async def _gradual_drain(self) -> Dict[str, Any]:
 
         """Gradually drain connections with staggered notifications."""
@@ -1052,12 +954,10 @@ class DrainHandler:
 
         connections_drained = 0
         
-
         for i in range(0, len(connections), connections_per_batch):
 
             batch = connections[i:i + connections_per_batch]
             
-
             for context in batch:
 
                 if context.state == ConnectionState.ACTIVE:
@@ -1072,7 +972,6 @@ class DrainHandler:
 
                 await asyncio.sleep(2.0)
         
-
         return {
 
             "connections_drained": connections_drained,
@@ -1083,7 +982,6 @@ class DrainHandler:
 
         }
     
-
     async def _user_aware_drain(self) -> Dict[str, Any]:
 
         """Drain connections with user awareness (multiple connections per user)."""
@@ -1092,7 +990,6 @@ class DrainHandler:
 
         connections_drained = 0
         
-
         for user_id, connection_ids in self.shutdown_manager.user_connections.items():
 
             user_contexts = [
@@ -1115,14 +1012,12 @@ class DrainHandler:
 
                     connections_drained += 1
             
-
             users_processed += 1
             
             # Small delay between users
 
             await asyncio.sleep(0.1)
         
-
         return {
 
             "users_processed": users_processed,
@@ -1133,7 +1028,6 @@ class DrainHandler:
 
         }
 
-
 @pytest.mark.L2
 
 @pytest.mark.integration
@@ -1142,7 +1036,6 @@ class TestGracefulWebSocketShutdown:
 
     """L2 integration tests for graceful WebSocket shutdown."""
     
-
     @pytest.fixture
 
     def shutdown_config(self):
@@ -1165,7 +1058,6 @@ class TestGracefulWebSocketShutdown:
 
         )
     
-
     @pytest.fixture
 
     def shutdown_manager(self, shutdown_config):
@@ -1174,7 +1066,6 @@ class TestGracefulWebSocketShutdown:
 
         return GracefulShutdownManager(shutdown_config)
     
-
     @pytest.fixture
 
     def shutdown_coordinator(self):
@@ -1183,7 +1074,6 @@ class TestGracefulWebSocketShutdown:
 
         return ShutdownCoordinator()
     
-
     @pytest.fixture
 
     def drain_handler(self, shutdown_manager):
@@ -1192,7 +1082,6 @@ class TestGracefulWebSocketShutdown:
 
         return DrainHandler(shutdown_manager)
     
-
     @pytest.fixture
 
     def test_users(self):
@@ -1219,7 +1108,6 @@ class TestGracefulWebSocketShutdown:
 
         ]
     
-
     def create_mock_websocket(self, auto_close: bool = False):
 
         """Create mock WebSocket for testing."""
@@ -1236,14 +1124,12 @@ class TestGracefulWebSocketShutdown:
 
         websocket.messages_sent = []
         
-
         async def mock_send(message):
 
             if not websocket.closed:
 
                 websocket.messages_sent.append(message)
         
-
         async def mock_close(code=None, reason=None):
 
             websocket.closed = True
@@ -1254,15 +1140,12 @@ class TestGracefulWebSocketShutdown:
 
                 await asyncio.sleep(0.1)  # Simulate close delay
         
-
         websocket.send.side_effect = mock_send
 
         websocket.close.side_effect = mock_close
         
-
         return websocket
     
-
     async def test_basic_graceful_shutdown(self, shutdown_manager, test_users):
 
         """Test basic graceful shutdown functionality."""
@@ -1315,7 +1198,6 @@ class TestGracefulWebSocketShutdown:
 
         assert metrics["graceful_close_rate"] > 0 or metrics["force_close_rate"] > 0
     
-
     async def test_message_preservation_during_shutdown(self, shutdown_manager, test_users):
 
         """Test message preservation during graceful shutdown."""
@@ -1340,7 +1222,6 @@ class TestGracefulWebSocketShutdown:
 
         ]
         
-
         for message in test_messages:
 
             success = shutdown_manager.queue_message_for_connection(connection_id, message)
@@ -1351,7 +1232,6 @@ class TestGracefulWebSocketShutdown:
 
         shutdown_result = await shutdown_manager.initiate_graceful_shutdown()
         
-
         assert shutdown_result["success"] is True
         
         # Check that messages were processed
@@ -1362,7 +1242,6 @@ class TestGracefulWebSocketShutdown:
 
         assert metrics["message_preservation_rate"] >= 80  # Should preserve most messages
     
-
     async def test_force_close_timeout(self, shutdown_manager, test_users):
 
         """Test force close when graceful drain times out."""
@@ -1383,7 +1262,6 @@ class TestGracefulWebSocketShutdown:
 
         shutdown_result = await shutdown_manager.initiate_graceful_shutdown()
         
-
         assert shutdown_result["success"] is True
 
         assert "force_close" in shutdown_result["phases_completed"]
@@ -1402,7 +1280,6 @@ class TestGracefulWebSocketShutdown:
 
         assert metrics["force_closed_connections"] > 0
     
-
     async def test_multiple_connections_shutdown(self, shutdown_manager, test_users):
 
         """Test shutdown with multiple connections."""
@@ -1425,7 +1302,6 @@ class TestGracefulWebSocketShutdown:
 
         shutdown_result = await shutdown_manager.initiate_graceful_shutdown()
         
-
         assert shutdown_result["success"] is True
 
         assert shutdown_result["total_connections"] == len(test_users)
@@ -1448,7 +1324,6 @@ class TestGracefulWebSocketShutdown:
 
         assert metrics["gracefully_closed_connections"] + metrics["force_closed_connections"] == len(test_users)
     
-
     async def test_shutdown_status_monitoring(self, shutdown_manager, test_users):
 
         """Test shutdown status monitoring."""
@@ -1497,7 +1372,6 @@ class TestGracefulWebSocketShutdown:
 
         assert final_status["phase"] == ShutdownPhase.STOPPED.value
     
-
     async def test_drain_strategies(self, shutdown_manager, drain_handler, test_users):
 
         """Test different connection drain strategies."""
@@ -1521,7 +1395,6 @@ class TestGracefulWebSocketShutdown:
 
         drain_result = await drain_handler.execute_drain_strategy("gradual")
         
-
         assert drain_result["strategy_used"] == "gradual"
 
         assert drain_result["connections_drained"] == len(connections)
@@ -1536,7 +1409,6 @@ class TestGracefulWebSocketShutdown:
 
             assert len(websocket.messages_sent) > 0
     
-
     async def test_coordinated_shutdown(self, shutdown_coordinator, test_users):
 
         """Test coordinated shutdown across multiple services."""
@@ -1544,7 +1416,6 @@ class TestGracefulWebSocketShutdown:
 
         service_managers = {}
         
-
         for i in range(3):
 
             service_name = f"service_{i}"
@@ -1565,7 +1436,6 @@ class TestGracefulWebSocketShutdown:
 
                 manager.register_connection(connection_id, user.id, websocket)
             
-
             service_managers[service_name] = manager
 
             shutdown_coordinator.register_service(service_name, manager, priority=i)
@@ -1574,7 +1444,6 @@ class TestGracefulWebSocketShutdown:
 
         coordination_result = await shutdown_coordinator.coordinate_shutdown("SIGTERM")
         
-
         assert coordination_result["coordination_success"] is True
 
         assert coordination_result["services_shutdown"] == 3
@@ -1597,7 +1466,6 @@ class TestGracefulWebSocketShutdown:
 
         assert final_status["total_services"] == 3
     
-
     async def test_state_persistence_during_shutdown(self, shutdown_manager, test_users):
 
         """Test state persistence during shutdown."""
@@ -1621,14 +1489,12 @@ class TestGracefulWebSocketShutdown:
 
                 shutdown_manager.queue_message_for_connection(connection_id, message)
             
-
             connections.append((connection_id, user.id, websocket))
         
         # Initiate shutdown
 
         shutdown_result = await shutdown_manager.initiate_graceful_shutdown()
         
-
         assert shutdown_result["success"] is True
         
         # Check that state was persisted
@@ -1637,7 +1503,6 @@ class TestGracefulWebSocketShutdown:
 
         persisted_state = shutdown_manager.state_persistence
         
-
         assert "shutdown_time" in persisted_state
 
         assert "total_connections" in persisted_state
@@ -1661,7 +1526,6 @@ class TestGracefulWebSocketShutdown:
                 )
                 # Connection might be found if it was still active during persistence
     
-
     @mock_justified("L2: Graceful shutdown with real internal components")
 
     async def test_websocket_integration_with_shutdown(self, shutdown_manager, test_users):
@@ -1699,19 +1563,16 @@ class TestGracefulWebSocketShutdown:
 
                 shutdown_manager.queue_message_for_connection(connection_id, message)
             
-
             active_connections.append((connection_id, user.id, websocket))
         
         # Add shutdown callback to simulate WebSocket manager cleanup
 
         cleanup_called = []
         
-
         def cleanup_callback(phase):
 
             cleanup_called.append(phase)
         
-
         shutdown_manager.add_shutdown_callback(cleanup_callback)
         
         # Initiate graceful shutdown
@@ -1750,7 +1611,6 @@ class TestGracefulWebSocketShutdown:
 
                     pass
             
-
             assert shutdown_notification_found
         
         # Verify cleanup callbacks were called
@@ -1769,7 +1629,6 @@ class TestGracefulWebSocketShutdown:
 
         assert metrics["message_preservation_rate"] >= 70  # Should preserve most messages
     
-
     async def test_shutdown_performance_benchmarks(self, shutdown_manager, test_users):
 
         """Test shutdown performance with many connections."""
@@ -1782,7 +1641,6 @@ class TestGracefulWebSocketShutdown:
 
         start_time = time.time()
         
-
         for i in range(connection_count):
 
             user = test_users[i % len(test_users)]
@@ -1791,12 +1649,10 @@ class TestGracefulWebSocketShutdown:
 
             websocket = self.create_mock_websocket(auto_close=True)
             
-
             shutdown_manager.register_connection(connection_id, user.id, websocket)
 
             connections.append((connection_id, websocket))
         
-
         registration_time = time.time() - start_time
         
         # Queue messages for each connection
@@ -1842,7 +1698,6 @@ class TestGracefulWebSocketShutdown:
         # Message preservation should be reasonable
 
         assert metrics["message_preservation_rate"] >= 60  # At least 60% preserved
-
 
 if __name__ == "__main__":
 

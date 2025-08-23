@@ -6,17 +6,10 @@ Tests 15, 18, 19 from original missing tests covering:
 - Unified logging aggregation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 import logging
@@ -26,10 +19,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from cryptography.fernet import Fernet
-
-# Add project root to path
-
-
 
 # Test 15: logging_manager_configuration
 class TestLoggingManagerService:
@@ -94,7 +83,6 @@ class TestLoggingManagerService:
         assert filter_func(api_record) == True
         assert filter_func(other_record) == False
 
-
 # Test 18: secret_manager_encryption
 class TestSecretManagerService:
     """Test secret storage and retrieval service."""
@@ -157,7 +145,6 @@ class TestSecretManagerService:
                 "Secret accessed",
                 extra={"secret_key": "api_key", "action": "read"}
             )
-
 
 # Test 19: unified_logging_aggregation
 class TestUnifiedLoggingService:
@@ -240,7 +227,6 @@ class TestUnifiedLoggingService:
         assert len(trace_logs) == 3
         assert all(log["trace_id"] == trace_id for log in trace_logs)
 
-
 # Additional service helper tests
 class TestServiceUtilities:
     """Test service utility functions."""
@@ -285,7 +271,6 @@ class TestServiceUtilities:
         config = config_manager.get_service_config("api")
         assert config["port"] == 8000
         assert config["workers"] == 4
-
 
 # Run service tests
 if __name__ == "__main__":

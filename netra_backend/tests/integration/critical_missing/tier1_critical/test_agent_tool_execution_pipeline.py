@@ -10,17 +10,10 @@ Business Value Justification:
 - Strategic Impact: Core platform functionality critical for all paid tiers
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -40,15 +33,12 @@ from netra_backend.tests.integration.critical_missing.shared_infrastructure.cont
     ServiceOrchestrator,
 )
 
-# Add project root to path
-
 # Define test-specific exceptions
 class AgentTimeoutError(NetraException):
     pass
 
 class AgentPermissionError(NetraException):
     pass
-
 
 @pytest.fixture(scope="module")
 async def l3_services():
@@ -58,7 +48,6 @@ async def l3_services():
     yield orchestrator, connections
     await orchestrator.stop_all()
 
-
 @pytest.fixture
 async def agent_service(l3_services):
     """Agent service with L3 real dependencies"""
@@ -66,13 +55,11 @@ async def agent_service(l3_services):
     supervisor = SupervisorAgent()
     return AgentService(supervisor)
 
-
 @pytest.fixture
 async def reset_services(l3_services):
     """Reset services for test isolation"""
     orchestrator, _ = l3_services
     await orchestrator.reset_for_test()
-
 
 class TestAgentToolExecutionPipeline:
     """Test end-to-end agent tool execution pipeline"""

@@ -29,7 +29,7 @@ pytestmark = pytest.mark.asyncio
 
 
 @pytest_asyncio.fixture
-async def websocket_test_manager():
+async def test_websocket_test_manager():
     """Create WebSocket test manager fixture"""
     manager = WebSocketTestManager()
     

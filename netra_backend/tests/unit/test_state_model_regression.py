@@ -3,31 +3,22 @@ Regression tests for state model validation errors.
 Ensures all state models can be instantiated with minimal required data.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from typing import Any, Dict
 
 import pytest
 from pydantic import ValidationError
 
-# Add project root to path
 # Import both versions of DeepAgentState to test consistency
 from netra_backend.app.agents.state import DeepAgentState as AgentsDeepAgentState
 from netra_backend.app.schemas.agent_models import (
     DeepAgentState as SchemaDeepAgentState,
 )
 from netra_backend.app.websocket.connection_executor import ConnectionOperationBuilder
-
 
 class TestDeepAgentStateRegression:
     """Regression tests for DeepAgentState validation issues."""
@@ -57,7 +48,6 @@ class TestDeepAgentStateRegression:
         request = "test_user_request"
         state = AgentsDeepAgentState(user_request=request)
         assert state.user_request == request
-
 
 class TestWebSocketConnectionRegression:
     """Regression tests for WebSocket connection state issues."""
@@ -89,7 +79,6 @@ class TestWebSocketConnectionRegression:
         # Should create state with default operation type
         state = builder._create_agent_state()
         assert state.user_request == "websocket_operation"
-
 
 class TestAllStateModelsInit:
     """Test all state models can be initialized properly."""
@@ -167,7 +156,6 @@ class TestAllStateModelsInit:
         assert state.processes == []
         assert state.memory_usage == 0.0
         assert state.cpu_usage == 0.0
-
 
 class TestValidationErrorMessages:
     """Test that validation errors are clear and helpful."""

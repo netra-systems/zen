@@ -73,11 +73,19 @@ async def _run_index_optimization_background(logger: logging.Logger) -> None:
     try:
         # Delay optimization to avoid startup bottleneck
         await asyncio.sleep(30)  # Wait 30 seconds after startup
-        logger.debug("Starting background database index optimization...")
-        optimization_results = await index_manager.optimize_all_databases()
-        logger.debug(f"Background database optimization completed: {optimization_results}")
+        logger.info("Starting background database index optimization...")
+        
+        # Add timeout to prevent hanging indefinitely
+        optimization_results = await asyncio.wait_for(
+            index_manager.optimize_all_databases(), 
+            timeout=120.0  # 2 minute timeout
+        )
+        logger.info(f"Background database optimization completed successfully: {optimization_results}")
+    except asyncio.TimeoutError:
+        logger.error("Background index optimization timed out after 2 minutes - continuing without optimization")
     except Exception as e:
         logger.error(f"Background index optimization failed: {e}")
+        # Continue running - don't let this crash the application
 
 
 def initialize_logging() -> Tuple[float, logging.Logger]:
@@ -119,10 +127,56 @@ def run_database_migrations(logger: logging.Logger) -> None:
     fast_startup = config.fast_startup_mode.lower() == "true"
     skip_migrations = config.skip_migrations.lower() == "true"
     
+    # Check if database is in mock mode by examining DATABASE_URL or service config
+    database_url = config.database_url or ""
+    is_mock_database = _is_mock_database_url(database_url) or _is_postgres_service_mock_mode()
+    
+    if is_mock_database:
+        logger.info("Skipping database migrations (PostgreSQL in mock mode)")
+        return
+    
     if 'pytest' not in sys.modules and not fast_startup and not skip_migrations:
         _execute_migrations(logger)
     elif fast_startup or skip_migrations:
         logger.info("Skipping database migrations (fast startup mode)")
+
+
+def _is_mock_database_url(database_url: str) -> bool:
+    """Check if database URL indicates mock mode."""
+    if not database_url:
+        return False
+    
+    # Check for common mock database URL patterns
+    mock_patterns = [
+        "postgresql://mock:mock@",
+        "postgresql+asyncpg://mock:mock@",
+        "/mock?",  # database name is "mock"
+        "/mock$",  # database name is "mock" at end
+        "@localhost:5432/mock"  # specific mock pattern used by dev launcher
+    ]
+    
+    return any(pattern in database_url for pattern in mock_patterns)
+
+
+def _is_postgres_service_mock_mode() -> bool:
+    """Check if PostgreSQL service is configured in mock mode via dev launcher config."""
+    import json
+    import os
+    from pathlib import Path
+    
+    try:
+        # Check dev launcher service config
+        config_path = Path.cwd() / ".dev_services.json"
+        if config_path.exists():
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                postgres_config = config.get("postgres", {})
+                return postgres_config.get("mode") == "mock"
+    except Exception:
+        pass  # Ignore errors in config reading
+    
+    # Also check environment variable
+    return os.environ.get("POSTGRES_MODE", "").lower() == "mock"
 
 
 def _execute_migrations(logger: logging.Logger) -> None:
@@ -172,6 +226,17 @@ def setup_database_connections(app: FastAPI) -> None:
     logger.info("Setting up database connections...")
     config = get_config()
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
+    
+    # Check if database is in mock mode by examining DATABASE_URL or service config
+    database_url = config.database_url or ""
+    is_mock_database = _is_mock_database_url(database_url) or _is_postgres_service_mock_mode()
+    
+    if is_mock_database:
+        logger.info("PostgreSQL in mock mode - using mock session factory")
+        app.state.db_session_factory = None  # Signal to use mock/fallback
+        app.state.database_available = False
+        app.state.database_mock_mode = True
+        return
     
     try:
         logger.debug("Calling initialize_postgres()...")

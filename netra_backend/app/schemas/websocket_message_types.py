@@ -21,7 +21,7 @@ class WebSocketConnectionState(str, Enum):
     ERROR = "error"
 
 
-# WebSocketMessage is imported from netra_backend.app.schemas.registry (single source of truth)
+# WebSocketMessage is imported from app.schemas.registry (single source of truth)
 
 class ClientMessage(WebSocketMessage):
     """Base class for client-to-server messages."""

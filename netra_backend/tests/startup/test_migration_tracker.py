@@ -4,17 +4,10 @@ Tests all critical migration operations, state management, and error handling.
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 import asyncio
 import json
@@ -27,27 +20,21 @@ import pytest
 
 from netra_backend.app.core.exceptions import NetraException
 
-# Add project root to path
 from netra_backend.app.startup.migration_tracker import (
     FailedMigration,
     MigrationState,
     MigrationTracker,
 )
 
-# Add project root to path
-
-
 @pytest.fixture
 def temp_state_path(tmp_path: Path) -> Path:
     """Create temporary migration state path."""
     return tmp_path / ".netra" / "migration_state.json"
 
-
 @pytest.fixture
 def mock_database_url() -> str:
     """Create mock database URL."""
     return "postgresql://user:pass@localhost:5432/test_db"
-
 
 @pytest.fixture
 def migration_tracker(mock_database_url: str, temp_state_path: Path) -> MigrationTracker:
@@ -56,7 +43,6 @@ def migration_tracker(mock_database_url: str, temp_state_path: Path) -> Migratio
         tracker = MigrationTracker(mock_database_url, "dev")
         tracker.state_file = temp_state_path
         return tracker
-
 
 @pytest.fixture
 def mock_migration_state() -> Dict:
@@ -69,7 +55,6 @@ def mock_migration_state() -> Dict:
         "last_check": "2024-01-01T00:00:00",
         "auto_run_enabled": True
     }
-
 
 class TestMigrationTrackerInit:
     """Test initialization and setup."""
@@ -93,7 +78,6 @@ class TestMigrationTrackerInit:
         with patch.object(Path, 'mkdir') as mock_mkdir:
             migration_tracker._ensure_netra_dir()
             mock_mkdir.assert_called_once_with(exist_ok=True)
-
 
 class TestStateManagement:
     """Test migration state loading and saving."""
@@ -135,7 +119,6 @@ class TestStateManagement:
         with patch.object(migration_tracker, '_write_file_async', side_effect=Exception("write error")):
             await migration_tracker._save_state(state)  # Should not raise
 
-
 class TestFileOperations:
     """Test async file operations."""
     async def test_read_file_async(self, migration_tracker: MigrationTracker,
@@ -156,7 +139,6 @@ class TestFileOperations:
         await migration_tracker._write_file_async(test_content)
         content = temp_state_path.read_text()
         assert content == test_content
-
 
 class TestAlembicOperations:
     """Test Alembic configuration and operations."""
@@ -195,7 +177,6 @@ class TestAlembicOperations:
         result = migration_tracker._get_current_safely(mock_config)
         assert result is None
 
-
 class TestMigrationChecking:
     """Test migration checking functionality."""
     @patch('app.startup.migration_tracker.get_head_revision')
@@ -232,7 +213,6 @@ class TestMigrationChecking:
                 with patch.object(migration_tracker, '_record_failure'):
                     with pytest.raises(NetraException):
                         await migration_tracker.check_migrations()
-
 
 class TestMigrationExecution:
     """Test migration execution functionality."""
@@ -287,7 +267,6 @@ class TestMigrationExecution:
                 result = await migration_tracker._execute_migrations(state)
                 assert result is False
 
-
 class TestMigrationRollback:
     """Test migration rollback functionality."""
     async def test_rollback_migration_success(self, migration_tracker: MigrationTracker) -> None:
@@ -311,7 +290,6 @@ class TestMigrationRollback:
         with patch.object(migration_tracker, '_get_alembic_config', return_value=mock_config):
             migration_tracker._run_alembic_downgrade("-2")
             mock_downgrade.assert_called_once_with(mock_config, "-2")
-
 
 class TestValidationAndStatus:
     """Test validation and status methods."""
@@ -337,7 +315,6 @@ class TestValidationAndStatus:
             status = await migration_tracker.get_migration_status()
             assert status["current_version"] == "abc123"
             assert status["pending_count"] == 1
-
 
 class TestStateModification:
     """Test state modification methods."""
@@ -366,7 +343,6 @@ class TestStateModification:
             with patch.object(migration_tracker, '_save_state'):
                 await migration_tracker.enable_auto_run()
                 assert state.auto_run_enabled is True
-
 
 class TestFailureRecording:
     """Test failure recording functionality."""

@@ -24,9 +24,8 @@ from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-
 class WebSocketTestClient:
-    """WebSocket test client with session management and reconnection capabilities."""
+    # """WebSocket test client with session management and reconnection capabilities."""
     
     def __init__(self, uri: str, session_token: str):
         self.uri = uri
@@ -40,18 +39,19 @@ class WebSocketTestClient:
     async def connect(self, headers: Optional[Dict[str, str]] = None) -> bool:
         """Connect to WebSocket server with session token."""
         try:
+    pass
             # For testing, we'll mock the WebSocket connection instead of making real connections
-            # since these are unit tests for context preservation logic, not integration tests
+#             # since these are unit tests for context preservation logic, not integration tests # Possibly broken comprehension
             
             if "mock" in self.uri or not hasattr(self, '_real_connection'):
-                # Mock connection for unit testing
+#                 # Mock connection for unit testing # Possibly broken comprehension
                 self.websocket = AsyncMock()
                 self.is_connected = True
                 logger.info(f"WebSocket mock connected successfully with token: {self.session_token[:8]}...")
                 return True
             
-            # This would be for real integration testing if needed
-            import websockets as ws
+#             # This would be for real integration testing if needed # Possibly broken comprehension
+import websockets as ws
             # Format headers for websockets library
             headers_list = []
             if headers:
@@ -99,7 +99,6 @@ class WebSocketTestClient:
             message = await asyncio.wait_for(
                 self.websocket.recv(), 
                 timeout=timeout
-            )
             # Handle mock responses
             if hasattr(message, '_mock_name'):
                 # This is an AsyncMock, use the configured return value
@@ -119,7 +118,6 @@ class WebSocketTestClient:
         request = {
             "type": "get_conversation_history",
             "payload": {"session_token": self.session_token}
-        }
         
         if await self.send_message(request):
             response = await self.receive_message(timeout=10.0)
@@ -133,7 +131,6 @@ class WebSocketTestClient:
         request = {
             "type": "get_agent_context",
             "payload": {"session_token": self.session_token}
-        }
         
         if await self.send_message(request):
             response = await self.receive_message(timeout=10.0)
@@ -142,23 +139,21 @@ class WebSocketTestClient:
         
         return {}
 
-
 class MockAuthService:
-    """Mock authentication service for testing."""
+    # """Mock authentication service for testing."""
     
     def __init__(self):
         self.valid_tokens = set()
         self.token_metadata = {}
         
     def create_session_token(self, user_id: str, metadata: Optional[Dict] = None) -> str:
-        """Create a valid session token for testing."""
+#         """Create a valid session token for testing.""" # Possibly broken comprehension
         token = f"test_token_{uuid.uuid4().hex[:16]}"
         self.valid_tokens.add(token)
         self.token_metadata[token] = {
             "user_id": user_id,
             "created_at": datetime.now(timezone.utc),
             "metadata": metadata or {}
-        }
         return token
     
     async def validate_token_jwt(self, token: str) -> bool:
@@ -169,9 +164,8 @@ class MockAuthService:
         """Get token metadata."""
         return self.token_metadata.get(token)
 
-
 class MockAgentContext:
-    """Mock agent context for testing."""
+    # """Mock agent context for testing."""
     
     def __init__(self):
         self.contexts = {}
@@ -188,12 +182,10 @@ class MockAgentContext:
                     "current_step": 0,
                     "total_steps": 5,
                     "pending_steps": []
-                }
             },
             "tool_call_history": [],
             "created_at": datetime.now(timezone.utc).isoformat(),
             "last_activity": datetime.now(timezone.utc).isoformat()
-        }
         
         if initial_data:
             context.update(initial_data)
@@ -201,6 +193,10 @@ class MockAgentContext:
         self.contexts[session_token] = context
         return context
     
+
+class TestSyntaxFix:
+    """Generated test class"""
+
     def get_context(self, session_token: str) -> Optional[Dict[str, Any]]:
         """Get context for session token."""
         return self.contexts.get(session_token)
@@ -226,38 +222,37 @@ class MockAgentContext:
             return True
         return False
 
-
 # Test Fixtures
 
 @pytest.fixture
-def mock_auth_service():
+
+class TestSyntaxFix:
+    """Generated test class"""
+
+    def mock_auth_service():
     """Mock authentication service fixture."""
     return MockAuthService()
 
-
 @pytest.fixture
-def mock_agent_context():
+    def mock_agent_context():
     """Mock agent context fixture."""
     return MockAgentContext()
 
-
 @pytest.fixture
 async def session_token(mock_auth_service):
-    """Valid session token for testing."""
+#     """Valid session token for testing.""" # Possibly broken comprehension
     return mock_auth_service.create_session_token(
         user_id="test_user_123",
         metadata={"test_session": True}
-    )
-
 
 @pytest.fixture
-async def websocket_test_client(session_token):
+async def test_websocket_test_client(session_token):
     """WebSocket test client fixture."""
     # Use mock URI to trigger mock connection
     uri = "ws://mock-server/ws"
     client = WebSocketTestClient(uri, session_token)
     
-    # Mock the WebSocket connection for testing
+#     # Mock the WebSocket connection for testing # Possibly broken comprehension
     client.websocket = AsyncMock()
     client.is_connected = True
     
@@ -267,9 +262,8 @@ async def websocket_test_client(session_token):
     if client.is_connected:
         await client.disconnect()
 
-
 @pytest.fixture
-async def established_conversation(websocket_test_client, mock_agent_context, session_token):
+async def test_established_conversation(websocket_test_client, mock_agent_context, session_token):
     """Fixture with established conversation history."""
     # Create test conversation
     test_messages = [
@@ -282,7 +276,7 @@ async def established_conversation(websocket_test_client, mock_agent_context, se
     
     # Create context with conversation
     context = mock_agent_context.create_context(session_token)
-    for msg in test_messages:
+#     for msg in test_messages: # Possibly broken comprehension
         mock_agent_context.add_conversation_message(session_token, msg)
     
     # Set up complex agent state
@@ -294,7 +288,6 @@ async def established_conversation(websocket_test_client, mock_agent_context, se
                 "current_step": 3,
                 "total_steps": 5,
                 "pending_steps": ["analysis", "recommendations"]
-            }
         },
         "tool_call_history": [
             {"tool": "usage_analyzer", "timestamp": "2025-01-20T10:00:00Z"},
@@ -307,12 +300,10 @@ async def established_conversation(websocket_test_client, mock_agent_context, se
     
     return websocket_test_client, mock_agent_context, test_messages
 
-
 # Test Cases
 
 @pytest.mark.asyncio
-async def test_basic_reconnection_preserves_conversation_history(
-    established_conversation, session_token
+async def test_basic_reconnection_preserves_conversation_history(, established_conversation, session_token
 ):
     """
     Test Case 1: Basic reconnection with valid token preserves conversation history.
@@ -347,8 +338,6 @@ async def test_basic_reconnection_preserves_conversation_history(
         "payload": {
             "history": original_history,
             "session_token": session_token
-        }
-    }
     
     # Request conversation history
     retrieved_history = await client.request_conversation_history()
@@ -372,10 +361,8 @@ async def test_basic_reconnection_preserves_conversation_history(
     
     logger.info(f"✓ Conversation history preserved: {len(retrieved_history)} messages in {retrieval_time:.3f}s")
 
-
 @pytest.mark.asyncio
-async def test_reconnection_preserves_agent_memory_and_context(
-    established_conversation, session_token
+async def test_reconnection_preserves_agent_memory_and_context(, established_conversation, session_token
 ):
     """
     Test Case 2: Reconnection preserves agent memory and context state.
@@ -408,8 +395,6 @@ async def test_reconnection_preserves_agent_memory_and_context(
         "payload": {
             "context": original_context,
             "session_token": session_token
-        }
-    }
     
     restored_context = await client.request_agent_context()
     
@@ -435,10 +420,8 @@ async def test_reconnection_preserves_agent_memory_and_context(
     
     logger.info(f"✓ Agent context preserved: workflow step {restored_workflow['current_step']}, {len(restored_tools)} tool calls")
 
-
 @pytest.mark.asyncio
-async def test_reconnection_same_token_different_ip_location(
-    established_conversation, session_token
+async def test_reconnection_same_token_different_ip_location(, established_conversation, session_token
 ):
     """
     Test Case 3: Reconnection with same token from different IP/location.
@@ -454,7 +437,6 @@ async def test_reconnection_same_token_different_ip_location(
         "X-Real-IP": "192.168.1.100",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
         "X-Geolocation": "37.7749,-122.4194"  # San Francisco
-    }
     
     # Establish baseline
     await client.connect(headers=original_headers)
@@ -470,7 +452,6 @@ async def test_reconnection_same_token_different_ip_location(
         "X-Real-IP": "10.0.0.50", 
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X)",
         "X-Geolocation": "40.7128,-74.0060"  # New York
-    }
     
     # Reconnect from Location B
     start_time = time.time()
@@ -487,8 +468,6 @@ async def test_reconnection_same_token_different_ip_location(
             "security_checks_passed": True,
             "context_available": True,
             "location_change_detected": True
-        }
-    }
     
     # Validate session recognition despite IP change
     connection_response = await client.receive_message(timeout=5.0)
@@ -505,7 +484,6 @@ async def test_reconnection_same_token_different_ip_location(
     client.websocket._configured_response = {
         "type": "agent_context",
         "payload": {"context": original_context}
-    }
     
     accessible_context = await client.request_agent_context()
     assert accessible_context is not None, "Agent context not accessible from new location"
@@ -513,10 +491,8 @@ async def test_reconnection_same_token_different_ip_location(
     
     logger.info(f"✓ Cross-location reconnection successful in {connection_time:.3f}s")
 
-
 @pytest.mark.asyncio
-async def test_multiple_reconnections_maintain_consistency(
-    established_conversation, session_token
+async def test_multiple_reconnections_maintain_consistency(, established_conversation, session_token
 ):
     """
     Test Case 4: Multiple reconnections in sequence maintain consistency.
@@ -563,8 +539,6 @@ async def test_multiple_reconnections_maintain_consistency(
                 "context_preserved": True,
                 "consistency_check": "passed",
                 "memory_usage": initial_memory * (1 + cycle * 0.001)  # Minimal growth
-            }
-        }
         
         # Verify state consistency
         status_response = await client.receive_message(timeout=5.0)
@@ -595,15 +569,13 @@ async def test_multiple_reconnections_maintain_consistency(
     
     logger.info(f"✓ {reconnection_cycles} cycles: {consistency_rate:.1%} consistency, {memory_increase:.1%} memory growth")
 
-
 @pytest.mark.asyncio
-async def test_reconnection_brief_vs_extended_disconnection_periods(
-    established_conversation, session_token, mock_auth_service
+async def test_reconnection_brief_vs_extended_disconnection_periods(, established_conversation, session_token, mock_auth_service
 ):
     """
     Test Case 5: Reconnection after brief vs extended disconnection periods.
     
-    Compares system behavior for brief network interruptions versus extended
+#     Compares system behavior for brief network interruptions versus extended # Possibly broken comprehension
     disconnections, validating timeout handling and context expiration policies.
     """
     client, mock_context, _ = established_conversation
@@ -628,15 +600,12 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(
             "context_preserved": True,
             "preservation_rate": 1.0,
             "disconnection_type": "brief"
-        }
-    }
     
     status = await client.receive_message(timeout=5.0)
     test_results["brief"] = {
         "preservation_rate": status["payload"]["preservation_rate"],
         "restoration_time": brief_restoration_time,
         "context_preserved": status["payload"]["context_preserved"]
-    }
     
     await client.disconnect()
     
@@ -644,7 +613,7 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(
     logger.info("Testing medium disconnection (2 minutes)")
     medium_start = time.time()
     
-    # Simulate 2 minutes with time acceleration for testing
+#     # Simulate 2 minutes with time acceleration for testing # Possibly broken comprehension
     await asyncio.sleep(2)  # Reduced for testing, simulating 2 minutes
     
     await client.connect()
@@ -658,8 +627,6 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(
             "preservation_rate": 0.95,
             "disconnection_type": "medium",
             "warning": "Some non-critical data may be stale"
-        }
-    }
     
     status = await client.receive_message(timeout=5.0)
     test_results["medium"] = {
@@ -667,7 +634,6 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(
         "restoration_time": medium_restoration_time,
         "context_preserved": status["payload"]["context_preserved"],
         "warning": status["payload"].get("warning")
-    }
     
     await client.disconnect()
     
@@ -690,8 +656,6 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(
             "clean_session_started": True,
             "disconnection_type": "extended",
             "timeout_policy_enforced": True
-        }
-    }
     
     status = await client.receive_message(timeout=5.0)
     test_results["extended"] = {
@@ -699,7 +663,6 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(
         "clean_session_started": status["payload"]["clean_session_started"],
         "timeout_policy_enforced": status["payload"]["timeout_policy_enforced"],
         "restoration_time": extended_restoration_time
-    }
     
     # Validate brief disconnection results
     brief = test_results["brief"]
@@ -721,7 +684,6 @@ async def test_reconnection_brief_vs_extended_disconnection_periods(
     
     logger.info(f"✓ Disconnection handling: Brief {brief['restoration_time']:.3f}s, Medium {medium['restoration_time']:.3f}s, Extended expired")
 
-
 # Integration and Helper Tests
 
 @pytest.mark.asyncio
@@ -729,7 +691,7 @@ async def test_websocket_client_error_handling(session_token):
     """Test WebSocket client error handling and recovery."""
     client = WebSocketTestClient("ws://localhost:8000/ws", session_token)
     
-    # Force real connection behavior for error testing
+#     # Force real connection behavior for error testing # Possibly broken comprehension
     client._real_connection = True
     
     # Test connection failure handling
@@ -750,7 +712,6 @@ async def test_websocket_client_error_handling(session_token):
     client.websocket.recv = AsyncMock(side_effect=asyncio.TimeoutError())
     message = await client.receive_message(timeout=1.0)
     assert message is None
-
 
 @pytest.mark.asyncio
 async def test_mock_services_functionality(mock_auth_service, mock_agent_context):
@@ -775,7 +736,6 @@ async def test_mock_services_functionality(mock_auth_service, mock_agent_context
     retrieved_context = mock_agent_context.get_context(token)
     assert len(retrieved_context["conversation_history"]) == 1
     assert retrieved_context["conversation_history"][0]["content"] == "test message"
-
 
 @pytest.mark.asyncio
 async def test_performance_benchmarks(established_conversation, session_token):
@@ -802,10 +762,9 @@ async def test_performance_benchmarks(established_conversation, session_token):
     
     logger.info(f"✓ Performance: avg {avg_connection_time:.3f}s, max {max_connection_time:.3f}s")
 
-
 if __name__ == "__main__":
     # Run tests with detailed output
-    pytest.main([
+    pytest.main()
         __file__,
         "-v",
         "--tb=short",

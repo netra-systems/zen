@@ -41,7 +41,6 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.real_client_types import ClientConfig, ConnectionState
 from tests.e2e.real_websocket_client import RealWebSocketClient
 
-
 class ConcurrentConnectionManager:
     """Manages multiple concurrent WebSocket connections for testing."""
     
@@ -84,7 +83,6 @@ class ConcurrentConnectionManager:
     def is_connection_active(self, connection_id: str) -> bool:
         """Check if specific connection is active."""
         return connection_id in self.active_connections
-
 
 class ConcurrentMessageBroadcaster:
     """Handles message broadcasting across concurrent connections."""
@@ -149,7 +147,6 @@ class ConcurrentMessageBroadcaster:
                 break
         
         return messages
-
 
 class ConcurrentConnectionValidator:
     """Validates concurrent connection behavior and constraints."""
@@ -226,7 +223,6 @@ class ConcurrentConnectionValidator:
         received_ids = {msg.get("id") for msg in received_messages}
         return bool(sent_ids.intersection(received_ids))
 
-
 class ConnectionLimitManager:
     """Manages and tests connection limits per user."""
     
@@ -267,7 +263,6 @@ class ConnectionLimitManager:
             "excess_rejected": rejected_connections > 0
         }
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 class TestConcurrentConnections:
@@ -293,7 +288,7 @@ class TestConcurrentConnections:
         """Initialize connection limit manager."""
         return ConnectionLimitManager(limit=5)
     
-    async def test_concurrent_connections_core_functionality(self, connection_manager, 
+    async def test_concurrent_connections_core_functionality(self, connection_manager:
                                                            message_broadcaster, connection_validator):
         """Test core concurrent connection functionality."""
         start_time = time.time()

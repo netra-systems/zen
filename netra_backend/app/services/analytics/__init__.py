@@ -7,6 +7,6 @@ Business Value Justification (BVJ):
 - Revenue Impact: Supports cost-conscious customers and enterprise analytics needs
 """
 
-from .cost_tracker import CostTracker
+from netra_backend.app.services.analytics.cost_tracker import CostTracker
 
 __all__ = ["CostTracker"]

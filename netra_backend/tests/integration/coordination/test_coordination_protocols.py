@@ -14,31 +14,20 @@ REQUIREMENTS:
 - Coordination state management
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime, timezone
 
 import pytest
 
-# Add project root to path
 from netra_backend.tests.integration.coordination.shared_fixtures import (
     coordination_agents,
     coordination_infrastructure,
 )
-
-# Add project root to path
-
 
 class TestCoordinationProtocols:
     """BVJ: Validates coordination protocols and agent collaboration workflows."""
@@ -240,7 +229,6 @@ class TestCoordinationProtocols:
         metrics = coordination_infrastructure.coordination_metrics
         assert metrics["agents_initialized"] > initial_metrics["agents_initialized"]
         assert metrics["heartbeats_sent"] > initial_metrics.get("heartbeats_sent", 0)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

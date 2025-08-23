@@ -69,21 +69,32 @@ def _get_cloud_run_origins() -> list[str]:
     ]
 
 def _get_localhost_origins() -> list[str]:
-    """Get localhost origins - now supports dynamic ports."""
+    """Get localhost origins - now supports dynamic ports with service discovery."""
     # Extended list to support more dynamic ports
     # Pattern matching in CustomCORSMiddleware handles truly dynamic ports
     origins = []
     hosts = ["http://localhost", "http://127.0.0.1"]
     # Common frontend ports (React, Vue, Vite, Angular, etc.)
-    frontend_ports = [3000, 3001, 3002, 3003, 4000, 4001, 4200, 5173, 5174]
+    frontend_ports = [3000, 3001, 3002, 3003, 4000, 4001, 4200, 5173, 5174, 5175]
     # Common backend/service ports
-    backend_ports = [8000, 8001, 8002, 8080, 8081, 8082, 5000, 5001]
+    backend_ports = [8000, 8001, 8002, 8003, 8080, 8081, 8082, 8083, 5000, 5001]
     
     for host in hosts:
         for port in frontend_ports + backend_ports:
             origins.append(f"{host}:{port}")
     
-    return origins
+    # Add service discovery origins if available
+    try:
+        from pathlib import Path
+        from dev_launcher.service_discovery import ServiceDiscovery
+        service_discovery = ServiceDiscovery(Path.cwd())
+        discovered_origins = service_discovery.get_all_service_origins()
+        origins.extend(discovered_origins)
+    except (ImportError, Exception):
+        # Service discovery not available or failed - continue with static list
+        pass
+    
+    return list(set(origins))  # Remove duplicates
 
 
 def _get_development_cors_origins() -> list[str]:
@@ -272,6 +283,7 @@ def _get_cloud_run_patterns() -> list[str]:
 def _check_localhost_pattern(origin: str) -> bool:
     """Check if origin matches localhost pattern with any port."""
     # Accept any localhost or 127.0.0.1 origin with any port in development
+    # Updated pattern to be more flexible with ports (including common dev ports)
     localhost_pattern = r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?$'
     return bool(re.match(localhost_pattern, origin))
 
@@ -393,13 +405,31 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
             
             if backend_info:
                 service_origins.add(backend_info.get('api_url', ''))
+                # Add WebSocket URL as HTTP origin for CORS
+                ws_url = backend_info.get('ws_url', '')
+                if ws_url:
+                    http_origin = ws_url.replace('ws://', 'http://').replace('wss://', 'https://')
+                    # Extract just the origin part (protocol + host + port)
+                    if '/' in http_origin.split('://')[1]:
+                        http_origin = http_origin.split('/')[0] + '//' + http_origin.split('//')[1].split('/')[0]
+                    service_origins.add(http_origin)
+            
             if frontend_info:
                 service_origins.add(frontend_info.get('url', ''))
+            
             if auth_info:
                 service_origins.add(auth_info.get('url', ''))
-                service_origins.add(auth_info.get('api_url', ''))
+                if auth_info.get('api_url'):
+                    service_origins.add(auth_info.get('api_url'))
             
-            return origin in service_origins
+            # Filter out empty strings
+            service_origins = {origin for origin in service_origins if origin}
+            
+            if origin in service_origins:
+                logger.debug(f"Origin {origin} matches service discovery registry")
+                return True
+                
+            return False
         except Exception as e:
             logger.warning(f"Service discovery CORS check failed: {e}")
             return False

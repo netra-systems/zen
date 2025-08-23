@@ -10,17 +10,10 @@ Critical Path: Dependency declaration -> Resolution -> Injection -> Validation -
 Coverage: Real dependency injection, circular detection, lazy loading
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -40,12 +33,10 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class DependencyScope(Enum):
     """Dependency scopes."""
@@ -53,13 +44,11 @@ class DependencyScope(Enum):
     TRANSIENT = "transient"
     SCOPED = "scoped"
 
-
 class DependencyLifetime(Enum):
     """Dependency lifetimes."""
     APPLICATION = "application"
     SESSION = "session"
     REQUEST = "request"
-
 
 @dataclass
 class DependencyMetadata:
@@ -76,7 +65,6 @@ class DependencyMetadata:
     version: str = "1.0.0"
     created_at: datetime = field(default_factory=datetime.now)
 
-
 class DependencyProtocol(Protocol):
     """Protocol for dependency injection."""
     
@@ -87,7 +75,6 @@ class DependencyProtocol(Protocol):
     async def cleanup(self) -> None:
         """Clean up the dependency."""
         ...
-
 
 class DependencyProxy:
     """Lazy loading proxy for dependencies."""
@@ -115,7 +102,6 @@ class DependencyProxy:
         await self._ensure_initialized()
         return self._instance
 
-
 class CircularDependencyError(Exception):
     """Raised when circular dependencies are detected."""
     
@@ -123,11 +109,9 @@ class CircularDependencyError(Exception):
         self.cycle = cycle
         super().__init__(f"Circular dependency detected: {' -> '.join(cycle)}")
 
-
 class DependencyResolutionError(Exception):
     """Raised when dependency resolution fails."""
     pass
-
 
 class DependencyRegistry:
     """Registry for dependency metadata."""
@@ -158,7 +142,6 @@ class DependencyRegistry:
         """Check if a dependency is registered."""
         actual_name = self.aliases.get(name, name)
         return actual_name in self.dependencies
-
 
 class DependencyGraph:
     """Builds and analyzes dependency graphs."""
@@ -231,7 +214,6 @@ class DependencyGraph:
         
         return result
 
-
 class DependencyContainer:
     """Container for managing dependency instances."""
     
@@ -267,7 +249,6 @@ class DependencyContainer:
             return self.scoped_instances.get(self.current_scope, {}).get(name)
         # TRANSIENT instances are always created new
         return None
-
 
 class DependencyResolver:
     """Resolves and injects dependencies."""
@@ -367,7 +348,6 @@ class DependencyResolver:
             
             self.container.clear_scope(scope_id)
 
-
 # Test service implementations
 class MockDatabaseService:
     """Mock database service for testing."""
@@ -392,7 +372,6 @@ class MockDatabaseService:
         if not self.is_connected:
             raise Exception("Database not connected")
         return [{"result": "mock_data"}]
-
 
 class MockCacheService:
     """Mock cache service for testing."""
@@ -419,7 +398,6 @@ class MockCacheService:
     async def set(self, key: str, value: Any) -> None:
         """Set value in cache."""
         self.cache[key] = value
-
 
 class MockAgentService:
     """Mock agent service for testing."""
@@ -453,7 +431,6 @@ class MockAgentService:
         # Cache result
         await self.cache_service.set(f"request:{request}", result)
         return result
-
 
 class DependencyManager:
     """Manages dependency resolution testing."""
@@ -512,14 +489,12 @@ class DependencyManager:
         self.registry.register_alias("db", "database_service")
         self.registry.register_alias("cache", "cache_service")
 
-
 @pytest.fixture
 def dependency_manager():
     """Create dependency manager for testing."""
     manager = DependencyManager()
     manager.setup_test_dependencies()
     return manager
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -538,7 +513,6 @@ async def test_basic_dependency_registration(dependency_manager):
     assert db_metadata.scope == DependencyScope.SINGLETON
     assert db_metadata.implementation_type == MockDatabaseService
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_simple_dependency_resolution(dependency_manager):
@@ -551,7 +525,6 @@ async def test_simple_dependency_resolution(dependency_manager):
     assert isinstance(db_service, MockDatabaseService)
     assert db_service.is_connected is True
     assert db_service.connection_string == "test://localhost:5432"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -571,7 +544,6 @@ async def test_dependency_chain_resolution(dependency_manager):
     # Verify services are initialized
     assert agent_service.database_service.is_connected is True
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_singleton_scope_behavior(dependency_manager):
@@ -584,7 +556,6 @@ async def test_singleton_scope_behavior(dependency_manager):
     
     # Should be the same instance
     assert db_service1 is db_service2
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -607,7 +578,6 @@ async def test_scoped_dependency_behavior(dependency_manager):
     # Should be different instance in different scope
     assert agent1 is not agent2
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_dependency_aliases(dependency_manager):
@@ -620,7 +590,6 @@ async def test_dependency_aliases(dependency_manager):
     
     # Should resolve to same instance
     assert db_via_alias is db_direct
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -637,7 +606,6 @@ async def test_lazy_dependency_loading(dependency_manager):
     # Get actual instance
     actual_instance = await lazy_agent.get_instance()
     assert isinstance(actual_instance, MockAgentService)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -669,7 +637,6 @@ async def test_circular_dependency_detection(dependency_manager):
     with pytest.raises(CircularDependencyError):
         await manager.resolver.resolve("circular_a")
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_dependency_graph_analysis(dependency_manager):
@@ -693,7 +660,6 @@ async def test_dependency_graph_analysis(dependency_manager):
     
     assert db_index < cache_index < agent_index
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_bulk_dependency_resolution(dependency_manager):
@@ -708,7 +674,6 @@ async def test_bulk_dependency_resolution(dependency_manager):
     assert "cache_service" in resolved
     assert isinstance(resolved["agent_service"], MockAgentService)
     assert isinstance(resolved["cache_service"], MockCacheService)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -729,7 +694,6 @@ async def test_dependency_cleanup(dependency_manager):
     
     # Verify scope is cleared
     assert scope_id not in manager.resolver.container.scoped_instances
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -754,7 +718,6 @@ async def test_dependency_error_handling(dependency_manager):
     with pytest.raises(DependencyResolutionError):
         await manager.resolver.resolve("broken_service")
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_concurrent_dependency_resolution(dependency_manager):
@@ -772,7 +735,6 @@ async def test_concurrent_dependency_resolution(dependency_manager):
     # All should be the same instance
     first_service = services[0]
     assert all(service is first_service for service in services)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

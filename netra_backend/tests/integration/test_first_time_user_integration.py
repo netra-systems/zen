@@ -9,9 +9,7 @@ BVJ (Business Value Justification):
 4. Revenue Impact: Catches issues before they affect real users
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import sys
@@ -20,11 +18,8 @@ from pathlib import Path
 import pytest
 
 # Add project root to path for test imports
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 from test_unified_first_time_user import FirstTimeUserTester
-
 
 @pytest.mark.integration
 @pytest.mark.first_time_user

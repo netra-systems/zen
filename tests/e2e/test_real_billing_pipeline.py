@@ -56,7 +56,7 @@ class BillingPipelineTestCore:
         await create_workload_events_table_if_missing()
         await self._cleanup_test_data()
 
-    async def teardown_test_environment(self):
+    async def test_teardown_test_environment(self):
         """Clean up test environment."""
         await self._cleanup_test_data()
         if self.clickhouse_client:

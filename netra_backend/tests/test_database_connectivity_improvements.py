@@ -15,17 +15,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: Reduces support costs and customer churn (+$5K MRR)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -45,10 +38,8 @@ from netra_backend.app.db.comprehensive_health_monitor import (
     HealthStatus,
 )
 
-# Add project root to path
 from netra_backend.app.db.fast_startup_connection_manager import (
     ConnectionHealth,
-    # Add project root to path
     FastStartupConnectionManager,
     connection_registry,
 )
@@ -67,7 +58,6 @@ from netra_backend.app.db.optimized_startup_checks import (
     CheckStatus,
     OptimizedStartupChecker,
 )
-
 
 class TestFastStartupConnectionManager:
     """Test fast startup connection manager."""
@@ -133,7 +123,6 @@ class TestFastStartupConnectionManager:
             # Verify retry attempts were made
             assert mock_attempt.call_count > 0
 
-
 class TestClickHouseReliableManager:
     """Test ClickHouse reliable manager."""
     
@@ -193,7 +182,6 @@ class TestClickHouseReliableManager:
                 await recovery_task
             except asyncio.CancelledError:
                 pass
-
 
 class TestGracefulDegradationManager:
     """Test graceful degradation manager."""
@@ -261,7 +249,6 @@ class TestGracefulDegradationManager:
         # Should be degraded service (50% availability)
         assert degradation_manager.metrics.service_level == ServiceLevel.DEGRADED_SERVICE
 
-
 class TestIntelligentRetrySystem:
     """Test intelligent retry system."""
     
@@ -328,7 +315,6 @@ class TestIntelligentRetrySystem:
         unknown_error = RuntimeError("Unknown error")
         severity = retry_system._classify_error(unknown_error, retry_system.default_policy)
         assert severity == ErrorSeverity.DEGRADED
-
 
 class TestOptimizedStartupChecker:
     """Test optimized startup checker."""
@@ -404,7 +390,6 @@ class TestOptimizedStartupChecker:
                 
                 assert result["background_tasks_scheduled"] > 0
                 assert len(startup_checker.background_tasks) > 0
-
 
 class TestComprehensiveHealthMonitor:
     """Test comprehensive health monitor."""
@@ -498,7 +483,6 @@ class TestComprehensiveHealthMonitor:
         # Verify tracking
         error_times = list(health_monitor.error_tracker["test_db"])
         assert len(error_times) == 2
-
 
 class TestIntegrationScenarios:
     """Test integration scenarios combining multiple components."""
@@ -608,7 +592,6 @@ class TestIntegrationScenarios:
         # All should have used fallback
         assert all(r["status"] == "cached" for r in results)
         assert degradation_manager.metrics.fallback_operations == 5
-
 
 # Mark all tests for async execution
 pytestmark = pytest.mark.asyncio

@@ -43,7 +43,6 @@ from alembic.operations import Operations
 from alembic.runtime.migration import MigrationContext
 from test_framework.mock_utils import mock_justified
 
-
 class MigrationValidator:
     """Validates database migrations for correctness and performance."""
     
@@ -116,7 +115,6 @@ class MigrationValidator:
         
         return len(self.errors) == 0
 
-
 class ContainerizedDatabaseManager:
     """Manages containerized databases for L3 testing."""
     
@@ -127,7 +125,6 @@ class ContainerizedDatabaseManager:
         
     async def start_containers(self) -> Dict[str, str]:
         """Start PostgreSQL and ClickHouse containers for testing."""
-        test_compose_file = Path(__file__).parent.parent.parent / "docker-compose.test.yml"
         
         try:
             subprocess.run(["docker-compose", "-f", str(test_compose_file), "up", "-d", "postgres", "clickhouse"], check=True, capture_output=True)
@@ -174,5 +171,4 @@ class ContainerizedDatabaseManager:
     
     async def stop_containers(self):
         """Stop and clean up containers."""
-        test_compose_file = Path(__file__).parent.parent.parent / "docker-compose.test.yml"
         subprocess.run(["docker-compose", "-f", str(test_compose_file), "down", "-v"], capture_output=True)

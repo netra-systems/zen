@@ -27,46 +27,35 @@ Coverage Target: 100% for all team collaboration features.
 
 # Import and run tests from refactored modules
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import pytest
 
-from .integration.critical_paths.test_concurrent_editing_performance import (
+from netra_backend.tests.integration.integration.critical_paths.test_concurrent_editing_performance import (
     TestConcurrentEditingPerformance,
 )
 
-# Add project root to path
-from .integration.critical_paths.test_team_creation_permissions import (
+from netra_backend.tests.integration.integration.critical_paths.test_team_creation_permissions import (
     TestTeamCreationPermissions,
 )
-from .integration.critical_paths.test_team_isolation_security import (
+from netra_backend.tests.integration.integration.critical_paths.test_team_isolation_security import (
     TestTeamIsolationSecurity,
 )
-from .integration.critical_paths.test_user_invitation_flow import (
+from netra_backend.tests.integration.integration.critical_paths.test_user_invitation_flow import (
     TestUserInvitationFlow,
 )
-from .integration.critical_paths.test_workspace_resource_sharing import (
+from netra_backend.tests.integration.integration.critical_paths.test_workspace_resource_sharing import (
     TestWorkspaceResourceSharing,
 )
-
-# Add project root to path
 
 # All core classes and functionality moved to:
 # app/tests/integration/test_helpers/team_collaboration_base.py
 
 # All fixtures moved to:
 # app/tests/integration/test_helpers/team_collaboration_base.py
-
 
 class TestTeamCollaborationPermissions:
     """Compatibility wrapper that imports and runs refactored test classes."""
@@ -77,7 +66,6 @@ class TestTeamCollaborationPermissions:
     workspace_tests = TestWorkspaceResourceSharing
     performance_tests = TestConcurrentEditingPerformance
     security_tests = TestTeamIsolationSecurity
-
 
 # Coverage validation and benchmarks moved to:
 # app/tests/integration/test_helpers/team_collaboration_base.py

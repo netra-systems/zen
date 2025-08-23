@@ -10,17 +10,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical for customer retention and platform reliability
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 import asyncio
 import json
@@ -34,16 +27,12 @@ import pytest
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.db.postgres import get_async_db
 
-# Add project root to path
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.websocket.ws_manager import manager
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 class MessagePipelineTestHelper:
     """Helper class for message pipeline testing."""
@@ -87,12 +76,10 @@ class MessagePipelineTestHelper:
         response_time = self.get_response_time()
         assert response_time < threshold_seconds, f"Response time {response_time}s exceeds {threshold_seconds}s threshold"
 
-
 @pytest.fixture
 def message_helper():
     """Fixture providing message pipeline test helper."""
     return MessagePipelineTestHelper()
-
 
 @pytest.fixture
 async def agent_service_with_mocks():
@@ -126,7 +113,6 @@ async def agent_service_with_mocks():
     # Create and return agent service
     agent_service = AgentService(supervisor)
     return agent_service, supervisor, llm_manager
-
 
 @pytest.mark.asyncio
 class TestMessagePipeline:
@@ -499,7 +485,6 @@ class TestMessagePipeline:
         logger.info(f"Handled {len(invalid_messages)} invalid messages with {error_count} error responses")
         
         logger.info(f"✅ Message validation test: {error_count} errors properly handled")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

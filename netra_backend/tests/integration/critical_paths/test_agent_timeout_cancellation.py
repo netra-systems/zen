@@ -10,17 +10,10 @@ Critical Path: Timeout detection -> Cancellation signal -> Graceful shutdown -> 
 Coverage: Real timeout managers, cancellation handlers, cleanup coordination
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -38,12 +31,10 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class TimeoutType(Enum):
     """Types of timeouts that can occur."""
@@ -51,7 +42,6 @@ class TimeoutType(Enum):
     RESPONSE = "response"
     IDLE = "idle"
     TOTAL = "total"
-
 
 class CancellationReason(Enum):
     """Reasons for cancellation."""
@@ -61,7 +51,6 @@ class CancellationReason(Enum):
     RESOURCE_EXHAUSTION = "resource_exhaustion"
     ERROR_THRESHOLD = "error_threshold"
 
-
 @dataclass
 class TimeoutConfig:
     """Configuration for timeout settings."""
@@ -70,7 +59,6 @@ class TimeoutConfig:
     grace_period_seconds: float = 5.0
     retry_count: int = 0
     escalation_enabled: bool = True
-
 
 @dataclass
 class CancellationEvent:
@@ -92,7 +80,6 @@ class CancellationEvent:
             "requested_at": self.requested_at.isoformat(),
             "graceful": self.graceful
         }
-
 
 class TimeoutManager:
     """Manages timeouts for agent operations."""
@@ -220,7 +207,6 @@ class TimeoutManager:
         duration = timeout_info["config"].duration_seconds
         return max(0, duration - elapsed)
 
-
 class CancellationHandler:
     """Handles cancellation requests and coordination."""
     
@@ -265,7 +251,6 @@ class CancellationHandler:
                 await hook(cancellation_event)
             except Exception as e:
                 logger.error(f"Cancellation hook failed: {e}")
-
 
 class CleanupCoordinator:
     """Coordinates cleanup operations during cancellation."""
@@ -349,7 +334,6 @@ class CleanupCoordinator:
                 cleanup_results["errors"].append(str(e))
                 logger.error(f"Cleanup task failed: {e}")
 
-
 class MockAgent:
     """Mock agent for testing timeout and cancellation."""
     
@@ -383,7 +367,6 @@ class MockAgent:
     def cancel(self):
         """Cancel the agent."""
         self.is_cancelled = True
-
 
 class AgentTimeoutCancellationManager:
     """Manages agent timeout and cancellation testing."""
@@ -474,7 +457,6 @@ class AgentTimeoutCancellationManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def timeout_cancellation_manager():
     """Create timeout cancellation manager for testing."""
@@ -482,7 +464,6 @@ async def timeout_cancellation_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -507,7 +488,6 @@ async def test_basic_timeout_detection(timeout_cancellation_manager):
     # Verify timeout was recorded
     assert len(manager.timeout_manager.timeout_history) > 0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_successful_task_completion(timeout_cancellation_manager):
@@ -530,7 +510,6 @@ async def test_successful_task_completion(timeout_cancellation_manager):
     
     # Verify no timeout occurred
     assert len(manager.timeout_manager.timeout_history) == 0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -557,7 +536,6 @@ async def test_manual_cancellation(timeout_cancellation_manager):
     
     assert cancellation_event.reason == CancellationReason.USER_REQUEST
     assert len(manager.cancellation_handler.cancellation_history) == 1
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -595,7 +573,6 @@ async def test_graceful_cleanup_execution(timeout_cancellation_manager):
     assert "task_2" in cleanup_executed
     assert cleanup_executed.index("task_1") < cleanup_executed.index("task_2")
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_multiple_timeout_types(timeout_cancellation_manager):
@@ -620,7 +597,6 @@ async def test_multiple_timeout_types(timeout_cancellation_manager):
     # Cancel all timeouts for agent
     cancelled_count = manager.timeout_manager.cancel_agent_timeouts(agent.agent_id)
     assert cancelled_count == 2
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -648,7 +624,6 @@ async def test_timeout_configuration_override(timeout_cancellation_manager):
     
     assert result["timed_out"] is True
     assert result["total_time"] < 1.0  # Should timeout before task completes
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -681,7 +656,6 @@ async def test_concurrent_agent_timeouts(timeout_cancellation_manager):
     assert len(successful_results) > 0  # Some should complete
     assert len(timed_out_results) > 0   # Some should timeout
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_cleanup_timeout_handling(timeout_cancellation_manager):
@@ -711,7 +685,6 @@ async def test_cleanup_timeout_handling(timeout_cancellation_manager):
     # Check cleanup stats
     assert manager.cleanup_coordinator.cleanup_stats["failed_cleanups"] > 0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_cancellation_hook_execution(timeout_cancellation_manager):
@@ -739,7 +712,6 @@ async def test_cancellation_hook_execution(timeout_cancellation_manager):
     
     # Verify successful hook was called despite failing hook
     assert agent.agent_id in hook_calls
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

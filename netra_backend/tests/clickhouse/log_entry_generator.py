@@ -8,9 +8,8 @@ import uuid
 from datetime import datetime, timedelta
 from typing import List, Optional
 
-from .data_models import LogEntry
-from .generator_base import DataGeneratorBase
-
+from netra_backend.tests.clickhouse.data_models import LogEntry
+from netra_backend.tests.clickhouse.generator_base import DataGeneratorBase
 
 class LogEntryGenerator(DataGeneratorBase):
     """Generate realistic log entries"""

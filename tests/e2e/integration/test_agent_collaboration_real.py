@@ -31,7 +31,6 @@ from tests.e2e.agent_collaboration_helpers import (
 )
 from netra_backend.app.schemas.UserPlan import PlanTier
 
-
 @pytest.mark.asyncio
 class TestRealAgentCollaboration:
     """Test #1: Real Multi-Agent Collaboration with LLM Integration."""
@@ -55,7 +54,7 @@ class TestRealAgentCollaboration:
         return CollaborationFlowValidator()
     
     @pytest.mark.asyncio
-    async def test_complex_cost_optimization_multi_agent_flow(self, test_core, flow_simulator, 
+    async def test_complex_cost_optimization_multi_agent_flow(self, test_core, flow_simulator:
                                                             flow_validator):
         """Test complex cost optimization requiring multiple agents with real LLM calls."""
         session_data = await test_core.establish_collaboration_session(PlanTier.ENTERPRISE)
@@ -240,7 +239,6 @@ class TestRealAgentCollaboration:
         for agent_type, result in orchestration_results.items():
             assert result["status"] == "success", f"{agent_type} orchestration failed"
             assert len(result["agents_involved"]) >= 1, f"No agents involved in {agent_type}"
-
 
 @pytest.mark.asyncio
 class TestAgentCollaborationPerformance:

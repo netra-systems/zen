@@ -1,28 +1,19 @@
 """Base tests for AgentReliabilityMixin - data classes and initialization."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
 import pytest
 
-# Add project root to path
 # Import the components we're testing
 from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.agent_reliability_types import AgentError, AgentHealthStatus
 from netra_backend.app.core.error_codes import ErrorSeverity
-
 
 class MockAgent(AgentReliabilityMixin):
     """Mock agent for testing the reliability mixin."""
@@ -30,7 +21,6 @@ class MockAgent(AgentReliabilityMixin):
     def __init__(self, name: str = "TestAgent"):
         self.name = name
         super().__init__()
-
 
 class TestAgentError:
     """Test AgentError dataclass."""
@@ -59,7 +49,6 @@ class TestAgentError:
         assert error.context == {"key": "value"}
         assert error.recovery_attempted is True
         assert error.recovery_successful is False
-
 
 class TestAgentHealthStatus:
     """Test AgentHealthStatus dataclass."""
@@ -98,14 +87,13 @@ class TestAgentHealthStatus:
         assert health.last_error == error
         assert health.status == "healthy"
 
-
 class TestAgentReliabilityMixinInitialization:
     """Test initialization and configuration of AgentReliabilityMixin."""
     
     @pytest.fixture
     def mock_agent(self):
         """Create a mock agent with reliability mixin."""
-        with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+        with patch('netra_backend.app.core.reliability.get_reliability_wrapper') as mock_wrapper:
             mock_reliability = Mock()
             mock_reliability.execute_safely = Mock()
             mock_reliability.circuit_breaker = Mock()

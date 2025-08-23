@@ -1,16 +1,9 @@
 """Agent Tests - Email validation tests for agent data processing"""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
@@ -22,11 +15,7 @@ from pydantic import BaseModel, EmailStr, Field, ValidationError
 from netra_backend.app.schemas.registry import WebSocketMessageType
 from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
 
-# Add project root to path
 from netra_backend.app.websocket.validation import MessageValidator
-
-# Add project root to path
-
 
 class EmailValidationModel(BaseModel):
     """Test model for email validation."""
@@ -34,7 +23,6 @@ class EmailValidationModel(BaseModel):
     numeric_field: int
     email_field: EmailStr
     
-
 def test_format_validation_email():
     """Test email format validation."""
     invalid_emails = ["invalid", "test@", "@example.com", "test@.com"]
@@ -43,7 +31,6 @@ def test_format_validation_email():
         data = {"required_field": "test", "numeric_field": 1, "email_field": invalid_email}
         with pytest.raises(ValidationError):
             EmailValidationModel(**data)
-
 
 def test_valid_email_validation():
     """Test that valid emails pass validation."""

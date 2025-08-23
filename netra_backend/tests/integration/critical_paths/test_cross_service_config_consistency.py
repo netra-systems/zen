@@ -10,17 +10,10 @@ Critical Path: Configuration synchronization -> Consistency validation -> Drift 
 Coverage: Multi-service config sync, version compatibility checks, drift detection mechanisms, automated reconciliation, service mesh integration
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -37,14 +30,10 @@ import pytest
 
 from netra_backend.app.config import get_config
 
-# Add project root to path
-from netra_backend.app.core.cache.redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from test_framework.mock_utils import mock_justified
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class ConfigSyncStatus(Enum):
     """Configuration synchronization status."""
@@ -53,7 +42,6 @@ class ConfigSyncStatus(Enum):
     VERSION_MISMATCH = "version_mismatch"
     SYNC_IN_PROGRESS = "sync_in_progress"
     SYNC_FAILED = "sync_failed"
-
 
 @dataclass
 class ServiceConfigState:
@@ -66,7 +54,6 @@ class ServiceConfigState:
     dependencies: Set[str] = field(default_factory=set)
     status: ConfigSyncStatus = ConfigSyncStatus.SYNCHRONIZED
 
-
 @dataclass
 class ConfigDriftResult:
     """Configuration drift detection result."""
@@ -77,7 +64,6 @@ class ConfigDriftResult:
     expected_values: Dict[str, Any] = field(default_factory=dict)
     actual_values: Dict[str, Any] = field(default_factory=dict)
     drift_timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-
 
 @dataclass
 class ConsistencyCheckResult:
@@ -90,7 +76,6 @@ class ConsistencyCheckResult:
     drift_results: List[ConfigDriftResult] = field(default_factory=list)
     version_mismatches: List[Tuple[str, str, str]] = field(default_factory=list)  # service, expected, actual
     reconciliation_needed: List[str] = field(default_factory=list)
-
 
 class CrossServiceConfigConsistencyManager:
     """Manages cross-service configuration consistency validation and synchronization."""
@@ -479,7 +464,6 @@ class CrossServiceConfigConsistencyManager:
             }
         ]
 
-
 @pytest.fixture
 async def redis_client():
     """Create Redis client for configuration caching."""
@@ -494,12 +478,10 @@ async def redis_client():
         # If Redis not available, return None
         yield None
 
-
 @pytest.fixture
 async def consistency_manager(redis_client):
     """Create cross-service configuration consistency manager."""
     return CrossServiceConfigConsistencyManager(redis_client)
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -891,7 +873,6 @@ class TestCrossServiceConfigConsistencyL3:
             
             # Low variance indicates reliable detection
             assert result["accuracy_variance"] < 4.0, f"High variance {result['accuracy_variance']} for {result['scenario']}"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

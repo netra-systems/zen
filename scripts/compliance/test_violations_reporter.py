@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Dict, List
 
 # Add the compliance directory to the path
-sys.path.insert(0, str(Path(__file__).parent))
 
 from core import ComplianceConfig, Violation
 from test_limits_checker import TestLimitsChecker

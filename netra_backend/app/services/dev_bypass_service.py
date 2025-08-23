@@ -9,5 +9,5 @@ class DevBypassService:
         self.websocket = websocket
 
     async def handle_message(self, data: Dict[str, Any]):
-        # Echo the message back to the client
-        await self.websocket.send_json({"echo": data})
+        # Echo the message back to the client using standard type/payload format
+        await self.websocket.send_json({"type": "echo", "payload": {"echo": data}})

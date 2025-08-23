@@ -8,7 +8,6 @@ COMPLIANCE: 450-line max file, 25-line max functions
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock
 
-
 # Thread test helpers
 async def create_test_thread(uow, user_id="test_user", title="Test Thread"):
     """Create a test thread with minimal setup."""
@@ -16,7 +15,6 @@ async def create_test_thread(uow, user_id="test_user", title="Test Thread"):
         "user_id": user_id,
         "title": title
     })
-
 
 async def create_test_threads(uow, count=5, user_id="test_user"):
     """Create multiple test threads."""
@@ -26,7 +24,6 @@ async def create_test_threads(uow, count=5, user_id="test_user"):
         threads.append(thread)
     return threads
 
-
 def setup_thread_mock_behavior(mock_repo):
     """Setup mock behavior for thread repository."""
     soft_deleted_threads = {}
@@ -35,7 +32,6 @@ def setup_thread_mock_behavior(mock_repo):
     thread_counter = [0]
     _setup_thread_create_mock(mock_repo, thread_counter, created_threads)
     _setup_thread_crud_mocks(mock_repo, created_threads, soft_deleted_threads, deleted_threads)
-
 
 def _setup_thread_create_mock(mock_repo, thread_counter, created_threads):
     """Setup thread creation mock."""
@@ -47,13 +43,11 @@ def _setup_thread_create_mock(mock_repo, thread_counter, created_threads):
         return thread
     mock_repo.create.side_effect = create_thread
 
-
 def _create_mock_thread(kwargs, counter):
     """Create a mock thread object."""
     base_attrs = _get_thread_base_attrs(kwargs, counter)
     time_attrs = _get_thread_time_attrs(kwargs)
     return AsyncMock(**{**base_attrs, **time_attrs})
-
 
 def _setup_thread_crud_mocks(mock_repo, created_threads, soft_deleted_threads, deleted_threads):
     """Setup CRUD operation mocks for threads."""
@@ -62,24 +56,20 @@ def _setup_thread_crud_mocks(mock_repo, created_threads, soft_deleted_threads, d
     _setup_thread_soft_delete_mock(mock_repo, created_threads, soft_deleted_threads)
     _setup_thread_get_mocks(mock_repo, created_threads, soft_deleted_threads, deleted_threads)
 
-
 def _setup_thread_update_mock(mock_repo):
     """Setup thread update mock."""
     update_func = _create_thread_update_func()
     mock_repo.update.side_effect = update_func
-
 
 def _setup_thread_delete_mocks(mock_repo, created_threads, soft_deleted_threads, deleted_threads):
     """Setup delete operation mocks."""
     delete_func = _create_thread_delete_func(created_threads, soft_deleted_threads, deleted_threads)
     mock_repo.delete.side_effect = delete_func
 
-
 def _setup_thread_soft_delete_mock(mock_repo, created_threads, soft_deleted_threads):
     """Setup soft delete operation mock."""
     soft_delete_func = _create_thread_soft_delete_func(created_threads, soft_deleted_threads)
     mock_repo.soft_delete.side_effect = soft_delete_func
-
 
 def _setup_thread_get_mocks(mock_repo, created_threads, soft_deleted_threads, deleted_threads):
     """Setup get operation mocks."""
@@ -109,7 +99,6 @@ def _setup_thread_get_mocks(mock_repo, created_threads, soft_deleted_threads, de
         return [created_threads.get(tid) for tid in thread_ids if tid in created_threads]
     mock_repo.get_many.side_effect = get_many_threads
 
-
 def _get_thread_base_attrs(kwargs, counter):
     """Get base thread attributes."""
     return {
@@ -118,7 +107,6 @@ def _get_thread_base_attrs(kwargs, counter):
         'title': kwargs.get('title'),
         'is_archived': False
     }
-
 
 def _get_thread_time_attrs(kwargs):
     """Get thread time-related attributes."""
@@ -131,7 +119,6 @@ def _get_thread_time_attrs(kwargs):
         'last_activity': kwargs.get('last_activity', now)
     }
 
-
 def _create_thread_update_func():
     """Create thread update function."""
     async def update_thread(id, updates=None, **kwargs):
@@ -143,7 +130,6 @@ def _create_thread_update_func():
         )
     return update_thread
 
-
 def _create_thread_delete_func(created_threads, soft_deleted_threads, deleted_threads):
     """Create thread delete function."""
     async def delete_thread(thread_id):
@@ -152,14 +138,12 @@ def _create_thread_delete_func(created_threads, soft_deleted_threads, deleted_th
         return True
     return delete_thread
 
-
 def _remove_from_collections(thread_id, created_threads, soft_deleted_threads):
     """Remove thread from created and soft deleted collections."""
     if thread_id in created_threads:
         del created_threads[thread_id]
     if thread_id in soft_deleted_threads:
         del soft_deleted_threads[thread_id]
-
 
 def _create_thread_soft_delete_func(created_threads, soft_deleted_threads):
     """Create thread soft delete function."""
@@ -171,14 +155,12 @@ def _create_thread_soft_delete_func(created_threads, soft_deleted_threads):
         return None
     return soft_delete_thread
 
-
 def _move_to_soft_deleted(thread_id, created_threads, soft_deleted_threads):
     """Move thread from created to soft deleted."""
     thread = created_threads[thread_id]
     thread.deleted_at = datetime.now()
     soft_deleted_threads[thread_id] = thread
     del created_threads[thread_id]
-
 
 def _create_soft_deleted_thread(thread_id, soft_deleted_threads):
     """Create new soft deleted thread entry."""
@@ -187,7 +169,6 @@ def _create_soft_deleted_thread(thread_id, soft_deleted_threads):
         deleted_at=datetime.now()
     )
 
-
 def _create_paginated_threads_func():
     """Create paginated threads function."""
     async def get_paginated_threads(page, page_size):
@@ -195,7 +176,6 @@ def _create_paginated_threads_func():
         items = [AsyncMock(id=f"thread_{i}") for i in range(item_count)]
         return AsyncMock(items=items, total=25, pages=3)
     return get_paginated_threads
-
 
 def _create_active_threads_func(created_threads):
     """Create active threads function."""
@@ -207,13 +187,11 @@ def _create_active_threads_func(created_threads):
         return active_threads
     return get_active_threads
 
-
 def _is_user_thread_active(thread, user_id, since):
     """Check if thread is active for user since given time."""
     user_match = hasattr(thread, 'user_id') and thread.user_id == user_id
     time_match = hasattr(thread, 'last_activity') and thread.last_activity >= since
     return user_match and time_match
-
 
 def _create_archive_thread_func():
     """Create archive thread function."""

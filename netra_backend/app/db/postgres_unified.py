@@ -13,6 +13,7 @@ from typing import AsyncGenerator, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -22,11 +23,12 @@ class UnifiedPostgresDB:
     """Unified async PostgreSQL manager that auto-detects environment"""
     
     def __init__(self):
-        # Detect environment
-        self.is_cloud_run = os.getenv("K_SERVICE") is not None
-        self.is_staging = os.getenv("ENVIRONMENT", "").lower() == "staging"
-        self.is_production = os.getenv("ENVIRONMENT", "").lower() == "production"
-        self.is_test = os.getenv("ENVIRONMENT", "").lower() == "test"
+        # Detect environment from unified config
+        config = get_unified_config()
+        self.is_cloud_run = config.deployment.is_cloud_run
+        self.is_staging = config.environment == "staging"
+        self.is_production = config.environment == "production"
+        self.is_test = config.environment == "test"
         
         # Manager will be initialized on first use
         self.manager = None
@@ -45,13 +47,13 @@ class UnifiedPostgresDB:
             if self.is_cloud_run or self.is_staging or self.is_production:
                 # Use Cloud SQL for Cloud Run, staging, and production
                 logger.info("Initializing Cloud SQL manager for cloud environment")
-                from .postgres_cloud import cloud_db
+                from netra_backend.app.db.postgres_cloud import cloud_db
                 self.manager = cloud_db
                 await self.manager.initialize_cloud_run()
             else:
                 # Use local async for development and testing
                 logger.info("Initializing async manager for local environment")
-                from .postgres_async import async_db
+                from netra_backend.app.db.postgres_async import async_db
                 self.manager = async_db
                 await self.manager.initialize_local()
             

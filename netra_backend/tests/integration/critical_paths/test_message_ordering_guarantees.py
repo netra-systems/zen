@@ -11,21 +11,10 @@ L2 Test: Real internal message ordering components with mocked external services
 Performance target: <50ms ordering latency, 99.9% ordering accuracy.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -42,7 +31,6 @@ from netra_backend.app.schemas import User
 
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
-
 
 @dataclass
 
@@ -64,7 +52,6 @@ class SequencedMessage:
 
     priority: int = 0  # 0 = normal, 1 = high, 2 = critical
 
-
 @dataclass
 
 class MessageBuffer:
@@ -83,12 +70,10 @@ class MessageBuffer:
 
     max_buffer_size: int = 100
 
-
 class MessageSequenceManager:
 
     """Manage message sequencing and ordering guarantees."""
     
-
     def __init__(self):
 
         self.user_sequences = defaultdict(int)  # user_id -> next_sequence_number
@@ -111,7 +96,6 @@ class MessageSequenceManager:
 
         }
     
-
     def assign_sequence_number(self, user_id: str, message: Dict[str, Any]) -> SequencedMessage:
 
         """Assign sequence number to outgoing message."""
@@ -122,7 +106,6 @@ class MessageSequenceManager:
 
         self.global_sequence += 1
         
-
         sequenced_message = SequencedMessage(
 
             message_id=str(uuid4()),
@@ -141,12 +124,10 @@ class MessageSequenceManager:
 
         )
         
-
         self.ordering_stats["total_messages"] += 1
 
         return sequenced_message
     
-
     def process_incoming_message(self, message: SequencedMessage) -> List[SequencedMessage]:
 
         """Process incoming message and return deliverable messages in order."""
@@ -186,7 +167,6 @@ class MessageSequenceManager:
 
                 self.ordering_stats["reordered_messages"] += 1
         
-
         elif message.sequence_number > buffer.expected_sequence:
             # Future message - buffer it
 
@@ -194,16 +174,13 @@ class MessageSequenceManager:
 
             self.ordering_stats["out_of_order_messages"] += 1
         
-
         else:
             # Duplicate or old message - ignore
 
             self.ordering_stats["dropped_messages"] += 1
         
-
         return deliverable_messages
     
-
     def _buffer_message(self, user_id: str, message: SequencedMessage) -> None:
 
         """Buffer an out-of-order message."""
@@ -221,10 +198,8 @@ class MessageSequenceManager:
 
             self.ordering_stats["buffer_overflows"] += 1
         
-
         buffer.buffered_messages[message.sequence_number] = message
     
-
     def check_buffer_timeouts(self) -> List[Tuple[str, List[SequencedMessage]]]:
 
         """Check for timed out buffered messages and force delivery."""
@@ -233,17 +208,14 @@ class MessageSequenceManager:
 
         timed_out_deliveries = []
         
-
         for user_id, buffer in self.message_buffers.items():
 
             if not buffer.buffered_messages:
 
                 continue
             
-
             time_since_last_delivery = current_time - buffer.last_delivery_time
             
-
             if time_since_last_delivery > buffer.buffer_timeout:
                 # Force delivery of buffered messages
 
@@ -251,7 +223,6 @@ class MessageSequenceManager:
 
                 sorted_sequences = sorted(buffer.buffered_messages.keys())
                 
-
                 for seq_num in sorted_sequences:
 
                     message = buffer.buffered_messages.pop(seq_num)
@@ -260,7 +231,6 @@ class MessageSequenceManager:
 
                     buffer.delivered_messages.append(message)
                 
-
                 if forced_messages:
                     # Update expected sequence to after forced messages
 
@@ -270,17 +240,14 @@ class MessageSequenceManager:
 
                     timed_out_deliveries.append((user_id, forced_messages))
         
-
         return timed_out_deliveries
     
-
     def get_ordering_stats(self) -> Dict[str, Any]:
 
         """Get message ordering statistics."""
 
         stats = self.ordering_stats.copy()
         
-
         if stats["total_messages"] > 0:
 
             stats["ordering_accuracy"] = (
@@ -303,17 +270,14 @@ class MessageSequenceManager:
 
             stats["reorder_rate"] = 0.0
         
-
         return stats
     
-
     def get_user_buffer_status(self, user_id: str) -> Dict[str, Any]:
 
         """Get buffer status for specific user."""
 
         buffer = self.message_buffers[user_id]
         
-
         return {
 
             "user_id": user_id,
@@ -332,12 +296,10 @@ class MessageSequenceManager:
 
         }
 
-
 class OrderEnforcer:
 
     """Enforce message ordering at the delivery level."""
     
-
     def __init__(self):
 
         self.delivery_queues = defaultdict(deque)  # user_id -> delivery_queue
@@ -354,14 +316,12 @@ class OrderEnforcer:
 
         self.max_queue_size = 1000
     
-
     def enqueue_for_delivery(self, user_id: str, messages: List[SequencedMessage]) -> None:
 
         """Enqueue messages for ordered delivery."""
 
         queue = self.delivery_queues[user_id]
         
-
         for message in messages:
             # Check queue capacity
 
@@ -371,13 +331,10 @@ class OrderEnforcer:
 
                 self.processing_stats["queue_overflows"] += 1
             
-
             queue.append(message)
         
-
         self.processing_stats["messages_processed"] += len(messages)
     
-
     async def deliver_next_batch(self, user_id: str, batch_size: int = 10) -> List[SequencedMessage]:
 
         """Deliver next batch of messages in order."""
@@ -386,7 +343,6 @@ class OrderEnforcer:
 
         delivered_messages = []
         
-
         for _ in range(min(batch_size, len(queue))):
 
             if queue:
@@ -395,10 +351,8 @@ class OrderEnforcer:
 
                 delivered_messages.append(message)
         
-
         return delivered_messages
     
-
     def verify_delivery_order(self, messages: List[SequencedMessage]) -> Dict[str, Any]:
 
         """Verify that delivered messages are in correct order."""
@@ -407,17 +361,14 @@ class OrderEnforcer:
 
             return {"ordered": True, "violations": []}
         
-
         violations = []
         
-
         for i in range(1, len(messages)):
 
             current_seq = messages[i].sequence_number
 
             previous_seq = messages[i-1].sequence_number
             
-
             if current_seq <= previous_seq:
 
                 violations.append({
@@ -432,10 +383,8 @@ class OrderEnforcer:
 
                 })
         
-
         self.processing_stats["ordering_violations"] += len(violations)
         
-
         return {
 
             "ordered": len(violations) == 0,
@@ -448,14 +397,12 @@ class OrderEnforcer:
 
         }
     
-
     def get_queue_status(self, user_id: str) -> Dict[str, Any]:
 
         """Get delivery queue status for user."""
 
         queue = self.delivery_queues[user_id]
         
-
         return {
 
             "user_id": user_id,
@@ -470,7 +417,6 @@ class OrderEnforcer:
 
         }
 
-
 @pytest.mark.L2
 
 @pytest.mark.integration
@@ -479,7 +425,6 @@ class TestMessageOrderingGuarantees:
 
     """L2 integration tests for message ordering guarantees."""
     
-
     @pytest.fixture
 
     def ws_manager(self):
@@ -492,7 +437,6 @@ class TestMessageOrderingGuarantees:
 
             return WebSocketManager()
     
-
     @pytest.fixture
 
     def sequence_manager(self):
@@ -501,7 +445,6 @@ class TestMessageOrderingGuarantees:
 
         return MessageSequenceManager()
     
-
     @pytest.fixture
 
     def order_enforcer(self):
@@ -510,7 +453,6 @@ class TestMessageOrderingGuarantees:
 
         return OrderEnforcer()
     
-
     @pytest.fixture
 
     def test_users(self):
@@ -537,7 +479,6 @@ class TestMessageOrderingGuarantees:
 
         ]
     
-
     def create_test_message(self, content: str, session_id: str = "", priority: int = 0) -> Dict[str, Any]:
 
         """Create test message."""
@@ -556,7 +497,6 @@ class TestMessageOrderingGuarantees:
 
         }
     
-
     async def test_basic_sequence_assignment(self, sequence_manager, test_users):
 
         """Test basic sequence number assignment."""
@@ -595,7 +535,6 @@ class TestMessageOrderingGuarantees:
 
         assert stats["out_of_order_messages"] == 0
     
-
     async def test_in_order_message_processing(self, sequence_manager, test_users):
 
         """Test processing of in-order messages."""
@@ -646,7 +585,6 @@ class TestMessageOrderingGuarantees:
 
         assert buffer_status["delivered_count"] == 10
     
-
     async def test_out_of_order_message_handling(self, sequence_manager, test_users):
 
         """Test handling of out-of-order messages."""
@@ -671,7 +609,6 @@ class TestMessageOrderingGuarantees:
 
         all_delivered = []
         
-
         for idx in delivery_order:
 
             delivered = sequence_manager.process_incoming_message(messages[idx])
@@ -696,7 +633,6 @@ class TestMessageOrderingGuarantees:
 
         assert stats["reordered_messages"] == 4  # Messages 1, 2, 3, 4 were reordered
     
-
     async def test_gap_handling_with_timeouts(self, sequence_manager, test_users):
 
         """Test handling of message gaps with timeout forcing."""
@@ -721,7 +657,6 @@ class TestMessageOrderingGuarantees:
 
         all_delivered = []
         
-
         for idx in send_order:
 
             delivered = sequence_manager.process_incoming_message(messages[idx])
@@ -758,7 +693,6 @@ class TestMessageOrderingGuarantees:
 
         assert len(timed_out) == 1
         
-
         user_id, forced_messages = timed_out[0]
 
         assert user_id == user.id
@@ -769,7 +703,6 @@ class TestMessageOrderingGuarantees:
 
         assert forced_messages[1].sequence_number == 4
     
-
     async def test_order_enforcer_delivery(self, order_enforcer, test_users):
 
         """Test order enforcer delivery mechanism."""
@@ -824,7 +757,6 @@ class TestMessageOrderingGuarantees:
 
         delivered_sequences = []
         
-
         for batch in all_batches:
 
             order_check = order_enforcer.verify_delivery_order(batch)
@@ -833,14 +765,12 @@ class TestMessageOrderingGuarantees:
 
             assert len(order_check["violations"]) == 0
             
-
             delivered_sequences.extend([msg.sequence_number for msg in batch])
         
         # Verify overall order
 
         assert delivered_sequences == list(range(15))
     
-
     async def test_concurrent_user_ordering(self, sequence_manager, order_enforcer, test_users):
 
         """Test message ordering for multiple concurrent users."""
@@ -848,7 +778,6 @@ class TestMessageOrderingGuarantees:
 
         user_messages = {}
         
-
         for user in test_users:
 
             messages = []
@@ -913,7 +842,6 @@ class TestMessageOrderingGuarantees:
 
                 assert next_seq == current_seq + 1, f"Order violation for user {user.id}"
     
-
     @mock_justified("L2: Message ordering with real internal components")
 
     async def test_websocket_integration_with_ordering(self, ws_manager, sequence_manager, order_enforcer, test_users):
@@ -956,12 +884,10 @@ class TestMessageOrderingGuarantees:
 
         all_delivered = []
         
-
         for idx in receive_order:
 
             delivered = sequence_manager.process_incoming_message(sent_messages[idx])
             
-
             if delivered:
                 # Use order enforcer for delivery
 
@@ -993,7 +919,6 @@ class TestMessageOrderingGuarantees:
 
         await ws_manager.disconnect_user(user.id, mock_websocket)
     
-
     async def test_ordering_performance_benchmarks(self, sequence_manager, order_enforcer, test_users):
 
         """Test message ordering performance benchmarks."""
@@ -1008,7 +933,6 @@ class TestMessageOrderingGuarantees:
 
         sequenced_messages = []
         
-
         for i in range(message_count):
 
             msg = self.create_test_message(f"Perf Message {i}")
@@ -1017,7 +941,6 @@ class TestMessageOrderingGuarantees:
 
             sequenced_messages.append(sequenced)
         
-
         assignment_time = time.time() - start_time
         
         # Should assign sequences quickly
@@ -1028,12 +951,10 @@ class TestMessageOrderingGuarantees:
 
         start_time = time.time()
         
-
         for msg in sequenced_messages:
 
             sequence_manager.process_incoming_message(msg)
         
-
         processing_time = time.time() - start_time
         
         # Should process quickly
@@ -1044,10 +965,8 @@ class TestMessageOrderingGuarantees:
 
         start_time = time.time()
         
-
         order_enforcer.enqueue_for_delivery(user.id, sequenced_messages)
         
-
         batches_delivered = 0
 
         while True:
@@ -1066,7 +985,6 @@ class TestMessageOrderingGuarantees:
 
             assert order_check["ordered"] is True
         
-
         enforcement_time = time.time() - start_time
         
         # Should enforce order quickly
@@ -1082,7 +1000,6 @@ class TestMessageOrderingGuarantees:
         assert stats["ordering_accuracy"] == 100.0  # Perfect for in-order processing
 
         assert stats["total_messages"] == message_count
-
 
 if __name__ == "__main__":
 

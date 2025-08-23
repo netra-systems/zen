@@ -213,7 +213,7 @@ class MessageBroadcastValidator:
         self.sent_messages: List[Dict[str, Any]] = []
         self.received_messages: Dict[str, List[Dict[str, Any]]] = {}
         
-    async def send_test_message(self, sender_tab: str, content: str) -> Dict[str, Any]:
+    async def test_send_test_message(self, sender_tab: str, content: str) -> Dict[str, Any]:
         """Send test message from specific tab."""
         message = {
             "id": str(uuid.uuid4()),

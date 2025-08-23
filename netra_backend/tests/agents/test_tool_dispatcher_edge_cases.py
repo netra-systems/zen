@@ -1,36 +1,28 @@
 """Unit tests for ToolDispatcher edge cases and error scenarios."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import pytest
 from netra_backend.app.schemas import ToolResult
 
-# Add project root to path
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from .tool_dispatcher_helpers import (
-    # Add project root to path
+from netra_backend.tests.helpers.tool_dispatcher_helpers import (
     create_mock_tool,
     create_test_state,
 )
 
-
 class TestToolDispatcherEdgeCases:
     """Test edge cases and error scenarios."""
+    @pytest.mark.asyncio
     async def test_dispatch_with_none_parameters(self):
         """Test dispatch with None parameters."""
         dispatcher = ToolDispatcher()
         result = await dispatcher.dispatch("create_corpus")
         self._verify_dispatch_handles_none_parameters(result)
+    @pytest.mark.asyncio
     async def test_dispatch_tool_with_empty_state(self):
         """Test dispatch_tool with minimal state."""
         tool, dispatcher = self._setup_dispatch_with_empty_state()

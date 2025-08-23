@@ -3,17 +3,10 @@ L4 Integration Test: Auth Service Failover Complete
 Tests auth service failover, recovery, and high availability
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import random
@@ -27,13 +20,9 @@ import pytest
 from netra_backend.app.config import get_config
 from netra_backend.app.services.auth_failover_service import AuthFailoverService
 
-# Add project root to path
-from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.health_monitor import HealthMonitor
 from netra_backend.app.services.redis_service import RedisService
-
-# Add project root to path
-
 
 class TestAuthServiceFailoverCompleteL4:
     """Complete auth service failover testing"""
@@ -41,13 +30,12 @@ class TestAuthServiceFailoverCompleteL4:
     @pytest.fixture
     async def ha_infrastructure(self):
         """High availability infrastructure setup"""
-        return {
+        # Create infrastructure dictionary
+        infrastructure = {
             'primary_auth': AuthService(instance_id='primary'),
             'secondary_auth': AuthService(instance_id='secondary'),
             'tertiary_auth': AuthService(instance_id='tertiary'),
-            'failover_service': AuthFailoverService(),
-            'health_monitor': HealthMonitor(),
-            'redis_service': RedisService(),
+            'redis_service': RedisService(test_mode=True),  # Enable test mode
             'active_instance': 'primary',
             'failover_history': [],
             'health_metrics': {
@@ -56,6 +44,14 @@ class TestAuthServiceFailoverCompleteL4:
                 'tertiary': {'healthy': True, 'response_time': 0.1}
             }
         }
+        
+        # Create failover service with service registry
+        infrastructure['failover_service'] = AuthFailoverService(service_registry=infrastructure)
+        
+        # Create health monitor with reference to infrastructure
+        infrastructure['health_monitor'] = HealthMonitor(health_provider=infrastructure)
+        
+        return infrastructure
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
@@ -314,6 +310,9 @@ class TestAuthServiceFailoverCompleteL4:
     async def test_auth_service_autoscaling(self, ha_infrastructure):
         """Test auth service autoscaling under load"""
         
+        # Simulate high load conditions by reducing capacity
+        ha_infrastructure['primary_auth'].capacity = 0.8  # 80% capacity
+        
         # Track instance pool
         instance_pool = {
             'primary': ha_infrastructure['primary_auth'],
@@ -334,7 +333,12 @@ class TestAuthServiceFailoverCompleteL4:
                 tasks.append(task)
             
             results = await asyncio.gather(*tasks, return_exceptions=True)
-            success_rate = sum(1 for r in results if not isinstance(r, Exception)) / len(results)
+            # Count successful authentications (not just non-exceptions)
+            successful = 0
+            for result in results:
+                if isinstance(result, dict) and result.get('success', False):
+                    successful += 1
+            success_rate = successful / len(results) if results else 0
             return success_rate
         
         # Monitor and scale
@@ -454,7 +458,7 @@ class TestAuthServiceFailoverCompleteL4:
         # Simulate partial failures
         ha_infrastructure['primary_auth'] = None  # Primary down
         ha_infrastructure['secondary_auth'].capacity = 0.5  # Secondary at 50%
-        # Tertiary fully functional
+        ha_infrastructure['tertiary_auth'].capacity = 0.5  # Tertiary also degraded
         
         # Define degraded operations
         degraded_features = {

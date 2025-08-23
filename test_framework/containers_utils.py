@@ -27,7 +27,7 @@ class TestcontainerHelper:
     
     def start_postgres_container(
         self, 
-        image: str = "postgres:15-alpine",
+        image: str = "postgres:17.6-alpine",
         database: str = "test_db",
         username: str = "test_user",
         password: str = "test_password"

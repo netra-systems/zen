@@ -150,14 +150,14 @@ def thread_data_factory():
 
 
 @pytest.fixture
-async def thread_creator(test_users):
+async def test_thread_creator(test_users):
     """Thread creation executor fixture."""
     user = test_users["mid"]
     return ThreadCreationExecutor(user.id)
 
 
 @pytest.fixture
-async def ui_state_tracker(test_users):
+async def test_ui_state_tracker(test_users):
     """UI state tracker fixture."""
     user = test_users["mid"]
     return ThreadUIStateTracker(user.id)

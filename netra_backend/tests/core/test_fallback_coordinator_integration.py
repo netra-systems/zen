@@ -1,26 +1,17 @@
 """Integration and execution tests for FallbackCoordinator."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 # Import the components we're testing
 from netra_backend.app.core.fallback_coordinator import FallbackCoordinator
-
 
 class TestFallbackCoordinatorExecution:
     """Execution tests for FallbackCoordinator."""
@@ -248,7 +239,6 @@ class TestFallbackCoordinatorExecution:
         
         # Handler should still have been called
         mock_handler.execute_with_fallback.assert_called_once()
-
 
 class TestFallbackCoordinatorIntegration:
     """Integration tests for FallbackCoordinator with mock dependencies."""

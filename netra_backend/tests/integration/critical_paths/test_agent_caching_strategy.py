@@ -10,17 +10,10 @@ Critical Path: Cache key generation -> Hit/miss detection -> Storage -> Retrieva
 Coverage: Real caching strategies, TTL management, cache warming, intelligent invalidation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -41,12 +34,10 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class CacheStrategy(Enum):
     """Different caching strategies."""
@@ -56,7 +47,6 @@ class CacheStrategy(Enum):
     FIFO = "fifo"  # First In First Out
     ADAPTIVE = "adaptive"  # Adaptive based on usage patterns
 
-
 class CacheType(Enum):
     """Types of caches."""
     RESPONSE_CACHE = "response_cache"
@@ -65,7 +55,6 @@ class CacheType(Enum):
     SESSION_CACHE = "session_cache"
     COMPUTATION_CACHE = "computation_cache"
 
-
 class CacheInvalidationType(Enum):
     """Cache invalidation triggers."""
     MANUAL = "manual"
@@ -73,7 +62,6 @@ class CacheInvalidationType(Enum):
     CAPACITY_LIMIT = "capacity_limit"
     DEPENDENCY_CHANGE = "dependency_change"
     PATTERN_MATCH = "pattern_match"
-
 
 @dataclass
 class CacheKey:
@@ -100,7 +88,6 @@ class CacheKey:
             namespace=namespace,
             cache_type=cache_type
         )
-
 
 @dataclass
 class CacheEntry:
@@ -140,7 +127,6 @@ class CacheEntry:
             "tags": self.tags,
             "metadata": self.metadata
         }
-
 
 class CacheMetrics:
     """Tracks cache performance metrics."""
@@ -203,7 +189,6 @@ class CacheMetrics:
             "runtime_hours": runtime_hours
         }
 
-
 class CacheEvictionPolicy:
     """Base class for cache eviction policies."""
     
@@ -217,7 +202,6 @@ class CacheEvictionPolicy:
     def select_eviction_candidates(self, entries: List[CacheEntry], required_space: int) -> List[CacheEntry]:
         """Select entries for eviction."""
         raise NotImplementedError
-
 
 class LRUEvictionPolicy(CacheEvictionPolicy):
     """Least Recently Used eviction policy."""
@@ -240,7 +224,6 @@ class LRUEvictionPolicy(CacheEvictionPolicy):
         
         return candidates
 
-
 class LFUEvictionPolicy(CacheEvictionPolicy):
     """Least Frequently Used eviction policy."""
     
@@ -261,7 +244,6 @@ class LFUEvictionPolicy(CacheEvictionPolicy):
                     break
         
         return candidates
-
 
 class AdaptiveEvictionPolicy(CacheEvictionPolicy):
     """Adaptive eviction policy that considers multiple factors."""
@@ -304,7 +286,6 @@ class AdaptiveEvictionPolicy(CacheEvictionPolicy):
                 break
         
         return candidates
-
 
 class CacheStorage:
     """Handles cache storage operations."""
@@ -461,7 +442,6 @@ class CacheStorage:
     def get_metrics(self) -> Dict[str, Any]:
         """Get cache metrics."""
         return self.metrics.get_stats()
-
 
 class AgentCacheManager:
     """Manages caching for AI agent operations."""
@@ -647,7 +627,6 @@ class AgentCacheManager:
         """Get comprehensive cache statistics."""
         return self.storage.get_metrics()
 
-
 class CacheTestManager:
     """Manages cache testing."""
     
@@ -672,7 +651,6 @@ class CacheTestManager:
         if self.redis_service:
             await self.redis_service.shutdown()
 
-
 @pytest.fixture
 async def cache_manager():
     """Create cache test manager."""
@@ -680,7 +658,6 @@ async def cache_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -710,7 +687,6 @@ async def test_basic_cache_operations(cache_manager):
     
     assert cached_response is not None
     assert "Machine learning" in cached_response
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -744,7 +720,6 @@ async def test_cache_key_generation(cache_manager):
     )
     
     assert key1.hash_key != key3.hash_key
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -790,7 +765,6 @@ async def test_cache_hit_miss_ratio(cache_manager):
     assert stats["misses"] >= 1
     assert stats["hit_ratio"] > 0.0
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_embedding_caching(cache_manager):
@@ -814,7 +788,6 @@ async def test_embedding_caching(cache_manager):
     # Test cache miss for different text
     miss_embedding = await manager.cache_manager.get_cached_embedding("Different text", model)
     assert miss_embedding is None
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -845,7 +818,6 @@ async def test_computation_caching(cache_manager):
         computation_id, different_params
     )
     assert miss_result is None
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -880,7 +852,6 @@ async def test_cache_ttl_expiration(cache_manager):
         model="gpt-4"
     )
     assert expired is None
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -921,7 +892,6 @@ async def test_cache_invalidation_by_tags(cache_manager):
         )
         assert cached is None
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_cache_warming(cache_manager):
@@ -955,7 +925,6 @@ async def test_cache_warming(cache_manager):
         assert cached is not None
         assert "Pre-warmed response" in cached
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_lru_eviction_policy(cache_manager):
@@ -987,7 +956,6 @@ async def test_lru_eviction_policy(cache_manager):
     # Check that cache size is within limits
     stats = manager.cache_manager.get_cache_stats()
     assert stats["total_size_mb"] * 1024 * 1024 <= manager.cache_manager.eviction_policy.max_size_bytes
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -1026,7 +994,6 @@ async def test_cache_access_tracking(cache_manager):
     if entry:
         assert entry.access_count >= 5
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_concurrent_cache_operations(cache_manager):
@@ -1060,7 +1027,6 @@ async def test_concurrent_cache_operations(cache_manager):
     read_results = await asyncio.gather(*read_tasks)
     successful_reads = [r for r in read_results if r is not None]
     assert len(successful_reads) == 20
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

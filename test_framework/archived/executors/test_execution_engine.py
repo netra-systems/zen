@@ -95,9 +95,9 @@ def configure_real_llm_if_requested(args, level: str, config: Dict):
     import asyncio
     import os
 
-    from .real_llm_config import configure_real_llm_testing, get_real_llm_manager
-    from .test_config import configure_real_llm
-    from .test_environment_setup import TestEnvironmentValidator, get_test_orchestrator
+    from test_framework.archived.executors.real_llm_config import configure_real_llm_testing, get_real_llm_manager
+    from test_framework.archived.executors.test_config import configure_real_llm
+    from test_framework.archived.executors.test_environment_setup import TestEnvironmentValidator, get_test_orchestrator
     
     # Initialize environment validator
     validator = TestEnvironmentValidator()
@@ -300,7 +300,7 @@ def finalize_test_run(runner, level: str, config: Dict, output: str, exit_code: 
     
     # Special reporting for agent startup tests
     if level == "agent-startup" and hasattr(runner.results, 'agent_performance'):
-        from .agent_startup_handler import print_agent_performance_summary
+        from test_framework.archived.executors.agent_startup_handler import print_agent_performance_summary
         print_agent_performance_summary(runner.results['agent_performance'])
     
     generate_test_reports(runner, level, config, output, exit_code)

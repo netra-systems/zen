@@ -1,194 +1,425 @@
 #!/usr/bin/env python3
 """
 String Literals Scanner for Netra Platform
-Scans codebase for string literals and maintains a master index.
+Scans project source code for string literals and maintains a focused index.
+Excludes dependencies, build artifacts, and noise for a clean, usable index.
 """
 
+import ast
 import json
 import re
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Set, Optional
 
-from string_literals import RawLiteral, scan_directory as scan_directory_core
-
-class StringLiteralCategorizer:
-    """Categorizes string literals based on patterns and context."""
+class StringLiteralScanner:
+    """Scanner that focuses on actual project code, excluding dependencies and noise."""
     
-    PATTERNS = {
-        'configuration': [
-            (r'^[A-Z_]+$', 'env_var'),  # Environment variables
-            (r'_(url|uri|host|port|key|token|secret)$', 'config_key'),
-            (r'^(max|min|default|timeout|retry)_', 'config_param'),
-            (r'_config$', 'config_name'),
-        ],
-        'paths': [
-            (r'^/api/', 'api_endpoint'),
-            (r'^/ws|^/websocket', 'websocket_endpoint'),
-            (r'\.(py|json|xml|yaml|yml|env)$', 'file_path'),
-            (r'^(app|frontend|scripts|tests|SPEC)/', 'dir_path'),
-            (r'^https?://', 'url'),
-        ],
-        'identifiers': [
-            (r'_(agent|manager|executor|service)$', 'component_name'),
-            (r'^(auth|main|frontend)_service$', 'service_name'),
-            (r'_id$', 'id_field'),
-        ],
-        'database': [
-            (r'^(threads|messages|users|agents|configs)', 'table_name'),
-            (r'_(at|by|id|name|type|status)$', 'column_name'),
-            (r'^(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE)', 'sql_keyword'),
-        ],
-        'events': [
-            (r'^(on|emit|handle)_', 'event_handler'),
-            (r'_(created|updated|deleted|connected|disconnected)$', 'event_type'),
-            (r'^websocket_', 'websocket_event'),
-        ],
-        'metrics': [
-            (r'_(count|total|rate|duration|latency|size)$', 'metric_name'),
-            (r'^(error|success|failure|timeout)_', 'metric_status'),
-        ],
-        'environment': [
-            (r'^(NETRA|APP|DB|REDIS|LOG|ENV)_', 'env_var_name'),
-            (r'^(development|staging|production|test)$', 'env_type'),
-        ],
-        'states': [
-            (r'^(pending|active|completed|failed|error|success)$', 'status_value'),
-            (r'^(healthy|degraded|offline|online)$', 'health_status'),
-            (r'^(enabled|disabled|true|false)$', 'boolean_state'),
-        ],
+    # Directories to completely exclude
+    EXCLUDE_DIRS = {
+        '.git', '__pycache__', 'venv', '.venv', 'node_modules', 
+        '.pytest_cache', 'htmlcov', 'coverage', 'dist', 'build',
+        '.tox', '.eggs', '.mypy_cache', '.ruff_cache', 'site-packages',
+        'dist-packages', 'Lib', 'Scripts', 'Include', '.next',
+        'out', 'cypress', 'public', 'static', 'env', '.env',
+        '.idea', '.vscode', 'tmp', 'temp', 'cache'
     }
     
-    def categorize(self, literal: str, context: str = '') -> Tuple[str, str]:
-        """Categorize a string literal based on patterns."""
-        # Skip if too short or too long
-        if len(literal) < 2 or len(literal) > 200:
-            return ('uncategorized', 'unknown')
-            
-        # Skip if it looks like a message or documentation
-        if ' ' in literal and len(literal.split()) > 3:
-            return ('uncategorized', 'message')
-            
-        # Check patterns
-        for category, patterns in self.PATTERNS.items():
-            for pattern, subtype in patterns:
-                if re.search(pattern, literal, re.IGNORECASE):
-                    return (category, subtype)
-                    
-        # Check context hints
-        context_lower = context.lower()
-        if 'config' in context_lower:
-            return ('configuration', 'config_value')
-        elif 'route' in context_lower or 'endpoint' in context_lower:
-            return ('paths', 'endpoint')
-        elif 'event' in context_lower or 'handler' in context_lower:
-            return ('events', 'event_name')
-            
-        return ('uncategorized', 'unknown')
-
-class StringLiteralIndexer:
-    """Main indexer that coordinates scanning and categorization."""
+    # File patterns to exclude
+    EXCLUDE_FILES = {
+        'package-lock.json', 'yarn.lock', 'poetry.lock', 'Pipfile.lock',
+        'requirements.txt', 'setup.py', 'setup.cfg', 'pyproject.toml'
+    }
     
-    def __init__(self, root_dir: str):
-        self.root_dir = Path(root_dir)
-        self.index: Dict[str, Dict[str, List[Dict]]] = defaultdict(lambda: defaultdict(list))
-        self.categorizer = StringLiteralCategorizer()
-                
-    def scan_directory(self, directory: Path, exclude_dirs: Set[str] = None) -> None:
-        """Recursively scan directory for Python files."""
-        if exclude_dirs is None:
-            exclude_dirs = {'.git', '__pycache__', 'venv', 'node_modules', '.pytest_cache'}
+    # Extensions to scan
+    INCLUDE_EXTENSIONS = {'.py', '.ts', '.tsx', '.js', '.jsx'}
+    
+    # Test file patterns (for separate handling)
+    TEST_PATTERNS = [
+        r'test_.*\.py$',
+        r'.*_test\.py$',
+        r'.*\.test\.[jt]sx?$',
+        r'.*\.spec\.[jt]sx?$',
+        r'__tests__',
+        r'/tests/',
+    ]
+    
+    # Common noise patterns to filter out
+    NOISE_PATTERNS = [
+        r'^$',  # Empty strings
+        r'^\s+$',  # Whitespace only
+        r'^[0-9]+$',  # Just numbers
+        r'^[a-f0-9]{32,}$',  # Hashes
+        r'^\W+$',  # Only special characters
+        r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',  # UUIDs
+    ]
+    
+    def __init__(self, root_dir: Path):
+        self.root_dir = root_dir
+        self.literals_by_category = defaultdict(lambda: defaultdict(list))
+        self.file_count = 0
+        self.literal_count = 0
+        self.errors = []
+        
+    def should_skip_dir(self, dir_path: Path) -> bool:
+        """Check if directory should be skipped."""
+        return (
+            dir_path.name in self.EXCLUDE_DIRS or 
+            dir_path.name.startswith('.') or
+            dir_path.name.endswith('.egg-info')
+        )
+        
+    def should_skip_file(self, file_path: Path) -> bool:
+        """Check if file should be skipped."""
+        if file_path.name in self.EXCLUDE_FILES:
+            return True
+        if file_path.suffix not in self.INCLUDE_EXTENSIONS:
+            return True
+        # Skip minified files
+        if '.min.' in file_path.name or '.bundle.' in file_path.name:
+            return True
+        # Skip generated files
+        if any(pattern in str(file_path) for pattern in ['generated/', 'gen/', 'protobuf/']):
+            return True
+        return False
+        
+    def is_test_file(self, file_path: Path) -> bool:
+        """Check if file is a test file."""
+        path_str = str(file_path).replace('\\', '/')
+        return any(re.search(pattern, path_str) for pattern in self.TEST_PATTERNS)
+        
+    def is_noise_literal(self, literal: str) -> bool:
+        """Check if literal is noise that should be filtered."""
+        if len(literal) > 500:  # Very long strings are often data/noise
+            return True
+        if len(literal) < 2:  # Too short to be meaningful
+            return True
+        return any(re.match(pattern, literal) for pattern in self.NOISE_PATTERNS)
+        
+    def categorize_literal(self, literal: str, file_context: str = None) -> Optional[str]:
+        """Categorize a string literal based on patterns and context."""
+        # Skip noise
+        if self.is_noise_literal(literal):
+            return None
             
-        literals = scan_directory_core(directory, self.root_dir, exclude_dirs)
-        self.process_literals(literals)
-                
-    def process_literals(self, literals: List[RawLiteral]) -> None:
-        """Process and categorize literals."""
-        for literal in literals:
-            category, subtype = self.categorizer.categorize(literal.value, literal.context)
+        # Environment variables
+        if re.match(r'^[A-Z][A-Z0-9_]{2,}$', literal):
+            if any(prefix in literal for prefix in ['NETRA_', 'DATABASE_', 'REDIS_', 'API_', 'AUTH_']):
+                return 'environment'
+            elif len(literal) > 3:
+                return 'configuration'
+        
+        # API paths and routes
+        if (literal.startswith('/') and 
+            any(segment in literal for segment in ['/api/', '/v1/', '/v2/', '/ws/', '/websocket/'])):
+            return 'paths'
+        
+        # File paths
+        if any(sep in literal for sep in ['/', '\\']):
+            if any(ext in literal for ext in ['.py', '.ts', '.tsx', '.js', '.jsx', '.json', '.xml']):
+                return 'paths'
+        
+        # Database fields and operations
+        if re.match(r'^(id|.*_id|.*_at|created|updated|deleted|modified)$', literal):
+            return 'database'
+        
+        # SQL/Database keywords
+        if literal.upper() in ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'FROM', 'WHERE', 'JOIN']:
+            return 'database'
+        
+        # Event names
+        if (re.match(r'^on[A-Z]', literal) or 
+            literal.startswith(('emit:', 'broadcast:', 'listen:')) or
+            literal.endswith(('_event', '_EVENT', ':event'))):
+            return 'events'
+        
+        # WebSocket message types
+        if literal in ['connect', 'disconnect', 'message', 'error', 'ping', 'pong', 'subscribe', 'unsubscribe']:
+            return 'events'
+        
+        # Metric names
+        if (re.match(r'^(metric|counter|gauge|histogram|timer)_', literal) or
+            literal.endswith(('_total', '_count', '_sum', '_bucket'))):
+            return 'metrics'
+        
+        # States and statuses
+        if literal.lower() in [
+            'pending', 'active', 'inactive', 'enabled', 'disabled',
+            'success', 'failed', 'error', 'warning', 'info',
+            'loading', 'loaded', 'ready', 'busy', 'idle',
+            'open', 'closed', 'connected', 'disconnected'
+        ]:
+            return 'states'
+        
+        # Service/agent/component identifiers
+        if literal.endswith(('_agent', '_service', '_manager', '_handler', '_provider', '_controller')):
+            return 'identifiers'
+        
+        # HTTP methods
+        if literal in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']:
+            return 'configuration'
+        
+        # Content types
+        if 'application/' in literal or 'text/' in literal or 'image/' in literal:
+            return 'configuration'
+        
+        # Short meaningful identifiers
+        if 3 <= len(literal) <= 50:
+            # Check if it's a valid identifier-like string
+            clean = literal.replace('_', '').replace('-', '').replace(':', '')
+            if clean and clean[0].isalpha() and clean.replace(' ', '').isalnum():
+                return 'identifiers'
+        
+        # Log messages and user-facing text
+        if ' ' in literal and len(literal) > 10:
+            return 'messages'
             
-            # Skip uncategorized messages
-            if category == 'uncategorized' and subtype == 'message':
-                continue
+        return None  # Filter out uncategorized
+        
+    def scan_python_file(self, file_path: Path) -> List[tuple]:
+        """Scan a Python file for string literals."""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
                 
-            # Create entry
-            entry = {
-                'value': literal.value,
-                'type': subtype,
-                'locations': [f"{literal.file}:{literal.line}"],
-                'context': literal.context
-            }
+            tree = ast.parse(content)
+            literals = []
             
-            # Check if already exists
-            existing = None
-            for existing_entry in self.index[category][literal.value]:
-                if existing_entry['value'] == literal.value:
-                    existing = existing_entry
-                    break
+            class LiteralVisitor(ast.NodeVisitor):
+                def __init__(self):
+                    self.literals = []
+                    self.in_docstring = False
                     
-            if existing:
-                # Add new location
-                location = f"{literal.file}:{literal.line}"
-                if location not in existing['locations']:
-                    existing['locations'].append(location)
-            else:
-                self.index[category][literal.value] = [entry]
+                def visit_FunctionDef(self, node):
+                    # Skip function docstrings
+                    if (node.body and 
+                        isinstance(node.body[0], ast.Expr) and
+                        isinstance(node.body[0].value, ast.Constant) and
+                        isinstance(node.body[0].value.value, str)):
+                        self.in_docstring = True
+                        self.visit(node.body[0])
+                        self.in_docstring = False
+                        for child in node.body[1:]:
+                            self.visit(child)
+                    else:
+                        self.generic_visit(node)
+                        
+                def visit_ClassDef(self, node):
+                    # Skip class docstrings
+                    if (node.body and 
+                        isinstance(node.body[0], ast.Expr) and
+                        isinstance(node.body[0].value, ast.Constant) and
+                        isinstance(node.body[0].value.value, str)):
+                        self.in_docstring = True
+                        self.visit(node.body[0])
+                        self.in_docstring = False
+                        for child in node.body[1:]:
+                            self.visit(child)
+                    else:
+                        self.generic_visit(node)
+                    
+                def visit_Constant(self, node):
+                    if isinstance(node.value, str) and not self.in_docstring:
+                        literal = node.value.strip()
+                        if literal:
+                            self.literals.append((literal, node.lineno))
+                    self.generic_visit(node)
+                    
+            visitor = LiteralVisitor()
+            visitor.visit(tree)
+            return visitor.literals
+            
+        except Exception as e:
+            self.errors.append(f"Error scanning {file_path}: {e}")
+            return []
+            
+    def scan_javascript_file(self, file_path: Path) -> List[tuple]:
+        """Scan a JavaScript/TypeScript file for string literals."""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
                 
+            # Remove comments
+            content = re.sub(r'//.*?$', '', content, flags=re.MULTILINE)
+            content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+            
+            literals = []
+            line_num = 1
+            
+            # Match string literals (both single and double quotes, including template literals)
+            patterns = [
+                r'"([^"\\]|\\.)*"',  # Double quotes
+                r"'([^'\\]|\\.)*'",  # Single quotes
+                r'`([^`\\]|\\.)*`',  # Template literals (basic, without interpolation)
+            ]
+            
+            for line in content.split('\n'):
+                for pattern in patterns:
+                    for match in re.finditer(pattern, line):
+                        literal = match.group()[1:-1]  # Remove quotes
+                        literal = literal.strip()
+                        if literal and not literal.startswith('${'):  # Skip template expressions
+                            literals.append((literal, line_num))
+                line_num += 1
+                    
+            return literals
+            
+        except Exception as e:
+            self.errors.append(f"Error scanning {file_path}: {e}")
+            return []
+            
+    def scan_file(self, file_path: Path) -> None:
+        """Scan a single file for string literals."""
+        is_test = self.is_test_file(file_path)
+        relative_path = str(file_path.relative_to(self.root_dir)).replace('\\', '/')
+        
+        if file_path.suffix == '.py':
+            literals = self.scan_python_file(file_path)
+        else:
+            literals = self.scan_javascript_file(file_path)
+            
+        self.file_count += 1
+        
+        for literal, line_no in literals:
+            # Use test_literals category for test files
+            if is_test:
+                category = 'test_literals'
+            else:
+                category = self.categorize_literal(literal, relative_path)
+            
+            if category:
+                # Store with location info
+                if literal not in self.literals_by_category[category]:
+                    self.literals_by_category[category][literal] = []
+                self.literals_by_category[category][literal].append(f"{relative_path}:{line_no}")
+                self.literal_count += 1
+                
+    def scan_directory(self, directory: Path) -> None:
+        """Recursively scan directory for string literals."""
+        if not directory.exists():
+            return
+            
+        for item in sorted(directory.iterdir()):
+            if item.is_dir():
+                if not self.should_skip_dir(item):
+                    self.scan_directory(item)
+            elif item.is_file():
+                if not self.should_skip_file(item):
+                    self.scan_file(item)
+                    
     def generate_index(self) -> Dict[str, Any]:
         """Generate the final index structure."""
-        output = {
+        index = {
             'metadata': {
-                'version': '1.0.0',
+                'version': '3.0.0',
                 'generated_at': datetime.now().isoformat(),
                 'root_directory': str(self.root_dir),
-                'total_literals': sum(len(entries) for cat in self.index.values() for entries in cat.values())
+                'files_scanned': self.file_count,
+                'total_literals': self.literal_count,
+                'unique_literals': sum(len(lits) for lits in self.literals_by_category.values()),
+                'errors': len(self.errors)
             },
             'categories': {}
         }
         
-        for category, literals_dict in self.index.items():
-            if not literals_dict:
-                continue
-                
-            category_data = {
-                'count': len(literals_dict),
+        for category in sorted(self.literals_by_category.keys()):
+            literals = self.literals_by_category[category]
+            index['categories'][category] = {
+                'count': len(literals),
                 'literals': {}
             }
             
-            # Sort by value for consistency
-            for value in sorted(literals_dict.keys()):
-                entries = literals_dict[value]
-                if entries:
-                    category_data['literals'][value] = entries[0]
-                    
-            output['categories'][category] = category_data
-            
-        return output
+            # Include all literals with their locations
+            for literal in sorted(literals.keys()):
+                locations = literals[literal]
+                index['categories'][category]['literals'][literal] = {
+                    'value': literal,
+                    'category': category,
+                    'locations': locations[:10]  # Limit locations to keep file size reasonable
+                }
+                
+        return index
         
     def save_index(self, output_path: Path) -> None:
-        """Save index to JSON file."""
+        """Save the scan results to a JSON file."""
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
         index = self.generate_index()
+        
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(index, f, indent=2, ensure_ascii=False)
             
-        print(f"Index saved to {output_path}")
-        print(f"Total literals indexed: {index['metadata']['total_literals']}")
+        # Print summary
+        print(f"\n{'='*50}")
+        print(f"String Literals Scan Complete")
+        print(f"{'='*50}")
+        print(f"Files scanned: {self.file_count:,}")
+        print(f"Total literals found: {self.literal_count:,}")
+        print(f"Unique literals: {index['metadata']['unique_literals']:,}")
+        
+        if self.errors:
+            print(f"Errors encountered: {len(self.errors)}")
+            
+        print(f"\nBreakdown by category:")
         for category, data in index['categories'].items():
-            print(f"  {category}: {data['count']} unique literals")
+            print(f"  {category:20s}: {data['count']:,} unique literals")
+            
+        print(f"\nIndex saved to: {output_path}")
+        
+        if self.errors and len(self.errors) <= 10:
+            print(f"\nErrors:")
+            for error in self.errors[:10]:
+                print(f"  - {error}")
+
 
 def main():
     """Main entry point."""
     import argparse
     
-    parser = argparse.ArgumentParser(description='Scan codebase for string literals')
-    parser.add_argument('--root', default='.', help='Root directory to scan')
-    parser.add_argument('--output', default='SPEC/generated/string_literals.json', 
-                        help='Output file path')
-    parser.add_argument('--include-tests', action='store_true', 
-                        help='Include test directories')
+    parser = argparse.ArgumentParser(
+        description='String Literals Scanner - Focused index for Netra Platform',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Scan with default settings
+  python scripts/scan_string_literals.py
+  
+  # Scan specific directories
+  python scripts/scan_string_literals.py --dirs netra_backend/app auth_service
+  
+  # Include test files in main index
+  python scripts/scan_string_literals.py --include-tests
+  
+  # Custom output location
+  python scripts/scan_string_literals.py --output custom_index.json
+        """
+    )
+    
+    parser.add_argument(
+        '--root', 
+        default='.', 
+        help='Root directory to scan (default: current directory)'
+    )
+    parser.add_argument(
+        '--output', 
+        default='SPEC/generated/string_literals.json',
+        help='Output file path (default: SPEC/generated/string_literals.json)'
+    )
+    parser.add_argument(
+        '--dirs', 
+        nargs='+',
+        help='Specific directories to scan (default: auto-detect project dirs)'
+    )
+    parser.add_argument(
+        '--include-tests',
+        action='store_true',
+        help='Include test directories in scanning (they are categorized separately)'
+    )
+    parser.add_argument(
+        '--verbose',
+        action='store_true',
+        help='Show detailed progress during scanning'
+    )
     
     args = parser.parse_args()
     
@@ -196,24 +427,58 @@ def main():
     output_path = root_dir / args.output
     
     print(f"Scanning {root_dir} for string literals...")
+    print(f"Excluding: dependencies, node_modules, build artifacts, etc.\n")
     
-    indexer = StringLiteralIndexer(root_dir)
+    scanner = StringLiteralScanner(root_dir)
     
-    # Scan main directories
-    dirs_to_scan = ['app', 'frontend', 'auth_service', 'scripts', 'dev_launcher']
-    if args.include_tests:
-        dirs_to_scan.append('tests')
+    # Determine directories to scan
+    if args.dirs:
+        dirs_to_scan = args.dirs
+    else:
+        # Auto-detect project structure
+        dirs_to_scan = []
         
+        # Backend services
+        if (root_dir / 'netra_backend' / 'app').exists():
+            dirs_to_scan.append('netra_backend/app')
+        elif (root_dir / 'netra_backend').exists():
+            dirs_to_scan.append('netra_backend')
+            
+        # Auth service
+        if (root_dir / 'auth_service').exists():
+            dirs_to_scan.append('auth_service')
+            
+        # Frontend source
+        for frontend_dir in ['frontend/src', 'frontend/components', 'frontend/providers', 'frontend/pages']:
+            if (root_dir / frontend_dir).exists():
+                dirs_to_scan.append(frontend_dir)
+        
+        # Scripts and shared
+        for util_dir in ['scripts', 'shared']:
+            if (root_dir / util_dir).exists():
+                dirs_to_scan.append(util_dir)
+                
+        # Include test directories if requested
+        if args.include_tests:
+            for test_dir in ['tests', 'netra_backend/tests', 'auth_service/tests']:
+                if (root_dir / test_dir).exists():
+                    dirs_to_scan.append(test_dir)
+    
+    # Scan directories
     for dir_name in dirs_to_scan:
         dir_path = root_dir / dir_name
         if dir_path.exists():
-            print(f"Scanning {dir_name}/...")
-            indexer.scan_directory(dir_path)
+            if args.verbose:
+                print(f"Scanning {dir_name}...")
+            scanner.scan_directory(dir_path)
+        else:
+            print(f"Warning: Directory not found: {dir_name}")
             
-    # Save the index
-    indexer.save_index(output_path)
+    # Save results
+    scanner.save_index(output_path)
     
     return 0
+
 
 if __name__ == '__main__':
     exit(main())

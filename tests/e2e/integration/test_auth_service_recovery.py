@@ -38,9 +38,6 @@ import httpx
 import pytest
 
 # Add parent directories to sys.path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent))
 
 from tests.e2e.service_failure_recovery_helpers import (
     create_auth_failure_simulator,
@@ -53,7 +50,7 @@ from tests.e2e.integration.service_orchestrator import (
 )
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.real_websocket_client import RealWebSocketClient
-from tests.test_websocket_real_connection import WebSocketRealConnectionTester
+from tests.e2e.test_websocket_real_connection import WebSocketRealConnectionTester
 
 logger = logging.getLogger(__name__)
 
@@ -381,7 +378,7 @@ class AuthServiceRecoveryTester:
         except Exception as e:
             return {"degraded_properly": False, "error": str(e)}
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Cleanup test environment and resources."""
         try:
             if self.orchestrator:
@@ -491,8 +488,6 @@ if __name__ == "__main__":
     import os
     
     # Add project root to path
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    sys.path.insert(0, project_root)
     
     # Run the tests
     pytest.main([__file__, "-v", "-s"])

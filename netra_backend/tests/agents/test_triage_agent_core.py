@@ -4,17 +4,10 @@ Tests agent initialization, request validation, entity extraction, and intent de
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import AsyncMock, Mock
 
@@ -27,7 +20,6 @@ from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
 
-
 @pytest.fixture
 def mock_llm_manager():
     """Create a mock LLM manager."""
@@ -36,12 +28,10 @@ def mock_llm_manager():
     mock.ask_structured_llm = AsyncMock(side_effect=Exception("Structured generation not available in test"))
     return mock
 
-
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create a mock tool dispatcher."""
     return Mock(spec=ToolDispatcher)
-
 
 @pytest.fixture
 def mock_redis_manager():
@@ -51,18 +41,15 @@ def mock_redis_manager():
     mock.set = AsyncMock(return_value=True)
     return mock
 
-
 @pytest.fixture
 def triage_agent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager):
     """Create a TriageSubAgent instance with mocked dependencies."""
     return TriageSubAgent(mock_llm_manager, mock_tool_dispatcher, mock_redis_manager)
 
-
 @pytest.fixture
 def sample_state():
     """Create a sample DeepAgentState."""
     return DeepAgentState(user_request="Optimize my GPT-4 costs by 30% while maintaining latency under 100ms")
-
 
 class TestTriageSubAgentInitialization:
     """Test agent initialization and configuration."""
@@ -84,7 +71,6 @@ class TestTriageSubAgentInitialization:
         
         assert agent.redis_manager == None
         assert agent.cache_ttl == 3600  # Still set even without Redis
-
 
 class TestRequestValidation:
     """Test request validation functionality."""
@@ -126,7 +112,6 @@ class TestRequestValidation:
         assert validation.is_valid == True  # Valid but with warnings
         assert len(validation.warnings) > 0
 
-
 class TestEntityExtraction:
     """Test entity extraction from requests."""
     
@@ -167,7 +152,6 @@ class TestEntityExtraction:
         entities = triage_agent._extract_entities_from_request(request)
         
         assert len(entities.time_ranges) > 0
-
 
 class TestIntentDetermination:
     """Test user intent determination."""

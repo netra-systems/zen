@@ -5,9 +5,9 @@ from typing import Any, Dict, Optional, Tuple
 
 # Try to import handlers for advanced features
 try:
-    from .corpus_indexing_handlers import create_indexing_handler
-    from .corpus_upload_handlers import create_upload_handler
-    from .corpus_validation_handlers import create_validation_handler
+    from netra_backend.app.agents.corpus_admin.corpus_indexing_handlers import create_indexing_handler
+    from netra_backend.app.agents.corpus_admin.corpus_upload_handlers import create_upload_handler
+    from netra_backend.app.agents.corpus_admin.corpus_validation_handlers import create_validation_handler
     HANDLERS_AVAILABLE = True
 except (ImportError, ValueError):
     try:

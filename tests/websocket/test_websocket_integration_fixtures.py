@@ -6,7 +6,11 @@ from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.main import app
-from netra_backend.app.routes.websocket_secure import (
+from netra_backend.app.routes.websocket_unified import (
+    UNIFIED_WEBSOCKET_CONFIG,
+    get_unified_websocket_manager,
+)
+from netra_backend.app.websocket.unified_websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict
@@ -17,33 +21,29 @@ import pytest
 import time
 import websockets
 
-    SECURE_WEBSOCKET_CONFIG,
-
-    SecureWebSocketManager,
-
-    get_secure_websocket_manager,
-
-)
 from test_framework.mock_utils import mock_justified
-
 
 @pytest.fixture
 
-def test_client():
+class TestSyntaxFix:
+    """Generated test class"""
+
+    def test_client():
 
     """Test client for FastAPI application."""
 
     return TestClient(app)
 
-
 @pytest.fixture
 
-def valid_jwt_token():
+class TestSyntaxFix:
+    """Generated test class"""
 
-    """Valid JWT token for testing."""
+    def valid_jwt_token():
+
+#     """Valid JWT token for testing.""" # Possibly broken comprehension
 
     return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test_payload.signature"
-
 
 @pytest.fixture
 
@@ -55,10 +55,12 @@ async def mock_async_db_session():
 
     return mock_session
 
-
 @pytest.fixture
 
-def mock_auth_client():
+class TestSyntaxFix:
+    """Generated test class"""
+
+    def mock_auth_client():
 
     """Mock authentication client."""
 
@@ -68,20 +70,24 @@ def mock_auth_client():
 
         yield mock
 
-
 @pytest.fixture
 
-def websocket_cors_handler():
+class TestSyntaxFix:
+    """Generated test class"""
 
-    """WebSocket CORS handler for testing."""
+    def websocket_cors_handler():
+
+#     """WebSocket CORS handler for testing.""" # Possibly broken comprehension
 
     return get_websocket_cors_handler()
 
-
 @pytest.fixture
 
-def secure_websocket_manager():
+class TestSyntaxFix:
+    """Generated test class"""
 
-    """Secure WebSocket manager for testing."""
+    def secure_websocket_manager():
 
-    return get_secure_websocket_manager()
+#     """Secure WebSocket manager for testing.""" # Possibly broken comprehension
+
+    return get_unified_websocket_manager()

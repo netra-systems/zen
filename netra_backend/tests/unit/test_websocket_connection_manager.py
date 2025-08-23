@@ -7,17 +7,10 @@ Business Value: Ensures accurate connection tracking and monitoring
 for operational insights and user experience optimization.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -26,11 +19,7 @@ from fastapi import WebSocket
 
 from netra_backend.app.websocket.connection_info import ConnectionInfo
 
-# Add project root to path
 from netra_backend.app.websocket.connection import ConnectionManager
-
-# Add project root to path
-
 
 class TestWebSocketConnectionManager:
     """Test suite for WebSocket connection information and statistics."""
@@ -103,7 +92,7 @@ class TestWebSocketConnectionManager:
     
     def test_is_connection_alive(self, manager, connection_info):
         """Test checking if connection is alive."""
-        with patch('app.websocket.connection_manager.ConnectionValidator') as mock_validator:
+        with patch('netra_backend.app.websocket.connection_manager.ConnectionValidator') as mock_validator:
             mock_validator.is_websocket_connected.return_value = True
             
             is_alive = manager.is_connection_alive(connection_info)

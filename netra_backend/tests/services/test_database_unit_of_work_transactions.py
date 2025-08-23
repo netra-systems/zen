@@ -3,37 +3,25 @@ Tests for Unit of Work pattern transaction handling.
 All functions ≤8 lines per requirements.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.services.database.unit_of_work import UnitOfWork
-from .database_transaction_test_helpers import (
+from netra_backend.tests.database_transaction_test_helpers import (
     create_mock_session_factory,
 )
-
-# Add project root to path
-
 
 @pytest.fixture
 def mock_async_session_factory():
     """Mock async session factory"""
     return create_mock_session_factory()
-
 
 class TestUnitOfWorkTransactions:
     """Test Unit of Work pattern transaction handling"""
@@ -104,7 +92,6 @@ class TestUnitOfWorkTransactions:
         with patch('app.services.database.unit_of_work.async_session_factory', factory):
             await _test_uow_error_scenarios(UnitOfWork, mock_session)
 
-
 def _verify_repositories_initialized(uow) -> None:
     """Verify repositories are initialized"""
     assert uow.threads is not None
@@ -112,12 +99,10 @@ def _verify_repositories_initialized(uow) -> None:
     assert uow.runs is not None
     assert uow.references is not None
 
-
 def _verify_session_injection(uow, mock_session) -> None:
     """Verify session is injected into repositories"""
     assert uow.threads._session is mock_session
     assert uow.messages._session is mock_session
-
 
 async def _execute_failing_uow_transaction() -> None:
     """Execute UoW transaction that fails"""
@@ -128,13 +113,11 @@ async def _execute_failing_uow_transaction() -> None:
     except ValueError:
         pass  # Expected exception
 
-
 def _assert_external_session_not_modified(external_session: AsyncMock) -> None:
     """Assert external session is not modified"""
     # External session should not be closed
     external_session.close.assert_not_called()
     external_session.rollback.assert_not_called()
-
 
 def _test_repository_access(uow) -> None:
     """Test repository access functionality"""
@@ -144,7 +127,6 @@ def _test_repository_access(uow) -> None:
     assert hasattr(uow, 'runs')
     assert hasattr(uow, 'references')
 
-
 async def _execute_nested_transactions(UnitOfWork) -> None:
     """Execute nested transaction scenario"""
     async with UnitOfWork() as outer_uow:
@@ -152,7 +134,6 @@ async def _execute_nested_transactions(UnitOfWork) -> None:
         async with UnitOfWork(outer_uow._session) as inner_uow:
             assert inner_uow._session is outer_uow._session
             assert inner_uow._external_session == True
-
 
 async def _test_uow_error_scenarios(UnitOfWork, mock_session) -> None:
     """Test various error scenarios in UoW"""

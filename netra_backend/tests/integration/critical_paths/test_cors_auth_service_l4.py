@@ -10,17 +10,10 @@ Critical Path: Frontend CORS -> Auth Service -> Authentication Flow
 Coverage: Real Docker containers, actual HTTP headers, browser-like requests
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -34,13 +27,10 @@ import httpx
 import pytest
 from testcontainers.compose import DockerCompose
 
-# Add project root to path
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
-    # Add project root to path
     L4StagingCriticalPathTestBase,
 )
-
 
 @dataclass
 class CorsTestResult:
@@ -53,7 +43,6 @@ class CorsTestResult:
     headers: Dict[str, str]
     response_time: float
     status_code: int
-
 
 class CorsAuthServiceL4Test(L4StagingCriticalPathTestBase):
     """L4 CORS authentication service test with real containers."""
@@ -75,7 +64,6 @@ class CorsAuthServiceL4Test(L4StagingCriticalPathTestBase):
     
     async def setup_test_specific_environment(self) -> None:
         """Setup Docker containers for L4 CORS testing."""
-        compose_file = Path(__file__).parent.parent.parent.parent / "docker-compose.staging.yml"
         
         if not compose_file.exists():
             await self._create_staging_compose_file(compose_file)
@@ -463,7 +451,6 @@ class CorsAuthServiceL4Test(L4StagingCriticalPathTestBase):
             except Exception as e:
                 print(f"Docker cleanup warning: {e}")
 
-
 @pytest.fixture
 async def cors_auth_l4_test():
     """Fixture for CORS auth service L4 test."""
@@ -472,7 +459,6 @@ async def cors_auth_l4_test():
         yield test_instance
     finally:
         await test_instance.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

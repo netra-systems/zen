@@ -10,17 +10,10 @@ Critical Path: State capture -> Serialization -> Storage -> Recovery -> Validati
 Coverage: Real state serialization, Redis/DB persistence, migration, versioning
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -39,12 +32,10 @@ from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class AgentExecutionState:
@@ -72,7 +63,6 @@ class AgentExecutionState:
         data["created_at"] = datetime.fromisoformat(data["created_at"])
         data["updated_at"] = datetime.fromisoformat(data["updated_at"])
         return cls(**data)
-
 
 class StateSerializer:
     """Serializes and deserializes agent state."""
@@ -111,7 +101,6 @@ class StateSerializer:
         except Exception as e:
             logger.error(f"State deserialization failed: {e}")
             raise
-
 
 class StorageManager:
     """Manages state storage in Redis and database."""
@@ -207,7 +196,6 @@ class StorageManager:
             logger.error(f"Failed to delete state for {agent_id}: {e}")
             return False
 
-
 class RecoveryHandler:
     """Handles state recovery and validation."""
     
@@ -264,7 +252,6 @@ class RecoveryHandler:
             state.version = target_version
             
         return state
-
 
 class AgentStatePersistenceManager:
     """Manages agent state persistence testing."""
@@ -337,7 +324,6 @@ class AgentStatePersistenceManager:
         if self.db_manager:
             await self.db_manager.shutdown()
 
-
 @pytest.fixture
 async def state_persistence_manager():
     """Create state persistence manager for testing."""
@@ -345,7 +331,6 @@ async def state_persistence_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -371,7 +356,6 @@ async def test_basic_state_save_load(state_persistence_manager):
     assert loaded_state.execution_context == original_state.execution_context
     assert loaded_state.variables == original_state.variables
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_persistent_state_storage(state_persistence_manager):
@@ -391,7 +375,6 @@ async def test_persistent_state_storage(state_persistence_manager):
     assert loaded_state is not None
     assert loaded_state.agent_id == test_state.agent_id
     assert loaded_state.variables == test_state.variables
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -416,7 +399,6 @@ async def test_state_serialization_compression(state_persistence_manager):
     assert deserialized_state.agent_id == test_state.agent_id
     assert deserialized_state.variables["large_data"] == test_state.variables["large_data"]
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_state_recovery_validation(state_persistence_manager):
@@ -436,7 +418,6 @@ async def test_state_recovery_validation(state_persistence_manager):
     missing_state = await manager.recovery_handler.recover_agent_state("non_existent_agent")
     assert missing_state is None
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_state_version_migration(state_persistence_manager):
@@ -452,7 +433,6 @@ async def test_state_version_migration(state_persistence_manager):
     
     assert migrated_state.version == "1.1.0"
     assert "migration_timestamp" in migrated_state.execution_context
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -478,7 +458,6 @@ async def test_state_validation_rules(state_persistence_manager):
     old_state.updated_at = datetime.now() - timedelta(hours=25)
     assert manager.recovery_handler.validate_state(old_state) is False
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_concurrent_state_operations(state_persistence_manager):
@@ -500,7 +479,6 @@ async def test_concurrent_state_operations(state_persistence_manager):
     
     assert len(loaded_states) == 10
     assert all(state is not None for state in loaded_states)
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -524,7 +502,6 @@ async def test_state_cleanup_operations(state_persistence_manager):
     deleted_state = await manager.storage_manager.load_state(test_state.agent_id)
     assert deleted_state is None
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_redis_fallback_to_database(state_persistence_manager):
@@ -543,7 +520,6 @@ async def test_redis_fallback_to_database(state_persistence_manager):
     loaded_state = await manager.storage_manager.load_state(test_state.agent_id)
     assert loaded_state is not None
     assert loaded_state.agent_id == test_state.agent_id
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

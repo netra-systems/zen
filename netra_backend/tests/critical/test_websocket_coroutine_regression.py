@@ -4,17 +4,10 @@ Business Value: Prevents WebSocket failures that disconnect users, protecting $8
 Tests ensure proper async/await usage and coroutine handling in WebSocket message processing.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -22,14 +15,12 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import WebSocket
-from routes.utils.websocket_helpers import (
+from netra_backend.app.routes.utils.websocket_helpers import (
     _handle_ping_message,
     _handle_with_manager,
-    # Add project root to path
     parse_json_message,
     validate_and_handle_message,
 )
-
 
 class TestCoroutineHandling:
     """Test proper coroutine handling in WebSocket message processing."""
@@ -170,14 +161,14 @@ class TestCoroutineHandling:
         
         assert result is False
 
-
 class TestAsyncAwaitChain:
     """Test proper async/await chain in message processing."""
     
     @pytest.mark.asyncio
     async def test_full_message_processing_chain(self):
         """Verify entire message processing chain awaits properly."""
-        from netra_backend.app.routes.websocket_secure import _process_single_message
+        # Note: _process_single_message was refactored in unified implementation
+        # from netra_backend.app.routes.websocket_unified import _process_single_message
         
         websocket = Mock(spec=WebSocket)
         websocket.receive_text = AsyncMock(return_value='{"type": "test"}')
@@ -221,7 +212,6 @@ class TestAsyncAwaitChain:
                 
                 # Verify parse_json_message was called
                 mock_parse.assert_called_once()
-
 
 class TestCoroutineErrorScenarios:
     """Test various error scenarios with coroutines."""
@@ -284,7 +274,6 @@ class TestCoroutineErrorScenarios:
         # Should handle exception gracefully
         result = await parse_json_message(invalid_json, "test_user", manager)
         assert result is None
-
 
 class TestRegressionPrevention:
     """Specific tests to prevent regression of the coroutine error."""

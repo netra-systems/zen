@@ -123,7 +123,7 @@ class ServiceConfigManager:
         self._populate_oauth_config(config)
         self._populate_cors_config(config)
         self._populate_environment_vars(config)
-        self._logger.info(f"Populated service config for {self._environment}")
+        self._logger.debug(f"Populated service config for {self._environment}")
     
     def _populate_service_modes(self, config: AppConfig) -> None:
         """Populate service modes into config."""

@@ -1,26 +1,17 @@
 """Tests for PR router security and validation functions."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.auth_integration.auth import (
     _is_allowed_return_domain,
     _is_valid_url,
-    # Add project root to path
     _validate_pr_inputs,
     _validate_pr_number_format,
     _validate_pr_with_github,
@@ -29,7 +20,6 @@ from netra_backend.app.core.exceptions_auth import (
     AuthenticationError,
     NetraSecurityException,
 )
-
 
 # Tests for _validate_return_url functions
 class TestValidateReturnUrl:
@@ -62,7 +52,6 @@ class TestValidateReturnUrl:
             if _is_valid_url(url):  # Some might be valid URLs but wrong domain
                 assert not _is_allowed_return_domain(url)
 
-
 # Tests for _validate_pr_number_format function
 class TestValidatePrNumberFormat:
     """Test _validate_pr_number_format function with valid and invalid inputs."""
@@ -84,7 +73,6 @@ class TestValidatePrNumberFormat:
         
         with pytest.raises(AuthenticationError, match="PR number must be between"):
             _validate_pr_number_format("10000")
-
 
 # Tests for input validation
 class TestInputValidation:
@@ -109,7 +97,6 @@ class TestInputValidation:
         """Test input validation rejects malicious domains."""
         with pytest.raises(NetraSecurityException, match="Return URL not in allowed domains"):
             await _validate_pr_inputs("123", "https://evil.com")
-
 
 # Tests for GitHub validation
 class TestGitHubValidation:

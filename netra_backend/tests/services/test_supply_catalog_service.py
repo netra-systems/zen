@@ -1,16 +1,9 @@
 """Test supply catalog service for AI model and resource management."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import MagicMock, patch
 
@@ -22,23 +15,17 @@ from netra_backend.app.schemas.unified_tools import (
     SupplyOptionUpdate,
 )
 
-# Add project root to path
 from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
-
-# Add project root to path
-
 
 @pytest.fixture
 def supply_catalog_service():
     """Create a test supply catalog service instance."""
     return SupplyCatalogService()
 
-
 @pytest.fixture  
 def mock_db_session():
     """Create a mock database session."""
     return MagicMock()
-
 
 class TestSupplyCatalogService:
     """Test supply catalog service basic functionality."""
@@ -170,4 +157,3 @@ class TestSupplyCatalogService:
         
         # Should not create new options if data exists
         supply_catalog_service.create_option.assert_not_called()
-

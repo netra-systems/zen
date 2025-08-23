@@ -14,7 +14,6 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
-
 class UserTestData:
     """Test data generators for different user segments."""
     
@@ -59,7 +58,6 @@ class UserTestData:
             })
         
         return base_data
-
 
 class UserJourneyScenarios:
     """Pre-defined user journey scenarios for testing."""
@@ -134,7 +132,6 @@ class UserJourneyScenarios:
         "contract_value": 999.0  # Enterprise plan price
     }
 
-
 class OptimizationTestScenarios:
     """Real-world optimization scenarios for testing."""
     
@@ -178,7 +175,6 @@ class OptimizationTestScenarios:
         "detailed_analysis": True
     }
 
-
 class ErrorScenarios:
     """Error scenarios for testing resilience."""
     
@@ -201,7 +197,6 @@ class ErrorScenarios:
         {"service": "billing", "error": "Payment service temporarily down"},
     ]
 
-
 class WebSocketTestScenarios:
     """WebSocket-specific test scenarios."""
     
@@ -223,7 +218,6 @@ class WebSocketTestScenarios:
             {"connections": 25, "plan": "enterprise", "should_succeed": True},
         ]
     }
-
 
 class ProviderIntegrationData:
     """Provider integration test data."""
@@ -259,7 +253,6 @@ class ProviderIntegrationData:
             }
         }
     }
-
 
 class BillingTestData:
     """Billing and subscription test data."""
@@ -301,7 +294,6 @@ class BillingTestData:
         "declined_card": "tok_test_declined_card",
         "insufficient_funds": "tok_test_insufficient_funds"
     }
-
 
 class AnalyticsTestData:
     """Analytics and reporting test data."""

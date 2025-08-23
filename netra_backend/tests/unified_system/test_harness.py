@@ -8,17 +8,10 @@ This module provides the core test harness for running multi-service unified tes
 Supports Auth Service, Backend, and Frontend together with real communication.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+from netra_backend.tests.test_utils import setup_test_path
 
 import asyncio
 import logging
@@ -33,7 +26,6 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class ServiceConfig:
     """Configuration for a test service instance."""
@@ -43,7 +35,6 @@ class ServiceConfig:
     health_endpoint: str
     process_timeout: int = 30
 
-
 @dataclass
 class ServiceProcess:
     """Running service process information."""
@@ -51,14 +42,15 @@ class ServiceProcess:
     process: subprocess.Popen
     started_at: float
 
-
 class UnifiedTestHarness:
     """Main test harness for multi-service testing."""
     
-    def __init__(self):
+    def __init__(self, test_name: str = "test"):
         self._services: Dict[str, ServiceProcess] = {}
         self._startup_timeout = 60
         self._health_check_interval = 1
+        self._test_name = test_name
+        self._is_setup = False
     
     async def start_all_services(self) -> Dict[str, int]:
         """Start all required services for unified testing."""
@@ -216,3 +208,52 @@ class UnifiedTestHarness:
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait()
+    
+    @classmethod
+    async def create_test_harness(cls, test_name: str = "test") -> "UnifiedTestHarness":
+        """
+        Create and initialize a full test harness with all services.
+        
+        Args:
+            test_name: Name identifier for the test
+            
+        Returns:
+            Initialized UnifiedTestHarness instance
+        """
+        harness = cls(test_name)
+        await harness.setup()
+        return harness
+    
+    @classmethod
+    async def create_minimal_harness(cls, test_name: str = "test") -> "UnifiedTestHarness":
+        """
+        Create a minimal test harness without starting services.
+        Useful for unit tests that don't need full service integration.
+        
+        Args:
+            test_name: Name identifier for the test
+            
+        Returns:
+            Minimal UnifiedTestHarness instance
+        """
+        harness = cls(test_name)
+        # Initialize minimal configuration without starting services
+        harness._is_setup = True
+        return harness
+    
+    async def setup(self) -> None:
+        """
+        Setup the test harness by starting all services.
+        """
+        if not self._is_setup:
+            await self.start_all_services()
+            await self.wait_for_health_checks()
+            self._is_setup = True
+    
+    async def teardown(self) -> None:
+        """
+        Teardown the test harness by stopping all services.
+        """
+        if self._is_setup:
+            await self.stop_all_services()
+            self._is_setup = False

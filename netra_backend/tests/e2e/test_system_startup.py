@@ -20,17 +20,10 @@ COVERAGE:
 - Error handling and recovery
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import os
@@ -44,13 +37,9 @@ import psutil
 import pytest
 
 from dev_launcher.config import LauncherConfig
-from dev_launcher.health_monitor import HealthMonitor
-from dev_launcher.launcher import DevLauncher
-from dev_launcher.service_discovery import ServiceDiscovery
-
-# Add project root to path
-
-
+# from scripts.dev_launcher_health_monitor import  # Should be mocked in tests HealthMonitor
+# from scripts.dev_launcher_launcher import  # Should be mocked in tests DevLauncher
+# from scripts.dev_launcher_service_discovery import  # Should be mocked in tests ServiceDiscovery
 
 class ServiceInfo:
     """Service information container."""
@@ -61,7 +50,6 @@ class ServiceInfo:
         self.health_path = health_path
         self.base_url = f"http://localhost:{port}"
         self.health_url = f"{self.base_url}{health_path}"
-
 
 class TestSystemStartup:
     """Complete system startup validation tests."""
@@ -144,11 +132,11 @@ class TestSystemStartup:
         """Test database connections are properly established."""
         from netra_backend.app.db.client import (
             get_clickhouse_client,
-            get_postgres_client,
+            get_db_client,
         )
         
         # Test PostgreSQL connection
-        postgres_client = await get_postgres_client()
+        postgres_client = await get_db_client()
         assert postgres_client is not None
         
         # Test ClickHouse connection  
@@ -273,7 +261,6 @@ class TestSystemStartup:
             remaining_processes = launcher.process_manager.get_running_processes()
             assert len(remaining_processes) == 0
 
-
 class TestStartupPerformance:
     """Startup performance validation tests."""
     
@@ -310,7 +297,6 @@ class TestStartupPerformance:
         
         # Verify reasonable startup time
         assert parallel_time < 60  # Should be under 1 minute
-
 
 class TestStartupRecovery:
     """Startup recovery and resilience tests."""
@@ -358,7 +344,6 @@ class TestStartupRecovery:
                 
             finally:
                 await launcher.shutdown()
-
 
 class TestStartupEnvironment:
     """Startup environment validation tests."""

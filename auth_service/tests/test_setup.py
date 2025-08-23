@@ -10,7 +10,6 @@ import pytest
 
 # Add auth_core to path for imports
 auth_service_dir = Path(__file__).parent.parent
-sys.path.insert(0, str(auth_service_dir))
 
 def test_environment_setup():
     """Test environment variables are set correctly"""

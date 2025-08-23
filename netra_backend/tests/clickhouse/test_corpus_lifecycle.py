@@ -4,17 +4,10 @@ Tests complete corpus lifecycle from creation to deletion and workload type cove
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 from datetime import datetime
@@ -23,15 +16,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from netra_backend.app.schemas import CorpusCreate
 
-# Add project root to path
 from netra_backend.app.services.corpus_service import (
     ContentSource,
     CorpusService,
     CorpusStatus,
 )
-
-# Add project root to path
-
 
 class TestCorpusLifecycle:
     """Test complete corpus lifecycle from creation to deletion"""
@@ -102,7 +91,6 @@ class TestCorpusLifecycle:
             db.delete.assert_called_with(corpus)
             db.commit.assert_called()
 
-
 class TestWorkloadTypesCoverage:
     """Test coverage of all workload types"""
     
@@ -143,7 +131,6 @@ class TestWorkloadTypesCoverage:
             assert len(stats["workload_distribution"]) == 6
             assert sum(stats["workload_distribution"].values()) == 1000
 
-
 def _create_test_corpus_data():
     """Create test corpus data."""
     return CorpusCreate(
@@ -151,7 +138,6 @@ def _create_test_corpus_data():
         description="Test corpus for coverage",
         domain="testing"
     )
-
 
 def _assert_corpus_created_correctly(corpus):
     """Assert corpus was created with correct attributes."""
@@ -165,7 +151,6 @@ def _assert_corpus_created_correctly(corpus):
     assert metadata["content_source"] == ContentSource.GENERATE.value
     assert metadata["version"] == 1
 
-
 def _create_mock_corpus():
     """Create mock corpus for testing."""
     corpus = MagicMock()
@@ -173,7 +158,6 @@ def _create_mock_corpus():
     corpus.table_name = "test_table"
     corpus.status = CorpusStatus.AVAILABLE.value
     return corpus
-
 
 def _get_valid_workload_types():
     """Get list of valid workload types."""
@@ -185,7 +169,6 @@ def _get_valid_workload_types():
         "failed_request",
         "custom_domain"
     ]
-
 
 def _setup_distribution_mock(mock_instance):
     """Setup distribution query mock."""
@@ -200,7 +183,6 @@ def _setup_distribution_mock(mock_instance):
             ("custom_domain", 20)
         ]  # distribution
     ]
-
 
 def _create_available_corpus():
     """Create available corpus for testing."""

@@ -12,17 +12,10 @@ Raw metrics ingestion -> Time-series aggregation -> Rollup computations -> Reten
 Coverage: Real ClickHouse time-series, Prometheus aggregation, retention policies, rollup accuracy, staging validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -34,8 +27,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-# Add project root to path
-from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
 import pytest
@@ -44,7 +36,6 @@ StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 from netra_backend.app.core.health_checkers import HealthChecker
 from netra_backend.app.db.client_clickhouse import ClickHouseClient
-
 
 # Mock metrics aggregation components for L4 testing
 class MetricsCollector:
@@ -55,7 +46,6 @@ class MetricsCollector:
     async def collect_metric(self, metric_data: Dict) -> Dict[str, Any]:
         return {"success": True}
 
-
 class PrometheusExporter:
     """Mock Prometheus exporter for L4 testing."""
     async def initialize(self): pass
@@ -64,24 +54,20 @@ class PrometheusExporter:
     async def export_metric(self, metric_data: Dict) -> Dict[str, Any]:
         return {"success": True}
 
-
 class TimeSeriesAggregator:
     """Mock time-series aggregator for L4 testing."""
     async def initialize(self): pass
     async def shutdown(self): pass
-
 
 class RollupEngine:
     """Mock rollup engine for L4 testing."""
     async def initialize(self): pass
     async def shutdown(self): pass
 
-
 class RetentionManager:
     """Mock retention manager for L4 testing."""
     async def initialize(self): pass
     async def shutdown(self): pass
-
 
 @dataclass
 class AggregationMetrics:
@@ -93,7 +79,6 @@ class AggregationMetrics:
     query_performance_improvement: float
     data_compression_ratio: float
 
-
 @dataclass
 class TimeSeriesMetric:
     """Time-series metric data container."""
@@ -103,7 +88,6 @@ class TimeSeriesMetric:
     labels: Dict[str, str]
     source: str
     aggregation_level: str
-
 
 class MetricsAggregationPipelineL4TestSuite:
     """L4 test suite for metrics aggregation pipeline in staging environment."""
@@ -694,7 +678,6 @@ class MetricsAggregationPipelineL4TestSuite:
         except Exception as e:
             print(f"L4 metrics aggregation cleanup failed: {e}")
 
-
 @pytest.fixture
 async def metrics_aggregation_pipeline_l4_suite():
     """Create L4 metrics aggregation pipeline test suite."""
@@ -702,7 +685,6 @@ async def metrics_aggregation_pipeline_l4_suite():
     await suite.initialize_l4_environment()
     yield suite
     await suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -722,7 +704,6 @@ async def test_time_series_data_generation_l4(metrics_aggregation_pipeline_l4_su
     # Validate generation performance
     assert generation_results["generation_time"] < 30.0, "Data generation took too long"
     assert generation_results["insertion_rate"] >= 100, "Data insertion rate too low"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -750,7 +731,6 @@ async def test_time_series_aggregation_accuracy_l4(metrics_aggregation_pipeline_
     for interval, agg_time in aggregation_results["aggregation_performance"].items():
         assert agg_time < 30.0, f"Aggregation too slow for {interval}: {agg_time}s"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
@@ -775,7 +755,6 @@ async def test_rollup_computations_accuracy_l4(metrics_aggregation_pipeline_l4_s
     for operation, rollup_time in rollup_results["rollup_performance"].items():
         assert rollup_time < 20.0, f"Rollup too slow for {operation}: {rollup_time}s"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
@@ -798,7 +777,6 @@ async def test_retention_policy_enforcement_l4(metrics_aggregation_pipeline_l4_s
     # Validate cleanup performance
     for policy, cleanup_time in retention_results["cleanup_performance"].items():
         assert cleanup_time < 15.0, f"Retention cleanup too slow for {policy}: {cleanup_time}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -826,7 +804,6 @@ async def test_query_optimization_performance_l4(metrics_aggregation_pipeline_l4
     for query_name, perf_data in optimization_results["query_performance"].items():
         execution_time = perf_data["execution_time"]
         assert execution_time < 10.0, f"Query too slow for {query_name}: {execution_time}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -867,7 +844,6 @@ async def test_metrics_aggregation_pipeline_e2e_l4(metrics_aggregation_pipeline_
     total_metrics_processed = generation_results["total_metrics_generated"]
     processing_rate = total_metrics_processed / total_e2e_time
     assert processing_rate >= 50, f"Pipeline processing rate too low: {processing_rate} metrics/sec"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

@@ -3,17 +3,10 @@ WebSocket compression and authentication testing module.
 Tests compression algorithms, authentication expiry handling, and security features.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -26,7 +19,6 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-
 def _create_compressible_test_data() -> str:
     """Create test data that compresses well"""
     return json.dumps({
@@ -35,7 +27,6 @@ def _create_compressible_test_data() -> str:
         'nested': {'level1': {'level2': {'level3': 'value' * 100}}}
     })
 
-
 def _verify_compression_ratio(data: str) -> None:
     """Verify compression achieves expected ratio"""
     original_size = len(data.encode())
@@ -43,7 +34,6 @@ def _verify_compression_ratio(data: str) -> None:
     compressed_size = len(compressed)
     compression_ratio = original_size / compressed_size
     assert compression_ratio > 5, f"Should achieve >5x compression, got {compression_ratio:.2f}x"
-
 
 class CompressedWebSocket:
     def __init__(self, enable_compression=True):
@@ -69,7 +59,6 @@ class CompressedWebSocket:
         else:
             return data.decode()
 
-
 async def _send_test_messages(ws_compressed: CompressedWebSocket, ws_uncompressed: CompressedWebSocket, data: str) -> None:
     """Send test messages to both compressed and uncompressed websockets"""
     messages = [data] * 100
@@ -77,12 +66,10 @@ async def _send_test_messages(ws_compressed: CompressedWebSocket, ws_uncompresse
         await ws_compressed.send(msg)
         await ws_uncompressed.send(msg)
 
-
 def _verify_bandwidth_savings(ws_compressed: CompressedWebSocket, ws_uncompressed: CompressedWebSocket) -> None:
     """Verify bandwidth savings meet expectations"""
     compression_savings = 1 - (ws_compressed.bytes_sent / ws_uncompressed.bytes_sent)
     assert compression_savings > 0.7, f"Should save >70% bandwidth, saved {compression_savings:.1%}"
-
 
 def _create_test_payloads() -> List[bytes]:
     """Create different types of test payloads"""
@@ -91,7 +78,6 @@ def _create_test_payloads() -> List[bytes]:
         b'0' * 10000,
         json.dumps([{'id': i, 'type': 'event', 'status': 'active'} for i in range(100)]).encode(),
     ]
-
 
 def _verify_payload_compression(payload: bytes) -> None:
     """Verify payload compression ratios"""
@@ -102,7 +88,6 @@ def _verify_payload_compression(payload: bytes) -> None:
         assert ratio > 100, "Highly repetitive data should compress >100x"
     elif isinstance(payload, bytes) and len(set(payload)) > 200:
         assert ratio < 1.5, "Random data shouldn't compress well"
-
 
 async def test_websocket_compression():
     """Test WebSocket compression with permessage-deflate extension"""
@@ -115,7 +100,6 @@ async def test_websocket_compression():
     test_payloads = _create_test_payloads()
     for payload in test_payloads:
         _verify_payload_compression(payload)
-
 
 class AuthenticatedWebSocket:
     def __init__(self, token: str, token_lifetime: int = 3600):
@@ -177,7 +161,6 @@ class AuthenticatedWebSocket:
         self.connection_alive = False
         return 'connection_closed'
 
-
 class GracePeriodWebSocket(AuthenticatedWebSocket):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -217,14 +200,12 @@ async def test_authentication_expiry_during_connection():
     await _test_longer_session()
     await _test_grace_period_handling()
 
-
 async def _test_immediate_expiry():
     ws_short = AuthenticatedWebSocket('short_token', token_lifetime=1)
     await asyncio.sleep(1.1)
     result = await ws_short.send_message('test')
     assert result['error'] == 'token_expired'
     assert not ws_short.is_token_valid()
-
 
 async def _test_refresh_mechanism():
     ws_short = AuthenticatedWebSocket('short_token', token_lifetime=1)
@@ -234,12 +215,10 @@ async def _test_refresh_mechanism():
     assert ws_short.authenticated
     assert ws_short.reauthentication_attempts == 1
 
-
 async def _test_longer_session():
     ws_long = AuthenticatedWebSocket('long_token', token_lifetime=2)
     message_results = await _send_messages_over_time(ws_long)
     _verify_message_results(message_results)
-
 
 async def _send_messages_over_time(ws_long) -> List[Dict]:
     message_results = []
@@ -249,13 +228,11 @@ async def _send_messages_over_time(ws_long) -> List[Dict]:
         await asyncio.sleep(0.5)
     return message_results
 
-
 def _verify_message_results(message_results: List[Dict]):
     expired_messages = [r for r in message_results if 'error' in r]
     successful_messages = [r for r in message_results if 'success' in r]
     assert len(expired_messages) > 0, "Should have some expired messages"
     assert len(successful_messages) > 0, "Should have some successful messages"
-
 
 async def _test_grace_period_handling():
     ws_grace = GracePeriodWebSocket('grace_token', token_lifetime=1)

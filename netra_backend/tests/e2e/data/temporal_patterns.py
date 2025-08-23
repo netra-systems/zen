@@ -15,7 +15,7 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design: Composable pattern generators
 
 Usage:
-    from tests.e2e.data.temporal_patterns import (
+    from netra_backend.tests.e2e.data.temporal_patterns import (
         TemporalPatternGenerator,
         SeasonalPatternGenerator,
         BurstPatternGenerator
@@ -30,7 +30,6 @@ from typing import Any, Dict, Iterator, List, Optional, Union
 
 import numpy as np
 
-
 class TemporalPatternType(Enum):
     """Types of temporal patterns."""
     SEASONAL = "seasonal"
@@ -38,7 +37,6 @@ class TemporalPatternType(Enum):
     BURST = "burst"
     LINEAR_GROWTH = "linear_growth"
     EXPONENTIAL_GROWTH = "exponential_growth"
-
 
 @dataclass
 class TemporalPattern:
@@ -48,7 +46,6 @@ class TemporalPattern:
     amplitude: float
     period_hours: int
     phase_offset: float = 0.0
-
 
 class TemporalPatternGenerator:
     """Generates temporal patterns for testing."""
@@ -88,7 +85,6 @@ class TemporalPatternGenerator:
             )
         }
 
-
 class SeasonalPatternGenerator:
     """Generates seasonal patterns for business scenarios."""
     
@@ -120,7 +116,6 @@ class SeasonalPatternGenerator:
             "weekend_reduction": {"multiplier": 0.3},
             "quarter_end_spike": {"multiplier": 1.5}
         }
-
 
 class BurstPatternGenerator:
     """Generates burst and spike patterns for stress testing."""
@@ -157,7 +152,6 @@ class BurstPatternGenerator:
             "long_burst": {"duration": 60, "intensity": 2.0}
         }
 
-
 class GrowthPatternGenerator:
     """Generates growth patterns for capacity planning."""
     
@@ -193,7 +187,6 @@ class GrowthPatternGenerator:
             "aggressive": {"rate": 0.5, "factor": 1.5}
         }
 
-
 # Helper functions for pattern calculations
 def _calculate_pattern_value(pattern: TemporalPattern, time_unit: int) -> float:
     """Calculate pattern value at specific time."""
@@ -201,18 +194,15 @@ def _calculate_pattern_value(pattern: TemporalPattern, time_unit: int) -> float:
     seasonal_component = pattern.amplitude * np.sin(angle)
     return pattern.base_value + seasonal_component
 
-
 def _calculate_burst_value(pattern: TemporalPattern, burst_index: int) -> float:
     """Calculate burst pattern value."""
     burst_intensity = np.random.exponential(pattern.amplitude)
     return pattern.base_value + burst_intensity
 
-
 def _calculate_growth_value(pattern: TemporalPattern, day: int) -> float:
     """Calculate growth pattern value."""
     growth_rate = pattern.amplitude
     return pattern.base_value * (1 + growth_rate * day / pattern.period_hours)
-
 
 def _calculate_burst_intensity(minute: int, total_duration: int) -> float:
     """Calculate burst intensity at specific minute."""
@@ -221,12 +211,10 @@ def _calculate_burst_intensity(minute: int, total_duration: int) -> float:
     intensity = max(0.1, 1.0 - (distance_from_peak / peak_minute))
     return intensity * np.random.uniform(0.8, 1.2)
 
-
 def _calculate_spike_probability(user_count: int, max_users: int) -> float:
     """Calculate spike probability for user count."""
     normalized_count = user_count / max_users
     return np.exp(-5 * normalized_count * normalized_count)
-
 
 def _calculate_seasonal_factor(month: int) -> float:
     """Calculate seasonal factor for month."""
@@ -234,7 +222,6 @@ def _calculate_seasonal_factor(month: int) -> float:
     if month in seasonal_months:
         return 1.5
     return 1.0
-
 
 def _create_business_hour_record(day: int, hour: int) -> Dict[str, Any]:
     """Create business hour usage record."""
@@ -246,7 +233,6 @@ def _create_business_hour_record(day: int, hour: int) -> Dict[str, Any]:
         "is_business_hour": is_business_hour, "is_weekend": is_weekend
     }
 
-
 def _create_quarterly_record(quarter: int, month: int) -> Dict[str, Any]:
     """Create quarterly business cycle record."""
     is_quarter_end = month == 2
@@ -256,7 +242,6 @@ def _create_quarterly_record(quarter: int, month: int) -> Dict[str, Any]:
         "usage_multiplier": multiplier, "is_quarter_end": is_quarter_end
     }
 
-
 def _create_holiday_record(holiday: Dict[str, Any]) -> Dict[str, Any]:
     """Create holiday period record."""
     return {
@@ -264,7 +249,6 @@ def _create_holiday_record(holiday: Dict[str, Any]) -> Dict[str, Any]:
         "start_date": holiday["start"], "end_date": holiday["end"],
         "usage_multiplier": holiday["multiplier"]
     }
-
 
 def _create_burst_record(minute: int, intensity: float) -> Dict[str, Any]:
     """Create burst pattern record."""
@@ -274,7 +258,6 @@ def _create_burst_record(minute: int, intensity: float) -> Dict[str, Any]:
         "expected_latency_ms": max(50, 500 / intensity)
     }
 
-
 def _create_spike_record(user_count: int, probability: float) -> Dict[str, Any]:
     """Create spike pattern record."""
     return {
@@ -283,16 +266,13 @@ def _create_spike_record(user_count: int, probability: float) -> Dict[str, Any]:
         "expected_response_time": 100 + (user_count * 0.1)
     }
 
-
 def _create_growth_record(month: int, usage: float, growth_type: str) -> Dict[str, Any]:
     """Create growth pattern record."""
     return {"month": month, "projected_usage": usage, "growth_type": growth_type}
 
-
 def _create_seasonal_growth_record(year: int, month: int, factor: float) -> Dict[str, Any]:
     """Create seasonal growth record."""
     return {"year": year, "month": month, "seasonal_factor": factor}
-
 
 def _get_holiday_periods(year: int) -> List[Dict[str, Any]]:
     """Get holiday periods for year."""

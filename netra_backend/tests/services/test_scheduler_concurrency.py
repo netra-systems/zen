@@ -4,17 +4,10 @@ Tests concurrent job execution, thread safety, and queue management
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime, timedelta
@@ -24,14 +17,11 @@ import pytest
 
 from netra_backend.app.agents.supply_researcher.models import ResearchType
 
-# Add project root to path
 from netra_backend.app.services.supply_research_scheduler import (
     ResearchSchedule,
     ScheduleFrequency,
-    # Add project root to path
     SupplyResearchScheduler,
 )
-
 
 @pytest.fixture
 def concurrent_scheduler():
@@ -39,7 +29,6 @@ def concurrent_scheduler():
     scheduler = SupplyResearchScheduler()
     scheduler._job_semaphore = asyncio.Semaphore(3)  # Limit concurrent jobs
     return scheduler
-
 
 class TestSupplyResearchSchedulerConcurrency:
     """Test concurrent job execution and thread safety"""
@@ -142,7 +131,6 @@ class TestSupplyResearchSchedulerConcurrency:
         assert len(execution_order) == 3
         assert all(not isinstance(r, Exception) for r in results)
 
-
 def _create_test_schedules(count):
     """Create multiple test schedules for concurrency testing."""
     return [
@@ -152,7 +140,6 @@ def _create_test_schedules(count):
             research_type=ResearchType.MODEL_UPDATES
         ) for i in range(count)
     ]
-
 
 def _populate_job_queue(job_queue, count):
     """Populate job queue with test jobs."""

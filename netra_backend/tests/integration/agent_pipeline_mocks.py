@@ -34,12 +34,10 @@ def mock_justified(reason: str):
 
     return decorator
 
-
 class AgentPipelineMocks:
 
     """Collection of mocks for agent pipeline testing."""
     
-
     @staticmethod
 
     @mock_justified("LLM provider external dependency for agent response generation")
@@ -50,7 +48,6 @@ class AgentPipelineMocks:
 
         llm_mock = Mock(spec=LLMManager)
         
-
         response_templates = {
 
             "triage": {
@@ -85,30 +82,23 @@ class AgentPipelineMocks:
 
         }
         
-
         async def mock_generate_response(prompt, agent_type="triage", quality_level="high_quality"):
 
             await asyncio.sleep(0.1)
             
-
             template_key = agent_type if agent_type in response_templates else "triage"
 
             quality_key = quality_level if quality_level in response_templates[template_key] else "high_quality"
             
-
             response = response_templates[template_key][quality_key]
             
-
             return {"content": response, "usage": {"prompt_tokens": len(prompt), "completion_tokens": len(response)}, "model": "gpt-4-turbo", "finish_reason": "stop"}
-
 
         llm_mock.generate_response = AsyncMock(side_effect=mock_generate_response)
 
         llm_mock._response_templates = response_templates
         
-
         return llm_mock
-
 
     @staticmethod
 
@@ -122,16 +112,13 @@ class AgentPipelineMocks:
 
         ws_mock.state = "connected"
         
-
         sent_messages = []
         
-
         async def mock_send_text(message):
 
             sent_messages.append({"content": message, "timestamp": datetime.now(timezone.utc), "type": "text"})
 
             return True
-
 
         async def mock_send_json(data):
 
@@ -139,16 +126,13 @@ class AgentPipelineMocks:
 
             return True
 
-
         ws_mock.send_text = AsyncMock(side_effect=mock_send_text)
 
         ws_mock.send_json = AsyncMock(side_effect=mock_send_json)
 
         ws_mock._sent_messages = sent_messages
         
-
         return ws_mock
-
 
     @staticmethod
 
@@ -162,21 +146,17 @@ class AgentPipelineMocks:
 
         redis_mock.enabled = True
         
-
         state_store = {}
         
-
         async def mock_set(key, value, ex=None):
 
             state_store[key] = value
 
             return True
 
-
         async def mock_get(key):
 
             return state_store.get(key)
-
 
         redis_mock.set = AsyncMock(side_effect=mock_set)
 
@@ -184,9 +164,7 @@ class AgentPipelineMocks:
 
         redis_mock._state_store = state_store
         
-
         return redis_mock
-
 
     @staticmethod
 
@@ -198,10 +176,8 @@ class AgentPipelineMocks:
 
         ws_manager_mock = Mock(spec=WebSocketManager)
         
-
         active_connections = {}
         
-
         async def mock_send_to_user(user_id, message):
 
             if user_id in active_connections:
@@ -220,13 +196,11 @@ class AgentPipelineMocks:
 
             return False
 
-
         async def mock_add_connection(user_id, websocket):
 
             active_connections[user_id] = {"websocket": websocket, "connected_at": datetime.now(timezone.utc)}
 
             return True
-
 
         ws_manager_mock.send_to_user = AsyncMock(side_effect=mock_send_to_user)
 
@@ -234,9 +208,7 @@ class AgentPipelineMocks:
 
         ws_manager_mock._active_connections = active_connections
         
-
         return ws_manager_mock
-
 
     @staticmethod
 
@@ -246,15 +218,12 @@ class AgentPipelineMocks:
 
         triage_agent = Mock()
         
-
         async def mock_intelligent_triage(message_content):
 
             await asyncio.sleep(0.05)
             
-
             content_lower = message_content.lower()
             
-
             if any(keyword in content_lower for keyword in ["optimize", "gpu", "memory", "cost", "performance"]):
 
                 if "database" in content_lower or "query" in content_lower:
@@ -281,11 +250,9 @@ class AgentPipelineMocks:
 
                 return {"agent": "general_assistant", "confidence": 0.60}
 
-
         triage_agent.route_message = AsyncMock(side_effect=mock_intelligent_triage)
 
         return triage_agent
-
 
     @staticmethod
 
@@ -299,21 +266,16 @@ class AgentPipelineMocks:
 
             content_lower = response_content.lower()
             
-
             specific_indicators = ["gb", "ms", "%", "$", "step", "implement", "analysis", "optimize"]
 
             specificity_score = min(1.0, sum(1 for indicator in specific_indicators if indicator in content_lower) / 4)
             
-
             actionable_indicators = ["reduce", "implement", "deploy", "configure", "set", "use", "apply"]
 
             actionability_score = min(1.0, sum(1 for indicator in actionable_indicators if indicator in content_lower) / 3)
             
-
             technical_accuracy = 0.85 if len(response_content) > 100 else 0.65
             
-
             return {"specificity_score": specificity_score, "actionability_score": actionability_score, "technical_accuracy": technical_accuracy, "overall_score": (specificity_score + actionability_score + technical_accuracy) / 3}
-
 
         return assess_response_quality

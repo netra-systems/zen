@@ -20,17 +20,10 @@ Test Coverage:
 - MFA flows
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -48,15 +41,12 @@ import jwt
 import pytest
 import websockets
 
-# Add project root to path
-
-
 # Set test environment
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
 
 # Import auth types
-from clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 
 # Test infrastructure
 from netra_backend.app.core.config import get_settings
@@ -73,7 +63,6 @@ from netra_backend.app.schemas.auth_types import (
     UserInfo,
 )
 
-
 @dataclass
 class LoginTestUser:
     """Test user for login flow testing."""
@@ -88,7 +77,6 @@ class LoginTestUser:
     devices: List[str] = field(default_factory=list)
     sessions: List[str] = field(default_factory=list)
 
-
 @dataclass
 class LoginFlowMetrics:
     """Metrics for login flow testing."""
@@ -102,7 +90,6 @@ class LoginFlowMetrics:
     session_invalidations: int = 0
     average_login_time: float = 0.0
     concurrent_sessions: int = 0
-
 
 class UserLoginFlowTestSuite:
     """Test suite for user login flows."""
@@ -314,7 +301,6 @@ class UserLoginFlowTestSuite:
             return True
         
         return False
-
 
 @pytest.mark.integration
 @pytest.mark.l3

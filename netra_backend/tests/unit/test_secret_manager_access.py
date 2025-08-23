@@ -7,17 +7,10 @@ Business Value: Ensures secure secret access control preventing security
 breaches that could result in lost enterprise customers.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
@@ -26,13 +19,9 @@ import pytest
 
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
-# Add project root to path
 from netra_backend.app.core.secret_manager_core import EnhancedSecretManager
 from netra_backend.app.core.secret_manager_types import SecretAccessLevel
 from netra_backend.app.schemas.config_types import EnvironmentType
-
-# Add project root to path
-
 
 class TestSecretManagerAccess:
     """Test suite for EnhancedSecretManager access control."""

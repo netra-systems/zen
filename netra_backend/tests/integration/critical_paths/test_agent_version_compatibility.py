@@ -10,17 +10,10 @@ Critical Path: Version detection -> Compatibility check -> Migration -> Validati
 Coverage: Real agent versioning, compatibility matrix, gradual rollout strategies
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -40,12 +33,10 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
-
 
 class VersionCompatibility(Enum):
     """Version compatibility levels."""
@@ -53,7 +44,6 @@ class VersionCompatibility(Enum):
     BACKWARDS_COMPATIBLE = "backwards_compatible"
     BREAKING_CHANGE = "breaking_change"
     INCOMPATIBLE = "incompatible"
-
 
 @dataclass
 class AgentVersion:
@@ -83,7 +73,6 @@ class AgentVersion:
         else:
             return VersionCompatibility.FULLY_COMPATIBLE
 
-
 @dataclass
 class AgentVersionInfo:
     """Complete agent version information."""
@@ -106,7 +95,6 @@ class AgentVersionInfo:
             "required_dependencies": self.required_dependencies,
             "created_at": self.created_at.isoformat()
         }
-
 
 class VersionRegistry:
     """Manages agent version registry."""
@@ -161,7 +149,6 @@ class VersionRegistry:
         except Exception as e:
             logger.error(f"Failed to get available versions: {e}")
             return []
-
 
 class CompatibilityChecker:
     """Checks version compatibility between agents."""
@@ -228,7 +215,6 @@ class CompatibilityChecker:
             upgrade_path.append(target_version)
         
         return upgrade_path
-
 
 class MigrationManager:
     """Manages agent version migrations."""
@@ -297,7 +283,6 @@ class MigrationManager:
             logger.error(f"Migration rollback failed: {e}")
             return False
 
-
 class AgentVersionManager:
     """Manages agent version compatibility testing."""
     
@@ -359,7 +344,6 @@ class AgentVersionManager:
         if self.redis_service:
             await self.redis_service.shutdown()
 
-
 @pytest.fixture
 async def version_manager():
     """Create version manager for testing."""
@@ -367,7 +351,6 @@ async def version_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -390,7 +373,6 @@ async def test_version_registration_and_retrieval(version_manager):
     assert "1.1.0" in versions
     assert "1.2.0" in versions
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_version_compatibility_check(version_manager):
@@ -411,7 +393,6 @@ async def test_version_compatibility_check(version_manager):
     assert compatibility == VersionCompatibility.BACKWARDS_COMPATIBLE
     assert len(issues) >= 1  # API version mismatch
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_upgrade_path_calculation(version_manager):
@@ -427,7 +408,6 @@ async def test_upgrade_path_calculation(version_manager):
     assert upgrade_path[0] == "1.0.0"
     assert upgrade_path[-1] == "1.2.0"
     assert "1.1.0" in upgrade_path
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -446,7 +426,6 @@ async def test_migration_planning(version_manager):
     assert migration_plan["compatibility"] == "backwards_compatible"
     assert len(migration_plan["upgrade_path"]) >= 3
     assert migration_plan["rollback_supported"] is True
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -472,7 +451,6 @@ async def test_migration_execution(version_manager):
     assert len(migration_state["completed_steps"]) == 2
     assert migration_state["status"] == "in_progress"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_migration_rollback(version_manager):
@@ -491,7 +469,6 @@ async def test_migration_rollback(version_manager):
     # Check rollback state
     migration_state = manager.migration_manager.active_migrations[migration_id]
     assert migration_state["status"] == "rolled_back"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
@@ -532,7 +509,6 @@ async def test_concurrent_version_operations(version_manager):
     assert len(retrieved_infos) == 5
     assert all(info is not None for info in retrieved_infos)
 
-
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
 async def test_version_compatibility_performance(version_manager):
@@ -561,7 +537,6 @@ async def test_version_compatibility_performance(version_manager):
     assert avg_check_time < 0.04  # Average check under 40ms
     
     logger.info(f"Performance: {avg_check_time*1000:.1f}ms per compatibility check")
-
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration

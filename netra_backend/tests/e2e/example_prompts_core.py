@@ -7,15 +7,13 @@ Maximum 300 lines, functions ≤8 lines.
 from datetime import datetime, timezone
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import (
+    SupervisorAgent as Supervisor,
+)
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional
 import pytest
 import uuid
-
-    SupervisorAgent as Supervisor,
-
-)
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.quality_gate_service import (
@@ -53,7 +51,6 @@ EXAMPLE_PROMPTS = [
 
 ]
 
-
 @pytest.fixture
 
 def real_llm_prompt_setup(db_session, real_llm_manager, real_websocket_manager, real_tool_dispatcher):
@@ -65,7 +62,6 @@ def real_llm_prompt_setup(db_session, real_llm_manager, real_websocket_manager, 
     quality_service = create_real_quality_service()
 
     return build_prompt_test_setup(supervisor, quality_service, real_llm_manager)
-
 
 def create_real_supervisor(db_session: AsyncSession, llm_manager: LLMManager, ws_manager: WebSocketManager, tool_dispatcher: ToolDispatcher) -> Supervisor:
 
@@ -79,13 +75,11 @@ def create_real_supervisor(db_session: AsyncSession, llm_manager: LLMManager, ws
 
     return supervisor
 
-
 def create_real_quality_service() -> QualityGateService:
 
     """Create real quality gate service for validation."""
 
     return QualityGateService()
-
 
 def build_prompt_test_setup(supervisor: Supervisor, quality_service: QualityGateService, llm_manager: LLMManager) -> Dict:
 
@@ -99,7 +93,6 @@ def build_prompt_test_setup(supervisor: Supervisor, quality_service: QualityGate
 
     }
 
-
 async def execute_full_prompt_workflow(setup: Dict, prompt: str, state: DeepAgentState) -> Dict:
 
     """Execute complete prompt workflow with real LLM and state validation."""
@@ -108,7 +101,6 @@ async def execute_full_prompt_workflow(setup: Dict, prompt: str, state: DeepAgen
 
     supervisor = setup['supervisor']
     
-
     try:
 
         result_state = await supervisor.run(prompt, supervisor.thread_id, supervisor.user_id, setup['run_id'])
@@ -117,12 +109,10 @@ async def execute_full_prompt_workflow(setup: Dict, prompt: str, state: DeepAgen
 
         execution_time = (end_time - start_time).total_seconds()
         
-
         response_text = extract_response_from_state(result_state)
 
         quality_passed = await validate_response_quality(setup, response_text, prompt)
         
-
         return create_workflow_result(True, prompt, execution_time, quality_passed, response_text, result_state)
 
     except Exception as e:
@@ -132,7 +122,6 @@ async def execute_full_prompt_workflow(setup: Dict, prompt: str, state: DeepAgen
         execution_time = (end_time - start_time).total_seconds()
 
         return create_workflow_result(False, prompt, execution_time, False, "", None, str(e))
-
 
 def extract_response_from_state(result_state) -> str:
 
@@ -154,9 +143,7 @@ def extract_response_from_state(result_state) -> str:
 
             return str(response) if response else "Empty response"
     
-
     return "Response not found in state"
-
 
 async def validate_response_quality(setup: Dict, response_text: str, prompt: str) -> bool:
 
@@ -180,7 +167,6 @@ async def validate_response_quality(setup: Dict, response_text: str, prompt: str
 
         return len(response_text) >= 50  # Fallback validation
 
-
 def determine_content_type(prompt: str) -> ContentType:
 
     """Determine content type based on prompt characteristics."""
@@ -196,7 +182,6 @@ def determine_content_type(prompt: str) -> ContentType:
     else:
 
         return ContentType.GENERAL_RESPONSE
-
 
 def create_workflow_result(success: bool, prompt: str, execution_time: float, quality_passed: bool, 
 
@@ -226,7 +211,6 @@ def create_ep_001_state() -> DeepAgentState:
 
     )
 
-
 def create_ep_002_state() -> DeepAgentState:
 
     """Create state for EP-002 example prompt test."""
@@ -238,7 +222,6 @@ def create_ep_002_state() -> DeepAgentState:
         metadata={'test_type': 'latency_budget', 'prompt_id': 'EP-002'}
 
     )
-
 
 def create_ep_003_state() -> DeepAgentState:
 
@@ -252,7 +235,6 @@ def create_ep_003_state() -> DeepAgentState:
 
     )
 
-
 def create_ep_004_state() -> DeepAgentState:
 
     """Create state for EP-004 example prompt test."""
@@ -264,7 +246,6 @@ def create_ep_004_state() -> DeepAgentState:
         metadata={'test_type': 'function_optimization', 'prompt_id': 'EP-004'}
 
     )
-
 
 def create_ep_005_state() -> DeepAgentState:
 
@@ -278,7 +259,6 @@ def create_ep_005_state() -> DeepAgentState:
 
     )
 
-
 def create_ep_006_state() -> DeepAgentState:
 
     """Create state for EP-006 example prompt test."""
@@ -290,7 +270,6 @@ def create_ep_006_state() -> DeepAgentState:
         metadata={'test_type': 'kv_cache_audit', 'prompt_id': 'EP-006'}
 
     )
-
 
 def create_ep_007_state() -> DeepAgentState:
 
@@ -304,7 +283,6 @@ def create_ep_007_state() -> DeepAgentState:
 
     )
 
-
 def create_ep_008_state() -> DeepAgentState:
 
     """Create state for EP-008 example prompt test."""
@@ -316,7 +294,6 @@ def create_ep_008_state() -> DeepAgentState:
         metadata={'test_type': 'tool_migration', 'prompt_id': 'EP-008'}
 
     )
-
 
 def create_ep_009_state() -> DeepAgentState:
 

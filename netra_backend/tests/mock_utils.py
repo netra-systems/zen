@@ -9,7 +9,6 @@ from typing import List
 
 import numpy as np
 
-
 class MockLanguageDetector:
     """Mock implementation of a language detector for testing."""
     
@@ -21,7 +20,6 @@ class MockLanguageDetector:
         if any(char in '你好' for char in text):
             return 'zh'
         return 'en'
-
 
 class MockJargonExtractor:
     """Mock implementation to find domain-specific jargon for testing."""
@@ -43,7 +41,6 @@ class MockJargonExtractor:
                 found.append(domain)
         return found
 
-
 class MockCodeDetector:
     """Mock implementation to detect code in prompts for testing."""
     
@@ -58,7 +55,6 @@ class MockCodeDetector:
             r';\s*$',   # C-style line endings
         ]
         return any(re.search(p, text) for p in patterns)
-
 
 class MockSemanticVectorizer:
     """

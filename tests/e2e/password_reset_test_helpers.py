@@ -164,7 +164,7 @@ class PasswordResetE2ETester:
         self.email_service.clear_sent_emails()
         self.test_results.clear()
     
-    async def cleanup_test_environment(self) -> None:
+    async def test_cleanup_test_environment(self) -> None:
         """Cleanup test environment."""
         self.email_service.clear_sent_emails()
         self.flow_validator.reset_tokens.clear()

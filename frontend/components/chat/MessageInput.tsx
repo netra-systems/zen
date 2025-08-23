@@ -104,7 +104,7 @@ export const MessageInput: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full" data-testid="message-input">
       <div className="flex items-end gap-2">
         <div className="flex-1 relative">
           <textarea

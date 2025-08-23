@@ -15,17 +15,10 @@ This test validates real-world LLM agent orchestration including:
 - Context management across agents
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -40,10 +33,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
-from .integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
-    # Add project root to path
     L4StagingCriticalPathTestBase,
 )
 
@@ -60,7 +51,7 @@ ExecutionContext = dict
 ExecutionResult = dict
 ExecutionContext = dict  # Use dict as placeholder
 ExecutionResult = dict   # Use dict as placeholder
-# # from netra_backend.app.llm.llm_manager import LLMManager
+# # from app.llm.llm_manager import LLMManager
 LLMManager = AsyncMock
 # # # from app.agents.tool_dispatcher import ToolDispatcher
 from unittest.mock import AsyncMock
@@ -69,12 +60,11 @@ from netra_backend.app.core.configuration.base import get_unified_config
 
 ToolDispatcher = AsyncMock
 ToolDispatcher = AsyncMock
-# # from netra_backend.app.services.redis.session_manager import RedisSessionManager
+# # from app.services.redis.session_manager import RedisSessionManager
 RedisSessionManager = AsyncMock
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class LLMOrchestrationMetrics:
@@ -92,7 +82,6 @@ class LLMOrchestrationMetrics:
     context_preservation_score: float = 0.0
     details: Dict[str, Any] = field(default_factory=dict)
 
-
 @dataclass
 class PromptTestScenario:
     """Test scenario configuration for critical prompts."""
@@ -103,7 +92,6 @@ class PromptTestScenario:
     quality_requirements: Dict[str, float]
     cost_limits: Dict[str, float]
     timeout_seconds: float = 30.0
-
 
 class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
     """L4 test for real LLM agent orchestration in staging environment."""
@@ -758,7 +746,6 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
         except Exception as e:
             logger.warning(f"Tool dispatcher cleanup warning: {e}")
 
-
 # Pytest integration
 @pytest.mark.asyncio
 @pytest.mark.l4
@@ -784,7 +771,6 @@ async def test_l4_real_llm_agent_orchestration():
     finally:
         # Ensure cleanup occurs
         await test_instance.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l4 
@@ -822,7 +808,6 @@ async def test_l4_llm_cost_optimization_scenario():
         
     finally:
         await test_instance.cleanup_l4_resources()
-
 
 if __name__ == "__main__":
     # Allow direct execution for debugging

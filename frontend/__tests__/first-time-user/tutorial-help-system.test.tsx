@@ -1,339 +1,208 @@
 /**
- * First-Time User Tutorial and Help System Tests - Business Critical
- * 
- * BUSINESS VALUE JUSTIFICATION:
- * - Segment: Free → Early (Critical for user activation and engagement)
- * - Business Goal: Reduce time-to-first-value from 10min to 3min
- * - Value Impact: Faster activation increases 35% conversion rate
- * - Revenue Impact: Tutorial optimization = $200K+ annually
- * 
- * ARCHITECTURAL COMPLIANCE: ≤300 lines, functions ≤8 lines
- * Coverage: Tooltips, guided tours, help accessibility, documentation
+ * First-time user tutorial and help system tests
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { jest } from '@jest/globals';
 
-// Real components under test
-import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
-import MainChat from '@/components/chat/MainChat';
-import { MessageInput } from '@/components/chat/MessageInput';
-
-// Test utilities
-import { TestProviders } from '../setup/test-providers';
-import { createMockUser } from '../utils/mock-factories';
-import {
-  setupCleanState,
-  resetAllMocks,
-  setupSimpleWebSocketMock,
-  clearAuthState,
-  mockAuthService,
-  renderWithTestSetup,
-  setupNextJSMocks,
-  setupAuthMocks
-} from './onboarding-test-helpers';
-
-// Setup mocks
-setupNextJSMocks();
-setupAuthMocks();
-
-// Mock unified chat store for tutorial tests
-const mockChatStore = {
-  messages: [],
-  isProcessing: false,
-  addMessage: jest.fn(),
-  setProcessing: jest.fn()
-};
-
-const mockWebSocket = {
-  sendMessage: jest.fn(),
-  isConnected: true
-};
+// Mock hooks
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseWebSocket = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseEventProcessor = jest.fn();
+const mockUseThreadNavigation = jest.fn();
 
 jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn(() => mockChatStore)
+  useUnifiedChatStore: mockUseUnifiedChatStore
 }));
 
 jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: jest.fn(() => mockWebSocket)
+  useWebSocket: mockUseWebSocket
 }));
 
-jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn(() => ({
-    isAuthenticated: true
-  }))
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
 }));
 
-describe('First-Time User Tutorial and Help System Tests', () => {
+jest.mock('@/hooks/useEventProcessor', () => ({
+  useEventProcessor: mockUseEventProcessor
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
+// Mock child components except ExamplePrompts which we want to test
+jest.mock('@/components/chat/ChatHeader', () => ({
+  ChatHeader: () => React.createElement('div', { 'data-testid': 'chat-header' }, 'Chat Header')
+}));
+
+jest.mock('@/components/chat/MessageList', () => ({
+  MessageList: () => React.createElement('div', { 'data-testid': 'message-list' }, 'Message List')
+}));
+
+jest.mock('@/components/chat/MessageInput', () => ({
+  MessageInput: () => React.createElement('div', { 'data-testid': 'message-input' }, 'Message Input')
+}));
+
+jest.mock('@/components/chat/PersistentResponseCard', () => ({
+  PersistentResponseCard: () => React.createElement('div', { 'data-testid': 'response-card' }, 'Response Card')
+}));
+
+jest.mock('@/components/chat/OverflowPanel', () => ({
+  OverflowPanel: () => React.createElement('div', { 'data-testid': 'overflow-panel' }, 'Overflow Panel')
+}));
+
+jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
+  EventDiagnosticsPanel: () => React.createElement('div', { 'data-testid': 'diagnostics-panel' }, 'Diagnostics Panel')
+}));
+
+jest.mock('@/utils/debug-logger', () => ({
+  logger: {
+    debug: jest.fn(),
+    error: jest.fn()
+  }
+}));
+
+// Import components after mocks
+import MainChat from '@/components/chat/MainChat';
+
+describe('First-Time User Tutorial Help System', () => {
   beforeEach(() => {
-    setupCleanState();
-    setupSimpleWebSocketMock();
-    resetAllMocks();
-    mockAuthService.user = createMockUser();
-  });
-
-  afterEach(() => {
-    clearAuthState();
     jest.clearAllMocks();
-  });
-
-  describe('Example Prompts as Tutorial System', () => {
-    it('displays example prompts prominently for guidance', async () => {
-      await renderExamplePrompts();
-      
-      await expectExamplePromptsVisible();
-      await expectTutorialGuidance();
+    
+    // Default state for first-time user showing help content
+    mockUseUnifiedChatStore.mockReturnValue({
+      isProcessing: false,
+      messages: [],
+      fastLayerData: null,
+      mediumLayerData: null,
+      slowLayerData: null,
+      currentRunId: null,
+      activeThreadId: null,
+      isThreadLoading: false,
+      handleWebSocketEvent: jest.fn()
     });
-
-    it('provides clear visual hierarchy for learning', async () => {
-      await renderExamplePrompts();
-      
-      const quickStartHeader = screen.getByText(/quick start examples/i);
-      expect(quickStartHeader).toBeInTheDocument();
-      expect(quickStartHeader).toHaveClass('text-xl', 'font-bold');
+    
+    mockUseWebSocket.mockReturnValue({
+      messages: []
     });
-
-    it('shows helpful hover states for user guidance', async () => {
-      const user = userEvent.setup();
-      await renderExamplePrompts();
-      
-      const promptCards = await getPromptCards();
-      if (promptCards.length > 0) {
-        await user.hover(promptCards[0]);
-        await expectHoverGuidance(promptCards[0]);
-      }
+    
+    mockUseLoadingState.mockReturnValue({
+      shouldShowLoading: false,
+      shouldShowEmptyState: true,
+      shouldShowExamplePrompts: true,
+      loadingMessage: ''
     });
-
-    it('provides collapsible interface to reduce cognitive load', async () => {
-      const user = userEvent.setup();
-      await renderExamplePrompts();
-      
-      const toggleButton = screen.getByText(/hide/i);
-      expect(toggleButton).toBeInTheDocument();
-      
-      await user.click(toggleButton);
-      await expectCollapsedState();
+    
+    mockUseEventProcessor.mockReturnValue({
+      processedCount: 0,
+      queueSize: 0
     });
-
-    it('shows clear call-to-action with visual cues', async () => {
-      await renderExamplePrompts();
-      
-      const clickInstructions = screen.getAllByText(/click to send/i);
-      expect(clickInstructions.length).toBeGreaterThan(0);
-      
-      clickInstructions.forEach(instruction => {
-        expect(instruction).toBeInTheDocument();
-      });
+    
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: null,
+      isNavigating: false
     });
   });
 
-  describe('Interactive Help Elements', () => {
-    it('provides immediate feedback on interactive elements', async () => {
-      const user = userEvent.setup();
-      await renderExamplePrompts();
-      
-      const promptCards = await getPromptCards();
-      if (promptCards.length > 0) {
-        await user.hover(promptCards[0]);
-        await expectInteractiveFeedback(promptCards[0]);
-      }
-    });
-
-    it('shows tooltips and guidance text appropriately', async () => {
-      await renderMainChat();
-      
-      await expectHelpTooltips();
-    });
-
-    it('provides keyboard navigation support for accessibility', async () => {
-      const user = userEvent.setup();
-      await renderExamplePrompts();
-      
-      await user.tab();
-      const focusedElement = document.activeElement;
-      expect(focusedElement).toBeInTheDocument();
-    });
-
-    it('maintains help visibility without overwhelming interface', async () => {
-      await renderMainChat();
-      
-      await expectBalancedHelpVisibility();
-    });
-  });
-
-  describe('Guided User Experience', () => {
-    it('progressively reveals features to avoid overwhelm', async () => {
-      await renderMainChat();
-      
-      await expectProgressiveDisclosure();
-    });
-
-    it('provides contextual help based on user state', async () => {
-      // First-time user should see more guidance
-      mockAuthService.user = createMockUser({ email: 'new@user.com' });
-      await renderMainChat();
-      
-      await expectContextualHelp();
-    });
-
-    it('offers clear next steps for user progression', async () => {
-      await renderMainChat();
-      
-      await expectClearNextSteps();
-    });
-
-    it('provides escape routes from help states', async () => {
-      const user = userEvent.setup();
-      await renderExamplePrompts();
-      
-      const hideButton = screen.getByText(/hide/i);
-      await user.click(hideButton);
-      
-      const showButton = screen.getByText(/show/i);
-      expect(showButton).toBeInTheDocument();
-    });
-  });
-
-  describe('Help Accessibility and Discoverability', () => {
-    it('ensures help elements are screen reader accessible', async () => {
-      await renderExamplePrompts();
-      
-      const quickStartHeader = screen.getByText(/quick start examples/i);
-      expect(quickStartHeader).toBeInTheDocument();
-      
-      const toggleButton = screen.getByRole('button');
-      expect(toggleButton).toHaveAccessibleName();
-    });
-
-    it('provides clear visual indicators for interactive help', async () => {
-      await renderExamplePrompts();
-      
-      const promptCards = await getPromptCards();
-      promptCards.forEach(card => {
-        expect(card).toHaveClass('cursor-pointer');
-      });
-    });
-
-    it('maintains help system performance', async () => {
-      const startTime = performance.now();
-      await renderExamplePrompts();
-      const loadTime = performance.now() - startTime;
-      
-      expect(loadTime).toBeLessThan(500); // Help should load quickly
-    });
-
-    it('provides consistent help patterns across components', async () => {
-      await renderMainChat();
-      
-      await expectConsistentHelpPatterns();
-    });
-  });
-
-  describe('Documentation and External Help', () => {
-    it('provides clear pathways to external documentation', async () => {
-      await renderMainChat();
-      
-      await expectDocumentationAccess();
-    });
-
-    it('offers contact options for additional support', async () => {
-      await renderMainChat();
-      
-      await expectSupportAccess();
-    });
-
-    it('maintains help context when navigating', async () => {
-      await renderMainChat();
-      
-      await expectPersistentHelpContext();
-    });
-  });
-
-  // Helper functions (≤8 lines each)
-  async function renderExamplePrompts(): Promise<void> {
-    await renderWithTestSetup(
-      <TestProviders>
-        <ExamplePrompts />
-      </TestProviders>
-    );
-  }
-
-  async function renderMainChat(): Promise<void> {
-    await renderWithTestSetup(
-      <TestProviders>
-        <MainChat />
-      </TestProviders>
-    );
-  }
-
-  async function expectExamplePromptsVisible(): Promise<void> {
+  it('shows tutorial steps in the welcome section', async () => {
+    render(<MainChat />);
+    
     await waitFor(() => {
-      const quickStartHeader = screen.getByText(/quick start examples/i);
-      expect(quickStartHeader).toBeInTheDocument();
+      expect(screen.getByText('Get Started in 3 Easy Steps:')).toBeInTheDocument();
     });
-  }
+    
+    // Verify all tutorial steps are present
+    expect(screen.getByText(/Choose an example prompt below/)).toBeInTheDocument();
+    expect(screen.getByText(/Describe your current setup/)).toBeInTheDocument();
+    expect(screen.getByText(/Get AI-powered recommendations/)).toBeInTheDocument();
+  });
 
-  async function expectTutorialGuidance(): Promise<void> {
-    const sparklesIcon = document.querySelector('svg');
-    expect(sparklesIcon).toBeInTheDocument();
-  }
-
-  async function getPromptCards(): Promise<HTMLElement[]> {
-    const cards = document.querySelectorAll('.cursor-pointer');
-    return Array.from(cards) as HTMLElement[];
-  }
-
-  async function expectHoverGuidance(card: HTMLElement): Promise<void> {
-    const sendIcon = card.querySelector('svg');
-    expect(sendIcon).toBeInTheDocument();
-  }
-
-  async function expectCollapsedState(): Promise<void> {
+  it('displays helpful tip with example prompt', async () => {
+    render(<MainChat />);
+    
     await waitFor(() => {
-      const showButton = screen.getByText(/show/i);
-      expect(showButton).toBeInTheDocument();
+      expect(screen.getByText(/Try typing something like:/)).toBeInTheDocument();
     });
-  }
+    
+    expect(screen.getByText(/I need to reduce my AI costs by 30% while maintaining quality/)).toBeInTheDocument();
+  });
 
-  async function expectInteractiveFeedback(card: HTMLElement): Promise<void> {
-    expect(card).toHaveClass('cursor-pointer');
-  }
+  it('shows numbered steps in tutorial', async () => {
+    render(<MainChat />);
+    
+    await waitFor(() => {
+      // Check for numbered step indicators
+      const stepElements = screen.getAllByText(/[123]/);
+      expect(stepElements.length).toBeGreaterThanOrEqual(3);
+    });
+  });
 
-  async function expectHelpTooltips(): Promise<void> {
-    expect(document.body).toBeInTheDocument();
-  }
+  it('displays example prompts component for guidance', async () => {
+    render(<MainChat />);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
+    });
+  });
 
-  async function expectBalancedHelpVisibility(): Promise<void> {
-    expect(document.body).toBeInTheDocument();
-  }
+  it('shows welcome icon for visual appeal', async () => {
+    render(<MainChat />);
+    
+    await waitFor(() => {
+      // Check that the welcome screen has the icon structure in the welcome section
+      expect(screen.getByText('Welcome to Netra AI')).toBeInTheDocument();
+      
+      // Look for the lightning bolt SVG icon in the welcome content
+      const welcomeIcon = document.querySelector('svg');
+      expect(welcomeIcon).toBeInTheDocument();
+    });
+  });
 
-  async function expectProgressiveDisclosure(): Promise<void> {
-    expect(document.body).toBeInTheDocument();
-  }
+  it('hides tutorial content when user progresses beyond first-time', async () => {
+    // Simulate user who has progressed past initial state
+    mockUseLoadingState.mockReturnValue({
+      shouldShowLoading: false,
+      shouldShowEmptyState: false,
+      shouldShowExamplePrompts: false,
+      loadingMessage: ''
+    });
+    
+    render(<MainChat />);
+    
+    // Tutorial content should not be visible
+    expect(screen.queryByText('Get Started in 3 Easy Steps:')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Try typing something like:/)).not.toBeInTheDocument();
+  });
 
-  async function expectContextualHelp(): Promise<void> {
-    expect(document.body).toBeInTheDocument();
-  }
+  it('shows tutorial content with proper animations', async () => {
+    render(<MainChat />);
+    
+    // Wait for content to animate in
+    await waitFor(() => {
+      expect(screen.getByText('Welcome to Netra AI')).toBeInTheDocument();
+    }, { timeout: 1000 });
+    
+    // Verify tutorial sections are present
+    expect(screen.getByText('Get Started in 3 Easy Steps:')).toBeInTheDocument();
+  });
 
-  async function expectClearNextSteps(): Promise<void> {
-    expect(document.body).toBeInTheDocument();
-  }
-
-  async function expectConsistentHelpPatterns(): Promise<void> {
-    expect(document.body).toBeInTheDocument();
-  }
-
-  async function expectDocumentationAccess(): Promise<void> {
-    expect(document.body).toBeInTheDocument();
-  }
-
-  async function expectSupportAccess(): Promise<void> {
-    expect(document.body).toBeInTheDocument();
-  }
-
-  async function expectPersistentHelpContext(): Promise<void> {
-    expect(document.body).toBeInTheDocument();
-  }
+  it('maintains tutorial visibility during loading states', async () => {
+    // Show loading but still display tutorial when appropriate
+    mockUseLoadingState.mockReturnValue({
+      shouldShowLoading: false,
+      shouldShowEmptyState: true,
+      shouldShowExamplePrompts: true,
+      loadingMessage: 'Initializing...'
+    });
+    
+    render(<MainChat />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('Welcome to Netra AI')).toBeInTheDocument();
+      expect(screen.getByText('Get Started in 3 Easy Steps:')).toBeInTheDocument();
+    });
+  });
 });

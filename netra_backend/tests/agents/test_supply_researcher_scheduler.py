@@ -2,37 +2,27 @@
 Tests for SupplyResearchScheduler functionality
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from background import BackgroundTaskManager
+from netra_backend.app.background import BackgroundTaskManager
 
 from netra_backend.app.agents.supply_researcher_sub_agent import (
     ResearchType,
     SupplyResearcherAgent,
 )
 
-# Add project root to path
 from netra_backend.app.services.supply_research_scheduler import (
     ResearchSchedule,
     ScheduleFrequency,
-    # Add project root to path
     SupplyResearchScheduler,
 )
-
 
 class TestSupplyResearchScheduler:
     """Test suite for SupplyResearchScheduler"""
@@ -76,6 +66,7 @@ class TestSupplyResearchScheduler:
         # Set next run to future
         schedule.next_run = datetime.now(UTC) + timedelta(hours=1)
         assert not schedule.should_run()
+    @pytest.mark.asyncio
     async def test_scheduler_execute_research(self):
         """Test executing scheduled research task"""
         background_manager = BackgroundTaskManager()
@@ -151,6 +142,7 @@ class TestSupplyResearchScheduler:
         assert all("name" in s for s in status)
         assert all("frequency" in s for s in status)
         assert all("next_run" in s for s in status)
+    @pytest.mark.asyncio
     async def test_scheduler_agent_integration(self):
         """Test scheduler integration with agent"""
         background_manager = BackgroundTaskManager()

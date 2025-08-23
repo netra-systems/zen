@@ -1,9 +1,11 @@
 /**
  * Auth Service Configuration
  * Centralized configuration for auth service endpoints
+ * Now supports dynamic port discovery in development environments
  */
 
-import { logger } from '@/utils/debug-logger';
+import { logger } from '@/lib/logger';
+import { serviceDiscovery } from './service-discovery';
 
 interface AuthServiceConfig {
   baseUrl: string;
@@ -23,10 +25,11 @@ interface AuthServiceConfig {
     redirectUri: string;
     javascriptOrigins: string[];
   };
+  dynamic?: boolean; // Whether URL was discovered dynamically
 }
 
 /**
- * Get auth service configuration based on environment
+ * Get auth service configuration based on environment (synchronous)
  */
 export function getAuthServiceConfig(): AuthServiceConfig {
   const env = process.env.NODE_ENV;
@@ -79,13 +82,95 @@ export function getAuthServiceConfig(): AuthServiceConfig {
 }
 
 /**
+ * Get auth service configuration with dynamic discovery (async)
+ */
+export async function getAuthServiceConfigAsync(): Promise<AuthServiceConfig> {
+  const env = process.env.NODE_ENV;
+  const authServiceUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
+  
+  try {
+    // Only use service discovery in development
+    if ((process.env.NEXT_PUBLIC_ENVIRONMENT || 'development') === 'development' && !authServiceUrl) {
+      logger.debug('Attempting dynamic auth service discovery');
+      
+      const authUrl = await serviceDiscovery.getAuthUrl();
+      
+      const config: AuthServiceConfig = {
+        baseUrl: authUrl,
+        endpoints: {
+          login: `${authUrl}/auth/login`,
+          logout: `${authUrl}/auth/logout`,
+          callback: `${authUrl}/auth/callback`,
+          token: `${authUrl}/auth/token`,
+          refresh: `${authUrl}/auth/refresh`,
+          validate_token: `${authUrl}/auth/validate`,
+          config: `${authUrl}/auth/config`,
+          session: `${authUrl}/auth/session`,
+          me: `${authUrl}/auth/me`,
+        },
+        oauth: {
+          googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+          redirectUri: env === 'staging' || process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' 
+            ? 'https://app.staging.netrasystems.ai/auth/callback'
+            : `${typeof window !== 'undefined' ? window.location.origin : authUrl}/auth/callback`,
+          javascriptOrigins: [
+            authUrl,
+            typeof window !== 'undefined' ? window.location.origin : '',
+            env === 'staging' || process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ? 'https://app.staging.netrasystems.ai' : '',
+          ].filter(Boolean),
+        },
+        dynamic: true,
+      };
+
+      logger.info('Dynamic auth service discovery successful:', { authUrl });
+      return config;
+    }
+  } catch (error) {
+    logger.warn('Auth service discovery failed, falling back to static config:', error);
+  }
+
+  // Fall back to static config
+  return getAuthServiceConfig();
+}
+
+/**
  * Auth service API client
  */
 export class AuthServiceClient {
   private config: AuthServiceConfig;
+  private dynamicConfig: Promise<AuthServiceConfig> | null = null;
   
   constructor() {
     this.config = getAuthServiceConfig();
+  }
+
+  /**
+   * Initialize with dynamic configuration (call this in development)
+   */
+  async initWithDynamicConfig(): Promise<void> {
+    try {
+      this.config = await getAuthServiceConfigAsync();
+      logger.debug('Auth service client initialized with dynamic config');
+    } catch (error) {
+      logger.warn('Failed to initialize with dynamic config, using static config:', error);
+    }
+  }
+
+  /**
+   * Get current configuration (sync)
+   */
+  getConfig(): AuthServiceConfig {
+    return this.config;
+  }
+
+  /**
+   * Get dynamic configuration (async)
+   */
+  async getDynamicConfig(): Promise<AuthServiceConfig> {
+    if (!this.dynamicConfig) {
+      this.dynamicConfig = getAuthServiceConfigAsync();
+    }
+    return this.dynamicConfig;
   }
   
   /**

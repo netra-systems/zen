@@ -3,17 +3,10 @@ Collaboration and authentication critical end-to-end tests.
 Tests 7-8: Authentication/authorization, multi-agent collaboration.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Add netra_backend to path  
 
 import asyncio
 import uuid
@@ -22,15 +15,12 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
 from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
-# Add project root to path
-
-
 class TestAgentE2ECriticalCollaboration(AgentE2ETestBase):
     """Collaboration and authentication critical tests"""
+    @pytest.mark.asyncio
     async def test_7_authentication_and_authorization(self, setup_agent_infrastructure):
         """
         Test Case 7: Authentication and Authorization
@@ -176,6 +166,7 @@ class TestAgentE2ECriticalCollaboration(AgentE2ETestBase):
             opt_start = opt_events[0]["start"]
             time_diff = abs((data_start - opt_start).total_seconds())
             assert time_diff < 1.0  # Started within 1 second of each other
+    @pytest.mark.asyncio
     async def test_8_multi_agent_collaboration(self, setup_agent_infrastructure):
         """
         Test Case 8: Multi-agent Collaboration

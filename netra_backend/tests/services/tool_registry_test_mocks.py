@@ -11,14 +11,12 @@ from langchain_core.tools import BaseTool
 
 from netra_backend.app.core.exceptions_base import NetraException
 
-
 class ToolStatus(Enum):
     """Enumeration for tool status states"""
     ACTIVE = "active"
     INACTIVE = "inactive" 
     DEPRECATED = "deprecated"
     MAINTENANCE = "maintenance"
-
 
 class MockAdvancedTool(BaseTool):
     """Advanced mock tool with lifecycle management"""
@@ -90,12 +88,10 @@ class MockAdvancedTool(BaseTool):
         """Calculate tool uptime in seconds"""
         return (datetime.now(UTC) - self.initialization_time).total_seconds()
 
-
 def create_mock_tool(name: str, **kwargs) -> MockAdvancedTool:
     """Factory function to create mock tools"""
     description = kwargs.get('description', f"Mock tool: {name}")
     return MockAdvancedTool(name=name, description=description, **kwargs)
-
 
 def create_test_tools(count: int = 3) -> List[MockAdvancedTool]:
     """Create a list of test tools"""
@@ -105,16 +101,13 @@ def create_test_tools(count: int = 3) -> List[MockAdvancedTool]:
         tools.append(tool)
     return tools
 
-
 def create_tool_with_dependencies(name: str, dependencies: List[str]) -> MockAdvancedTool:
     """Create tool with specified dependencies"""
     return create_mock_tool(name, dependencies=dependencies)
 
-
 def assert_tool_status(tool: MockAdvancedTool, expected_status: ToolStatus) -> None:
     """Assert tool has expected status"""
     assert tool.status == expected_status
-
 
 def assert_tool_called(tool: MockAdvancedTool, expected_count: int = None) -> None:
     """Assert tool was called expected number of times"""

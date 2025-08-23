@@ -1,28 +1,19 @@
 """Unit tests for ToolDispatcher advanced operations."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from .tool_dispatcher_assertions import (
+from netra_backend.tests.tool_dispatcher_assertions import (
     assert_execution_error_response,
 )
-from .tool_dispatcher_helpers import (
-    # Add project root to path
+from netra_backend.tests.helpers.tool_dispatcher_helpers import (
     create_mock_tool,
     create_test_state,
     verify_dispatch_response_error,
@@ -30,14 +21,15 @@ from .tool_dispatcher_helpers import (
     verify_metadata,
 )
 
-
 class TestToolDispatcherAdvancedOperations:
     """Test advanced dispatcher operations."""
+    @pytest.mark.asyncio
     async def test_dispatch_tool_success(self):
         """Test dispatch_tool method with success."""
         tool, dispatcher, state = self._setup_dispatch_tool_success()
         result = await dispatcher.dispatch_tool("test_tool", {"param": "value"}, state, "run_123")
         self._verify_dispatch_tool_success(result)
+    @pytest.mark.asyncio
     async def test_dispatch_tool_not_found(self):
         """Test dispatch_tool with non-existent tool."""
         dispatcher, state = self._setup_dispatch_tool_not_found()
@@ -49,26 +41,31 @@ class TestToolDispatcherAdvancedOperations:
         dispatcher = ToolDispatcher()
         response = dispatcher._create_tool_not_found_response("missing_tool", "run_123")
         self._verify_tool_not_found_response(response)
+    @pytest.mark.asyncio
     async def test_execute_tool_with_error_handling_success(self):
         """Test _execute_tool_with_error_handling with success."""
         tool, dispatcher, state = self._setup_execute_with_error_handling_success()
         response = await dispatcher._execute_tool_with_error_handling(tool, "test_tool", {"param": "value"}, state, "run_123")
         verify_dispatch_response_success(response)
+    @pytest.mark.asyncio
     async def test_execute_tool_with_error_handling_failure(self):
         """Test _execute_tool_with_error_handling with failure."""
         failing_tool, dispatcher, state = self._setup_execute_with_error_handling_failure()
         response = await dispatcher._execute_tool_with_error_handling(failing_tool, "failing_tool", {"param": "value"}, state, "run_123")
         verify_dispatch_response_error(response, "Tool failing_tool failed")
+    @pytest.mark.asyncio
     async def test_execute_tool_by_type_production_tool(self):
         """Test _execute_tool_by_type with ProductionTool."""
         dispatcher, production_tool, state = self._setup_production_tool_test()
         result = await dispatcher._execute_tool_by_type(production_tool, {"param": "value"}, state, "run_123")
         self._verify_production_tool_result(result, production_tool)
+    @pytest.mark.asyncio
     async def test_execute_tool_by_type_async_tool(self):
         """Test _execute_tool_by_type with async tool."""
         dispatcher, async_tool = self._setup_async_tool_test()
         result = await dispatcher._execute_tool_by_type(async_tool, {"param": "value"}, None, "run_123")
         self._verify_async_tool_result(result)
+    @pytest.mark.asyncio
     async def test_execute_tool_by_type_sync_tool(self):
         """Test _execute_tool_by_type with sync tool."""
         dispatcher, sync_tool = self._setup_sync_tool_test()

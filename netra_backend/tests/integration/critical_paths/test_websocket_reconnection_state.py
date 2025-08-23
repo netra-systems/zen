@@ -24,21 +24,10 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -53,21 +42,15 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-
-
 logger = central_logger.get_logger(__name__)
-
 
 class WebSocketStateManager:
 
     """Manage WebSocket connection state for reconnection scenarios."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -88,7 +71,6 @@ class WebSocketStateManager:
 
         }
     
-
     async def save_connection_state(self, session_id: str, state_data: Dict[str, Any]) -> bool:
 
         """Save connection state to Redis for reconnection."""
@@ -107,7 +89,6 @@ class WebSocketStateManager:
 
             }
             
-
             await self.redis.hset(state_key, mapping={
 
                 k: json.dumps(v) if isinstance(v, (dict, list)) else str(v)
@@ -118,21 +99,18 @@ class WebSocketStateManager:
 
             await self.redis.expire(state_key, self.state_expiry)
             
-
             self.active_states[session_id] = state_with_timestamp
 
             self.metrics["states_created"] += 1
 
             return True
             
-
         except Exception as e:
 
             logger.error(f"Failed to save state for {session_id}: {e}")
 
             return False
     
-
     async def restore_connection_state(self, session_id: str) -> Optional[Dict[str, Any]]:
 
         """Restore connection state from Redis."""
@@ -143,7 +121,6 @@ class WebSocketStateManager:
 
             stored_state = await self.redis.hgetall(state_key)
             
-
             if not stored_state:
 
                 return None
@@ -174,21 +151,18 @@ class WebSocketStateManager:
 
                 return None
             
-
             self.metrics["states_restored"] += 1
 
             self.metrics["reconnections"] += 1
 
             return parsed_state
             
-
         except Exception as e:
 
             logger.error(f"Failed to restore state for {session_id}: {e}")
 
             return None
     
-
     async def update_state(self, session_id: str, updates: Dict[str, Any]) -> bool:
 
         """Update existing connection state."""
@@ -201,7 +175,6 @@ class WebSocketStateManager:
 
         return False
     
-
     async def cleanup_expired_states(self) -> int:
 
         """Clean up expired connection states."""
@@ -212,7 +185,6 @@ class WebSocketStateManager:
 
         cleaned = 0
         
-
         for key in keys:
 
             ttl = await self.redis.ttl(key)
@@ -223,15 +195,12 @@ class WebSocketStateManager:
 
                 cleaned += 1
         
-
         return cleaned
-
 
 class MessageBuffer:
 
     """Buffer messages during WebSocket disconnection."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -252,7 +221,6 @@ class MessageBuffer:
 
         }
     
-
     async def buffer_message(self, session_id: str, message: Dict[str, Any]) -> bool:
 
         """Buffer message for disconnected session."""
@@ -282,12 +250,10 @@ class MessageBuffer:
 
             }
             
-
             await self.redis.rpush(buffer_key, json.dumps(buffered_message))
 
             await self.redis.expire(buffer_key, self.buffer_expiry)
             
-
             self.metrics["messages_buffered"] += 1
             
             # Track buffer creation
@@ -296,17 +262,14 @@ class MessageBuffer:
 
                 self.metrics["buffers_created"] += 1
             
-
             return True
             
-
         except Exception as e:
 
             logger.error(f"Failed to buffer message for {session_id}: {e}")
 
             return False
     
-
     async def get_buffered_messages(self, session_id: str, limit: int = None) -> List[Dict[str, Any]]:
 
         """Get buffered messages for session replay."""
@@ -315,7 +278,6 @@ class MessageBuffer:
 
             buffer_key = f"msg_buffer:{session_id}"
             
-
             if limit:
 
                 messages = await self.redis.lrange(buffer_key, -limit, -1)
@@ -324,7 +286,6 @@ class MessageBuffer:
 
                 messages = await self.redis.lrange(buffer_key, 0, -1)
             
-
             parsed_messages = []
 
             for msg_str in messages:
@@ -339,17 +300,14 @@ class MessageBuffer:
 
                     continue
             
-
             return parsed_messages
             
-
         except Exception as e:
 
             logger.error(f"Failed to get buffered messages for {session_id}: {e}")
 
             return []
     
-
     async def replay_messages(self, session_id: str, websocket: AsyncMock) -> Dict[str, Any]:
 
         """Replay buffered messages to reconnected client."""
@@ -358,7 +316,6 @@ class MessageBuffer:
 
             messages = await self.get_buffered_messages(session_id)
             
-
             replay_stats = {
 
                 "messages_replayed": 0,
@@ -369,15 +326,12 @@ class MessageBuffer:
 
             }
             
-
             if not messages:
 
                 return replay_stats
             
-
             start_time = time.time()
             
-
             for message in messages:
 
                 try:
@@ -387,7 +341,6 @@ class MessageBuffer:
 
                                    if k not in ["buffered_at", "message_id"]}
                     
-
                     if hasattr(websocket, 'send_json'):
 
                         await websocket.send_json(clean_message)
@@ -396,36 +349,30 @@ class MessageBuffer:
 
                         await websocket.send(json.dumps(clean_message))
                     
-
                     replay_stats["messages_replayed"] += 1
 
                     self.metrics["messages_replayed"] += 1
                     
-
                 except Exception as e:
 
                     logger.error(f"Replay error for message: {e}")
 
                     replay_stats["replay_errors"] += 1
             
-
             replay_stats["replay_duration"] = time.time() - start_time
             
             # Clear buffer after successful replay
 
             await self.clear_buffer(session_id)
             
-
             return replay_stats
             
-
         except Exception as e:
 
             logger.error(f"Failed to replay messages for {session_id}: {e}")
 
             return {"messages_replayed": 0, "replay_errors": 1, "replay_duration": 0}
     
-
     async def clear_buffer(self, session_id: str) -> bool:
 
         """Clear message buffer for session."""
@@ -436,27 +383,22 @@ class MessageBuffer:
 
             deleted = await self.redis.delete(buffer_key)
             
-
             if deleted:
 
                 self.metrics["buffers_flushed"] += 1
             
-
             return deleted > 0
             
-
         except Exception as e:
 
             logger.error(f"Failed to clear buffer for {session_id}: {e}")
 
             return False
 
-
 class ReconnectionHandler:
 
     """Handle WebSocket reconnection logic and coordination."""
     
-
     def __init__(self, state_manager: WebSocketStateManager, message_buffer: MessageBuffer):
 
         self.state_manager = state_manager
@@ -481,7 +423,6 @@ class ReconnectionHandler:
 
         }
     
-
     async def handle_disconnection(self, session_id: str, connection_state: Dict[str, Any]) -> bool:
 
         """Handle WebSocket disconnection by saving state and starting buffer."""
@@ -491,7 +432,6 @@ class ReconnectionHandler:
 
             state_saved = await self.state_manager.save_connection_state(session_id, connection_state)
             
-
             if not state_saved:
 
                 logger.error(f"Failed to save state for disconnected session {session_id}")
@@ -512,24 +452,20 @@ class ReconnectionHandler:
 
             }
             
-
             return True
             
-
         except Exception as e:
 
             logger.error(f"Disconnection handling failed for {session_id}: {e}")
 
             return False
     
-
     async def attempt_reconnection(self, session_id: str, new_websocket: AsyncMock) -> Dict[str, Any]:
 
         """Attempt to reconnect WebSocket and restore state."""
 
         self.metrics["reconnection_attempts"] += 1
         
-
         reconnection_result = {
 
             "success": False,
@@ -542,7 +478,6 @@ class ReconnectionHandler:
 
         }
         
-
         try:
             # Check if we have tracking for this session
 
@@ -552,7 +487,6 @@ class ReconnectionHandler:
 
                 return reconnection_result
             
-
             attempt_info = self.reconnection_attempts[session_id]
             
             # Check attempt limits
@@ -575,14 +509,12 @@ class ReconnectionHandler:
 
             restored_state = await self.state_manager.restore_connection_state(session_id)
             
-
             if not restored_state:
 
                 reconnection_result["error"] = "Failed to restore connection state"
 
                 return reconnection_result
             
-
             reconnection_result["state_restored"] = True
 
             self.metrics["state_restorations"] += 1
@@ -605,10 +537,8 @@ class ReconnectionHandler:
 
             del self.reconnection_attempts[session_id]
             
-
             return reconnection_result
             
-
         except Exception as e:
 
             logger.error(f"Reconnection failed for {session_id}: {e}")
@@ -619,7 +549,6 @@ class ReconnectionHandler:
 
             return reconnection_result
     
-
     async def get_reconnection_status(self, session_id: str) -> Optional[Dict[str, Any]]:
 
         """Get current reconnection status for session."""
@@ -628,12 +557,10 @@ class ReconnectionHandler:
 
             return None
         
-
         attempt_info = self.reconnection_attempts[session_id]
 
         time_since_disconnect = time.time() - attempt_info["disconnected_at"]
         
-
         return {
 
             "session_id": session_id,
@@ -650,7 +577,6 @@ class ReconnectionHandler:
 
         }
     
-
     async def cleanup_stale_sessions(self) -> int:
 
         """Clean up stale reconnection attempts."""
@@ -659,7 +585,6 @@ class ReconnectionHandler:
 
         stale_threshold = 3600  # 1 hour
         
-
         stale_sessions = [
 
             session_id for session_id, info in self.reconnection_attempts.items()
@@ -668,7 +593,6 @@ class ReconnectionHandler:
 
         ]
         
-
         for session_id in stale_sessions:
 
             del self.reconnection_attempts[session_id]
@@ -676,15 +600,12 @@ class ReconnectionHandler:
 
             await self.message_buffer.clear_buffer(session_id)
         
-
         return len(stale_sessions)
-
 
 class WebSocketReconnectionManager:
 
     """Comprehensive WebSocket reconnection management system."""
     
-
     def __init__(self, redis_client: aioredis.Redis):
 
         self.redis = redis_client
@@ -697,7 +618,6 @@ class WebSocketReconnectionManager:
 
         self.active_sessions = {}
     
-
     async def register_session(self, session_id: str, websocket: AsyncMock, initial_state: Dict[str, Any] = None):
 
         """Register new WebSocket session."""
@@ -720,7 +640,6 @@ class WebSocketReconnectionManager:
 
             await self.state_manager.save_connection_state(session_id, initial_state)
     
-
     async def simulate_disconnection(self, session_id: str) -> bool:
 
         """Simulate WebSocket disconnection."""
@@ -729,7 +648,6 @@ class WebSocketReconnectionManager:
 
             return False
         
-
         session_info = self.active_sessions[session_id]
 
         session_info["status"] = "disconnected"
@@ -742,7 +660,6 @@ class WebSocketReconnectionManager:
 
         )
     
-
     async def simulate_message_during_disconnect(self, session_id: str, message: Dict[str, Any]) -> bool:
 
         """Simulate message arriving while client is disconnected."""
@@ -753,7 +670,6 @@ class WebSocketReconnectionManager:
 
         return False
     
-
     async def simulate_reconnection(self, session_id: str, new_websocket: AsyncMock) -> Dict[str, Any]:
 
         """Simulate WebSocket reconnection."""
@@ -764,17 +680,14 @@ class WebSocketReconnectionManager:
 
         )
         
-
         if reconnection_result["success"] and session_id in self.active_sessions:
 
             self.active_sessions[session_id]["websocket"] = new_websocket
 
             self.active_sessions[session_id]["status"] = "connected"
         
-
         return reconnection_result
     
-
     async def get_comprehensive_metrics(self) -> Dict[str, Any]:
 
         """Get comprehensive metrics across all components."""
@@ -792,7 +705,6 @@ class WebSocketReconnectionManager:
             "disconnected_sessions": len([s for s in self.active_sessions.values() if s["status"] == "disconnected"])
 
         }
-
 
 @pytest.fixture
 
@@ -839,7 +751,6 @@ async def redis_client():
 
         yield client
 
-
 @pytest.fixture
 
 async def reconnection_manager(redis_client):
@@ -847,7 +758,6 @@ async def reconnection_manager(redis_client):
     """Create WebSocket reconnection manager."""
 
     return WebSocketReconnectionManager(redis_client)
-
 
 @pytest.mark.asyncio
 
@@ -895,7 +805,6 @@ async def test_connection_state_preservation(reconnection_manager):
 
     assert restored_state["preferences"]["theme"] == "dark"
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.integration
@@ -928,7 +837,6 @@ async def test_message_buffering_during_disconnect(reconnection_manager):
 
     ]
     
-
     for message in test_messages:
 
         buffer_success = await reconnection_manager.simulate_message_during_disconnect(session_id, message)
@@ -942,7 +850,6 @@ async def test_message_buffering_during_disconnect(reconnection_manager):
     assert len(buffered_messages) == 3
 
     assert buffered_messages[0]["content"] == "Message 1"
-
 
 @pytest.mark.asyncio
 
@@ -978,7 +885,6 @@ async def test_successful_reconnection_with_state_restoration(reconnection_manag
 
     reconnection_result = await reconnection_manager.simulate_reconnection(session_id, new_websocket)
     
-
     assert reconnection_result["success"] is True
 
     assert reconnection_result["state_restored"] is True
@@ -994,7 +900,6 @@ async def test_successful_reconnection_with_state_restoration(reconnection_manag
     elif hasattr(new_websocket, 'send'):
 
         new_websocket.send.assert_called_once()
-
 
 @pytest.mark.asyncio
 
@@ -1030,17 +935,14 @@ async def test_reconnection_attempt_limits(reconnection_manager):
 
         result = await reconnection_manager.simulate_reconnection(session_id, new_websocket)
         
-
         if not result["success"]:
 
             failed_attempts += 1
         
-
         if "Max reconnection attempts exceeded" in result.get("error", ""):
 
             break
     
-
     assert failed_attempts > 0
     
     # Check reconnection status
@@ -1048,7 +950,6 @@ async def test_reconnection_attempt_limits(reconnection_manager):
     status = await reconnection_manager.reconnection_handler.get_reconnection_status(session_id)
 
     assert status is None or status["attempts"] >= reconnection_manager.reconnection_handler.max_reconnection_attempts
-
 
 @pytest.mark.asyncio
 
@@ -1074,7 +975,6 @@ async def test_message_buffer_size_limits(reconnection_manager):
 
     buffer_size = reconnection_manager.message_buffer.max_buffer_size
     
-
     for i in range(buffer_size + 10):  # Exceed buffer limit
 
         message = {"type": "overflow_test", "content": f"Message {i}", "sequence": i}
@@ -1086,7 +986,6 @@ async def test_message_buffer_size_limits(reconnection_manager):
     buffered_messages = await reconnection_manager.message_buffer.get_buffered_messages(session_id)
 
     assert len(buffered_messages) <= buffer_size
-
 
 @pytest.mark.asyncio
 
@@ -1124,7 +1023,6 @@ async def test_concurrent_reconnection_attempts(reconnection_manager):
 
         return await reconnection_manager.simulate_reconnection(session_id, new_websocket)
     
-
     start_time = time.time()
 
     tasks = [attempt_reconnection(session_id) for session_id in sessions]
@@ -1140,7 +1038,6 @@ async def test_concurrent_reconnection_attempts(reconnection_manager):
     successful_reconnections = sum(1 for result in results if result["success"])
 
     assert successful_reconnections == session_count
-
 
 @pytest.mark.asyncio
 
@@ -1176,11 +1073,9 @@ async def test_state_expiration_handling(reconnection_manager):
 
     result = await reconnection_manager.simulate_reconnection(session_id, new_websocket)
     
-
     assert result["success"] is False
 
     assert "Failed to restore connection state" in result.get("error", "")
-
 
 @pytest.mark.asyncio
 
@@ -1230,7 +1125,6 @@ async def test_message_replay_ordering(reconnection_manager):
 
     result = await reconnection_manager.simulate_reconnection(session_id, new_websocket)
     
-
     assert result["success"] is True
 
     assert result["messages_replayed"] == 5
@@ -1242,7 +1136,6 @@ async def test_message_replay_ordering(reconnection_manager):
         call_args = new_websocket.send_json.call_args_list
 
         assert len(call_args) == 5
-
 
 @pytest.mark.asyncio
 
@@ -1281,7 +1174,6 @@ async def test_cleanup_stale_sessions(reconnection_manager):
 
     cleaned_count = await reconnection_manager.reconnection_handler.cleanup_stale_sessions()
     
-
     assert cleaned_count == len(session_ids)
     
     # Verify sessions were cleaned up
@@ -1289,7 +1181,6 @@ async def test_cleanup_stale_sessions(reconnection_manager):
     for session_id in session_ids:
 
         assert session_id not in reconnection_manager.reconnection_handler.reconnection_attempts
-
 
 @pytest.mark.asyncio
 
@@ -1317,7 +1208,6 @@ async def test_comprehensive_metrics_tracking(reconnection_manager):
 
     await reconnection_manager.simulate_message_during_disconnect(session_id, {"type": "test", "content": "metrics"})
     
-
     new_websocket = AsyncMock()
 
     await reconnection_manager.simulate_reconnection(session_id, new_websocket)
@@ -1326,7 +1216,6 @@ async def test_comprehensive_metrics_tracking(reconnection_manager):
 
     final_metrics = await reconnection_manager.get_comprehensive_metrics()
     
-
     assert final_metrics["state_manager"]["states_created"] > initial_metrics["state_manager"]["states_created"]
 
     assert final_metrics["message_buffer"]["messages_buffered"] > initial_metrics["message_buffer"]["messages_buffered"]

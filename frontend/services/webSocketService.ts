@@ -985,7 +985,10 @@ class WebSocketService {
     }
     
     logger.debug('Creating secure WebSocket with authentication and compression support', {
-      protocols: protocols.map(p => p.startsWith('jwt.') ? 'jwt.[token]' : p)
+      url: url,
+      protocols: protocols.map(p => p.startsWith('jwt.') ? 'jwt.[token]' : p),
+      tokenPrefix: cleanToken.substring(0, 10) + '...',
+      encodedTokenLength: encodedToken.length
     });
     
     return new WebSocket(url, protocols);
@@ -1283,9 +1286,10 @@ class WebSocketService {
     urlObj.searchParams.delete('auth');
     urlObj.searchParams.delete('jwt');
     
-    // Use secure WebSocket endpoint
-    if (urlObj.pathname === '/ws' || urlObj.pathname.endsWith('/ws')) {
-      urlObj.pathname = urlObj.pathname.replace(/\/ws$/, '/ws/secure');
+    // Use unified WebSocket endpoint 
+    // All WebSocket connections now use the single unified '/ws' endpoint
+    if (urlObj.pathname !== '/ws') {
+      urlObj.pathname = '/ws';
     }
     
     return urlObj.toString();

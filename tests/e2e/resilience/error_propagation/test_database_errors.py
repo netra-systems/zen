@@ -24,13 +24,12 @@ from tests.e2e.integration.fixtures.error_propagation_fixtures import (
     test_user,
 )
 
-
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestDatabaseErrorHandling:
     """Test database error handling and recovery."""
     
-    async def test_connection_timeout_handling(self, service_orchestrator, real_http_client,
+    async def test_connection_timeout_handling(self, service_orchestrator, real_http_client:
                                              error_correlation_context):
         """Test database connection timeout handling."""
         # Attempt operation that might timeout
@@ -44,7 +43,7 @@ class TestDatabaseErrorHandling:
         if not response.success:
             assert "timeout" in response.error.lower() or "connection" in response.error.lower()
         
-    async def test_query_failure_recovery(self, service_orchestrator, real_http_client,
+    async def test_query_failure_recovery(self, service_orchestrator, real_http_client:
                                         error_correlation_context):
         """Test recovery from query failures."""
         # Send invalid query
@@ -67,7 +66,7 @@ class TestDatabaseErrorHandling:
         # Should recover
         assert valid_response.success or valid_response.status_code == 200
         
-    async def test_transaction_rollback(self, service_orchestrator, real_http_client,
+    async def test_transaction_rollback(self, service_orchestrator, real_http_client:
                                       error_correlation_context):
         """Test transaction rollback on errors."""
         # Attempt operation that should rollback on failure
@@ -86,7 +85,7 @@ class TestDatabaseErrorHandling:
         if not response.success:
             assert "transaction" in response.error.lower() or "rollback" in response.error.lower()
             
-    async def test_concurrent_database_errors(self, service_orchestrator, real_http_client,
+    async def test_concurrent_database_errors(self, service_orchestrator, real_http_client:
                                             error_correlation_context):
         """Test handling of concurrent database errors."""
         # Create multiple potentially failing operations
@@ -105,7 +104,7 @@ class TestDatabaseErrorHandling:
         successful_count = sum(1 for r in results if hasattr(r, 'success') and r.success)
         assert successful_count >= 0  # System should remain functional
         
-    async def test_connection_pool_exhaustion(self, service_orchestrator, real_http_client,
+    async def test_connection_pool_exhaustion(self, service_orchestrator, real_http_client:
                                             error_correlation_context):
         """Test handling of connection pool exhaustion."""
         # Create many concurrent requests to exhaust pool
@@ -125,7 +124,7 @@ class TestDatabaseErrorHandling:
         # Some errors are acceptable under load
         assert error_count <= 15  # Most should succeed or fail gracefully
         
-    async def test_deadlock_detection(self, service_orchestrator, real_http_client,
+    async def test_deadlock_detection(self, service_orchestrator, real_http_client:
                                     error_correlation_context):
         """Test deadlock detection and resolution."""
         # Attempt operations that might cause deadlock

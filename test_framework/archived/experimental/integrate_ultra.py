@@ -20,7 +20,7 @@ def integrate_ultra_optimization(runner, args) -> bool:
         return False
     
     # Import ultra orchestrator
-    from .ultra_test_orchestrator import UltraTestOrchestrator
+    from test_framework.archived.experimental.ultra_test_orchestrator import UltraTestOrchestrator
     
     # Run with ultra optimization
     print("\n🚀 ULTRA OPTIMIZATION ENABLED - 100x Performance Mode")

@@ -11,17 +11,10 @@ L3 Test: Uses multiple PostgreSQL containers to simulate primary-replica setup
 and validate read routing, load balancing, and failover mechanisms.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import random
@@ -41,7 +34,6 @@ from testcontainers.postgres import PostgresContainer
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-
 
 class ReadReplicaRoutingManager:
     """Manages read replica routing testing with multiple PostgreSQL containers."""
@@ -621,7 +613,6 @@ class ReadReplicaRoutingManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def replica_manager():
     """Create read replica routing manager for testing."""
@@ -629,7 +620,6 @@ async def replica_manager():
     await manager.setup_primary_replica_containers(2)
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -680,7 +670,6 @@ class TestDatabaseReadReplicaRoutingL3:
         # Failed reads should be minimal
         failure_rate = result["failed_reads"] / result["concurrent_readers"]
         assert failure_rate < 0.3  # Less than 30% failure rate
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

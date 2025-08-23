@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 # Add auth service to path
 auth_service_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(auth_service_dir))
-from main import app
+from auth_service.main import app
 
 from auth_service.auth_core.models.auth_models import AuthProvider
 
@@ -178,7 +178,7 @@ def test_oauth_token_exchange_mocked(mock_client):
     mock_async_client.get.return_value = user_response
     
     # Test callback with mocked responses
-    response = client.get("/auth/callback?code=test_code&state=test_state")
+    response = client.get("/auth/callback?code=test_code&state=test_state", follow_redirects=False)
     
     # Should handle the mocked OAuth flow
     assert response.status_code in [302, 500]  # Redirect or server error

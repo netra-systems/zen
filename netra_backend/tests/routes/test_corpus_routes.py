@@ -9,17 +9,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: Improved agent accuracy drives customer satisfaction and retention
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from contextlib import asynccontextmanager
 from unittest.mock import MagicMock, patch
@@ -29,14 +22,11 @@ import pytest
 from netra_backend.app.config import get_config
 from netra_backend.app.services.key_manager import KeyManager
 
-# Add project root to path
 from netra_backend.app.services.security_service import SecurityService
-from .test_route_fixtures import (
+from netra_backend.tests.test_route_fixtures import (
     TEST_DOCUMENT_DATA,
-    # Add project root to path
     CommonResponseValidators,
 )
-
 
 class TestCorpusRoute:
     """Test corpus CRUD operations and search functionality."""

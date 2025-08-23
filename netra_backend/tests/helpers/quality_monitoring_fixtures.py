@@ -19,7 +19,6 @@ from netra_backend.app.services.quality_monitoring_service import (
     QualityTrend,
 )
 
-
 @pytest.fixture
 def mock_redis_manager():
     """Mock Redis manager"""
@@ -29,7 +28,6 @@ def mock_redis_manager():
     redis_manager.store_agent_profile = AsyncMock()
     return redis_manager
 
-
 @pytest.fixture
 def mock_clickhouse_manager():
     """Mock ClickHouse manager"""
@@ -38,12 +36,10 @@ def mock_clickhouse_manager():
     clickhouse_manager.batch_insert_quality_events = AsyncMock()
     return clickhouse_manager
 
-
 @pytest.fixture
 def mock_db_session():
     """Mock database session"""
     return AsyncMock()
-
 
 @pytest.fixture
 def quality_monitoring_service(mock_redis_manager, mock_clickhouse_manager, mock_db_session):
@@ -54,12 +50,10 @@ def quality_monitoring_service(mock_redis_manager, mock_clickhouse_manager, mock
         db_session=mock_db_session
     )
 
-
 @pytest.fixture
 def real_quality_monitoring_service():
     """Create real service for testing actual methods"""
     return QualityMonitoringService()
-
 
 @pytest.fixture
 def service_with_mocks():
@@ -68,7 +62,6 @@ def service_with_mocks():
     service.redis_manager = AsyncMock()
     service.clickhouse_manager = AsyncMock()
     return service
-
 
 @pytest.fixture
 def sample_quality_metrics():
@@ -86,7 +79,6 @@ def sample_quality_metrics():
         issues=[]
     )
 
-
 @pytest.fixture
 def poor_quality_metrics():
     """Poor quality metrics for testing alerts"""
@@ -103,7 +95,6 @@ def poor_quality_metrics():
         issues=["Low quality", "Generic content"]
     )
 
-
 @pytest.fixture
 def minimal_quality_metrics():
     """Minimal quality metrics for testing"""
@@ -111,7 +102,6 @@ def minimal_quality_metrics():
         overall_score=0.5,
         quality_level=QualityLevel.ACCEPTABLE
     )
-
 
 @pytest.fixture
 def sample_quality_alert():
@@ -127,7 +117,6 @@ def sample_quality_alert():
         threshold=0.5
     )
 
-
 @pytest.fixture
 def test_quality_thresholds():
     """Test quality thresholds"""
@@ -137,7 +126,6 @@ def test_quality_thresholds():
         "max_error_rate": 0.05
     }
 
-
 @pytest.fixture
 def custom_config():
     """Custom configuration for service"""
@@ -146,7 +134,6 @@ def custom_config():
         "monitoring_interval": 30,
         "retention_days": 30
     }
-
 
 @pytest.fixture
 def sample_response_data():
@@ -158,7 +145,6 @@ def sample_response_data():
         "tokens": 150
     }
 
-
 @pytest.fixture
 def batch_responses():
     """Batch response data for testing"""
@@ -167,7 +153,6 @@ def batch_responses():
         {"id": 2, "confidence": 0.85},
         {"id": 3, "confidence": 0.95}
     ]
-
 
 @pytest.fixture
 def error_data():
@@ -179,12 +164,10 @@ def error_data():
         "severity": "high"
     }
 
-
 @pytest.fixture
 def historical_data():
     """Historical data for trend analysis"""
     return [0.85, 0.9, 0.88, 0.92, 0.87]
-
 
 @pytest.fixture
 def sla_targets():
@@ -195,7 +178,6 @@ def sla_targets():
         "error_rate": 0.01
     }
 
-
 @pytest.fixture
 def actual_metrics():
     """Actual metrics for SLA testing"""
@@ -205,12 +187,10 @@ def actual_metrics():
         "error_rate": 0.008
     }
 
-
 @pytest.fixture
 def anomaly_values():
     """Values with anomalies for detection testing"""
     return [0.9, 0.88, 0.91, 0.89, 0.3, 0.92, 0.87, 1.5]
-
 
 @pytest.fixture
 def response_times():

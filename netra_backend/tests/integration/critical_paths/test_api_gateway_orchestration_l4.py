@@ -12,17 +12,10 @@ Request routing -> Authentication validation -> Rate limiting -> Caching -> Circ
 Coverage: Real nginx/envoy gateway, JWT validation, Redis rate limiting, response caching, staging validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -37,34 +30,32 @@ import httpx
 import jwt
 import pytest
 
-# Add project root to path
-
-
-from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
-StagingTestSuite = AsyncMock
-get_staging_suite = AsyncMock
-# from auth_integration import create_access_token, validate_token_jwt
-# from netra_backend.app.auth_integration.auth import create_access_token
+# Import from correct e2e path or use mocks if not available
+try:
+    from e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+except ImportError:
+    StagingTestSuite = AsyncMock
+    get_staging_suite = AsyncMock
+# from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
+# from app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
 
 from netra_backend.app.redis_manager import RedisManager
 
 create_access_token = AsyncMock()
-# from netra_backend.app.core.unified.jwt_validator import validate_token_jwt
+# from app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock
 
 validate_token_jwt = AsyncMock()
 from netra_backend.app.core.health_checkers import HealthChecker
-
 
 # Mock API gateway components for L4 testing
 class GatewayManager:
     """Mock gateway manager for L4 testing."""
     async def initialize(self): pass
     async def shutdown(self): pass
-
 
 class RouteManager:
     """Mock route manager for L4 testing."""
@@ -73,24 +64,20 @@ class RouteManager:
     
     async def register_route(self, route): pass
 
-
 class CircuitBreakerManager:
     """Mock circuit breaker manager for L4 testing."""
     async def initialize(self): pass
     async def shutdown(self): pass
-
 
 class ResponseCache:
     """Mock response cache for L4 testing."""
     async def initialize(self): pass
     async def shutdown(self): pass
 
-
 class RedisCache:
     """Mock Redis cache for L4 testing."""
     async def initialize(self): pass
     async def close(self): pass
-
 
 @dataclass
 class APIGatewayMetrics:
@@ -103,7 +90,6 @@ class APIGatewayMetrics:
     average_response_time: float
     circuit_breaker_activations: int
 
-
 @dataclass
 class GatewayRoute:
     """API gateway route configuration."""
@@ -114,7 +100,6 @@ class GatewayRoute:
     rate_limit: int
     cache_ttl: int
     circuit_breaker_enabled: bool
-
 
 class APIGatewayOrchestrationL4TestSuite:
     """L4 test suite for API gateway orchestration in staging environment."""
@@ -637,7 +622,6 @@ class APIGatewayOrchestrationL4TestSuite:
         except Exception as e:
             print(f"L4 API gateway cleanup failed: {e}")
 
-
 @pytest.fixture
 async def api_gateway_orchestration_l4_suite():
     """Create L4 API gateway orchestration test suite."""
@@ -645,7 +629,6 @@ async def api_gateway_orchestration_l4_suite():
     await suite.initialize_l4_environment()
     yield suite
     await suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -664,7 +647,6 @@ async def test_api_gateway_authentication_flow_l4(api_gateway_orchestration_l4_s
     if auth_results["auth_response_times"]:
         avg_auth_time = sum(auth_results["auth_response_times"]) / len(auth_results["auth_response_times"])
         assert avg_auth_time < 2.0, f"Authentication response time too slow: {avg_auth_time}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging  
@@ -686,7 +668,6 @@ async def test_api_gateway_rate_limiting_l4(api_gateway_orchestration_l4_suite):
         avg_rate_limit_time = sum(rate_limit_results["rate_limit_response_times"]) / len(rate_limit_results["rate_limit_response_times"])
         assert avg_rate_limit_time < 1.0, f"Rate limiting response time too slow: {avg_rate_limit_time}s"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
@@ -701,7 +682,6 @@ async def test_api_gateway_response_caching_l4(api_gateway_orchestration_l4_suit
     
     # Caching should improve response times
     assert caching_results["cache_response_improvement"] >= 0.2, "Caching not improving response times significantly"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -723,7 +703,6 @@ async def test_api_gateway_circuit_breaker_l4(api_gateway_orchestration_l4_suite
         # Recovery should be attempted when circuit breaker opens
         assert circuit_breaker_results["recovery_attempts"] <= 5, "Too many recovery attempts"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
@@ -740,7 +719,6 @@ async def test_api_gateway_request_routing_l4(api_gateway_orchestration_l4_suite
     if routing_results["routing_latencies"]:
         avg_routing_latency = sum(routing_results["routing_latencies"]) / len(routing_results["routing_latencies"])
         assert avg_routing_latency < 1.0, f"Request routing latency too high: {avg_routing_latency}s"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -797,7 +775,6 @@ async def test_api_gateway_performance_under_load_l4(api_gateway_orchestration_l
     # Validate throughput
     throughput = len(successful_requests) / total_performance_time
     assert throughput >= 2.0, f"API gateway throughput too low: {throughput} requests/second"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

@@ -11,17 +11,10 @@ Coverage: Real configuration namespaces, database row-level security, Redis cach
 L3 Realism: Tests against actual database constraints, Redis namespaces, configuration hot reload systems
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -42,17 +35,13 @@ from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas.UserPlan import PlanTier
 from netra_backend.app.services.audit_service import AuditService
 
-# Add project root to path
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.database.session_manager import SessionManager
 from netra_backend.app.services.metrics.analytics_collector import AnalyticsCollector
 from netra_backend.app.services.user_service import user_service as UserService
 from test_framework.test_config import configure_dedicated_test_environment
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class TenantIsolationMetrics:
@@ -72,7 +61,6 @@ class TenantIsolationMetrics:
     def __post_init__(self):
         if self.config_response_times is None:
             self.config_response_times = []
-
 
 class MultiTenantConfigIsolationL3Manager:
     """L3 multi-tenant configuration isolation test manager with real service integration."""
@@ -984,7 +972,6 @@ class MultiTenantConfigIsolationL3Manager:
         except Exception as e:
             logger.error(f"L3 multi-tenant isolation cleanup failed: {e}")
 
-
 @pytest.fixture
 async def multi_tenant_isolation_l3():
     """Create L3 multi-tenant configuration isolation manager."""
@@ -992,7 +979,6 @@ async def multi_tenant_isolation_l3():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3
@@ -1014,7 +1000,6 @@ async def test_configuration_namespace_complete_isolation(multi_tenant_isolation
     assert result["config_b_accessible"], "Tenant B cannot access its own configuration"
     assert not any(attempt["access_granted"] for attempt in result["cross_access_attempts"]), \
         "Cross-tenant configuration access was granted"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3
@@ -1044,7 +1029,6 @@ async def test_data_residency_gdpr_compliance(multi_tenant_isolation_l3):
     assert eu_result["analytics_residency"]["compliant"], "EU analytics residency failed"
     assert us_result["encryption_residency"]["compliant"], "US encryption residency failed"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
@@ -1065,7 +1049,6 @@ async def test_cache_namespace_separation_strict(multi_tenant_isolation_l3):
     assert result["tenant_b_data_accessible"], "Tenant B cannot access its cache data"
     assert result["tenant_a_keys_count"] > 0, "No cache keys found for tenant A"
     assert result["tenant_b_keys_count"] > 0, "No cache keys found for tenant B"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3
@@ -1090,7 +1073,6 @@ async def test_configuration_hot_reload_isolation(multi_tenant_isolation_l3):
     assert not tenant_b_config.get("features", {}).get("hot_reload_test"), \
         "Configuration hot reload affected other tenant"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
@@ -1112,7 +1094,6 @@ async def test_analytics_isolation_comprehensive(multi_tenant_isolation_l3):
     assert result["analytics_retrieved_a"] > 0, "No analytics retrieved for tenant A"
     assert result["analytics_retrieved_b"] > 0, "No analytics retrieved for tenant B"
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
@@ -1133,7 +1114,6 @@ async def test_database_row_level_security_enforcement(multi_tenant_isolation_l3
     assert result["tenant_b_data_count"] > 0, "Tenant B has no accessible data"
     assert result["tenant_a_cross_access_count"] == 0, "Tenant A can access tenant B's data"
     assert result["tenant_b_cross_access_count"] == 0, "Tenant B can access tenant A's data"
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3

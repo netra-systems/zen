@@ -1,31 +1,41 @@
 """WebSocket management modules.
 
-This package contains the refactored WebSocket manager functionality,
-split into focused modules for better maintainability.
+This package contains the unified WebSocket manager functionality.
+All WebSocket operations should use the unified manager system.
 """
 
-# Conditional imports to avoid circular dependencies
+# Import from unified WebSocket system
 try:
-    from netra_backend.app.core.websocket_connection_manager import (
-        WebSocketConnectionManager as ConnectionManager,
+    from netra_backend.app.websocket.unified.manager import (
+        UnifiedWebSocketManager,
+        get_unified_manager
     )
 except ImportError:
-    ConnectionManager = None
+    UnifiedWebSocketManager = None
+    get_unified_manager = None
 
 try:
-    from netra_backend.app.websocket.connection_info import ConnectionInfo
+    from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
 except ImportError:
     ConnectionInfo = None
+    ConnectionManager = None
 
 try:
     from netra_backend.app.websocket.heartbeat_manager import HeartbeatManager
 except ImportError:
     HeartbeatManager = None
 
-# WebSocket error handler import removed - module not found
+# For backward compatibility, provide access to the unified manager
+try:
+    from netra_backend.app.ws_manager import WebSocketManager
+except ImportError:
+    WebSocketManager = None
 
 __all__ = [
     'ConnectionInfo',
-    'ConnectionManager',
-    'HeartbeatManager'
+    'ConnectionManager', 
+    'HeartbeatManager',
+    'UnifiedWebSocketManager',
+    'get_unified_manager',
+    'WebSocketManager'
 ]

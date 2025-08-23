@@ -17,17 +17,10 @@ Features:
 Each function ≤8 lines, file ≤300 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import os
@@ -42,21 +35,19 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import asyncpg
 import clickhouse_connect
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-# Add project root to path
 from netra_backend.app.core.database_types import DatabaseConfig, DatabaseType
 from netra_backend.app.core.exceptions_config import DatabaseError
-from .database_test_fixtures import (
+# Import unified configuration system
+from netra_backend.app.config import get_config
+from netra_backend.tests.fixtures.database_test_fixtures import (
     create_mock_message,
     create_mock_thread,
     create_mock_user,
 )
-
-# Add project root to path
-
 
 class TestDatabaseManager:
     """Manager for test database lifecycle and utilities."""
@@ -73,10 +64,11 @@ class TestDatabaseManager:
         """Load base database configuration."""
         # Test-specific database configuration from environment
         return {
-            "postgres_host": os.environ.get("TEST_POSTGRES_HOST", "localhost"),
-            "postgres_port": os.environ.get("TEST_POSTGRES_PORT", "5432"),
-            "clickhouse_host": os.environ.get("TEST_CLICKHOUSE_HOST", "localhost"),
-            "clickhouse_port": os.environ.get("TEST_CLICKHOUSE_PORT", "8123")
+            # @marked: Test configuration - uses config system fallbacks
+            "postgres_host": "localhost",  # Default for tests
+            "postgres_port": "5432",       # Default for tests
+            "clickhouse_host": "localhost", # Default for tests  
+            "clickhouse_port": "8123"       # Default for tests
         }
 
     def _setup_clickhouse_db(self, db_id: str, db_name: str, client) -> Dict[str, Any]:

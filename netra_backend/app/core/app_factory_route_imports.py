@@ -13,6 +13,7 @@ def _import_core_routes() -> tuple:
         config,
         corpus,
         demo,
+        discovery,
         generation,
         health,
         quality,
@@ -23,7 +24,7 @@ def _import_core_routes() -> tuple:
         users,
     )
     return (supply, generation, admin, references, health, corpus,
-            synthetic_data, config, demo, unified_tools, quality, users)
+            synthetic_data, config, demo, unified_tools, quality, users, discovery)
 
 
 def _create_basic_modules_dict_from_imports(imports: tuple) -> dict:
@@ -37,12 +38,13 @@ def _unpack_route_imports(imports: tuple) -> tuple:
     return imports
 
 
-def _create_basic_modules_dict(supply, generation, admin, references, health, corpus, synthetic_data, config, demo, unified_tools, quality, users) -> dict:
+def _create_basic_modules_dict(supply, generation, admin, references, health, corpus, synthetic_data, config, demo, unified_tools, quality, users, discovery) -> dict:
     """Create basic modules dictionary mapping"""
     core_modules = _create_core_modules_dict(supply, generation, admin, references)
     extended_modules = _create_extended_modules_dict(health, corpus, synthetic_data, config)
     utility_modules = _create_utility_modules_dict(demo, unified_tools, quality, users)
-    return {**core_modules, **extended_modules, **utility_modules}
+    system_modules = _create_system_modules_dict(discovery)
+    return {**core_modules, **extended_modules, **utility_modules, **system_modules}
 
 
 def _create_core_modules_dict(supply, generation, admin, references) -> dict:
@@ -58,6 +60,11 @@ def _create_extended_modules_dict(health, corpus, synthetic_data, config) -> dic
 def _create_utility_modules_dict(demo, unified_tools, quality, users) -> dict:
     """Create utility modules dictionary mapping."""
     return {"demo": demo, "unified_tools": unified_tools, "quality": quality, "users": users}
+
+
+def _create_system_modules_dict(discovery) -> dict:
+    """Create system modules dictionary mapping."""
+    return {"discovery": discovery}
 
 
 def import_named_routers() -> dict:
@@ -96,18 +103,18 @@ def _import_extended_router_modules() -> tuple:
         router as health_extended_router,
     )
     from netra_backend.app.routes.monitoring import router as monitoring_router
-    from netra_backend.app.routes.websocket_secure import (
-        router as websocket_secure_router,
+    from netra_backend.app.routes.websocket_unified import (
+        router as websocket_unified_router,
     )
-    return health_extended_router, monitoring_router, gcp_monitoring_router, websocket_secure_router
+    return health_extended_router, monitoring_router, gcp_monitoring_router, websocket_unified_router
 
 
 def _create_extended_router_dict(router_imports: tuple) -> dict:
     """Create extended router dictionary from imports."""
-    health_extended_router, monitoring_router, gcp_monitoring_router, websocket_secure_router = router_imports
+    health_extended_router, monitoring_router, gcp_monitoring_router, websocket_unified_router = router_imports
     return {"health_extended_router": health_extended_router,
-        "monitoring_router": monitoring_router, "gcp_monitoring_router": gcp_monitoring_router, 
-        "websocket_secure_router": websocket_secure_router}
+        "monitoring_router": monitoring_router, "gcp_monitoring_router": gcp_monitoring_router,
+        "websocket_unified_router": websocket_unified_router}
 
 
 def import_factory_routers() -> dict:

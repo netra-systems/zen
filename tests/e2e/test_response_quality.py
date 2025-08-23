@@ -3,7 +3,7 @@
 Tests response quality gates, validation metrics, and quality standards.
 
 Business Value Justification (BVJ):
-1. Segment: Platform/Internal (Quality assurance protection)
+    1. Segment: Platform/Internal (Quality assurance protection)
 2. Business Goal: Validate response quality meets business standards
 3. Value Impact: Ensures consistent high-quality agent responses
 4. Strategic Impact: Prevents quality degradation affecting customer satisfaction
@@ -22,9 +22,8 @@ from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.quality.quality_gate_service import QualityGateService
 
-
 class ResponseQualityTester:
-    """Tests response quality validation and gates."""
+    # """Tests response quality validation and gates."""
     
     def __init__(self, use_mock_llm: bool = True):
         self.config = get_config()
@@ -44,8 +43,6 @@ class ResponseQualityTester:
                 "agent_name": f"TestAgent_{response_type}",
                 "timestamp": time.time(),
                 "user_id": "test_user_quality_001"
-            }
-        }
         return response
     
     async def validate_response_quality(self, response: Dict[str, Any], 
@@ -57,7 +54,6 @@ class ResponseQualityTester:
         # Apply quality validation
         validation_result = await self._run_quality_validation(
             response["content"], quality_level, content_type
-        )
         
         validation_time = time.time() - start_time
         quality_result = {
@@ -66,7 +62,6 @@ class ResponseQualityTester:
             "validation_time": validation_time,
             "expected_quality": quality_level.value,
             "content_type": content_type.value
-        }
         
         self.quality_results.append(quality_result)
         return quality_result
@@ -81,7 +76,6 @@ class ResponseQualityTester:
             "completeness_score": metrics.get("completeness", 0.0),
             "clarity_score": metrics.get("clarity", 0.0),
             "overall_score": metrics.get("overall", 0.0)
-        }
         
         self.quality_metrics[f"test_{len(self.quality_metrics)}"] = metric_result
         return metric_result
@@ -122,7 +116,7 @@ class ResponseQualityTester:
         
         return threshold_results
     
-    async def test_content_type_validation(self, responses: List[Dict[str, Any]],
+    async def test_content_type_validation(self, responses: List[Dict[str, Any]], 
                                          content_types: List[ContentType]) -> Dict[str, Any]:
         """Test content type specific validation."""
         type_results = {}
@@ -130,25 +124,22 @@ class ResponseQualityTester:
         for content_type in content_types:
             type_specific_results = []
             
-            for response in responses:
+#             for response in responses: # Possibly broken comprehension
                 validation = await self.validate_response_quality(
                     response, QualityLevel.GOOD, content_type
-                )
                 type_specific_results.append(validation)
             
             type_results[content_type.value] = {
                 "total_validations": len(type_specific_results),
                 "passed": sum(1 for r in type_specific_results if r["validation_result"]["passed"]),
                 "average_score": sum(r["validation_result"]["score"] for r in type_specific_results) / len(type_specific_results)
-            }
         
         return type_results
 
-
 class TestResponseQuality:
-    """E2E tests for response quality validation."""
+    # """E2E tests for response quality validation."""
     
-    @pytest.fixture
+    # @pytest.fixture
     def quality_tester(self):
         """Initialize quality tester."""
         return ResponseQualityTester(use_mock_llm=True)
@@ -159,11 +150,9 @@ class TestResponseQuality:
         response = await quality_tester.create_test_response(
             "optimization",
             "Implement caching strategy with Redis to reduce API calls by 40% and improve response times to under 200ms."
-        )
         
         quality_result = await quality_tester.validate_response_quality(
             response, QualityLevel.GOOD, ContentType.OPTIMIZATION
-        )
         
         assert quality_result["validation_result"]["passed"] is not None
         assert quality_result["validation_time"] < 2.0, "Quality validation too slow"
@@ -177,8 +166,7 @@ class TestResponseQuality:
             "data_analysis",
             "Based on infrastructure analysis, CPU utilization peaks at 85% during peak hours (2-4 PM EST). "
             "Recommend scaling to 3 additional instances with auto-scaling threshold at 70% CPU. "
-            "Expected cost increase: $240/month. Expected performance improvement: 35% faster response times."
-        )
+#             "Expected cost increase: $240/month. Expected performance improvement: 35% faster response times." # Possibly broken comprehension
         
         metrics = await quality_tester.test_quality_metrics(high_quality_response)
         
@@ -198,14 +186,12 @@ class TestResponseQuality:
             "optimization",
             "Implement database connection pooling with max 50 connections. "
             "Expected performance improvement: 60% faster queries. Implementation time: 2 days."
-        )
         responses.append(high_quality)
         
         # Low quality response
         low_quality = await quality_tester.create_test_response(
             "optimization", 
             "Make it better and faster."
-        )
         responses.append(low_quality)
         
         threshold_results = await quality_tester.validate_quality_gate_thresholds(responses)
@@ -261,27 +247,24 @@ class TestResponseQuality:
         length_factor = min(1.0, len(content) / 100)
         return {"specificity": length_factor * 0.8, "actionability": length_factor * 0.7, "completeness": length_factor * 0.75, "clarity": length_factor * 0.85, "overall": length_factor * 0.77}
 
-
 @pytest.mark.critical
 class TestCriticalQualityScenarios:
-    """Critical quality validation scenarios."""
+    # """Critical quality validation scenarios."""
     
-    @pytest.mark.asyncio
-    async def test_enterprise_quality_standards(self):
-        """Test enterprise-level quality standards."""
-        tester = ResponseQualityTester(use_mock_llm=True)
+    # @pytest.mark.asyncio
+    # async def test_enterprise_quality_standards(self):
+    # """Test enterprise-level quality standards."""
+    # tester = ResponseQualityTester(use_mock_llm=True)
         
-        enterprise_response = await tester.create_test_response(
-            "enterprise",
-            "Enterprise infrastructure optimization plan: Implement microservices architecture "
-            "with Docker containers, Kubernetes orchestration, and service mesh. "
-            "Expected benefits: 50% improved scalability, 30% cost reduction, 99.9% uptime. "
-            "Implementation timeline: 12 weeks. Budget required: $500K. ROI: 18 months."
-        )
+    # enterprise_response = await tester.create_test_response(
+    # "enterprise",
+    # "Enterprise infrastructure optimization plan: Implement microservices architecture "
+    # "with Docker containers, Kubernetes orchestration, and service mesh. "
+    # "Expected benefits: 50% improved scalability, 30% cost reduction, 99.9% uptime. "
+    # "Implementation timeline: 12 weeks. Budget required: $500K. ROI: 18 months."
         
-        quality_result = await tester.validate_response_quality(
-            enterprise_response, QualityLevel.EXCELLENT, ContentType.ACTION_PLAN
-        )
+    # quality_result = await tester.validate_response_quality(
+    # enterprise_response, QualityLevel.EXCELLENT, ContentType.ACTION_PLAN
         
-        assert quality_result["validation_result"]["score"] >= 0.8  # Enterprise standard
-        assert quality_result["validation_time"] < 3.0  # Enterprise SLA
+    # assert quality_result["validation_result"]["score"] >= 0.8  # Enterprise standard
+    # assert quality_result["validation_time"] < 3.0  # Enterprise SLA

@@ -21,17 +21,10 @@ COVERAGE:
 - Error propagation and recovery
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -42,20 +35,16 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import httpx
 import pytest
-from auth_integration.auth import get_current_user
-from clients.auth_client import auth_client
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.clients.auth_client import auth_client
 
-from dev_launcher.health_monitor import HealthMonitor
+# from scripts.dev_launcher_health_monitor import  # Should be mocked in tests HealthMonitor
 
-# Add project root to path
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.postgres import get_async_db as get_postgres_client
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.user_service import CRUDUser
-
-# Add project root to path
-
 
 class ServiceEndpoint:
     """Service endpoint configuration."""
@@ -65,7 +54,6 @@ class ServiceEndpoint:
         self.base_url = base_url
         self.health_path = health_path
         self.health_url = f"{base_url}{health_path}"
-
 
 class TestCrossServiceAuthentication:
     """Cross-service authentication and authorization tests."""
@@ -171,7 +159,6 @@ class TestCrossServiceAuthentication:
             # Verify consistency
             assert backend_validation == websocket_validation == api_validation
             assert all(v["user_id"] == test_user_data["user_id"] for v in [backend_validation, websocket_validation, api_validation])
-
 
 class TestDatabaseConsistency:
     """Database state consistency across services tests."""
@@ -279,7 +266,6 @@ class TestDatabaseConsistency:
                 
                 assert sync_lag < 5.0  # Max 5 seconds sync lag
 
-
 class TestServiceDiscovery:
     """Service discovery and communication tests."""
     
@@ -366,7 +352,6 @@ class TestServiceDiscovery:
                 # Should handle communication errors gracefully
                 assert "connection" in str(e).lower() or "network" in str(e).lower()
 
-
 class TestErrorPropagation:
     """Error propagation and recovery across services tests."""
     
@@ -450,7 +435,6 @@ class TestErrorPropagation:
         
         # Verify circuit breaker logic
         assert failure_count <= 6  # Should stop calling after circuit opens
-
 
 class TestMultiServiceIntegration:
     """Complete multi-service integration scenarios."""

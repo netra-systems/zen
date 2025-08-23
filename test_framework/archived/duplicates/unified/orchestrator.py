@@ -15,9 +15,9 @@ from typing import Any, Callable, Dict, List, Optional, Type
 
 import yaml
 
-from ..docker_testing.compose_manager import DockerComposeManager
-from ..gcp_integration.log_reader import GCPLogReader
-from ..staging_testing.endpoint_validator import StagingEndpointValidator
+from test_framework.archived.duplicates.docker_testing.compose_manager import DockerComposeManager
+from test_framework.archived.duplicates.gcp_integration.log_reader import GCPLogReader
+from test_framework.archived.duplicates.staging_testing.endpoint_validator import StagingEndpointValidator
 from .base_interfaces import (
     BaseTestComponent,
     IContainerManager,

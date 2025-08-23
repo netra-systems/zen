@@ -73,9 +73,27 @@ async def close_database_connections() -> None:
 async def cleanup_resources(app: FastAPI) -> None:
     """Shutdown all application services."""
     await asyncio.sleep(0.1)
-    await app.state.background_task_manager.shutdown()
-    await app.state.agent_supervisor.shutdown()
-    await websocket_manager.shutdown()
+    
+    # Shutdown background task manager with timeout
+    try:
+        await asyncio.wait_for(app.state.background_task_manager.shutdown(), timeout=5.0)
+    except (asyncio.TimeoutError, AttributeError, Exception) as e:
+        logger.warning(f"Background task manager shutdown timeout/error: {e}")
+    
+    # Shutdown agent supervisor with timeout  
+    try:
+        await asyncio.wait_for(app.state.agent_supervisor.shutdown(), timeout=5.0)
+    except (asyncio.TimeoutError, AttributeError, Exception) as e:
+        logger.warning(f"Agent supervisor shutdown timeout/error: {e}")
+    
+    # Shutdown WebSocket manager with timeout to prevent blocking
+    try:
+        await asyncio.wait_for(websocket_manager.shutdown(), timeout=3.0)
+        logger.info("WebSocket manager shutdown completed")
+    except asyncio.TimeoutError:
+        logger.warning("WebSocket manager shutdown timed out - forcing cleanup")
+    except Exception as e:
+        logger.warning(f"WebSocket manager shutdown error: {e}")
 
 
 async def finalize_shutdown() -> None:

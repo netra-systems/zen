@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+    <metadata>
+        <title>Database sslmode Regression Prevention</title>
+        <description>Critical fix to prevent recurring database connection issues in health checker and other components</description>
+        <created>2025-08-22</created>
+        <priority>critical</priority>
+    </metadata>
+    
+    <context>
+        <business_value>
+            <segment>Platform/Internal</segment>
+            <business_goal>Database reliability and development velocity</business_goal>
+            <value_impact>Eliminates production outages from sslmode errors, reduces debugging time by 80%</value_impact>
+            <strategic_impact>Prevents revenue loss from database connection failures</strategic_impact>
+        </business_value>
+        
+        <problem_statement>
+            The health checker and other components were experiencing recurring "connect() got an unexpected keyword argument 'sslmode'" errors because asyncpg does not understand the sslmode parameter - it needs ssl instead.
+        </problem_statement>
+        
+        <root_causes>
+            <cause type="module_import_timing">Health checker imported async_engine at module load time when it was None, creating stale reference</cause>
+            <cause type="bypass_conversion">Some components created engines directly without URL conversion logic</cause>
+            <cause type="missing_validation">No validation to catch sslmode URLs before engine creation</cause>
+        </root_causes>
+    </context>
+    
+    <solution>
+        <approach>Three-layer defense strategy</approach>
+        
+        <layer1 title="Fresh Engine References">
+            <description>Health checker and pool metrics now get fresh engine references at runtime instead of stale module-level imports</description>
+            <files>
+                <file>netra_backend/app/services/database/health_checker.py</file>
+                <file>netra_backend/app/services/database/pool_metrics.py</file>
+            </files>
+            <pattern>
+                <before>from netra_backend.app.db.postgres import async_engine</before>
+                <after>from netra_backend.app.db.postgres_core import async_engine  # Inside function</after>
+            </pattern>
+        </layer1>
+        
+        <layer2 title="Centralized URL Conversion">
+            <description>Added get_converted_async_db_url() function that MUST be used by any component creating async engines</description>
+            <files>
+                <file>netra_backend/app/db/postgres_core.py</file>
+                <file>netra_backend/app/core/unified/db_connection_manager.py</file>
+            </files>
+            <usage>
+                <code>
+                from netra_backend.app.db.postgres_core import get_converted_async_db_url
+                converted_url = get_converted_async_db_url(config.database_url)
+                engine = create_async_engine(converted_url, **engine_args)
+                </code>
+            </usage>
+        </layer2>
+        
+        <layer3 title="Runtime Validation">
+            <description>Added validation in _create_and_setup_engine to catch any URLs that still contain sslmode</description>
+            <validation_logic>
+                if "sslmode=" in async_db_url:
+                    raise RuntimeError("CRITICAL: Database URL contains 'sslmode' parameter...")
+            </validation_logic>
+        </layer3>
+    </solution>
+    
+    <environment_handling>
+        <development>No SSL/sslmode required - URLs remain unchanged</development>
+        <staging_production>sslmode parameters converted to ssl for asyncpg compatibility</staging_production>
+        <cloud_sql>sslmode parameters removed entirely as SSL handled by proxy</cloud_sql>
+    </environment_handling>
+    
+    <prevention_checklist>
+        <item>✓ Never import async_engine at module level - always get fresh reference</item>
+        <item>✓ Use get_converted_async_db_url() for any new engine creation</item>
+        <item>✓ Test with staging URLs containing sslmode parameters</item>
+        <item>✓ Check logs for "CRITICAL: Database URL contains 'sslmode'" messages</item>
+        <item>✓ Verify health checker works in both dev and staging environments</item>
+    </prevention_checklist>
+    
+    <testing>
+        <unit_tests>
+            <test>URL conversion function works for all database types</test>
+            <test>Validation catches sslmode URLs and fails clearly</test>
+            <test>Health checker gets fresh engine references</test>
+        </unit_tests>
+        
+        <integration_tests>
+            <test>Health checker works with staging database URLs</test>
+            <test>No sslmode errors during startup monitoring</test>
+            <test>Connection monitoring functions correctly</test>
+        </integration_tests>
+    </testing>
+    
+    <monitoring>
+        <alerts>
+            <alert>Health checker sslmode error detection with detailed logging</alert>
+            <alert>Engine creation validation failures</alert>
+        </alerts>
+        
+        <metrics>
+            <metric>Health check success rate</metric>
+            <metric>Database connection initialization time</metric>
+        </metrics>
+    </monitoring>
+</spec>

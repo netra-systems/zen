@@ -10,7 +10,10 @@ from typing import Dict, List, Optional
 from sqlalchemy import and_, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth_service.auth_core.database.models import AuthAuditLog, AuthSession, AuthUser
+try:
+    from auth_service.auth_core.database.models import AuthAuditLog, AuthSession, AuthUser
+except ImportError:
+    from .models import AuthAuditLog, AuthSession, AuthUser
 
 logger = logging.getLogger(__name__)
 
@@ -35,41 +38,89 @@ class AuthUserRepository:
         return result.scalar_one_or_none()
     
     async def create_oauth_user(self, user_info: Dict) -> AuthUser:
-        """Create or update OAuth user"""
+        """Create or update OAuth user with atomic transaction and race condition protection"""
+        from sqlalchemy.exc import IntegrityError
+        from sqlalchemy import select
+        
         email = user_info.get("email")
         provider = user_info.get("provider", "google")
         provider_user_id = user_info.get("id", user_info.get("sub"))
         
-        # Check if user exists
-        existing_user = await self.get_by_email(email)
+        if not email:
+            raise ValueError("Email is required for OAuth user creation")
         
-        if existing_user:
-            # Update existing user
-            existing_user.full_name = user_info.get("name", existing_user.full_name)
-            existing_user.auth_provider = provider
-            existing_user.provider_user_id = provider_user_id
-            existing_user.provider_data = user_info
-            existing_user.last_login_at = datetime.now(timezone.utc)
-            existing_user.updated_at = datetime.now(timezone.utc)
-            
-            await self.session.flush()
-            return existing_user
-        
-        # Create new user
-        new_user = AuthUser(
-            email=email,
-            full_name=user_info.get("name", ""),
-            auth_provider=provider,
-            provider_user_id=provider_user_id,
-            provider_data=user_info,
-            is_active=True,
-            is_verified=True,  # OAuth users are pre-verified
-            last_login_at=datetime.now(timezone.utc)
-        )
-        
-        self.session.add(new_user)
-        await self.session.flush()
-        return new_user
+        max_retries = 3
+        for attempt in range(max_retries):
+            # CRITICAL FIX: Use a single atomic transaction
+            transaction = None
+            try:
+                # Start atomic transaction
+                transaction = await self.session.begin()
+                
+                # Use SELECT FOR UPDATE to lock the row and prevent race conditions
+                stmt = select(AuthUser).where(AuthUser.email == email).with_for_update()
+                result = await self.session.execute(stmt)
+                existing_user = result.scalar_one_or_none()
+                
+                if existing_user:
+                    # Update existing user atomically
+                    existing_user.full_name = user_info.get("name", existing_user.full_name)
+                    existing_user.auth_provider = provider
+                    existing_user.provider_user_id = provider_user_id
+                    existing_user.provider_data = user_info
+                    existing_user.last_login_at = datetime.now(timezone.utc)
+                    existing_user.updated_at = datetime.now(timezone.utc)
+                    existing_user.is_active = True
+                    existing_user.is_verified = True
+                    
+                    await self.session.flush()
+                    await transaction.commit()
+                    return existing_user
+                
+                # Create new user atomically
+                new_user = AuthUser(
+                    email=email,
+                    full_name=user_info.get("name", ""),
+                    auth_provider=provider,
+                    provider_user_id=provider_user_id,
+                    provider_data=user_info,
+                    is_active=True,
+                    is_verified=True,  # OAuth users are pre-verified
+                    last_login_at=datetime.now(timezone.utc)
+                )
+                
+                self.session.add(new_user)
+                await self.session.flush()
+                await transaction.commit()
+                return new_user
+                
+            except IntegrityError as e:
+                # Handle race condition: user was created by another request
+                logger.info(f"Race condition detected on attempt {attempt + 1}, retrying: {e}")
+                if transaction:
+                    await transaction.rollback()
+                
+                # Wait before retry with exponential backoff
+                import asyncio
+                await asyncio.sleep(0.1 * (2 ** attempt))
+                continue
+                
+            except Exception as e:
+                # Handle any other errors
+                logger.error(f"OAuth user creation failed on attempt {attempt + 1}: {e}")
+                if transaction:
+                    await transaction.rollback()
+                
+                if attempt == max_retries - 1:
+                    raise
+                
+                # Wait before retry
+                import asyncio
+                await asyncio.sleep(0.1 * (2 ** attempt))
+                continue
+                
+        # If we get here, all retries failed
+        raise RuntimeError(f"Failed to create OAuth user for {email} after {max_retries} attempts")
     
     async def create_local_user(self, email: str, 
                                password_hash: str, 

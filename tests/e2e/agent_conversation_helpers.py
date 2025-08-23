@@ -122,7 +122,7 @@ class AgentConversationTestCore:
             "thread_id": "test_thread"
         }
     
-    async def teardown_test_environment(self):
+    async def test_teardown_test_environment(self):
         """Tear down test environment."""
         self.test_env = {}
         self.websocket_core = None

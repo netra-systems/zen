@@ -10,17 +10,10 @@ Critical Path: Auth failure detection -> Circuit breaker activation -> Fallback 
 Coverage: Multi-service circuit breaker coordination, auth service failure scenarios, fallback auth mechanisms, state synchronization
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -32,16 +25,12 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import docker
 import pytest
-from clients.auth_client_cache import AuthCircuitBreakerManager
+from netra_backend.app.clients.auth_client_cache import AuthCircuitBreakerManager
 
-# Add project root to path
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class ServiceEndpoint:
@@ -51,7 +40,6 @@ class ServiceEndpoint:
     circuit_breaker: CircuitBreaker
     has_auth_dependency: bool
 
-
 @dataclass
 class CascadeMetrics:
     """Circuit breaker cascade metrics."""
@@ -59,7 +47,6 @@ class CascadeMetrics:
     services_isolated: int = 0
     fallback_activations: int = 0
     recovery_attempts: int = 0
-
 
 class AuthServiceCircuitBreakerCascadeL3Manager:
     """Manages L3 auth service circuit breaker cascade testing."""
@@ -329,14 +316,12 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
                 except:
                     pass
 
-
 @pytest.fixture
 async def docker_client():
     """Docker client for container management."""
     client = docker.from_env()
     yield client
     client.close()
-
 
 @pytest.fixture
 async def auth_circuit_cascade_l3(docker_client):
@@ -345,7 +330,6 @@ async def auth_circuit_cascade_l3(docker_client):
     await manager.setup_containerized_environment()
     yield manager
     await manager.cleanup_environment()
-
 
 @pytest.mark.L3
 class TestAuthServiceCircuitBreakerCascadeL3:

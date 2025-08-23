@@ -24,7 +24,6 @@ from tests.e2e.config import TEST_USERS
 
 logger = central_logger.get_logger(__name__)
 
-
 class SessionManager:
     """Core session management for disconnection testing."""
     
@@ -57,7 +56,6 @@ class SessionManager:
             if data["token"] == token:
                 return {"session_id": session_id, **data}
         return None
-
 
 class ConnectionManager:
     """Manages WebSocket connections for session testing."""
@@ -92,7 +90,6 @@ class ConnectionManager:
         self.record_connection_event("graceful_disconnect", websocket.user_id,
                                    {"preserved": True})
 
-
 class TokenRefreshManager:
     """Handles token refresh during active sessions."""
     
@@ -125,7 +122,6 @@ class TokenRefreshManager:
             self.refresh_events.append({"session_id": session_id, 
                                       "timestamp": datetime.now()})
 
-
 # ============================================================================
 # TEST FIXTURES
 # ============================================================================
@@ -135,25 +131,22 @@ def session_manager():
     """Session manager fixture."""
     return SessionManager()
 
-
 @pytest.fixture
 def connection_manager():
     """WebSocket connection manager fixture."""
     return ConnectionManager()
-
 
 @pytest.fixture
 def token_refresh_manager(session_manager):
     """Token refresh manager fixture."""
     return TokenRefreshManager(session_manager)
 
-
 # ============================================================================
 # CRITICAL TESTS - SESSION PERSISTENCE
 # ============================================================================
 
 @pytest.mark.asyncio
-async def test_session_persists_across_disconnect_reconnect(session_manager, 
+async def test_session_persists_across_disconnect_reconnect(session_manager:
                                                            connection_manager):
     """Test session persistence across disconnect/reconnect."""
     user = TEST_USERS["enterprise"]
@@ -167,7 +160,6 @@ async def test_session_persists_across_disconnect_reconnect(session_manager,
     reconnected_ws = connection_manager.create_authenticated_connection(user.id, token)
     _validate_session_persistence(session_manager, token, user.id, session_id)
 
-
 async def _build_chat_history(session_manager, session_id, connection):
     """Build chat history during session."""
     messages = [
@@ -179,7 +171,6 @@ async def _build_chat_history(session_manager, session_id, connection):
         session_manager.add_chat_message(session_id, message)
         await connection.send_json({"type": "message", "data": message})
 
-
 def _validate_session_persistence(session_manager, token, user_id, session_id):
     """Validate session and history preserved."""
     session_data = session_manager.validate_session_token(token)
@@ -188,7 +179,6 @@ def _validate_session_persistence(session_manager, token, user_id, session_id):
     
     chat_history = session_manager.chat_histories.get(session_id, [])
     assert len(chat_history) == 2, "Chat history must be preserved"
-
 
 @pytest.mark.asyncio
 async def test_graceful_disconnect_preserves_session(session_manager, connection_manager):
@@ -203,13 +193,11 @@ async def test_graceful_disconnect_preserves_session(session_manager, connection
     
     _validate_graceful_disconnect(session_manager, connection_manager, token)
 
-
 def _add_session_activity(session_manager, session_id):
     """Add session activity."""
     session_manager.add_chat_message(session_id, {
         "role": "user", "content": "What optimization strategies do you recommend?"
     })
-
 
 def _validate_graceful_disconnect(session_manager, connection_manager, token):
     """Validate session preservation."""
@@ -221,9 +209,8 @@ def _validate_graceful_disconnect(session_manager, connection_manager, token):
     disconnect_events = [e for e in events if e["event"] == "graceful_disconnect"]
     assert len(disconnect_events) == 1, "Graceful disconnect must be recorded"
 
-
 @pytest.mark.asyncio  
-async def test_token_refresh_during_active_session(session_manager, token_refresh_manager,
+async def test_token_refresh_during_active_session(session_manager, token_refresh_manager:
                                                    connection_manager):
     """Test token refresh without session interruption."""
     user = TEST_USERS["enterprise"]
@@ -236,7 +223,6 @@ async def test_token_refresh_during_active_session(session_manager, token_refres
     _validate_token_refresh_continuity(session_manager, connection_manager, 
                                      user.id, refreshed_token, session_id)
 
-
 def _establish_session_with_activity(session_manager, connection_manager, 
                                      session_id, user_id, token):
     """Establish connection and add session activity."""
@@ -245,7 +231,6 @@ def _establish_session_with_activity(session_manager, connection_manager,
         session_manager.add_chat_message(session_id, {
             "role": "user", "content": f"Message {i+1} before token refresh"
         })
-
 
 def _perform_token_refresh(token_refresh_manager, initial_token):
     """Perform token refresh and validate."""
@@ -256,7 +241,6 @@ def _perform_token_refresh(token_refresh_manager, initial_token):
     assert refreshed_token is not None, "Token refresh must succeed"
     assert refreshed_token != initial_token, "New token must be different"
     return refreshed_token
-
 
 def _validate_token_refresh_continuity(session_manager, connection_manager, 
                                       user_id, refreshed_token, session_id):
@@ -270,7 +254,6 @@ def _validate_token_refresh_continuity(session_manager, connection_manager,
     
     chat_history = session_manager.chat_histories.get(session_id, [])
     assert len(chat_history) == 3, "Chat history preserved during token refresh"
-
 
 @pytest.mark.asyncio
 async def test_multiple_disconnection_scenarios(session_manager, connection_manager):
@@ -291,19 +274,16 @@ async def test_multiple_disconnection_scenarios(session_manager, connection_mana
         await websocket.close(code=scenario["code"], reason=scenario["reason"])
         _validate_scenario_persistence(session_manager, token, scenario["reason"])
 
-
 def _add_scenario_message(session_manager, session_id, code):
     """Add message for disconnection scenario."""
     session_manager.add_chat_message(session_id, {
         "role": "user", "content": f"Test message for scenario {code}"
     })
 
-
 def _validate_scenario_persistence(session_manager, token, reason):
     """Validate session persists after scenario."""
     session_data = session_manager.validate_session_token(token)
     assert session_data is not None, f"Session must persist after {reason}"
-
 
 @pytest.mark.asyncio
 async def test_concurrent_session_operations(session_manager, connection_manager):

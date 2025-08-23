@@ -3,23 +3,15 @@ Metrics calculation tests for Quality Gate Service
 Tests individual metric calculation methods
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.quality_gate_service import ContentType, QualityMetrics
-from .quality_gate_content import (
+from netra_backend.tests.quality_gate_content import (
     get_clear_content,
     get_complete_action_plan_simple,
     get_complete_optimization_content,
@@ -27,7 +19,6 @@ from .quality_gate_content import (
     get_high_hallucination_risk_content,
     get_high_quantification_content,
     get_high_redundancy_content,
-    # Add project root to path
     get_high_specificity_content,
     get_irrelevant_context,
     get_low_actionability_content,
@@ -39,13 +30,13 @@ from .quality_gate_content import (
     get_relevant_context,
     get_unclear_content,
 )
-from .quality_gate_fixtures import (
+from netra_backend.tests.quality_gate_fixtures import (
     quality_service,
     redis_mock,
     setup_novelty_mocks_duplicate,
     setup_novelty_mocks_fresh,
 )
-from .quality_gate_helpers import (
+from netra_backend.tests.quality_gate_helpers import (
     assert_actionability_score_range,
     assert_clarity_score_approximation,
     assert_completeness_by_content_type,
@@ -55,7 +46,6 @@ from .quality_gate_helpers import (
     assert_relevance_with_context,
     assert_specificity_score_range,
 )
-
 
 class TestQualityGateMetrics:
     """Test suite for QualityGateService metrics calculation"""

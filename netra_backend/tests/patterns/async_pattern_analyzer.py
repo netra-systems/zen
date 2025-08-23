@@ -7,7 +7,6 @@ Maximum 300 lines, functions ≤8 lines
 import ast
 from typing import List
 
-
 class AsyncPatternAnalyzer(ast.NodeVisitor):
     """AST analyzer for async test patterns"""
     

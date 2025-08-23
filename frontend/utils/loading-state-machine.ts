@@ -133,10 +133,13 @@ const isLoadingState = (state: ChatLoadingState): boolean => {
  * Checks if ready to show example prompts
  */
 const isReadyForPrompts = (state: ChatLoadingState, context: ChatStateContext): boolean => {
+  const isReadyState = state === ChatLoadingState.READY;
   const isThreadReadyState = state === ChatLoadingState.THREAD_READY;
   const hasNoMessages = !context.thread.hasMessages;
   const notProcessing = !context.processing.isProcessing;
-  return isThreadReadyState && hasNoMessages && notProcessing;
+  
+  // Show example prompts in READY state (no thread) OR in THREAD_READY state with no messages
+  return (isReadyState || (isThreadReadyState && hasNoMessages)) && notProcessing;
 };
 
 /**

@@ -6,7 +6,7 @@ Maximum 300 lines, functions ≤8 lines.
 
 from typing import Dict, List, Optional, Tuple
 
-from .performance_metrics import (
+from netra_backend.tests.e2e.validators.performance_metrics import (
     BenchmarkComparison,
     LatencyMetrics,
     PerformanceRegression,
@@ -14,7 +14,6 @@ from .performance_metrics import (
     ResourceMetrics,
     ThroughputMetrics,
 )
-
 
 class RegressionDetector:
     """Detects performance regressions."""
@@ -85,7 +84,6 @@ class RegressionDetector:
         """Add regression detail if threshold exceeded."""
         if value > self.regression_threshold:
             details.append(f"{metric_name} regression: {value*100:.1f}% (threshold: {threshold_pct}%)")
-
 
 class BenchmarkComparator:
     """Compares performance against benchmarks."""

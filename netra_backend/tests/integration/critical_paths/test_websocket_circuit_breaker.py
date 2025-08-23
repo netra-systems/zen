@@ -11,21 +11,10 @@ L2 Test: Real internal circuit breaker components with mocked external services.
 Performance target: <100ms failure detection, <30s recovery time.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -43,7 +32,6 @@ from netra_backend.app.schemas import User
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
-
 class CircuitState(Enum):
 
     """Circuit breaker states."""
@@ -53,7 +41,6 @@ class CircuitState(Enum):
     OPEN = "open"          # Failing, blocking requests
 
     HALF_OPEN = "half_open"  # Testing if service recovered
-
 
 @dataclass
 
@@ -71,7 +58,6 @@ class CircuitBreakerConfig:
 
     max_requests_half_open: int = 3  # Max requests in half-open state
 
-
 @dataclass
 
 class FailureRecord:
@@ -86,12 +72,10 @@ class FailureRecord:
 
     request_id: str = ""
 
-
 class WebSocketCircuitBreaker:
 
     """Circuit breaker for WebSocket operations."""
     
-
     def __init__(self, name: str, config: CircuitBreakerConfig = None):
 
         self.name = name
@@ -126,7 +110,6 @@ class WebSocketCircuitBreaker:
 
         }
     
-
     async def call(self, func: Callable, *args, **kwargs) -> Any:
 
         """Execute function with circuit breaker protection."""
@@ -157,7 +140,6 @@ class WebSocketCircuitBreaker:
 
             raise CircuitBreakerOpenError(f"Circuit breaker {self.name} is OPEN")
         
-
         elif self.state == CircuitState.HALF_OPEN:
 
             if self.half_open_requests >= self.config.max_requests_half_open:
@@ -166,7 +148,6 @@ class WebSocketCircuitBreaker:
 
                 raise CircuitBreakerOpenError(f"Circuit breaker {self.name} half-open limit exceeded")
             
-
             self.half_open_requests += 1
         
         # Execute the function
@@ -179,14 +160,12 @@ class WebSocketCircuitBreaker:
 
             return result
         
-
         except Exception as e:
 
             self._record_failure(str(type(e).__name__), str(e))
 
             raise
     
-
     def _should_open_circuit(self) -> bool:
 
         """Check if circuit should be opened."""
@@ -205,10 +184,8 @@ class WebSocketCircuitBreaker:
 
         ]
         
-
         return len(recent_failures) >= self.config.failure_threshold
     
-
     def _should_try_half_open(self) -> bool:
 
         """Check if circuit should try half-open state."""
@@ -217,12 +194,10 @@ class WebSocketCircuitBreaker:
 
             return False
         
-
         time_since_failure = time.time() - self.last_failure_time
 
         return time_since_failure >= self.config.timeout
     
-
     def _open_circuit(self) -> None:
 
         """Open the circuit."""
@@ -235,7 +210,6 @@ class WebSocketCircuitBreaker:
 
         self.metrics["circuit_opens"] += 1
     
-
     def _half_open_circuit(self) -> None:
 
         """Set circuit to half-open state."""
@@ -246,7 +220,6 @@ class WebSocketCircuitBreaker:
 
         self.half_open_requests = 0
     
-
     def _close_circuit(self) -> None:
 
         """Close the circuit."""
@@ -261,7 +234,6 @@ class WebSocketCircuitBreaker:
 
         self.metrics["circuit_closes"] += 1
     
-
     def _record_success(self) -> None:
 
         """Record a successful operation."""
@@ -278,7 +250,6 @@ class WebSocketCircuitBreaker:
 
                 self._close_circuit()
     
-
     def _record_failure(self, error_type: str, error_message: str) -> None:
 
         """Record a failed operation."""
@@ -287,7 +258,6 @@ class WebSocketCircuitBreaker:
 
         self.last_failure_time = time.time()
         
-
         failure = FailureRecord(
 
             timestamp=time.time(),
@@ -300,7 +270,6 @@ class WebSocketCircuitBreaker:
 
         )
         
-
         self.failure_history.append(failure)
         
         # Keep only recent failures
@@ -325,14 +294,12 @@ class WebSocketCircuitBreaker:
 
             self._open_circuit()
     
-
     def get_state_info(self) -> Dict[str, Any]:
 
         """Get current circuit breaker state information."""
 
         current_time = time.time()
         
-
         return {
 
             "name": self.name,
@@ -371,19 +338,16 @@ class WebSocketCircuitBreaker:
 
         }
 
-
 class CircuitBreakerOpenError(Exception):
 
     """Exception raised when circuit breaker is open."""
 
     pass
 
-
 class FallbackHandler:
 
     """Handle fallback operations when circuit breaker is open."""
     
-
     def __init__(self):
 
         self.cached_responses = {}
@@ -400,7 +364,6 @@ class FallbackHandler:
 
         }
     
-
     async def handle_websocket_fallback(self, operation: str, user_id: str, **kwargs) -> Dict[str, Any]:
 
         """Handle fallback for WebSocket operations."""
@@ -421,7 +384,6 @@ class FallbackHandler:
 
             return cached_response
         
-
         self.fallback_stats["cache_misses"] += 1
         
         # Provide operation-specific fallbacks
@@ -442,7 +404,6 @@ class FallbackHandler:
 
             return await self._handle_default_fallback(operation, user_id)
     
-
     async def _handle_send_message_fallback(self, user_id: str, **kwargs) -> Dict[str, Any]:
 
         """Handle fallback for send message operation."""
@@ -473,17 +434,14 @@ class FallbackHandler:
 
         self.cached_responses[cache_key] = fallback_response.copy()
         
-
         return fallback_response
     
-
     async def _handle_connection_status_fallback(self, user_id: str) -> Dict[str, Any]:
 
         """Handle fallback for connection status check."""
 
         self.fallback_stats["degraded_responses"] += 1
         
-
         return {
 
             "user_id": user_id,
@@ -500,14 +458,12 @@ class FallbackHandler:
 
         }
     
-
     async def _handle_broadcast_fallback(self, **kwargs) -> Dict[str, Any]:
 
         """Handle fallback for broadcast operation."""
 
         self.fallback_stats["degraded_responses"] += 1
         
-
         return {
 
             "success": False,
@@ -524,14 +480,12 @@ class FallbackHandler:
 
         }
     
-
     async def _handle_default_fallback(self, operation: str, user_id: str) -> Dict[str, Any]:
 
         """Handle default fallback for unknown operations."""
 
         self.fallback_stats["default_responses"] += 1
         
-
         return {
 
             "success": False,
@@ -548,7 +502,6 @@ class FallbackHandler:
 
         }
     
-
     def update_cache(self, operation: str, user_id: str, response: Dict[str, Any]) -> None:
 
         """Update cached response for successful operations."""
@@ -574,14 +527,12 @@ class FallbackHandler:
 
             self.cached_responses = dict(sorted_items[-800:])
     
-
     def get_fallback_stats(self) -> Dict[str, Any]:
 
         """Get fallback handler statistics."""
 
         total_requests = sum(self.fallback_stats.values())
         
-
         stats = self.fallback_stats.copy()
 
         if total_requests > 0:
@@ -592,17 +543,14 @@ class FallbackHandler:
 
             stats["cache_hit_rate"] = 0.0
         
-
         stats["cache_size"] = len(self.cached_responses)
 
         return stats
-
 
 class RecoveryDetector:
 
     """Detect service recovery for circuit breaker."""
     
-
     def __init__(self):
 
         self.health_checks = []
@@ -613,7 +561,6 @@ class RecoveryDetector:
 
         self.min_checks = 5  # Minimum checks for reliable detection
     
-
     async def perform_health_check(self, circuit_breaker: WebSocketCircuitBreaker) -> bool:
 
         """Perform health check for circuit breaker."""
@@ -623,7 +570,6 @@ class RecoveryDetector:
 
             await asyncio.sleep(0.01)  # Simulate network call
             
-
             check_result = {
 
                 "timestamp": time.time(),
@@ -636,15 +582,12 @@ class RecoveryDetector:
 
             }
             
-
             self.health_checks.append(check_result)
 
             self._cleanup_old_checks()
             
-
             return True
             
-
         except Exception as e:
 
             check_result = {
@@ -659,15 +602,12 @@ class RecoveryDetector:
 
             }
             
-
             self.health_checks.append(check_result)
 
             self._cleanup_old_checks()
             
-
             return False
     
-
     def _cleanup_old_checks(self) -> None:
 
         """Remove old health check records."""
@@ -682,7 +622,6 @@ class RecoveryDetector:
 
         ]
     
-
     def is_service_recovered(self, circuit_name: str) -> bool:
 
         """Check if service has recovered based on health checks."""
@@ -703,20 +642,16 @@ class RecoveryDetector:
 
         ]
         
-
         if len(recent_checks) < self.min_checks:
 
             return False  # Not enough data
         
-
         successful_checks = sum(1 for check in recent_checks if check["success"])
 
         success_rate = successful_checks / len(recent_checks)
         
-
         return success_rate >= self.recovery_threshold
     
-
     def get_recovery_stats(self, circuit_name: str) -> Dict[str, Any]:
 
         """Get recovery statistics for circuit."""
@@ -725,7 +660,6 @@ class RecoveryDetector:
 
         window_start = current_time - self.check_window
         
-
         recent_checks = [
 
             check for check in self.health_checks
@@ -736,7 +670,6 @@ class RecoveryDetector:
 
         ]
         
-
         if not recent_checks:
 
             return {
@@ -751,12 +684,10 @@ class RecoveryDetector:
 
             }
         
-
         successful_checks = sum(1 for check in recent_checks if check["success"])
 
         success_rate = successful_checks / len(recent_checks)
         
-
         response_times = [
 
             check.get("response_time", 0) for check in recent_checks
@@ -765,10 +696,8 @@ class RecoveryDetector:
 
         ]
         
-
         avg_response_time = sum(response_times) / len(response_times) if response_times else 0
         
-
         return {
 
             "total_checks": len(recent_checks),
@@ -785,7 +714,6 @@ class RecoveryDetector:
 
         }
 
-
 @pytest.mark.L2
 
 @pytest.mark.integration
@@ -794,20 +722,18 @@ class TestWebSocketCircuitBreaker:
 
     """L2 integration tests for WebSocket circuit breaker."""
     
-
     @pytest.fixture
 
     def ws_manager(self):
 
         """Create WebSocket manager with mocked external services."""
 
-        with patch('app.ws_manager.redis_manager') as mock_redis:
+        with patch('netra_backend.app.ws_manager.redis_manager') as mock_redis:
 
             mock_redis.enabled = False  # Use in-memory storage
 
             return WebSocketManager()
     
-
     @pytest.fixture
 
     def circuit_config(self):
@@ -828,7 +754,6 @@ class TestWebSocketCircuitBreaker:
 
         )
     
-
     @pytest.fixture
 
     def circuit_breaker(self, circuit_config):
@@ -837,7 +762,6 @@ class TestWebSocketCircuitBreaker:
 
         return WebSocketCircuitBreaker("websocket_test", circuit_config)
     
-
     @pytest.fixture
 
     def fallback_handler(self):
@@ -846,7 +770,6 @@ class TestWebSocketCircuitBreaker:
 
         return FallbackHandler()
     
-
     @pytest.fixture
 
     def recovery_detector(self):
@@ -855,7 +778,6 @@ class TestWebSocketCircuitBreaker:
 
         return RecoveryDetector()
     
-
     @pytest.fixture
 
     def test_users(self):
@@ -882,7 +804,6 @@ class TestWebSocketCircuitBreaker:
 
         ]
     
-
     async def simulate_failing_operation(self):
 
         """Simulate an operation that always fails."""
@@ -891,7 +812,6 @@ class TestWebSocketCircuitBreaker:
 
         raise Exception("Simulated failure")
     
-
     async def simulate_successful_operation(self):
 
         """Simulate an operation that always succeeds."""
@@ -900,7 +820,6 @@ class TestWebSocketCircuitBreaker:
 
         return {"success": True, "timestamp": time.time()}
     
-
     async def test_circuit_breaker_basic_functionality(self, circuit_breaker):
 
         """Test basic circuit breaker functionality."""
@@ -918,7 +837,6 @@ class TestWebSocketCircuitBreaker:
 
             assert result["success"] is True
         
-
         state_info = circuit_breaker.get_state_info()
 
         assert state_info["state"] == CircuitState.CLOSED.value
@@ -927,7 +845,6 @@ class TestWebSocketCircuitBreaker:
 
         assert state_info["metrics"]["failed_requests"] == 0
     
-
     async def test_circuit_breaker_opens_on_failures(self, circuit_breaker):
 
         """Test circuit breaker opens after threshold failures."""
@@ -935,7 +852,6 @@ class TestWebSocketCircuitBreaker:
 
         failure_count = 0
         
-
         for i in range(circuit_breaker.config.failure_threshold + 1):
 
             try:
@@ -962,12 +878,10 @@ class TestWebSocketCircuitBreaker:
 
             await circuit_breaker.call(self.simulate_successful_operation)
         
-
         state_info = circuit_breaker.get_state_info()
 
         assert state_info["metrics"]["blocked_requests"] > 0
     
-
     async def test_circuit_breaker_half_open_transition(self, circuit_breaker):
 
         """Test circuit breaker transitions to half-open state."""
@@ -1009,12 +923,10 @@ class TestWebSocketCircuitBreaker:
 
             circuit_breaker._half_open_circuit()
         
-
         state_info = circuit_breaker.get_state_info()
 
         assert state_info["state"] == CircuitState.HALF_OPEN.value
     
-
     async def test_circuit_breaker_recovery_flow(self, circuit_breaker):
 
         """Test complete circuit breaker recovery flow."""
@@ -1056,7 +968,6 @@ class TestWebSocketCircuitBreaker:
 
         assert result["success"] is True
     
-
     async def test_fallback_handler_functionality(self, fallback_handler, test_users):
 
         """Test fallback handler operations."""
@@ -1071,7 +982,6 @@ class TestWebSocketCircuitBreaker:
 
         )
         
-
         assert send_fallback["success"] is False
 
         assert send_fallback["queued"] is True
@@ -1086,7 +996,6 @@ class TestWebSocketCircuitBreaker:
 
         )
         
-
         assert status_fallback["connected"] is False
 
         assert status_fallback["status"] == "unknown"
@@ -1101,7 +1010,6 @@ class TestWebSocketCircuitBreaker:
 
         )
         
-
         assert cached_response["source"] == "cache"
         
         # Verify fallback stats
@@ -1114,7 +1022,6 @@ class TestWebSocketCircuitBreaker:
 
         assert stats["cache_hit_rate"] > 0
     
-
     async def test_recovery_detector_functionality(self, recovery_detector, circuit_breaker):
 
         """Test recovery detector operations."""
@@ -1152,7 +1059,6 @@ class TestWebSocketCircuitBreaker:
 
         assert stats["min_checks_met"] is True
     
-
     @mock_justified("L2: Circuit breaker with real internal components")
 
     async def test_websocket_integration_with_circuit_breaker(self, ws_manager, circuit_breaker, fallback_handler, test_users):
@@ -1195,12 +1101,10 @@ class TestWebSocketCircuitBreaker:
 
         original_send = ws_manager.send_message_to_user
         
-
         async def failing_send(*args, **kwargs):
 
             raise Exception("WebSocket connection failed")
         
-
         ws_manager.send_message_to_user = failing_send
         
         # Generate failures to open circuit
@@ -1272,7 +1176,6 @@ class TestWebSocketCircuitBreaker:
 
         await ws_manager.disconnect_user(user.id, mock_websocket)
     
-
     async def test_concurrent_circuit_breaker_operations(self, circuit_breaker):
 
         """Test circuit breaker under concurrent load."""
@@ -1285,7 +1188,6 @@ class TestWebSocketCircuitBreaker:
 
         blocked_count = 0
         
-
         async def concurrent_operation(operation_id: int):
 
             try:
@@ -1340,7 +1242,6 @@ class TestWebSocketCircuitBreaker:
 
         total_requests = state_info["metrics"]["total_requests"]
         
-
         assert total_requests == concurrent_operations
 
         assert success_count > 0  # Some operations should succeed
@@ -1351,7 +1252,6 @@ class TestWebSocketCircuitBreaker:
 
             assert blocked_count > 0
     
-
     async def test_circuit_breaker_performance_benchmarks(self, circuit_breaker):
 
         """Test circuit breaker performance benchmarks."""
@@ -1362,12 +1262,10 @@ class TestWebSocketCircuitBreaker:
 
         start_time = time.time()
         
-
         for _ in range(operation_count):
 
             await circuit_breaker.call(self.simulate_successful_operation)
         
-
         success_time = time.time() - start_time
         
         # Should handle operations quickly
@@ -1378,7 +1276,6 @@ class TestWebSocketCircuitBreaker:
 
         start_time = time.time()
         
-
         for _ in range(circuit_breaker.config.failure_threshold):
 
             try:
@@ -1389,7 +1286,6 @@ class TestWebSocketCircuitBreaker:
 
                 pass
         
-
         failure_detection_time = time.time() - start_time
         
         # Should detect failures quickly
@@ -1406,7 +1302,6 @@ class TestWebSocketCircuitBreaker:
 
         start_time = time.time()
         
-
         for _ in range(100):
 
             try:
@@ -1417,7 +1312,6 @@ class TestWebSocketCircuitBreaker:
 
                 pass
         
-
         blocked_time = time.time() - start_time
         
         # Should block requests very quickly
@@ -1429,7 +1323,6 @@ class TestWebSocketCircuitBreaker:
         state_info = circuit_breaker.get_state_info()
 
         assert state_info["metrics"]["blocked_requests"] == 100
-
 
 if __name__ == "__main__":
 

@@ -5,21 +5,10 @@ Test 8: WebSocket Reconnect State Recovery - $10K MRR
 Test 9: Database Transaction Rollback Safety - $15K MRR
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import time
@@ -30,22 +19,17 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
-
-
 @pytest.mark.asyncio
 
 class TestLLMManagerInit:
 
     """Test 7: LLM Manager Connection Pool Initialization"""
     
-
     async def test_connection_pool_creation(self):
 
         """Test LLM connection pool initializes properly."""
         from netra_backend.app.services.llm_manager import LLMManager
         
-
         llm_manager = Mock(spec=LLMManager)
 
         llm_manager.initialize_pool = AsyncMock(return_value={
@@ -62,14 +46,12 @@ class TestLLMManagerInit:
 
         pool_info = await llm_manager.initialize_pool()
         
-
         assert pool_info["pool_size"] == 10
 
         assert len(pool_info["providers"]) == 3
 
         llm_manager.initialize_pool.assert_called_once()
     
-
     async def test_provider_health_checks(self):
 
         """Test health checks for each LLM provider."""
@@ -84,7 +66,6 @@ class TestLLMManagerInit:
 
         }
         
-
         health_results = {}
 
         for provider, expected in providers.items():
@@ -98,12 +79,10 @@ class TestLLMManagerInit:
 
         assert healthy_count >= 2
     
-
     async def test_connection_pool_warmup(self):
 
         """Test connection pool warmup reduces first-call latency."""
         
-
         llm_manager = Mock(spec=LLMManager)
         
         # Cold call
@@ -128,20 +107,17 @@ class TestLLMManagerInit:
 
         assert warm_duration < cold_duration
 
-
 @pytest.mark.asyncio
 
 class TestWebSocketRecovery:
 
     """Test 8: WebSocket Reconnect State Recovery"""
     
-
     async def test_state_preservation_on_disconnect(self):
 
         """Test state is preserved when WebSocket disconnects."""
         from netra_backend.app.services.websocket_manager import WebSocketManager
         
-
         ws_manager = Mock(spec=WebSocketManager)
         
         # Active state before disconnect
@@ -158,7 +134,6 @@ class TestWebSocketRecovery:
 
         }
         
-
         ws_manager.preserve_state = AsyncMock(return_value=True)
         
         # Preserve state on disconnect
@@ -167,7 +142,6 @@ class TestWebSocketRecovery:
 
         assert preserved is True
     
-
     async def test_automatic_reconnection_logic(self):
 
         """Test automatic reconnection with exponential backoff."""
@@ -176,7 +150,6 @@ class TestWebSocketRecovery:
 
         max_attempts = 3
         
-
         for attempt in range(max_attempts):
 
             delay = 2 ** attempt  # Exponential backoff
@@ -193,12 +166,10 @@ class TestWebSocketRecovery:
 
             await asyncio.sleep(0.01)  # Simulate delay
         
-
         assert len(reconnect_attempts) == 3
 
         assert reconnect_attempts[2]["delay"] == 4  # 2^2
     
-
     async def test_message_queue_recovery(self):
 
         """Test pending messages are recovered after reconnect."""
@@ -219,11 +190,9 @@ class TestWebSocketRecovery:
 
             recovered_messages.append(msg)
         
-
         assert len(recovered_messages) == len(pending_messages)
 
         assert recovered_messages[0]["id"] == "msg_1"
-
 
 @pytest.mark.asyncio
 
@@ -231,19 +200,16 @@ class TestDatabaseRollback:
 
     """Test 9: Database Transaction Rollback Safety"""
     
-
     async def test_transaction_atomicity(self):
 
         """Test database transactions are atomic."""
         from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
         from sqlalchemy.orm import sessionmaker
         
-
         engine = create_async_engine("sqlite+aiosqlite:///:memory:")
 
         async_session = sessionmaker(engine, class_=AsyncSession)
         
-
         async with async_session() as session:
 
             try:
@@ -261,7 +227,6 @@ class TestDatabaseRollback:
 
                         raise Exception("Simulated failure")
                     
-
                     await session.commit()
 
             except Exception:
@@ -270,10 +235,8 @@ class TestDatabaseRollback:
 
                 rolled_back = True
             
-
             assert rolled_back is True
     
-
     async def test_nested_transaction_handling(self):
 
         """Test nested transactions handle correctly."""
@@ -282,7 +245,6 @@ class TestDatabaseRollback:
 
         inner_transaction = {"id": "inner", "status": "pending"}
         
-
         try:
             # Outer transaction
 
@@ -296,7 +258,6 @@ class TestDatabaseRollback:
 
             raise Exception("Inner transaction failed")
             
-
         except Exception:
             # Both should rollback
 
@@ -304,12 +265,10 @@ class TestDatabaseRollback:
 
             inner_transaction["status"] = "rolled_back"
         
-
         assert outer_transaction["status"] == "rolled_back"
 
         assert inner_transaction["status"] == "rolled_back"
     
-
     async def test_distributed_transaction_coordination(self):
 
         """Test coordination between multiple databases."""
@@ -318,7 +277,6 @@ class TestDatabaseRollback:
 
         clickhouse_tx = {"db": "clickhouse", "status": "pending"}
         
-
         try:
             # Start both transactions
 
@@ -330,12 +288,10 @@ class TestDatabaseRollback:
 
             clickhouse_tx["status"] = "failed"
             
-
             if clickhouse_tx["status"] == "failed":
 
                 raise Exception("ClickHouse transaction failed")
                 
-
         except Exception:
             # Rollback both
 
@@ -343,7 +299,6 @@ class TestDatabaseRollback:
 
             clickhouse_tx["status"] = "rolled_back"
         
-
         assert postgres_tx["status"] == "rolled_back"
 
         assert clickhouse_tx["status"] == "rolled_back"

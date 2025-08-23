@@ -10,17 +10,10 @@ Critical Path: Request arrival -> Token bucket check -> Rate limit enforcement -
 Coverage: Token bucket algorithm, rate limiting enforcement, burst handling, fair usage
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -33,13 +26,9 @@ import redis.asyncio as redis
 
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.services.monitoring.rate_limiter import GCPRateLimiter
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class TokenBucketRateLimiter:
     """Token bucket rate limiter implementation for testing."""
@@ -99,7 +88,6 @@ class TokenBucketRateLimiter:
         """Clear rate limit for identifier."""
         if identifier in self.token_buckets:
             del self.token_buckets[identifier]
-
 
 class RateLimitingManager:
     """Manages rate limiting testing with token bucket algorithm."""
@@ -288,7 +276,6 @@ class RateLimitingManager:
         if self.redis_manager:
             await self.redis_manager.shutdown()
 
-
 @pytest.fixture
 async def rate_limiting_manager():
     """Create rate limiting manager for testing."""
@@ -296,7 +283,6 @@ async def rate_limiting_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -321,7 +307,6 @@ async def test_token_bucket_rate_limiting_basic(rate_limiting_manager):
     assert all(r["allowed"] for r in allowed_requests)
     assert all(r["request_time"] < 0.1 for r in allowed_requests)
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
 async def test_burst_capacity_enforcement(rate_limiting_manager):
@@ -339,7 +324,6 @@ async def test_burst_capacity_enforcement(rate_limiting_manager):
     assert burst_result["allowed_count"] <= 5
     assert burst_result["blocked_count"] >= 3
     assert burst_result["burst_time"] < 1.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -360,7 +344,6 @@ async def test_sustained_rate_limiting_performance(rate_limiting_manager):
     assert sustained_result["allowed_count"] <= 8  # Allow some tolerance
     assert sustained_result["average_rate"] <= 4.0  # Should be close to 3 rps
     assert sustained_result["test_time"] >= 2.0
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism

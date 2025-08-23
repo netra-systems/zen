@@ -175,7 +175,10 @@ class UnifiedBroadcastingManager:
         """Prepare and validate message for broadcasting."""
         prepared = self.manager.messaging.message_handler.prepare_and_validate_message(message)
         if prepared:
-            prepared["broadcast_timestamp"] = time.time()
+            # Add broadcast timestamp to payload to maintain type/payload structure
+            if "payload" not in prepared:
+                prepared["payload"] = {}
+            prepared["payload"]["broadcast_timestamp"] = time.time()
         return prepared
 
     async def _execute_room_broadcast(self, room_id: str, message: Dict[str, Any], broadcast_type: str) -> bool:
@@ -276,8 +279,10 @@ class UnifiedBroadcastingManager:
         """Send job progress notification to job room."""
         progress_message = {
             "type": "generation_progress",
-            "payload": progress_data,
-            "timestamp": time.time()
+            "payload": {
+                **progress_data,
+                "timestamp": time.time()
+            }
         }
         return await self.broadcast_to_job(job_id, progress_message)
 
@@ -285,8 +290,10 @@ class UnifiedBroadcastingManager:
         """Send job completion notification to job room."""
         completion_message = {
             "type": "generation_complete",
-            "payload": completion_data,
-            "timestamp": time.time()
+            "payload": {
+                **completion_data,
+                "timestamp": time.time()
+            }
         }
         return await self.broadcast_to_job(job_id, completion_message)
 
@@ -294,8 +301,10 @@ class UnifiedBroadcastingManager:
         """Send job error notification to job room."""
         error_message = {
             "type": "generation_error",
-            "payload": error_data,
-            "timestamp": time.time()
+            "payload": {
+                **error_data,
+                "timestamp": time.time()
+            }
         }
         return await self.broadcast_to_job(job_id, error_message)
 
@@ -309,8 +318,12 @@ class UnifiedBroadcastingManager:
         """Create batch completion message structure."""
         return {
             "type": "batch_complete",
-            "payload": {"job_id": job_id, "batch_num": batch_num, "batch_size": batch_size},
-            "timestamp": time.time()
+            "payload": {
+                "job_id": job_id, 
+                "batch_num": batch_num, 
+                "batch_size": batch_size,
+                "timestamp": time.time()
+            }
         }
 
     # Administrative broadcasting methods
@@ -318,9 +331,12 @@ class UnifiedBroadcastingManager:
         """Broadcast system announcement to all users."""
         announcement_message = {
             "type": "system_announcement",
-            "payload": {"message": announcement, "priority": priority},
-            "timestamp": time.time(),
-            "system": True
+            "payload": {
+                "message": announcement, 
+                "priority": priority,
+                "timestamp": time.time(),
+                "system": True
+            }
         }
         return await self.broadcast_to_all(announcement_message)
 
@@ -328,9 +344,11 @@ class UnifiedBroadcastingManager:
         """Broadcast maintenance notice to all users."""
         maintenance_message = {
             "type": "maintenance_notice",
-            "payload": maintenance_data,
-            "timestamp": time.time(),
-            "system": True
+            "payload": {
+                **maintenance_data,
+                "timestamp": time.time(),
+                "system": True
+            }
         }
         return await self.broadcast_to_all(maintenance_message)
 

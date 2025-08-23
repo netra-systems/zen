@@ -11,9 +11,7 @@ Comprehensive test for message queue processing pipeline:
 8. Queue overflow handling
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -27,12 +25,8 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import pytest
 
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
-
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 QUEUE_SERVICE_URL = os.getenv("QUEUE_SERVICE_URL", "http://localhost:8084")
-
 
 class MessageQueueTester:
     """Test message queue processing pipeline."""
@@ -379,7 +373,6 @@ class MessageQueueTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -405,7 +398,6 @@ async def test_message_queue_processing_pipeline():
         critical_tests = ["queue_health", "message_publishing", "message_ordering"]
         for test in critical_tests:
             assert results.get(test, False), f"Critical test failed: {test}"
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(test_message_queue_processing_pipeline())

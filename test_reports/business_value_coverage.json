@@ -1,0 +1,333 @@
+{
+  "metadata": {
+    "generated_at": "2025-08-22T12:59:22.906514",
+    "total_tests": 5503,
+    "total_business_value": 425527.0,
+    "average_value_score": 77.32636743594404
+  },
+  "tier_coverage": {
+    "all": {
+      "total_tests": 2306,
+      "average_value_score": 72.73677363399827,
+      "components_covered": 9,
+      "coverage_percentage": 0.0
+    },
+    "enterprise": {
+      "total_tests": 1282,
+      "average_value_score": 88.2597503900156,
+      "components_covered": 8,
+      "coverage_percentage": 0.0
+    },
+    "free": {
+      "total_tests": 1381,
+      "average_value_score": 74.35047067342505,
+      "components_covered": 7,
+      "coverage_percentage": 0.0
+    },
+    "mid": {
+      "total_tests": 335,
+      "average_value_score": 81.1910447761194,
+      "components_covered": 8,
+      "coverage_percentage": 0.0
+    },
+    "early": {
+      "total_tests": 199,
+      "average_value_score": 74.22110552763819,
+      "components_covered": 6,
+      "coverage_percentage": 0.0
+    }
+  },
+  "component_coverage": {
+    "agent_orchestration": {
+      "component_name": "agent_orchestration",
+      "tier": "all",
+      "total_tests": 834,
+      "unit_tests": 67,
+      "integration_tests": 24,
+      "e2e_tests": 741,
+      "real_llm_tests": 19,
+      "performance_tests": 2,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 69033.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "authentication": {
+      "component_name": "authentication",
+      "tier": "all",
+      "total_tests": 1867,
+      "unit_tests": 0,
+      "integration_tests": 198,
+      "e2e_tests": 1669,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 158962.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "websocket": {
+      "component_name": "websocket",
+      "tier": "all",
+      "total_tests": 1315,
+      "unit_tests": 23,
+      "integration_tests": 264,
+      "e2e_tests": 1026,
+      "real_llm_tests": 15,
+      "performance_tests": 2,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 105539.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "analytics": {
+      "component_name": "analytics",
+      "tier": "enterprise",
+      "total_tests": 14,
+      "unit_tests": 0,
+      "integration_tests": 4,
+      "e2e_tests": 10,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 1016.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "cost_optimization": {
+      "component_name": "cost_optimization",
+      "tier": "enterprise",
+      "total_tests": 112,
+      "unit_tests": 0,
+      "integration_tests": 2,
+      "e2e_tests": 110,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 8237.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "observability": {
+      "component_name": "observability",
+      "tier": "enterprise",
+      "total_tests": 128,
+      "unit_tests": 0,
+      "integration_tests": 31,
+      "e2e_tests": 97,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 7968.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "other": {
+      "component_name": "other",
+      "tier": "all",
+      "total_tests": 557,
+      "unit_tests": 108,
+      "integration_tests": 164,
+      "e2e_tests": 285,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 31651.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "database": {
+      "component_name": "database",
+      "tier": "all",
+      "total_tests": 647,
+      "unit_tests": 2,
+      "integration_tests": 119,
+      "e2e_tests": 522,
+      "real_llm_tests": 12,
+      "performance_tests": 4,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 41671.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "frontend": {
+      "component_name": "frontend",
+      "tier": "all",
+      "total_tests": 29,
+      "unit_tests": 0,
+      "integration_tests": 29,
+      "e2e_tests": 0,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 1450.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    }
+  },
+  "test_type_distribution": {
+    "e2e": 4460,
+    "integration": 835,
+    "performance": 8,
+    "unit": 200
+  },
+  "quality_metrics": {
+    "real_llm_coverage": 0.8359076867163365,
+    "e2e_coverage": 81.04670179901872,
+    "multi_service_coverage": 23.223696165727784,
+    "high_value_test_count": 4147,
+    "critical_test_count": 992,
+    "critical_test_percentage": 18.026530983100127
+  },
+  "top_value_tests": [
+    {
+      "name": "test_agent_startup_with_rate_limiting",
+      "file": "tests\\e2e\\test_agent_startup_resilience_e2e.py",
+      "score": 95.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for enterprise customers - Full customer journey validation"
+    },
+    {
+      "name": "test_agent_startup_database_connectivity_failure_recovery",
+      "file": "tests\\e2e\\test_agent_startup_resilience_e2e.py",
+      "score": 95.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for enterprise customers - Full customer journey validation"
+    },
+    {
+      "name": "TestPostgreSQLOperations.test_postgresql_user_operations",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "TestClickHouseOperations.test_clickhouse_analytics_writes",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "TestClickHouseOperations.test_clickhouse_data_aggregation",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "TestCrossDatabaseConsistency.test_cross_database_consistency",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "TestTransactionAtomicity.test_transaction_atomicity",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "TestConnectionPoolManagement.test_connection_pool_management",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "TestConnectionPoolManagement.test_connection_pool_exhaustion",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "TestConcurrentWrites.test_concurrent_writes",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "test_complete_database_operations_integration",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "test_postgresql_user_operations",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "test_clickhouse_analytics_writes",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "test_clickhouse_data_aggregation",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "test_cross_database_consistency",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "test_transaction_atomicity",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "test_connection_pool_management",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "test_connection_pool_exhaustion",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "test_concurrent_writes",
+      "file": "tests\\e2e\\test_database_operations.py",
+      "score": 95.0,
+      "justification": "Protects enterprise tier customer data and access control - Full customer journey validation"
+    },
+    {
+      "name": "test_user_data_isolation",
+      "file": "tests\\e2e\\test_isolation.py",
+      "score": 95.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for enterprise customers - Full customer journey validation"
+    }
+  ],
+  "coverage_gaps": [
+    {
+      "type": "missing_e2e",
+      "component": "frontend",
+      "severity": "high",
+      "message": "frontend has no end-to-end tests"
+    }
+  ],
+  "recommendations": [
+    "Increase real LLM test coverage from 0.8% to target 85%"
+  ]
+}

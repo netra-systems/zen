@@ -16,7 +16,6 @@ from netra_backend.app.agents.triage_sub_agent import (
     UserIntent,
 )
 
-
 class TriageMockHelpers:
     """Enhanced mock helpers for triage testing"""
     
@@ -34,7 +33,6 @@ class TriageMockHelpers:
     def create_mock_redis(available=True):
         """Create mock Redis manager"""
         return MockRedisManager(available)
-
 
 class MockLLMManager:
     """Enhanced mock LLM manager for comprehensive testing"""
@@ -125,7 +123,6 @@ class MockLLMManager:
                 )
             )
 
-
 class MockToolDispatcher:
     """Mock tool dispatcher"""
     
@@ -141,7 +138,6 @@ class MockToolDispatcher:
             "corpus_manager": {"category": "data", "relevance": 0.6},
             "multi_objective_optimization": {"category": "optimization", "relevance": 0.85}
         }
-
 
 class MockRedisManager:
     """Enhanced mock Redis manager"""
@@ -169,7 +165,6 @@ class MockRedisManager:
         """Check if Redis is available"""
         if not self.available:
             raise Exception("Redis not available")
-
 
 class ValidationHelpers:
     """Helpers for validation testing"""
@@ -217,7 +212,6 @@ class ValidationHelpers:
             "What's the best way to handle user authentication in my app?",
         ]
 
-
 class EntityExtractionHelpers:
     """Helpers for entity extraction testing"""
     
@@ -257,7 +251,6 @@ class EntityExtractionHelpers:
         return {"gpt-4-turbo", "claude-3-opus", "llama-2-70b-chat", 
                 "gemini-pro", "palm-2"}
 
-
 class IntentHelpers:
     """Helpers for intent determination testing"""
     
@@ -284,7 +277,6 @@ class IntentHelpers:
             ("Migrate from GPT-3.5 to GPT-4", "migrate"),
             ("Validate my optimization results", "validate"),
         ]
-
 
 class AsyncTestHelpers:
     """Helpers for async testing"""
@@ -315,7 +307,6 @@ class AsyncTestHelpers:
         
         await asyncio.gather(*tasks)
         return states
-
 
 class AssertionHelpers:
     """Helpers for common assertions"""
@@ -354,7 +345,6 @@ class AssertionHelpers:
         for i in range(len(tools) - 1):
             assert tools[i].relevance_score >= tools[i + 1].relevance_score
 
-
 class PerformanceHelpers:
     """Helpers for performance testing"""
     
@@ -377,7 +367,6 @@ class PerformanceHelpers:
     def measure_execution_time(start_time, end_time):
         """Measure execution time in milliseconds"""
         return (end_time - start_time).total_seconds() * 1000
-
 
 class EdgeCaseHelpers:
     """Helpers for edge case testing"""

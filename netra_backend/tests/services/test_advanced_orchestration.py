@@ -4,17 +4,10 @@ Tests conditional execution, error handling, timeout management, and concurrent 
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 from datetime import UTC, datetime
@@ -25,11 +18,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from langchain_core.tools import BaseTool
 
-# Add project root to path
 from netra_backend.app.core.exceptions_base import NetraException
-
-# Add project root to path
-
 
 class MockAdvancedTool(BaseTool):
     """Advanced mock tool with error simulation capabilities"""
@@ -53,7 +42,6 @@ class MockAdvancedTool(BaseTool):
         if self.delay_seconds > 0:
             await asyncio.sleep(self.delay_seconds)
         return self._run(query)
-
 
 class AdvancedToolOrchestrator:
     """Advanced orchestrator with error handling and conditional execution"""
@@ -144,7 +132,6 @@ class AdvancedToolOrchestrator:
         tasks = [self.execute_conditional_chain(config) for config in chain_configs]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         return results
-
 
 class TestAdvancedOrchestration:
     """Test advanced orchestration features"""

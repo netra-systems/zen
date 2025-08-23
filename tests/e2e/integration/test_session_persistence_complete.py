@@ -34,8 +34,6 @@ from typing import Any, Dict, List, Optional
 import httpx
 import pytest
 
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Import test helpers
 # Redis for session persistence validation
@@ -113,7 +111,7 @@ class SessionPersistenceTestManager:
             print(f"WebSocket connection failed: {e}")
             return None
             
-    async def send_test_messages(self, ws_client, user_id: str, count: int = 3) -> List[Dict]:
+    async def test_send_test_messages(self, ws_client, user_id: str, count: int = 3) -> List[Dict]:
         """Send test messages to establish session state."""
         messages = []
         

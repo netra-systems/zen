@@ -3,38 +3,28 @@ Tests for async timeout and retry functionality
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_retry_logic import (
     async_timeout,
     with_retry,
     with_timeout,
 )
 from netra_backend.app.core.exceptions_service import ServiceTimeoutError
-from .async_utils_helpers import (
+from netra_backend.tests.helpers.async_utils_helpers import (
     create_eventually_successful,
-    # Add project root to path
     create_quick_operation,
     create_retry_counter,
     create_slow_operation,
 )
-
 
 class TestAsyncTimeout:
     """Test async timeout functionality"""
@@ -62,7 +52,6 @@ class TestAsyncTimeout:
             return await create_slow_operation()
         with pytest.raises(ServiceTimeoutError):
             await slow_decorated_function()
-
 
 class TestWithRetry:
     """Test retry decorator functionality"""
@@ -110,7 +99,6 @@ class TestWithRetry:
         assert len(call_times) == 3
         assert call_times[1] - call_times[0] >= 0.01
         assert call_times[2] - call_times[1] >= 0.02
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

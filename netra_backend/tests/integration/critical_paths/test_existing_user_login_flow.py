@@ -10,17 +10,10 @@ Business Value Justification (BVJ):
 - Revenue Impact: Direct - can't monetize users who can't log in
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import os
@@ -35,9 +28,6 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 
-# Add project root to path
-
-
 # Set test environment before imports
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
@@ -46,9 +36,8 @@ os.environ["SKIP_STARTUP_CHECKS"] = "true"
 from netra_backend.app.config import get_config
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.main import app
-from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.session_service import SessionService
-
 
 class TestExistingUserLoginFlow:
     """Test existing user login flow from authentication to logout."""

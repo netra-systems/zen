@@ -204,7 +204,7 @@ class QualityCalculator:
     
     def _initialize_calculators(self) -> tuple:
         """Initialize all quality calculators."""
-        from .quality_metrics import DocumentationCalculator, TestCoverageCalculator
+        from netra_backend.app.services.factory_status.quality_metrics import DocumentationCalculator, TestCoverageCalculator
         coverage_calc = TestCoverageCalculator(self.repo_path)
         doc_calc = DocumentationCalculator(self.repo_path)
         arch_validator = ArchitectureValidator(self.repo_path)

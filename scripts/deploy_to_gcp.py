@@ -49,11 +49,12 @@ class ServiceConfig:
 class GCPDeployer:
     """Manages deployment of services to Google Cloud Platform."""
     
-    def __init__(self, project_id: str, region: str = "us-central1"):
+    def __init__(self, project_id: str, region: str = "us-central1", service_account_path: Optional[str] = None):
         self.project_id = project_id
         self.region = region
         self.project_root = Path(__file__).parent.parent
         self.registry = f"gcr.io/{project_id}"
+        self.service_account_path = service_account_path
         
         # Use gcloud.cmd on Windows
         self.gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
@@ -73,14 +74,14 @@ class GCPDeployer:
                 min_instances=1,
                 max_instances=20,
                 environment_vars={
-                    "ENVIRONMENT": "production",
+                    "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                 }
             ),
             ServiceConfig(
                 name="auth",
                 directory="auth_service",
-                port=8001,
+                port=8080,
                 dockerfile="Dockerfile.auth",
                 cloud_run_name="netra-auth",
                 memory="512Mi",
@@ -88,7 +89,7 @@ class GCPDeployer:
                 min_instances=1,
                 max_instances=10,
                 environment_vars={
-                    "ENVIRONMENT": "production",
+                    "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                 }
             ),
@@ -121,7 +122,12 @@ class GCPDeployer:
             if result.returncode != 0:
                 print("❌ gcloud CLI is not installed")
                 return False
-                
+            
+            # Authenticate with service account if provided
+            if self.service_account_path:
+                if not self.authenticate_with_service_account():
+                    return False
+                    
             # Check if project is set
             result = subprocess.run(
                 [self.gcloud_cmd, "config", "get-value", "project"],
@@ -146,6 +152,42 @@ class GCPDeployer:
         except FileNotFoundError:
             print("❌ gcloud CLI is not installed")
             print("Please install: https://cloud.google.com/sdk/docs/install")
+            return False
+    
+    def authenticate_with_service_account(self) -> bool:
+        """Authenticate using service account key file."""
+        if not self.service_account_path:
+            return True
+            
+        service_account_file = Path(self.service_account_path)
+        if not service_account_file.exists():
+            print(f"❌ Service account file not found: {service_account_file}")
+            return False
+            
+        print(f"🔐 Authenticating with service account: {service_account_file}")
+        
+        try:
+            # Activate service account
+            result = subprocess.run(
+                [
+                    self.gcloud_cmd, "auth", "activate-service-account",
+                    "--key-file", str(service_account_file)
+                ],
+                capture_output=True,
+                text=True,
+                check=True,
+                shell=self.use_shell
+            )
+            
+            print("✅ Service account authentication successful")
+            
+            # Also set GOOGLE_APPLICATION_CREDENTIALS for ADC
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(service_account_file)
+            
+            return True
+            
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Failed to authenticate with service account: {e.stderr}")
             return False
     
     def run_pre_deployment_checks(self) -> bool:
@@ -264,10 +306,9 @@ COPY shared/ ./shared/
 
 # Set environment variables
 ENV PYTHONPATH=/app
-ENV PORT=8888
 
-# Run the application
-CMD ["uvicorn", "netra_backend.app.main:app", "--host", "0.0.0.0", "--port", "8888"]
+# Run the application - use sh to evaluate PORT env var
+CMD ["sh", "-c", "uvicorn netra_backend.app.main:app --host 0.0.0.0 --port ${PORT:-8888}"]
 """
         elif service.name == "auth":
             content = """FROM python:3.11-slim
@@ -290,10 +331,9 @@ COPY shared/ ./shared/
 
 # Set environment variables
 ENV PYTHONPATH=/app
-ENV PORT=8001
 
-# Run the application
-CMD ["uvicorn", "auth_service.main:app", "--host", "0.0.0.0", "--port", "8001"]
+# Run the application - use sh to evaluate PORT env var
+CMD ["sh", "-c", "uvicorn auth_service.main:app --host 0.0.0.0 --port ${PORT:-8001}"]
 """
         elif service.name == "frontend":
             content = """FROM node:18-alpine AS builder
@@ -327,7 +367,6 @@ RUN npm ci --production
 
 # Set environment variables
 ENV NODE_ENV=production
-ENV PORT=3000
 
 EXPOSE 3000
 
@@ -486,27 +525,28 @@ CMD ["npm", "start"]
         
         # Add service-specific configurations
         if service.name == "backend":
-            # Backend needs connections to databases
+            # Backend needs connections to databases and all required secrets
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "DATABASE_URL=database-url:latest,REDIS_URL=redis-url:latest"
+                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=session-secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest"
             ])
         elif service.name == "auth":
             # Auth service needs database and JWT secrets
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "DATABASE_URL=database-url:latest,JWT_SECRET=jwt-secret:latest"
+                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest"
             ])
         elif service.name == "frontend":
-            # Frontend needs API URLs
-            backend_url = self.get_service_url("netra-backend")
-            auth_url = self.get_service_url("netra-auth")
+            # Frontend needs API URLs - use staging URLs for consistent configuration
+            # These will be the final Cloud Run URLs or use predefined staging domains
+            staging_api_url = "https://api.staging.netrasystems.ai"
+            staging_auth_url = "https://auth.staging.netrasystems.ai"
+            staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
             
-            if backend_url and auth_url:
-                cmd.extend([
-                    "--update-env-vars",
-                    f"NEXT_PUBLIC_API_URL={backend_url},NEXT_PUBLIC_AUTH_URL={auth_url}"
-                ])
+            cmd.extend([
+                "--update-env-vars",
+                f"NEXT_PUBLIC_API_URL={staging_api_url},NEXT_PUBLIC_AUTH_URL={staging_auth_url},NEXT_PUBLIC_WS_URL={staging_ws_url}"
+            ])
         
         try:
             result = subprocess.run(
@@ -563,10 +603,15 @@ CMD ["npm", "start"]
         """Create necessary secrets in Secret Manager."""
         print("\n🔐 Setting up secrets in Secret Manager...")
         
+        # CRITICAL: All these secrets are REQUIRED for staging deployment
+        # Based on staging_secrets_requirements.xml
         secrets = {
-            "database-url": "postgresql://user:password@/netra?host=/cloudsql/PROJECT_ID:REGION:INSTANCE",
-            "redis-url": "redis://10.0.0.1:6379",
-            "jwt-secret": "your-secure-jwt-secret-here"
+            "database-url-staging": "postgresql://netra_user:REPLACE_WITH_REAL_PASSWORD@34.132.142.103:5432/netra?sslmode=require",
+            "jwt-secret-key-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",
+            "session-secret-key-staging": "your-secure-session-secret-key-staging-32-chars-minimum", 
+            "openai-api-key-staging": "sk-REPLACE_WITH_REAL_OPENAI_KEY",
+            "fernet-key-staging": "REPLACE_WITH_REAL_FERNET_KEY_BASE64_32_BYTES",
+            "jwt-secret-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum"  # Auth service uses this name
         }
         
         for name, value in secrets.items():
@@ -791,6 +836,8 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
                        help="Run pre-deployment checks (architecture, tests, etc.)")
     parser.add_argument("--cleanup", action="store_true", 
                        help="Clean up deployments")
+    parser.add_argument("--service-account", 
+                       help="Path to service account JSON key file for authentication")
     
     args = parser.parse_args()
     
@@ -800,7 +847,7 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
         print("   Example: python scripts/deploy_to_gcp.py --project {} --build-local --run-checks\n".format(args.project))
         time.sleep(2)
     
-    deployer = GCPDeployer(args.project, args.region)
+    deployer = GCPDeployer(args.project, args.region, service_account_path=args.service_account)
     
     try:
         if args.cleanup:

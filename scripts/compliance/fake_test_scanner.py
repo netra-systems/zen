@@ -26,8 +26,6 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 # Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
 from netra_backend.app.logging_config import central_logger
 from test_framework.bad_test_detector import BadTestDetector

@@ -6,17 +6,10 @@ CRITICAL: These tests prevent regression of the WebSocket auth failure
 where tokens were created but users didn't exist in the database.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import uuid
@@ -25,15 +18,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import jwt
 import pytest
-from routes.utils.websocket_helpers import authenticate_websocket_user
+from netra_backend.app.routes.utils.websocket_helpers import authenticate_websocket_user
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.services.security_service import SecurityService
-
-# Add project root to path
-
 
 class TestAuthUserPersistenceRegression:
     """Regression tests for auth user persistence issues."""
@@ -294,7 +283,6 @@ class TestAuthUserPersistenceRegression:
                 
                 assert verified_user is not None, f"{test_case['method']} auth must create database users"
                 assert verified_user.email == test_case["email"]
-
 
 class TestAuthServiceIntegration:
     """Integration tests for auth service with main app."""

@@ -18,7 +18,6 @@ from netra_backend.app.services.websocket.message_queue import (
     QueuedMessage,
 )
 
-
 class MessageType(Enum):
     """Test message types enum."""
     START_AGENT = "start_agent"
@@ -27,7 +26,6 @@ class MessageType(Enum):
     HEARTBEAT = "heartbeat"
     BROADCAST = "broadcast"
     NOTIFICATION = "notification"
-
 
 class MockMessageHandler(BaseMessageHandler):
     """Mock message handler for testing."""
@@ -55,7 +53,6 @@ class MockMessageHandler(BaseMessageHandler):
             'payload': payload,
             'timestamp': datetime.now(UTC)
         })
-
 
 class MockWebSocketConnection:
     """Mock WebSocket connection for testing."""
@@ -85,7 +82,6 @@ class MockWebSocketConnection:
         self.is_closed = True
         self.close_code = code
         self.close_reason = reason
-
 
 class MockConnectionManager:
     """Mock connection manager for testing."""
@@ -119,7 +115,6 @@ class MockConnectionManager:
             if not connection.is_closed:
                 await connection.send_json(message)
 
-
 @pytest.fixture
 def mock_handler_registry():
     """Fixture providing mock handler registry."""
@@ -141,12 +136,10 @@ def mock_handler_registry():
         'handlers': registry
     }
 
-
 @pytest.fixture
 def mock_connection_manager():
     """Fixture providing mock connection manager."""
     return MockConnectionManager()
-
 
 @pytest.fixture
 def sample_handlers():
@@ -156,7 +149,6 @@ def sample_handlers():
         MockMessageHandler("user_message"),
         MockMessageHandler("system_status")
     ]
-
 
 def create_test_message(
     message_type: str,
@@ -170,7 +162,6 @@ def create_test_message(
         "user_id": user_id,
         "timestamp": datetime.now(UTC).isoformat()
     }
-
 
 def create_queued_message(
     message_type: str,

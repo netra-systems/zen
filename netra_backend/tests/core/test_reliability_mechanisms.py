@@ -3,17 +3,10 @@ Comprehensive reliability mechanism test suite for Netra agents.
 Tests circuit breakers, retry logic, timeouts, and system resilience.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -24,19 +17,16 @@ import pytest
 
 from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
 
-# Add project root to path
 from netra_backend.app.core.reliability import (
     AgentReliabilityWrapper,
     get_reliability_wrapper,
 )
 from netra_backend.app.core.reliability_circuit_breaker import (
-    # Add project root to path
     CircuitBreaker,
     CircuitBreakerConfig,
     CircuitBreakerState,
 )
 from netra_backend.app.core.reliability_retry import RetryConfig, RetryHandler
-
 
 class TestCircuitBreakerCore:
     """Test circuit breaker core functionality"""
@@ -59,7 +49,6 @@ class TestCircuitBreakerCore:
         assert cb.metrics.failed_calls == 2
         assert cb.metrics.error_types["ValueError"] == 1
         assert cb.metrics.error_types["ConnectionError"] == 1
-
 
 class TestCircuitBreakerStateTransitions:
     """Test state transitions and recovery patterns"""
@@ -93,7 +82,6 @@ class TestCircuitBreakerStateTransitions:
         cb.can_execute()
         cb.record_failure("Error2")
         assert cb.state == CircuitBreakerState.OPEN
-
 
 class TestRetryMechanisms:
     """Test retry handler functionality"""
@@ -139,7 +127,6 @@ class TestRetryMechanisms:
         
         assert call_count == 1
 
-
 class TestTimeoutAndFallback:
     """Test timeout handling and fallback patterns"""
     async def test_timeout_enforcement_and_fallback(self):
@@ -168,7 +155,6 @@ class TestTimeoutAndFallback:
         
         with pytest.raises(asyncio.TimeoutError):
             await wrapper.execute_safely(timeout_op, "test_op", timeout=0.01)
-
 
 class TestResourceIsolationAndScenarios:
     """Test resource isolation and failure scenarios"""
@@ -225,7 +211,6 @@ class TestResourceIsolationAndScenarios:
         )
         assert result == "degraded_response"
 
-
 class TestHealthMonitoring:
     """Test system health monitoring and metrics"""
     
@@ -247,7 +232,6 @@ class TestHealthMonitoring:
         assert metrics["successful_calls"] == 2
         assert metrics["failed_calls"] == 1
         assert abs(metrics["success_rate"] - 0.666) < 0.01
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

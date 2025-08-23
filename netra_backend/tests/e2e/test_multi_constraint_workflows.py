@@ -4,37 +4,26 @@ Provides shared fixtures for multi-constraint optimization tests.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import uuid
 from typing import Dict
 
 import pytest
 
-# Add project root to path
-from netra_backend.tests.multi_constraint_test_helpers import (
+from netra_backend.tests.e2e.multi_constraint_test_helpers import (
     build_multi_constraint_setup,
-    # Add project root to path
     create_agent_instances,
 )
-
 
 @pytest.fixture(scope="function")
 def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for multi-constraint optimization testing."""
     agents = create_agent_instances(real_llm_manager, real_tool_dispatcher)
     return build_multi_constraint_setup(agents, real_llm_manager, real_websocket_manager)
-
 
 # Note: Test classes have been moved to separate modules:
 # - TestKVCachingAuditWorkflows -> test_multi_constraint_kv_cache.py
@@ -43,7 +32,6 @@ def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_d
 # - TestConstraintPriorityWorkflows -> test_multi_constraint_priority.py
 # - TestMultiConstraintEdgeCases -> test_multi_constraint_edge_cases.py
 # - TestWorkflowDataIntegrity -> test_multi_constraint_integrity.py
-
 
 class TestMultiConstraintWorkflows:
     """Basic tests for test_multi_constraint_workflows.py functionality."""

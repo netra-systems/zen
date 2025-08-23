@@ -4,17 +4,10 @@ Tests error context integration, weak reference behavior, and concurrency edge c
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import gc
@@ -26,18 +19,15 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.async_utils import (
     AsyncCircuitBreaker,
     AsyncRateLimiter,
-    # Add project root to path
     AsyncResourceManager,
     AsyncTaskPool,
     shutdown_async_utils,
 )
 from netra_backend.app.core.error_context import ErrorContext
 from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
-
 
 class TestErrorContextIntegration:
     """Test error context integration with async utilities."""
@@ -141,7 +131,6 @@ class TestErrorContextIntegration:
         assert len(cleanup_log) == 1
         assert cleanup_log[0][1] == True  # Exception occurred
 
-
 class TestWeakRefBehavior:
     """Test weak reference behavior in async utilities."""
     async def test_resource_manager_weak_ref_cleanup(self):
@@ -236,7 +225,6 @@ class TestWeakRefBehavior:
         assert "good_0" in cleanup_calls
         assert "bad_1" in cleanup_calls
         assert "good_2" in cleanup_calls
-
 
 class TestConcurrencyEdgeCases:
     """Test concurrency edge cases and race conditions."""

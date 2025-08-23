@@ -2,6 +2,9 @@
  * Data Flow Integration Tests
  * Tests for WebSocket, chat, threads, and agent integration
  */
+// Unmock auth service for proper service functionality
+jest.unmock('@/auth/service');
+
 
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
@@ -14,7 +17,7 @@ import { ChatComponent, ThreadComponent } from './helpers/test-components';
 import { setupTestEnvironment, clearStorages, resetStores, cleanupWebSocket } from './helpers/test-setup';
 import { createMockMessage, createMockThread } from './helpers/test-builders';
 import { assertTextContent, assertMessageCount, assertThreadCount } from './helpers/test-assertions';
-import { waitForConnection, sendMessage, sendStreamChunk, sendAgentStart, sendAgentMessage, sendAgentComplete } from './helpers/websocket-helpers';
+import { waitForConnection, sendMessage, sendStreamChunk, sendAgentStart, sendAgentMessage, sendAgentComplete, createActWrapper } from './helpers/websocket-helpers';
 
 describe('Data Flow Integration Tests', () => {
   let server: WS;
@@ -36,8 +39,8 @@ describe('Data Flow Integration Tests', () => {
         
         React.useEffect(() => {
           const ws = new WebSocket('ws://localhost:8000/ws');
-          ws.onopen = () => setConnected(true);
-          ws.onclose = () => setConnected(false);
+          ws.onopen = createActWrapper(() => setConnected(true));
+          ws.onclose = createActWrapper(() => setConnected(false));
           return () => ws.close();
         }, []);
         
@@ -60,10 +63,10 @@ describe('Data Flow Integration Tests', () => {
         
         React.useEffect(() => {
           const ws = new WebSocket('ws://localhost:8000/ws');
-          ws.onmessage = (event) => {
+          ws.onmessage = createActWrapper((event) => {
             const data = JSON.parse(event.data);
-            setMessage(data.content);
-          };
+            setMessage(data.data?.content || data.content);
+          });
           return () => ws.close();
         }, []);
         
@@ -73,7 +76,7 @@ describe('Data Flow Integration Tests', () => {
       const { getByTestId } = render(<TestComponent />);
       
       await waitForConnection(server);
-      sendMessage(server, JSON.stringify({ content: 'Hello from server' }));
+      sendMessage(server, 'Hello from server');
       
       await assertTextContent(getByTestId('message'), 'Hello from server');
     });
@@ -99,12 +102,12 @@ describe('Data Flow Integration Tests', () => {
         
         React.useEffect(() => {
           const ws = new WebSocket('ws://localhost:8000/ws');
-          ws.onmessage = (event) => {
+          ws.onmessage = createActWrapper((event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'stream_chunk') {
-              setStreamingContent(prev => prev + data.chunk);
+              setStreamingContent(prev => (prev || '') + data.data.chunk);
             }
-          };
+          });
           return () => ws.close();
         }, []);
         
@@ -117,10 +120,10 @@ describe('Data Flow Integration Tests', () => {
       
       await waitForConnection(server);
       
-      sendStreamChunk(server, 'Hello ');
-      await assertTextContent(getByTestId('streaming-content'), 'Hello ');
+      sendStreamChunk(server, 'Hello');
+      await assertTextContent(getByTestId('streaming-content'), 'Hello');
       
-      sendStreamChunk(server, 'World!');
+      sendStreamChunk(server, ' World!');
       await assertTextContent(getByTestId('streaming-content'), 'Hello World!');
     });
   });
@@ -180,26 +183,24 @@ describe('Data Flow Integration Tests', () => {
         React.useEffect(() => {
           const ws = new WebSocket('ws://localhost:8000/ws');
           
-          ws.onmessage = (event) => {
+          ws.onmessage = createActWrapper((event) => {
             const data = JSON.parse(event.data);
             
             if (data.type === 'agent_started') {
               setAgentStatus('processing');
             } else if (data.type === 'agent_message') {
-              setAgentMessage(data.content);
+              setAgentMessage(data.data?.content || data.content);
             } else if (data.type === 'agent_completed') {
               setAgentStatus('completed');
             }
-          };
+          });
           
-          const startAgent = () => {
+          ws.onopen = createActWrapper(() => {
             ws.send(JSON.stringify({
               type: 'start_agent',
               task: 'analyze'
             }));
-          };
-          
-          setTimeout(startAgent, 100);
+          });
           
           return () => ws.close();
         }, []);
@@ -215,7 +216,9 @@ describe('Data Flow Integration Tests', () => {
       const { getByTestId } = render(<AgentComponent />);
       
       await waitForConnection(server);
-      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Wait for the component to send the initial start_agent message
+      await server.nextMessage;
       
       sendAgentStart(server);
       await assertTextContent(getByTestId('agent-status'), 'processing');

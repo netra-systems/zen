@@ -3,17 +3,31 @@
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 from netra_backend.app.core.exceptions_base import NetraException
 
-
 class DatabaseError(NetraException):
     """Base class for database-related exceptions."""
     
-    def __init__(self, message: str = None, **kwargs):
+    def __init__(self, message: str = None, query: str = None, **kwargs):
+        from netra_backend.app.schemas.core_enums import ErrorCategory
+        
+        self.query = query
+        self._category = ErrorCategory.DATABASE
+        
         super().__init__(
             message=message or "Database operation failed",
             code=ErrorCode.DATABASE_QUERY_FAILED,
             severity=ErrorSeverity.HIGH,
             **kwargs
         )
+    
+    @property
+    def message(self):
+        """Get error message."""
+        return self.error_details.message
+    
+    @property
+    def category(self):
+        """Get error category."""
+        return self._category
 
 
 class DatabaseConnectionError(DatabaseError):

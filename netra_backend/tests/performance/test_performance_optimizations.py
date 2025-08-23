@@ -6,30 +6,20 @@ Compliance: <300 lines, 25-line max functions, modular design.
 
 # Import all performance test modules
 
-# Add project root to path
-
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
-from .test_performance_batching import (
+from netra_backend.tests.test_performance_batching import (
     TestBatchProcessor,
     TestMessageBatcher,
 )
-from .test_performance_cache import (
-    # Add project root to path
+from netra_backend.tests.test_performance_cache import (
     TestMemoryCache,
     TestQueryOptimizer,
 )
-from .test_performance_monitoring import (
+from netra_backend.tests.test_performance_monitoring import (
     TestDatabaseIndexOptimization,
     TestPerformanceMonitoring,
     TestPerformanceOptimizationIntegration,

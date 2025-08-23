@@ -8,17 +8,10 @@ Tests critical paths including middleware setup, route registration,
 error handling, and security configurations.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from unittest.mock import MagicMock, Mock, patch
 
@@ -26,10 +19,8 @@ import pytest
 from fastapi import FastAPI, HTTPException
 from pydantic import ValidationError
 
-# Add project root to path
 from netra_backend.app.core.app_factory import (
     create_app,
-    # Add project root to path
     create_fastapi_app,
     initialize_oauth,
     register_api_routes,
@@ -40,7 +31,6 @@ from netra_backend.app.core.app_factory import (
     setup_security_middleware,
 )
 from netra_backend.app.core.exceptions_base import NetraException
-
 
 # Test fixtures for setup
 @pytest.fixture
@@ -54,19 +44,16 @@ def mock_app():
     app.get = Mock()
     return app
 
-
 @pytest.fixture
 def real_app():
     """Real FastAPI application for integration tests."""
     return FastAPI()
 
-
 @pytest.fixture
 def mock_lifespan():
     """Mock lifespan manager."""
-    with patch('app.core.app_factory.lifespan') as mock:
+    with patch('netra_backend.app.core.app_factory.lifespan') as mock:
         yield mock
-
 
 # Helper functions for 25-line compliance
 def assert_exception_handler_added(app, exception_type):
@@ -75,22 +62,18 @@ def assert_exception_handler_added(app, exception_type):
                                              None if not hasattr(app.add_exception_handler, 'call_args_list') 
                                              else app.add_exception_handler.call_args_list)
 
-
 def assert_middleware_added(app, middleware_type):
     """Assert middleware was added to app."""
     calls = app.middleware.call_args_list if hasattr(app.middleware, 'call_args_list') else []
     assert any("http" in str(call) for call in calls) or app.middleware.called
 
-
 def get_handler_calls(app):
     """Get exception handler calls from netra_backend.app."""
     return app.add_exception_handler.call_args_list
 
-
 def get_middleware_calls(app):
     """Get middleware calls from netra_backend.app."""
     return app.middleware.call_args_list if hasattr(app.middleware, 'call_args_list') else []
-
 
 def assert_router_included(app, expected_count=None):
     """Assert routers were included in app."""
@@ -99,11 +82,9 @@ def assert_router_included(app, expected_count=None):
     else:
         assert app.include_router.called
 
-
 def create_mock_router():
     """Create a mock router for testing."""
     return Mock()
-
 
 # Core app factory functionality tests
 class TestFastAPIAppCreation:
@@ -121,22 +102,21 @@ class TestFastAPIAppCreation:
 
     def test_create_app_returns_configured_app(self):
         """create_app returns fully configured application."""
-        with patch('app.core.app_factory.create_fastapi_app') as mock_create:
+        with patch('netra_backend.app.core.app_factory.create_fastapi_app') as mock_create:
             mock_create.return_value = Mock(spec=FastAPI)
-            with patch('app.core.app_factory._configure_app_handlers'):
-                with patch('app.core.app_factory._configure_app_routes'):
+            with patch('netra_backend.app.core.app_factory._configure_app_handlers'):
+                with patch('netra_backend.app.core.app_factory._configure_app_routes'):
                     app = create_app()
                     assert app is not None
 
     def test_create_app_calls_configuration_methods(self, mock_app):
         """create_app calls all configuration methods."""
-        with patch('app.core.app_factory.create_fastapi_app', return_value=mock_app):
-            with patch('app.core.app_factory._configure_app_handlers') as mock_handlers:
-                with patch('app.core.app_factory._configure_app_routes') as mock_routes:
+        with patch('netra_backend.app.core.app_factory.create_fastapi_app', return_value=mock_app):
+            with patch('netra_backend.app.core.app_factory._configure_app_handlers') as mock_handlers:
+                with patch('netra_backend.app.core.app_factory._configure_app_routes') as mock_routes:
                     create_app()
                     mock_handlers.assert_called_once_with(mock_app)
                     mock_routes.assert_called_once_with(mock_app)
-
 
 class TestErrorHandlerRegistration:
     """Test error handler registration."""
@@ -174,15 +154,14 @@ class TestErrorHandlerRegistration:
         exception_types = [call[0][0] for call in calls]
         assert Exception in exception_types
 
-
 class TestSecurityMiddleware:
     """Test security middleware setup."""
 
     def test_setup_security_middleware_calls_all_components(self, mock_app):
         """setup_security_middleware sets up all security components."""
-        with patch('app.core.app_factory._add_ip_blocking_middleware') as mock_ip:
-            with patch('app.core.app_factory._add_path_traversal_middleware') as mock_path:
-                with patch('app.core.app_factory._add_security_headers_middleware') as mock_headers:
+        with patch('netra_backend.app.core.app_factory._add_ip_blocking_middleware') as mock_ip:
+            with patch('netra_backend.app.core.app_factory._add_path_traversal_middleware') as mock_path:
+                with patch('netra_backend.app.core.app_factory._add_security_headers_middleware') as mock_headers:
                     setup_security_middleware(mock_app)
                     mock_ip.assert_called_once_with(mock_app)
                     mock_path.assert_called_once_with(mock_app)
@@ -190,14 +169,14 @@ class TestSecurityMiddleware:
 
     def test_ip_blocking_middleware_added(self, mock_app):
         """IP blocking middleware is added."""
-        with patch('app.middleware.ip_blocking.ip_blocking_middleware') as mock_middleware:
+        with patch('netra_backend.app.middleware.ip_blocking.ip_blocking_middleware') as mock_middleware:
             from netra_backend.app.core.app_factory import _add_ip_blocking_middleware
             _add_ip_blocking_middleware(mock_app)
             mock_app.middleware.assert_called_with("http")
 
     def test_path_traversal_middleware_added(self, mock_app):
         """Path traversal protection middleware is added."""
-        with patch('app.middleware.path_traversal_protection.path_traversal_protection_middleware'):
+        with patch('netra_backend.app.middleware.path_traversal_protection.path_traversal_protection_middleware'):
             from netra_backend.app.core.app_factory import (
                 _add_path_traversal_middleware,
             )
@@ -206,8 +185,8 @@ class TestSecurityMiddleware:
 
     def test_security_headers_middleware_added(self, mock_app):
         """Security headers middleware is added."""
-        with patch('app.middleware.security_headers.SecurityHeadersMiddleware') as mock_middleware:
-            with patch('app.config.settings') as mock_settings:
+        with patch('netra_backend.app.middleware.security_headers.SecurityHeadersMiddleware') as mock_middleware:
+            with patch('netra_backend.app.config.settings') as mock_settings:
                 mock_settings.environment = "development"
                 from netra_backend.app.core.app_factory import (
                     _add_security_headers_middleware,
@@ -215,17 +194,16 @@ class TestSecurityMiddleware:
                 _add_security_headers_middleware(mock_app)
                 mock_app.add_middleware.assert_called_once()
 
-
 class TestRequestMiddleware:
     """Test request middleware setup."""
 
     def test_setup_request_middleware_calls_all_components(self, mock_app):
         """setup_request_middleware sets up all request components."""
-        with patch('app.core.app_factory.setup_cors_middleware') as mock_cors:
-            with patch('app.core.app_factory.create_cors_redirect_middleware') as mock_cors_redirect:
-                with patch('app.core.app_factory.create_error_context_middleware') as mock_error:
-                    with patch('app.core.app_factory.create_request_logging_middleware') as mock_logging:
-                        with patch('app.core.app_factory.setup_session_middleware') as mock_session:
+        with patch('netra_backend.app.core.app_factory.setup_cors_middleware') as mock_cors:
+            with patch('netra_backend.app.core.app_factory.create_cors_redirect_middleware') as mock_cors_redirect:
+                with patch('netra_backend.app.core.app_factory.create_error_context_middleware') as mock_error:
+                    with patch('netra_backend.app.core.app_factory.create_request_logging_middleware') as mock_logging:
+                        with patch('netra_backend.app.core.app_factory.setup_session_middleware') as mock_session:
                             mock_cors_redirect.return_value = Mock()
                             mock_error.return_value = Mock()
                             mock_logging.return_value = Mock()
@@ -235,27 +213,26 @@ class TestRequestMiddleware:
 
     def test_middleware_setup_calls_all_components(self, mock_app):
         """setup_middleware calls both security and request middleware."""
-        with patch('app.core.app_factory.setup_security_middleware') as mock_security:
-            with patch('app.core.app_factory.setup_request_middleware') as mock_request:
+        with patch('netra_backend.app.core.app_factory.setup_security_middleware') as mock_security:
+            with patch('netra_backend.app.core.app_factory.setup_request_middleware') as mock_request:
                 setup_middleware(mock_app)
                 mock_security.assert_called_once_with(mock_app)
                 mock_request.assert_called_once_with(mock_app)
-
 
 class TestRouteRegistration:
     """Test API route registration."""
 
     def test_register_api_routes_imports_and_registers(self, mock_app):
         """register_api_routes imports and registers routes."""
-        with patch('app.core.app_factory._import_and_register_routes') as mock_import:
+        with patch('netra_backend.app.core.app_factory._import_and_register_routes') as mock_import:
             register_api_routes(mock_app)
             mock_import.assert_called_once_with(mock_app)
 
     def test_import_and_register_routes_process(self, mock_app):
         """_import_and_register_routes follows correct process."""
-        with patch('app.core.app_factory.import_all_route_modules') as mock_import:
-            with patch('app.core.app_factory.get_all_route_configurations') as mock_config:
-                with patch('app.core.app_factory._register_route_modules') as mock_register:
+        with patch('netra_backend.app.core.app_factory.import_all_route_modules') as mock_import:
+            with patch('netra_backend.app.core.app_factory.get_all_route_configurations') as mock_config:
+                with patch('netra_backend.app.core.app_factory._register_route_modules') as mock_register:
                     mock_import.return_value = {}
                     mock_config.return_value = {}
                     from netra_backend.app.core.app_factory import (
@@ -285,7 +262,6 @@ class TestRouteRegistration:
         _register_route_modules(mock_app, routes_config)
         assert mock_app.include_router.call_count == 2
 
-
 class TestRootEndpoint:
     """Test root endpoint setup."""
 
@@ -296,7 +272,7 @@ class TestRootEndpoint:
 
     def test_root_endpoint_handler_created(self, real_app):
         """Root endpoint handler is created correctly."""
-        with patch('app.logging_config.central_logger') as mock_logger:
+        with patch('netra_backend.app.logging_config.central_logger') as mock_logger:
             mock_logger.get_logger.return_value.info = Mock()
             setup_root_endpoint(real_app)
             # Check that route was added
@@ -307,7 +283,6 @@ class TestRootEndpoint:
         setup_root_endpoint(mock_app)
         # Verify that setup completed (logger will be called when endpoint is invoked)
         mock_app.get.assert_called_once_with("/")
-
 
 class TestOAuthInitialization:
     """Test OAuth initialization."""
@@ -324,15 +299,14 @@ class TestOAuthInitialization:
         result = initialize_oauth(mock_app)
         assert result is None  # Should return None (no-op)
 
-
 class TestConfigurationMethods:
     """Test configuration helper methods."""
 
     def test_configure_app_handlers_calls_all_setup(self, mock_app):
         """_configure_app_handlers calls all handler setup methods."""
-        with patch('app.core.app_factory.register_error_handlers') as mock_errors:
-            with patch('app.core.app_factory.setup_middleware') as mock_middleware:
-                with patch('app.core.app_factory.initialize_oauth') as mock_oauth:
+        with patch('netra_backend.app.core.app_factory.register_error_handlers') as mock_errors:
+            with patch('netra_backend.app.core.app_factory.setup_middleware') as mock_middleware:
+                with patch('netra_backend.app.core.app_factory.initialize_oauth') as mock_oauth:
                     from netra_backend.app.core.app_factory import (
                         _configure_app_handlers,
                     )
@@ -343,21 +317,20 @@ class TestConfigurationMethods:
 
     def test_configure_app_routes_calls_route_setup(self, mock_app):
         """_configure_app_routes calls route setup methods."""
-        with patch('app.core.app_factory.register_api_routes') as mock_routes:
-            with patch('app.core.app_factory.setup_root_endpoint') as mock_root:
+        with patch('netra_backend.app.core.app_factory.register_api_routes') as mock_routes:
+            with patch('netra_backend.app.core.app_factory.setup_root_endpoint') as mock_root:
                 from netra_backend.app.core.app_factory import _configure_app_routes
                 _configure_app_routes(mock_app)
                 mock_routes.assert_called_once_with(mock_app)
                 mock_root.assert_called_once_with(mock_app)
-
 
 class TestIntegrationScenarios:
     """Test integration scenarios and edge cases."""
 
     def test_full_app_creation_integration(self):
         """Full app creation works end-to-end."""
-        with patch('app.core.app_factory.import_all_route_modules', return_value={}):
-            with patch('app.core.app_factory.get_all_route_configurations', return_value={}):
+        with patch('netra_backend.app.core.app_factory.import_all_route_modules', return_value={}):
+            with patch('netra_backend.app.core.app_factory.get_all_route_configurations', return_value={}):
                 app = create_app()
                 assert isinstance(app, FastAPI)
 
@@ -370,8 +343,8 @@ class TestIntegrationScenarios:
 
     def test_middleware_setup_order(self, mock_app):
         """Middleware is set up in correct order."""
-        with patch('app.core.app_factory.setup_security_middleware') as mock_security:
-            with patch('app.core.app_factory.setup_request_middleware') as mock_request:
+        with patch('netra_backend.app.core.app_factory.setup_security_middleware') as mock_security:
+            with patch('netra_backend.app.core.app_factory.setup_request_middleware') as mock_request:
                 setup_middleware(mock_app)
                 # Security middleware should be set up before request middleware
                 mock_security.assert_called_once()
@@ -379,9 +352,9 @@ class TestIntegrationScenarios:
 
     def test_app_creation_with_minimal_config(self):
         """App can be created with minimal configuration."""
-        with patch('app.core.app_factory.import_all_route_modules', return_value={}):
-            with patch('app.core.app_factory.get_all_route_configurations', return_value={}):
-                with patch('app.core.middleware_setup.setup_cors_middleware'):
-                    with patch('app.core.middleware_setup.setup_session_middleware'):
+        with patch('netra_backend.app.core.app_factory.import_all_route_modules', return_value={}):
+            with patch('netra_backend.app.core.app_factory.get_all_route_configurations', return_value={}):
+                with patch('netra_backend.app.core.middleware_setup.setup_cors_middleware'):
+                    with patch('netra_backend.app.core.middleware_setup.setup_session_middleware'):
                         app = create_app()
                         assert app is not None

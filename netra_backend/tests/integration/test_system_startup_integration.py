@@ -9,17 +9,10 @@ Tests the complete startup process including:
 - Health check validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import os
@@ -29,16 +22,12 @@ from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from startup_checks import StartupChecker, StartupCheckResult
+from netra_backend.app.startup_checks import StartupChecker, StartupCheckResult
 
 from netra_backend.app.config import get_config
 
-# Add project root to path
 from netra_backend.app.core.app_factory import create_app
 from test_framework.mock_utils import mock_justified
-
-# Add project root to path
-
 
 class TestSystemStartupIntegration:
     """Integration tests for system startup sequence."""
@@ -327,7 +316,6 @@ class TestSystemStartupIntegration:
                 
                 assert "staging" in str(exc_info.value).lower()
                 assert "check_redis" in str(exc_info.value)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

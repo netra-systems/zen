@@ -9,14 +9,45 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.performance_monitor_alerts import PerformanceAlertManager
-from netra_backend.app.performance_monitor_collector import MetricCollector
-from netra_backend.app.performance_monitor_coverage import MonitoringCoverageTracker
-from netra_backend.app.performance_monitor_metrics import PerformanceMetricsProcessor
-from netra_backend.app.performance_monitor_types import (
-    AlertSeverity,
-    PerformanceThresholds,
-)
+# Performance monitoring imports - optional for flexibility
+try:
+    from netra_backend.app.performance_monitor_alerts import PerformanceAlertManager
+    HAS_ALERT_MANAGER = True
+except ImportError:
+    HAS_ALERT_MANAGER = False
+    PerformanceAlertManager = None
+
+try:
+    from netra_backend.app.performance_monitor_collector import MetricCollector
+    HAS_COLLECTOR = True
+except ImportError:
+    HAS_COLLECTOR = False
+    MetricCollector = None
+
+try:
+    from netra_backend.app.performance_monitor_coverage import MonitoringCoverageTracker
+    HAS_COVERAGE = True
+except ImportError:
+    HAS_COVERAGE = False
+    MonitoringCoverageTracker = None
+
+try:
+    from netra_backend.app.performance_monitor_metrics import PerformanceMetricsProcessor
+    HAS_METRICS = True
+except ImportError:
+    HAS_METRICS = False
+    PerformanceMetricsProcessor = None
+
+try:
+    from netra_backend.app.performance_monitor_types import (
+        AlertSeverity,
+        PerformanceThresholds,
+    )
+    HAS_TYPES = True
+except ImportError:
+    HAS_TYPES = False
+    AlertSeverity = None
+    PerformanceThresholds = None
 
 logger = central_logger.get_logger(__name__)
 
@@ -24,10 +55,10 @@ logger = central_logger.get_logger(__name__)
 class PerformanceMonitor:
     """Monitors WebSocket performance with micro-functions."""
     
-    def __init__(self, thresholds: Optional[PerformanceThresholds] = None):
-        self.thresholds = thresholds or PerformanceThresholds()
-        self.metric_collector = MetricCollector()
-        self.alert_manager = PerformanceAlertManager()
+    def __init__(self, thresholds: Optional[Any] = None):
+        self.thresholds = thresholds or (PerformanceThresholds() if HAS_TYPES else {})
+        self.metric_collector = MetricCollector() if HAS_COLLECTOR else None
+        self.alert_manager = PerformanceAlertManager() if HAS_ALERT_MANAGER else None
         self.coverage_tracker = MonitoringCoverageTracker()
         self.metrics_processor = PerformanceMetricsProcessor(self.metric_collector)
         self._init_monitoring_state()

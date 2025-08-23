@@ -25,7 +25,7 @@ from typing import Any, Dict
 import pytest
 
 from tests.e2e.database_test_connections import DatabaseConnectionManager
-from tests.database_test_operations import (
+from tests.e2e.database_test_operations import (
     ChatMessageOperations,
     SessionCacheOperations,
     UserDataOperations,

@@ -3,17 +3,10 @@ Core critical end-to-end tests for agent lifecycle, WebSocket streaming, and orc
 Tests 1-3: Complete agent lifecycle, WebSocket real-time streaming, supervisor orchestration.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Add netra_backend to path  
 
 import asyncio
 import uuid
@@ -21,15 +14,12 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
-# Add project root to path
-
-
 class TestAgentE2ECriticalCore(AgentE2ETestBase):
     """Critical core tests for agent lifecycle and orchestration"""
+    @pytest.mark.asyncio
     async def test_1_complete_agent_lifecycle_request_to_completion(self, setup_agent_infrastructure):
         """
         Test Case 1: Complete Agent Lifecycle from Request to Completion
@@ -82,6 +72,7 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
                 assert len(supervisor._impl.sub_agents) == 7
         else:
             assert len(supervisor.sub_agents) == 7  # Legacy implementation (now includes admin agents)
+    @pytest.mark.asyncio
     async def test_2_websocket_real_time_streaming(self, setup_agent_infrastructure):
         """
         Test Case 2: WebSocket Real-time Message Streaming
@@ -134,6 +125,7 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         # Should have fewer or no messages when streaming is disabled
         non_streaming_count = len(messages_sent)
         assert non_streaming_count >= 0  # May be 0 or have some messages
+    @pytest.mark.asyncio
     async def test_3_supervisor_orchestration_logic(self, setup_agent_infrastructure):
         """
         Test Case 3: Supervisor Orchestration of Sub-agents

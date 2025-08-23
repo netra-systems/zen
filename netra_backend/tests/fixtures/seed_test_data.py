@@ -11,8 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.exceptions import NetraException
-from .small_datasets import get_all_small_datasets
-
+from netra_backend.tests.small_datasets import get_all_small_datasets
 
 class TestDataSeeder:
     """Fast test database seeding service"""
@@ -157,7 +156,6 @@ class TestDataSeeder:
             "performance_target_met": total_time < 1.0
         }
 
-
 class FastTestDataLoader:
     """Ultra-fast test data loader for unit tests"""
     
@@ -182,7 +180,6 @@ class FastTestDataLoader:
     def clear_cache(self):
         """Clear dataset cache"""
         self.cache.clear()
-
 
 # CLI interface for manual seeding
 async def main():
@@ -211,7 +208,6 @@ async def main():
     print(f"  Speed: {stats['records_per_second']} records/sec")
     print(f"  Target met (<1s): {'✓' if stats['performance_target_met'] else '✗'}")
 
-
 # Export instances
 test_seeder = TestDataSeeder()
 fast_loader = FastTestDataLoader()
@@ -228,7 +224,6 @@ def load_test_dataset(name: str) -> List[Dict[str, Any]]:
 def load_sample_data(name: str, count: int = 5) -> List[Dict[str, Any]]:
     """Quick sample data loading function"""
     return fast_loader.load_sample_data(name, count)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

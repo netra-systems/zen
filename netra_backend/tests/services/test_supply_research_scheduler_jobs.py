@@ -3,17 +3,10 @@ Comprehensive tests for Supply Research Scheduler job execution and retry logic
 Tests scheduling, execution, background tasks, retry mechanisms, and error handling
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -29,14 +22,11 @@ from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
 
-# Add project root to path
 from netra_backend.app.services.supply_research_scheduler import (
     ResearchSchedule,
     ScheduleFrequency,
-    # Add project root to path
     SupplyResearchScheduler,
 )
-
 
 class TestSupplyResearchSchedulerJobs:
     """Test job execution for supply research scheduler"""
@@ -246,7 +236,6 @@ class TestSupplyResearchSchedulerJobs:
         assert isinstance(call_args[1], timedelta)  # execution_time
         assert call_args[2] == True  # success
 
-
 class TestSupplyResearchSchedulerRetryLogic:
     """Test retry logic and failure handling"""
     
@@ -372,7 +361,6 @@ class TestSupplyResearchSchedulerRetryLogic:
         assert len(sleep_times) == 1
         assert 0.5 <= sleep_times[0] <= 1.5  # base_delay(1) * (0.5 to 1.5 jitter range)
 
-
 class TestSupplyResearchSchedulerConcurrency:
     """Test concurrent job execution and thread safety"""
     
@@ -486,7 +474,6 @@ class TestSupplyResearchSchedulerConcurrency:
         # Assert no deadlock occurred (all tasks completed)
         assert len(execution_order) == 3
         assert all(not isinstance(r, Exception) for r in results)
-
 
 class TestSupplyResearchSchedulerPerformance:
     """Test performance and resource management"""

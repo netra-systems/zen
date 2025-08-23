@@ -54,8 +54,8 @@
         <protocol>jwt.{token} via Sec-WebSocket-Protocol header</protocol>
         <fallback>Graceful degradation when no token available</fallback>
         <endpoints>
-          <secure>/ws/secure</secure>
-          <legacy>/ws (automatically redirected to /ws/secure)</legacy>
+          <secure>/ws</secure>
+          <legacy>/ws (automatically redirected to /ws)</legacy>
         </endpoints>
       </implementation>
       <token_lifecycle>

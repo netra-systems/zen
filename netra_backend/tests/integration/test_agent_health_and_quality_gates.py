@@ -5,17 +5,10 @@ Test 14: Tool Dispatcher Initialization - $10K MRR
 Test 15: Quality Gate First Response Validation - $12K MRR
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -24,10 +17,6 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-
-# Add project root to path
-
-
 
 @pytest.mark.asyncio
 class TestAgentHealthMonitoring:
@@ -87,7 +76,6 @@ class TestAgentHealthMonitoring:
         assert replacement["new_agent"] == "performance_agent_v2"
         assert replacement["replacement_time"] < 5.0
 
-
 @pytest.mark.asyncio
 class TestToolDispatcherInit:
     """Test 14: Tool Dispatcher Initialization"""
@@ -145,7 +133,6 @@ class TestToolDispatcherInit:
         assert result["tool"] == "gpu_analyzer"
         assert result["result"]["gpu_utilization"] == 0.85
         assert result["execution_time"] < 2.0
-
 
 @pytest.mark.asyncio
 class TestQualityGateValidation:

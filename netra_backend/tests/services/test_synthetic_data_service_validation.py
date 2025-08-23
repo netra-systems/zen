@@ -3,17 +3,10 @@ Data Quality Validation Test Suite for Synthetic Data Service
 Testing data quality and validation mechanisms
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -30,20 +23,15 @@ from netra_backend.app.services.synthetic_data.metrics import (
     detect_anomalies,
 )
 
-# Add project root to path
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from .test_synthetic_data_service_basic import (
+from netra_backend.tests.test_synthetic_data_service_basic import (
     GenerationConfig,
     ValidationResult,
 )
 
-# Add project root to path
-
-
 @pytest.fixture
 def validation_service():
     return SyntheticDataService()
-
 
 # ==================== Test Suite: Data Quality Validation ====================
 
@@ -192,7 +180,6 @@ class TestDataQualityValidation:
         assert "statistical_validation" in report
         assert "quality_metrics" in report
         assert report["overall_quality_score"] > 0.9
-
 
 # ==================== Test Runner ====================
 

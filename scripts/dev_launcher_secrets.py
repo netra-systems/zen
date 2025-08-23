@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from .dev_launcher_config import get_project_root
+from scripts.dev_launcher_config import get_project_root
 
 
 class EnhancedSecretLoader:

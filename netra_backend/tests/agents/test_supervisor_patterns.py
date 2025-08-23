@@ -4,17 +4,10 @@ Tests for advanced workflow patterns, resource management, and coordination stra
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime, timezone
@@ -24,20 +17,18 @@ import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import (
-    # Add project root to path
+from netra_backend.app.agents.base.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
 )
 
-# Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
-from .supervisor_extensions import (
+from netra_backend.tests.helpers.supervisor_extensions import (
     install_supervisor_extensions,
 )
-from .supervisor_test_helpers import (
+from netra_backend.tests.supervisor_test_helpers import (
     assert_agent_called,
     create_agent_state,
     create_execution_context,
@@ -50,7 +41,6 @@ from .supervisor_test_helpers import (
 
 # Install extension methods for testing
 install_supervisor_extensions()
-
 
 class TestWorkflowPatterns:
     """Test common workflow patterns and coordination strategies"""
@@ -132,6 +122,8 @@ class TestWorkflowPatterns:
         assert opt_result and opt_result.state.optimizations_result["result"] == "optimizations_processed"
         assert validation_result and validation_result.state.data_result["validation"]["status"] == "valid"
 
+    @pytest.mark.asyncio
+
     async def test_fan_out_fan_in_pattern(self):
         """Test fan-out/fan-in pattern for parallel processing"""
         supervisor = await self._setup_fanout_supervisor()
@@ -141,6 +133,8 @@ class TestWorkflowPatterns:
         triage_result = await self._execute_triage_phase(supervisor, state, context)
         parallel_results = await self._execute_parallel_phase(supervisor, triage_result.state, context)
         self._verify_fanin_results(parallel_results)
+        
+    @pytest.mark.asyncio
         
     async def test_pipeline_with_feedback_loops(self):
         """Test pipeline with feedback loops and iterative refinement"""
@@ -189,9 +183,10 @@ class TestWorkflowPatterns:
         assert current_state.optimizations_result["quality_score"] >= 0.9
         assert iteration_count <= 3  # Should converge quickly
 
-
 class TestResourceManagement:
     """Test resource management and coordination"""
+    
+    @pytest.mark.asyncio
     
     async def test_resource_contention_handling(self):
         """Test handling of resource contention between agents"""
@@ -244,7 +239,6 @@ class TestResourceManagement:
         assert all(result.success for result in results)
         assert "completed" in results[0].state.data_result["resource_usage"]
         assert "completed" in results[1].state.optimizations_result["resource_usage"]
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -5,17 +5,10 @@ This file shows GOOD patterns for writing tests that are easy to understand,
 maintain, and debug. Use these patterns as templates for new tests.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 from datetime import datetime
@@ -25,13 +18,9 @@ import pytest
 
 from netra_backend.app.services.agent_service import AgentService
 
-# Add project root to path
-from ..helpers.shared_test_types import (
+from netra_backend.tests.helpers.shared_test_types import (
     TestErrorHandling as SharedTestErrorHandling,
 )
-
-# Add project root to path
-
 
 # ==============================================================================
 # EXAMPLE 1: Clear Unit Test with Explicit Mocking
@@ -102,7 +91,6 @@ class TestAgentServiceUnit:
         assert result['status'] == 'success'
         
         # CLEAR: We tested DELEGATION, not implementation
-
 
 # ==============================================================================
 # EXAMPLE 2: Integration Test with Partial Mocking
@@ -175,7 +163,6 @@ class TestAgentServiceIntegration:
             assert result['status'] == 'success'
             assert 'message_id' in result
 
-
 # ==============================================================================
 # EXAMPLE 3: Performance Test with Clear Metrics
 # ==============================================================================
@@ -243,7 +230,6 @@ class TestAgentPerformance:
         assert p50_latency < 0.1, f"P50 latency {p50_latency:.3f}s exceeds 100ms"
         assert p99_latency < 0.5, f"P99 latency {p99_latency:.3f}s exceeds 500ms"
         assert throughput >= 50, f"Throughput {throughput:.1f} req/s below 50"
-
 
 # ==============================================================================
 # EXAMPLE 4: Error Handling Test with Clear Scenarios
@@ -326,7 +312,6 @@ class TestErrorHandling(SharedTestErrorHandling):
             system_healthy = False
         assert system_healthy
 
-
 # ==============================================================================
 # EXAMPLE 5: Test Fixtures with Clear Documentation
 # ==============================================================================
@@ -390,7 +375,6 @@ def test_data_factory():
             return base
     
     return TestDataFactory()
-
 
 # ==============================================================================
 # Test Documentation Template

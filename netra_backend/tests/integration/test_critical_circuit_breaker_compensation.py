@@ -3,17 +3,10 @@ Critical circuit breaker and compensation integration tests.
 Business Value: Maintains $25K MRR through graceful degradation and fault tolerance.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import uuid
 from datetime import datetime
@@ -21,15 +14,11 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-# Add project root to path
-from .test_fixtures_common import (
+from netra_backend.tests.integration.test_fixtures_common import (
     mock_infrastructure,
     setup_circuit_breakers_for_chain,
     test_database,
 )
-
-# Add project root to path
-
 
 class TestCircuitBreakerCompensationIntegration:
     """Circuit breaker and compensation integration tests"""

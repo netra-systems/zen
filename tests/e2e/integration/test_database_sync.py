@@ -28,18 +28,18 @@ from typing import Any, Dict, List, Optional
 import pytest
 import pytest_asyncio
 
-from tests.database_sync_fixtures import (
+from tests.e2e.database_sync_fixtures import (
     DatabaseSyncValidator,
     create_eventual_consistency_user,
     create_performance_user_data,
     create_test_user_data,
 )
-from tests.database_sync_helpers import (
+from tests.e2e.database_sync_helpers import (
     create_sync_task,
     measure_performance_duration,
     sync_user_to_backend,
     verify_auth_backend_consistency,
-    verify_backend_user_exists,
+    test_verify_backend_user_exists,
     verify_sync_consistency,
 )
 from tests.e2e.database_test_connections import (
@@ -91,7 +91,7 @@ class TestDatabaseSyncE2E:
     async def _verify_complete_sync_integrity(self, validator, user_id, test_data):
         """Verify complete synchronization integrity."""
         await verify_auth_backend_consistency(validator, user_id)
-        await verify_backend_user_exists(validator, user_id, test_data)
+        await test_verify_backend_user_exists(validator, user_id, test_data)
     
     @pytest.mark.critical
     @pytest.mark.asyncio

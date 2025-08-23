@@ -3,17 +3,10 @@ Test Suite 2: Performance and Edge Cases Tests
 Tests query performance characteristics and edge case handling
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -29,11 +22,7 @@ from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.models_clickhouse import get_content_corpus_schema
 
-# Add project root to path
 from netra_backend.app.services.corpus_service import CorpusService
-
-# Add project root to path
-
 
 class TestLargeDatasetPerformance:
     """Test query performance with large datasets"""
@@ -117,7 +106,6 @@ class TestLargeDatasetPerformance:
         # Should group efficiently (order doesn't matter)
         assert ("GROUP BY hour_of_day, day_of_week" in query or 
                 "GROUP BY day_of_week, hour_of_day" in query)
-
 
 class TestEdgeCaseHandling:
     """Test edge cases in query handling"""
@@ -214,7 +202,6 @@ class TestEdgeCaseHandling:
         assert not result["valid"]
         assert "invalid workload_type" in result["errors"][0]
 
-
 class TestConcurrencyAndAsync:
     """Test concurrent query execution and async patterns"""
     async def test_concurrent_corpus_operations(self):
@@ -266,7 +253,6 @@ class TestConcurrencyAndAsync:
             # Should return quickly despite slow operation
             assert duration < 1.0
 
-
 class TestMetricsCalculation:
     """Test metrics calculation edge cases"""
     
@@ -312,7 +298,6 @@ class TestMetricsCalculation:
         # Test basic functionality
         assert result["mean"] == 2.0
 
-
 class TestPatternDetection:
     """Test pattern detection edge cases"""
     
@@ -353,7 +338,6 @@ class TestPatternDetection:
         # Z-score method
         zscore_outliers = engine.identify_outliers(values, method="zscore")
         assert zscore_outliers != None  # Should detect outliers
-
 
 class TestConnectionHandling:
     """Test database connection handling"""

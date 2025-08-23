@@ -18,21 +18,10 @@ The original comprehensive file was refactored into focused modules:
 - Additional modules for API management, provider integration, etc.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import time
@@ -43,15 +32,13 @@ import pytest
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-from .integration.helpers.user_flow_helpers import (
+from netra_backend.tests.integration.integration.helpers.user_flow_helpers import (
 
     MockAuthService,
 
     MockUsageService,
 
     MockWebSocketManager,
-    # Add project root to path
 
     generate_test_user_data,
 
@@ -59,12 +46,10 @@ from .integration.helpers.user_flow_helpers import (
 
 )
 
-
 class TestCompleteUserJourney:
 
     """Integration tests for complete end-to-end user journeys"""
     
-
     @pytest.mark.asyncio
 
     async def test_complete_new_user_journey(self, 
@@ -121,7 +106,6 @@ class TestCompleteUserJourney:
 
         assert "session" in result["step_results"][2].get("context", {})
     
-
     @pytest.mark.asyncio
 
     async def test_user_journey_with_interruptions(self, test_session: AsyncSession):
@@ -146,7 +130,6 @@ class TestCompleteUserJourney:
 
         ]
         
-
         initial_result = await simulate_user_journey(initial_steps, mock_services)
 
         assert initial_result["success"] is True
@@ -169,14 +152,12 @@ class TestCompleteUserJourney:
 
         user_context = initial_result["step_results"][0].get("context", {})
         
-
         continuation_result = await simulate_user_journey(continuation_steps, mock_services)
         
         # Should be able to complete despite interruption
 
         assert continuation_result["success"] is True
     
-
     @pytest.mark.asyncio
 
     async def test_multiple_user_concurrent_journeys(self, test_session: AsyncSession):
@@ -187,7 +168,6 @@ class TestCompleteUserJourney:
 
         user_data_list = [generate_test_user_data() for _ in range(num_users)]
         
-
         mock_services = {
 
             "auth_service": MockAuthService(),
@@ -226,12 +206,10 @@ class TestCompleteUserJourney:
 
         successful_journeys = sum(1 for r in results if isinstance(r, dict) and r.get("success"))
         
-
         assert successful_journeys >= num_users * 0.8, f"Too many failed journeys: {successful_journeys}/{num_users}"
 
         assert total_time < 10.0, f"Concurrent journeys took too long: {total_time:.2f}s"
     
-
     @pytest.mark.asyncio
 
     async def test_user_journey_performance_metrics(self, test_session: AsyncSession):
@@ -260,7 +238,6 @@ class TestCompleteUserJourney:
 
         ]
         
-
         start_time = time.time()
 
         result = await simulate_user_journey(journey_steps, mock_services)
@@ -279,7 +256,6 @@ class TestCompleteUserJourney:
 
         assert len(step_results) == len(journey_steps)
 
-
 @pytest.fixture
 
 async def test_user_data() -> Dict[str, Any]:
@@ -287,7 +263,6 @@ async def test_user_data() -> Dict[str, Any]:
     """Fixture providing test user data"""
 
     return generate_test_user_data()
-
 
 @pytest.fixture
 

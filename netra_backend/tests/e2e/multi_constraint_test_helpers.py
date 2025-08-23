@@ -5,13 +5,11 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
+    ActionsToMeetGoalsSubAgent,
+)
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from typing import Dict, List
 import uuid
-
-    ActionsToMeetGoalsSubAgent,
-
-)
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import (
 
@@ -26,7 +24,6 @@ from netra_backend.app.schemas.agent_models import AgentMetadata
 from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
-
 def create_test_llm_manager() -> LLMManager:
 
     """Create real LLM manager instance."""
@@ -35,13 +32,11 @@ def create_test_llm_manager() -> LLMManager:
 
     return manager
 
-
 def create_test_websocket_manager() -> WebSocketManager:
 
     """Create WebSocket manager instance."""
 
     return WebSocketManager()
-
 
 def create_agent_instances(llm: LLMManager, tool_dispatcher) -> Dict:
 
@@ -61,7 +56,6 @@ def create_agent_instances(llm: LLMManager, tool_dispatcher) -> Dict:
 
     }
 
-
 def build_multi_constraint_setup(agents: Dict, llm: LLMManager, ws: WebSocketManager) -> Dict:
 
     """Build complete setup dictionary."""
@@ -74,7 +68,6 @@ def build_multi_constraint_setup(agents: Dict, llm: LLMManager, ws: WebSocketMan
 
     }
 
-
 async def execute_multi_constraint_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
 
     """Execute complete multi-constraint optimization workflow."""
@@ -83,16 +76,13 @@ async def execute_multi_constraint_workflow(setup: Dict, state: DeepAgentState) 
 
     workflow_steps = ['triage', 'data', 'optimization', 'actions', 'reporting']
     
-
     for step_name in workflow_steps:
 
         step_result = await execute_constraint_step(setup, step_name, state)
 
         results.append(step_result)
     
-
     return results
-
 
 async def execute_constraint_step(setup: Dict, step_name: str, state: DeepAgentState) -> Dict:
 
@@ -104,7 +94,6 @@ async def execute_constraint_step(setup: Dict, step_name: str, state: DeepAgentS
 
     agent.user_id = setup['user_id']
     
-
     try:
 
         execution_result = await agent.run(state, setup['run_id'], True)
@@ -114,7 +103,6 @@ async def execute_constraint_step(setup: Dict, step_name: str, state: DeepAgentS
     except Exception as e:
 
         return create_error_result(step_name, agent, state, e)
-
 
 def create_constraint_result(step_name: str, agent, state: DeepAgentState, result) -> Dict:
 
@@ -130,7 +118,6 @@ def create_constraint_result(step_name: str, agent, state: DeepAgentState, resul
 
     }
 
-
 def create_error_result(step_name: str, agent, state: DeepAgentState, error: Exception) -> Dict:
 
     """Create error result dictionary."""
@@ -144,7 +131,6 @@ def create_error_result(step_name: str, agent, state: DeepAgentState, error: Exc
         'agent_type': type(agent).__name__, 'error': str(error)
 
     }
-
 
 def create_kv_cache_audit_state() -> DeepAgentState:
 
@@ -172,7 +158,6 @@ def create_kv_cache_audit_state() -> DeepAgentState:
 
     )
 
-
 def create_comprehensive_cache_state() -> DeepAgentState:
 
     """Create state for comprehensive cache analysis."""
@@ -199,7 +184,6 @@ def create_comprehensive_cache_state() -> DeepAgentState:
 
     )
 
-
 def create_triple_constraint_state() -> DeepAgentState:
 
     """Create state for triple constraint optimization."""
@@ -224,7 +208,6 @@ def create_triple_constraint_state() -> DeepAgentState:
 
     )
 
-
 def create_quality_cost_latency_state() -> DeepAgentState:
 
     """Create state for quality vs cost vs latency analysis."""
@@ -248,7 +231,6 @@ def create_quality_cost_latency_state() -> DeepAgentState:
         metadata=metadata
 
     )
-
 
 def create_holistic_optimization_state() -> DeepAgentState:
 
@@ -276,7 +258,6 @@ def create_holistic_optimization_state() -> DeepAgentState:
 
     )
 
-
 def create_infrastructure_app_state() -> DeepAgentState:
 
     """Create state for infrastructure and application optimization."""
@@ -300,7 +281,6 @@ def create_infrastructure_app_state() -> DeepAgentState:
         metadata=metadata
 
     )
-
 
 def create_priority_optimization_state() -> DeepAgentState:
 
@@ -326,7 +306,6 @@ def create_priority_optimization_state() -> DeepAgentState:
 
     )
 
-
 def create_dynamic_constraint_state() -> DeepAgentState:
 
     """Create state for dynamic constraint adjustment."""
@@ -350,7 +329,6 @@ def create_dynamic_constraint_state() -> DeepAgentState:
         metadata=metadata
 
     )
-
 
 def create_impossible_constraints_state() -> DeepAgentState:
 
@@ -376,7 +354,6 @@ def create_impossible_constraints_state() -> DeepAgentState:
 
     )
 
-
 def create_minimal_constraint_state() -> DeepAgentState:
 
     """Create state for minimal constraints test."""
@@ -401,7 +378,6 @@ def create_minimal_constraint_state() -> DeepAgentState:
 
     )
 
-
 def validate_basic_workflow_execution(results: List[Dict]) -> None:
 
     """Validate basic workflow execution requirements."""
@@ -411,7 +387,6 @@ def validate_basic_workflow_execution(results: List[Dict]) -> None:
     assert all('step' in r for r in results), "All results must have step names"
 
     assert all('agent_state' in r for r in results), "All results must have agent states"
-
 
 def validate_cache_scope_identification(result: Dict, state: DeepAgentState) -> None:
 
@@ -425,7 +400,6 @@ def validate_cache_scope_identification(result: Dict, state: DeepAgentState) -> 
 
     assert 'optimization opportunities' in state.user_request
 
-
 def validate_cache_inventory_analysis(result: Dict, state: DeepAgentState) -> None:
 
     """Validate cache inventory analysis."""
@@ -436,7 +410,6 @@ def validate_cache_inventory_analysis(result: Dict, state: DeepAgentState) -> No
 
     assert result['agent_type'] == 'DataSubAgent'
 
-
 def validate_optimization_opportunity_identification(result: Dict, state: DeepAgentState) -> None:
 
     """Validate optimization opportunity identification."""
@@ -445,7 +418,6 @@ def validate_optimization_opportunity_identification(result: Dict, state: DeepAg
     # Allow None execution_result for fallback scenarios
 
     assert result['agent_type'] == 'OptimizationsCoreSubAgent'
-
 
 def validate_constraint_conflict_identification(result: Dict, state: DeepAgentState) -> None:
 
@@ -463,14 +435,12 @@ def validate_constraint_conflict_identification(result: Dict, state: DeepAgentSt
 
     assert isinstance(constraints_str, str)
 
-
 def validate_multi_objective_analysis(result: Dict, state: DeepAgentState) -> None:
 
     """Validate multi-objective analysis."""
 
     assert result['agent_state'] == SubAgentLifecycle.COMPLETED
     # Allow None execution_result for fallback scenarios
-
 
 def validate_compromise_recommendations(result: Dict, state: DeepAgentState) -> None:
 
@@ -480,7 +450,6 @@ def validate_compromise_recommendations(result: Dict, state: DeepAgentState) -> 
 
     assert result['agent_type'] == 'ActionsToMeetGoalsSubAgent'
 
-
 def validate_completed_or_fallback_states(results: List[Dict]) -> None:
 
     """Validate that agents completed or gracefully failed."""
@@ -488,7 +457,6 @@ def validate_completed_or_fallback_states(results: List[Dict]) -> None:
     valid_states = [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED]
 
     assert all(r['agent_state'] in valid_states for r in results)
-
 
 def validate_constraint_data_consistency(results: List[Dict], state: DeepAgentState) -> None:
 
@@ -504,7 +472,6 @@ def validate_constraint_data_consistency(results: List[Dict], state: DeepAgentSt
 
     assert all(r['state_updated'] for r in completed_results)
 
-
 def validate_optimization_state_preservation(results: List[Dict], state: DeepAgentState) -> None:
 
     """Validate optimization state preservation."""
@@ -517,7 +484,6 @@ def validate_optimization_state_preservation(results: List[Dict], state: DeepAge
 
     assert hasattr(state, 'metadata')
 
-
 def validate_impossible_constraints_handling(results: List[Dict]) -> None:
 
     """Validate handling of impossible constraints."""
@@ -529,7 +495,6 @@ def validate_impossible_constraints_handling(results: List[Dict]) -> None:
     valid_states = [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED]
 
     assert triage_result['agent_state'] in valid_states
-
 
 def validate_priority_optimization_results(results: List[Dict], state: DeepAgentState) -> None:
 
@@ -545,7 +510,6 @@ def validate_priority_optimization_results(results: List[Dict], state: DeepAgent
     # Allow flexible priority structure
 
     assert isinstance(priorities_str, str)
-
 
 def create_state_with_metadata(user_request: str, custom_fields: dict) -> DeepAgentState:
 

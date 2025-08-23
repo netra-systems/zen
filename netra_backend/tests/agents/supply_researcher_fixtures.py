@@ -15,7 +15,6 @@ from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearche
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 
-
 @pytest.fixture
 def mock_db():
     """Create mock database session with common methods"""
@@ -27,7 +26,6 @@ def mock_db():
     db.flush = AsyncMock()
     return db
 
-
 @pytest.fixture
 def mock_llm_manager():
     """Create mock LLM manager with structured output support"""
@@ -35,13 +33,11 @@ def mock_llm_manager():
     _setup_llm_responses(llm)
     return llm
 
-
 def _setup_llm_responses(llm):
     """Setup default LLM responses (≤8 lines)"""
     default_response = _get_default_llm_response()
     llm.ask_llm = AsyncMock(return_value=json.dumps(default_response))
     llm.structured_output = AsyncMock(return_value=default_response)
-
 
 def _get_default_llm_response():
     """Get default LLM response structure (≤8 lines)"""
@@ -52,14 +48,12 @@ def _get_default_llm_response():
         "timeframe": "current"
     }
 
-
 @pytest.fixture
 def mock_supply_service(mock_db):
     """Create mock supply research service"""
     service = Mock(spec=SupplyResearchService)
     _setup_supply_service(service, mock_db)
     return service
-
 
 def _setup_supply_service(service, db):
     """Setup supply service mock methods (≤8 lines)"""
@@ -69,7 +63,6 @@ def _setup_supply_service(service, db):
     service.validate_supply_data = Mock(return_value=(True, []))
     service.calculate_price_changes = Mock(return_value={"total_changes": 0})
     service.detect_anomalies = Mock(return_value=[])
-
 
 @pytest.fixture
 def agent(mock_llm_manager, mock_db, mock_supply_service):
@@ -82,13 +75,11 @@ def agent(mock_llm_manager, mock_db, mock_supply_service):
     _setup_agent_websocket(agent)
     return agent
 
-
 def _setup_agent_websocket(agent):
     """Setup agent WebSocket manager (≤8 lines)"""
     agent.websocket_manager = Mock()
     agent.websocket_manager.send_agent_update = AsyncMock()
     agent.websocket_manager.broadcast = AsyncMock()
-
 
 @pytest.fixture
 def sample_state():
@@ -99,7 +90,6 @@ def sample_state():
         user_id="test_user"
     )
 
-
 @pytest.fixture
 def high_confidence_research_data():
     """Create high confidence research data fixture"""
@@ -107,7 +97,6 @@ def high_confidence_research_data():
         "citations": _get_sample_citations(),
         "questions_answered": _get_sample_qa_pairs()
     }
-
 
 def _get_sample_citations():
     """Get sample citations for testing (≤8 lines)"""
@@ -117,14 +106,12 @@ def _get_sample_citations():
         {"source": "Blog Post", "url": "https://blog.openai.com"}
     ]
 
-
 def _get_sample_qa_pairs():
     """Get sample Q&A pairs for testing (≤8 lines)"""
     return [
         {"question": "pricing", "answer": "detailed pricing info"},
         {"question": "capabilities", "answer": "full capabilities"}
     ]
-
 
 @pytest.fixture
 def high_confidence_extracted_data():
@@ -136,7 +123,6 @@ def high_confidence_extracted_data():
         "capabilities": ["chat", "code", "vision"]
     }]
 
-
 @pytest.fixture
 def low_confidence_research_data():
     """Create low confidence research data fixture"""
@@ -145,12 +131,10 @@ def low_confidence_research_data():
         "questions_answered": []
     }
 
-
 @pytest.fixture
 def low_confidence_extracted_data():
     """Create low confidence extracted data fixture"""
     return [{"pricing_input": Decimal("30")}]
-
 
 @pytest.fixture
 def malicious_inputs():
@@ -163,7 +147,6 @@ def malicious_inputs():
         "{{7*7}}"
     ]
 
-
 @pytest.fixture
 def mock_redis_manager():
     """Create mock Redis manager"""
@@ -172,7 +155,6 @@ def mock_redis_manager():
     redis.get = AsyncMock(return_value=json.dumps(_get_cached_data()))
     return redis
 
-
 def _get_cached_data():
     """Get cached data structure (≤8 lines)"""
     return {
@@ -180,7 +162,6 @@ def _get_cached_data():
         "pricing_output": 60,
         "cached_at": datetime.now().isoformat()
     }
-
 
 @pytest.fixture
 def successful_api_response():
@@ -192,12 +173,10 @@ def successful_api_response():
         "citations": _get_sample_citations()
     }
 
-
 @pytest.fixture
 def research_query_test_cases():
     """Create research query generation test cases"""
     return _get_query_test_cases()
-
 
 def _get_query_test_cases():
     """Get query test case data (≤8 lines)"""
@@ -207,7 +186,6 @@ def _get_query_test_cases():
         _get_capabilities_test_case(),
         _get_availability_test_case()
     ]
-
 
 def _get_pricing_test_case():
     """Get pricing query test case (≤8 lines)"""
@@ -222,7 +200,6 @@ def _get_pricing_test_case():
         "expected_keywords": ["pricing", "cost", "tokens", "gpt-4"]
     }
 
-
 def _get_capabilities_test_case():
     """Get capabilities query test case (≤8 lines)"""
     from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
@@ -236,7 +213,6 @@ def _get_capabilities_test_case():
         "expected_keywords": ["capabilities", "context", "features", "claude-3"]
     }
 
-
 def _get_availability_test_case():
     """Get availability query test case (≤8 lines)"""
     from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
@@ -249,7 +225,6 @@ def _get_availability_test_case():
         },
         "expected_keywords": ["availability", "api", "access", "gemini"]
     }
-
 
 @pytest.fixture
 def anomaly_test_data():
@@ -265,29 +240,24 @@ def anomaly_test_data():
         }]
     }
 
-
 # Helper functions for test assertions (≤8 lines each)
 
 def assert_websocket_updates_sent(agent):
     """Assert WebSocket updates were sent"""
     assert agent.websocket_manager.send_agent_update.called
 
-
 def assert_confidence_score_high(score):
     """Assert confidence score is high (>0.8)"""
     assert score > 0.8
-
 
 def assert_confidence_score_low(score):
     """Assert confidence score is low (<0.6)"""
     assert score < 0.6
 
-
 def assert_malicious_input_safe(parsed_result):
     """Assert malicious input was parsed safely"""
     assert isinstance(parsed_result, dict)
     assert "research_type" in parsed_result
-
 
 def assert_api_response_structure(response):
     """Assert API response has required structure"""
@@ -295,7 +265,6 @@ def assert_api_response_structure(response):
     assert "status" in response
     assert "questions_answered" in response
     assert "citations" in response
-
 
 def assert_research_query_keywords(query, keywords):
     """Assert research query contains expected keywords"""

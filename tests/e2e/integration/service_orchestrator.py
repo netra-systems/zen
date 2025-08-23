@@ -46,7 +46,7 @@ class E2EServiceOrchestrator:
             current = current.parent
         raise RuntimeError("Cannot detect project root")
     
-    async def start_test_environment(self, db_name: str) -> None:
+    async def test_start_test_environment(self, db_name: str) -> None:
         """Start complete test environment."""
         logger.info("Starting E2E test environment")
         
@@ -141,7 +141,7 @@ class E2EServiceOrchestrator:
             "database": {"postgres_ready": self.db_manager.postgres_pool is not None}
         }
     
-    async def stop_test_environment(self, db_name: str) -> None:
+    async def test_stop_test_environment(self, db_name: str) -> None:
         """Stop complete test environment."""
         logger.info("Stopping E2E test environment")
         

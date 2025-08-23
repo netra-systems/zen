@@ -155,7 +155,7 @@ class QueryBuilder(BaseExecutionInterface):
         
     def _build_performance_query(self, user_id: int, params: Dict[str, Any]) -> str:
         """Build performance metrics query from parameters."""
-        from .query_operations import QueryOperations
+        from netra_backend.app.agents.data_sub_agent.query_operations import QueryOperations
         return QueryOperations.build_performance_metrics_query(
             user_id=user_id,
             workload_id=params.get('workload_id'),
@@ -166,7 +166,7 @@ class QueryBuilder(BaseExecutionInterface):
         
     def _build_anomaly_query(self, user_id: int, params: Dict[str, Any]) -> str:
         """Build anomaly detection query from parameters."""
-        from .query_operations import QueryOperations
+        from netra_backend.app.agents.data_sub_agent.query_operations import QueryOperations
         return QueryOperations.build_anomaly_detection_query(
             user_id=user_id,
             metric_name=params.get('metric_name', 'latency_ms'),
@@ -177,7 +177,7 @@ class QueryBuilder(BaseExecutionInterface):
         
     def _build_correlation_query(self, user_id: int, params: Dict[str, Any]) -> str:
         """Build correlation analysis query from parameters."""
-        from .query_operations import QueryOperations
+        from netra_backend.app.agents.data_sub_agent.query_operations import QueryOperations
         return QueryOperations.build_correlation_analysis_query(
             user_id=user_id,
             metric1=params.get('metric1', 'latency_ms'),
@@ -188,7 +188,7 @@ class QueryBuilder(BaseExecutionInterface):
         
     def _build_usage_query(self, user_id: int, params: Dict[str, Any]) -> str:
         """Build usage patterns query from parameters."""
-        from .query_operations import QueryOperations
+        from netra_backend.app.agents.data_sub_agent.query_operations import QueryOperations
         return QueryOperations.build_usage_patterns_query(
             user_id=user_id,
             days_back=params.get('days_back', 30)
@@ -237,7 +237,7 @@ class QueryBuilder(BaseExecutionInterface):
         aggregation_level: str = "minute"
     ) -> str:
         """Build query for performance metrics - backward compatibility."""
-        from .query_operations import QueryOperations
+        from netra_backend.app.agents.data_sub_agent.query_operations import QueryOperations
         return QueryOperations.build_performance_metrics_query(
             user_id, workload_id, start_time, end_time, aggregation_level
         )
@@ -251,7 +251,7 @@ class QueryBuilder(BaseExecutionInterface):
         z_score_threshold: float = 2.0
     ) -> str:
         """Build query for anomaly detection - backward compatibility."""
-        from .query_operations import QueryOperations
+        from netra_backend.app.agents.data_sub_agent.query_operations import QueryOperations
         return QueryOperations.build_anomaly_detection_query(
             user_id, metric_name, start_time, end_time, z_score_threshold
         )
@@ -265,7 +265,7 @@ class QueryBuilder(BaseExecutionInterface):
         end_time: datetime
     ) -> str:
         """Build query for correlation analysis - backward compatibility."""
-        from .query_operations import QueryOperations
+        from netra_backend.app.agents.data_sub_agent.query_operations import QueryOperations
         return QueryOperations.build_correlation_analysis_query(
             user_id, metric1, metric2, start_time, end_time
         )
@@ -276,7 +276,7 @@ class QueryBuilder(BaseExecutionInterface):
         days_back: int = 30
     ) -> str:
         """Build query for usage pattern analysis - backward compatibility."""
-        from .query_operations import QueryOperations
+        from netra_backend.app.agents.data_sub_agent.query_operations import QueryOperations
         return QueryOperations.build_usage_patterns_query(
             user_id, days_back
         )

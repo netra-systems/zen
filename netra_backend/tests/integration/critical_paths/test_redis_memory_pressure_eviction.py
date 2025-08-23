@@ -11,17 +11,10 @@ L3 Realism: Real Redis containers with memory limits, actual eviction policies, 
 Performance Requirements: Eviction time < 50ms, memory recovery > 80%, cache efficiency maintained > 85%
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -40,15 +33,11 @@ import redis.asyncio as aioredis
 
 from netra_backend.app.logging_config import central_logger
 
-# Add project root to path
-from .integration.helpers.redis_l3_helpers import (
+from netra_backend.tests.integration.helpers.redis_l3_helpers import (
     RedisContainer as NetraRedisContainer,
 )
 
-# Add project root to path
-
 logger = central_logger.get_logger(__name__)
-
 
 @dataclass
 class MemoryPressureMetrics:
@@ -83,7 +72,6 @@ class MemoryPressureMetrics:
     def avg_cache_efficiency(self) -> float:
         """Calculate average cache efficiency."""
         return statistics.mean(self.cache_efficiency_samples) if self.cache_efficiency_samples else 0.0
-
 
 class MemoryPressureEvictionL3Manager:
     """L3 memory pressure and eviction test manager with real Redis containers."""
@@ -530,7 +518,6 @@ class MemoryPressureEvictionL3Manager:
         except Exception as e:
             logger.error(f"Memory pressure cleanup failed: {e}")
 
-
 @pytest.fixture
 async def memory_pressure_manager():
     """Create L3 memory pressure and eviction manager."""
@@ -538,7 +525,6 @@ async def memory_pressure_manager():
     await manager.setup_redis_with_memory_limits()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -556,7 +542,6 @@ async def test_memory_pressure_eviction_simulation(memory_pressure_manager):
     
     logger.info(f"Memory pressure simulation completed: {len(result)} containers tested")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -571,7 +556,6 @@ async def test_lru_eviction_policy_accuracy(memory_pressure_manager):
     
     logger.info(f"LRU accuracy test completed: {result['lru_accuracy']:.2f}% accuracy, recent survival: {result['recent_survival_rate']:.1f}%")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -585,7 +569,6 @@ async def test_cache_efficiency_under_memory_pressure(memory_pressure_manager):
     assert result["mixed_efficiency"] > 60.0, f"Mixed workload efficiency too low: {result['mixed_efficiency']:.1f}%"
     
     logger.info(f"Cache efficiency test completed: baseline {result['baseline_efficiency']:.1f}%, under pressure {result['pressure_efficiency']:.1f}%")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration
@@ -603,7 +586,6 @@ async def test_memory_recovery_after_pressure_relief(memory_pressure_manager):
     
     logger.info(f"Memory recovery test completed: {len(result)} containers tested")
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
@@ -617,7 +599,6 @@ async def test_concurrent_eviction_performance(memory_pressure_manager):
     assert result["failed_tasks"] <= 5, f"Too many failed concurrent tasks: {result['failed_tasks']}"
     
     logger.info(f"Concurrent eviction test completed: {result['tasks_per_second']:.1f} tasks/s, {result['success_rate']:.1f}% success rate")
-
 
 @pytest.mark.asyncio
 @pytest.mark.integration

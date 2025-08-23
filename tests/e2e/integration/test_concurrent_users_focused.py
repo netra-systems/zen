@@ -21,15 +21,14 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design with focused responsibilities
 """
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from tests.e2e.integration.concurrent_user_models import IsolationValidator
-from tests.e2e.integration.concurrent_user_simulators import (
 import asyncio
 import pytest
 import time
 
+from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from tests.e2e.integration.concurrent_user_models import IsolationValidator
+from tests.e2e.integration.concurrent_user_simulators import (
     ConcurrentUserSimulator,
-
     ConcurrentWebSocketManager,
 
 )

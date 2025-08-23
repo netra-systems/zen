@@ -13,11 +13,10 @@ from netra_backend.app.services.quality_gate_service import (
     QualityGateService,
     QualityLevel,
 )
-from .model_effectiveness_tests import (
+from netra_backend.tests.e2e.model_effectiveness_tests import (
     _execute_model_selection_workflow,
     _validate_model_effectiveness_results,
 )
-
 
 @pytest.mark.real_llm
 class TestExamplePromptsModelSelection:
@@ -44,14 +43,12 @@ class TestExamplePromptsModelSelection:
         results = await _execute_model_selection_workflow(setup, state)
         await _validate_ep_009_results(results, state, setup)
 
-
 def _create_ep_005_state() -> DeepAgentState:
     """Create state for EP-005 example prompt test."""
     return DeepAgentState(
         user_request="I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?",
         metadata={'test_type': 'ep_005', 'prompt_id': 'EP-005', 'candidate_models': ['gpt-4o', 'claude-3-sonnet']}
     )
-
 
 def _create_ep_008_state() -> DeepAgentState:
     """Create state for EP-008 example prompt test."""
@@ -60,7 +57,6 @@ def _create_ep_008_state() -> DeepAgentState:
         metadata={'test_type': 'ep_008', 'prompt_id': 'EP-008', 'target_model': 'GPT-5'}
     )
 
-
 def _create_ep_009_state() -> DeepAgentState:
     """Create state for EP-009 example prompt test."""
     return DeepAgentState(
@@ -68,24 +64,20 @@ def _create_ep_009_state() -> DeepAgentState:
         metadata={'test_type': 'ep_009', 'prompt_id': 'EP-009', 'upgrade_model': 'GPT-5', 'analysis_type': 'rollback'}
     )
 
-
 async def _validate_ep_005_results(results: List[Dict], state: DeepAgentState, setup: Dict):
     """Validate EP-005 results with enhanced quality checks."""
     _validate_model_effectiveness_results(results, state)
     await _validate_response_quality_ep_005(results, setup)
-
 
 async def _validate_ep_008_results(results: List[Dict], state: DeepAgentState, setup: Dict):
     """Validate EP-008 results with enhanced quality checks."""
     _validate_tool_migration_results(results, state)
     await _validate_response_quality_ep_008(results, setup)
 
-
 async def _validate_ep_009_results(results: List[Dict], state: DeepAgentState, setup: Dict):
     """Validate EP-009 results with enhanced quality checks."""
     _validate_rollback_analysis_results(results, state)
     await _validate_response_quality_ep_009(results, setup)
-
 
 def _validate_tool_migration_results(results: List[Dict], state: DeepAgentState):
     """Validate tool migration workflow results."""
@@ -93,13 +85,11 @@ def _validate_tool_migration_results(results: List[Dict], state: DeepAgentState)
     assert 'GPT-5' in state.user_request
     assert any('tool' in str(result).lower() for result in results)
 
-
 def _validate_rollback_analysis_results(results: List[Dict], state: DeepAgentState):
     """Validate rollback analysis workflow results."""
     assert len(results) > 0, "No results returned from workflow"
     assert 'rollback' in state.user_request.lower()
     assert 'GPT-5' in state.user_request
-
 
 async def _validate_response_quality_ep_005(results: List[Dict], setup: Dict):
     """Validate response quality for EP-005 using quality gate service."""
@@ -114,7 +104,6 @@ async def _validate_response_quality_ep_005(results: List[Dict], setup: Dict):
         assert is_valid, f"EP-005 response quality validation failed: {feedback}"
         assert score >= 70, f"EP-005 quality score too low: {score}"
 
-
 async def _validate_response_quality_ep_008(results: List[Dict], setup: Dict):
     """Validate response quality for EP-008 using quality gate service."""
     quality_service = QualityGateService()
@@ -128,7 +117,6 @@ async def _validate_response_quality_ep_008(results: List[Dict], setup: Dict):
         assert is_valid, f"EP-008 response quality validation failed: {feedback}"
         assert score >= 70, f"EP-008 quality score too low: {score}"
 
-
 async def _validate_response_quality_ep_009(results: List[Dict], setup: Dict):
     """Validate response quality for EP-009 using quality gate service."""
     quality_service = QualityGateService()
@@ -141,7 +129,6 @@ async def _validate_response_quality_ep_009(results: List[Dict], setup: Dict):
         )
         assert is_valid, f"EP-009 response quality validation failed: {feedback}"
         assert score >= 70, f"EP-009 quality score too low: {score}"
-
 
 def _extract_response_text_model(result) -> str:
     """Extract response text from model selection workflow result."""

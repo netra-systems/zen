@@ -16,17 +16,10 @@ L4 Realism: Tests against real staging PostgreSQL and ClickHouse clusters with p
            configuration, data volumes, and transaction patterns.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import logging
@@ -41,14 +34,10 @@ import pytest
 
 from netra_backend.app.core.configuration.database import DatabaseConfigManager
 
-# Add project root to path
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.postgres_core import async_engine, async_session_factory
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class DatabaseTransactionL4Tester:
     """Simplified L4 database transaction consistency tester for staging environments."""
@@ -252,7 +241,6 @@ class DatabaseTransactionL4Tester:
         except Exception as e:
             logger.error(f"L4 transaction consistency cleanup failed: {e}")
 
-
 @pytest.fixture
 async def l4_transaction_manager():
     """Create L4 database transaction consistency manager for staging tests."""
@@ -260,7 +248,6 @@ async def l4_transaction_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio
@@ -292,7 +279,6 @@ async def test_l4_postgres_acid_atomicity_comprehensive(l4_transaction_manager):
     assert rollback_result["rollback_verified"] is True
     assert rollback_result["staging_verified"] is True
 
-
 @pytest.mark.staging
 @pytest.mark.asyncio
 async def test_l4_clickhouse_consistency_sync(l4_transaction_manager):
@@ -310,7 +296,6 @@ async def test_l4_clickhouse_consistency_sync(l4_transaction_manager):
     assert consistency_result["consistency_achieved"] is True
     assert consistency_result["staging_verified"] is True
     assert consistency_result["sync_latency"] < 10.0
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio
@@ -350,7 +335,6 @@ async def test_l4_cross_database_consistency_validation(l4_transaction_manager):
         assert result["clickhouse"]["consistency_achieved"] is True
         assert result["postgres"]["staging_verified"] is True
         assert result["clickhouse"]["staging_verified"] is True
-
 
 @pytest.mark.staging
 @pytest.mark.asyncio

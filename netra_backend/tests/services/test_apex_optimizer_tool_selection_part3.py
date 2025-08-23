@@ -3,17 +3,10 @@ Comprehensive tests for Apex Optimizer tool selection - Part 3: Tool Chaining Te
 Tests tool chaining mechanisms, orchestration, and complex workflows
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import json
@@ -32,20 +25,17 @@ from netra_backend.app.services.apex_optimizer_agent.tools.base import (
     ToolMetadata,
 )
 
-# Add project root to path
 from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
     ApexToolSelector,
 )
 from netra_backend.app.services.context import ToolContext
 
-# Add project root to path
 # Import helper classes from part 1
-from .test_apex_optimizer_tool_selection_part1 import (
+from netra_backend.tests.test_apex_optimizer_tool_selection_part1 import (
     MockLLMConnector,
     MockOptimizationTool,
     OptimizationCategory,
 )
-
 
 class ToolChain:
     """Manages chaining of optimization tools"""
@@ -129,7 +119,6 @@ class ToolChain:
             return 'multi' in condition or len(result.get('input_params', {})) > 2
         
         return False
-
 
 class TestApexOptimizerToolChaining:
     """Test tool chaining and orchestration"""

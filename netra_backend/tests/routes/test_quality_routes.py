@@ -9,31 +9,21 @@ Business Value Justification (BVJ):
 - Revenue Impact: Quality monitoring enables SLA guarantees for Enterprise tier
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
 import pytest
 
-# Add project root to path
-from .test_route_fixtures import (
+from netra_backend.tests.test_route_fixtures import (
     CommonResponseValidators,
     MockServiceFactory,
-    # Add project root to path
     basic_test_client,
 )
-
 
 class TestQualityRoute:
     """Test quality metric endpoints and monitoring functionality."""

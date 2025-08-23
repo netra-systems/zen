@@ -10,7 +10,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LoginButton } from '@/auth/components';
-import { AuthProvider } from '@/auth/context';
+import { AuthProvider, AuthContext } from '@/auth/context';
 import { authService } from '@/auth/service';
 import '@testing-library/jest-dom';
 
@@ -27,38 +27,44 @@ jest.mock('@/lib/logger', () => ({
   }
 }));
 
-describe('Authentication Error Message Tests', () => {
-  const mockLogin = jest.fn();
-  const mockLogout = jest.fn();
-  
-  const baseAuthContext = {
-    user: null,
-    login: mockLogin,
-    logout: mockLogout,
-    loading: false,
-    authConfig: {
-      development_mode: false,
-      google_client_id: 'test-client-id',
-      endpoints: {
-        login: '/auth/login',
-        callback: '/auth/callback'
-      }
-    },
-    token: null
-  };
+// Mock the auth context
+const mockLogin = jest.fn();
+const mockLogout = jest.fn();
 
+const mockAuthContext = {
+  user: null,
+  login: mockLogin,
+  logout: mockLogout,
+  loading: false,
+  authConfig: {
+    development_mode: false,
+    google_client_id: 'test-client-id',
+    endpoints: {
+      login: '/auth/login',
+      callback: '/auth/callback'
+    }
+  },
+  token: null
+};
+
+describe('Authentication Error Message Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(authService.useAuth).mockReturnValue(baseAuthContext);
+    // Mock authService.useAuth to return our mock context
+    jest.mocked(authService.useAuth).mockReturnValue(mockAuthContext);
   });
 
   describe('Invalid Credentials Errors', () => {
     it('should handle invalid login credentials gracefully', async () => {
-      mockLogin.mockRejectedValueOnce(new Error('Invalid credentials'));
+      mockLogin.mockImplementation(() => {
+        throw new Error('Invalid credentials');
+      });
       
       render(<LoginButton />);
       
       const button = screen.getByText('Login with Google');
+      
+      // The click should not cause the test to fail even if login throws
       await userEvent.click(button);
       
       expect(mockLogin).toHaveBeenCalled();

@@ -22,7 +22,6 @@ from netra_backend.app.services.state_persistence import state_persistence_servi
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.websocket.ws_manager import manager
 
-
 class ThreadTestDataFactory:
     """Factory for creating thread test data."""
     
@@ -81,7 +80,6 @@ class ThreadTestDataFactory:
                 **kwargs.get("metadata", {})
             }
         }
-
 
 class ThreadTestScenarios:
     """Predefined test scenarios for comprehensive testing."""
@@ -185,7 +183,6 @@ class ThreadTestScenarios:
             "user_id": user_id
         }
 
-
 class ThreadTestValidators:
     """Validation utilities for thread testing."""
     
@@ -257,7 +254,6 @@ class ThreadTestValidators:
         
         assert thread1_msg_ids.isdisjoint(thread2_msg_ids)
 
-
 class ThreadTestMocks:
     """Mock objects for thread testing."""
     
@@ -293,7 +289,6 @@ class ThreadTestMocks:
         service.load_agent_state = AsyncMock()
         service.recover_agent_state = AsyncMock(return_value=(True, "recovery_123"))
         return service
-
 
 class ThreadPerformanceTestUtils:
     """Utilities for thread performance testing."""
@@ -352,37 +347,31 @@ class ThreadPerformanceTestUtils:
             "operation_count": len(metrics)
         }
 
-
 # Pytest fixtures for thread testing
 @pytest.fixture
 def thread_data_factory():
     """Thread test data factory fixture."""
     return ThreadTestDataFactory()
 
-
 @pytest.fixture
 def thread_scenarios():
     """Thread test scenarios fixture."""
     return ThreadTestScenarios()
-
 
 @pytest.fixture
 def thread_validators():
     """Thread validators fixture."""
     return ThreadTestValidators()
 
-
 @pytest.fixture
 def thread_mocks():
     """Thread mocks fixture."""
     return ThreadTestMocks()
 
-
 @pytest.fixture
 def performance_utils():
     """Performance testing utilities fixture."""
     return ThreadPerformanceTestUtils()
-
 
 @pytest.fixture
 async def mock_db_session():
@@ -395,12 +384,10 @@ async def mock_db_session():
     session.refresh = AsyncMock()
     return session
 
-
 @pytest.fixture
 async def thread_service():
     """Thread service fixture."""
     return ThreadService()
-
 
 @pytest.fixture
 def mock_websocket_manager():
@@ -409,7 +396,6 @@ def mock_websocket_manager():
     
     with patch('app.ws_manager.manager', manager_mock):
         yield manager_mock
-
 
 @pytest.fixture
 def mock_state_persistence():

@@ -8,7 +8,7 @@ Keeps file under 300 lines as required by architecture standards.
 from netra_backend.app.heartbeat_config import HeartbeatConfig
 from netra_backend.app.heartbeat_manager import HeartbeatManager
 
-from . import heartbeat_utils
+from netra_backend.app.websocket import heartbeat_utils
 
 # Re-export all classes and functions for backward compatibility
 __all__ = [

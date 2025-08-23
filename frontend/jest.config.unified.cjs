@@ -34,15 +34,15 @@ const commonConfig = {
     'node_modules/(?!(react-markdown|remark-.*|rehype-.*|unified|micromark.*|mdast-.*|hast-.*|unist-.*|vfile|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|space-separated-tokens|comma-separated-tokens|bail|is-plain-obj|trough|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|estree-util-.*|devlop|zwitch|longest-streak|markdown-table|trim-lines|ccount|escape-string-regexp|html-void-elements|web-namespaces|estree-walker)/)',
   ],
   
-  // Global test configuration
-  globals: {
-    'ts-jest': {
+  // Transform patterns for ESM and TypeScript modules
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
       tsconfig: {
         jsx: 'react-jsx',
         esModuleInterop: true,
         allowSyntheticDefaultImports: true,
       },
-    },
+    }],
   },
   
   // Improved error handling
@@ -199,21 +199,8 @@ const config = {
 module.exports = async () => {
   const nextJestConfig = await createJestConfig(config)();
   
-  // Transform configuration for TypeScript
-  const transform = {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: {
-        jsx: 'react-jsx',
-        esModuleInterop: true,
-        allowSyntheticDefaultImports: true,
-      },
-    }],
-    '^.+\\.(js|jsx)$': ['babel-jest', { presets: ['next/babel'] }],
-  };
-  
   return {
     ...nextJestConfig,
-    transform,
     // Ensure proper timeout handling
     testTimeout: config.testTimeout,
     // Ensure proper worker configuration

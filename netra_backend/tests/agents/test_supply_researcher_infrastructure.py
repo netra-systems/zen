@@ -3,17 +3,10 @@ Infrastructure tests for SupplyResearcherAgent - Error recovery, audit, metrics
 Modular design with ≤300 lines, ≤8 lines per function
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import json
 from datetime import datetime
@@ -21,18 +14,17 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.state import DeepAgentState
-from .supply_researcher_fixtures import (
-    # Add project root to path
+from netra_backend.tests.agents.supply_researcher_fixtures import (
     agent,
     mock_redis_manager,
     successful_api_response,
 )
 
-
 class TestSupplyResearcherInfrastructure:
     """Infrastructure and operational tests"""
+
+    @pytest.mark.asyncio
 
     async def test_error_recovery_fallback(self, agent):
         """Test error recovery with fallback to cached data"""
@@ -75,6 +67,8 @@ class TestSupplyResearcherInfrastructure:
         """Verify cache was accessed during fallback (≤8 lines)"""
         if agent.redis_manager:
             assert agent.redis_manager.get.called
+
+    @pytest.mark.asyncio
 
     async def test_performance_metrics_collection(self, agent):
         """Test collection of performance metrics"""
@@ -150,6 +144,8 @@ class TestSupplyResearcherInfrastructure:
         assert circuit_breaker["state"] == "open"
         assert circuit_breaker["failure_count"] > circuit_breaker["failure_threshold"]
 
+    @pytest.mark.asyncio
+
     async def test_health_check_endpoints(self, agent):
         """Test health check and readiness endpoints"""
         health_status = await _check_agent_health(agent)
@@ -223,6 +219,8 @@ class TestSupplyResearcherInfrastructure:
         assert len(resources["connections"]) == 0
         assert len(resources["files"]) == 0
         assert len(resources["memory_objects"]) == 0
+
+    @pytest.mark.asyncio
 
     async def test_graceful_shutdown_handling(self, agent):
         """Test graceful shutdown procedures"""

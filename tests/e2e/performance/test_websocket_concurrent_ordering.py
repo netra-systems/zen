@@ -28,7 +28,7 @@ Validation criteria:
 # Add parent directories to sys.path for imports
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 import asyncio
@@ -38,11 +38,8 @@ import sys
 import time
 import uuid
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
-sys.path.insert(0, str(Path(__file__).parent))
 
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.real_client_types import ClientConfig, ConnectionState

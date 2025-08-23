@@ -2,30 +2,21 @@
 Integration tests for SupplyResearcherAgent
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from decimal import Decimal
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from background import BackgroundTaskManager
+from netra_backend.app.background import BackgroundTaskManager
 
 from netra_backend.app.agents.state import DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.supply_researcher_sub_agent import (
     ResearchType,
-    # Add project root to path
     SupplyResearcherAgent,
 )
 from netra_backend.app.db.models_postgres import AISupplyItem, User
@@ -36,9 +27,9 @@ from netra_backend.app.services.supply_research_scheduler import (
 )
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 
-
 class TestSupplyResearcherIntegration:
     """Integration tests for supply research system"""
+    @pytest.mark.asyncio
     async def test_agent_database_integration(self):
         """Test agent integration with database models"""
         mock_db = Mock()
@@ -142,6 +133,7 @@ class TestSupplyResearcherIntegration:
         print(f"E2E Test Success: Admin request processed, GPT-5 pricing would be added to supply")
         print(f"Research confidence: {result.get('confidence_score', 0):.2f}")
         print(f"Citations: {len(result.get('citations', []))} sources")
+    @pytest.mark.asyncio
     async def test_e2e_admin_chat_supply_update(self):
         """End-to-end test: Admin requests supply update via chat"""
         mock_db, mock_user, mock_ws_manager = self._setup_test_infrastructure()
@@ -158,6 +150,7 @@ class TestSupplyResearcherIntegration:
             self._verify_database_operations(mock_db)
             self._verify_websocket_updates(mock_ws_manager)
             self._verify_supply_updates(result)
+    @pytest.mark.asyncio
     async def test_full_research_workflow(self):
         """Test complete research workflow from request to database update"""
         # This would be a full integration test with real components

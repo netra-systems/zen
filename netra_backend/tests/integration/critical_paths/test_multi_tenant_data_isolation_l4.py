@@ -13,16 +13,13 @@ Comprehensive test for multi-tenant data isolation:
 This test validates complete data isolation in a multi-tenant environment.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
 import json
 import secrets
 
-# Add project root to path
 import sys
 import time
 import uuid
@@ -33,9 +30,6 @@ from typing import Any, Dict, List, Optional, Set
 import aiohttp
 import pytest
 import websockets
-
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Configuration
 BASE_URL = "http://localhost:8000"
@@ -49,7 +43,6 @@ CLICKHOUSE_URL = "http://localhost:8123"
 NUM_TENANTS = 3
 NUM_USERS_PER_TENANT = 2
 NUM_RESOURCES_PER_TENANT = 5
-
 
 class TenantData:
     """Container for tenant-specific test data."""
@@ -65,7 +58,6 @@ class TenantData:
         self.encryption_key: str = secrets.token_hex(32)
         self.data_partition: str = f"partition_{tenant_id}"
         
-
 class MultiTenantIsolationTester:
     """Test multi-tenant data isolation."""
     
@@ -628,7 +620,6 @@ class MultiTenantIsolationTester:
         
         return results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l4
@@ -686,7 +677,6 @@ async def test_multi_tenant_data_isolation():
         else:
             print(f"\n[WARNING] {total_tests - passed_tests} tests failed")
 
-
 async def main():
     """Run the test standalone."""
     print("="*80)
@@ -703,7 +693,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

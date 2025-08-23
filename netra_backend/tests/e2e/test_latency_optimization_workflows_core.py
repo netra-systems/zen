@@ -4,51 +4,40 @@ Tests real LLM agents with complete data flow validation for latency optimizatio
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import time
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityGateService,
     QualityLevel,
 )
-from netra_backend.tests.latency_optimization_helpers import (
-    create_3x_latency_state,
-    create_bottleneck_analysis_state,
-    create_caching_optimization_state,
-    # Add project root to path
-    create_latency_optimization_setup,
-    create_parallel_processing_state,
-    execute_latency_workflow,
-    validate_3x_latency_results,
-    validate_bottleneck_identification,
-    validate_caching_strategy_results,
-    validate_execution_time_bounds,
-    validate_parallel_processing_results,
-    validate_timing_consistency,
-)
-
+# from latency_optimization_helpers - using fixtures instead (
+#     create_3x_latency_state,
+#     create_bottleneck_analysis_state,
+#     create_caching_optimization_state,
+#     create_latency_optimization_setup,
+#     create_parallel_processing_state,
+#     execute_latency_workflow,
+#     validate_3x_latency_results,
+#     validate_bottleneck_identification,
+#     validate_caching_strategy_results,
+#     validate_execution_time_bounds,
+#     validate_parallel_processing_results,
+#     validate_timing_consistency,
+# )
 
 @pytest.fixture
 def latency_optimization_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for latency optimization testing."""
     return create_latency_optimization_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher)
-
 
 class TestLatencyOptimization3x:
     """Test 3x latency reduction without budget increase."""
@@ -67,7 +56,6 @@ class TestLatencyOptimization3x:
         results = await execute_latency_workflow(setup, state)
         validate_bottleneck_identification(results, state)
 
-
 class TestLatencyOptimizationStrategies:
     """Test various latency optimization strategies."""
     
@@ -84,7 +72,6 @@ class TestLatencyOptimizationStrategies:
         state = create_parallel_processing_state()
         results = await execute_latency_workflow(setup, state)
         validate_parallel_processing_results(results)
-
 
 class TestWorkflowPerformance:
     """Test performance characteristics of latency optimization workflows."""
@@ -107,7 +94,6 @@ class TestWorkflowPerformance:
         results = await execute_latency_workflow(setup, state)
         validate_timing_consistency(results)
 
-
 @pytest.mark.real_llm
 class TestExamplePromptsPerformanceOptimization:
     """Test specific example prompts EP-002 and EP-004 with real LLM validation."""
@@ -126,14 +112,12 @@ class TestExamplePromptsPerformanceOptimization:
         results = await execute_latency_workflow(setup, state)
         await _validate_ep_004_results(results, state, setup)
 
-
 def _create_ep_002_state() -> DeepAgentState:
     """Create state for EP-002 example prompt test."""
     return DeepAgentState(
         user_request="My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.",
         metadata={'test_type': 'ep_002', 'prompt_id': 'EP-002', 'latency_target': '3x', 'budget_constraint': 'zero'}
     )
-
 
 def _create_ep_004_state() -> DeepAgentState:
     """Create state for EP-004 example prompt test."""
@@ -142,25 +126,21 @@ def _create_ep_004_state() -> DeepAgentState:
         metadata={'test_type': 'ep_004', 'prompt_id': 'EP-004', 'target_function': 'user_authentication'}
     )
 
-
 async def _validate_ep_002_results(results, state: DeepAgentState, setup):
     """Validate EP-002 results with enhanced quality checks."""
     await validate_3x_latency_results(results, state)
     await _validate_response_quality_ep_002(results, setup)
-
 
 async def _validate_ep_004_results(results, state: DeepAgentState, setup):
     """Validate EP-004 results with enhanced quality checks."""
     _validate_function_optimization_results(results, state)
     await _validate_response_quality_ep_004(results, setup)
 
-
 def _validate_function_optimization_results(results, state: DeepAgentState):
     """Validate function optimization workflow results."""
     assert len(results) > 0, "No results returned from workflow"
     assert 'user_authentication' in state.user_request
     assert any('function' in str(result).lower() for result in results)
-
 
 async def _validate_response_quality_ep_002(results, setup):
     """Validate response quality for EP-002 using quality gate service."""
@@ -175,7 +155,6 @@ async def _validate_response_quality_ep_002(results, setup):
         assert is_valid, f"EP-002 response quality validation failed: {feedback}"
         assert score >= 70, f"EP-002 quality score too low: {score}"
 
-
 async def _validate_response_quality_ep_004(results, setup):
     """Validate response quality for EP-004 using quality gate service."""
     quality_service = QualityGateService()
@@ -188,7 +167,6 @@ async def _validate_response_quality_ep_004(results, setup):
         )
         assert is_valid, f"EP-004 response quality validation failed: {feedback}"
         assert score >= 70, f"EP-004 quality score too low: {score}"
-
 
 def _extract_response_text(result) -> str:
     """Extract response text from workflow result."""

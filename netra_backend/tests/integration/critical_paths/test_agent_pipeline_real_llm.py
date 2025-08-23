@@ -11,15 +11,12 @@ Coverage: Full pipeline validation with real LLM providers, staging environment 
 """
 
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
 import logging
 
-# Add project root to path
 import sys
 import time
 import uuid
@@ -33,14 +30,7 @@ import pytest
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-from app.auth_integration.auth import get_current_user
+from netra_backend.app.auth_integration.auth import get_current_user
 
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
@@ -56,17 +46,14 @@ from netra_backend.app.schemas.registry import WebSocketMessage as WSMessage
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from ...e2e.real_client_types import (
+from netra_backend.tests.e2e.real_client_types import (
 
     ClientConfig,
 
     ConnectionState,
 
 )
-from ...e2e.real_websocket_client import RealWebSocketClient
-
-# Add project root to path
-
+from netra_backend.tests.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 
@@ -182,19 +169,16 @@ PERFORMANCE_SLAS = {
 
 }
 
-
 class StagingEnvironmentManager:
 
     """Manages staging environment configuration and health checks."""
     
-
     def __init__(self):
 
         self.config = STAGING_CONFIG
 
         self.health_status = {}
         
-
     async def verify_staging_health(self) -> bool:
 
         """Verify staging environment is healthy and accessible."""
@@ -212,7 +196,6 @@ class StagingEnvironmentManager:
 
             auth_health = await self._check_auth_health()
             
-
             self.health_status = {
 
                 "websocket": ws_health,
@@ -225,17 +208,14 @@ class StagingEnvironmentManager:
 
             }
             
-
             return self.health_status["overall"]
             
-
         except Exception as e:
 
             logger.error(f"Staging health check failed: {e}")
 
             return False
     
-
     async def _check_websocket_health(self) -> bool:
 
         """Check WebSocket endpoint health."""
@@ -260,7 +240,6 @@ class StagingEnvironmentManager:
 
             return False
     
-
     async def _check_api_health(self) -> bool:
 
         """Check API endpoint health."""
@@ -269,7 +248,6 @@ class StagingEnvironmentManager:
 
         return True
     
-
     async def _check_auth_health(self) -> bool:
 
         """Check auth service health."""
@@ -278,12 +256,10 @@ class StagingEnvironmentManager:
 
         return True
 
-
 class AgentPipelineRealLLMTester:
 
     """Comprehensive L4 agent pipeline tester with real LLM integration."""
     
-
     def __init__(self):
 
         self.staging_manager = StagingEnvironmentManager()
@@ -320,7 +296,6 @@ class AgentPipelineRealLLMTester:
 
         }
         
-
     async def initialize(self) -> bool:
 
         """Initialize all components for L4 testing."""
@@ -348,19 +323,16 @@ class AgentPipelineRealLLMTester:
 
             await self._initialize_websocket_client()
             
-
             logger.info("L4 agent pipeline tester initialized successfully")
 
             return True
             
-
         except Exception as e:
 
             logger.error(f"Failed to initialize L4 tester: {e}")
 
             return False
     
-
     async def _initialize_llm_manager(self):
 
         """Initialize LLM manager with real provider configurations."""
@@ -370,7 +342,6 @@ class AgentPipelineRealLLMTester:
 
         staging_settings.environment = "staging"
         
-
         self.llm_manager = LLMManager(staging_settings)
         
         # Verify LLM providers are accessible
@@ -385,7 +356,6 @@ class AgentPipelineRealLLMTester:
 
                                    error_code="LLM_PROVIDER_UNHEALTHY")
     
-
     async def _initialize_quality_gate_service(self):
 
         """Initialize quality gate service for response validation."""
@@ -394,14 +364,12 @@ class AgentPipelineRealLLMTester:
 
         await self.quality_gate_service.initialize()
     
-
     async def _initialize_cost_tracking_service(self):
 
         """Initialize cost tracking service for accurate cost monitoring."""
 
         self.cost_tracking_service = CostCalculatorService()
     
-
     async def _initialize_websocket_client(self):
 
         """Initialize real WebSocket client for staging environment."""
@@ -416,7 +384,6 @@ class AgentPipelineRealLLMTester:
 
         )
         
-
         self.websocket_client = RealWebSocketClient(
 
             STAGING_CONFIG["websocket_url"],
@@ -425,7 +392,6 @@ class AgentPipelineRealLLMTester:
 
         )
     
-
     async def test_end_to_end_agent_pipeline(self, test_prompt: Dict[str, Any], 
 
                                            llm_config: str) -> Dict[str, Any]:
@@ -436,7 +402,6 @@ class AgentPipelineRealLLMTester:
 
         start_time = time.time()
         
-
         try:
 
             self.test_metrics["total_tests"] += 1
@@ -447,7 +412,6 @@ class AgentPipelineRealLLMTester:
 
             auth_headers = await self._get_staging_auth_headers()
             
-
             connection_success = await self.websocket_client.connect(auth_headers)
 
             if not connection_success:
@@ -456,7 +420,6 @@ class AgentPipelineRealLLMTester:
 
                                    error_code="WEBSOCKET_CONNECTION_FAILED")
             
-
             connection_time = time.time() - connection_start
             
             # Step 2: Initialize supervisor agent
@@ -471,7 +434,6 @@ class AgentPipelineRealLLMTester:
 
             pipeline_start = time.time()
             
-
             message = {
 
                 "type": "user_message",
@@ -530,7 +492,6 @@ class AgentPipelineRealLLMTester:
 
             })
             
-
             total_time = time.time() - start_time
             
             # Update metrics
@@ -545,7 +506,6 @@ class AgentPipelineRealLLMTester:
 
             self.test_metrics["response_times"].append(total_time)
             
-
             return {
 
                 "test_id": test_id,
@@ -578,7 +538,6 @@ class AgentPipelineRealLLMTester:
 
             }
             
-
         except Exception as e:
 
             self.test_metrics["failed_tests"] += 1
@@ -588,7 +547,6 @@ class AgentPipelineRealLLMTester:
             self.test_metrics["error_types"][error_type] = \
                 self.test_metrics["error_types"].get(error_type, 0) + 1
             
-
             return {
 
                 "test_id": test_id,
@@ -603,7 +561,6 @@ class AgentPipelineRealLLMTester:
 
             }
         
-
         finally:
             # Cleanup WebSocket connection
 
@@ -611,7 +568,6 @@ class AgentPipelineRealLLMTester:
 
                 await self.websocket_client.close()
     
-
     async def _get_staging_auth_headers(self) -> Dict[str, str]:
 
         """Get authentication headers for staging environment."""
@@ -626,7 +582,6 @@ class AgentPipelineRealLLMTester:
 
         }
     
-
     async def _initialize_supervisor_agent(self, test_id: str):
 
         """Initialize supervisor agent for test session."""
@@ -665,7 +620,6 @@ class AgentPipelineRealLLMTester:
 
         )
     
-
     async def _collect_pipeline_responses(self, test_id: str, 
 
                                         timeout: float = 60.0) -> List[Dict[str, Any]]:
@@ -676,7 +630,6 @@ class AgentPipelineRealLLMTester:
 
         start_time = time.time()
         
-
         while time.time() - start_time < timeout:
 
             try:
@@ -693,16 +646,13 @@ class AgentPipelineRealLLMTester:
 
                         break
                         
-
             except asyncio.TimeoutError:
                 # Continue waiting for more responses
 
                 continue
         
-
         return responses
     
-
     async def _validate_response_quality(self, responses: List[Dict[str, Any]], 
 
                                        test_prompt: Dict[str, Any]) -> Dict[str, Any]:
@@ -725,7 +675,6 @@ class AgentPipelineRealLLMTester:
 
                 break
         
-
         if not agent_response:
 
             return {"score": 0.0, "passed": False, "reason": "No agent response content"}
@@ -742,10 +691,8 @@ class AgentPipelineRealLLMTester:
 
         )
         
-
         passed = quality_result["score"] >= test_prompt["quality_threshold"]
         
-
         return {
 
             "score": quality_result["score"],
@@ -758,7 +705,6 @@ class AgentPipelineRealLLMTester:
 
         }
     
-
     async def _track_and_validate_costs(self, test_id: str, llm_config: str, 
 
                                       prompt: str) -> Dict[str, Any]:
@@ -788,7 +734,6 @@ class AgentPipelineRealLLMTester:
 
         )
         
-
         return {
 
             "estimated_cost": estimated_cost,
@@ -801,14 +746,12 @@ class AgentPipelineRealLLMTester:
 
         }
     
-
     def _validate_performance_slas(self, metrics: Dict[str, float]) -> Dict[str, Any]:
 
         """Validate performance metrics against SLA requirements."""
 
         sla_results = {}
         
-
         for metric, value in metrics.items():
 
             sla_key = metric.replace("_time", "_time")
@@ -829,10 +772,8 @@ class AgentPipelineRealLLMTester:
 
                 }
         
-
         overall_passed = all(result["passed"] for result in sla_results.values())
         
-
         return {
 
             "overall_passed": overall_passed,
@@ -841,7 +782,6 @@ class AgentPipelineRealLLMTester:
 
         }
     
-
     async def get_test_summary(self) -> Dict[str, Any]:
 
         """Get comprehensive test execution summary."""
@@ -850,17 +790,14 @@ class AgentPipelineRealLLMTester:
 
                        max(self.test_metrics["total_tests"], 1) * 100)
         
-
         avg_quality_score = (sum(self.test_metrics["quality_scores"]) / 
 
                            max(len(self.test_metrics["quality_scores"]), 1))
         
-
         avg_response_time = (sum(self.test_metrics["response_times"]) / 
 
                            max(len(self.test_metrics["response_times"]), 1))
         
-
         return {
 
             "total_tests": self.test_metrics["total_tests"],
@@ -881,7 +818,6 @@ class AgentPipelineRealLLMTester:
 
         }
     
-
     async def cleanup(self):
 
         """Clean up all test resources."""
@@ -903,7 +839,6 @@ class AgentPipelineRealLLMTester:
         except Exception as e:
 
             logger.error(f"Cleanup failed: {e}")
-
 
 @pytest.fixture
 
@@ -927,11 +862,9 @@ async def l4_pipeline_tester():
 
         pytest.skip("L4 tests require --real-llm flag or staging environment")
     
-
     yield tester
 
     await tester.cleanup()
-
 
 @pytest.mark.asyncio
 
@@ -950,7 +883,6 @@ async def test_supervisor_agent_real_llm_initialization(l4_pipeline_tester):
 
     )
     
-
     assert result["success"] is True
 
     assert result["performance_metrics"]["supervisor_init_time"] <= PERFORMANCE_SLAS["supervisor_initialization_time"]
@@ -958,7 +890,6 @@ async def test_supervisor_agent_real_llm_initialization(l4_pipeline_tester):
     assert result["quality_result"]["passed"] is True
 
     assert result["sla_validation"]["overall_passed"] is True
-
 
 @pytest.mark.asyncio 
 
@@ -998,7 +929,6 @@ async def test_multi_provider_llm_pipeline(l4_pipeline_tester):
 
     assert avg_quality >= 0.6  # Minimum quality threshold
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.integration 
@@ -1021,7 +951,6 @@ async def test_agent_pipeline_quality_gates(l4_pipeline_tester):
 
         )
         
-
         if result["success"]:
 
             quality_results.append(result["quality_result"])
@@ -1032,9 +961,7 @@ async def test_agent_pipeline_quality_gates(l4_pipeline_tester):
 
     pass_rate = len(passed_gates) / max(len(quality_results), 1)
     
-
     assert pass_rate >= PERFORMANCE_SLAS["quality_gate_pass_rate"]
-
 
 @pytest.mark.asyncio
 
@@ -1058,7 +985,6 @@ async def test_cost_tracking_accuracy(l4_pipeline_tester):
 
         )
         
-
         if result["success"]:
 
             cost_results.append(result["cost_result"])
@@ -1074,7 +1000,6 @@ async def test_cost_tracking_accuracy(l4_pipeline_tester):
     assert total_cost > 0  # Should have tracked some cost
 
     assert total_cost < 1.0  # Should not be excessive for test prompts
-
 
 @pytest.mark.asyncio
 
@@ -1093,7 +1018,6 @@ async def test_websocket_resilience_real_environment(l4_pipeline_tester):
 
     )
     
-
     assert initial_result["success"] is True
     
     # Simulate connection disruption and recovery
@@ -1108,9 +1032,7 @@ async def test_websocket_resilience_real_environment(l4_pipeline_tester):
 
     )
     
-
     assert recovery_result["success"] is True
-
 
 @pytest.mark.asyncio
 
@@ -1127,7 +1049,6 @@ async def test_concurrent_agent_pipeline_load(l4_pipeline_tester):
 
     num_concurrent = 5
     
-
     for i in range(num_concurrent):
 
         prompt = TEST_PROMPTS[i % len(TEST_PROMPTS)]
@@ -1154,11 +1075,9 @@ async def test_concurrent_agent_pipeline_load(l4_pipeline_tester):
 
     success_rate = len(successful_results) / len(results) * 100
     
-
     assert success_rate >= 80.0  # 80% success rate under load
 
     assert total_time < 120.0  # Complete within 2 minutes
-
 
 @pytest.mark.asyncio
 
@@ -1183,7 +1102,6 @@ async def test_error_recovery_scenarios(l4_pipeline_tester):
 
     }
     
-
     result = await l4_pipeline_tester.test_end_to_end_agent_pipeline(
 
         invalid_prompt, "gemini-1.5-flash"
@@ -1202,9 +1120,7 @@ async def test_error_recovery_scenarios(l4_pipeline_tester):
 
     )
     
-
     assert recovery_result["success"] is True
-
 
 @pytest.mark.asyncio
 
@@ -1219,7 +1135,6 @@ async def test_staging_environment_performance_slas(l4_pipeline_tester):
 
     performance_results = []
     
-
     for test_prompt in TEST_PROMPTS:
 
         result = await l4_pipeline_tester.test_end_to_end_agent_pipeline(
@@ -1228,7 +1143,6 @@ async def test_staging_environment_performance_slas(l4_pipeline_tester):
 
         )
         
-
         if result["success"]:
 
             performance_results.append(result["performance_metrics"])
@@ -1245,7 +1159,6 @@ async def test_staging_environment_performance_slas(l4_pipeline_tester):
 
                 assert value <= PERFORMANCE_SLAS[sla_key], \
                     f"SLA violation: {metric} = {value}s exceeds {PERFORMANCE_SLAS[sla_key]}s"
-
 
 @pytest.mark.asyncio
 

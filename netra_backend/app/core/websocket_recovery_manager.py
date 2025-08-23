@@ -6,9 +6,7 @@ and provides global connection monitoring and recovery operations.
 
 from typing import Any, Dict, Optional
 
-from netra_backend.app.core.websocket_connection_manager import (
-    WebSocketConnectionManager,
-)
+from netra_backend.app.websocket.connection import ConnectionManager as WebSocketConnectionManager
 from netra_backend.app.core.websocket_recovery_types import (
     ConnectionState,
     ReconnectionConfig,

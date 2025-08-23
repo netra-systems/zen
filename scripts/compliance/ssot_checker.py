@@ -10,7 +10,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Set
 
-from .core import ComplianceConfig, Violation
+from scripts.compliance.core import ComplianceConfig, Violation
 
 
 class SSOTChecker:

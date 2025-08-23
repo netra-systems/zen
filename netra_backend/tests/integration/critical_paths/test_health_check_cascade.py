@@ -10,17 +10,10 @@ Critical Path: Service health check -> Dependency validation -> Health propagati
 Coverage: Health check orchestration, dependency mapping, cascading health status, alerting
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import json
@@ -33,15 +26,11 @@ import pytest
 
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-# Add project root to path
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.monitoring.alerting_service import AlertingService
 from netra_backend.app.services.redis_service import RedisService
 
-# Add project root to path
-
 logger = logging.getLogger(__name__)
-
 
 class HealthCheckCascadeManager:
     """Manages health check cascade testing with dependencies."""
@@ -229,7 +218,6 @@ class HealthCheckCascadeManager:
         if self.alerting_service:
             await self.alerting_service.shutdown()
 
-
 @pytest.fixture
 async def health_cascade_manager():
     """Create health check cascade manager for testing."""
@@ -237,7 +225,6 @@ async def health_cascade_manager():
     await manager.initialize_services()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -258,7 +245,6 @@ async def test_service_health_check_registration(health_cascade_manager):
     assert registration_result["registration_time"] < 0.5
     assert "database" in registration_result["dependencies"]
     assert "redis" in registration_result["dependencies"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
@@ -289,7 +275,6 @@ async def test_dependency_cascade_failure_detection(health_cascade_manager):
     # At least some dependent services should be affected
     assert any(service in affected_services for service in dependent_services)
 
-
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
 async def test_health_check_alerting_integration(health_cascade_manager):
@@ -317,7 +302,6 @@ async def test_health_check_alerting_integration(health_cascade_manager):
     first_alert = alerting_result["generated_alerts"][0]
     assert first_alert.get("service") == alerting_result["failed_service"]
     assert first_alert.get("severity") in ["critical", "warning"]
-
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism

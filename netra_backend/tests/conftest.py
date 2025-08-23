@@ -1,31 +1,32 @@
 """
 Backend-specific test configuration.
 Depends on root /tests/conftest.py for common fixtures and environment setup.
+
+# Setup Python path for imports
+import sys
+from pathlib import Path
+
+# Add project root to Python path for netra_backend imports
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 """
 
-# Add the project root directory to Python path for imports
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
 import os
-import sys
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-
-if project_root not in sys.path:
-
-    sys.path.insert(0, project_root)
-
+# Lazy imports moved to fixtures to avoid slow startup during test collection
 from netra_backend.app.core.network_constants import (
-
     DatabaseConstants,
-
     HostConstants,
-
     ServicePorts,
-
 )
 
 # Set test environment variables BEFORE importing any app modules
 # Use isolated values if TEST_ISOLATION is enabled
+
+# CRITICAL: Set test collection mode to skip heavy initialization during pytest collection
+os.environ["TEST_COLLECTION_MODE"] = "1"
 
 if os.environ.get("TEST_ISOLATION") == "1":
     # When using test isolation, environment is already configured
@@ -45,6 +46,13 @@ else:
     # Standard test environment setup
 
     os.environ["TESTING"] = "1"
+    # Import network constants lazily to avoid slow startup
+    from netra_backend.app.core.network_constants import (
+        DatabaseConstants,
+        HostConstants, 
+        ServicePorts,
+    )
+    
     # Use PostgreSQL URL format even for tests to satisfy validator
 
     os.environ["DATABASE_URL"] = DatabaseConstants.build_postgres_url(
@@ -114,20 +122,16 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
-from netra_backend.app.config import get_config
-from netra_backend.app.db.base import Base
-from netra_backend.app.db.models_agent_state import *  # Import all agent state models
-from netra_backend.app.db.models_content import *  # Import all content models
-from netra_backend.app.db.models_postgres import *  # Import all postgres models
+# Configuration imports moved to fixtures to avoid slow startup during test collection
+from netra_backend.app.core.configuration.base import get_unified_config
 
-# Import all models to ensure they are registered with Base before creating tables
-from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
+# NOTE: Import main app lazily in fixtures to avoid slow startup during test collection
+# The app will be imported when actually needed in fixtures, not during conftest loading
 
-# Initialize database on import to ensure async_session_factory is available
-from netra_backend.app.db.postgres import initialize_postgres
+# Database imports moved to fixtures to avoid slow startup during test collection
 from netra_backend.app.db.session import get_db_session
-from netra_backend.app.main import app
 from netra_backend.tests.conftest_helpers import (
 
     _create_mock_tool_dispatcher,
@@ -212,16 +216,8 @@ def pytest_configure(config):
 
     )
 
-
-try:
-
-    initialize_postgres()
-
-except Exception as e:
-    # Log but don't fail on import - some tests may not need database
-    import logging
-
-    logging.getLogger(__name__).warning(f"Failed to initialize database in conftest.py: {e}")
+# Database initialization moved to fixtures - no longer done at module level
+# This avoids slow startup during test collection
 
 # Temporarily disabled to fix test hanging issue
 # @pytest.fixture(scope="function")
@@ -231,7 +227,6 @@ except Exception as e:
 #     yield loop
 #     loop.close()
 
-
 @pytest.fixture(scope="function")
 
 def ensure_db_initialized():
@@ -239,7 +234,6 @@ def ensure_db_initialized():
     """Ensure database is initialized for tests that need it."""
     from netra_backend.app.db.postgres import async_session_factory, initialize_postgres
     
-
     if async_session_factory is None:
 
         try:
@@ -254,13 +248,25 @@ def ensure_db_initialized():
 
     return async_session_factory
 
-
 @pytest.fixture(scope="function")
 
 async def test_engine():
+    """Create test database engine."""
+    # Import Base lazily to avoid slow startup during test collection
+    from netra_backend.app.db.base import Base
 
-    config = get_config()
-    engine = create_async_engine(config.database_url, echo=False)
+    # Use in-memory SQLite for tests to avoid requiring real database
+    # This ensures tests are isolated and fast
+    test_database_url = "sqlite+aiosqlite:///:memory:"
+    
+    engine = create_async_engine(
+        test_database_url,
+        echo=False,
+        poolclass=StaticPool,
+        connect_args={
+            "check_same_thread": False,
+        }
+    )
 
     async with engine.begin() as conn:
 
@@ -274,7 +280,6 @@ async def test_engine():
 
     await engine.dispose()
 
-
 @pytest.fixture(scope="function")
 
 async def db_session(test_engine):
@@ -285,15 +290,16 @@ async def db_session(test_engine):
 
         yield session
 
-
 @pytest.fixture(scope="function")
 
 def client(db_session):
+    """Create FastAPI test client with database session override."""
+    # Import app lazily to avoid startup during test collection
+    from netra_backend.app.main import app
 
     def override_get_db():
 
         yield db_session
-
 
     app.dependency_overrides[get_db_session] = override_get_db
 
@@ -312,7 +318,8 @@ def real_llm_manager():
     """Create real LLM manager when ENABLE_REAL_LLM_TESTING=true, otherwise proper mock."""
 
     if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
-        from netra_backend.app.config import get_config
+        # Use unified configuration system
+        from netra_backend.app.config import get_unified_config as get_config
         from netra_backend.app.llm.llm_manager import LLMManager
 
         config = get_config()
@@ -322,20 +329,19 @@ def real_llm_manager():
 
         return _create_mock_llm_manager()
 
-
 def _create_mock_llm_manager():
 
     """Create properly configured async mock LLM manager."""
     from unittest.mock import AsyncMock, MagicMock
 
-    mock_manager = MagicMock()
+    # Use AsyncMock for async methods, regular Mock for sync methods
+    mock_manager = AsyncMock()
 
     _setup_basic_llm_mocks(mock_manager)
 
     _setup_performance_llm_mocks(mock_manager)
 
     return mock_manager
-
 
 @pytest.fixture(scope="function") 
 
@@ -352,7 +358,6 @@ def real_websocket_manager():
 
     return manager
 
-
 @pytest.fixture(scope="function")
 
 def real_tool_dispatcher():
@@ -365,7 +370,6 @@ def real_tool_dispatcher():
 
     return _create_mock_tool_dispatcher()
 
-
 @pytest.fixture(scope="function")
 
 def real_agent_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
@@ -376,7 +380,6 @@ def real_agent_setup(real_llm_manager, real_websocket_manager, real_tool_dispatc
 
     return _build_real_setup_dict(agents, real_llm_manager, real_websocket_manager, real_tool_dispatcher)
 
-
 def _create_real_agents(llm_manager, tool_dispatcher):
 
     """Create real agent instances with proper dependencies."""
@@ -384,7 +387,6 @@ def _create_real_agents(llm_manager, tool_dispatcher):
     agent_classes = _import_agent_classes()
 
     return _instantiate_agents(agent_classes, llm_manager, tool_dispatcher)
-
 
 def _build_real_setup_dict(agents, llm_manager, websocket_manager, tool_dispatcher):
 
@@ -399,11 +401,13 @@ def _build_real_setup_dict(agents, llm_manager, websocket_manager, tool_dispatch
 
     }
 
+# Import database repository fixtures to make them available
+pytest_plugins = ["netra_backend.tests.helpers.database_repository_fixtures"]
+
 # =============================================================================
 # AGENT TESTING FIXTURES
 # Consolidated from netra_backend/tests/agents/conftest.py
 # =============================================================================
-
 
 def _setup_database_mock():
 
@@ -421,7 +425,6 @@ def _setup_database_mock():
 
     return db_session
 
-
 async def _mock_call_llm(*args, **kwargs):
 
     """Mock LLM call returning optimization response."""
@@ -433,7 +436,6 @@ async def _mock_call_llm(*args, **kwargs):
         "tool_calls": []
 
     }
-
 
 async def _mock_ask_llm(*args, **kwargs):
 
@@ -449,7 +451,6 @@ async def _mock_ask_llm(*args, **kwargs):
         "recommendations": ["Switch to GPT-3.5 for low-complexity tasks", "Implement caching"]
 
     })
-
 
 async def _mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
 
@@ -483,7 +484,6 @@ async def _mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
 
         return Mock()
 
-
 def _setup_agent_llm_manager():
 
     """Create LLM manager mock with realistic response methods."""
@@ -502,11 +502,11 @@ def _setup_agent_llm_manager():
 
     return llm_manager
 
-
 def _setup_websocket_tool_dispatcher():
 
     """Create websocket manager and tool dispatcher mock."""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 
     websocket_manager = WebSocketManager()
 
@@ -522,7 +522,6 @@ def _setup_websocket_tool_dispatcher():
 
     return websocket_manager, tool_dispatcher
 
-
 def _setup_core_services():
 
     """Create core business services."""
@@ -537,7 +536,6 @@ def _setup_core_services():
     corpus_service = CorpusService()
 
     return synthetic_service, quality_service, corpus_service
-
 
 def _setup_mock_services():
 
@@ -557,7 +555,6 @@ def _setup_mock_services():
 
     return state_service, apex_selector
 
-
 def _setup_agents(db_session, llm_manager, websocket_manager, tool_dispatcher):
 
     """Create supervisor and agent service with proper configuration."""
@@ -576,7 +573,6 @@ def _setup_agents(db_session, llm_manager, websocket_manager, tool_dispatcher):
 
     return supervisor, agent_service
 
-
 @pytest.fixture
 
 def mock_dependencies():
@@ -589,7 +585,6 @@ def mock_dependencies():
 
     return llm_manager, tool_dispatcher
 
-
 @pytest.fixture
 
 def agent(mock_dependencies):
@@ -598,7 +593,6 @@ def agent(mock_dependencies):
     from unittest.mock import patch, Mock, AsyncMock
     from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
     
-
     llm_manager, tool_dispatcher = mock_dependencies
 
     with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager') as mock_redis_class:
@@ -616,7 +610,6 @@ def agent(mock_dependencies):
 
         mock_redis_class.return_value = mock_redis_instance
         
-
         agent = DataSubAgent(llm_manager, tool_dispatcher)
         # Ensure redis_manager is properly mocked
 
@@ -628,7 +621,6 @@ def agent(mock_dependencies):
 
     return agent
 
-
 @pytest.fixture
 
 def service(agent):
@@ -636,7 +628,6 @@ def service(agent):
     """Alias agent as service for integration test compatibility"""
 
     return agent
-
 
 @pytest.fixture
 
@@ -671,7 +662,6 @@ def sample_performance_data():
         }
 
     ]
-
 
 @pytest.fixture
 
@@ -711,7 +701,6 @@ def sample_anomaly_data():
 
     ]
 
-
 @pytest.fixture
 
 def sample_usage_patterns():
@@ -728,13 +717,13 @@ def sample_usage_patterns():
 
     ]
 
-
 @pytest.fixture
 
 def setup_real_infrastructure():
 
     """Setup infrastructure for real LLM tests."""
-    from netra_backend.app.core.config import get_config
+    # Use unified configuration system
+    from netra_backend.app.config import get_unified_config as get_config
 
     config = get_config()
 
@@ -771,7 +760,6 @@ def setup_real_infrastructure():
 # Consolidated from netra_backend/tests/clickhouse/conftest.py
 # =============================================================================
 
-
 @pytest.fixture
 
 def mock_clickhouse_client():
@@ -794,7 +782,6 @@ def mock_clickhouse_client():
 
     return client
 
-
 @pytest.fixture
 
 def mock_db_session():
@@ -815,7 +802,6 @@ def mock_db_session():
     session.query = MagicMock()
 
     return session
-
 
 @pytest.fixture
 
@@ -850,7 +836,6 @@ def sample_corpus_data():
         ]
 
     }
-
 
 @pytest.fixture
 
@@ -888,7 +873,6 @@ def sample_corpus_records():
 
 # NOTE: mock_redis_manager is now provided by root conftest.py to avoid duplication
 
-
 @pytest.fixture(autouse=True)
 
 def setup_backend_test_environment(monkeypatch):
@@ -897,7 +881,6 @@ def setup_backend_test_environment(monkeypatch):
     # Backend-specific database configs (root conftest handles common env vars)
 
     monkeypatch.setenv("CLICKHOUSE_URL", "clickhouse://test:test@localhost:9000/test")
-
 
 @pytest.fixture
 
@@ -937,7 +920,6 @@ def performance_metrics_data():
 
     }
 
-
 @pytest.fixture
 
 def anomaly_detection_data():
@@ -961,7 +943,6 @@ def anomaly_detection_data():
 # Consolidated from netra_backend/tests/performance/conftest.py
 # =============================================================================
 
-
 @pytest.fixture
 
 def mock_settings():
@@ -984,7 +965,6 @@ def mock_settings():
 
     return mock_config
 
-
 @pytest.fixture
 
 def mock_performance_websocket_manager():
@@ -996,7 +976,6 @@ def mock_performance_websocket_manager():
     manager.broadcast = AsyncMock()
 
     return manager
-
 
 @pytest.fixture
 
@@ -1024,7 +1003,6 @@ def performance_test_data():
 
     }
 
-
 @pytest.fixture(autouse=True)
 
 def setup_performance_environment(tmp_path, monkeypatch):
@@ -1037,7 +1015,6 @@ def setup_performance_environment(tmp_path, monkeypatch):
 
     test_dir.mkdir()
     
-
     corpus_dir = test_dir / "content_corpuses"
 
     corpus_dir.mkdir()
@@ -1046,9 +1023,7 @@ def setup_performance_environment(tmp_path, monkeypatch):
 
     monkeypatch.setenv("CORPUS_TEST_DIR", str(corpus_dir))
     
-
     yield test_dir
-
 
 @pytest.fixture
 
@@ -1058,14 +1033,12 @@ def cleanup_performance_files():
 
     files_to_cleanup = []
     
-
     def register_cleanup(filepath: str):
 
         """Register file for cleanup"""
 
         files_to_cleanup.append(filepath)
     
-
     yield register_cleanup
     
     # Cleanup
@@ -1077,10 +1050,32 @@ def cleanup_performance_files():
             os.remove(filepath)
 
 # =============================================================================
+# AUTH TOKEN FIXTURES
+# =============================================================================
+
+@pytest.fixture
+def test_auth_token():
+    """Generate a test authentication token for E2E tests."""
+    import jwt
+    import time
+    
+    payload = {
+        "user_id": "test_user_123",
+        "email": "test@example.com",
+        "exp": int(time.time()) + 3600,  # 1 hour expiry
+        "iat": int(time.time())
+    }
+    
+    # Use a test secret key
+    secret_key = "test_secret_key_for_e2e_testing"
+    token = jwt.encode(payload, secret_key, algorithm="HS256")
+    
+    return token
+
+# =============================================================================
 # WEBSOCKET MANAGER TESTING FIXTURES
 # Consolidated from netra_backend/tests/ws_manager/conftest.py
 # =============================================================================
-
 
 class MockWebSocket:
 
@@ -1100,31 +1095,29 @@ class MockWebSocket:
 
         self.close_calls = []
     
-
     async def mock_send_json(self, data):
 
         self.send_calls.append(data)
     
-
     async def mock_close(self, code=1000, reason=""):
 
         self.close_calls.append({"code": code, "reason": reason})
 
         self.client_state = WebSocketState.DISCONNECTED
 
-
 @pytest.fixture
 
 def fresh_manager():
 
     """Create a fresh WebSocketManager instance for each test"""
+    from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+    
     # Reset singleton
 
     WebSocketManager._instance = None
 
     WebSocketManager._initialized = False
     
-
     manager = WebSocketManager()
 
     yield manager
@@ -1133,7 +1126,6 @@ def fresh_manager():
 
     WebSocketManager._instance = None
 
-
 @pytest.fixture
 
 def mock_websocket():
@@ -1141,7 +1133,6 @@ def mock_websocket():
     """Create a mock WebSocket"""
 
     return MockWebSocket()
-
 
 @pytest.fixture
 
@@ -1155,7 +1146,6 @@ def connected_websocket():
     ws.client_state = WebSocketState.CONNECTED
 
     return ws
-
 
 @pytest.fixture
 

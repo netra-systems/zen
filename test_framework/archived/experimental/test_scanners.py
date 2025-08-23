@@ -73,7 +73,7 @@ class TestScanners:
     
     def _scan_backend_test_directories(self, test_dirs: List[Path], discovered: defaultdict):
         """Scan backend test directories for Python test files"""
-        from .test_categories import TestCategories
+        from test_framework.archived.experimental.test_categories import TestCategories
         categories = TestCategories()
         
         for test_dir in test_dirs:

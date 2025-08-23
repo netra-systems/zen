@@ -2,21 +2,10 @@
 Tests for WebSocketManager messaging functionality
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -26,12 +15,8 @@ from unittest.mock import AsyncMock, call, patch
 import pytest
 from starlette.websockets import WebSocketState
 
-# Add project root to path
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-from .test_base import MockWebSocket, WebSocketTestBase
-
-# Add project root to path
-
+from netra_backend.tests.test_base import MockWebSocket, WebSocketTestBase
 
 class TestMessageSending(WebSocketTestBase):
 
@@ -45,12 +30,10 @@ class TestMessageSending(WebSocketTestBase):
 
         await fresh_manager.connect(connected_websocket, connection_id)
         
-
         message = {"type": "test", "data": "hello"}
 
         await fresh_manager.send_message(connection_id, message)
         
-
         connected_websocket.send_json.assert_called_once_with(message)
 
     async def test_send_message_to_disconnected(self, fresh_manager, disconnected_websocket):
@@ -61,7 +44,6 @@ class TestMessageSending(WebSocketTestBase):
 
         await fresh_manager.connect(disconnected_websocket, connection_id)
         
-
         message = {"type": "test", "data": "hello"}
 
         await fresh_manager.send_message(connection_id, message)
@@ -88,7 +70,6 @@ class TestMessageSending(WebSocketTestBase):
 
         connected_websocket.send_json.side_effect = Exception("Send failed")
         
-
         await fresh_manager.connect(connected_websocket, connection_id)
         
         # Should not raise
@@ -107,7 +88,6 @@ class TestMessageSending(WebSocketTestBase):
 
         await fresh_manager.connect(connected_websocket, connection_id)
         
-
         complex_message = {
 
             "type": "complex",
@@ -124,11 +104,9 @@ class TestMessageSending(WebSocketTestBase):
 
         }
         
-
         await fresh_manager.send_message(connection_id, complex_message)
 
         connected_websocket.send_json.assert_called_once_with(complex_message)
-
 
 class TestConnectionSending(WebSocketTestBase):
 
@@ -142,10 +120,8 @@ class TestConnectionSending(WebSocketTestBase):
 
         await fresh_manager.connect(connected_websocket, connection_id)
         
-
         await fresh_manager.send_to_connection(connection_id, "test", {"key": "value"})
         
-
         expected_message = {
 
             "type": "test",
@@ -156,7 +132,6 @@ class TestConnectionSending(WebSocketTestBase):
 
         }
         
-
         actual_call = connected_websocket.send_json.call_args[0][0]
 
         assert actual_call["type"] == expected_message["type"]
@@ -173,12 +148,10 @@ class TestConnectionSending(WebSocketTestBase):
 
         connection_id = "user-conn-1"
         
-
         await fresh_manager.connect(connected_websocket, connection_id, user_id=user_id)
 
         await fresh_manager.send_to_user(user_id, "user_message", {"msg": "hello"})
         
-
         assert connected_websocket.send_json.called
 
         message = connected_websocket.send_json.call_args[0][0]
@@ -193,21 +166,18 @@ class TestConnectionSending(WebSocketTestBase):
 
         user_id = "multi-user"
         
-
         ws1 = MockWebSocket()
 
         ws2 = MockWebSocket()
 
         ws3 = MockWebSocket()  # Different user
         
-
         await fresh_manager.connect(ws1, "conn-1", user_id=user_id)
 
         await fresh_manager.connect(ws2, "conn-2", user_id=user_id)
 
         await fresh_manager.connect(ws3, "conn-3", user_id="other-user")
         
-
         await fresh_manager.send_to_user(user_id, "broadcast", {"data": "test"})
         
         # Should send to both connections of the user
@@ -234,15 +204,12 @@ class TestConnectionSending(WebSocketTestBase):
 
         ws_user = MockWebSocket()
         
-
         await fresh_manager.connect(ws_admin, "admin-1", role="admin")
 
         await fresh_manager.connect(ws_user, "user-1", role="user")
         
-
         await fresh_manager.send_to_role("admin", "admin_only", {"restricted": True})
         
-
         assert ws_admin.send_json.called
 
         assert not ws_user.send_json.called
@@ -257,17 +224,14 @@ class TestConnectionSending(WebSocketTestBase):
 
         ws3 = MockWebSocket()
         
-
         await fresh_manager.connect(ws1, "mod-1", role="moderator")
 
         await fresh_manager.connect(ws2, "mod-2", role="moderator")
 
         await fresh_manager.connect(ws3, "user-1", role="user")
         
-
         await fresh_manager.send_to_role("moderator", "mod_message", {"info": "test"})
         
-
         assert ws1.send_json.called
 
         assert ws2.send_json.called
@@ -281,7 +245,6 @@ class TestConnectionSending(WebSocketTestBase):
 
         await fresh_manager.send_to_role("nonexistent-role", "test", {})
 
-
 class TestSpecializedMessages(WebSocketTestBase):
 
     """Test specialized message types"""
@@ -294,10 +257,8 @@ class TestSpecializedMessages(WebSocketTestBase):
 
         await fresh_manager.connect(connected_websocket, connection_id)
         
-
         await fresh_manager.send_error(connection_id, "Something went wrong", "ERROR_CODE")
         
-
         message = self.assert_message_sent(connected_websocket, "error")
 
         assert message["error"] == "Something went wrong"
@@ -312,10 +273,8 @@ class TestSpecializedMessages(WebSocketTestBase):
 
         await fresh_manager.connect(connected_websocket, connection_id)
         
-
         await fresh_manager.send_success(connection_id, "Operation completed", {"result": "data"})
         
-
         message = self.assert_message_sent(connected_websocket, "success")
 
         assert message["message"] == "Operation completed"
@@ -330,7 +289,6 @@ class TestSpecializedMessages(WebSocketTestBase):
 
         await fresh_manager.connect(connected_websocket, connection_id)
         
-
         await fresh_manager.send_notification(
 
             connection_id,
@@ -343,7 +301,6 @@ class TestSpecializedMessages(WebSocketTestBase):
 
         )
         
-
         message = self.assert_message_sent(connected_websocket, "notification")
 
         assert message["title"] == "New message"
@@ -360,7 +317,6 @@ class TestSpecializedMessages(WebSocketTestBase):
 
         await fresh_manager.connect(connected_websocket, connection_id)
         
-
         await fresh_manager.send_status_update(
 
             connection_id,
@@ -371,13 +327,11 @@ class TestSpecializedMessages(WebSocketTestBase):
 
         )
         
-
         message = self.assert_message_sent(connected_websocket, "status_update")
 
         assert message["status"] == "processing"
 
         assert message["details"] == {"progress": 50}
-
 
 class TestBroadcasting(WebSocketTestBase):
 
@@ -393,14 +347,12 @@ class TestBroadcasting(WebSocketTestBase):
 
         ws3 = MockWebSocket()
         
-
         await fresh_manager.connect(ws1, "conn-1")
 
         await fresh_manager.connect(ws2, "conn-2")
 
         await fresh_manager.connect(ws3, "conn-3")
         
-
         await fresh_manager.broadcast({"type": "announcement", "data": "Hello all"})
         
         # All should receive the message
@@ -425,14 +377,12 @@ class TestBroadcasting(WebSocketTestBase):
 
         ws3 = MockWebSocket()
         
-
         await fresh_manager.connect(ws1, "conn-1")
 
         await fresh_manager.connect(ws2, "conn-2")
 
         await fresh_manager.connect(ws3, "conn-3")
         
-
         await fresh_manager.broadcast(
 
             {"type": "update", "data": "test"},
@@ -441,7 +391,6 @@ class TestBroadcasting(WebSocketTestBase):
 
         )
         
-
         assert ws1.send_json.called
 
         assert not ws2.send_json.called  # Excluded
@@ -469,14 +418,12 @@ class TestBroadcasting(WebSocketTestBase):
 
         ws2.send_json.side_effect = Exception("Send failed")
         
-
         await fresh_manager.connect(ws1, "conn-1")
 
         await fresh_manager.connect(ws2, "conn-2")
 
         await fresh_manager.connect(ws3, "conn-3")
         
-
         await fresh_manager.broadcast({"type": "test", "data": "broadcast"})
         
         # ws1 and ws3 should still receive the message

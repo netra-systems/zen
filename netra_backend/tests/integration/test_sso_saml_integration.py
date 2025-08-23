@@ -24,17 +24,10 @@ Architecture Requirements:
 - Comprehensive error handling
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import base64
@@ -44,25 +37,22 @@ from datetime import datetime, timezone
 from typing import Any, Dict
 
 import pytest
-from app.auth_integration.auth import get_current_user
-from clients.auth_client_core import AuthServiceClient
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.core.auth_constants import AuthConstants, JWTConstants
 
-# Add project root to path
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.schemas.registry import WebSocketMessage
-from .sso_saml_components import (
+from netra_backend.tests.integration.sso_saml_components import (
     EnterpriseSessionManager,
     EnterpriseTokenManager,
     MockIdPErrorGenerator,
-    # Add project root to path
     SAMLAssertionValidator,
 )
-
 
 # Test Fixtures
 @pytest.fixture
@@ -70,18 +60,15 @@ async def saml_validator():
     """SAML assertion validator fixture"""
     return SAMLAssertionValidator()
 
-
 @pytest.fixture
 async def token_manager():
     """Enterprise token manager fixture"""
     return EnterpriseTokenManager()
 
-
 @pytest.fixture
 async def session_manager():
     """Enterprise session manager fixture"""
     return EnterpriseSessionManager()
-
 
 @pytest.fixture
 async def valid_saml_assertion():
@@ -99,19 +86,16 @@ async def valid_saml_assertion():
     }
     return base64.b64encode(json.dumps(assertion_data).encode()).decode()
 
-
 @pytest.fixture
 async def enterprise_tenant_id():
     """Enterprise tenant ID fixture"""
     return "enterprise_tenant_12345"
-
 
 @pytest.fixture
 async def db_session():
     """Database session fixture"""
     async with get_db_session() as session:
         yield session
-
 
 # Core Integration Tests
 @pytest.mark.asyncio

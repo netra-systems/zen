@@ -113,6 +113,20 @@ class Thread(BaseModel):
     )
 
 
+class Optimization(BaseModel):
+    """Unified Optimization model - single source of truth."""
+    id: str
+    name: str
+    config: Dict[str, Any] = Field(default_factory=dict)
+    version: int = 1
+    parent_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+
 @dataclass
 class CircuitBreakerConfig:
     """Unified configuration for circuit breaker behavior - consolidates all variants."""
@@ -136,10 +150,16 @@ class CircuitBreakerConfig:
 @dataclass
 class HealthCheckResult:
     """Result of a health check operation."""
-    status: str  # Using string to avoid enum dependency
-    response_time: float
+    component_name: str
+    success: bool
+    health_score: float
+    response_time_ms: float
+    status: Optional[str] = None  # Using string to avoid enum dependency
+    response_time: Optional[float] = None  # Legacy field for compatibility
+    error_message: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
     details: Dict[str, Any] = field(default_factory=dict)
-    timestamp: datetime = field(default_factory=datetime.now)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 @dataclass

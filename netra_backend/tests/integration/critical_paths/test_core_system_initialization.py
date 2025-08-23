@@ -10,21 +10,10 @@ Critical Path: Service discovery -> Health checks -> Database readiness -> Agent
 Coverage: Microservice startup orchestration, dependency resolution, graceful degradation
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -37,29 +26,19 @@ import aiohttp
 import pytest
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.core.config import Settings
-from netra_backend.app.services.database.connection_manager import (
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
-    DatabaseConnectionManager,
-
-)
-
-# Add project root to path
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-
-
 logger = logging.getLogger(__name__)
-
 
 class SystemInitializationManager:
 
     """Manages system initialization testing with real component validation."""
     
-
     def __init__(self):
 
         self.services = {}
@@ -68,7 +47,6 @@ class SystemInitializationManager:
 
         self.startup_times = {}
         
-
     async def start_service(self, service_name: str, service_class, **kwargs) -> bool:
 
         """Start a service and track initialization time."""
@@ -109,7 +87,6 @@ class SystemInitializationManager:
 
                     await service.initialize()
                     
-
             self.services[service_name] = service
 
             self.startup_times[service_name] = time.time() - start_time
@@ -126,7 +103,6 @@ class SystemInitializationManager:
 
             return False
     
-
     async def check_service_health(self, service_name: str) -> Dict:
 
         """Check individual service health status."""
@@ -135,7 +111,6 @@ class SystemInitializationManager:
 
             return {"status": "not_started", "details": "Service not initialized"}
             
-
         service = self.services[service_name]
 
         try:
@@ -160,7 +135,6 @@ class SystemInitializationManager:
 
             return {"status": "unhealthy", "details": str(e)}
     
-
     async def get_system_health(self) -> Dict:
 
         """Get comprehensive system health status."""
@@ -171,7 +145,6 @@ class SystemInitializationManager:
 
             health_results[service_name] = await self.check_service_health(service_name)
         
-
         overall_healthy = all(
 
             result["status"] == "healthy" 
@@ -180,7 +153,6 @@ class SystemInitializationManager:
 
         )
         
-
         return {
 
             "overall_status": "healthy" if overall_healthy else "degraded",
@@ -192,7 +164,6 @@ class SystemInitializationManager:
             "timestamp": time.time()
 
         }
-
 
 @pytest.fixture
 
@@ -218,7 +189,6 @@ async def system_manager():
 
                 pass
 
-
 @pytest.mark.asyncio
 
 async def test_microservice_startup_orchestration(system_manager):
@@ -238,7 +208,6 @@ async def test_microservice_startup_orchestration(system_manager):
 
     ]
     
-
     startup_results = []
     
     # Start services in dependency order
@@ -272,7 +241,6 @@ async def test_microservice_startup_orchestration(system_manager):
     system_health = await system_manager.get_system_health()
 
     assert system_health["overall_status"] == "healthy"
-
 
 @pytest.mark.asyncio
 
@@ -309,7 +277,6 @@ async def test_dependency_resolution_chain(system_manager):
     assert system_health["overall_status"] == "degraded"
 
     assert system_health["services"]["database"]["status"] == "unhealthy"
-
 
 @pytest.mark.asyncio
 
@@ -356,7 +323,6 @@ async def test_health_check_endpoints_integration(system_manager):
 
         assert health_status["startup_times"][service_name] > 0
 
-
 @pytest.mark.asyncio 
 
 async def test_graceful_shutdown_sequence(system_manager):
@@ -376,7 +342,6 @@ async def test_graceful_shutdown_sequence(system_manager):
 
     ]
     
-
     for service_name, service_class in startup_sequence:
 
         await system_manager.start_service(service_name, service_class)
@@ -391,7 +356,6 @@ async def test_graceful_shutdown_sequence(system_manager):
 
     shutdown_sequence = list(reversed(startup_sequence))
     
-
     for service_name, _ in shutdown_sequence:
 
         service = system_manager.services[service_name]
@@ -416,7 +380,6 @@ async def test_graceful_shutdown_sequence(system_manager):
 
     assert len(system_manager.services) == 0
 
-
 @pytest.mark.asyncio
 
 async def test_startup_performance_benchmarks(system_manager):
@@ -435,7 +398,6 @@ async def test_startup_performance_benchmarks(system_manager):
 
     ]
     
-
     total_start_time = time.time()
     
     # Start all services
@@ -444,7 +406,6 @@ async def test_startup_performance_benchmarks(system_manager):
 
         await system_manager.start_service(service_name, service_class)
     
-
     total_startup_time = time.time() - total_start_time
     
     # Verify overall startup time < 15 seconds
@@ -465,7 +426,6 @@ async def test_startup_performance_benchmarks(system_manager):
 
     }
     
-
     for service_name, max_time in performance_requirements.items():
 
         actual_time = system_manager.startup_times[service_name]

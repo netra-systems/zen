@@ -13,7 +13,7 @@ import time
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from .dev_launcher_config import setup_environment_variables, setup_frontend_environment
+from scripts.dev_launcher_config import setup_environment_variables, setup_frontend_environment
 
 
 class LogStreamer(threading.Thread):

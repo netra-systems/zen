@@ -8,7 +8,6 @@ from typing import Dict, List
 
 from pydantic import BaseModel, Field
 
-
 class LatencyMetrics(BaseModel):
     """Latency measurement metrics."""
     p50_ms: float = Field(default=0.0, description="50th percentile latency")
@@ -18,14 +17,12 @@ class LatencyMetrics(BaseModel):
     max_ms: float = Field(default=0.0, description="Maximum latency")
     min_ms: float = Field(default=0.0, description="Minimum latency")
 
-
 class ThroughputMetrics(BaseModel):
     """Throughput measurement metrics."""
     requests_per_second: float = Field(default=0.0, description="Requests per second")
     tokens_per_second: float = Field(default=0.0, description="Tokens processed per second")
     operations_per_minute: float = Field(default=0.0, description="Operations per minute")
     peak_throughput: float = Field(default=0.0, description="Peak throughput achieved")
-
 
 class ResourceMetrics(BaseModel):
     """Resource usage metrics."""
@@ -36,7 +33,6 @@ class ResourceMetrics(BaseModel):
     io_operations_per_second: float = Field(default=0.0, description="I/O operations per second")
     network_bytes_per_second: float = Field(default=0.0, description="Network bytes per second")
 
-
 class PerformanceThresholds(BaseModel):
     """Performance threshold configuration."""
     max_latency_p99_ms: float = Field(default=2000.0, description="Max P99 latency threshold")
@@ -44,7 +40,6 @@ class PerformanceThresholds(BaseModel):
     max_cpu_percent: float = Field(default=80.0, description="Max CPU usage threshold")
     max_memory_mb: float = Field(default=1024.0, description="Max memory usage threshold")
     max_error_rate_percent: float = Field(default=0.1, description="Max error rate threshold")
-
 
 class PerformanceRegression(BaseModel):
     """Performance regression detection result."""
@@ -54,14 +49,12 @@ class PerformanceRegression(BaseModel):
     resource_regression_percent: float = Field(default=0.0)
     regression_details: List[str] = Field(default_factory=list)
 
-
 class BenchmarkComparison(BaseModel):
     """Benchmark comparison result."""
     baseline_met: bool = Field(default=False)
     performance_improvement_percent: float = Field(default=0.0)
     benchmark_details: Dict[str, float] = Field(default_factory=dict)
     comparison_summary: List[str] = Field(default_factory=list)
-
 
 class PerformanceValidationResult(BaseModel):
     """Comprehensive performance validation result."""

@@ -36,7 +36,7 @@ from auth_service.auth_core.models.auth_models import AuthProvider
 # Add auth service to path
 auth_service_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(auth_service_dir))
-from main import app
+from auth_service.main import app
 
 # Test client
 client = TestClient(app)
@@ -134,7 +134,8 @@ class TestGoogleOAuthFlow:
         
         # Test callback with Google auth code
         response = client.get(
-            f"/auth/callback?code={oauth_code}&state={oauth_state}"
+            f"/auth/callback?code={oauth_code}&state={oauth_state}",
+            follow_redirects=False
         )
         
         # Should successfully complete OAuth flow
@@ -200,7 +201,8 @@ class TestGoogleOAuthFlow:
                 mock_async_client.get.return_value = user_response
             
             response = client.get(
-                f"/auth/callback?code={oauth_code}&state={oauth_state}"
+                f"/auth/callback?code={oauth_code}&state={oauth_state}",
+                follow_redirects=False
             )
             
             # Validate response based on token validity
@@ -265,7 +267,8 @@ class TestGoogleOAuthFlow:
             mock_async_client.get.return_value = user_response
             
             response = client.get(
-                f"/auth/callback?code={oauth_code}&state={oauth_state}"
+                f"/auth/callback?code={oauth_code}&state={oauth_state}",
+                follow_redirects=False
             )
             
             # Should handle various profile formats
@@ -345,20 +348,22 @@ class TestGoogleOAuthFlow:
         
         # Test valid state
         response = client.get(
-            f"/auth/callback?code={oauth_code}&state={valid_state}"
+            f"/auth/callback?code={oauth_code}&state={valid_state}",
+            follow_redirects=False
         )
         assert response.status_code in [200, 302, 500]
         
         # Test invalid state (should be rejected for security)
         response = client.get(
-            f"/auth/callback?code={oauth_code}&state=invalid_state"
+            f"/auth/callback?code={oauth_code}&state=invalid_state",
+            follow_redirects=False
         )
         # Current implementation might not validate state
         # This test documents the security requirement
         assert response.status_code in [200, 302, 401, 400, 500]
         
         # Test missing state
-        response = client.get(f"/auth/callback?code={oauth_code}")
+        response = client.get(f"/auth/callback?code={oauth_code}", follow_redirects=False)
         assert response.status_code in [200, 302, 400, 422, 500]
     
     def test_google_oauth_provider_enum(self):
@@ -410,7 +415,8 @@ class TestGoogleOAuthFlow:
         # Test concurrent OAuth callbacks
         def make_oauth_request():
             response = client.get(
-                f"/auth/callback?code={oauth_code}&state={oauth_state}"
+                f"/auth/callback?code={oauth_code}&state={oauth_state}",
+                follow_redirects=False
             )
             return response.status_code
         

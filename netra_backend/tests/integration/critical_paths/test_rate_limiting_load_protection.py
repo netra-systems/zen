@@ -13,17 +13,10 @@ Load spike simulation -> Fair resource allocation -> System recovery validation
 Coverage: API rate limiting, per-user quotas, burst protection, graceful degradation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import statistics
@@ -36,14 +29,10 @@ from typing import Any, Dict, List, Optional, Tuple
 import aiohttp
 import pytest
 
-# Add project root to path
-from .l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     CriticalPathMetrics,
     L4StagingCriticalPathTestBase,
 )
-
-# Add project root to path
-
 
 @dataclass
 class LoadTestScenario:
@@ -54,7 +43,6 @@ class LoadTestScenario:
     request_interval_seconds: float
     expected_success_rate: float
     tier: str
-
 
 @dataclass
 class RateLimitTestResult:
@@ -67,7 +55,6 @@ class RateLimitTestResult:
     average_response_time: float
     max_response_time: float
     rate_limit_enforced: bool
-
 
 class RateLimitingLoadL4Test(L4StagingCriticalPathTestBase):
     """L4 test for rate limiting under load in staging environment."""
@@ -762,7 +749,6 @@ class RateLimitingLoadL4Test(L4StagingCriticalPathTestBase):
         self.load_test_results.clear()
         self.baseline_metrics.clear()
 
-
 # Pytest fixtures and test functions
 @pytest.fixture
 async def rate_limiting_load_test():
@@ -771,7 +757,6 @@ async def rate_limiting_load_test():
     await test.initialize_l4_environment()
     yield test
     await test.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -798,7 +783,6 @@ async def test_rate_limiting_under_load_l4(rate_limiting_load_test):
     print(f"  Service Calls: {metrics.service_calls}")
     print(f"  Load Test Results: {len(rate_limiting_load_test.load_test_results)}")
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 async def test_tier_based_rate_limiting_l4(rate_limiting_load_test):
@@ -820,7 +804,6 @@ async def test_tier_based_rate_limiting_l4(rate_limiting_load_test):
         free_success = tier_averages["free"]["avg_success_rate"]
         
         assert enterprise_success > free_success, f"Enterprise tier ({enterprise_success:.2f}) should outperform free tier ({free_success:.2f})"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging

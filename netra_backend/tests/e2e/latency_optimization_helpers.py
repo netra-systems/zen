@@ -31,7 +31,6 @@ def create_latency_optimization_setup(real_llm_manager, real_websocket_manager, 
     )
     from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
-
     agents = {
 
         'triage': TriageSubAgent(real_llm_manager, real_tool_dispatcher),
@@ -48,7 +47,6 @@ def create_latency_optimization_setup(real_llm_manager, real_websocket_manager, 
 
     return build_latency_setup(agents, real_llm_manager, real_websocket_manager)
 
-
 def build_latency_setup(agents: Dict, llm: LLMManager, ws: WebSocketManager) -> Dict:
 
     """Build complete setup dictionary."""
@@ -60,7 +58,6 @@ def build_latency_setup(agents: Dict, llm: LLMManager, ws: WebSocketManager) -> 
         'run_id': str(uuid.uuid4()), 'user_id': 'latency-test-user'
 
     }
-
 
 def create_3x_latency_state() -> DeepAgentState:
 
@@ -74,7 +71,6 @@ def create_3x_latency_state() -> DeepAgentState:
 
     )
 
-
 def create_bottleneck_analysis_state() -> DeepAgentState:
 
     """Create state for bottleneck analysis test."""
@@ -86,7 +82,6 @@ def create_bottleneck_analysis_state() -> DeepAgentState:
         metadata={'test_type': 'bottleneck_analysis', 'focus': 'identification'}
 
     )
-
 
 def create_caching_optimization_state() -> DeepAgentState:
 
@@ -100,7 +95,6 @@ def create_caching_optimization_state() -> DeepAgentState:
 
     )
 
-
 def create_parallel_processing_state() -> DeepAgentState:
 
     """Create state for parallel processing optimization test."""
@@ -112,7 +106,6 @@ def create_parallel_processing_state() -> DeepAgentState:
         metadata={'test_type': 'parallel_optimization', 'focus': 'parallelization'}
 
     )
-
 
 def create_impossible_latency_state() -> DeepAgentState:
 
@@ -126,7 +119,6 @@ def create_impossible_latency_state() -> DeepAgentState:
 
     )
 
-
 def create_already_optimized_state() -> DeepAgentState:
 
     """Create state for already optimized system test."""
@@ -139,7 +131,6 @@ def create_already_optimized_state() -> DeepAgentState:
 
     )
 
-
 async def execute_latency_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
 
     """Execute complete latency optimization workflow with all 5 agents."""
@@ -148,16 +139,13 @@ async def execute_latency_workflow(setup: Dict, state: DeepAgentState) -> List[D
 
     workflow_steps = ['triage', 'data', 'optimization', 'actions', 'reporting']
     
-
     for step_name in workflow_steps:
 
         step_result = await execute_timed_step(setup, step_name, state)
 
         results.append(step_result)
     
-
     return results
-
 
 async def execute_timed_step(setup: Dict, step_name: str, state: DeepAgentState) -> Dict:
 
@@ -166,12 +154,9 @@ async def execute_timed_step(setup: Dict, step_name: str, state: DeepAgentState)
 
     fix_websocket_interface(setup['websocket'])
     
-
     timing_data = await execute_step_with_detailed_timing(setup, step_name, state)
     
-
     return create_enhanced_timed_result(step_name, timing_data, state)
-
 
 async def execute_step_with_detailed_timing(setup: Dict, step_name: str, state: DeepAgentState) -> Dict:
 
@@ -181,22 +166,18 @@ async def execute_step_with_detailed_timing(setup: Dict, step_name: str, state: 
 
     setup_start = time.perf_counter()
     
-
     agent = setup_agent_for_execution(setup, step_name)
 
     setup_time = time.perf_counter() - setup_start
     
-
     execution_start = time.perf_counter()
 
     execution_result = await agent.run(state, setup['run_id'], True)
 
     execution_time = time.perf_counter() - execution_start
     
-
     total_time = time.perf_counter() - start_time
     
-
     return {
 
         'agent': agent, 'execution_result': execution_result,
@@ -204,7 +185,6 @@ async def execute_step_with_detailed_timing(setup: Dict, step_name: str, state: 
         'setup_time': setup_time, 'execution_time': execution_time, 'total_time': total_time
 
     }
-
 
 def fix_websocket_interface(websocket_manager):
 
@@ -218,7 +198,6 @@ def fix_websocket_interface(websocket_manager):
 
         websocket_manager.send_message = websocket_manager.send_to_thread
 
-
 def setup_agent_for_execution(setup: Dict, step_name: str):
 
     """Setup agent for execution with required properties."""
@@ -230,7 +209,6 @@ def setup_agent_for_execution(setup: Dict, step_name: str):
     agent.user_id = setup['user_id']
 
     return agent
-
 
 def create_timed_result(step_name: str, agent, state: DeepAgentState, 
 
@@ -246,7 +224,6 @@ def create_timed_result(step_name: str, agent, state: DeepAgentState,
 
     }
 
-
 def create_enhanced_timed_result(step_name: str, timing_data: Dict, state: DeepAgentState) -> Dict:
 
     """Create enhanced timed result with detailed performance metrics."""
@@ -255,7 +232,6 @@ def create_enhanced_timed_result(step_name: str, timing_data: Dict, state: DeepA
 
     performance_metrics = calculate_performance_metrics(timing_data)
     
-
     return {
 
         'step': step_name, 'agent_state': agent.state, 'workflow_state': state,
@@ -268,7 +244,6 @@ def create_enhanced_timed_result(step_name: str, timing_data: Dict, state: DeepA
 
     }
 
-
 def calculate_performance_metrics(timing_data: Dict) -> Dict:
 
     """Calculate performance metrics from timing data."""
@@ -277,7 +252,6 @@ def calculate_performance_metrics(timing_data: Dict) -> Dict:
 
     execution_efficiency = timing_data['execution_time'] / timing_data['total_time'] * 100
     
-
     return {
 
         'setup_overhead_percent': setup_overhead, 'execution_efficiency_percent': execution_efficiency,
@@ -288,7 +262,6 @@ def calculate_performance_metrics(timing_data: Dict) -> Dict:
 
 # Validation Helper Functions
 
-
 async def validate_3x_latency_results(results: List[Dict], state: DeepAgentState):
 
     """Validate 3x latency reduction results."""
@@ -298,7 +271,6 @@ async def validate_3x_latency_results(results: List[Dict], state: DeepAgentState
     await validate_latency_requirement_parsing(results[0], state)
 
     await validate_current_performance_analysis(results[1], state)
-
 
 async def validate_latency_requirement_parsing(result: Dict, state: DeepAgentState):
 
@@ -312,7 +284,6 @@ async def validate_latency_requirement_parsing(result: Dict, state: DeepAgentSta
 
     assert result['execution_time'] < 30.0  # Reasonable execution time
 
-
 async def validate_current_performance_analysis(result: Dict, state: DeepAgentState):
 
     """Validate current performance analysis."""
@@ -322,7 +293,6 @@ async def validate_current_performance_analysis(result: Dict, state: DeepAgentSt
     assert result['state_updated']
 
     assert result['execution_time'] < 60.0  # Data analysis should be reasonable
-
 
 async def validate_optimization_strategy_development(result: Dict, state: DeepAgentState):
 
@@ -334,7 +304,6 @@ async def validate_optimization_strategy_development(result: Dict, state: DeepAg
 
     assert result['execution_time'] < 90.0  # Complex analysis time limit
 
-
 def validate_bottleneck_identification(results: List[Dict], state: DeepAgentState):
 
     """Validate bottleneck identification results."""
@@ -345,7 +314,6 @@ def validate_bottleneck_identification(results: List[Dict], state: DeepAgentStat
 
     validate_data_analysis_measures_performance(results[1])
 
-
 def validate_triage_identifies_bottlenecks(result: Dict):
 
     """Validate triage identifies bottleneck focus."""
@@ -353,7 +321,6 @@ def validate_triage_identifies_bottlenecks(result: Dict):
     assert result['agent_state'] == SubAgentLifecycle.COMPLETED
 
     assert 'bottleneck' in result['workflow_state'].user_request.lower()
-
 
 def validate_data_analysis_measures_performance(result: Dict):
 
@@ -363,7 +330,6 @@ def validate_data_analysis_measures_performance(result: Dict):
 
     assert result['state_updated']
 
-
 def validate_optimization_targets_bottlenecks(result: Dict):
 
     """Validate optimization targets identified bottlenecks."""
@@ -371,7 +337,6 @@ def validate_optimization_targets_bottlenecks(result: Dict):
     assert result['agent_state'] == SubAgentLifecycle.COMPLETED
 
     assert result['state_updated'] or result['execution_result'] is not None
-
 
 def validate_caching_strategy_results(results: List[Dict]):
 
@@ -381,7 +346,6 @@ def validate_caching_strategy_results(results: List[Dict]):
 
     assert all(r['agent_state'] == SubAgentLifecycle.COMPLETED for r in results[:3])
 
-
 def validate_parallel_processing_results(results: List[Dict]):
 
     """Validate parallel processing optimization results."""
@@ -389,7 +353,6 @@ def validate_parallel_processing_results(results: List[Dict]):
     assert len(results) == 5, "All 5 workflow steps must execute"
 
     assert all(r['agent_state'] == SubAgentLifecycle.COMPLETED for r in results[:3])
-
 
 def validate_execution_time_bounds(results: List[Dict], total_time: float):
 
@@ -403,7 +366,6 @@ def validate_execution_time_bounds(results: List[Dict], total_time: float):
 
     validate_performance_metrics_presence(results)
 
-
 def validate_timing_consistency(results: List[Dict]):
 
     """Validate timing consistency across steps."""
@@ -415,7 +377,6 @@ def validate_timing_consistency(results: List[Dict]):
     assert all(t >= 0 for t in execution_times), "All execution times should be non-negative"
 
     validate_timing_precision(results)
-
 
 def validate_performance_metrics_presence(results: List[Dict]):
 
@@ -430,7 +391,6 @@ def validate_performance_metrics_presence(results: List[Dict]):
             assert 'setup_overhead_percent' in metrics
 
             assert 'execution_efficiency_percent' in metrics
-
 
 def validate_timing_precision(results: List[Dict]):
 
@@ -450,7 +410,6 @@ def validate_timing_precision(results: List[Dict]):
 
         print(f"Performance Good: {len(fast_steps)} fast steps detected")
 
-
 def validate_impossible_target_handling(results: List[Dict]):
 
     """Validate handling of impossible latency targets."""
@@ -460,7 +419,6 @@ def validate_impossible_target_handling(results: List[Dict]):
     triage_result = results[0]
 
     assert triage_result['agent_state'] in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED]
-
 
 def validate_optimized_system_handling(results: List[Dict]):
 
@@ -472,7 +430,6 @@ def validate_optimized_system_handling(results: List[Dict]):
 
                for r in results)
 
-
 def validate_agent_data_flow(results: List[Dict], state: DeepAgentState):
 
     """Validate proper data flow between agents."""
@@ -482,7 +439,6 @@ def validate_agent_data_flow(results: List[Dict], state: DeepAgentState):
     assert state.user_request is not None
 
     assert hasattr(state, 'metadata')
-
 
 def validate_state_consistency(results: List[Dict], original_state: DeepAgentState):
 

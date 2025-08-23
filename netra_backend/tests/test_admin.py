@@ -1,27 +1,20 @@
-# Add project root to path
 import sys
 from pathlib import Path
 
-from ..test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
-
-import datetime
+from datetime import datetime
+from datetime import timezone
 import uuid
 from unittest.mock import MagicMock, patch
 
 import pytest
-from auth_integration.auth import ActiveUserWsDep
+from netra_backend.app.auth_integration.auth import ActiveUserWsDep
 from fastapi.testclient import TestClient
-from main import app
+from netra_backend.app.main import app
 from netra_backend.app.schemas import User
 
 from netra_backend.app.config import get_config
-
 
 @pytest.fixture(scope="function", autouse=True)
 def settings_override():
@@ -42,6 +35,8 @@ def superuser_client():
         full_name="Super User",
         is_active=True,
         is_superuser=True,
+        role="admin",
+        created_at=datetime.now(timezone.utc),
     )
     app.dependency_overrides[ActiveUserWsDep] = lambda: mock_user
     with TestClient(app) as client:

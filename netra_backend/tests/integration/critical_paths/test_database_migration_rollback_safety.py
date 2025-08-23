@@ -11,17 +11,10 @@ L3 Test: Uses real PostgreSQL and ClickHouse containers to validate migration ro
 safety, data preservation, and recovery mechanisms under various failure scenarios.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import shutil
@@ -42,7 +35,6 @@ from testcontainers.postgres import PostgresContainer
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-
 
 class MigrationRollbackSafetyManager:
     """Manages migration rollback safety testing with real containers."""
@@ -553,7 +545,6 @@ class MigrationRollbackSafetyManager:
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
-
 @pytest.fixture
 async def migration_manager():
     """Create migration rollback safety manager for testing."""
@@ -561,7 +552,6 @@ async def migration_manager():
     await manager.setup_database_containers()
     yield manager
     await manager.cleanup()
-
 
 @pytest.mark.L3
 @pytest.mark.integration
@@ -672,7 +662,6 @@ class TestDatabaseMigrationRollbackSafetyL3:
         # Rollback should succeed despite concurrent operations
         assert rollback_result["rollback_successful"] is True
         assert rollback_result["data_restored"] is True
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s", "--tb=short"])

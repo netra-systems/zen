@@ -168,7 +168,7 @@ class RedisTestClient:
         if self.connection_pool:
             await self.connection_pool.disconnect()
             
-    async def flush_test_data(self):
+    async def test_flush_test_data(self):
         """Flush all test data from Redis."""
         if self.client:
             await self.client.flushdb()
@@ -202,7 +202,7 @@ class CacheContentionTestSuite:
         
         logger.info(f"Test environment setup complete. {len(self.test_keys)} keys prepared.")
         
-    async def teardown_test_environment(self):
+    async def test_teardown_test_environment(self):
         """Cleanup test environment."""
         try:
             # Clean up test keys

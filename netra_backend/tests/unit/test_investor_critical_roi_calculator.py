@@ -5,17 +5,10 @@ Each successful investor demo converts to $10K-100K ARR.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import time
 from datetime import datetime, timedelta, timezone
@@ -26,16 +19,13 @@ import pytest
 
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
-# Add project root to path
 from netra_backend.app.services.cost_calculator import (
-    # Add project root to path
     CostCalculatorService,
     CostTier,
     ModelCostInfo,
     calculate_cost_savings,
     create_cost_calculator,
 )
-
 
 class ROICalculatorService:
     """Service for calculating investor-critical ROI metrics"""
@@ -139,7 +129,6 @@ class ROICalculatorService:
                 "current_provider": LLMProvider.OPENAI, "current_model": "gpt-4",
                 "optimized_provider": LLMProvider.GOOGLE, "optimized_model": "gemini-2.5-pro"
             }}
-
 
 class TestInvestorCriticalROICalculator:
     """INVESTOR CRITICAL: Tests for instant ROI calculation accuracy"""
@@ -285,7 +274,6 @@ class TestInvestorCriticalROICalculator:
         assert isinstance(roi_metrics["dollar_savings"], Decimal)
         assert isinstance(roi_metrics["percentage_savings"], Decimal)
         # Note: Negative savings are mathematically valid but should be clearly presented
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

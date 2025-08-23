@@ -6,7 +6,11 @@ from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.main import app
-from netra_backend.app.routes.websocket_secure import (
+from netra_backend.app.routes.websocket_unified import (
+    UNIFIED_WEBSOCKET_CONFIG,
+    get_unified_websocket_manager,
+)
+from netra_backend.app.websocket.unified_websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, Optional
@@ -17,80 +21,75 @@ import pytest
 import time
 import websockets
 
-    SECURE_WEBSOCKET_CONFIG,
-
-    SecureWebSocketManager,
-
-    get_secure_websocket_manager,
-
-)
 from test_framework.mock_utils import mock_justified
-
 
 class WebSocketTestHelpers:
 
-    """Helper utilities for WebSocket testing."""
+    # """Helper utilities for WebSocket testing."""
     
 
-    @staticmethod
+    # @staticmethod
 
-    async def create_test_websocket_connection(
+    # async def create_test_websocket_connection(
 
-        url: str,
+    # url: str,
 
-        headers: Optional[Dict[str, str]] = None,
+    # headers: Optional[Dict[str, str]] = None,
 
-        timeout: float = 5.0
+    # timeout: float = 5.0
 
-    ):
+    # ):
 
-        """Create a test WebSocket connection."""
+    # """Create a test WebSocket connection."""
 
-        try:
+    # try:
 
-            connection = await asyncio.wait_for(
+    # connection = await asyncio.wait_for(
 
-                websockets.connect(url, extra_headers=headers or {}),
+    # websockets.connect(url, extra_headers=headers or {}),
 
-                timeout=timeout
+    # timeout=timeout
 
-            )
+    # )
 
-            return connection
+    # return connection
 
-        except asyncio.TimeoutError:
+    # except asyncio.TimeoutError:
 
-            raise TimeoutError(f"WebSocket connection to {url} timed out")
+    # raise TimeoutError(f"WebSocket connection to {url} timed out")
     
 
-    @staticmethod
+    # @staticmethod
 
-    async def send_and_receive(
+    # async def send_and_receive(
 
-        websocket,
+    # websocket,
 
-        message: Dict[str, Any],
+    # message: Dict[str, Any],
 
-        timeout: float = 5.0
+    # timeout: float = 5.0
 
-    ) -> Dict[str, Any]:
+    # ) -> Dict[str, Any]:
 
-        """Send a message and receive response."""
+    # """Send a message and receive response."""
 
-        await websocket.send(json.dumps(message))
+    # await websocket.send(json.dumps(message))
 
-        response = await asyncio.wait_for(
+    # response = await asyncio.wait_for(
 
-            websocket.recv(),
+    # websocket.recv(),
 
-            timeout=timeout
+    # timeout=timeout
 
-        )
+    # )
 
-        return json.loads(response)
+    # return json.loads(response)
     
 
-    @staticmethod
+    # @staticmethod
+
+class TestSyntaxFix:
+    """Generated test class"""
 
     def create_mock_websocket(
 
@@ -100,7 +99,7 @@ class WebSocketTestHelpers:
 
     ):
 
-        """Create a mock WebSocket for testing."""
+#         """Create a mock WebSocket for testing.""" # Possibly broken comprehension
 
         class MockWebSocket:
 
@@ -152,6 +151,9 @@ class WebSocketTestHelpers:
     
 
     @staticmethod
+
+class TestSyntaxFix:
+    """Generated test class"""
 
     def validate_websocket_message(message: Dict[str, Any], expected_type: str):
 

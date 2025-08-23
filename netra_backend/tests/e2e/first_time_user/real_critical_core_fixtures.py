@@ -18,8 +18,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from .real_critical_auth_helpers import CriticalUserJourneyHelpers
-
+from netra_backend.tests.e2e.first_time_user.real_critical_auth_helpers import CriticalUserJourneyHelpers
 
 # Core Environment Fixtures
 @pytest.fixture
@@ -27,31 +26,26 @@ async def critical_user_journey_environment():
     """Setup comprehensive environment for critical user journey testing"""
     return await CriticalUserJourneyHelpers.create_real_user_context()
 
-
 @pytest.fixture  
 async def real_optimization_service():
     """Real optimization service for testing actual analysis"""
     return await CriticalUserJourneyHelpers.setup_real_optimization_service()
 
-
 @pytest.fixture
 async def concurrent_load_config():
     """Configuration for concurrent load testing"""
-    from .real_critical_optimization_helpers import ConcurrentTestHelpers
+    from netra_backend.tests.e2e.first_time_user.real_critical_optimization_helpers import ConcurrentTestHelpers
     return await ConcurrentTestHelpers.setup_concurrent_load_environment()
-
 
 @pytest.fixture
 async def real_auth_environment():
     """Real authentication environment for OAuth testing"""
     return await CriticalUserJourneyHelpers.setup_real_auth_environment()
 
-
 @pytest.fixture
 async def websocket_connection_manager():
     """Real WebSocket connection manager for onboarding testing"""
     return await CriticalUserJourneyHelpers.initialize_real_websocket_connection()
-
 
 # OAuth and Authentication Fixtures
 @pytest.fixture
@@ -65,7 +59,6 @@ async def oauth_flow_environment():
     }
     return oauth_config
 
-
 @pytest.fixture
 def user_profile_data():
     """User profile data for testing"""
@@ -77,7 +70,6 @@ def user_profile_data():
         "created_at": datetime.now(timezone.utc)
     }
 
-
 @pytest.fixture
 async def session_management_config():
     """Session management configuration for testing"""
@@ -88,13 +80,11 @@ async def session_management_config():
         "csrf_protection": True
     }
 
-
 # AI Provider Connection Fixtures
 @pytest.fixture
 def ai_provider_credentials():
     """AI provider credentials for connection testing"""
     return CriticalUserJourneyHelpers.create_ai_provider_credentials()
-
 
 @pytest.fixture
 async def provider_validation_environment():
@@ -107,7 +97,6 @@ async def provider_validation_environment():
     }
     return validation_config
 
-
 @pytest.fixture
 def encrypted_storage_config():
     """Configuration for encrypted credential storage"""
@@ -117,7 +106,6 @@ def encrypted_storage_config():
         "backup_encryption": True,
         "audit_logging": True
     }
-
 
 # WebSocket and Real-time Communication Fixtures
 @pytest.fixture
@@ -130,7 +118,6 @@ async def websocket_test_environment():
         "compression_enabled": True
     }
     return ws_config
-
 
 @pytest.fixture
 def onboarding_state_config():
@@ -148,7 +135,6 @@ def onboarding_state_config():
         "state_persistence": True
     }
 
-
 @pytest.fixture
 async def realtime_progress_tracker():
     """Real-time progress tracking for onboarding"""
@@ -159,7 +145,6 @@ async def realtime_progress_tracker():
         "step_validation": True
     }
     return progress_config
-
 
 # Optimization and Analysis Fixtures
 @pytest.fixture
@@ -186,7 +171,6 @@ def usage_data_samples():
         }
     }
 
-
 @pytest.fixture
 async def optimization_analysis_config():
     """Configuration for optimization analysis testing"""
@@ -199,7 +183,6 @@ async def optimization_analysis_config():
     }
     return analysis_config
 
-
 @pytest.fixture
 def cost_savings_calculator():
     """Cost savings calculator for value demonstration"""
@@ -210,7 +193,6 @@ def cost_savings_calculator():
         "scenario_modeling": True
     }
     return calculator_config
-
 
 # Performance and Load Testing Fixtures
 @pytest.fixture
@@ -223,7 +205,6 @@ def performance_thresholds():
         "optimization_analysis_ms": 30000,
         "concurrent_user_limit": 100
     }
-
 
 @pytest.fixture
 async def load_testing_environment():

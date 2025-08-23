@@ -1,16 +1,9 @@
 """Tests for health checker functions."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import time
 from datetime import datetime
@@ -18,20 +11,17 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-# Add project root to path
 from netra_backend.app.core.health_checkers import (
     _create_disabled_result,
     _create_failed_result,
     _create_success_result,
     check_clickhouse_health,
-    # Add project root to path
     check_postgres_health,
     check_redis_health,
     check_system_resources,
     check_websocket_health,
 )
 from netra_backend.app.core.health_types import HealthCheckResult
-
 
 class TestHealthCheckerHelpers:
     """Test helper functions for health checkers."""
@@ -73,7 +63,6 @@ class TestHealthCheckerHelpers:
         assert result.metadata["status"] == "disabled"
         assert result.metadata["reason"] == "Service disabled in dev mode"
 
-
 class TestPostgresHealthChecker:
     """Test PostgreSQL health checker."""
     async def test_postgres_health_success(self):
@@ -112,7 +101,6 @@ class TestPostgresHealthChecker:
         assert result.health_score == 0.0
         assert "Connection failed" in result.error_message
 
-
 class TestClickHouseHealthChecker:
     """Test ClickHouse health checker."""
     async def test_clickhouse_health_success(self):
@@ -138,7 +126,6 @@ class TestClickHouseHealthChecker:
         
         assert result.success is False
         assert "ClickHouse unavailable" in result.error_message
-
 
 class TestRedisHealthChecker:
     """Test Redis health checker."""
@@ -193,7 +180,6 @@ class TestRedisHealthChecker:
         assert result.success is False
         assert "Redis connection failed" in result.error_message
 
-
 class TestWebSocketHealthChecker:
     """Test WebSocket health checker."""
     async def test_websocket_health_success(self):
@@ -231,7 +217,6 @@ class TestWebSocketHealthChecker:
         
         assert result.success is False
         assert "WebSocket manager error" in result.error_message
-
 
 class TestSystemResourcesChecker:
     """Test system resources health checker."""

@@ -4,21 +4,10 @@ Tests real LLM agents for model effectiveness and GPT-5 migration workflows.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import uuid
@@ -27,18 +16,14 @@ from typing import Dict, List, Optional
 import pytest
 import pytest_asyncio
 from netra_backend.app.schemas import SubAgentLifecycle
-from ws_manager import WebSocketManager
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 
-# Add project root to path
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.core.exceptions import NetraException
 from netra_backend.app.llm.llm_manager import LLMManager
-
-# Add project root to path
-
 
 @pytest.fixture
 
@@ -57,25 +42,20 @@ def model_selection_setup(real_llm_manager, real_websocket_manager, real_tool_di
     )
     from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
-
     agents = _create_agent_dictionary(real_llm_manager, real_tool_dispatcher)
 
     return _build_model_setup(agents, real_llm_manager, real_websocket_manager)
 
-
 def _create_agent_dictionary(llm_manager, tool_dispatcher):
-
     """Create dictionary of agents"""
-
+    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
         ActionsToMeetGoalsSubAgent,
-
     )
-
+    from netra_backend.app.agents.optimizations_core_sub_agent import (
         OptimizationsCoreSubAgent,
-
     )
+    from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
-
     return {
 
         'triage': TriageSubAgent(llm_manager, tool_dispatcher, None),
@@ -90,7 +70,6 @@ def _create_agent_dictionary(llm_manager, tool_dispatcher):
 
     }
 
-
 async def _create_real_llm_manager() -> LLMManager:
 
     """Create real LLM manager instance."""
@@ -101,13 +80,11 @@ async def _create_real_llm_manager() -> LLMManager:
 
     return manager
 
-
 def _create_websocket_manager() -> WebSocketManager:
 
     """Create WebSocket manager instance."""
 
     return WebSocketManager()
-
 
 def _build_model_setup(agents: Dict, llm: LLMManager, ws: WebSocketManager) -> Dict:
 
@@ -121,12 +98,10 @@ def _build_model_setup(agents: Dict, llm: LLMManager, ws: WebSocketManager) -> D
 
     }
 
-
 class TestModelEffectivenessAnalysis:
 
     """Test model effectiveness analysis workflows."""
     
-
     @pytest.mark.real_llm
 
     async def test_gpt4o_claude3_sonnet_effectiveness(self, model_selection_setup):
@@ -141,7 +116,6 @@ class TestModelEffectivenessAnalysis:
 
         _validate_model_effectiveness_results(results, state)
     
-
     @pytest.mark.real_llm
 
     async def test_comparative_model_analysis(self, model_selection_setup):
@@ -156,7 +130,6 @@ class TestModelEffectivenessAnalysis:
 
         _validate_comparative_analysis_results(results)
 
-
 def _create_model_effectiveness_state() -> DeepAgentState:
 
     """Create state for model effectiveness analysis."""
@@ -168,7 +141,6 @@ def _create_model_effectiveness_state() -> DeepAgentState:
         metadata=AgentMetadata(custom_fields={'test_type': 'model_effectiveness', 'candidate_models': 'gpt-4o,claude-3-sonnet'})
 
     )
-
 
 def _create_comparative_analysis_state() -> DeepAgentState:
 
@@ -182,7 +154,6 @@ def _create_comparative_analysis_state() -> DeepAgentState:
 
     )
 
-
 async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
 
     """Execute complete model selection workflow with all 5 agents."""
@@ -191,7 +162,6 @@ async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) 
 
     results = []
     
-
     for step_name in workflow_steps:
 
         step_result = await _execute_model_step(setup, step_name, state)
@@ -199,7 +169,6 @@ async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) 
         results.append(step_result)
 
     return results
-
 
 async def _execute_model_step(setup: Dict, step_name: str, state: DeepAgentState) -> Dict:
 
@@ -209,11 +178,9 @@ async def _execute_model_step(setup: Dict, step_name: str, state: DeepAgentState
 
     agent = _setup_agent_for_execution(setup, step_name)
     
-
     execution_result = await agent.run(state, setup['run_id'], True)
 
     return _create_model_result(step_name, agent, state, execution_result)
-
 
 def _setup_agent_for_execution(setup: Dict, step_name: str):
 
@@ -227,7 +194,6 @@ def _setup_agent_for_execution(setup: Dict, step_name: str):
 
     return agent
 
-
 def _fix_websocket_interface(setup: Dict):
 
     """Fix WebSocket interface compatibility"""
@@ -239,7 +205,6 @@ def _fix_websocket_interface(setup: Dict):
     elif hasattr(setup['websocket'], 'send_to_thread') and not hasattr(setup['websocket'], 'send_message'):
 
         setup['websocket'].send_message = setup['websocket'].send_to_thread
-
 
 def _create_model_result(step_name: str, agent, state: DeepAgentState, result) -> Dict:
 
@@ -255,7 +220,6 @@ def _create_model_result(step_name: str, agent, state: DeepAgentState, result) -
 
     }
 
-
 def _validate_model_effectiveness_results(results: List[Dict], state: DeepAgentState):
 
     """Validate model effectiveness analysis results."""
@@ -268,7 +232,6 @@ def _validate_model_effectiveness_results(results: List[Dict], state: DeepAgentS
 
     _validate_effectiveness_optimization(results[2], state)
 
-
 def _validate_model_identification(result: Dict, state: DeepAgentState):
 
     """Validate identification of target models."""
@@ -278,7 +241,6 @@ def _validate_model_identification(result: Dict, state: DeepAgentState):
     assert 'gpt-4o' in state.user_request or 'claude-3-sonnet' in state.user_request
 
     assert 'effective' in state.user_request
-
 
 def _validate_current_setup_analysis(result: Dict, state: DeepAgentState):
 
@@ -290,7 +252,6 @@ def _validate_current_setup_analysis(result: Dict, state: DeepAgentState):
 
     assert result['agent_type'] == 'DataSubAgent'
 
-
 def _validate_effectiveness_optimization(result: Dict, state: DeepAgentState):
 
     """Validate effectiveness optimization recommendations."""
@@ -301,7 +262,6 @@ def _validate_effectiveness_optimization(result: Dict, state: DeepAgentState):
 
     assert result['agent_type'] == 'OptimizationsCoreSubAgent'
 
-
 def _validate_comparative_analysis_results(results: List[Dict]):
 
     """Validate comparative model analysis results."""
@@ -310,12 +270,10 @@ def _validate_comparative_analysis_results(results: List[Dict]):
 
     assert all(r['agent_state'] == SubAgentLifecycle.COMPLETED for r in results[:3])
 
-
 class TestGPT5MigrationWorkflows:
 
     """Test GPT-5 migration and tool selection workflows."""
     
-
     async def test_gpt5_tool_selection(self, model_selection_setup):
 
         """Test: '@Netra which of our Agent tools should switch to GPT-5? Which versions? What to set the verbosity to?'"""
@@ -328,7 +286,6 @@ class TestGPT5MigrationWorkflows:
 
         _validate_gpt5_tool_selection_results(results, state)
     
-
     async def test_gpt5_upgrade_analysis(self, model_selection_setup):
 
         """Test: '@Netra was the upgrade yesterday to GPT-5 worth it? Rollback anything where quality didn't improve much but cost was higher'"""
@@ -340,7 +297,6 @@ class TestGPT5MigrationWorkflows:
         results = await _execute_model_selection_workflow(setup, state)
 
         _validate_gpt5_upgrade_analysis_results(results, state)
-
 
 def _create_gpt5_tool_selection_state() -> DeepAgentState:
 
@@ -354,7 +310,6 @@ def _create_gpt5_tool_selection_state() -> DeepAgentState:
 
     )
 
-
 def _create_gpt5_upgrade_analysis_state() -> DeepAgentState:
 
     """Create state for GPT-5 upgrade analysis."""
@@ -366,7 +321,6 @@ def _create_gpt5_upgrade_analysis_state() -> DeepAgentState:
         metadata={'test_type': 'gpt5_upgrade_analysis', 'action': 'cost_benefit_analysis', 'rollback_candidate': True}
 
     )
-
 
 def _validate_gpt5_tool_selection_results(results: List[Dict], state: DeepAgentState):
 
@@ -380,7 +334,6 @@ def _validate_gpt5_tool_selection_results(results: List[Dict], state: DeepAgentS
 
     _validate_verbosity_configuration(results[3])
 
-
 def _validate_tool_inventory_analysis(result: Dict):
 
     """Validate tool inventory analysis."""
@@ -388,7 +341,6 @@ def _validate_tool_inventory_analysis(result: Dict):
     assert result['agent_state'] == SubAgentLifecycle.COMPLETED
 
     assert result['state_updated']
-
 
 def _validate_migration_recommendations(result: Dict):
 
@@ -398,13 +350,11 @@ def _validate_migration_recommendations(result: Dict):
 
     assert result['agent_state'] in [SubAgentLifecycle.COMPLETED]
 
-
 def _validate_verbosity_configuration(result: Dict):
 
     """Validate verbosity configuration recommendations."""
 
     assert result['agent_state'] == SubAgentLifecycle.COMPLETED
-
 
 def _validate_gpt5_upgrade_analysis_results(results: List[Dict], state: DeepAgentState):
 
@@ -416,7 +366,6 @@ def _validate_gpt5_upgrade_analysis_results(results: List[Dict], state: DeepAgen
 
     _validate_rollback_recommendations(results[3])
 
-
 def _validate_upgrade_impact_assessment(result: Dict):
 
     """Validate upgrade impact assessment."""
@@ -425,13 +374,11 @@ def _validate_upgrade_impact_assessment(result: Dict):
 
     assert result['state_updated']
 
-
 def _validate_rollback_recommendations(result: Dict):
 
     """Validate rollback recommendations."""
 
     assert result['agent_state'] == SubAgentLifecycle.COMPLETED
-
 
 if __name__ == "__main__":
 

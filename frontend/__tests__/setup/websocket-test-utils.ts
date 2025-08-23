@@ -18,6 +18,9 @@ export class TestWebSocket extends EventTarget {
   onclose: ((event: CloseEvent) => void) | null = null;
   onerror: ((event: Event) => void) | null = null;
   onmessage: ((event: MessageEvent) => void) | null = null;
+  
+  private sentMessages: string[] = [];
+  private connected: boolean = false;
 
   constructor(url: string) {
     super();
@@ -25,10 +28,22 @@ export class TestWebSocket extends EventTarget {
     this.readyState = this.CONNECTING;
   }
 
+  connect(): void {
+    setTimeout(() => {
+      this.readyState = this.OPEN;
+      this.connected = true;
+      const event = new Event('open');
+      this.onopen?.(event);
+      this.dispatchEvent(event);
+    }, 0);
+  }
+
   send(data: string | ArrayBuffer | Blob): void {
     if (this.readyState !== this.OPEN) {
       throw new Error('WebSocket is not open');
     }
+    const messageData = typeof data === 'string' ? data : data.toString();
+    this.sentMessages.push(messageData);
   }
 
   close(code?: number, reason?: string): void {
@@ -36,6 +51,7 @@ export class TestWebSocket extends EventTarget {
       return;
     }
     this.readyState = this.CLOSING;
+    this.connected = false;
     setTimeout(() => {
       this.readyState = this.CLOSED;
       const event = new CloseEvent('close', { code, reason });
@@ -43,30 +59,64 @@ export class TestWebSocket extends EventTarget {
       this.dispatchEvent(event);
     }, 0);
   }
+
+  simulateMessage(data: any): void {
+    if (this.readyState === this.OPEN) {
+      const messageData = typeof data === 'string' ? data : JSON.stringify(data);
+      const event = new MessageEvent('message', { data: messageData });
+      this.onmessage?.(event);
+      this.dispatchEvent(event);
+    }
+  }
+
+  simulateError(error?: any): void {
+    const event = new ErrorEvent('error', { error });
+    this.onerror?.(event);
+    this.dispatchEvent(event);
+  }
+
+  simulateReconnect(): void {
+    if (this.readyState === this.CLOSED) {
+      this.readyState = this.CONNECTING;
+      this.connect();
+    }
+  }
+
+  getSentMessages(): string[] {
+    return [...this.sentMessages];
+  }
+
+  isConnected(): boolean {
+    return this.connected;
+  }
 }
 
 /**
  * Connection state manager for tracking WebSocket states
  */
 export class ConnectionStateManager {
-  private states: Map<string, number> = new Map();
-  private stateHistory: Array<{ url: string; state: number; timestamp: number }> = [];
+  private currentState: string = 'disconnected';
+  private stateHistory: Array<{ state: string; timestamp: number }> = [];
 
-  setState(url: string, state: number): void {
-    this.states.set(url, state);
-    this.stateHistory.push({ url, state, timestamp: Date.now() });
+  setState(state: string): void {
+    this.currentState = state;
+    this.stateHistory.push({ state, timestamp: Date.now() });
   }
 
-  getState(url: string): number | undefined {
-    return this.states.get(url);
+  getState(): string {
+    return this.currentState;
   }
 
-  getHistory(): Array<{ url: string; state: number; timestamp: number }> {
+  getHistory(): Array<{ state: string; timestamp: number }> {
     return [...this.stateHistory];
   }
 
   clear(): void {
-    this.states.clear();
+    this.currentState = 'disconnected';
+    this.stateHistory = [];
+  }
+
+  clearHistory(): void {
     this.stateHistory = [];
   }
 }
@@ -76,6 +126,10 @@ export class ConnectionStateManager {
  */
 export class MessageBuffer {
   private messages: Array<{ type: 'sent' | 'received'; data: any; timestamp: number }> = [];
+
+  add(data: any): void {
+    this.addReceived(data);
+  }
 
   addSent(data: any): void {
     this.messages.push({ type: 'sent', data, timestamp: Date.now() });
@@ -95,6 +149,12 @@ export class MessageBuffer {
 
   getReceivedMessages(): any[] {
     return this.messages.filter(m => m.type === 'received').map(m => m.data);
+  }
+
+  flush(): string[] {
+    const received = this.getReceivedMessages();
+    this.clear();
+    return received;
   }
 
   clear(): void {

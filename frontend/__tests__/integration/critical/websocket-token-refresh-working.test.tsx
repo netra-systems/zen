@@ -18,7 +18,7 @@ import { webSocketService } from '@/services/webSocketService';
 jest.mock('@/config', () => ({
   config: {
     apiUrl: 'http://localhost:8000',
-    wsUrl: 'ws://localhost:8000/ws/secure'
+    wsUrl: 'ws://localhost:8000/ws'
   }
 }));
 
@@ -126,7 +126,7 @@ describe('WebSocket Token Refresh Implementation (Working)', () => {
       return mockWebSocket;
     }) as any;
     
-    server = new WS('ws://localhost:8000/ws/secure');
+    server = new WS('ws://localhost:8000/ws');
     jest.clearAllMocks();
     jest.useFakeTimers();
   });
@@ -162,7 +162,7 @@ describe('WebSocket Token Refresh Implementation (Working)', () => {
 
       // Verify WebSocket connection was attempted with the token
       expect(global.WebSocket).toHaveBeenCalledWith(
-        expect.stringContaining('ws://localhost:8000/ws/secure'),
+        expect.stringContaining('ws://localhost:8000/ws'),
         expect.arrayContaining([expect.stringContaining('jwt.')])
       );
     });

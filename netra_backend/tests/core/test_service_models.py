@@ -1,24 +1,13 @@
 """Tests for service model classes."""
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 from datetime import UTC, datetime
 
-# Add project root to path
 from netra_backend.app.core.service_interfaces import ServiceHealth, ServiceMetrics
-
-# Add project root to path
-
 
 class TestServiceModels:
     """Test service model classes."""

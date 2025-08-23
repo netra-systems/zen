@@ -12,7 +12,7 @@ try:
         HealthScoreCalculator,
         TestCoverageAnalyzer,
     )
-    from .status_integration_analyzer import IntegrationAnalyzer
+    from scripts.status_integration_analyzer import IntegrationAnalyzer
 except ImportError:
     from status_agent_analyzer import (
         AgentSystemAnalyzer,

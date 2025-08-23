@@ -9,7 +9,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 from unittest.mock import patch
 
-
 class DatetimeTestHelpers:
     """Helper functions for datetime utility testing."""
     
@@ -32,7 +31,6 @@ class DatetimeTestHelpers:
     def assert_timezone_offset_change(before: datetime, after: datetime):
         """Assert timezone offset changed between times."""
         assert before.strftime("%z") != after.strftime("%z")
-
 
 class StringTestHelpers:
     """Helper functions for string utility testing."""

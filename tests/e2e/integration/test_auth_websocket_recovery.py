@@ -38,7 +38,6 @@ from tests.e2e.auth_test_fixtures import (
     assert_auth_performance
 )
 
-
 @pytest.mark.critical
 @pytest.mark.asyncio
 class TestAuthWebSocketRecovery:
@@ -336,7 +335,6 @@ class TestAuthWebSocketRecovery:
             
         except Exception as e:
             skip_if_services_unavailable(str(e))
-
 
 # Business Impact Summary for Recovery Tests
 """

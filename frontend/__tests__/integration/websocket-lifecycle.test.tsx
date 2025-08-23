@@ -26,7 +26,7 @@ describe('WebSocket Connection Lifecycle Tests', () => {
 
   beforeEach(() => {
     // Use real WebSocket simulation instead of mocks
-    wsManager = createWebSocketManager(undefined, true);
+    wsManager = WebSocketTestManager.createWebSocketManager(undefined, true);
     stateManager = wsManager.getStateManager();
     wsManager.setup();
   });

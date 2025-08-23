@@ -5,9 +5,7 @@ This module runs import tests for all critical modules to ensure
 no import errors exist in the codebase.
 """
 
-from ..test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import sys
 from pathlib import Path
@@ -16,10 +14,8 @@ from typing import List, Tuple
 import pytest
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from test_framework.import_tester import ImportResult, ImportTester
-
 
 class TestImports:
     """Test class for module imports"""
@@ -27,7 +23,9 @@ class TestImports:
     @pytest.fixture(autouse=True)
     def setup(self):
         """Setup test environment"""
-        self.tester = ImportTester(verbose=False)
+        # Get project root path (parent of netra_backend/)
+        project_root = Path(__file__).parent.parent.parent
+        self.tester = ImportTester(root_path=str(project_root), verbose=False)
         self.critical_errors = []
     
     def _assert_import_success(self, result: ImportResult):
@@ -110,7 +108,7 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
         route_modules = [
             'netra_backend.app.routes.health',
             'netra_backend.app.routes.agent_route',
-            'netra_backend.app.routes.websocket_secure',
+            'netra_backend.app.routes.websocket_unified',
             'netra_backend.app.routes.threads_route',
             'netra_backend.app.routes.corpus',
             'netra_backend.app.routes.admin',
@@ -132,7 +130,7 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
             'netra_backend.app.core.error_handlers',
             'netra_backend.app.core.configuration.base',
             'netra_backend.app.core.configuration.database',
-            'netra_backend.app.core.configuration.secrets',
+            'netra_backend.app.core.configuration.unified_secrets',
             'netra_backend.app.core.agent_recovery',
             'netra_backend.app.core.health.checks',
             'netra_backend.app.core.resource_manager',
@@ -195,7 +193,6 @@ Missing Dependencies: {', '.join(result.missing_dependencies) if result.missing_
             
             pytest.fail(error_msg)
 
-
 @pytest.mark.fast
 class TestFastFailImports:
     """Fast-fail import tests for CI/CD"""
@@ -237,7 +234,6 @@ Troubleshooting steps:
                     error_msg += "\nTry: pip install " + " ".join(result.missing_dependencies)
                 
                 pytest.fail(error_msg)
-
 
 def test_import_performance():
     """Test that imports complete within reasonable time"""

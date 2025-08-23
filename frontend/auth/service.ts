@@ -1,11 +1,13 @@
-import { AuthConfigResponse } from '@/auth';
+import { AuthConfigResponse } from './types';
 import { useContext } from 'react';
-import { AuthContext, AuthContextType } from '@/auth';
+import { AuthContext, AuthContextType } from './context';
 import { authService as authServiceClient } from '@/lib/auth-service-config';
 import { logger } from '@/lib/logger';
+import { jwtDecode } from 'jwt-decode';
 
 const TOKEN_KEY = 'jwt_token';
 const DEV_LOGOUT_FLAG = 'dev_logout_flag';
+const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // Refresh 5 minutes before expiry
 
 class AuthService {
   async getAuthConfig(retries = 3, delay = 1000): Promise<AuthConfigResponse> {
@@ -28,10 +30,10 @@ class AuthService {
             callback: authConfig.endpoints?.callback || config.endpoints.callback,
             token: authConfig.endpoints?.token || config.endpoints.token,
             user: authConfig.endpoints?.user || config.endpoints.me,
-            ...(authConfig.endpoints?.dev_login && { dev_login: authConfig.endpoints.dev_login })
+            dev_login: authConfig.endpoints?.dev_login || `${config.baseUrl}/auth/dev/login`
           },
-          authorized_javascript_origins: authConfig.authorized_javascript_origins || config.oauth.javascriptOrigins,
-          authorized_redirect_uris: authConfig.authorized_redirect_uris || [config.oauth.redirectUri]
+          authorized_javascript_origins: authConfig.authorized_javascript_origins || config.oauth?.javascriptOrigins || [],
+          authorized_redirect_uris: authConfig.authorized_redirect_uris || [config.oauth?.redirectUri || 'http://localhost:3000/auth/callback']
         };
       } catch (error) {
         if (i < retries - 1) {
@@ -85,6 +87,10 @@ class AuthService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
+  setToken(token: string): void {
+    localStorage.setItem(TOKEN_KEY, token);
+  }
+
   getAuthHeaders(): Record<string, string> {
     const token = this.getToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
@@ -92,6 +98,70 @@ class AuthService {
 
   removeToken(): void {
     localStorage.removeItem(TOKEN_KEY);
+  }
+
+  /**
+   * Check if token needs refresh (within threshold)
+   */
+  needsRefresh(token?: string): boolean {
+    const currentToken = token || this.getToken();
+    if (!currentToken) return false;
+    
+    try {
+      const decoded = jwtDecode(currentToken) as any;
+      const expiryTime = decoded.exp * 1000; // Convert to milliseconds
+      const currentTime = Date.now();
+      
+      return (expiryTime - currentTime) <= REFRESH_THRESHOLD_MS;
+    } catch (error) {
+      logger.error('Error checking token expiry', error as Error, {
+        component: 'AuthService',
+        action: 'needs_refresh_check'
+      });
+      return true; // Assume refresh needed if token is invalid
+    }
+  }
+
+  /**
+   * Refresh the current token
+   */
+  async refreshToken(): Promise<{ access_token: string; expires_in: number } | null> {
+    try {
+      const response = await authServiceClient.refreshToken();
+      if (response.access_token) {
+        this.setToken(response.access_token);
+        logger.info('Token refreshed successfully', {
+          component: 'AuthService',
+          action: 'token_refresh_success'
+        });
+        return response;
+      }
+      return null;
+    } catch (error) {
+      logger.error('Token refresh failed', error as Error, {
+        component: 'AuthService',
+        action: 'token_refresh_failed'
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Validate a token
+   */
+  async validateToken(token?: string): Promise<boolean> {
+    const currentToken = token || this.getToken();
+    if (!currentToken) return false;
+    
+    try {
+      return await authServiceClient.validateToken(currentToken);
+    } catch (error) {
+      logger.error('Token validation failed', error as Error, {
+        component: 'AuthService',
+        action: 'token_validation_failed'
+      });
+      return false;
+    }
   }
 
   getDevLogoutFlag(): boolean {
@@ -136,4 +206,11 @@ class AuthService {
   };
 }
 
-export const authService = new AuthService();
+// Create instance
+const authServiceInstance = new AuthService();
+
+// Export both the instance and the class
+export { authServiceInstance as authService, AuthService };
+
+// Also provide as default export for compatibility
+export default AuthService;

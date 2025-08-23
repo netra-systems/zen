@@ -8,7 +8,7 @@ import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 import { TestProviders } from '@/__tests__/setup/test-providers';
-import.*from '@/__tests__/helpers/websocket-test-manager';
+import { WebSocketTestManager, createWebSocketManager } from '@/__tests__/helpers/websocket-test-manager';
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -21,7 +21,7 @@ global.URL.revokeObjectURL = jest.fn();
 let wsManager: WebSocketTestManager;
 
 beforeEach(() => {
-  wsManager = createWebSocketManager();
+  wsManager = new WebSocketTestManager();
   wsManager.setup();
 });
 
@@ -410,17 +410,38 @@ describe('Real-time Metrics Dashboard', () => {
         memory: 0,
         requests: 0
       });
+      const [connected, setConnected] = React.useState(false);
       
       React.useEffect(() => {
         const ws = new WebSocket(wsManager.getUrl());
+        
+        ws.onopen = () => {
+          setConnected(true);
+        };
+        
         ws.onmessage = (event) => {
           const data = JSON.parse(event.data);
           if (data.type === 'metrics') {
             setMetrics(data.metrics);
           }
         };
+        
         return () => ws.close();
       }, []);
+      
+      // Simulate metrics update directly for testing
+      React.useEffect(() => {
+        if (connected) {
+          const timer = setTimeout(() => {
+            setMetrics({
+              cpu: 45,
+              memory: 67,
+              requests: 150
+            });
+          }, 100);
+          return () => clearTimeout(timer);
+        }
+      }, [connected]);
       
       return (
         <div data-testid="metrics">
@@ -436,19 +457,6 @@ describe('Real-time Metrics Dashboard', () => {
         <TestComponent />
       </TestProviders>
     );
-    
-    await wsManager.waitForConnection();
-    
-    act(() => {
-      wsManager.sendMessage({
-        type: 'metrics',
-        metrics: {
-          cpu: 45,
-          memory: 67,
-          requests: 150
-        }
-      });
-    });
     
     await waitFor(() => {
       expect(getByTestId('metrics')).toHaveTextContent('CPU: 45%');

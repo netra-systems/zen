@@ -20,7 +20,6 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
 
-
 @pytest.fixture
 def mock_llm_manager():
     """Create properly mocked LLM manager"""
@@ -30,7 +29,6 @@ def mock_llm_manager():
     _setup_triage_agent_responses(llm_manager)
     return llm_manager
 
-
 def _setup_basic_llm_responses(llm_manager: Mock) -> None:
     """Setup basic LLM response mocks."""
     llm_manager.call_llm = AsyncMock(return_value={
@@ -38,11 +36,9 @@ def _setup_basic_llm_responses(llm_manager: Mock) -> None:
         "tool_calls": []
     })
 
-
 def _setup_structured_llm_responses(llm_manager: Mock) -> None:
     """Setup structured LLM response mocks."""
     llm_manager.ask_llm = AsyncMock(return_value=json.dumps(_get_optimization_response()))
-
 
 def _get_optimization_response() -> Dict[str, Any]:
     """Get mock optimization response data."""
@@ -55,7 +51,6 @@ def _get_optimization_response() -> Dict[str, Any]:
         "analysis": "User needs AI workload optimization"
     }
 
-
 def _setup_triage_agent_responses(llm_manager: Mock) -> None:
     """Setup triage agent structured LLM responses."""
     from netra_backend.app.agents.triage_sub_agent import (
@@ -67,7 +62,6 @@ def _setup_triage_agent_responses(llm_manager: Mock) -> None:
         UserIntent,
     )
     llm_manager.ask_structured_llm = AsyncMock(return_value=_create_triage_result())
-
 
 def _create_triage_result() -> 'TriageResult':
     """Create mock triage result."""
@@ -91,7 +85,6 @@ def _create_triage_result() -> 'TriageResult':
         metadata=_create_triage_metadata()
     )
 
-
 def _create_extracted_entities() -> 'ExtractedEntities':
     """Create mock extracted entities."""
     from netra_backend.app.agents.triage_sub_agent import ExtractedEntities
@@ -101,7 +94,6 @@ def _create_extracted_entities() -> 'ExtractedEntities':
         time_ranges=[]
     )
 
-
 def _create_user_intent() -> 'UserIntent':
     """Create mock user intent."""
     from netra_backend.app.agents.triage_sub_agent import UserIntent
@@ -109,7 +101,6 @@ def _create_user_intent() -> 'UserIntent':
         primary_intent="optimize",
         secondary_intents=["analyze", "monitor"]
     )
-
 
 def _create_triage_metadata() -> 'TriageMetadata':
     """Create mock triage metadata."""
@@ -120,7 +111,6 @@ def _create_triage_metadata() -> 'TriageMetadata':
         fallback_used=False,
         retry_count=0
     )
-
 
 @pytest.fixture
 def mock_db_session():
@@ -139,7 +129,6 @@ def mock_db_session():
     
     return session
 
-
 @pytest.fixture
 def mock_websocket_manager():
     """Create mock WebSocket manager"""
@@ -151,7 +140,6 @@ def mock_websocket_manager():
     ws_manager.send_sub_agent_update = AsyncMock()
     return ws_manager
 
-
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create mock tool dispatcher"""
@@ -162,7 +150,6 @@ def mock_tool_dispatcher():
         "result": {"data": "Tool execution successful"}
     })
     return dispatcher
-
 
 @pytest.fixture
 def mock_persistence_service():
@@ -184,7 +171,6 @@ def mock_persistence_service():
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     
     return mock_persistence
-
 
 @pytest.fixture
 def supervisor_agent(mock_db_session, mock_llm_manager, 
@@ -211,14 +197,12 @@ def supervisor_agent(mock_db_session, mock_llm_manager,
         
         return supervisor
 
-
 def create_mock_infrastructure():
     """Create mock infrastructure for e2e testing"""
     db_session = AsyncMock(spec=AsyncSession)
     llm_manager = Mock(spec=LLMManager)
     ws_manager = Mock()
     return db_session, llm_manager, ws_manager
-
 
 def setup_llm_responses(llm_manager):
     """Setup LLM responses for full optimization flow"""
@@ -236,11 +220,9 @@ def setup_llm_responses(llm_manager):
     llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_structured_llm)
     llm_manager.call_llm = AsyncMock(return_value={"content": "Optimization complete"})
 
-
 def setup_websocket_manager(ws_manager):
     """Setup websocket manager for testing"""
     ws_manager.send_message = AsyncMock()
-
 
 def create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence):
     """Create supervisor with all mocked dependencies"""

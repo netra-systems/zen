@@ -11,21 +11,10 @@ L2 Test: Real internal heartbeat components with mocked external services.
 Performance target: <30s zombie detection, 99% heartbeat reliability.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -43,7 +32,6 @@ from netra_backend.app.schemas import User
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
-
 class HeartbeatState(Enum):
 
     """Heartbeat connection states."""
@@ -55,7 +43,6 @@ class HeartbeatState(Enum):
     ZOMBIE = "zombie"
 
     DISCONNECTED = "disconnected"
-
 
 @dataclass
 
@@ -72,7 +59,6 @@ class HeartbeatConfig:
     zombie_timeout: float = 300.0   # Time before zombie cleanup
 
     adaptive_interval: bool = True  # Adjust interval based on network conditions
-
 
 @dataclass
 
@@ -98,12 +84,10 @@ class ConnectionHealth:
 
     updated_at: float = field(default_factory=time.time)
 
-
 class HeartbeatManager:
 
     """Manage WebSocket heartbeat mechanism."""
     
-
     def __init__(self, config: HeartbeatConfig = None):
 
         self.config = config or HeartbeatConfig()
@@ -116,7 +100,6 @@ class HeartbeatManager:
 
         self.running = False
         
-
         self.stats = {
 
             "total_heartbeats_sent": 0,
@@ -135,14 +118,12 @@ class HeartbeatManager:
 
         }
     
-
     async def register_connection(self, connection_id: str, user_id: str, websocket: Any) -> ConnectionHealth:
 
         """Register a new connection for heartbeat monitoring."""
 
         current_time = time.time()
         
-
         health = ConnectionHealth(
 
             connection_id=connection_id,
@@ -157,10 +138,8 @@ class HeartbeatManager:
 
         )
         
-
         self.connections[connection_id] = health
         
-
         if user_id not in self.user_connections:
 
             self.user_connections[user_id] = set()
@@ -173,10 +152,8 @@ class HeartbeatManager:
 
         self.heartbeat_tasks[connection_id] = task
         
-
         return health
     
-
     async def unregister_connection(self, connection_id: str) -> bool:
 
         """Unregister a connection from heartbeat monitoring."""
@@ -205,7 +182,6 @@ class HeartbeatManager:
 
         health = self.connections.pop(connection_id)
         
-
         if health.user_id in self.user_connections:
 
             self.user_connections[health.user_id].discard(connection_id)
@@ -214,10 +190,8 @@ class HeartbeatManager:
 
                 del self.user_connections[health.user_id]
         
-
         return True
     
-
     async def _heartbeat_loop(self, connection_id: str, websocket: Any) -> None:
 
         """Main heartbeat loop for a connection."""
@@ -228,7 +202,6 @@ class HeartbeatManager:
 
                 health = self.connections[connection_id]
                 
-
                 if health.state == HeartbeatState.ZOMBIE:
                     # Stop heartbeats for zombie connections
 
@@ -242,7 +215,6 @@ class HeartbeatManager:
 
                 response_received = await self._wait_for_heartbeat_response(connection_id)
                 
-
                 if response_received:
 
                     await self._handle_heartbeat_response(connection_id)
@@ -261,10 +233,8 @@ class HeartbeatManager:
 
                     interval = self.config.interval
                 
-
                 await asyncio.sleep(interval)
         
-
         except asyncio.CancelledError:
 
             pass
@@ -276,14 +246,12 @@ class HeartbeatManager:
 
                 self.connections[connection_id].state = HeartbeatState.ZOMBIE
     
-
     async def _send_heartbeat(self, connection_id: str, websocket: Any) -> None:
 
         """Send heartbeat ping to connection."""
 
         current_time = time.time()
         
-
         heartbeat_message = {
 
             "type": "heartbeat_ping",
@@ -296,7 +264,6 @@ class HeartbeatManager:
 
         }
         
-
         try:
 
             if hasattr(websocket, 'send'):
@@ -311,10 +278,8 @@ class HeartbeatManager:
 
                 self.connections[connection_id].updated_at = current_time
             
-
             self.stats["total_heartbeats_sent"] += 1
         
-
         except Exception as e:
             # Handle send failure
 
@@ -322,7 +287,6 @@ class HeartbeatManager:
 
                 self.connections[connection_id].state = HeartbeatState.MISSED
     
-
     async def _wait_for_heartbeat_response(self, connection_id: str, timeout: float = None) -> bool:
 
         """Wait for heartbeat response within timeout."""
@@ -331,17 +295,14 @@ class HeartbeatManager:
 
             timeout = self.config.timeout
         
-
         start_time = time.time()
         
-
         while time.time() - start_time < timeout:
 
             if connection_id not in self.connections:
 
                 return False
             
-
             health = self.connections[connection_id]
             
             # Check if we received a response since sending heartbeat
@@ -350,13 +311,10 @@ class HeartbeatManager:
 
                 return True
             
-
             await asyncio.sleep(0.1)  # Check every 100ms
         
-
         return False
     
-
     async def handle_heartbeat_response(self, connection_id: str, response_data: Dict[str, Any]) -> None:
 
         """Handle incoming heartbeat response from client."""
@@ -365,7 +323,6 @@ class HeartbeatManager:
 
             return
         
-
         current_time = time.time()
 
         health = self.connections[connection_id]
@@ -388,12 +345,10 @@ class HeartbeatManager:
 
         health.state = HeartbeatState.ACTIVE
         
-
         self.stats["total_responses_received"] += 1
 
         self._update_avg_rtt(rtt_ms)
     
-
     async def _handle_heartbeat_response(self, connection_id: str) -> None:
 
         """Handle successful heartbeat response."""
@@ -402,7 +357,6 @@ class HeartbeatManager:
 
             return
         
-
         health = self.connections[connection_id]
 
         current_time = time.time()
@@ -421,12 +375,10 @@ class HeartbeatManager:
 
         health.rtt_ms = rtt_ms
         
-
         self.stats["total_responses_received"] += 1
 
         self._update_avg_rtt(rtt_ms)
     
-
     async def _handle_missed_heartbeat(self, connection_id: str) -> None:
 
         """Handle missed heartbeat response."""
@@ -435,7 +387,6 @@ class HeartbeatManager:
 
             return
         
-
         health = self.connections[connection_id]
 
         health.missed_count += 1
@@ -444,7 +395,6 @@ class HeartbeatManager:
 
         self.stats["missed_heartbeats"] += 1
         
-
         if health.missed_count >= self.config.max_missed:
             # Mark as zombie
 
@@ -460,7 +410,6 @@ class HeartbeatManager:
 
             health.state = HeartbeatState.MISSED
     
-
     def _update_avg_rtt(self, rtt_ms: float) -> None:
 
         """Update average RTT statistic."""
@@ -469,7 +418,6 @@ class HeartbeatManager:
 
         total_responses = self.stats["total_responses_received"]
         
-
         if total_responses == 1:
 
             self.stats["avg_rtt_ms"] = rtt_ms
@@ -479,7 +427,6 @@ class HeartbeatManager:
 
             self.stats["avg_rtt_ms"] = ((current_avg * (total_responses - 1)) + rtt_ms) / total_responses
     
-
     def _calculate_adaptive_interval(self, connection_id: str) -> float:
 
         """Calculate adaptive heartbeat interval based on connection quality."""
@@ -488,7 +435,6 @@ class HeartbeatManager:
 
             return self.config.interval
         
-
         health = self.connections[connection_id]
 
         base_interval = self.config.interval
@@ -523,14 +469,12 @@ class HeartbeatManager:
 
         return max(10.0, min(adjusted_interval, 120.0))  # 10s to 2m
     
-
     async def _schedule_zombie_cleanup(self, connection_id: str) -> None:
 
         """Schedule cleanup of zombie connection."""
 
         await asyncio.sleep(self.config.zombie_timeout)
         
-
         if connection_id in self.connections:
 
             health = self.connections[connection_id]
@@ -541,7 +485,6 @@ class HeartbeatManager:
 
                 self.stats["connections_cleaned"] += 1
     
-
     async def cleanup_zombie_connections(self) -> int:
 
         """Manually cleanup all zombie connections."""
@@ -550,7 +493,6 @@ class HeartbeatManager:
 
         zombies_to_cleanup = []
         
-
         for connection_id, health in self.connections.items():
 
             if health.state == HeartbeatState.ZOMBIE:
@@ -562,7 +504,6 @@ class HeartbeatManager:
 
                     zombies_to_cleanup.append(connection_id)
         
-
         cleanup_count = 0
 
         for connection_id in zombies_to_cleanup:
@@ -573,17 +514,14 @@ class HeartbeatManager:
 
                 self.stats["connections_cleaned"] += 1
         
-
         return cleanup_count
     
-
     def get_connection_health(self, connection_id: str) -> Optional[ConnectionHealth]:
 
         """Get health status for specific connection."""
 
         return self.connections.get(connection_id)
     
-
     def get_user_connections_health(self, user_id: str) -> List[ConnectionHealth]:
 
         """Get health status for all user connections."""
@@ -592,7 +530,6 @@ class HeartbeatManager:
 
             return []
         
-
         return [
 
             self.connections[conn_id] 
@@ -603,7 +540,6 @@ class HeartbeatManager:
 
         ]
     
-
     def get_heartbeat_stats(self) -> Dict[str, Any]:
 
         """Get comprehensive heartbeat statistics."""
@@ -638,17 +574,14 @@ class HeartbeatManager:
 
             )
         
-
         stats["connection_states"] = state_counts
 
         stats["total_active_connections"] = len(self.connections)
 
         stats["total_users"] = len(self.user_connections)
         
-
         return stats
     
-
     def get_system_health_summary(self) -> Dict[str, Any]:
 
         """Get overall system health summary."""
@@ -661,12 +594,10 @@ class HeartbeatManager:
 
         zombie_connections = 0
         
-
         total_rtt = 0.0
 
         rtt_samples = 0
         
-
         for health in self.connections.values():
 
             if health.state == HeartbeatState.ACTIVE:
@@ -687,19 +618,16 @@ class HeartbeatManager:
 
                 zombie_connections += 1
         
-
         total_connections = len(self.connections)
 
         avg_rtt = total_rtt / rtt_samples if rtt_samples > 0 else 0.0
         
-
         health_score = 0.0
 
         if total_connections > 0:
 
             health_score = (healthy_connections / total_connections) * 100
         
-
         return {
 
             "health_score": health_score,
@@ -718,7 +646,6 @@ class HeartbeatManager:
 
         }
     
-
     def _determine_system_status(self, health_score: float, zombie_count: int, total_count: int) -> str:
 
         """Determine overall system status."""
@@ -739,12 +666,10 @@ class HeartbeatManager:
 
             return "poor"
 
-
 class TimeoutDetector:
 
     """Detect connection timeouts and adaptive timing."""
     
-
     def __init__(self, heartbeat_manager: HeartbeatManager):
 
         self.heartbeat_manager = heartbeat_manager
@@ -753,19 +678,16 @@ class TimeoutDetector:
 
         self.network_conditions = {}  # connection_id -> network quality metrics
     
-
     def record_timeout_event(self, connection_id: str, timeout_type: str) -> None:
 
         """Record a timeout event for analysis."""
 
         current_time = time.time()
         
-
         if connection_id not in self.timeout_history:
 
             self.timeout_history[connection_id] = []
         
-
         timeout_event = {
 
             "timestamp": current_time,
@@ -776,7 +698,6 @@ class TimeoutDetector:
 
         }
         
-
         self.timeout_history[connection_id].append(timeout_event)
         
         # Keep only recent history (last 100 events)
@@ -789,7 +710,6 @@ class TimeoutDetector:
 
         self._update_network_conditions(connection_id)
     
-
     def _update_network_conditions(self, connection_id: str) -> None:
 
         """Update network condition assessment."""
@@ -798,12 +718,10 @@ class TimeoutDetector:
 
             return
         
-
         current_time = time.time()
 
         recent_window = 300.0  # 5 minutes
         
-
         recent_timeouts = [
 
             event for event in self.timeout_history[connection_id]
@@ -812,7 +730,6 @@ class TimeoutDetector:
 
         ]
         
-
         timeout_rate = len(recent_timeouts) / (recent_window / 60)  # per minute
         
         # Get connection health for RTT
@@ -839,7 +756,6 @@ class TimeoutDetector:
 
             quality = "poor"
         
-
         self.network_conditions[connection_id] = {
 
             "quality": quality,
@@ -852,7 +768,6 @@ class TimeoutDetector:
 
         }
     
-
     def get_recommended_intervals(self, connection_id: str) -> Dict[str, float]:
 
         """Get recommended heartbeat intervals based on network conditions."""
@@ -861,7 +776,6 @@ class TimeoutDetector:
 
         base_timeout = self.heartbeat_manager.config.timeout
         
-
         conditions = self.network_conditions.get(connection_id)
 
         if not conditions:
@@ -874,7 +788,6 @@ class TimeoutDetector:
 
             }
         
-
         quality = conditions["quality"]
         
         # Adjust intervals based on network quality
@@ -919,7 +832,6 @@ class TimeoutDetector:
 
             }
     
-
     def get_timeout_analysis(self) -> Dict[str, Any]:
 
         """Get timeout analysis across all connections."""
@@ -930,7 +842,6 @@ class TimeoutDetector:
 
         quality_distribution = {"excellent": 0, "good": 0, "fair": 0, "poor": 0}
         
-
         for connection_id, history in self.timeout_history.items():
 
             if history:
@@ -939,7 +850,6 @@ class TimeoutDetector:
 
                 connections_with_timeouts += 1
             
-
             conditions = self.network_conditions.get(connection_id)
 
             if conditions:
@@ -948,7 +858,6 @@ class TimeoutDetector:
 
                 quality_distribution[quality] += 1
         
-
         return {
 
             "total_connections_monitored": len(self.timeout_history),
@@ -963,7 +872,6 @@ class TimeoutDetector:
 
         }
 
-
 @pytest.mark.L2
 
 @pytest.mark.integration
@@ -972,7 +880,6 @@ class TestHeartbeatMechanism:
 
     """L2 integration tests for heartbeat mechanism."""
     
-
     @pytest.fixture
 
     def heartbeat_config(self):
@@ -993,7 +900,6 @@ class TestHeartbeatMechanism:
 
         )
     
-
     @pytest.fixture
 
     def heartbeat_manager(self, heartbeat_config):
@@ -1002,7 +908,6 @@ class TestHeartbeatMechanism:
 
         return HeartbeatManager(heartbeat_config)
     
-
     @pytest.fixture
 
     def timeout_detector(self, heartbeat_manager):
@@ -1011,7 +916,6 @@ class TestHeartbeatMechanism:
 
         return TimeoutDetector(heartbeat_manager)
     
-
     @pytest.fixture
 
     def test_users(self):
@@ -1038,7 +942,6 @@ class TestHeartbeatMechanism:
 
         ]
     
-
     def create_mock_websocket(self):
 
         """Create mock WebSocket for testing."""
@@ -1051,7 +954,6 @@ class TestHeartbeatMechanism:
 
         websocket.heartbeat_responses = []
         
-
         async def mock_send(message):
 
             websocket.messages_sent.append(message)
@@ -1082,12 +984,10 @@ class TestHeartbeatMechanism:
 
                 pass
         
-
         websocket.send.side_effect = mock_send
 
         return websocket
     
-
     async def test_basic_heartbeat_functionality(self, heartbeat_manager, test_users):
 
         """Test basic heartbeat registration and monitoring."""
@@ -1102,7 +1002,6 @@ class TestHeartbeatMechanism:
 
         health = await heartbeat_manager.register_connection(connection_id, user.id, websocket)
         
-
         assert health.connection_id == connection_id
 
         assert health.user_id == user.id
@@ -1141,7 +1040,6 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
-
     async def test_heartbeat_response_handling(self, heartbeat_manager, test_users):
 
         """Test handling of heartbeat responses."""
@@ -1190,7 +1088,6 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
-
     async def test_missed_heartbeat_detection(self, heartbeat_manager, test_users):
 
         """Test detection of missed heartbeats."""
@@ -1233,7 +1130,6 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
-
     async def test_zombie_connection_detection(self, heartbeat_manager, test_users):
 
         """Test zombie connection detection and cleanup."""
@@ -1278,7 +1174,6 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
-
     async def test_adaptive_heartbeat_intervals(self, heartbeat_manager, test_users):
 
         """Test adaptive heartbeat interval adjustment."""
@@ -1297,14 +1192,12 @@ class TestHeartbeatMechanism:
 
         original_send = websocket.send
         
-
         async def delayed_send(message):
 
             await asyncio.sleep(0.5)  # 500ms delay
 
             await original_send(message)
         
-
         websocket.send = delayed_send
         
         # Wait for adaptive adjustment
@@ -1321,7 +1214,6 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
-
     async def test_multiple_user_connections(self, heartbeat_manager, test_users):
 
         """Test heartbeat management for multiple users and connections."""
@@ -1338,7 +1230,6 @@ class TestHeartbeatMechanism:
 
                 websocket = self.create_mock_websocket()
                 
-
                 await heartbeat_manager.register_connection(connection_id, user.id, websocket)
 
                 connections.append((connection_id, user.id, websocket))
@@ -1355,7 +1246,6 @@ class TestHeartbeatMechanism:
 
             assert len(user_health) == 2  # 2 connections per user
             
-
             for health in user_health:
 
                 assert health.state == HeartbeatState.ACTIVE
@@ -1374,7 +1264,6 @@ class TestHeartbeatMechanism:
 
             await heartbeat_manager.unregister_connection(connection_id)
     
-
     async def test_timeout_detection_and_analysis(self, heartbeat_manager, timeout_detector, test_users):
 
         """Test timeout detection and network condition analysis."""
@@ -1417,7 +1306,6 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
-
     async def test_system_health_monitoring(self, heartbeat_manager, test_users):
 
         """Test overall system health monitoring."""
@@ -1461,7 +1349,6 @@ class TestHeartbeatMechanism:
 
         health_summary = heartbeat_manager.get_system_health_summary()
         
-
         assert health_summary["total_connections"] == 5
 
         assert health_summary["healthy_connections"] >= 1  # At least some healthy
@@ -1476,7 +1363,6 @@ class TestHeartbeatMechanism:
 
             await heartbeat_manager.unregister_connection(connection_id)
     
-
     @mock_justified("L2: Heartbeat mechanism with real internal components")
 
     async def test_websocket_integration_with_heartbeat(self, heartbeat_manager, test_users):
@@ -1540,7 +1426,6 @@ class TestHeartbeatMechanism:
 
         user_messages = [msg for msg in sent_messages if msg["type"] == "user_message"]
         
-
         assert len(heartbeat_messages) > 0
 
         assert len(user_messages) == 3
@@ -1555,7 +1440,6 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
-
     async def test_heartbeat_performance_under_load(self, heartbeat_manager, test_users):
 
         """Test heartbeat performance with many concurrent connections."""
@@ -1568,7 +1452,6 @@ class TestHeartbeatMechanism:
 
         start_time = time.time()
         
-
         for i in range(connection_count):
 
             connection_id = f"load_test_{i}"
@@ -1577,12 +1460,10 @@ class TestHeartbeatMechanism:
 
             websocket = self.create_mock_websocket()
             
-
             await heartbeat_manager.register_connection(connection_id, user_id, websocket)
 
             connections.append((connection_id, websocket))
         
-
         registration_time = time.time() - start_time
         
         # Wait for heartbeat cycles
@@ -1638,7 +1519,6 @@ class TestHeartbeatMechanism:
         final_stats = heartbeat_manager.get_heartbeat_stats()
 
         assert final_stats["total_active_connections"] == 0
-
 
 if __name__ == "__main__":
 

@@ -11,17 +11,10 @@ Tests Google Secret Manager integration, fallback mechanisms, and secret rotatio
 without disruption in staging environment.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import os
 from pathlib import Path
@@ -30,11 +23,10 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from dev_launcher.google_secret_manager import GoogleSecretManager
-from dev_launcher.secret_config import SecretConfig
-from dev_launcher.secret_loader import SecretLoader
+# from scripts.dev_launcher_google_secret_manager import  # Should be mocked in tests GoogleSecretManager
+# from scripts.dev_launcher_secret_config import  # Should be mocked in tests SecretConfig
+# from scripts.dev_launcher_secret_loader import  # Should be mocked in tests SecretLoader
 from test_framework.mock_utils import mock_justified
-
 
 class TestStagingSecretsManagerIntegration:
     """Test Google Secret Manager integration in staging environment."""

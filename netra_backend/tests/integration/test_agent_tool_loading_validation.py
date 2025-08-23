@@ -16,21 +16,13 @@ REQUIREMENTS:
 - 100% tool availability validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 
-# Add project root to path
 # Set testing environment
 import os
 import time
@@ -44,7 +36,7 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -53,7 +45,6 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)
-
 
 class MockTool:
     """Mock tool for testing tool loading and validation."""
@@ -95,7 +86,6 @@ class MockTool:
     def validate_permissions(self, required_permissions: List[str]) -> bool:
         """Validate if tool has required permissions."""
         return all(perm in self.permissions for perm in required_permissions)
-
 
 class MockToolDispatcher(ToolDispatcher):
     """Mock tool dispatcher for testing."""
@@ -194,7 +184,6 @@ class MockToolDispatcher(ToolDispatcher):
         }
         
         return is_valid
-
 
 class TestAgentToolLoadingValidation:
     """BVJ: Protects $35K MRR through reliable agent tool loading and validation."""
@@ -603,7 +592,6 @@ class TestAgentToolLoadingValidation:
             f"Total executions {total_executions} below expected {expected_total}"
         
         logger.info(f"Performance monitoring validated: {len(monitoring_tools)} tools with {total_executions} total executions")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

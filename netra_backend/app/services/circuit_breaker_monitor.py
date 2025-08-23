@@ -134,7 +134,7 @@ class CircuitBreakerMonitor:
     
     def _record_state_change_event(self, circuit_name: str, old_state: str, new_state: str, status: Dict[str, Any]) -> None:
         """Record state change event"""
-        from .circuit_breaker_helpers import create_state_change_event
+        from netra_backend.app.services.circuit_breaker_helpers import create_state_change_event
         event = create_state_change_event(circuit_name, old_state, new_state, status)
         self._events.append(event)
         self._trim_events()
@@ -142,7 +142,7 @@ class CircuitBreakerMonitor:
 
     async def _handle_circuit_open_alert(self, circuit_name: str, new_state: str, status: Dict[str, Any]) -> None:
         """Handle alert creation for circuit open state"""
-        from .circuit_breaker_helpers import should_create_open_circuit_alert
+        from netra_backend.app.services.circuit_breaker_helpers import should_create_open_circuit_alert
         if should_create_open_circuit_alert(new_state):
             await self._create_open_circuit_alert(circuit_name, new_state, status)
 
@@ -163,14 +163,14 @@ class CircuitBreakerMonitor:
     
     async def _check_alerts(self, circuit_name: str, status: Dict[str, Any]) -> None:
         """Check for alert conditions."""
-        from .circuit_breaker_helpers import extract_circuit_metrics
+        from netra_backend.app.services.circuit_breaker_helpers import extract_circuit_metrics
         metrics_data = extract_circuit_metrics(status)
         await self._check_success_rate_alert(circuit_name, metrics_data)
         await self._check_rejection_rate_alert(circuit_name, metrics_data)
     
     async def _check_success_rate_alert(self, circuit_name: str, metrics_data: Dict[str, Any]) -> None:
         """Check and create low success rate alert if needed."""
-        from .circuit_breaker_helpers import should_alert_low_success_rate
+        from netra_backend.app.services.circuit_breaker_helpers import should_alert_low_success_rate
         if should_alert_low_success_rate(metrics_data["state"], metrics_data["success_rate"], metrics_data["total_calls"]):
             await self._create_alert(circuit_name, AlertSeverity.MEDIUM, f"Low success rate: {metrics_data['success_rate']:.2%}", metrics_data["state"], {"total_calls": metrics_data["total_calls"]})
     
@@ -266,7 +266,7 @@ class CircuitBreakerMetricsCollector:
     
     def _extract_metrics(self, status: Dict[str, Any], timestamp: datetime) -> Dict[str, Any]:
         """Extract key metrics from circuit status."""
-        from .circuit_breaker_helpers import extract_metrics_from_status
+        from netra_backend.app.services.circuit_breaker_helpers import extract_metrics_from_status
         return extract_metrics_from_status(status, timestamp)
     
     def _store_metrics(self, circuit_name: str, metrics: Dict[str, Any]) -> None:
@@ -284,7 +284,7 @@ class CircuitBreakerMetricsCollector:
         if circuit_name not in self._metrics_history:
             return []
         
-        from .circuit_breaker_helpers import filter_metrics_by_time
+        from netra_backend.app.services.circuit_breaker_helpers import filter_metrics_by_time
         cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
         return filter_metrics_by_time(self._metrics_history[circuit_name], cutoff_time)
     
@@ -329,7 +329,7 @@ circuit_monitor.add_alert_handler(default_alert_handler)
 
 async def get_circuit_health_dashboard() -> Dict[str, Any]:
     """Get comprehensive circuit breaker health dashboard."""
-    from .circuit_breaker_helpers import build_alert_data, build_event_data
+    from netra_backend.app.services.circuit_breaker_helpers import build_alert_data, build_event_data
     health_summary = circuit_monitor.get_health_summary()
     recent_events = circuit_monitor.get_recent_events(20)
     recent_alerts = circuit_monitor.get_recent_alerts(10)
@@ -339,7 +339,7 @@ async def get_circuit_health_dashboard() -> Dict[str, Any]:
 
 def _build_dashboard_response(health_summary, recent_events, recent_alerts, aggregated_metrics) -> Dict[str, Any]:
     """Build dashboard response dictionary."""
-    from .circuit_breaker_helpers import build_alert_data, build_event_data
+    from netra_backend.app.services.circuit_breaker_helpers import build_alert_data, build_event_data
     event_data = build_event_data(recent_events)
     alert_data = build_alert_data(recent_alerts)
     return _create_dashboard_dict(health_summary, event_data, alert_data, aggregated_metrics)

@@ -7,7 +7,7 @@ Provides comprehensive analysis and performance insights for test suites
 from collections import defaultdict
 from typing import Any, Dict, List
 
-from .failure_patterns import FailurePatternAnalyzer
+from test_framework.archived.experimental.failure_patterns import FailurePatternAnalyzer
 
 
 class TestInsightGenerator:

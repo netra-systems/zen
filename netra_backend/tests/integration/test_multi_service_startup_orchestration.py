@@ -11,17 +11,10 @@ This test validates service startup orchestration using real Docker containers (
 to ensure proper dependency resolution and graceful failure handling.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import os
@@ -35,10 +28,9 @@ from unittest.mock import AsyncMock, patch
 import aiohttp
 import pytest
 import yaml
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-
 
 @pytest.mark.integration
 class TestMultiServiceStartupOrchestration:
@@ -452,7 +444,6 @@ class TestMultiServiceStartupOrchestration:
     async def _make_service_unhealthy(self, service: str) -> None:
         """Make a service report as unhealthy."""
         logger.info(f"Making service unhealthy: {service}")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

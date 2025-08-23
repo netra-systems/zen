@@ -12,21 +12,10 @@ Connection establishment -> Load testing -> Network interruption -> Reconnection
 Coverage: 100+ concurrent connections, network fault injection, message delivery guarantees, staging environment validation
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -38,25 +27,21 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-# Add project root to path
-from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
 import pytest
 import websockets
 
-
 StagingTestSuite = AsyncMock
 
 get_staging_suite = AsyncMock
-# from ws_manager import WebSocketManager
-
+# from netra_backend.app.ws_manager import WebSocketManager
 
 WebSocketManager = AsyncMock
-# from netra_backend.app.services.redis.session_manager import RedisSessionManager
+# from app.services.redis.session_manager import RedisSessionManager
 
 RedisSessionManager = AsyncMock
-
 
 @dataclass
 
@@ -78,12 +63,10 @@ class WebSocketLoadMetrics:
 
     average_latency_ms: float
 
-
 class WebSocketL4TestSuite:
 
     """L4 test suite for WebSocket resilience in staging environment."""
     
-
     def __init__(self):
 
         self.staging_suite: Optional[StagingTestSuite] = None
@@ -112,7 +95,6 @@ class WebSocketL4TestSuite:
 
         }
         
-
     async def initialize_l4_environment(self) -> None:
 
         """Initialize L4 staging environment for WebSocket testing."""
@@ -129,7 +111,6 @@ class WebSocketL4TestSuite:
 
         await self._validate_websocket_endpoint()
     
-
     async def _validate_websocket_endpoint(self) -> None:
 
         """Validate WebSocket endpoint is accessible in staging."""
@@ -137,14 +118,12 @@ class WebSocketL4TestSuite:
 
         health_url = self.websocket_url.replace("wss://", "https://").replace("/ws", "/health/")
         
-
         health_status = await self.staging_suite.check_service_health(health_url)
 
         if not health_status.healthy:
 
             raise RuntimeError(f"WebSocket service unhealthy: {health_status.details}")
     
-
     async def create_websocket_connection(self, connection_id: str, 
 
                                         auth_token: Optional[str] = None) -> Dict[str, Any]:
@@ -153,7 +132,6 @@ class WebSocketL4TestSuite:
 
         start_time = time.time()
         
-
         try:
             # Prepare connection headers
 
@@ -189,7 +167,6 @@ class WebSocketL4TestSuite:
 
             )
             
-
             connection_time = time.time() - start_time
             
             # Store connection and metrics
@@ -214,10 +191,8 @@ class WebSocketL4TestSuite:
 
             self.message_queues[connection_id] = []
             
-
             self.test_metrics["connections_tested"] += 1
             
-
             return {
 
                 "success": True,
@@ -230,7 +205,6 @@ class WebSocketL4TestSuite:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -245,7 +219,6 @@ class WebSocketL4TestSuite:
 
             }
     
-
     async def execute_concurrent_load_test(self, connection_count: int = 100) -> WebSocketLoadMetrics:
 
         """Execute concurrent load test with specified connection count."""
@@ -260,7 +233,6 @@ class WebSocketL4TestSuite:
 
             auth_token = f"test_token_{i}"  # Simulate different auth tokens
             
-
             task = self.create_websocket_connection(connection_id, auth_token)
 
             connection_tasks.append(task)
@@ -277,7 +249,6 @@ class WebSocketL4TestSuite:
 
         connection_times = []
         
-
         for result in connection_results:
 
             if isinstance(result, Exception):
@@ -316,7 +287,6 @@ class WebSocketL4TestSuite:
 
         )
         
-
         return WebSocketLoadMetrics(
 
             total_connections=connection_count,
@@ -335,14 +305,12 @@ class WebSocketL4TestSuite:
 
         )
     
-
     async def _test_message_delivery_under_load(self, connections: List[Dict]) -> float:
 
         """Test message delivery success rate under load."""
 
         message_tasks = []
         
-
         for conn_result in connections:
 
             connection_id = conn_result["connection_id"]
@@ -363,7 +331,6 @@ class WebSocketL4TestSuite:
 
             }
             
-
             task = self._send_and_verify_message(websocket, connection_id, test_message)
 
             message_tasks.append(task)
@@ -372,15 +339,12 @@ class WebSocketL4TestSuite:
 
         message_results = await asyncio.gather(*message_tasks, return_exceptions=True)
         
-
         successful_messages = sum(1 for result in message_results 
 
                                 if not isinstance(result, Exception) and result.get("success", False))
         
-
         return successful_messages / len(message_results) if message_results else 0.0
     
-
     async def _send_and_verify_message(self, websocket: websockets.WebSocketServerProtocol,
 
                                      connection_id: str, message: Dict) -> Dict[str, Any]:
@@ -404,29 +368,24 @@ class WebSocketL4TestSuite:
 
             self.test_metrics["messages_received"] += 1
             
-
             return {"success": True, "response": response}
             
-
         except Exception as e:
 
             return {"success": False, "error": str(e)}
     
-
     async def _test_reconnection_under_load(self, connections: List[Dict]) -> float:
 
         """Test reconnection success rate under load."""
 
         reconnection_tasks = []
         
-
         for conn_result in connections:
 
             connection_id = conn_result["connection_id"]
 
             websocket = conn_result["websocket"]
             
-
             task = self._simulate_disconnection_and_reconnect(connection_id, websocket)
 
             reconnection_tasks.append(task)
@@ -435,15 +394,12 @@ class WebSocketL4TestSuite:
 
         reconnection_results = await asyncio.gather(*reconnection_tasks, return_exceptions=True)
         
-
         successful_reconnections = sum(1 for result in reconnection_results 
 
                                      if not isinstance(result, Exception) and result.get("success", False))
         
-
         return successful_reconnections / len(reconnection_results) if reconnection_results else 0.0
     
-
     async def _simulate_disconnection_and_reconnect(self, connection_id: str,
 
                                                   websocket: websockets.WebSocketServerProtocol) -> Dict[str, Any]:
@@ -469,10 +425,8 @@ class WebSocketL4TestSuite:
 
             )
             
-
             self.test_metrics["reconnections_attempted"] += 1
             
-
             if reconnection_result["success"]:
 
                 self.test_metrics["reconnections_successful"] += 1
@@ -491,7 +445,6 @@ class WebSocketL4TestSuite:
 
                 }
                 
-
                 message_result = await self._send_and_verify_message(
 
                     reconnection_result["websocket"], 
@@ -502,7 +455,6 @@ class WebSocketL4TestSuite:
 
                 )
                 
-
                 return {
 
                     "success": True,
@@ -517,19 +469,16 @@ class WebSocketL4TestSuite:
 
                 return {"success": False, "error": reconnection_result["error"]}
                 
-
         except Exception as e:
 
             return {"success": False, "error": str(e)}
     
-
     async def simulate_network_interruptions(self, interruption_scenarios: List[str]) -> Dict[str, Any]:
 
         """Simulate various network interruption scenarios."""
 
         scenario_results = {}
         
-
         for scenario in interruption_scenarios:
 
             if scenario == "temporary_disconnection":
@@ -552,15 +501,12 @@ class WebSocketL4TestSuite:
 
                 result = {"success": False, "error": f"Unknown scenario: {scenario}"}
             
-
             scenario_results[scenario] = result
 
             self.test_metrics["network_interruptions_simulated"] += 1
         
-
         return scenario_results
     
-
     async def _test_temporary_disconnection(self) -> Dict[str, Any]:
 
         """Test temporary disconnection recovery."""
@@ -575,7 +521,6 @@ class WebSocketL4TestSuite:
 
             return {"success": False, "error": "Failed to create initial connection"}
         
-
         websocket = conn_result["websocket"]
         
         # Send pre-disconnection message
@@ -612,7 +557,6 @@ class WebSocketL4TestSuite:
 
         )
         
-
         return {
 
             "success": True,
@@ -625,7 +569,6 @@ class WebSocketL4TestSuite:
 
         }
     
-
     async def _test_intermittent_connectivity(self) -> Dict[str, Any]:
 
         """Test handling of intermittent connectivity issues."""
@@ -640,7 +583,6 @@ class WebSocketL4TestSuite:
 
             return {"success": False, "error": "Failed to create connection"}
         
-
         websocket = conn_result["websocket"]
 
         successful_messages = 0
@@ -661,7 +603,6 @@ class WebSocketL4TestSuite:
 
             }
             
-
             try:
 
                 result = await self._send_and_verify_message(websocket, connection_id, message)
@@ -676,15 +617,12 @@ class WebSocketL4TestSuite:
 
                     await asyncio.sleep(0.5)  # Brief interruption simulation
                     
-
             except Exception:
 
                 pass  # Expected for intermittent connectivity
         
-
         success_rate = successful_messages / total_attempts
         
-
         return {
 
             "success": success_rate >= 0.7,  # 70% success rate threshold
@@ -697,20 +635,17 @@ class WebSocketL4TestSuite:
 
         }
     
-
     async def _test_connection_timeout(self) -> Dict[str, Any]:
 
         """Test connection timeout handling."""
 
         connection_id = f"timeout_test_{uuid.uuid4().hex[:8]}"
         
-
         try:
             # Attempt connection with very short timeout
 
             start_time = time.time()
             
-
             websocket = await asyncio.wait_for(
 
                 websockets.connect(
@@ -729,7 +664,6 @@ class WebSocketL4TestSuite:
 
             )
             
-
             connection_time = time.time() - start_time
             
             # Test that connection stays alive
@@ -742,13 +676,10 @@ class WebSocketL4TestSuite:
 
             await websocket.send(json.dumps(test_msg))
             
-
             response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
             
-
             await websocket.close()
             
-
             return {
 
                 "success": True,
@@ -761,7 +692,6 @@ class WebSocketL4TestSuite:
 
             }
             
-
         except asyncio.TimeoutError:
 
             return {
@@ -786,14 +716,12 @@ class WebSocketL4TestSuite:
 
             }
     
-
     async def _test_ping_failure(self) -> Dict[str, Any]:
 
         """Test ping/pong failure handling."""
 
         connection_id = f"ping_test_{uuid.uuid4().hex[:8]}"
         
-
         try:
             # Create connection with aggressive ping settings
 
@@ -815,7 +743,6 @@ class WebSocketL4TestSuite:
 
             successful_pings = 0
             
-
             for _ in range(5):  # Test 5 ping cycles
 
                 try:
@@ -830,18 +757,14 @@ class WebSocketL4TestSuite:
 
                     pass  # Expected ping failure
                 
-
                 ping_count += 1
 
                 await asyncio.sleep(2.5)  # Wait between pings
             
-
             await websocket.close()
             
-
             ping_success_rate = successful_pings / ping_count
             
-
             return {
 
                 "success": ping_success_rate >= 0.6,  # 60% ping success threshold
@@ -854,7 +777,6 @@ class WebSocketL4TestSuite:
 
             }
             
-
         except Exception as e:
 
             return {
@@ -865,7 +787,6 @@ class WebSocketL4TestSuite:
 
             }
     
-
     async def cleanup_l4_resources(self) -> None:
 
         """Clean up L4 test resources."""
@@ -879,18 +800,15 @@ class WebSocketL4TestSuite:
 
                 close_tasks.append(websocket.close())
         
-
         if close_tasks:
 
             await asyncio.gather(*close_tasks, return_exceptions=True)
         
-
         self.active_connections.clear()
 
         self.connection_metrics.clear()
 
         self.message_queues.clear()
-
 
 @pytest.fixture
 
@@ -905,7 +823,6 @@ async def websocket_l4_suite():
     yield suite
 
     await suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 
@@ -938,7 +855,6 @@ async def test_concurrent_websocket_connections_l4(websocket_l4_suite):
 
     assert max_connection_time < 10.0, f"Maximum connection time too high: {max_connection_time}s"
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.staging
@@ -960,7 +876,6 @@ async def test_websocket_network_interruption_recovery_l4(websocket_l4_suite):
 
     ]
     
-
     scenario_results = await websocket_l4_suite.simulate_network_interruptions(interruption_scenarios)
     
     # Validate temporary disconnection recovery
@@ -993,7 +908,6 @@ async def test_websocket_network_interruption_recovery_l4(websocket_l4_suite):
 
     assert ping_test["success"] is True or ping_test["ping_success_rate"] >= 0.5
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.staging
@@ -1010,7 +924,6 @@ async def test_websocket_message_delivery_guarantees_l4(websocket_l4_suite):
 
     assert conn_result["success"] is True
     
-
     websocket = conn_result["websocket"]
     
     # Test ordered message delivery
@@ -1021,7 +934,6 @@ async def test_websocket_message_delivery_guarantees_l4(websocket_l4_suite):
 
     received_messages = []
     
-
     for i in range(message_count):
 
         message = {
@@ -1036,7 +948,6 @@ async def test_websocket_message_delivery_guarantees_l4(websocket_l4_suite):
 
         }
         
-
         sent_messages.append(message)
         
         # Send and receive
@@ -1059,9 +970,7 @@ async def test_websocket_message_delivery_guarantees_l4(websocket_l4_suite):
 
             assert received["sequence"] == i, f"Message ordering violation at position {i}"
     
-
     await websocket.close()
-
 
 @pytest.mark.asyncio
 
@@ -1076,19 +985,16 @@ async def test_websocket_reconnection_success_rate_l4(websocket_l4_suite):
 
     connections = []
     
-
     for i in range(connection_count):
 
         connection_id = f"reconnect_test_{i}_{uuid.uuid4().hex[:8]}"
 
         conn_result = await websocket_l4_suite.create_websocket_connection(connection_id)
         
-
         if conn_result["success"]:
 
             connections.append(conn_result)
     
-
     assert len(connections) >= 18, "Insufficient initial connections for reconnection test"
     
     # Test reconnection success rate
@@ -1105,7 +1011,6 @@ async def test_websocket_reconnection_success_rate_l4(websocket_l4_suite):
 
     assert websocket_l4_suite.test_metrics["reconnections_successful"] >= 15
 
-
 @pytest.mark.asyncio
 
 @pytest.mark.staging
@@ -1119,7 +1024,6 @@ async def test_websocket_performance_under_stress_l4(websocket_l4_suite):
 
     conn_result = await websocket_l4_suite.create_websocket_connection(connection_id)
     
-
     assert conn_result["success"] is True
 
     websocket = conn_result["websocket"]
@@ -1132,7 +1036,6 @@ async def test_websocket_performance_under_stress_l4(websocket_l4_suite):
 
     successful_sends = 0
     
-
     for i in range(message_volume):
 
         try:
@@ -1149,7 +1052,6 @@ async def test_websocket_performance_under_stress_l4(websocket_l4_suite):
 
             }
             
-
             await websocket.send(json.dumps(message))
 
             successful_sends += 1
@@ -1158,12 +1060,10 @@ async def test_websocket_performance_under_stress_l4(websocket_l4_suite):
 
             await asyncio.sleep(0.01)
             
-
         except Exception:
 
             pass  # Expected under stress
     
-
     total_duration = time.time() - start_time
 
     throughput = successful_sends / total_duration if total_duration > 0 else 0
@@ -1176,5 +1076,4 @@ async def test_websocket_performance_under_stress_l4(websocket_l4_suite):
 
     assert total_duration < 5.0, f"Stress test took too long: {total_duration}s"
     
-
     await websocket.close()

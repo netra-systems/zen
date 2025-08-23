@@ -14,7 +14,7 @@ try:
         RecommendationsRenderer,
         TestingSectionRenderer,
     )
-    from .status_types import PatternMatch, StatusReportData
+    from scripts.status_types import PatternMatch, StatusReportData
 except ImportError:
     from status_section_renderers import (
         ComponentDetailsRenderer,
@@ -83,7 +83,7 @@ Generated: {timestamp}
     
     def _get_component_metrics(self, component_health: Dict, component_key: str) -> Dict[str, int]:
         """Get metrics for component"""
-        from .status_types import ComponentHealthData
+        from scripts.status_types import ComponentHealthData
         component = component_health.get(component_key, {})
         if isinstance(component, ComponentHealthData):
             return {'files': component.total_files, 'issues': component.issues_found}

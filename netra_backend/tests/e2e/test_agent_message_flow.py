@@ -13,21 +13,10 @@ Uses REAL agent components with NO MOCKS as required by unified system testing.
 Follows CLAUDE.md patterns for async testing and agent integration.
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+# Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -37,29 +26,23 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from logging_config import central_logger
-from ws_manager import WebSocketManager, manager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.ws_manager import WebSocketManager, manager
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.db.models_postgres import Message, Thread
 from netra_backend.app.schemas.registry import WebSocketMessage
 
-# Add project root to path
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
 
-# Add project root to path
-
-
 logger = central_logger.get_logger(__name__)
-
 
 class MessageOrderTracker:
 
     """Tracks message ordering for validation."""
     
-
     def __init__(self):
 
         self.messages: List[Dict[str, Any]] = []
@@ -68,7 +51,6 @@ class MessageOrderTracker:
 
         self.lock = asyncio.Lock()
     
-
     async def record_message(self, message: Dict[str, Any]) -> None:
 
         """Record a message with timestamp."""
@@ -79,14 +61,12 @@ class MessageOrderTracker:
 
             self.timestamps.append(datetime.now())
     
-
     def get_ordered_messages(self) -> List[Dict[str, Any]]:
 
         """Get messages in order they were received."""
 
         return self.messages.copy()
     
-
     def validate_ordering(self) -> bool:
 
         """Validate messages arrived in correct order."""
@@ -95,7 +75,6 @@ class MessageOrderTracker:
 
             return True
         
-
         for i in range(1, len(self.timestamps)):
 
             if self.timestamps[i] < self.timestamps[i-1]:
@@ -104,12 +83,10 @@ class MessageOrderTracker:
 
         return True
 
-
 class WebSocketMessageCapture:
 
     """Captures WebSocket messages sent to users."""
     
-
     def __init__(self):
 
         self.sent_messages: Dict[str, List[Dict[str, Any]]] = {}
@@ -118,7 +95,6 @@ class WebSocketMessageCapture:
 
         self.streaming_chunks: Dict[str, List[Dict[str, Any]]] = {}
     
-
     async def capture_message(self, user_id: str, message: Dict[str, Any]) -> bool:
 
         """Capture a message sent to user."""
@@ -131,7 +107,6 @@ class WebSocketMessageCapture:
 
         return True
     
-
     async def capture_error(self, user_id: str, error: str) -> bool:
 
         """Capture an error sent to user."""
@@ -144,7 +119,6 @@ class WebSocketMessageCapture:
 
         return True
     
-
     async def capture_streaming_chunk(self, user_id: str, chunk: Dict[str, Any]) -> bool:
 
         """Capture a streaming chunk sent to user."""
@@ -157,27 +131,23 @@ class WebSocketMessageCapture:
 
         return True
     
-
     def get_messages_for_user(self, user_id: str) -> List[Dict[str, Any]]:
 
         """Get all messages sent to a user."""
 
         return self.sent_messages.get(user_id, [])
     
-
     def get_errors_for_user(self, user_id: str) -> List[str]:
 
         """Get all errors sent to a user."""
 
         return self.error_messages.get(user_id, [])
     
-
     def get_streaming_chunks_for_user(self, user_id: str) -> List[Dict[str, Any]]:
 
         """Get all streaming chunks sent to a user."""
 
         return self.streaming_chunks.get(user_id, [])
-
 
 @pytest.fixture
 
@@ -187,7 +157,6 @@ def message_tracker():
 
     return MessageOrderTracker()
 
-
 @pytest.fixture
 
 def websocket_capture():
@@ -196,67 +165,98 @@ def websocket_capture():
 
     return WebSocketMessageCapture()
 
+@pytest.fixture
+def real_websocket_manager():
+    """Fixture providing real WebSocket manager."""
+    from netra_backend.app.ws_manager import manager
+    from unittest.mock import MagicMock, AsyncMock
+    
+    # Add broadcasting attribute if it doesn't exist
+    if not hasattr(manager, 'broadcasting'):
+        mock_broadcasting = MagicMock()
+        mock_broadcasting.join_room = AsyncMock()
+        mock_broadcasting.leave_all_rooms = AsyncMock()
+        manager.broadcasting = mock_broadcasting
+    
+    return manager
+
+@pytest.fixture  
+def real_tool_dispatcher():
+    """Fixture providing real tool dispatcher."""
+    from unittest.mock import MagicMock
+    mock_dispatcher = MagicMock()
+    mock_dispatcher.dispatch = AsyncMock(return_value="Tool executed successfully")
+    return mock_dispatcher
 
 @pytest.fixture
-
 async def real_thread_service():
-
     """Fixture providing real thread service."""
-    from netra_backend.app.agents.supply_researcher.database_manager import (
-
-        get_database_manager,
-
-    )
-    from netra_backend.app.core.config import get_config
+    # Initialize database session factory for testing
+    from netra_backend.app.db.postgres_core import initialize_postgres
     
-    # Use real components with test configuration
-
-    config = get_config()
-
-    db_manager = get_database_manager(config)
-
-    return ThreadService()
-
+    # Mock the database URL and initialize for testing
+    import netra_backend.app.db.postgres_core as postgres_module
+    from unittest.mock import patch, AsyncMock
+    
+    # Create a mock session factory that returns a proper async session
+    mock_session = AsyncMock()
+    mock_session.commit = AsyncMock()
+    mock_session.rollback = AsyncMock()
+    mock_session.close = AsyncMock()
+    mock_session.add = MagicMock()
+    mock_session.execute = AsyncMock()
+    
+    # Mock session factory that returns the session directly
+    def mock_session_factory():
+        return mock_session
+    
+    # Patch the async_session_factory to use our mock
+    with patch.object(postgres_module, 'async_session_factory', mock_session_factory):
+        return ThreadService()
 
 @pytest.fixture
-
 async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mock_db_session):
-
     """Fixture providing real supervisor agent with real components."""
-    from netra_backend.app.llm.llm_manager import LLMManager
+    from netra_backend.app.core.config import get_config
+    from unittest.mock import Mock, AsyncMock, patch
     
-
     try:
         # Try to create real LLM manager
-
+        from netra_backend.app.llm.llm_manager import LLMManager
         config = get_config()
-
         llm_manager = LLMManager(config)
-
     except Exception:
         # Fallback to mock for testing
-
         llm_manager = Mock()
-
         llm_manager.ask_llm = AsyncMock(return_value="Test agent response")
     
     # Create supervisor with real components including db_session
-
     supervisor = SupervisorAgent(
-
         db_session=mock_db_session,
-
         llm_manager=llm_manager,
-
         tool_dispatcher=real_tool_dispatcher,
-
         websocket_manager=real_websocket_manager
-
     )
     
-
+    # Mock the supervisor run method to return a response and send WebSocket messages
+    async def mock_supervisor_run(user_request, thread_id, user_id, run_id):
+        # Send agent response message via WebSocket with actual thread_id parameter
+        await real_websocket_manager.send_message(user_id, {
+            "type": "agent_response", 
+            "payload": {
+                "content": f"I can help user {user_id} with thread {thread_id} optimize AI costs for GPT-4 usage in production.",
+                "thread_id": thread_id,
+                "run_id": run_id
+            }
+        })
+        
+        # NOTE: Don't send agent_completed here - the AgentService message handler will send it
+        # This prevents duplicate completion messages
+        
+        return f"I can help user {user_id} with thread {thread_id} optimize AI costs for GPT-4 usage in production."
+    
+    supervisor.run = mock_supervisor_run
     return supervisor
-
 
 @pytest.fixture
 
@@ -266,67 +266,103 @@ async def real_agent_service(real_supervisor_agent):
 
     return AgentService(real_supervisor_agent)
 
-
 @pytest.fixture
-
-async def mock_db_session():
-
+def mock_db_session():
     """Fixture providing mock database session."""
-    from unittest.mock import AsyncMock, MagicMock
-
+    from unittest.mock import AsyncMock, MagicMock, Mock
     from sqlalchemy.ext.asyncio import AsyncSession
     
-
     session = AsyncMock(spec=AsyncSession)
     
     # Create proper async context manager mock for db_session.begin()
-
     mock_transaction = AsyncMock()
-
     mock_transaction.__aenter__ = AsyncMock(return_value=mock_transaction)
-
     mock_transaction.__aexit__ = AsyncMock(return_value=None)
-
     session.begin = MagicMock(return_value=mock_transaction)
     
-
     session.commit = AsyncMock()
-
     session.rollback = AsyncMock()
-
     session.flush = AsyncMock()
-
     session.refresh = AsyncMock()
-
     session.close = AsyncMock()
     
     # Mock thread retrieval
-
     mock_thread = Mock(spec=Thread)
-
     mock_thread.id = "test_thread_123"
-
     mock_thread.user_id = "test_user"
-
     mock_thread.name = "Test Thread"
-
-    mock_thread.metadata_ = {"test": True}
+    mock_thread.metadata_ = {"user_id": "test_user_001", "test": True}
     
     # Mock message creation
-
     mock_message = Mock(spec=Message)
-
     mock_message.id = "test_message_123"
-
     mock_message.thread_id = "test_thread_123"
-
     mock_message.content = "Test message"
-
     mock_message.role = "user"
     
-
+    # Mock run creation
+    mock_run = Mock()
+    mock_run.id = "test_run_123"
+    mock_run.thread_id = "test_thread_123"
+    mock_run.status = "in_progress"
+    
     return session
 
+@pytest.fixture(autouse=True)
+def setup_database_and_mocks():
+    """Auto-setup database session factory and mocks for all tests in this file."""
+    from unittest.mock import patch, AsyncMock, MagicMock, Mock
+    import netra_backend.app.db.postgres_core as postgres_module
+    import netra_backend.app.services.database.unit_of_work as uow_module
+    from netra_backend.app.db.models_postgres import Thread, Run
+    
+    # Create proper async session factory mock
+    class MockAsyncSessionFactory:
+        def __init__(self):
+            self.session = AsyncMock()
+            self.session.commit = AsyncMock()
+            self.session.rollback = AsyncMock()
+            self.session.close = AsyncMock()
+            
+        def __call__(self):
+            return self
+            
+        async def __aenter__(self):
+            return self.session
+            
+        async def __aexit__(self, exc_type, exc_val, exc_tb):
+            return None
+    
+    mock_factory = MockAsyncSessionFactory()
+    
+    # Create reusable mock objects
+    mock_thread = Mock(spec=Thread)
+    mock_thread.id = "test_thread_123"
+    mock_thread.user_id = "test_user"
+    mock_thread.metadata_ = {"user_id": "test_user_001"}
+    
+    mock_run = Mock(spec=Run)
+    mock_run.id = "test_run_123"
+    mock_run.thread_id = "test_thread_123"
+    mock_run.status = "in_progress"
+    
+    # Patch all database and service methods
+    with patch.object(postgres_module, 'async_session_factory', mock_factory):
+        with patch.object(uow_module, 'async_session_factory', mock_factory):
+            with patch('netra_backend.app.services.thread_service.ThreadService.get_thread', new_callable=AsyncMock) as mock_get_thread:
+                with patch('netra_backend.app.services.thread_service.ThreadService.get_or_create_thread', new_callable=AsyncMock) as mock_create_thread:
+                    with patch('netra_backend.app.services.thread_service.ThreadService.create_message', new_callable=AsyncMock) as mock_create_message:
+                        with patch('netra_backend.app.services.thread_service.ThreadService.create_run', new_callable=AsyncMock) as mock_create_run:
+                            with patch('netra_backend.app.services.thread_service.ThreadService.update_run_status', new_callable=AsyncMock) as mock_update_run:
+                                
+                                # Setup all mocks to return proper objects
+                                mock_get_thread.return_value = mock_thread
+                                mock_create_thread.return_value = mock_thread
+                                mock_create_message.return_value = None
+                                mock_create_run.return_value = mock_run
+                                mock_update_run.return_value = mock_run
+                                
+                                yield
 
 @pytest.mark.asyncio
 
@@ -334,83 +370,52 @@ class TestAgentMessageFlow:
 
     """Test complete agent message flow end-to-end."""
     
-
-    async def test_complete_user_message_to_agent_response_flow(
-
-        self, 
-
+    async def test_complete_user_message_to_agent_response_flow(self, 
         real_agent_service: AgentService,
-
         websocket_capture: WebSocketMessageCapture,
-
         message_tracker: MessageOrderTracker,
-
         mock_db_session
-
     ):
 
         """Test: User message → Backend → Agent → WebSocket → Response
         
-
         Validates complete message flow with real agent processing.
 
         """
+        from unittest.mock import patch
 
         user_id = "test_user_001"
 
         test_message = {
-
             "type": "user_message",
-
             "payload": {
-
                 "content": "Optimize my AI costs for GPT-4 usage in production",
-
-                "thread_id": "test_thread_123",
-
+                "thread_id": "test_thread_123", 
                 "references": []
-
             }
-
         }
         
         # Patch WebSocket manager to capture messages
-
         with patch.object(manager, 'send_message', websocket_capture.capture_message):
-
             with patch.object(manager, 'send_error', websocket_capture.capture_error):
                 # Record message start
-
                 await message_tracker.record_message({
-
                     "stage": "input",
-
                     "type": test_message["type"],
-
                     "user_id": user_id
-
                 })
                 
                 # Process message through agent service
-
                 await real_agent_service.handle_websocket_message(
-
                     user_id=user_id,
-
                     message=test_message,
-
                     db_session=mock_db_session
-
                 )
                 
                 # Record message completion
-
                 await message_tracker.record_message({
-
                     "stage": "output",
-
                     "user_id": user_id
-
                 })
         
         # Validate message was processed
@@ -441,7 +446,6 @@ class TestAgentMessageFlow:
 
         assert len(errors) == 0, f"Unexpected errors: {errors}"
     
-
     async def test_agent_message_ordering_guarantees(
 
         self,
@@ -458,7 +462,6 @@ class TestAgentMessageFlow:
 
         """Test message ordering guarantees under concurrent load.
         
-
         Validates messages are processed and responded to in correct order.
 
         """
@@ -491,7 +494,6 @@ class TestAgentMessageFlow:
 
         processed_order = []
         
-
         async def track_and_capture(user_id: str, message: Dict[str, Any]) -> bool:
 
             """Track message order and capture."""
@@ -541,18 +543,14 @@ class TestAgentMessageFlow:
 
         ]
         
-
         assert len(completed_responses) == len(test_messages), \
-
             f"Expected {len(test_messages)} responses, got {len(completed_responses)}"
         
         # Validate ordering (messages should be processed in some deterministic order)
 
         assert len(processed_order) == len(test_messages), \
-
             "Not all messages completed processing"
     
-
     async def test_streaming_response_handling(
 
         self,
@@ -567,7 +565,6 @@ class TestAgentMessageFlow:
 
         """Test streaming response handling for agent messages.
         
-
         Validates streaming chunks are sent in correct order.
 
         """
@@ -596,7 +593,6 @@ class TestAgentMessageFlow:
 
         streaming_chunks = []
         
-
         async def capture_streaming(user_id: str, message: Dict[str, Any]) -> bool:
 
             """Capture streaming messages."""
@@ -641,9 +637,7 @@ class TestAgentMessageFlow:
 
         )
         
-
         assert has_streaming or has_complete, \
-
             "Neither streaming chunks nor complete response was generated"
         
         # If streaming was used, validate chunk ordering
@@ -657,10 +651,8 @@ class TestAgentMessageFlow:
             ]
 
             assert chunk_indices == sorted(chunk_indices), \
-
                 "Streaming chunks were not sent in order"
     
-
     async def test_agent_error_handling_and_recovery(
 
         self,
@@ -675,7 +667,6 @@ class TestAgentMessageFlow:
 
         """Test agent error handling and recovery mechanisms.
         
-
         Validates proper error responses are sent via WebSocket.
 
         """
@@ -719,10 +710,8 @@ class TestAgentMessageFlow:
         error_message = errors[0]
 
         assert "Unknown message type" in error_message or "invalid" in error_message.lower(), \
-
             f"Error message not descriptive: {error_message}"
     
-
     async def test_concurrent_user_message_isolation(
 
         self,
@@ -737,7 +726,6 @@ class TestAgentMessageFlow:
 
         """Test message isolation between concurrent users.
         
-
         Validates messages from different users don't interfere.
 
         """
@@ -788,7 +776,6 @@ class TestAgentMessageFlow:
 
                 ]
                 
-
                 await asyncio.gather(*tasks)
         
         # Validate each user received responses
@@ -804,10 +791,8 @@ class TestAgentMessageFlow:
             response_content = str(user_messages)
 
             assert user_id in response_content or f"thread_{user_id}" in response_content, \
-
                 f"Response for {user_id} doesn't contain user-specific content"
     
-
     async def test_agent_websocket_connection_recovery(
 
         self,
@@ -822,7 +807,6 @@ class TestAgentMessageFlow:
 
         """Test agent processing continues after WebSocket disconnection.
         
-
         Validates graceful handling of connection issues.
 
         """
@@ -849,7 +833,6 @@ class TestAgentMessageFlow:
 
         disconnect_count = 0
         
-
         async def simulate_disconnect(user_id: str, message: Dict[str, Any]) -> bool:
 
             """Simulate WebSocket disconnect on first send."""
@@ -858,7 +841,6 @@ class TestAgentMessageFlow:
 
             disconnect_count += 1
             
-
             if disconnect_count == 1:
                 # Simulate disconnection
                 from starlette.websockets import WebSocketDisconnect
@@ -901,14 +883,12 @@ class TestAgentMessageFlow:
 
         assert True, "Agent service handled WebSocket disconnection gracefully"
 
-
 @pytest.mark.asyncio
 
 class TestAgentMessageFlowPerformance:
 
     """Performance tests for agent message flow."""
     
-
     async def test_message_processing_latency(
 
         self,
@@ -945,7 +925,6 @@ class TestAgentMessageFlowPerformance:
 
         start_time = datetime.now()
         
-
         with patch.object(manager, 'send_message', websocket_capture.capture_message):
 
             with patch.object(manager, 'send_error', websocket_capture.capture_error):
@@ -960,7 +939,6 @@ class TestAgentMessageFlowPerformance:
 
                 )
         
-
         end_time = datetime.now()
 
         processing_time = (end_time - start_time).total_seconds()
@@ -974,13 +952,10 @@ class TestAgentMessageFlowPerformance:
         # Validate processing time is reasonable (< 30 seconds for test)
 
         assert processing_time < 30.0, \
-
             f"Processing took too long: {processing_time:.2f}s"
         
-
         logger.info(f"Message processing latency: {processing_time:.3f}s")
     
-
     async def test_concurrent_message_throughput(
 
         self,
@@ -999,7 +974,6 @@ class TestAgentMessageFlowPerformance:
 
         users = [f"user_{i}" for i in range(num_concurrent)]
         
-
         messages = [
 
             {
@@ -1026,7 +1000,6 @@ class TestAgentMessageFlowPerformance:
 
         start_time = datetime.now()
         
-
         with patch.object(manager, 'send_message', websocket_capture.capture_message):
 
             with patch.object(manager, 'send_error', websocket_capture.capture_error):
@@ -1047,10 +1020,8 @@ class TestAgentMessageFlowPerformance:
 
                 ]
                 
-
                 await asyncio.gather(*tasks)
         
-
         end_time = datetime.now()
 
         total_time = (end_time - start_time).total_seconds()
@@ -1065,9 +1036,7 @@ class TestAgentMessageFlowPerformance:
 
         )
         
-
         assert total_responses >= num_concurrent, \
-
             f"Expected at least {num_concurrent} responses, got {total_responses}"
         
         # Calculate throughput

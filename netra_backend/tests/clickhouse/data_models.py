@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List
 
-
 @dataclass
 class LLMEvent:
     """Realistic LLM event data"""
@@ -28,7 +27,6 @@ class LLMEvent:
     response: str
     metadata: Dict[str, Any]
 
-
 @dataclass
 class WorkloadMetric:
     """Realistic workload metric data"""
@@ -37,7 +35,6 @@ class WorkloadMetric:
     workload_id: str
     metrics: Dict[str, List[Any]]  # name, value, unit arrays
     metadata: Dict[str, Any]
-
 
 @dataclass
 class LogEntry:

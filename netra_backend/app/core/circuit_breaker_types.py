@@ -19,9 +19,13 @@ class CircuitState(Enum):
     HALF_OPEN = "half_open"  # Testing recovery
 
 
+# Alias for compatibility with existing code
+CircuitBreakerState = CircuitState
+
+
 @dataclass
 class CircuitConfig:
-    """Circuit breaker configuration with production defaults."""
+    """Circuit breaker configuration with environment-aware defaults."""
     name: str
     failure_threshold: int = 5
     recovery_timeout: float = 30.0
@@ -29,6 +33,39 @@ class CircuitConfig:
     timeout_seconds: float = 10.0
     adaptive_threshold: bool = True
     slow_call_threshold: float = 5.0
+    
+    @classmethod
+    def create_for_environment(cls, name: str, environment: str = "production") -> 'CircuitConfig':
+        """Create circuit breaker config optimized for specific environment."""
+        env_configs = {
+            "development": {
+                "failure_threshold": 10,
+                "recovery_timeout": 30.0,
+                "half_open_max_calls": 5,
+                "timeout_seconds": 15.0
+            },
+            "staging": {
+                "failure_threshold": 8,
+                "recovery_timeout": 60.0,
+                "half_open_max_calls": 4,
+                "timeout_seconds": 12.0
+            },
+            "production": {
+                "failure_threshold": 5,
+                "recovery_timeout": 120.0,
+                "half_open_max_calls": 3,
+                "timeout_seconds": 10.0
+            },
+            "testing": {
+                "failure_threshold": 15,
+                "recovery_timeout": 5.0,
+                "half_open_max_calls": 10,
+                "timeout_seconds": 30.0
+            }
+        }
+        
+        config = env_configs.get(environment.lower(), env_configs["production"])
+        return cls(name=name, **config)
     
     def __post_init__(self) -> None:
         """Validate configuration parameters."""

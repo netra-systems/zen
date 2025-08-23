@@ -10,17 +10,10 @@ Tests database pool functionality:
 - Connection leak detection and cleanup
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import time
@@ -34,7 +27,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.pool import QueuePool, StaticPool
 
 from test_framework.mock_utils import mock_justified
-
 
 class DatabaseConnectionManager:
     """Mock database connection manager for integration testing."""
@@ -61,7 +53,6 @@ class DatabaseConnectionManager:
     async def get_health_info(self):
         return {'status': 'healthy', 'connection_count': 5, 'pool_size': 10}
 
-
 class DatabaseConnectivityMaster:
     """Mock database connectivity master for integration testing."""
     
@@ -73,7 +64,6 @@ class DatabaseConnectivityMaster:
         
     async def cleanup_all(self):
         pass
-
 
 class TestDatabasePoolIntegration:
     """Integration tests for database connection pool management."""
@@ -360,7 +350,6 @@ class TestDatabasePoolIntegration:
             return {'pool_type': type(pool).__name__, 'checked_out': getattr(pool, 'checkedout', lambda: 0)()}
         except Exception:
             return {}
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

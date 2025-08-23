@@ -9,17 +9,17 @@ import time
 from typing import Any, Callable, Optional, Tuple
 
 from netra_backend.app.agents.state import DeepAgentState
-from ..e2e.state_validation_utils import StateIntegrityChecker
-from .performance_analyzer import (
+from netra_backend.tests.e2e.state_validation_utils import StateIntegrityChecker
+from netra_backend.tests.e2e.validators.performance_analyzer import (
     BenchmarkComparator,
     RegressionDetector,
 )
-from .performance_measurer import (
+from netra_backend.tests.e2e.validators.performance_measurer import (
     LatencyMeasurer,
     ResourceMonitor,
     ThroughputTracker,
 )
-from .performance_metrics import (
+from netra_backend.tests.e2e.validators.performance_metrics import (
     BenchmarkComparison,
     LatencyMetrics,
     PerformanceRegression,
@@ -28,7 +28,6 @@ from .performance_metrics import (
     ResourceMetrics,
     ThroughputMetrics,
 )
-
 
 class PerformanceValidator:
     """Comprehensive performance validation framework."""

@@ -8,17 +8,10 @@ Tests critical paths including lifecycle management, WebSocket integration,
 error handling, and state transitions.
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
 from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
 
 import asyncio
 import time
@@ -27,13 +20,9 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from starlette.websockets import WebSocketDisconnect
 
-# Add project root to path
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
-
-# Add project root to path
-
+from netra_backend.app.schemas.Agent import SubAgentLifecycle
 
 # Test implementation of AgentLifecycleMixin
 class TestAgent(AgentLifecycleMixin):
@@ -46,7 +35,7 @@ class TestAgent(AgentLifecycleMixin):
         self.user_id = "test_user"
         self.start_time = time.time()
         self.end_time = None
-        self.state = SubAgentLifecycle.IDLE
+        self.state = SubAgentLifecycle.PENDING
         self.context = Mock()
         self.should_fail_execute = False
         self.should_fail_entry = False
@@ -77,13 +66,11 @@ class TestAgent(AgentLifecycleMixin):
         """Mock send update."""
         pass
 
-
 # Test fixtures for setup
 @pytest.fixture
 def test_agent():
     """Test agent instance."""
     return TestAgent()
-
 
 @pytest.fixture
 def deep_agent_state():
@@ -91,7 +78,6 @@ def deep_agent_state():
     state = Mock(spec=DeepAgentState)
     state.step_count = 0
     return state
-
 
 @pytest.fixture
 def mock_websocket_manager():
@@ -101,47 +87,39 @@ def mock_websocket_manager():
     manager.send_error = AsyncMock()
     return manager
 
-
 # Helper functions for 25-line compliance
 def assert_agent_state(agent, expected_state):
     """Assert agent is in expected state."""
     assert agent.state == expected_state
-
 
 def assert_execution_time_set(agent):
     """Assert agent execution time is set."""
     assert agent.end_time is not None
     assert agent.end_time >= agent.start_time
 
-
 def setup_agent_for_success(agent):
     """Set up agent for successful execution."""
     agent.should_fail_execute = False
     agent.should_fail_entry = False
 
-
 def setup_agent_for_failure(agent):
     """Set up agent for failed execution."""
     agent.should_fail_execute = True
 
-
 def setup_agent_for_entry_failure(agent):
     """Set up agent for failed entry conditions."""
     agent.should_fail_entry = True
-
 
 async def run_agent_successfully(agent, state, run_id="test_run"):
     """Run agent successfully."""
     setup_agent_for_success(agent)
     await agent.run(state, run_id, stream_updates=False)
 
-
 async def run_agent_with_failure(agent, state, run_id="test_run"):
     """Run agent with execution failure."""
     setup_agent_for_failure(agent)
     with pytest.raises(RuntimeError):
         await agent.run(state, run_id, stream_updates=False)
-
 
 # Core lifecycle functionality tests
 class TestLifecycleBasics:
@@ -193,7 +171,6 @@ class TestLifecycleBasics:
         assert status == "failed" 
         assert_agent_state(test_agent, SubAgentLifecycle.FAILED)
 
-
 class TestEntryConditions:
     """Test entry condition handling."""
 
@@ -237,7 +214,6 @@ class TestEntryConditions:
         # Should not raise exception
         await test_agent._send_entry_condition_warning("test_run", True)
 
-
 class TestExecutionFlow:
     """Test main execution flow."""
 
@@ -277,7 +253,6 @@ class TestExecutionFlow:
         initial_count = deep_agent_state.step_count
         await run_agent_successfully(test_agent, deep_agent_state)
         assert deep_agent_state.step_count == initial_count + 1
-
 
 class TestWebSocketIntegration:
     """Test WebSocket communication integration."""
@@ -340,7 +315,6 @@ class TestWebSocketIntegration:
         user_id = test_agent._get_websocket_user_id("test_run")
         assert user_id == "test_run"
 
-
 class TestErrorHandling:
     """Test error handling mechanisms."""
 
@@ -361,8 +335,12 @@ class TestErrorHandling:
         error = RuntimeError("Test error")
         test_agent._handle_execution_error = AsyncMock()
         
+        # Test the method within a proper exception context as it would be used in production
         with pytest.raises(RuntimeError, match="Test error"):
-            await test_agent._handle_and_reraise_error(error, deep_agent_state, "test_run", True)
+            try:
+                raise error
+            except RuntimeError as e:
+                await test_agent._handle_and_reraise_error(e, deep_agent_state, "test_run", True)
         test_agent._handle_execution_error.assert_called_once()
 
     @pytest.mark.asyncio
@@ -386,7 +364,6 @@ class TestErrorHandling:
         
         # Should not raise exception
         await test_agent._send_websocket_warning("test_run")
-
 
 class TestCleanupAndFinalization:
     """Test cleanup and finalization procedures."""
@@ -432,7 +409,6 @@ class TestCleanupAndFinalization:
         await test_agent._send_completion_update("test_run", False, "completed", 1.5)
         test_agent._send_update.assert_not_called()
 
-
 class TestIntegrationScenarios:
     """Test integration scenarios and edge cases."""
 
@@ -454,7 +430,7 @@ class TestIntegrationScenarios:
         first_count = deep_agent_state.step_count
         
         # Reset agent state
-        test_agent.state = SubAgentLifecycle.IDLE
+        test_agent.state = SubAgentLifecycle.PENDING
         
         # Second run
         await run_agent_successfully(test_agent, deep_agent_state)

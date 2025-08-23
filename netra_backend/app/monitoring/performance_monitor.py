@@ -17,10 +17,10 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
-from .dashboard import PerformanceDashboard
-from .models import MetricsCollector
-from .metrics_collector import PerformanceMetric
-from .performance_alerting import PerformanceAlertManager
+from netra_backend.app.monitoring.dashboard import PerformanceDashboard
+from netra_backend.app.monitoring.models import MetricsCollector
+from netra_backend.app.monitoring.metrics_collector import PerformanceMetric, MetricsCollector as MetricsCollectorImpl
+from netra_backend.app.monitoring.performance_alerting import PerformanceAlertManager
 
 logger = central_logger.get_logger(__name__)
 

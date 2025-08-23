@@ -3,21 +3,10 @@ OAuth Flow End-to-End Tests
 Business Value: $25K MRR - Critical authentication path validation
 """
 
-# Add project root to path
-
 from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
-from ..test_utils import setup_test_path
+from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-if str(PROJECT_ROOT) not in sys.path:
-
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
-setup_test_path()
 
 import asyncio
 import json
@@ -29,8 +18,6 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
-
-# Add project root to path
 
 # Import main app with error handling
 
@@ -52,14 +39,12 @@ except ImportError:
 
     SecurityService = Mock
 
-
 try:
     from netra_backend.app.clients.auth_client import auth_client
 
 except ImportError:
 
     auth_client = Mock()
-
 
 try:
     from netra_backend.app.schemas.auth_types import DevLoginRequest
@@ -73,14 +58,12 @@ except ImportError:
 
         name: str = "Development User"
 
-
 try:
     from netra_backend.app.auth_integration.auth import get_current_user
 
 except ImportError:
 
     get_current_user = Mock()
-
 
 @pytest.fixture
 
@@ -89,7 +72,6 @@ def test_client():
     """Create test client for OAuth flow testing"""
 
     return TestClient(app)
-
 
 @pytest.fixture
 
@@ -113,7 +95,6 @@ def mock_auth_client():
 
         yield mock
 
-
 @pytest.fixture
 
 def mock_security_service():
@@ -131,7 +112,6 @@ def mock_security_service():
     mock.validate_token = AsyncMock()
 
     return mock
-
 
 @pytest.fixture
 
@@ -153,12 +133,10 @@ def mock_websocket_manager():
 
         yield manager
 
-
 class TestOAuthCompleteFlow:
 
     """Test complete OAuth login sequence"""
     
-
     async def test_complete_oauth_login_flow(self, test_client, mock_auth_client):
 
         """
@@ -178,7 +156,6 @@ class TestOAuthCompleteFlow:
 
             }
             
-
             response = test_client.get("/api/auth/login?provider=google")
 
             assert response.status_code in [200, 302]  # Redirect or success
@@ -205,7 +182,6 @@ class TestOAuthCompleteFlow:
 
             }
             
-
             callback_response = test_client.get(
 
                 "/api/auth/callback?code=test_auth_code&state=test_state"
@@ -228,7 +204,6 @@ class TestOAuthCompleteFlow:
 
             }
             
-
             profile_response = test_client.get(
 
                 "/api/auth/me",
@@ -245,12 +220,10 @@ class TestOAuthCompleteFlow:
 
             assert profile_data["email"] == "test@example.com"
 
-
 class TestTokenGenerationAndValidation:
 
     """Test JWT token lifecycle"""
     
-
     async def test_token_generation_and_validation(self, mock_security_service):
 
         """
@@ -282,7 +255,6 @@ class TestTokenGenerationAndValidation:
 
         )
         
-
         assert access_token == "jwt_access_token"
 
         assert refresh_token == "jwt_refresh_token"
@@ -309,7 +281,6 @@ class TestTokenGenerationAndValidation:
 
         assert validation_result["user_id"] == "test_user"
         
-
     async def test_token_expiration_handling(self, mock_security_service):
 
         """Test expired token handling"""
@@ -323,22 +294,18 @@ class TestTokenGenerationAndValidation:
 
         }
         
-
         expired_token = "expired_jwt_token"
 
         validation_result = await mock_security_service.validate_token_jwt(expired_token)
         
-
         assert validation_result["valid"] is False
 
         assert "expired" in validation_result.get("error", "").lower()
-
 
 class TestWebSocketAuthentication:
 
     """Test WebSocket auth with JWT"""
     
-
     async def test_websocket_authentication(self, mock_websocket_manager):
 
         """
@@ -370,12 +337,10 @@ class TestWebSocketAuthentication:
 
         )
         
-
         assert auth_result["authenticated"] is True
 
         assert auth_result["user_id"] == "test_user"
         
-
     async def test_websocket_invalid_token_rejection(self, mock_websocket_manager):
 
         """Test WebSocket rejection of invalid tokens"""
@@ -399,17 +364,14 @@ class TestWebSocketAuthentication:
 
         )
         
-
         assert auth_result["authenticated"] is False
 
         assert "invalid" in auth_result.get("error", "").lower()
-
 
 class TestTokenRefreshFlow:
 
     """Test token refresh across services"""
     
-
     async def test_token_refresh_across_services(self, test_client, mock_security_service):
 
         """
@@ -461,19 +423,16 @@ class TestTokenRefreshFlow:
 
             }
             
-
             assert refresh_result["access_token"] == "new_access_token"
 
             assert refresh_result["refresh_token"] == "new_refresh_token"
 
             assert refresh_result["token_type"] == "Bearer"
 
-
 class TestOAuthErrorScenarios:
 
     """Test OAuth error handling scenarios"""
     
-
     async def test_oauth_provider_error(self, test_client, mock_auth_client):
 
         """Test OAuth provider error handling"""
@@ -483,13 +442,11 @@ class TestOAuthErrorScenarios:
 
             mock_login.side_effect = Exception("OAuth provider unavailable")
             
-
             response = test_client.get("/api/auth/login?provider=google")
             # Should handle error gracefully
 
             assert response.status_code in [500, 502, 503]
     
-
     async def test_invalid_authorization_code(self, test_client):
 
         """Test invalid authorization code handling"""
@@ -498,7 +455,6 @@ class TestOAuthErrorScenarios:
 
             mock_callback.side_effect = Exception("Invalid authorization code")
             
-
             response = test_client.get(
 
                 "/api/auth/callback?code=invalid_code&state=test_state"
@@ -508,7 +464,6 @@ class TestOAuthErrorScenarios:
 
             assert response.status_code in [400, 401, 500]
     
-
     async def test_state_parameter_validation(self, test_client):
 
         """Test CSRF protection via state parameter"""
@@ -519,12 +474,10 @@ class TestOAuthErrorScenarios:
 
         assert response.status_code in [400, 403]
 
-
 class TestCrossServiceTokenValidation:
 
     """Test token validation across different services"""
     
-
     async def test_auth_service_token_validation(self, mock_auth_client):
 
         """Test token validation through auth service"""
@@ -544,17 +497,14 @@ class TestCrossServiceTokenValidation:
 
             }
             
-
             token = "cross_service_token"
 
             validation_result = mock_validate(token)
             
-
             assert validation_result["valid"] is True
 
             assert validation_result["user_id"] == "test_user"
     
-
     async def test_backend_service_token_acceptance(self, test_client):
 
         """Test backend service accepts valid tokens from auth service"""
@@ -581,19 +531,16 @@ class TestCrossServiceTokenValidation:
 
             )
             
-
             assert response.status_code == 200
 
             user_data = response.json()
 
             assert user_data["authenticated"] is True
 
-
 class TestDevLoginFlow:
 
     """Test development login functionality"""
     
-
     async def test_dev_login_flow(self, test_client, mock_auth_client):
 
         """Test development mode login flow"""
@@ -601,7 +548,6 @@ class TestDevLoginFlow:
 
         mock_auth_client.detect_environment.return_value = Mock(value="development")
         
-
         dev_request = DevLoginRequest(
 
             email="dev@example.com",
@@ -610,7 +556,6 @@ class TestDevLoginFlow:
 
         )
         
-
         with patch('app.routes.auth_routes.dev_login.handle_dev_login') as mock_dev_login:
 
             mock_dev_login.return_value = {
@@ -631,7 +576,6 @@ class TestDevLoginFlow:
 
             }
             
-
             response = test_client.post(
 
                 "/api/auth/dev_login",
@@ -640,7 +584,6 @@ class TestDevLoginFlow:
 
             )
             
-
             assert response.status_code == 200
 
             data = response.json()
@@ -649,14 +592,12 @@ class TestDevLoginFlow:
 
             assert data["user"]["email"] == "dev@example.com"
 
-
 @pytest.mark.integration
 
 class TestOAuthIntegrationFlow:
 
     """Integration tests for complete OAuth flow"""
     
-
     async def test_end_to_end_oauth_integration(self, test_client):
 
         """
@@ -702,7 +643,6 @@ class TestOAuthIntegrationFlow:
             # Verify response indicates successful authentication
 
             assert response.status_code in [200, 302]
-
 
 if __name__ == "__main__":
     # Run specific test for debugging

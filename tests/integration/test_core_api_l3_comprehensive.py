@@ -17,7 +17,6 @@ import httpx
 import pytest
 
 # Add app to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../app'))
 
 # Mock classes for testing
 from fastapi import FastAPI

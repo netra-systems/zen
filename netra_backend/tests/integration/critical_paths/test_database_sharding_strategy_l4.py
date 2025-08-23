@@ -12,17 +12,10 @@ Shard key selection -> Data distribution -> Cross-shard queries -> Shard rebalan
 Coverage: Real PostgreSQL sharding, ClickHouse distribution, cross-shard joins, rebalancing operations, staging validation
 """
 
-# Add project root to path
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import hashlib
@@ -33,8 +26,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-# Add project root to path
-from ..e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 
 import pytest
@@ -45,17 +37,15 @@ StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 from netra_backend.app.core.health_checkers import HealthChecker
 from netra_backend.app.db.client_clickhouse import ClickHouseClient
-from netra_backend.app.db.models_content import Message, Thread
-from netra_backend.app.db.models_user import User, UserPlan
-from netra_backend.app.db.postgres import AsyncSessionLocal, get_async_session
-
+from netra_backend.app.db.models_agent import Message, Thread
+from netra_backend.app.db.models_user import User
+from netra_backend.app.db.postgres import async_session_factory as AsyncSessionLocal, get_async_db as get_async_session
 
 # Mock sharding components for L4 testing
 class ShardingManager:
     """Mock sharding manager for L4 testing."""
     async def initialize(self): pass
     async def shutdown(self): pass
-
 
 class CrossShardQueryEngine:
     """Mock cross-shard query engine for L4 testing."""
@@ -64,7 +54,6 @@ class CrossShardQueryEngine:
     
     async def execute_distributed_query(self, query: str, target_shards: List[str]) -> Dict[str, Any]:
         return {"success": True, "shard_sources": target_shards, "results": []}
-
 
 class ShardRebalancer:
     """Mock shard rebalancer for L4 testing."""
@@ -77,7 +66,6 @@ class ShardRebalancer:
     async def execute_rebalancing(self, migration_plan: Dict) -> Dict[str, Any]:
         return {"success": True}
 
-
 @dataclass
 class ShardingMetrics:
     """Metrics container for sharding strategy testing."""
@@ -88,7 +76,6 @@ class ShardingMetrics:
     consistency_violation_count: int
     query_performance_degradation: float
 
-
 @dataclass 
 class ShardInfo:
     """Shard information container."""
@@ -98,7 +85,6 @@ class ShardInfo:
     size_bytes: int
     health_status: str
     last_accessed: float
-
 
 class DatabaseShardingL4TestSuite:
     """L4 test suite for database sharding strategy in staging environment."""
@@ -665,7 +651,6 @@ class DatabaseShardingL4TestSuite:
         except Exception as e:
             print(f"Failed to cleanup shard {shard.shard_id}: {e}")
 
-
 @pytest.fixture
 async def database_sharding_l4_suite():
     """Create L4 database sharding test suite."""
@@ -673,7 +658,6 @@ async def database_sharding_l4_suite():
     await suite.initialize_l4_environment()
     yield suite
     await suite.cleanup_l4_resources()
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -703,7 +687,6 @@ async def test_data_distribution_across_shards_l4(database_sharding_l4_suite):
     # Validate distribution time performance
     assert distribution_results["distribution_time"] < 30.0, "Data distribution took too long"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging  
 @pytest.mark.l4
@@ -726,7 +709,6 @@ async def test_cross_shard_query_operations_l4(database_sharding_l4_suite):
     if query_results.get("max_query_latency"):
         assert query_results["max_query_latency"] < 30.0, "Maximum cross-shard query latency too high"
 
-
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
@@ -748,7 +730,6 @@ async def test_shard_rebalancing_operations_l4(database_sharding_l4_suite):
     
     # Validate rebalancing performance
     assert rebalancing_results["rebalancing_time"] < 60.0, "Shard rebalancing took too long"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -777,7 +758,6 @@ async def test_shard_health_monitoring_l4(database_sharding_l4_suite):
             response_time = health_check["health_result"].get("response_time", 0)
             if response_time > 0:
                 assert time.time() - response_time < 5.0, "Health check response time too slow"
-
 
 @pytest.mark.asyncio
 @pytest.mark.staging
@@ -813,7 +793,6 @@ async def test_sharding_performance_under_load_l4(database_sharding_l4_suite):
     
     # Validate large dataset handling
     assert large_dataset_results["insertion_success_rate"] >= 0.95, "Large dataset insertion success rate too low"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

@@ -7,7 +7,6 @@ import asyncio
 from datetime import datetime
 from typing import Any, Callable, Dict, List
 
-
 class DebugTestHelpers:
     """Helper functions for debug utility testing."""
     
@@ -26,7 +25,6 @@ class DebugTestHelpers:
             data = [i for i in range(1000000)]
             return len(data)
         return memory_intensive
-
 
 class MigrationTestHelpers:
     """Helper functions for migration utility testing."""

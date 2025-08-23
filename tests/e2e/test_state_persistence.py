@@ -44,7 +44,6 @@ from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)
 
-
 class StatePersistenceTester:
     """Core state persistence testing with conversation continuity focus."""
     
@@ -104,7 +103,6 @@ class StatePersistenceTester:
                .with_authentication(token)
                .build())
 
-
 class ConversationContextValidator:
     """Validates conversation context preservation during reconnection."""
     
@@ -142,7 +140,6 @@ class ConversationContextValidator:
     def _verify_preference_retention(self, before: Dict[str, Any], after: Dict[str, Any]) -> bool:
         """Verify user preferences retained."""
         return before["user_preferences"] == after["user_preferences"]
-
 
 class ReconnectionStateManager:
     """Manages state persistence during WebSocket reconnection scenarios."""
@@ -187,7 +184,6 @@ class ReconnectionStateManager:
             "timestamp": datetime.now(timezone.utc).isoformat()
         })
 
-
 # ============================================================================
 # PHASE 9 STATE PERSISTENCE CRITICAL TEST CASES
 # ============================================================================
@@ -197,18 +193,15 @@ def persistence_tester():
     """State persistence tester fixture."""
     return StatePersistenceTester()
 
-
 @pytest.fixture
 def context_validator(persistence_tester):
     """Conversation context validator fixture."""
     return ConversationContextValidator(persistence_tester)
 
-
 @pytest.fixture
 def reconnection_manager(persistence_tester):
     """Reconnection state manager fixture."""
     return ReconnectionStateManager(persistence_tester)
-
 
 @pytest.fixture
 def mock_db_session():
@@ -218,9 +211,8 @@ def mock_db_session():
     session.begin.return_value.__aexit__ = AsyncMock()
     return session
 
-
 @pytest.mark.asyncio
-async def test_agent_state_persistence_across_reconnect(persistence_tester, context_validator,
+async def test_agent_state_persistence_across_reconnect(persistence_tester, context_validator:
                                                        reconnection_manager, mock_db_session):
     """Test agent remembers context across WebSocket reconnection."""
     # BVJ: State persistence essential for premium user experience continuity
@@ -276,9 +268,8 @@ async def test_agent_state_persistence_across_reconnect(persistence_tester, cont
     unique_messages = set(msg["data"] for msg in message_history if msg["type"] == "json")
     assert len(message_history) == len(unique_messages), "No duplicate message processing"
 
-
 @pytest.mark.asyncio
-async def test_conversation_history_continuity(persistence_tester, context_validator,
+async def test_conversation_history_continuity(persistence_tester, context_validator:
                                               mock_db_session):
     """Test conversation history remains accessible after reconnection."""
     # BVJ: History continuity critical for seamless user experience
@@ -313,7 +304,6 @@ async def test_conversation_history_continuity(persistence_tester, context_valid
         assert restored_state.messages[-1]["content"].startswith("Based on our analysis"), \
             "Latest context must be preserved"
 
-
 @pytest.mark.asyncio
 async def test_user_preferences_persistence(persistence_tester, mock_db_session):
     """Test user preferences maintained across sessions."""
@@ -347,9 +337,8 @@ async def test_user_preferences_persistence(persistence_tester, mock_db_session)
         assert restored_context["notification_style"] == "detailed", "New preferences must persist"
         assert restored_context["analysis_frequency"] == "daily", "Updated preferences must be saved"
 
-
 @pytest.mark.asyncio  
-async def test_agent_decision_consistency(persistence_tester, reconnection_manager,
+async def test_agent_decision_consistency(persistence_tester, reconnection_manager:
                                          mock_db_session):
     """Test agent decisions remain consistent after reconnection."""  
     # BVJ: Decision consistency prevents user confusion and builds trust
@@ -383,7 +372,6 @@ async def test_agent_decision_consistency(persistence_tester, reconnection_manag
             "Agent decisions must remain consistent"
         assert restored_context["confidence_score"] == 0.85, \
             "Decision confidence must be preserved"
-
 
 @pytest.mark.asyncio
 async def test_concurrent_state_operations(persistence_tester, mock_db_session):

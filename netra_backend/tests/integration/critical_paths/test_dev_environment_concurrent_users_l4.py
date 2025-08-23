@@ -19,9 +19,7 @@ BVJ:
 - Strategic Impact: Foundation for enterprise adoption and revenue scaling
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
-setup_test_path()
+# Test framework import - using pytest fixtures instead
 
 import asyncio
 import concurrent.futures
@@ -40,10 +38,6 @@ import aiohttp
 import psutil
 import pytest
 import websockets
-
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Service URLs
 AUTH_SERVICE_URL = "http://localhost:8081"
@@ -94,7 +88,6 @@ CONCURRENT_SCENARIOS = [
         "operations": ["login", "create_thread", "send_message", "get_profile"]
     }
 ]
-
 
 class ConcurrentUserTester:
     """Test concurrent user functionality and isolation."""
@@ -831,7 +824,6 @@ class ConcurrentUserTester:
         
         return all_results
 
-
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.level_4
@@ -907,7 +899,6 @@ async def test_dev_environment_concurrent_users():
         
         print("\n[SUCCESS] Concurrent user tests completed!")
 
-
 async def main():
     """Run the test standalone."""
     if sys.platform == "win32":
@@ -938,7 +929,6 @@ async def main():
             return 0
         else:
             return 1
-
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

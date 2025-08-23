@@ -190,7 +190,7 @@ class ROICalculator:
     
     def _estimate_value_timeline(self, commits: List[CommitInfo]) -> str:
         """Estimate value realization timeline."""
-        from .business_core import BusinessConstants
+        from netra_backend.app.services.factory_status.business_core import BusinessConstants
         
         customer_facing = sum(1 for c in commits if self._is_customer_facing_commit(c))
         total_commits = len(commits)
@@ -203,7 +203,7 @@ class ROICalculator:
     
     def _is_customer_facing_commit(self, commit: CommitInfo) -> bool:
         """Check if commit affects customer-facing components."""
-        from .business_core import BusinessConstants
+        from netra_backend.app.services.factory_status.business_core import BusinessConstants
         return any(pattern in commit.message.lower() for pattern in BusinessConstants.CUSTOMER_FACING_PATTERNS)
 
 

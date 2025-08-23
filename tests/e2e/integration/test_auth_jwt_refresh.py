@@ -27,10 +27,9 @@ import logging
 import pytest
 import time
 
+from tests.e2e.integration.test_auth_jwt_generation import (
     JWTGenerationTestManager,
-
     TokenSet,
-
 )
 
 
@@ -366,15 +365,12 @@ class TestJWTRefresh:
         # Validate new tokens are different
 
         assert new_token_set.access_token != original_token_set.access_token, \
-
             "New access token should be different"
 
         assert new_token_set.refresh_token != original_token_set.refresh_token, \
-
             "New refresh token should be different"
 
         assert new_token_set.user_id == original_token_set.user_id, \
-
             "User ID should remain same"
         
         # Validate new tokens work
@@ -437,11 +433,9 @@ class TestJWTRefresh:
         # Validate service-specific behavior
 
         assert refresh_validation["auth_service_validates"], \
-
             "Auth service should validate refresh tokens"
 
         assert refresh_validation["backend_rejects"], \
-
             "Backend service should reject refresh tokens for API access"
         
 
@@ -477,7 +471,6 @@ class TestJWTRefresh:
         assert not validation_results["not_expired"], "Expired refresh token should be detected"
 
         assert not validation_results.get("auth_service_validates", True), \
-
             "Auth service should reject expired refresh tokens"
         
         # Try to use expired refresh token in flow (should fail)
@@ -536,11 +529,9 @@ class TestJWTRefresh:
         # Should detect invalid signature
 
         assert not validation_results["valid_structure"], \
-
             "Invalid refresh token should be detected"
 
         assert "jwt_error" in validation_results or "error" in validation_results, \
-
             "Should have JWT validation error"
         
         # Try to use invalid refresh token in flow (should fail)
@@ -645,7 +636,6 @@ class TestJWTRefresh:
         # Validate refresh history
 
         assert len(jwt_manager.refresh_history) == refresh_count, \
-
             "Should track correct number of refreshes"
         
 
@@ -693,26 +683,21 @@ class TestJWTRefresh:
         # Validate timing progression
 
         assert new_access_info["issued_at"] > original_access_info["issued_at"], \
-
             "New access token should have later issue time"
 
         assert new_access_info["expires_at"] > original_access_info["expires_at"], \
-
             "New access token should have later expiry time"
         
 
         assert new_refresh_info["issued_at"] > original_refresh_info["issued_at"], \
-
             "New refresh token should have later issue time"
 
         assert new_refresh_info["expires_at"] > original_refresh_info["expires_at"], \
-
             "New refresh token should have later expiry time"
         
         # Validate expiry relationships
 
         assert new_access_info["expires_at"] < new_refresh_info["expires_at"], \
-
             "Access token should expire before refresh token"
         
         # Calculate time differences
@@ -729,11 +714,9 @@ class TestJWTRefresh:
         
 
         assert abs(access_duration - expected_access_duration) < 60, \
-
             "Access token duration should be approximately 15 minutes"
 
         assert abs(refresh_duration - expected_refresh_duration) < 3600, \
-
             "Refresh token duration should be approximately 7 days"
         
 
