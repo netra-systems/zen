@@ -18,7 +18,7 @@ import yaml
 from test_framework.archived.duplicates.docker_testing.compose_manager import DockerComposeManager
 from test_framework.archived.duplicates.gcp_integration.log_reader import GCPLogReader
 from test_framework.archived.duplicates.staging_testing.endpoint_validator import StagingEndpointValidator
-from .base_interfaces import (
+from test_framework.archived.duplicates.unified.base_interfaces import (
     BaseTestComponent,
     IContainerManager,
     IDeploymentValidator,

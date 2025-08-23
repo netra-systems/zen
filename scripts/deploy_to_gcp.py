@@ -113,7 +113,7 @@ class GCPDeployer:
                 port=3000,
                 dockerfile="Dockerfile.frontend",
                 cloud_run_name="netra-frontend-staging",
-                memory="512Mi",
+                memory="1Gi",
                 cpu="1",
                 min_instances=0,
                 max_instances=10,
@@ -534,6 +534,18 @@ CMD ["npm", "start"]
         for key, value in service.environment_vars.items():
             env_vars.append(f"{key}={value}")
         
+        # Add service-specific environment variables
+        if service.name == "frontend":
+            # Frontend needs API URLs - use staging URLs for consistent configuration
+            staging_api_url = "https://api.staging.netrasystems.ai"
+            staging_auth_url = "https://auth.staging.netrasystems.ai"
+            staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
+            env_vars.extend([
+                f"NEXT_PUBLIC_API_URL={staging_api_url}",
+                f"NEXT_PUBLIC_AUTH_URL={staging_auth_url}",
+                f"NEXT_PUBLIC_WS_URL={staging_ws_url}"
+            ])
+        
         if env_vars:
             cmd.extend(["--set-env-vars", ",".join(env_vars)])
         
@@ -549,17 +561,6 @@ CMD ["npm", "start"]
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
                 "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest"
-            ])
-        elif service.name == "frontend":
-            # Frontend needs API URLs - use staging URLs for consistent configuration
-            # These will be the final Cloud Run URLs or use predefined staging domains
-            staging_api_url = "https://api.staging.netrasystems.ai"
-            staging_auth_url = "https://auth.staging.netrasystems.ai"
-            staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
-            
-            cmd.extend([
-                "--update-env-vars",
-                f"NEXT_PUBLIC_API_URL={staging_api_url},NEXT_PUBLIC_AUTH_URL={staging_auth_url},NEXT_PUBLIC_WS_URL={staging_ws_url}"
             ])
         
         try:

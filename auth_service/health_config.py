@@ -1,14 +1,18 @@
 """
 Auth service health check configuration.
-Sets up all health checks for the auth service using the unified health system.
+Simplified standalone health checks for auth service.
 """
 
 import os
 from typing import Dict, Any
+from enum import Enum
 
-from netra_backend.app.services.unified_health_service import UnifiedHealthService
-from netra_backend.app.services.health_registry import health_registry
-from netra_backend.app.core.health_types import HealthCheckConfig, CheckType, HealthStatus
+
+class HealthStatus(Enum):
+    """Health status values"""
+    HEALTHY = "healthy"
+    DEGRADED = "degraded"
+    UNHEALTHY = "unhealthy"
 
 
 async def check_auth_postgres_health() -> Dict[str, Any]:
@@ -67,7 +71,7 @@ async def check_oauth_providers_health() -> Dict[str, Any]:
 async def check_jwt_configuration() -> Dict[str, Any]:
     """Check JWT configuration and secret key."""
     try:
-        secret_key = os.getenv("SECRET_KEY")
+        secret_key = os.getenv("SECRET_KEY") or os.getenv("JWT_SECRET_KEY")
         algorithm = os.getenv("ALGORITHM", "HS256")
         
         if not secret_key:
@@ -94,48 +98,27 @@ async def check_jwt_configuration() -> Dict[str, Any]:
         }
 
 
-async def setup_auth_health_service() -> UnifiedHealthService:
-    """Configure health checks for the auth service."""
+# Simplified health check setup - auth service is independent
+async def get_auth_health() -> Dict[str, Any]:
+    """Get overall health status of auth service."""
+    health_checks = {
+        "database": await check_auth_postgres_health(),
+        "jwt": await check_jwt_configuration(),
+        "oauth": await check_oauth_providers_health()
+    }
     
-    health_service = UnifiedHealthService("auth_service", "1.0.0")
+    # Determine overall status
+    overall_status = HealthStatus.HEALTHY.value
+    for check in health_checks.values():
+        if check["status"] == HealthStatus.UNHEALTHY.value:
+            overall_status = HealthStatus.UNHEALTHY.value
+            break
+        elif check["status"] == HealthStatus.DEGRADED.value and overall_status == HealthStatus.HEALTHY.value:
+            overall_status = HealthStatus.DEGRADED.value
     
-    # Critical infrastructure checks
-    await health_service.register_check(HealthCheckConfig(
-        name="postgres",
-        description="PostgreSQL database for auth",
-        check_function=check_auth_postgres_health,
-        timeout_seconds=10.0,
-        check_type=CheckType.READINESS,
-        critical=True,
-        priority=1,  # Critical
-        labels={"component": "database", "service": "auth"}
-    ))
-    
-    # JWT configuration check
-    await health_service.register_check(HealthCheckConfig(
-        name="jwt_configuration",
-        description="JWT token configuration",
-        check_function=check_jwt_configuration,
-        timeout_seconds=2.0,
-        check_type=CheckType.READINESS,
-        critical=True,
-        priority=1,  # Critical for auth service
-        labels={"component": "security", "service": "auth"}
-    ))
-    
-    # OAuth provider checks
-    await health_service.register_check(HealthCheckConfig(
-        name="oauth_providers",
-        description="OAuth provider connectivity",
-        check_function=check_oauth_providers_health,
-        timeout_seconds=5.0,
-        check_type=CheckType.COMPONENT,
-        critical=False,
-        priority=2,  # Important but not critical
-        labels={"component": "oauth", "service": "auth"}
-    ))
-    
-    # Register with global registry
-    health_registry.register_service("auth_service", health_service)
-    
-    return health_service
+    return {
+        "status": overall_status,
+        "service": "auth_service",
+        "version": "1.0.0",
+        "checks": health_checks
+    }
