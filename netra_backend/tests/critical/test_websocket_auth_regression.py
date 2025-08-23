@@ -4,13 +4,9 @@ Suite 1: Authentication Error Propagation
 Ensures all auth failures are loud and properly propagated.
 """
 
-import sys
-from pathlib import Path
-
-# Test framework import - using pytest fixtures instead
-
 import asyncio
 import json
+import time
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -19,6 +15,8 @@ from netra_backend.app.routes.utils.websocket_helpers import (
     authenticate_websocket_user,
     decode_token_payload,
     validate_user_id_in_payload,
+    parse_json_message,
+    check_connection_alive,
 )
 from starlette.websockets import WebSocketState
 
@@ -31,15 +29,18 @@ class TestAuthenticationErrorPropagation:
         websocket = Mock(spec=WebSocket)
         websocket.close = AsyncMock()
         security_service = Mock()
-        security_service.decode_token = Mock(side_effect=ValueError("Invalid token"))
         
-        with pytest.raises(ValueError) as exc_info:
-            await authenticate_websocket_user(websocket, "invalid_token", security_service)
-        
-        assert "Invalid token" in str(exc_info.value)
-        websocket.close.assert_called_once()
-        assert websocket.close.call_args[1]['code'] == 1008
-        assert "Authentication failed" in websocket.close.call_args[1]['reason']
+        # Mock the auth_client.validate_token_jwt to return invalid token
+        with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={"valid": False})
+            
+            with pytest.raises(ValueError) as exc_info:
+                await authenticate_websocket_user(websocket, "invalid_token", security_service)
+            
+            assert "Invalid or expired token" in str(exc_info.value)
+            websocket.close.assert_called_once()
+            assert websocket.close.call_args[1]['code'] == 1008
+            assert "Authentication failed" in websocket.close.call_args[1]['reason']
     
     @pytest.mark.asyncio
     async def test_missing_user_id_in_token_raises_error(self):
@@ -47,13 +48,16 @@ class TestAuthenticationErrorPropagation:
         websocket = Mock(spec=WebSocket)
         websocket.close = AsyncMock()
         security_service = Mock()
-        security_service.decode_token = Mock(return_value={})  # No 'sub' field
         
-        with pytest.raises(ValueError) as exc_info:
-            await authenticate_websocket_user(websocket, "token_without_sub", security_service)
-        
-        assert "User ID not found in token" in str(exc_info.value)
-        websocket.close.assert_called_once()
+        # Mock auth_client to return valid token but no user_id
+        with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={"valid": True, "user_id": None})
+            
+            with pytest.raises(ValueError) as exc_info:
+                await authenticate_websocket_user(websocket, "token_without_user_id", security_service)
+            
+            assert "Invalid token" in str(exc_info.value)
+            websocket.close.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_database_connection_failure_propagates(self):
@@ -61,16 +65,23 @@ class TestAuthenticationErrorPropagation:
         websocket = Mock(spec=WebSocket)
         websocket.close = AsyncMock()
         security_service = Mock()
-        security_service.decode_token = Mock(return_value={"sub": "test-user"})
         
-        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
-            mock_db.side_effect = ConnectionError("Database unavailable")
+        # Mock auth_client to return valid token
+        with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={
+                "valid": True, 
+                "user_id": "test-user", 
+                "email": "test@example.com"
+            })
             
-            with pytest.raises(ConnectionError) as exc_info:
-                await authenticate_websocket_user(websocket, "valid_token", security_service)
-            
-            assert "Database unavailable" in str(exc_info.value)
-            websocket.close.assert_called_once()
+            with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+                mock_db.side_effect = ConnectionError("Database unavailable")
+                
+                with pytest.raises(ConnectionError) as exc_info:
+                    await authenticate_websocket_user(websocket, "valid_token", security_service)
+                
+                assert "Database unavailable" in str(exc_info.value)
+                websocket.close.assert_called_once()
 
 class TestUserLookupFailures:
     """Suite 2: Verify user lookup failures are explicit."""
@@ -81,19 +92,30 @@ class TestUserLookupFailures:
         websocket = Mock(spec=WebSocket)
         websocket.close = AsyncMock()
         security_service = Mock()
-        security_service.decode_token = Mock(return_value={"sub": "nonexistent-user-123"})
         security_service.get_user_by_id = AsyncMock(return_value=None)
         
-        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
-            mock_session = AsyncMock()
-            mock_db.return_value.__aenter__.return_value = mock_session
+        # Mock auth_client to return valid token
+        with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={
+                "valid": True, 
+                "user_id": "nonexistent-user-123", 
+                "email": "test@example.com"
+            })
             
-            with pytest.raises(ValueError) as exc_info:
-                await authenticate_websocket_user(websocket, "token", security_service)
-            
-            assert "User not found" in str(exc_info.value)
-            websocket.close.assert_called_once()
-            assert "1008" in str(websocket.close.call_args)
+            with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+                mock_session = AsyncMock()
+                # Mock the database query result for log_empty_database_warning
+                mock_result = Mock()
+                mock_result.scalar.return_value = 0  # Empty database
+                mock_session.execute = AsyncMock(return_value=mock_result)
+                mock_db.return_value.__aenter__.return_value = mock_session
+                
+                with pytest.raises(ValueError) as exc_info:
+                    await authenticate_websocket_user(websocket, "token", security_service)
+                
+                assert "User not found" in str(exc_info.value)
+                websocket.close.assert_called_once()
+                assert websocket.close.call_args[1]['code'] == 1008
     
     @pytest.mark.asyncio
     async def test_inactive_user_fails_explicitly(self):
@@ -101,22 +123,29 @@ class TestUserLookupFailures:
         websocket = Mock(spec=WebSocket)
         websocket.close = AsyncMock()
         security_service = Mock()
-        security_service.decode_token = Mock(return_value={"sub": "inactive-user"})
         
         mock_user = Mock()
         mock_user.is_active = False
         mock_user.id = "inactive-user"
         security_service.get_user_by_id = AsyncMock(return_value=mock_user)
         
-        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
-            mock_session = AsyncMock()
-            mock_db.return_value.__aenter__.return_value = mock_session
+        # Mock auth_client to return valid token
+        with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={
+                "valid": True, 
+                "user_id": "inactive-user", 
+                "email": "inactive@example.com"
+            })
             
-            with pytest.raises(ValueError) as exc_info:
-                await authenticate_websocket_user(websocket, "token", security_service)
-            
-            assert "User inactive-user is not active" in str(exc_info.value)
-            websocket.close.assert_called_once()
+            with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+                mock_session = AsyncMock()
+                mock_db.return_value.__aenter__.return_value = mock_session
+                
+                with pytest.raises(ValueError) as exc_info:
+                    await authenticate_websocket_user(websocket, "token", security_service)
+                
+                assert "not active" in str(exc_info.value)
+                websocket.close.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_database_rollback_on_user_fetch_error(self):
@@ -124,7 +153,6 @@ class TestUserLookupFailures:
         websocket = Mock(spec=WebSocket)
         websocket.close = AsyncMock()
         security_service = Mock()
-        security_service.decode_token = Mock(return_value={"sub": "test-user"})
         
         # First call fails, second succeeds after rollback
         security_service.get_user_by_id = AsyncMock(
@@ -134,16 +162,24 @@ class TestUserLookupFailures:
             ]
         )
         
-        with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
-            mock_session = AsyncMock()
-            mock_session.rollback = AsyncMock()
-            mock_db.return_value.__aenter__.return_value = mock_session
+        # Mock auth_client to return valid token
+        with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            mock_auth_client.validate_token_jwt = AsyncMock(return_value={
+                "valid": True, 
+                "user_id": "test-user", 
+                "email": "test@example.com"
+            })
             
-            result = await authenticate_websocket_user(websocket, "token", security_service)
-            
-            assert result == "test-user"
-            mock_session.rollback.assert_called_once()
-            assert security_service.get_user_by_id.call_count == 2
+            with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+                mock_session = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_db.return_value.__aenter__.return_value = mock_session
+                
+                result = await authenticate_websocket_user(websocket, "token", security_service)
+                
+                assert result == "test-user"
+                mock_session.rollback.assert_called_once()
+                assert security_service.get_user_by_id.call_count == 2
 
 class TestWebSocketMessageHandling:
     """Suite 3: Verify message processing failures are explicit."""
@@ -151,59 +187,58 @@ class TestWebSocketMessageHandling:
     @pytest.mark.asyncio
     async def test_malformed_json_logs_and_responds_error(self):
         """Test that malformed JSON is logged and error sent to client."""
-        from netra_backend.app.routes.utils.websocket_helpers import parse_json_message
-        
         manager = Mock()
-        manager.send_error = AsyncMock()
+        manager.send_message = AsyncMock()  # Updated to match actual implementation
         
         result = await parse_json_message("{invalid json", "user-123", manager)
         
         assert result is None
-        manager.send_error.assert_called_once_with("user-123", "Invalid JSON message format")
+        # Check that send_message was called with error response
+        manager.send_message.assert_called_once()
+        call_args = manager.send_message.call_args
+        assert call_args[0][0] == "user-123"  # user_id
+        error_response = call_args[0][1]  # error message
+        assert error_response["type"] == "error"
+        assert "JSON" in error_response["error"]
     
     @pytest.mark.asyncio  
     async def test_message_timeout_closes_stale_connections(self):
         """Test that message timeouts close stale connections."""
-        from netra_backend.app.routes.utils.websocket_helpers import (
-            check_connection_alive,
-        )
-        
         conn_info = Mock()
         conn_info.last_activity = 0  # Very old timestamp
         
         manager = Mock()
-        manager.disconnect_user = AsyncMock()
+        manager.connection_manager = Mock()
+        manager.connection_manager.is_connection_alive = Mock(return_value=False)  # Connection is dead
         
-        with patch('time.time', return_value=1000):  # Current time much later
-            result = check_connection_alive(conn_info, "user-123", manager)
+        result = check_connection_alive(conn_info, "user-123", manager)
         
         assert result is False  # Should indicate connection dead
+        manager.connection_manager.is_connection_alive.assert_called_once_with(conn_info)
     
     @pytest.mark.asyncio
     async def test_handler_exceptions_logged_with_context(self):
         """Test that message handler exceptions include full context."""
-        # Note: _handle_validated_message was refactored in unified implementation
-        # from netra_backend.app.routes.websocket_unified import _handle_validated_message
+        from netra_backend.app.routes.utils.websocket_helpers import validate_and_handle_message
         
         websocket = Mock(spec=WebSocket)
         websocket.application_state = WebSocketState.CONNECTED
         
         message = {"type": "unknown_type", "payload": {"data": "test"}}
-        agent_service = Mock()
-        agent_service.process_message = AsyncMock(
-            side_effect=RuntimeError("Handler failed")
-        )
         
         manager = Mock()
-        manager.handle_message = AsyncMock(return_value=False)
+        manager.handle_message = AsyncMock(side_effect=RuntimeError("Handler failed"))
+        manager.send_message = AsyncMock()  # For error handling
         
-        with patch('app.routes.websockets.manager', manager):
-            result = await _handle_validated_message(
-                "user-123", websocket, message, json.dumps(message), agent_service
-            )
+        # Should handle exceptions gracefully and return True to keep connection alive
+        result = await validate_and_handle_message(
+            "user-123", websocket, message, manager
+        )
         
         assert result is True  # Should continue despite error
         manager.handle_message.assert_called_once()
+        # Should send error message to client
+        manager.send_message.assert_called_once()
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

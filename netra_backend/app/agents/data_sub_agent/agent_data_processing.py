@@ -16,10 +16,10 @@ class DataProcessor:
         """Process data and stream results via WebSocket for real-time updates."""
         try:
             result = await self.agent.analysis_engine.process_data(data)
-            response = {"type": "data_result", "data": result, "processed": True}
+            response = {"type": "data_result", "payload": {"data": result, "processed": True}}
             await websocket.send(json.dumps(response))
         except Exception as e:
-            await websocket.send(json.dumps({"type": "error", "message": str(e)}))
+            await websocket.send(json.dumps({"type": "error", "payload": {"error": str(e)}}))
 
     def _validate_data(self, data: Dict[str, Any]) -> bool:
         """Validate data has required fields."""

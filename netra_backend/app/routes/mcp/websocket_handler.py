@@ -55,7 +55,7 @@ class MCPWebSocketHandler:
         """Send session created message"""
         await websocket.send_json({
             "type": "session_created",
-            "session_id": session_id
+            "payload": {"session_id": session_id}
         })
     
     async def _handle_messages(self, websocket: WebSocket, session_id: str) -> None:
@@ -170,9 +170,11 @@ def _build_websocket_response(session_id: str) -> dict:
     """Build WebSocket response message"""
     return {
         "type": "response",
-        "session_id": session_id,
-        "status": "not_implemented",
-        "message": "WebSocket MCP transport pending full implementation"
+        "payload": {
+            "session_id": session_id,
+            "status": "not_implemented",
+            "message": "WebSocket MCP transport pending full implementation"
+        }
     }
 
 

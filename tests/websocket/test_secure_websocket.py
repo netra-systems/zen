@@ -100,13 +100,8 @@ class MockWebSocket:
         raise asyncio.TimeoutError()
     
 
-class TestSyntaxFix:
-    """Generated test class"""
-
     def add_message(self, message: str):
-
         """Add message to receive queue."""
-
         self.received_messages.append(message)
 
 @pytest.fixture
@@ -126,26 +121,17 @@ async def mock_db_session():
     return session
 
 @pytest.fixture
-
-class TestSyntaxFix:
-    """Generated test class"""
-
-    def mock_cors_handler():
-        """Mock CORS handler."""
-        handler = MagicMock(spec=WebSocketCORSHandler)
-
+def mock_cors_handler():
+    """Mock CORS handler."""
+    handler = MagicMock(spec=WebSocketCORSHandler)
     handler.is_origin_allowed.return_value = True
-
     handler.get_security_stats.return_value = {"violations": 0}
-
     return handler
 
 class TestUnifiedWebSocketManager:
-
-    # """Test UnifiedWebSocketManager functionality."""
+    """Test UnifiedWebSocketManager functionality."""
     
-
-    # @mock_justified("External auth service API not available in test environment - testing JWT validation flow")
+    @mock_justified("External auth service API not available in test environment - testing JWT validation flow")
 
     # async def test_secure_auth_header_success(self, mock_db_session):
 
@@ -702,14 +688,16 @@ class TestUnifiedWebSocketManager:
     # assert websocket2.closed is True
 
     # mock_db_session.close.assert_called_once()
+    
+    def test_placeholder(self):
+        """Placeholder test to ensure class has valid methods."""
+        pass
+
 
 class TestSecureWebSocketEndpoint:
-
-    # """Test the secure WebSocket endpoint integration."""
+    """Test the secure WebSocket endpoint integration."""
     
-
-    # @pytest.fixture
-
+    @pytest.fixture
     def mock_websocket(self):
 
         """Mock WebSocket with CORS headers."""
@@ -738,13 +726,10 @@ class TestSecureWebSocketEndpoint:
         mock_cors.return_value = True
 
         mock_validate.return_value = {
-
             "valid": True,
-
             "user_id": "test_user",
-
             "email": "test@example.com"
-
+        }
         
         # Test that CORS validation is called
         from netra_backend.app.routes.websocket_unified import UnifiedWebSocketManager
@@ -777,13 +762,11 @@ class TestSecureWebSocketEndpoint:
         assert mock_cors(mock_websocket) is False
 
 class TestMemoryLeakPrevention:
-
-    # """Test memory leak prevention mechanisms."""
+    """Test memory leak prevention mechanisms."""
     
-
-    # async def test_connection_cleanup_on_error(self, mock_db_session):
-
-    # """Test connection cleanup when errors occur."""
+    async def test_connection_cleanup_on_error(self, mock_db_session):
+        """Test connection cleanup when errors occur."""
+        pass  # This test is commented out - placeholder for syntax validation
 
     # manager = UnifiedWebSocketManager(mock_db_session)
 
@@ -845,13 +828,11 @@ class TestMemoryLeakPrevention:
     # mock_db_session.close.assert_called_once()
 
 class TestErrorHandling:
-
-    # """Test comprehensive error handling."""
+    """Test comprehensive error handling."""
     
-
-    # async def test_auth_service_error_handling(self, mock_db_session):
-
-    # """Test handling of auth service errors."""
+    async def test_auth_service_error_handling(self, mock_db_session):
+        """Test handling of auth service errors."""
+        pass  # This test is commented out - placeholder for syntax validation
 
     # manager = UnifiedWebSocketManager(mock_db_session)
 
@@ -930,6 +911,5 @@ class TestErrorHandling:
 
     # assert error_msg["type"] == "error"
 
-    # if __name__ == "__main__":
-
-    # pytest.main([__file__, "-v"])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

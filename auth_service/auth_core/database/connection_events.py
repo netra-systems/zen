@@ -13,9 +13,23 @@ from sqlalchemy.pool import ConnectionPoolEntry, _ConnectionFairy
 logger = logging.getLogger(__name__)
 
 
-# Auth service specific configuration
+# Import settings lazily to avoid circular dependency
+def get_settings():
+    """Get settings lazily to avoid circular import."""
+    from netra_backend.app.config import get_config
+    return get_config()
+
+# Initialize settings at module level
+settings = get_settings()
+
+
+# Auth service specific database configuration
 class AuthDatabaseConfig:
-    """Auth service database configuration constants."""
+    """Auth service database configuration constants.
+    
+    Uses auth-specific values that are more conservative than the main backend
+    since auth service handles lighter workloads but requires reliability.
+    """
     STATEMENT_TIMEOUT = 15000  # 15 seconds (shorter than backend)
     POOL_SIZE = 5  # Smaller pool for auth service
     MAX_OVERFLOW = 10  # Conservative overflow
@@ -80,8 +94,15 @@ def _set_auth_connection_pid(dbapi_conn: Connection, connection_record: Connecti
 
 def _log_auth_connection_established(connection_record: ConnectionPoolEntry):
     """Log auth service connection establishment."""
-    pid = connection_record.info.get('pid', 'unknown')
-    logger.debug(f"Auth service: Database connection established with timeouts, PID={pid}")
+    # Use unified settings for logging control if available, otherwise default to debug
+    try:
+        should_log = getattr(settings, 'log_async_checkout', False)
+    except Exception:
+        should_log = False
+    
+    if should_log or logger.isEnabledFor(logging.DEBUG):
+        pid = connection_record.info.get('pid', 'unknown')
+        logger.debug(f"Auth service: Database connection established with timeouts, PID={pid}")
 
 
 def _monitor_auth_pool_usage(pool):
@@ -123,7 +144,13 @@ def _create_auth_async_checkout_handler(engine: AsyncEngine):
 
 def _log_auth_checkout_if_enabled(connection_record: ConnectionPoolEntry):
     """Log auth service checkout if debug logging enabled."""
-    if logger.isEnabledFor(logging.DEBUG):
+    # Use unified settings for logging control if available, otherwise fall back to debug level
+    try:
+        should_log = getattr(settings, 'log_async_checkout', False)
+    except Exception:
+        should_log = False
+    
+    if should_log or logger.isEnabledFor(logging.DEBUG):
         pid = connection_record.info.get('pid', 'unknown')
         logger.debug(f"Auth service: Connection checked out from pool, PID={pid}")
 
