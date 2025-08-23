@@ -381,4 +381,50 @@
       <solution>Use gunicorn with uvicorn workers</solution>
     </issue>
   </troubleshooting>
+  
+  <critical_deployment_learnings>
+    <learning>
+      <id>no-minimal-backend-versions</id>
+      <category>deployment</category>
+      <date>2025-08-23</date>
+      <severity>critical</severity>
+      <title>NEVER Create Minimal Backend Versions for Staging/Production</title>
+      <problem>
+        <description>Creating "minimal" versions of the backend (like main_minimal.py) for deployment causes severe issues</description>
+        <symptoms>
+          <symptom>Missing critical functionality in staging/production</symptom>
+          <symptom>Incomplete API endpoints deployed</symptom>
+          <symptom>WebSocket functionality missing</symptom>
+          <symptom>Agent systems not available</symptom>
+          <symptom>Database migrations not executed</symptom>
+          <symptom>Health checks incomplete or misleading</symptom>
+        </symptoms>
+        <root_cause>Attempting to reduce resource usage by deploying stripped-down versions</root_cause>
+      </problem>
+      <solution>
+        <description>ALWAYS deploy the full main.py application to all environments</description>
+        <implementation>
+          <requirement>Use netra_backend.app.main:app in Dockerfile CMD</requirement>
+          <requirement>Never create main_minimal.py or similar reduced versions</requirement>
+          <requirement>Deploy complete application with all features</requirement>
+          <note>Resource optimization should be done through proper configuration, not code removal</note>
+        </implementation>
+        <verification>
+          <step>Verify Dockerfile uses main:app not main_minimal:app</step>
+          <step>Ensure no minimal versions exist in codebase</step>
+          <step>Test all features work in staging</step>
+          <step>Confirm WebSocket and agent systems functional</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>NEVER create minimal versions of the main application</guideline>
+        <guideline>This is a VIOLATION of deployment best practices</guideline>
+        <guideline>Use environment variables and configuration for resource management</guideline>
+        <guideline>Deploy the same codebase to all environments</guideline>
+        <guideline>Use Cloud Run scaling settings to manage resources</guideline>
+      </prevention>
+      <violation_severity>CRITICAL</violation_severity>
+      <violation_message>Creating minimal backend versions is a CRITICAL VIOLATION that breaks production functionality</violation_message>
+    </learning>
+  </critical_deployment_learnings>
 </specification>

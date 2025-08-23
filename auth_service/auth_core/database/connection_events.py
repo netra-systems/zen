@@ -16,8 +16,13 @@ logger = logging.getLogger(__name__)
 # Import settings lazily to avoid circular dependency
 def get_settings():
     """Get settings lazily to avoid circular import."""
-    from netra_backend.app.config import get_config
-    return get_config()
+    try:
+        from netra_backend.app.config import get_config
+        return get_config()
+    except ImportError:
+        # Handle case where netra_backend is not available (auth service running standalone)
+        logger.debug("netra_backend config not available, using defaults")
+        return None
 
 # Initialize settings at module level
 settings = get_settings()
@@ -96,7 +101,7 @@ def _log_auth_connection_established(connection_record: ConnectionPoolEntry):
     """Log auth service connection establishment."""
     # Use unified settings for logging control if available, otherwise default to debug
     try:
-        should_log = getattr(settings, 'log_async_checkout', False)
+        should_log = getattr(settings, 'log_async_checkout', False) if settings else False
     except Exception:
         should_log = False
     
@@ -146,7 +151,7 @@ def _log_auth_checkout_if_enabled(connection_record: ConnectionPoolEntry):
     """Log auth service checkout if debug logging enabled."""
     # Use unified settings for logging control if available, otherwise fall back to debug level
     try:
-        should_log = getattr(settings, 'log_async_checkout', False)
+        should_log = getattr(settings, 'log_async_checkout', False) if settings else False
     except Exception:
         should_log = False
     

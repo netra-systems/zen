@@ -1,4 +1,8 @@
-"""WebSocket connection manager with recovery capabilities.
+"""DEPRECATED: WebSocket connection manager with recovery capabilities.
+
+⚠️  DEPRECATED - Use UnifiedWebSocketManager instead ⚠️
+This module is deprecated and will be removed in a future version.
+Please use: from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 
 Manages individual WebSocket connections with automatic reconnection,
 message reliability, and state preservation.

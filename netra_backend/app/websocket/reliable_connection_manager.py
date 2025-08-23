@@ -1,4 +1,8 @@
-"""Enhanced WebSocket connection manager with comprehensive reliability features.
+"""DEPRECATED: Enhanced WebSocket connection manager with comprehensive reliability features.
+
+⚠️  DEPRECATED - Use UnifiedWebSocketManager instead ⚠️
+This module is deprecated and will be removed in a future version.
+Please use: from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 
 This module provides reliable connection management with circuit breakers,
 health monitoring, and automatic recovery capabilities.
@@ -30,7 +34,7 @@ from netra_backend.app.websocket.connection_info import ConnectionInfo
 from netra_backend.app.websocket.connection_lifecycle_manager import (
     ConnectionLifecycleManager,
 )
-from netra_backend.app.websocket.connection_manager import ConnectionManager
+# Removed circular import - use connection.py ConnectionManager instead
 from netra_backend.app.websocket.connection import get_connection_manager
 from netra_backend.app.websocket.connection_message_handler import (
     ConnectionMessageHandler,

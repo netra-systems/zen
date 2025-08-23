@@ -1,4 +1,8 @@
-"""Modernized WebSocket Connection Manager
+"""DEPRECATED: Modernized WebSocket Connection Manager
+
+⚠️  DEPRECATED - Use UnifiedWebSocketManager instead ⚠️
+This module is deprecated and will be removed in a future version.
+Please use: from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 
 Modern connection manager using the new architecture patterns while maintaining
 backward compatibility. Uses modern execution patterns with reliability and monitoring.

@@ -97,11 +97,12 @@ class JWTHandler:
                 token, 
                 self.secret, 
                 algorithms=[self.algorithm],
-                # Enhanced security options
+                # Enhanced security options - disable audience verification since we handle it manually
                 options={
                     "verify_signature": True,
                     "verify_exp": True,
                     "verify_iat": True,
+                    "verify_aud": False,  # We validate audience manually in cross-service validation
                     "require": ["exp", "iat", "sub"]
                 }
             )
@@ -290,8 +291,16 @@ class JWTHandler:
                 logger.warning(f"Invalid token issuer: {issuer}")
                 return False
             
-            if audience not in ["netra-platform", "netra-backend", "netra-auth"]:
-                logger.warning(f"Invalid token audience: {audience}")
+            # For development environment, be more permissive with audiences
+            env = os.getenv("ENVIRONMENT", "development").lower()
+            valid_audiences = ["netra-platform", "netra-backend", "netra-auth"]
+            
+            if env == "development":
+                # In development, allow more permissive audience validation
+                valid_audiences.extend(["test", "localhost", "development"])
+            
+            if audience not in valid_audiences:
+                logger.warning(f"Invalid token audience: {audience} (env: {env})")
                 return False
             
             # Check for token replay attacks by validating jti (JWT ID) if present

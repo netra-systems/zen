@@ -76,16 +76,22 @@ class UserAuthService:
                     logger.warning(f"Missing required field in auth response: {field}")
                     return False
             
-            # Validate timestamp is recent (within 5 minutes)
+            # Validate timestamp is recent (within 5 minutes for production, 1 hour for dev)
             verified_at = result.get("verified_at")
             if verified_at:
                 try:
                     import datetime
+                    import os
+                    
                     verified_time = datetime.datetime.fromisoformat(verified_at.replace('Z', '+00:00'))
                     now = datetime.datetime.now(datetime.timezone.utc)
                     
-                    if (now - verified_time).total_seconds() > 300:  # 5 minutes
-                        logger.warning("Token verification timestamp too old")
+                    # More permissive timestamp validation for development
+                    env = os.getenv("ENVIRONMENT", "development").lower()
+                    max_age = 3600 if env == "development" else 300  # 1 hour vs 5 minutes
+                    
+                    if (now - verified_time).total_seconds() > max_age:
+                        logger.warning(f"Token verification timestamp too old (env: {env})")
                         return False
                 except Exception as e:
                     logger.warning(f"Failed to parse verification timestamp: {e}")

@@ -377,14 +377,24 @@ class JWTSecurityValidator:
         self.allowed_algorithms = ["HS256", "RS256"]
     
     def _get_strong_secret(self) -> str:
-        """Get strong JWT secret"""
-        secret = os.getenv("JWT_SECRET")
-        if not secret:
-            raise ValueError("JWT_SECRET must be set")
+        """Get strong JWT secret using proper secret loading chain"""
+        from auth_service.auth_core.secret_loader import AuthSecretLoader
         
-        # Ensure secret is strong enough
-        if len(secret) < 32:
-            raise ValueError("JWT_SECRET must be at least 32 characters")
+        try:
+            secret = AuthSecretLoader.get_jwt_secret()
+        except ValueError as e:
+            # If we're in development and no secret is configured, use a development default
+            env = os.getenv("ENVIRONMENT", "development").lower()
+            if env == "development":
+                logger.warning("Using development default JWT secret - NOT FOR PRODUCTION")
+                secret = "dev-secret-key-DO-NOT-USE-IN-PRODUCTION-32chars"
+            else:
+                raise ValueError(f"JWT secret not configured for {env} environment") from e
+        
+        # Ensure secret is strong enough for production environments
+        env = os.getenv("ENVIRONMENT", "development").lower()
+        if len(secret) < 32 and env in ["staging", "production"]:
+            raise ValueError("JWT_SECRET must be at least 32 characters in production")
         
         return secret
     

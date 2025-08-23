@@ -33,6 +33,7 @@
             <critical-takeaway>Auth service maintains separate auth_users table but syncs IDs with main database.</critical-takeaway>
             <critical-takeaway>Token validation via POST /auth/validate, not a TokenValidator class.</critical-takeaway>
             <critical-takeaway>Redis sessions optional in dev/staging - service healthy without Redis.</critical-takeaway>
+            <critical-takeaway>Auth service MUST use unified configuration via lazy loading pattern while maintaining service independence (unified_config_auth_service.xml).</critical-takeaway>
         </category>
 
         <category name="Project Structure" path="SPEC/learnings/project_structure_enforcement.xml" keywords="Structure, Imports, netra_backend, Canonical">
