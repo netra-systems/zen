@@ -13,7 +13,8 @@ logger = central_logger.get_logger(__name__)
 class MigrationRunner:
     """Handles database migration execution"""
     
-    def __init__(self):
+    def __init__(self, session):
+        self.session = session
         self.migrations_executed = []
         self.migration_history = []
     
@@ -77,3 +78,13 @@ class MigrationRunner:
                 "success": False,
                 "error": f"Migration {migration_name} not found in executed migrations"
             }
+    
+    async def run_migration(self, migration):
+        """Run a single migration with transaction safety"""
+        try:
+            await self.session.begin()
+            await migration.up(self.session)
+            await self.session.commit()
+        except Exception as e:
+            await self.session.rollback()
+            raise e

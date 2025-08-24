@@ -235,6 +235,28 @@ class AuthDatabase:
             "pool_type": "NullPool" if (self.is_cloud_run or self.is_test_mode) else "AsyncAdaptedQueuePool",
         }
 
+
+class DatabaseConnection:
+    """Compatibility class for test expectations - delegates to shared manager."""
+    
+    @staticmethod
+    def _normalize_url_for_asyncpg(url: str) -> str:
+        """Normalize URL for asyncpg compatibility.
+        
+        Args:
+            url: Database URL to normalize
+            
+        Returns:
+            URL normalized for asyncpg with SSL parameters handled
+        """
+        from shared.database.core_database_manager import CoreDatabaseManager
+        
+        # Resolve SSL parameter conflicts first
+        resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(url, "asyncpg")
+        
+        # Format for async driver
+        return CoreDatabaseManager.format_url_for_async_driver(resolved_url)
+
 # Global database instance
 auth_db = AuthDatabase()
 

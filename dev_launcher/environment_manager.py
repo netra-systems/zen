@@ -219,7 +219,8 @@ def get_environment_manager(isolation_mode: Optional[bool] = None) -> Environmen
     if _global_manager is None:
         # Auto-detect isolation mode based on environment
         if isolation_mode is None:
-            environment = os.environ.get("ENVIRONMENT", "development")
+            env = get_env()
+            environment = env.get("ENVIRONMENT", "development")
             isolation_mode = environment == "development"
         
         _global_manager = EnvironmentManager(isolation_mode=isolation_mode)

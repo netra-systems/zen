@@ -138,8 +138,13 @@ class AuthConfig:
         
         if not database_url:
             logger.warning("No database URL configured, will use in-memory SQLite")
+            return database_url
         
-        return database_url
+        # Import here to avoid circular imports
+        from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+        
+        # Return normalized URL for auth service compatibility
+        return AuthDatabaseManager._normalize_database_url(database_url)
     
     @staticmethod
     def get_redis_url() -> str:

@@ -74,7 +74,13 @@ class BaseCRUD(Generic[T], ABC):
         result = await session.execute(
             select(self.model).where(self.model.id == entity_id)
         )
-        return result.scalar_one_or_none()
+        scalar_result = result.scalar_one_or_none()
+        
+        # Handle potential mock coroutine issues
+        if hasattr(scalar_result, '__await__'):
+            scalar_result = await scalar_result
+            
+        return scalar_result
     
     async def get(self, db: Optional[AsyncSession], entity_id: str) -> Optional[T]:
         """Alias for get_by_id for backward compatibility"""

@@ -21,7 +21,7 @@ import asyncpg
 # Setup test path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from test_framework.setup_test_path import setup_test_path
+from test_framework import setup_test_path
 setup_test_path()
 
 
@@ -31,11 +31,10 @@ class TestAuthServiceSSLParameterFailures:
     @pytest.mark.asyncio
     async def test_cloud_sql_sslmode_parameter_rejection(self):
         """
-        FAILING TEST: Reproduces asyncpg rejecting sslmode parameter for Cloud SQL.
+        FIXED TEST: Verifies that Cloud SQL sslmode parameters are properly removed.
         
         Root Cause: asyncpg doesn't recognize 'sslmode' parameter for Unix socket 
-        connections to Cloud SQL. Only 'ssl' parameter is valid, but for Cloud SQL
-        Unix sockets, NO SSL parameters should be present.
+        connections to Cloud SQL. SSL parameters should be completely removed.
         """
         from auth_service.auth_core.config import AuthConfig
         
@@ -51,27 +50,11 @@ class TestAuthServiceSSLParameterFailures:
         }):
             db_url = AuthConfig.get_database_url()
             
-            # Convert to asyncpg format (this is where the bug occurs)
-            asyncpg_url = db_url.replace("postgresql://", "postgresql+asyncpg://")
-            
-            # The problem: URL still contains sslmode which is invalid
-            assert "sslmode=" in asyncpg_url, "URL contains problematic sslmode parameter"
-            
-            # This MUST fail when asyncpg tries to parse it
-            with pytest.raises(Exception) as exc_info:
-                # Simulate asyncpg connection attempt
-                import urllib.parse as urlparse
-                parsed = urlparse.urlparse(asyncpg_url)
-                query_params = urlparse.parse_qs(parsed.query)
-                
-                # asyncpg rejects sslmode parameter for Unix socket connections
-                if 'sslmode' in query_params and '/cloudsql/' in asyncpg_url:
-                    raise ValueError("asyncpg.exceptions.InterfaceError: "
-                                   "unrecognized configuration parameter 'sslmode'")
-            
-            error_msg = str(exc_info.value)
-            assert "unrecognized configuration parameter" in error_msg
-            assert "sslmode" in error_msg
+            # Verify the fix: SSL parameters should be removed for Cloud SQL
+            assert "sslmode=" not in db_url, "SSL parameters should be removed for Cloud SQL"
+            assert "ssl=" not in db_url, "SSL parameters should be removed for Cloud SQL"
+            assert "/cloudsql/" in db_url, "Should still contain Cloud SQL path"
+            assert db_url.startswith("postgresql+asyncpg://"), "Should be formatted for asyncpg"
     
     def test_ssl_parameter_not_removed_for_cloud_sql(self):
         """
@@ -208,10 +191,10 @@ class TestAuthServiceConfigurationConsistency:
     
     def test_auth_config_database_url_handling_inconsistency(self):
         """
-        FAILING TEST: Shows AuthConfig handling DATABASE_URL differently than main backend.
+        FIXED TEST: Verifies AuthConfig properly normalizes DATABASE_URL.
         
-        Root Cause: AuthConfig.get_database_url() has different normalization 
-        logic than netra_backend DatabaseConfigManager.
+        Root Cause: AuthConfig.get_database_url() now has consistent normalization 
+        logic with the shared database manager.
         """
         from auth_service.auth_core.config import AuthConfig
         
@@ -225,12 +208,13 @@ class TestAuthServiceConfigurationConsistency:
         }):
             auth_url = AuthConfig.get_database_url()
             
-            # Auth service should normalize the URL, but it doesn't
-            assert auth_url == test_url, "AuthConfig doesn't normalize DATABASE_URL"
+            # Auth service should now normalize the URL
+            assert auth_url != test_url, "AuthConfig should normalize DATABASE_URL"
             
-            # This MUST fail - raw URL will cause SSL parameter issues
-            if "/cloudsql/" in auth_url and "sslmode=" in auth_url:
-                pytest.fail("AuthConfig returning raw URL with SSL parameters for Cloud SQL")
+            # Verify the fix: SSL parameters should be removed for Cloud SQL
+            assert "/cloudsql/" in auth_url, "Should contain Cloud SQL path"
+            assert "sslmode=" not in auth_url, "SSL parameters should be removed"
+            assert auth_url.startswith("postgresql+asyncpg://"), "Should be formatted for asyncpg"
     
     def test_secret_loader_url_format_compatibility(self):
         """
@@ -272,10 +256,10 @@ class TestAuthServiceDeploymentSpecificIssues:
     
     def test_cloud_run_environment_ssl_parameter_handling(self):
         """
-        FAILING TEST: Shows Cloud Run environment SSL parameter handling issues.
+        FIXED TEST: Verifies Cloud Run environment SSL parameter handling works correctly.
         
         Root Cause: Cloud Run container receives DATABASE_URL with sslmode parameter
-        but auth service code expects clean Unix socket URL.
+        but auth service now properly normalizes it for asyncpg compatibility.
         """
         # Simulate exact Cloud Run environment variables
         cloud_run_env = {
@@ -289,16 +273,14 @@ class TestAuthServiceDeploymentSpecificIssues:
             
             manager = AuthDatabaseManager()
             
-            # This MUST fail - Cloud Run URL format incompatible
-            with pytest.raises(Exception) as exc_info:
-                connection_url = manager.get_connection_url()
-                
-                # Validate URL for asyncpg compatibility
-                if "/cloudsql/" in connection_url and ("sslmode=" in connection_url or "ssl=" in connection_url):
-                    raise ValueError("Cloud SQL URL contains SSL parameters incompatible with asyncpg")
+            # This should now work - URL format should be compatible
+            connection_url = manager.get_connection_url()
             
-            error_msg = str(exc_info.value)
-            assert "ssl" in error_msg.lower() or "configuration" in error_msg.lower()
+            # Verify the fix: URL should be compatible with asyncpg
+            assert "/cloudsql/" in connection_url, "Should contain Cloud SQL path"
+            assert "sslmode=" not in connection_url, "SSL parameters should be removed for Cloud SQL"
+            assert "ssl=" not in connection_url, "SSL parameters should be removed for Cloud SQL"
+            assert connection_url.startswith("postgresql+asyncpg://"), "Should be formatted for asyncpg"
     
     def test_staging_secret_manager_url_format_mismatch(self):
         """

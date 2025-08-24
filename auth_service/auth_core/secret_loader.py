@@ -161,3 +161,32 @@ class AuthSecretLoader:
         else:
             logger.warning("No Google Client Secret found in environment")
         return secret
+    
+    @staticmethod
+    def get_database_url() -> str:
+        """Get database URL from secrets with proper normalization.
+        
+        Returns:
+            Database URL normalized for auth service compatibility
+        """
+        env = os.getenv("ENVIRONMENT", "development").lower()
+        
+        # First try to load from Secret Manager in staging/production
+        if env in ["staging", "production"]:
+            secret_name = f"{env}-database-url"
+            secret_url = AuthSecretLoader._load_from_secret_manager(secret_name)
+            if secret_url:
+                logger.info(f"Using {secret_name} from Secret Manager")
+                # Import here to avoid circular imports
+                from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+                return AuthDatabaseManager._normalize_database_url(secret_url)
+        
+        # Fall back to environment variable
+        database_url = os.getenv("DATABASE_URL", "")
+        if not database_url:
+            logger.warning("No database URL found in secrets or environment")
+            return ""
+        
+        # Import here to avoid circular imports
+        from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+        return AuthDatabaseManager._normalize_database_url(database_url)

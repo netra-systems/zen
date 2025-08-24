@@ -217,3 +217,26 @@ class AuthDatabaseManager:
             URL with ssl parameter for asyncpg compatibility
         """
         return CoreDatabaseManager.convert_ssl_params_for_asyncpg(url)
+    
+    @staticmethod
+    def _normalize_database_url(url: str) -> str:
+        """Normalize database URL for auth service compatibility.
+        
+        Args:
+            url: Database URL to normalize
+            
+        Returns:
+            URL normalized for auth service with SSL parameters handled
+        """
+        # Use the same logic as get_auth_database_url_async
+        resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(url, "asyncpg")
+        return CoreDatabaseManager.format_url_for_async_driver(resolved_url)
+    
+    @staticmethod
+    def get_connection_url() -> str:
+        """Get normalized connection URL for auth service.
+        
+        Returns:
+            Database URL ready for asyncpg connection
+        """
+        return AuthDatabaseManager.get_auth_database_url_async()
