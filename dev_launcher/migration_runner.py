@@ -4,12 +4,12 @@ Handles automatic migration checks and execution during startup.
 """
 
 import logging
-import os
 import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
+from dev_launcher.isolated_environment import get_env
 from dev_launcher.utils import print_with_emoji
 
 logger = logging.getLogger(__name__)
@@ -84,7 +84,8 @@ class MigrationRunner:
     
     def _should_skip_migrations(self, env: Optional[Dict] = None) -> bool:
         """Check if migrations should be skipped."""
-        env = env or os.environ
+        isolated_env = get_env()
+        env = env or isolated_env.get_subprocess_env()
         
         # Check various skip flags
         skip_flags = [
@@ -111,11 +112,13 @@ class MigrationRunner:
             pass  # Ignore errors in config reading
         
         # Also check environment variable
-        return os.environ.get("POSTGRES_MODE", "").lower() == "mock"
+        isolated_env = get_env()
+        return isolated_env.get("POSTGRES_MODE", "").lower() == "mock"
     
     def _get_database_url(self, env: Optional[Dict] = None) -> Optional[str]:
         """Get database URL from environment."""
-        env = env or os.environ
+        isolated_env = get_env()
+        env = env or isolated_env.get_subprocess_env()
         
         # Try different database URL keys
         for key in ["DATABASE_URL", "POSTGRES_URL", "DB_URL"]:
@@ -138,7 +141,7 @@ class MigrationRunner:
                 cmd,
                 capture_output=True,
                 text=True,
-                env=env or os.environ,
+                env=env or isolated_env.get_subprocess_env(),
                 cwd=str(self.project_root),
                 timeout=10
             )
@@ -171,7 +174,7 @@ class MigrationRunner:
                 cmd,
                 capture_output=True,
                 text=True,
-                env=env or os.environ,
+                env=env or isolated_env.get_subprocess_env(),
                 cwd=str(self.project_root),
                 timeout=10
             )
@@ -206,7 +209,7 @@ class MigrationRunner:
                 cmd,
                 capture_output=True,
                 text=True,
-                env=env or os.environ,
+                env=env or isolated_env.get_subprocess_env(),
                 cwd=str(self.project_root),
                 timeout=30
             )
@@ -231,7 +234,8 @@ class MigrationRunner:
     
     def _is_development_mode(self, env: Optional[Dict] = None) -> bool:
         """Check if running in development mode."""
-        env = env or os.environ
+        isolated_env = get_env()
+        env = env or isolated_env.get_subprocess_env()
         
         # Check various development indicators
         dev_indicators = [

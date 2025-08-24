@@ -18,11 +18,12 @@ Provides clear options for using local vs shared resources with user-friendly pr
 
 import json
 import logging
-import os
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from dev_launcher.isolated_environment import get_env
 
 from dev_launcher.unicode_utils import get_emoji, safe_print, setup_unicode_console
 
@@ -81,17 +82,16 @@ class ServiceResource:
         return env_vars
 
 
-@dataclass
-class ServicesConfiguration:
-    """Complete services configuration."""
-    
-    # Core services with their configurations
-    redis: ServiceResource = field(default_factory=lambda: ServiceResource(
+def _get_redis_defaults():
+    """Get Redis configuration with environment variable support."""
+    env = get_env()
+    redis_mode = env.get("REDIS_MODE")
+    return ServiceResource(
         name="redis",
-        mode=ResourceMode(os.environ.get("REDIS_MODE", "docker").lower()) if os.environ.get("REDIS_MODE") else ResourceMode.DOCKER,
+        mode=ResourceMode(redis_mode.lower()) if redis_mode else ResourceMode.DOCKER,
         local_config={
-            "host": os.environ.get("REDIS_HOST", "localhost"),
-            "port": int(os.environ.get("REDIS_PORT", "6379")),
+            "host": env.get("REDIS_HOST", "localhost"),
+            "port": int(env.get("REDIS_PORT", "6379")),
             "db": 0
         },
         shared_config={
@@ -107,28 +107,32 @@ class ServicesConfiguration:
             "docker": True,
             "container_name": "netra-dev-redis"
         }
-        # Mock mode not supported in development
-    ))
-    
-    clickhouse: ServiceResource = field(default_factory=lambda: ServiceResource(
+    )
+
+
+def _get_clickhouse_defaults():
+    """Get ClickHouse configuration with environment variable support."""
+    env = get_env()
+    clickhouse_mode = env.get("CLICKHOUSE_MODE")
+    return ServiceResource(
         name="clickhouse",
-        mode=ResourceMode(os.environ.get("CLICKHOUSE_MODE", "docker").lower()) if os.environ.get("CLICKHOUSE_MODE") else ResourceMode.DOCKER,
+        mode=ResourceMode(clickhouse_mode.lower()) if clickhouse_mode else ResourceMode.DOCKER,
         local_config={
-            "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
-            "port": int(os.environ.get("CLICKHOUSE_NATIVE_PORT", "9000")),
-            "http_port": int(os.environ.get("CLICKHOUSE_HTTP_PORT", "8123")),
-            "user": os.environ.get("CLICKHOUSE_USER", "default"),
-            "password": os.environ.get("CLICKHOUSE_PASSWORD", "netra_dev_password"),
-            "database": os.environ.get("CLICKHOUSE_DB", "netra_dev"),
-            "secure": False
+            "host": env.get("CLICKHOUSE_HOST", "localhost"),
+            "port": int(env.get("CLICKHOUSE_NATIVE_PORT", "9000")),
+            "http_port": int(env.get("CLICKHOUSE_HTTP_PORT", "8123")),
+            "user": env.get("CLICKHOUSE_USER", "default"),
+            "password": env.get("CLICKHOUSE_PASSWORD", "netra_dev_password"),
+            "database": env.get("CLICKHOUSE_DB", "netra_dev"),
         },
         shared_config={
-            "host": os.environ.get("CLICKHOUSE_SHARED_HOST", "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"),
-            "port": 8443,
+            "host": env.get("CLICKHOUSE_SHARED_HOST", "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"),
+            "port": 9440,
+            "http_port": 8443,
+            "secure": True,
             "user": "default",
-            "password": "46YQC0J~6SfZ.",
-            "database": "default",
-            "secure": True
+            "password": "AGpI.gJfV2.0_",
+            "database": "netra_shared",
         },
         docker_config={
             "host": "localhost",
@@ -137,77 +141,89 @@ class ServicesConfiguration:
             "user": "default",
             "password": "netra_dev_password",
             "database": "netra_dev",
-            "secure": False,
             "docker": True,
             "container_name": "netra-dev-clickhouse"
         }
-        # Mock mode not supported in development
-    ))
-    
-    postgres: ServiceResource = field(default_factory=lambda: ServiceResource(
+    )
+
+
+def _get_postgres_defaults():
+    """Get PostgreSQL configuration with environment variable support.""" 
+    env = get_env()
+    postgres_mode = env.get("POSTGRES_MODE")
+    return ServiceResource(
         name="postgres",
-        mode=ResourceMode(os.environ.get("POSTGRES_MODE", "docker").lower()) if os.environ.get("POSTGRES_MODE") else ResourceMode.DOCKER,
+        mode=ResourceMode(postgres_mode.lower()) if postgres_mode else ResourceMode.DOCKER,
         local_config={
             "host": "localhost",
             "port": 5433,
-            "user": "postgres",
-            "password": "",
-            "database": "netra_dev"
+            "database": "netra_dev",
+            "user": "netra_dev",
+            "password": "netra_dev_password"
         },
         shared_config={
-            # Can be configured for shared dev database if needed
-            "host": "dev-postgres.example.com",
+            "host": "34.93.246.241",
             "port": 5432,
-            "user": "dev_user",
-            "password": "",  # Will be loaded from secrets
-            "database": "netra_dev"
+            "database": "netra",
+            "user": "netra_dev",
+            "password": "bGBaG2g4Cfa&Q@cNxGZ3"
         },
         docker_config={
             "host": "localhost",
             "port": 5433,
-            "user": "postgres",
-            "password": "",
             "database": "netra_dev",
+            "user": "netra_dev", 
+            "password": "netra_dev_password",
             "docker": True,
             "container_name": "netra-dev-postgres"
         }
-        # Mock mode not supported in development
-    ))
-    
-    llm: ServiceResource = field(default_factory=lambda: ServiceResource(
+    )
+
+
+def _get_llm_defaults():
+    """Get LLM configuration with environment variable support."""
+    env = get_env()
+    llm_mode = env.get("LLM_MODE")
+    return ServiceResource(
         name="llm",
-        mode=ResourceMode(os.environ.get("LLM_MODE", "shared").lower()) if os.environ.get("LLM_MODE") else ResourceMode.SHARED,
-        local_config={
-            # Local LLM options (e.g., Ollama)
-            "provider": "ollama",
-            "base_url": "http://localhost:11434"
-        },
+        mode=ResourceMode(llm_mode.lower()) if llm_mode else ResourceMode.SHARED,
         shared_config={
-            # Cloud LLM providers
             "providers": ["anthropic", "openai", "gemini"],
-            "default_provider": "gemini"
-        },
-        # Mock mode not supported in development
-    ))
-    
-    auth_service: ServiceResource = field(default_factory=lambda: ServiceResource(
-        name="auth_service",
-        mode=ResourceMode(os.environ.get("AUTH_MODE", "local").lower()) if os.environ.get("AUTH_MODE") else ResourceMode.LOCAL,
+            "anthropic_api_key": "ANTHROPIC_API_KEY",
+            "openai_api_key": "OPENAI_API_KEY",
+            "gemini_api_key": "GEMINI_API_KEY"
+        }
+    )
+
+
+def _get_auth_defaults():
+    """Get Auth service configuration with environment variable support."""
+    env = get_env()
+    auth_mode = env.get("AUTH_MODE")
+    return ServiceResource(
+        name="auth",
+        mode=ResourceMode(auth_mode.lower()) if auth_mode else ResourceMode.LOCAL,
         local_config={
             "host": "localhost",
-            "port": 8081,
-            "health_endpoint": "/health",
-            "enabled": True
-        },
-        shared_config={
-            # For production/staging
-            "host": "auth.netrasystems.ai",
-            "port": 443,
-            "health_endpoint": "/health",
-            "enabled": True
-        },
-        # Mock mode not supported in development
-    ))
+            "port": 8081
+        }
+    )
+
+
+@dataclass
+class ServicesConfiguration:
+    """Complete services configuration."""
+    
+    # Core services with their configurations
+    redis: ServiceResource = field(default_factory=_get_redis_defaults)
+    
+    clickhouse: ServiceResource = field(default_factory=_get_clickhouse_defaults)
+    
+    postgres: ServiceResource = field(default_factory=_get_postgres_defaults)
+    
+    llm: ServiceResource = field(default_factory=_get_llm_defaults)
+    
+    auth_service: ServiceResource = field(default_factory=_get_auth_defaults)
     
     def get_all_env_vars(self) -> Dict[str, str]:
         """Get all environment variables for all services."""
@@ -255,7 +271,8 @@ class ServicesConfiguration:
         """Add PostgreSQL URL to environment variables."""
         if self.postgres.mode == ResourceMode.DISABLED:
             return
-        existing_db_url = os.environ.get("DATABASE_URL")
+        env = get_env()
+        existing_db_url = env.get("DATABASE_URL")
         if existing_db_url:
             env_vars["DATABASE_URL"] = existing_db_url
         # Mock mode not supported in development - removed mock database URL

@@ -10,7 +10,7 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from dev_launcher.environment_manager import EnvironmentManager, get_environment_manager, reset_global_manager
+from dev_launcher.isolated_environment import get_env
 
 
 class TestEnvironmentManager:

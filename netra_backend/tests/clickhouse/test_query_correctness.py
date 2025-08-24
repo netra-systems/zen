@@ -3,7 +3,7 @@ Test Suite 1: Query Correctness Tests
 Tests the correctness of ClickHouse queries and their results
 """
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

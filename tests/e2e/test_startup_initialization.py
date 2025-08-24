@@ -823,7 +823,7 @@ async def test_file_descriptor_limit_exceeded(test_env):
 @pytest.mark.asyncio
 async def test_background_task_timeout_crash(test_env):
     """Test 23: Prevent background task crashes"""
-    from netra_backend.app.background import BackgroundTaskManager
+    from netra_backend.app.services.background_task_manager import BackgroundTaskManager
     
     manager = BackgroundTaskManager()
     

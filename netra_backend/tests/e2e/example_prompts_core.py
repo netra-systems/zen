@@ -9,7 +9,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import (
     SupervisorAgent as Supervisor,
 )
-from netra_backend.app.websocket_core.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional
 import pytest

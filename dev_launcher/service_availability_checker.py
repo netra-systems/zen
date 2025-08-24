@@ -13,6 +13,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+from dev_launcher.isolated_environment import get_env
+
 from dev_launcher.service_config import ResourceMode, ServicesConfiguration
 from dev_launcher.unicode_utils import get_emoji, safe_print
 
@@ -246,9 +248,10 @@ class ServiceAvailabilityChecker:
                         )
                         if result.returncode == 0:
                             # Add to PATH for this session
-                            current_path = os.environ.get('PATH', '')
+                            env_manager = get_env()
+                            current_path = env_manager.get('PATH', '')
                             if str(postgres_path) not in current_path:
-                                os.environ['PATH'] = f"{postgres_path};{current_path}"
+                                env_manager.set('PATH', f"{postgres_path};{current_path}", "service_availability_checker")
                             
                             # Check connection
                             available = self._check_postgres_connection_with_path(str(psql_path))
@@ -270,7 +273,8 @@ class ServiceAvailabilityChecker:
         try:
             # Try to connect to PostgreSQL server
             # Use connection parameters from config
-            env = os.environ.copy()
+            isolated_env = get_env()
+            env = isolated_env.get_subprocess_env()
             env['PGPASSWORD'] = ''  # Use empty password for dev setup
             
             result = subprocess.run(
@@ -294,7 +298,8 @@ class ServiceAvailabilityChecker:
         valid_keys = []
         
         for key_name in api_keys:
-            key_value = os.environ.get(key_name, '')
+            isolated_env = get_env()
+            key_value = isolated_env.get(key_name, '')
             if key_value and not self._is_placeholder_key(key_value):
                 valid_keys.append(key_name)
         

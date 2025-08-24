@@ -22,7 +22,7 @@ from netra_backend.app.services.cost_calculator import (
 from netra_backend.app.services.user_service import user_service as UsageService
 from netra_backend.app.services.user_service import user_service as UserService
 from netra_backend.app.websocket_core import UnifiedWebSocketManager as IWebSocketService
-from netra_backend.app.websocket_core.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional

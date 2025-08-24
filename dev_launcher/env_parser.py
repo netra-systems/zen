@@ -5,10 +5,11 @@ Provides parsing for .env files with ${VAR} interpolation and validation.
 """
 
 import logging
-import os
 import re
 from pathlib import Path
 from typing import Dict, Optional, Tuple
+
+from dev_launcher.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -113,9 +114,11 @@ class EnvParser:
                 # Recursively resolve if needed
                 return self.interpolate_value(replacement_value, secrets)
             
-            # Check OS environment as fallback
-            if var_name in os.environ:
-                return os.environ[var_name]
+            # Check isolated environment as fallback
+            env = get_env()
+            value = env.get(var_name)
+            if value is not None:
+                return value
             
             # Variable not found - return original or empty
             logger.warning(f"      [WARN] Variable {var_name} not found for interpolation")

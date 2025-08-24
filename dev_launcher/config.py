@@ -3,11 +3,11 @@ Configuration management for the dev launcher.
 """
 
 import logging
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from dev_launcher.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import (
     Environment,
     EnvironmentVariables,
@@ -558,7 +558,8 @@ class LauncherConfig:
     
     def _show_env_var_status(self, var: str):
         """Show individual environment variable status."""
-        value = os.environ.get(var)
+        env = get_env()
+        value = env.get(var)
         if value:
             masked = self._mask_env_var_value(value)
             print(f"  {var:30} = {masked}")

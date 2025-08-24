@@ -7,7 +7,6 @@ Handles missing tables, schema creation, and basic recovery.
 
 import asyncio
 import logging
-import os
 import subprocess
 import sys
 import tempfile
@@ -18,6 +17,8 @@ from urllib.parse import urlparse
 
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
+from dev_launcher.isolated_environment import get_env
 
 from dev_launcher.utils import print_with_emoji
 
@@ -76,7 +77,8 @@ class DatabaseInitializer:
     
     async def _initialize_postgresql(self) -> bool:
         """Initialize PostgreSQL database."""
-        database_url = os.environ.get('DATABASE_URL')
+        env = get_env()
+        database_url = env.get('DATABASE_URL')
         if not database_url:
             self._print("ℹ️", "POSTGRES", "No DATABASE_URL configured, skipping PostgreSQL initialization")
             return True
@@ -182,18 +184,20 @@ class DatabaseInitializer:
     
     def _are_databases_mock(self) -> bool:
         """Check if databases are configured in mock mode."""
-        postgres_mode = os.environ.get('POSTGRES_MODE', '').lower()
-        database_url = os.environ.get('DATABASE_URL', '')
+        env = get_env()
+        postgres_mode = env.get('POSTGRES_MODE', '').lower()
+        database_url = env.get('DATABASE_URL', '')
         
         return (
             postgres_mode == 'mock' or 
             'mock' in database_url.lower() or
-            os.environ.get('MOCK_DATABASE', '').lower() == 'true'
+            env.get('MOCK_DATABASE', '').lower() == 'true'
         )
     
     def _is_development(self) -> bool:
         """Check if running in development mode."""
-        return os.environ.get('ENVIRONMENT', 'development').lower() == 'development'
+        env = get_env()
+        return env.get('ENVIRONMENT', 'development').lower() == 'development'
 
 
 class DatabaseHealthChecker:
@@ -218,14 +222,15 @@ class DatabaseHealthChecker:
         results = {}
         
         # Check PostgreSQL
-        database_url = os.environ.get('DATABASE_URL')
+        env = get_env()
+        database_url = env.get('DATABASE_URL')
         if database_url and 'mock' not in database_url.lower():
             results['postgresql'] = await self._check_postgresql_readiness(database_url)
         else:
             results['postgresql'] = True  # Mock or not configured
             
         # Check Redis
-        redis_url = os.environ.get('REDIS_URL')
+        redis_url = env.get('REDIS_URL')
         if redis_url and 'mock' not in redis_url.lower():
             results['redis'] = await self._check_redis_readiness(redis_url)
         else:

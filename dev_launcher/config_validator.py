@@ -11,7 +11,6 @@ Smart validation to minimize user interaction.
 import asyncio
 import json
 import logging
-import os
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
@@ -21,6 +20,7 @@ from typing import Dict, List, Optional, Union
 import aiohttp
 from pydantic import BaseModel, Field
 
+from dev_launcher.isolated_environment import get_env
 from dev_launcher.service_config import ResourceMode, ServicesConfiguration
 
 logger = logging.getLogger(__name__)
@@ -271,14 +271,16 @@ async def validate_service_config(
 
 def _detect_ci_environment() -> bool:
     """Detect if running in CI environment."""
+    env = get_env()
     ci_indicators = ['CI', 'GITHUB_ACTIONS', 'GITLAB_CI', 'JENKINS_URL']
-    return any(os.environ.get(indicator) for indicator in ci_indicators)
+    return any(env.get(indicator) for indicator in ci_indicators)
 
 
 def _extract_env_overrides() -> Dict[str, str]:
     """Extract service configuration from environment variables."""
+    env = get_env()
     overrides = {}
-    for key, value in os.environ.items():
+    for key, value in env.get_all().items():
         if key.startswith(('REDIS_', 'CLICKHOUSE_', 'POSTGRES_', 'LLM_')):
             overrides[key] = value
     return overrides

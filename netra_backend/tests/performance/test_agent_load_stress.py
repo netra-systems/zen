@@ -5,7 +5,7 @@ Comprehensive testing for agent system under load conditions.
 Tests concurrent agent requests, resource isolation, and performance degradation.
 """
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 from netra_backend.app.websocket_core import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path

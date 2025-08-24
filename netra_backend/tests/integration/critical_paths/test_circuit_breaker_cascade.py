@@ -36,8 +36,8 @@ from netra_backend.app.core.health_checkers import (
     check_redis_health,
 )
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.websocket_core.connection_manager import (
-    ConnectionManager,
+from netra_backend.app.websocket_core import (
+    WebSocketManager as ConnectionManager,
     get_connection_manager,
 )
 

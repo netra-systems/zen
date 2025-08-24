@@ -10,9 +10,8 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 from dev_launcher.config import LauncherConfig
-from dev_launcher.environment_manager import get_environment_manager, reset_global_manager
+from dev_launcher.isolated_environment import get_env
 from dev_launcher.launcher import DevLauncher
-from dev_launcher.secret_loader import SecretLoader
 
 
 class TestEnvironmentLoadingRegression:

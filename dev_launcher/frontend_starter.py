@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Dict, Optional, Tuple
 
 from dev_launcher.config import LauncherConfig, resolve_path
+from dev_launcher.isolated_environment import get_env
 from dev_launcher.log_streamer import Colors, LogManager, LogStreamer
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.utils import (
@@ -65,7 +66,8 @@ class FrontendStarter:
         from dev_launcher.config import resolve_path
         
         # Only show errors if environment loading is complete
-        if os.environ.get('NETRA_SECRETS_LOADING') == 'true':
+        env = get_env()
+        if env.get('NETRA_SECRETS_LOADING') == 'true':
             logger.debug("Frontend preparation failed during environment loading - deferring error display")
             return
         
@@ -102,7 +104,8 @@ class FrontendStarter:
         wait_interval = 0.1
         waited = 0.0
         
-        while os.environ.get('NETRA_SECRETS_LOADING') == 'true' and waited < max_wait:
+        env = get_env()
+        while env.get('NETRA_SECRETS_LOADING') == 'true' and waited < max_wait:
             time.sleep(wait_interval)
             waited += wait_interval
             

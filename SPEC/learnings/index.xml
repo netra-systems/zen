@@ -48,6 +48,15 @@
             <critical-takeaway>ALWAYS use batch operations for path migrations - never migrate file-by-file to avoid inconsistencies.</critical-takeaway>
             <critical-takeaway>Path migrations must be atomic - all changes in single commit with tests passing before and after.</critical-takeaway>
             <critical-takeaway>Use multi-agent coordination for large migrations: Principal (strategy), Implementation (execution), QA (verification), DevOps (deployment).</critical-takeaway>
+        </category>
+        
+        <category name="Import Refactoring Crisis" path="SPEC/learnings/import_refactoring_2025-08-23.xml" keywords="Import Errors, ModuleNotFoundError, Refactoring, PerformanceMonitor, ConnectionManager, BackgroundTaskManager, ATOMIC SCOPE">
+            <critical-takeaway>CRITICAL: 330+ import errors from non-atomic refactoring. Refactors MUST update tests in same commit.</critical-takeaway>
+            <critical-takeaway>PerformanceMonitor moved from monitoring.performance_monitor to monitoring.metrics_collector (23 files affected).</critical-takeaway>
+            <critical-takeaway>ConnectionManager renamed to WebSocketManager in websocket_core module (22 files affected).</critical-takeaway>
+            <critical-takeaway>BackgroundTaskManager moved from app.background to app.services.background_task_manager (6 files affected).</critical-takeaway>
+            <critical-takeaway>Create backward compatibility stubs when removing modules to prevent import failures during transition.</critical-takeaway>
+            <critical-takeaway>Add pytest --collect-only to CI/CD to catch import errors before merge.</critical-takeaway>
             <critical-takeaway>New services must follow standard scaffold: {service_name}/{service_name}_core/ structure with health endpoints from start.</critical-takeaway>
             <critical-takeaway>Validate import hierarchy: Core->Models->Services->Routes->Main, never reverse imports.</critical-takeaway>
             <critical-takeaway>Configuration alignment critical: Update Python imports, Docker paths, CI/CD, env vars atomically.</critical-takeaway>
@@ -443,6 +452,16 @@
             <critical-takeaway>URL validation must handle multiple PostgreSQL schemes and provide meaningful error messages</critical-takeaway>
             <critical-takeaway>Test-driven development with 28 comprehensive tests ensures robust method implementation</critical-takeaway>
             <critical-takeaway>Microservice isolation requires method dependency analysis to prevent runtime attribute errors</critical-takeaway>
+        </category>
+
+        <category name="Environment Management" path="SPEC/learnings/environment_management.xml" keywords="Environment Variables, Isolation, Centralized Management, os.environ, Development, Testing">
+            <critical-takeaway>NEVER use direct os.environ access - use centralized IsolatedEnvironment manager to prevent conflicts</critical-takeaway>
+            <critical-takeaway>Enable isolation mode in development/testing to prevent environment pollution between runs</critical-takeaway>
+            <critical-takeaway>Always provide source tracking when setting environment variables for debugging purposes</critical-takeaway>
+            <critical-takeaway>Use get_subprocess_env() for external process calls to maintain isolation boundaries</critical-takeaway>
+            <critical-takeaway>Environment variable operations must be thread-safe in multi-threaded applications</critical-takeaway>
+            <critical-takeaway>Implement variable protection mechanisms to prevent accidental overrides of critical values</critical-takeaway>
+            <critical-takeaway>Comprehensive tests essential for centralized infrastructure components affecting entire system</critical-takeaway>
         </category>
     </categories>
     

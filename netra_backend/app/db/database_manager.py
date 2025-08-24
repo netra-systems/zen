@@ -14,10 +14,8 @@ Each function ≤15 lines, class ≤200 lines total.
 """
 
 import os
-import re
 import asyncio
 from typing import Optional
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -28,6 +26,7 @@ from sqlalchemy.exc import OperationalError, DisconnectionError
 from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
+from shared.database.core_database_manager import CoreDatabaseManager
 
 
 class DatabaseManager:
@@ -41,7 +40,6 @@ class DatabaseManager:
             Clean database URL with driver prefixes and SSL params stripped
         """
         # First check direct environment variable (for tests that patch os.environ)
-        import os
         raw_url = os.environ.get("DATABASE_URL", "")
         
         # Skip configuration loading during test collection to prevent hanging
@@ -59,16 +57,9 @@ class DatabaseManager:
         if not raw_url:
             return DatabaseManager._get_default_database_url()
         
-        # Strip async driver prefixes
-        clean_url = raw_url.replace("postgresql+asyncpg://", "postgresql://")
-        clean_url = clean_url.replace("postgres+asyncpg://", "postgresql://")
-        clean_url = clean_url.replace("postgres://", "postgresql://")
-        
-        # Handle SSL parameters - remove for Cloud SQL, normalize for others
-        if "/cloudsql/" in clean_url:
-            # Cloud SQL Unix socket - remove all SSL parameters
-            clean_url = re.sub(r'[&?]sslmode=[^&]*', '', clean_url)
-            clean_url = re.sub(r'[&?]ssl=[^&]*', '', clean_url)
+        # Use shared core database manager for URL processing
+        clean_url = CoreDatabaseManager.strip_driver_prefixes(raw_url)
+        clean_url = CoreDatabaseManager.convert_ssl_params_for_psycopg2(clean_url)
         
         return clean_url
     
@@ -80,16 +71,7 @@ class DatabaseManager:
             Database URL compatible with synchronous drivers
         """
         base_url = DatabaseManager.get_base_database_url()
-        
-        # Ensure synchronous driver
-        if base_url.startswith("postgresql+asyncpg://"):
-            base_url = base_url.replace("postgresql+asyncpg://", "postgresql://")
-        
-        # Convert asyncpg SSL params to psycopg2 format
-        if "ssl=" in base_url and "/cloudsql/" not in base_url:
-            base_url = base_url.replace("ssl=", "sslmode=")
-        
-        return base_url
+        return CoreDatabaseManager.format_url_for_sync_driver(base_url)
     
     @staticmethod
     def get_application_url_async() -> str:
@@ -99,24 +81,7 @@ class DatabaseManager:
             Database URL compatible with asyncpg driver
         """
         base_url = DatabaseManager.get_base_database_url()
-        
-        # Ensure async driver
-        if base_url.startswith("postgresql://"):
-            base_url = base_url.replace("postgresql://", "postgresql+asyncpg://")
-        
-        # Handle SSL parameters based on connection type
-        if "/cloudsql/" in base_url:
-            # Cloud SQL Unix socket - remove all SSL parameters
-            base_url = re.sub(r'[&?]sslmode=[^&]*', '', base_url)
-            base_url = re.sub(r'[&?]ssl=[^&]*', '', base_url)
-        else:
-            # CRITICAL FIX: For ALL non-Cloud SQL async connections,
-            # convert psycopg2 'sslmode=' to asyncpg 'ssl=' format
-            # This is REQUIRED because asyncpg doesn't understand 'sslmode'
-            if "sslmode=" in base_url:
-                base_url = base_url.replace("sslmode=", "ssl=")
-        
-        return base_url
+        return CoreDatabaseManager.format_url_for_async_driver(base_url)
     
     @staticmethod
     def validate_base_url() -> bool:
@@ -127,9 +92,9 @@ class DatabaseManager:
         """
         base_url = DatabaseManager.get_base_database_url()
         
-        # Check for driver-specific elements
+        # Check for driver-specific elements using shared utilities
         has_async_driver = "asyncpg" in base_url
-        has_mixed_ssl = ("ssl=" in base_url and "sslmode=" in base_url)
+        has_mixed_ssl = CoreDatabaseManager.has_mixed_ssl_params(base_url)
         
         return not (has_async_driver or has_mixed_ssl)
     
@@ -150,7 +115,7 @@ class DatabaseManager:
             return False
         
         # Should use sslmode (not ssl) unless Cloud SQL
-        if "/cloudsql/" not in target_url and "ssl=" in target_url:
+        if not CoreDatabaseManager.is_cloud_sql_connection(target_url) and "ssl=" in target_url:
             return False
         
         return target_url.startswith("postgresql://")
@@ -172,7 +137,7 @@ class DatabaseManager:
             return False
         
         # Should use ssl (not sslmode) unless Cloud SQL
-        if "/cloudsql/" not in target_url and "sslmode=" in target_url:
+        if not CoreDatabaseManager.is_cloud_sql_connection(target_url) and "sslmode=" in target_url:
             return False
         
         return True
@@ -273,7 +238,6 @@ class DatabaseManager:
             True if using Cloud SQL Unix socket connections
         """
         # First check direct environment variable (for tests that patch os.environ)
-        import os
         database_url = os.environ.get("DATABASE_URL", "")
         
         # If not found, try unified config
@@ -284,7 +248,7 @@ class DatabaseManager:
             except Exception:
                 pass  # Will return False below
         
-        return "/cloudsql/" in database_url
+        return CoreDatabaseManager.is_cloud_sql_connection(database_url)
     
     @staticmethod
     def is_local_development() -> bool:
@@ -527,14 +491,7 @@ class DatabaseManager:
         Returns:
             Normalized PostgreSQL URL
         """
-        # Convert postgres:// to postgresql://
-        if url.startswith("postgres://"):
-            url = url.replace("postgres://", "postgresql://")
-        
-        # Strip async driver prefixes for base URL
-        url = url.replace("postgresql+asyncpg://", "postgresql://")
-        
-        return url
+        return CoreDatabaseManager.normalize_postgres_url(url)
     
     @staticmethod
     def _convert_sslmode_to_ssl(url: str) -> str:
@@ -547,15 +504,7 @@ class DatabaseManager:
         Returns:
             URL with ssl parameter for asyncpg compatibility
         """
-        # Skip conversion for Cloud SQL connections
-        if "/cloudsql/" in url:
-            return url
-        
-        # Convert sslmode= to ssl= for asyncpg
-        if "sslmode=" in url:
-            url = url.replace("sslmode=", "ssl=")
-        
-        return url
+        return CoreDatabaseManager.convert_ssl_params_for_asyncpg(url)
     
     @staticmethod
     def _get_default_auth_url() -> str:

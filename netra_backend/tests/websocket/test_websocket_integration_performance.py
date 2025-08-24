@@ -19,7 +19,7 @@ from netra_backend.app.websocket_core.compression import WebSocketCompressor
 
 from netra_backend.app.websocket_core.memory_manager import WebSocketMemoryManager
 from netra_backend.app.websocket_core.message_batcher import WebSocketMessageBatcher
-from netra_backend.app.websocket_core.performance_monitor import PerformanceMonitor
+from netra_backend.app.monitoring.system_monitor import SystemPerformanceMonitor as PerformanceMonitor
 
 class WebSocketIntegrationTestHelper:
     """Helper class for integration testing."""

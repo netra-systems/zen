@@ -4,11 +4,12 @@ Log filtering system for clean startup output.
 Consolidated log filtering based on startup mode as per spec v2.0.
 """
 
-import os
 import re
 import time
 from enum import Enum
 from typing import Any, Dict, Optional, Set
+
+from dev_launcher.isolated_environment import get_env
 
 try:
     from .filter_patterns import (
@@ -234,7 +235,8 @@ class LogFilter:
     @classmethod
     def from_env(cls) -> 'LogFilter':
         """Create log filter from environment variable."""
-        mode_str = os.environ.get("NETRA_STARTUP_MODE", "minimal").lower()
+        env = get_env()
+        mode_str = env.get("NETRA_STARTUP_MODE", "minimal").lower()
         try:
             mode = StartupMode(mode_str)
         except ValueError:

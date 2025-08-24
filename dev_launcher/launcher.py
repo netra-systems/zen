@@ -7,7 +7,6 @@ import atexit
 import hashlib
 import json
 import logging
-import os
 import signal
 import sys
 import threading
@@ -23,8 +22,8 @@ from dev_launcher.critical_error_handler import CriticalError, critical_handler
 from dev_launcher.database_connector import DatabaseConnector
 from dev_launcher.database_initialization import DatabaseInitializer, DatabaseHealthChecker
 from dev_launcher.environment_checker import EnvironmentChecker
-from dev_launcher.environment_manager import get_environment_manager
-from dev_launcher.environment_validator import EnvironmentValidator
+from dev_launcher.isolated_environment import get_env
+from dev_launcher.isolated_environment import EnvironmentValidator
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.health_registration import HealthRegistrationHelper
 from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
@@ -34,7 +33,7 @@ from dev_launcher.network_resilience import NetworkResilientClient, RetryPolicy
 from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
 from dev_launcher.process_manager import ProcessManager
 from dev_launcher.race_condition_manager import RaceConditionManager, ResourceType
-from dev_launcher.secret_loader import SecretLoader
+# SecretLoader functionality is now integrated into isolated_environment.py
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.service_startup import ServiceStartupCoordinator
 from dev_launcher.signal_handler import SignalHandler
@@ -79,7 +78,8 @@ class DevLauncher:
         # Get mode from config or environment
         mode_str = getattr(self.config, 'startup_mode', None)
         if not mode_str:
-            mode_str = os.environ.get("NETRA_STARTUP_MODE", "minimal")
+            env = get_env()
+            mode_str = env.get("NETRA_STARTUP_MODE", "minimal")
         
         # Set startup mode
         try:
@@ -124,15 +124,14 @@ class DevLauncher:
         # Initialize network resilience client early
         self.network_client = NetworkResilientClient(self.use_emoji)
         
-        self.secret_loader = self._create_secret_loader()
         self._secrets_loaded = False  # Track if secrets have been loaded
         
-        # Note: Local secrets loading moved to after helpers setup to ensure env_manager is available
+        # Note: Local secrets loading moved to after helpers setup to ensure environment is available
         
         self.service_startup = self._create_service_startup()
         self.summary_display = SummaryDisplay(self.config, self.service_discovery, self.use_emoji)
         
-        # Load local secrets now that env_manager is available
+        # Load local secrets now that environment is available
         self._load_local_secrets_early()
     
     def _setup_helpers(self):
@@ -147,27 +146,56 @@ class DevLauncher:
         self.environment_validator = EnvironmentValidator()
         
         # Get environment manager with matching isolation mode
-        environment = os.environ.get('ENVIRONMENT', 'development').lower()
+        env = get_env()
+        environment = env.get('ENVIRONMENT', 'development').lower()
         isolation_mode = environment == 'development'
-        self.env_manager = get_environment_manager(isolation_mode=isolation_mode)
+        self.env = get_env()
+        if isolation_mode and not self.env.is_isolation_enabled():
+            self.env.enable_isolation()
     
-    def _create_secret_loader(self) -> SecretLoader:
-        """Create secret loader instance with isolation mode detection."""
-        # Detect development mode and enable isolation by default
-        environment = os.environ.get('ENVIRONMENT', 'development').lower()
+    def _setup_environment_isolation(self):
+        """Setup environment isolation based on development mode detection."""
+        env = get_env()
+        environment = env.get('ENVIRONMENT', 'development').lower()
         isolation_mode = environment == 'development'
         
         if self.config.verbose:
             isolation_status = "ENABLED" if isolation_mode else "DISABLED"
             logger.info(f"[LAUNCHER] Environment isolation: {isolation_status} (ENVIRONMENT={environment})")
         
-        return SecretLoader(
-            project_id=self.config.project_id,
-            verbose=self.config.verbose,
-            project_root=self.config.project_root,
-            load_secrets=self.config.load_secrets,
-            isolation_mode=isolation_mode
-        )
+        if isolation_mode and not env.is_isolation_enabled():
+            env.enable_isolation()
+    
+    def _load_environment_files(self):
+        """Load environment variables from .env files."""
+        env = get_env()
+        project_root = self.config.project_root
+        
+        # Load from .env file if it exists
+        env_file = project_root / ".env"
+        if env_file.exists():
+            try:
+                loaded_count, errors = env.load_from_file(env_file, source="env_file")
+                if self.config.verbose:
+                    logger.info(f"Loaded {loaded_count} variables from .env")
+                if errors:
+                    for error in errors:
+                        logger.warning(f"Environment loading error: {error}")
+            except Exception as e:
+                logger.warning(f"Failed to load .env file: {e}")
+        
+        # Also check for .env.local for local overrides
+        env_local_file = project_root / ".env.local"
+        if env_local_file.exists():
+            try:
+                loaded_count, errors = env.load_from_file(env_local_file, source="env_local", override_existing=True)
+                if self.config.verbose:
+                    logger.info(f"Loaded {loaded_count} variables from .env.local")
+                if errors:
+                    for error in errors:
+                        logger.warning(f"Environment loading error: {error}")
+            except Exception as e:
+                logger.warning(f"Failed to load .env.local file: {e}")
     
     def _create_service_startup(self) -> ServiceStartupCoordinator:
         """Create service startup coordinator."""
@@ -764,8 +792,8 @@ class DevLauncher:
         }
         
         for var, default_value in defaults.items():
-            if not self.env_manager.has_variable(var):
-                if self.env_manager.set_environment(var, default_value, source="launcher_defaults"):
+            if not self.env.get(var):
+                if self.env.set(var, default_value, source="launcher_defaults"):
                     self._print("ℹ️", "DEFAULT", f"Set {var}={default_value}")
         
         # Generate cross-service auth token if not present
@@ -806,7 +834,7 @@ class DevLauncher:
             
             self.service_discovery.set_cross_service_auth_token(token)
             # Use environment manager to set token
-            self.env_manager.set_environment('CROSS_SERVICE_AUTH_TOKEN', token, 
+            self.env.set('CROSS_SERVICE_AUTH_TOKEN', token, 
                                            source="launcher_auth_token", allow_override=True)
             self._print("🔑", "TOKEN", f"Generated secure cross-service auth token ({len(token)} chars)")
             
@@ -814,7 +842,7 @@ class DevLauncher:
             logger.debug(f"Token entropy check: unique chars={len(set(token))}, length={len(token)}")
         else:
             # Use environment manager to set existing token
-            self.env_manager.set_environment('CROSS_SERVICE_AUTH_TOKEN', existing_token, 
+            self.env.set('CROSS_SERVICE_AUTH_TOKEN', existing_token, 
                                            source="launcher_auth_token", allow_override=True)
             self._print("🔑", "TOKEN", f"Using existing cross-service auth token ({len(existing_token)} chars)")
     
@@ -823,7 +851,7 @@ class DevLauncher:
         required_vars = ["DATABASE_URL", "JWT_SECRET_KEY"]
         
         for var in required_vars:
-            value = self.env_manager.get_environment(var)
+            value = self.env.get(var)
             if not value:
                 critical_handler.check_env_var(var, value)
     
@@ -864,7 +892,8 @@ class DevLauncher:
             results = checker.check_all_services(self.config.services_config)
             
             # Store original environment state for comparison
-            original_env = {key: os.environ.get(key) for key in [
+            env = get_env()
+            original_env = {key: env.get(key) for key in [
                 'REDIS_URL', 'REDIS_HOST', 'REDIS_PORT', 'REDIS_MODE',
                 'CLICKHOUSE_URL', 'CLICKHOUSE_HOST', 'CLICKHOUSE_PORT', 'CLICKHOUSE_MODE',
                 'DATABASE_URL', 'POSTGRES_HOST', 'POSTGRES_PORT', 'POSTGRES_MODE',
@@ -880,11 +909,12 @@ class DevLauncher:
                 # Update environment variables with detailed tracking
                 service_env_vars = self.config.services_config.get_all_env_vars()
                 env_changes = []
+                env_instance = get_env()
                 
                 for key, new_value in service_env_vars.items():
                     old_value = original_env.get(key)
                     if old_value != new_value:
-                        os.environ[key] = new_value
+                        env_instance.set(key, new_value, "launcher_service_config")
                         env_changes.append(f"{key}: {old_value or 'unset'} → {new_value}")
                 
                 if env_changes:
@@ -952,7 +982,8 @@ class DevLauncher:
         verification_failures = []
         
         for key, expected_value in service_env_vars.items():
-            actual_value = os.environ.get(key)
+            env = get_env()
+            actual_value = env.get(key)
             if actual_value != expected_value:
                 verification_failures.append(f"{key}: expected '{expected_value}', got '{actual_value}'")
         
@@ -996,13 +1027,14 @@ class DevLauncher:
                 
                 # Get service modes with fallback to environment variables
                 redis_mode = getattr(services_config.redis, 'mode', None)
-                redis_mock = (redis_mode and redis_mode.value == "mock") or os.environ.get('REDIS_MODE') == 'mock'
+                env = get_env()
+                redis_mock = (redis_mode and redis_mode.value == "mock") or env.get('REDIS_MODE') == 'mock'
                 
                 clickhouse_mode = getattr(services_config.clickhouse, 'mode', None) 
-                clickhouse_mock = (clickhouse_mode and clickhouse_mode.value == "mock") or os.environ.get('CLICKHOUSE_MODE') == 'mock'
+                clickhouse_mock = (clickhouse_mode and clickhouse_mode.value == "mock") or env.get('CLICKHOUSE_MODE') == 'mock'
                 
                 postgres_mode = getattr(services_config.postgres, 'mode', None)
-                postgres_mock = (postgres_mode and postgres_mode.value == "mock") or os.environ.get('POSTGRES_MODE') == 'mock'
+                postgres_mock = (postgres_mode and postgres_mode.value == "mock") or env.get('POSTGRES_MODE') == 'mock'
                 
                 # Check for disabled services as well
                 redis_disabled = redis_mode and redis_mode.value == "disabled"
@@ -1105,11 +1137,12 @@ class DevLauncher:
             # Prevent environment race condition using the race condition manager
             if self.race_condition_manager.prevent_environment_race_condition("launcher_secret_loader"):
                 # Use temporary flag with environment manager
-                with self.env_manager.set_temporary_flag('NETRA_SECRETS_LOADING', 'true', 'launcher_early_load'):
-                    # Load with local-only mode (no GCP)
-                    self.secret_loader.local_first = True
-                    self.secret_loader.load_secrets = False  # Ensure no GCP loading
-                    self.secret_loader.load_all_secrets()
+                # Set temporary flag and load environment files
+                self.env.set('NETRA_SECRETS_LOADING', 'true', 'launcher_early_load')
+                try:
+                    self._load_environment_files()
+                finally:
+                    self.env.delete('NETRA_SECRETS_LOADING')
                     self._secrets_loaded = True
             else:
                 logger.warning("Race condition detected during early secret loading, retrying...")
@@ -1132,7 +1165,7 @@ class DevLauncher:
         
         try:
             # Prevent race condition - ensure environment loading is complete
-            if self.env_manager.has_variable('NETRA_SECRETS_LOADING'):
+            if self.env.get('NETRA_SECRETS_LOADING'):
                 self._print("⏳", "SECRETS", "Waiting for environment loading to complete...")
                 # Brief wait to ensure loading completes
                 time.sleep(0.1)
@@ -1161,12 +1194,13 @@ class DevLauncher:
         if self._secrets_loaded:
             # Local secrets already loaded, only load GCP secrets if needed
             self._print("🔐", "SECRETS", "Loading additional secrets from GCP...")
-            # Re-enable GCP loading for this call
-            self.secret_loader.load_secrets = True
-            result = self.secret_loader.load_all_secrets()
+            # GCP loading not implemented in unified config, using local files only
+            self._load_environment_files()
+            result = True
         else:
             self._print("🔐", "SECRETS", "Starting enhanced environment variable loading...")
-            result = self.secret_loader.load_all_secrets()
+            self._load_environment_files()
+            result = True
             self._secrets_loaded = True
         
         if self.config.verbose:
