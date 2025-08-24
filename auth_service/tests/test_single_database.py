@@ -47,6 +47,7 @@ async def test_single_database_initialization():
             # Add auth_service directory to path for imports
             auth_service_path = Path(__file__).parent.parent
             if str(auth_service_path) not in sys.path:
+                sys.path.append(str(auth_service_path))
             
             from main import lifespan
             
