@@ -34,8 +34,11 @@ class BaseIntegrationTest:
     
     def setup_mocks(self):
         """Set up common mocks for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         self.mock_db = MagicMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         self.mock_redis = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.mock_http_client = AsyncMock()
     
     def cleanup_resources(self):

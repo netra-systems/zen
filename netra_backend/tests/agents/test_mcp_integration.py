@@ -10,10 +10,10 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-from mcp_client import MCPTool
+from netra_backend.app.mcp_client import MCPTool
 
 from netra_backend.app.agents.mcp_integration.context_manager import (
     MCPAgentContext,
@@ -28,6 +28,7 @@ from netra_backend.app.services.agent_mcp_bridge import AgentMCPBridge
 @pytest.fixture
 def mock_mcp_service():
     """Mock MCP client service."""
+    # Mock: Generic component isolation for controlled unit testing
     service = AsyncMock()
     service.discover_tools.return_value = [
         {"name": "file_read", "description": "Read file", "schema": {}},
@@ -98,6 +99,7 @@ class TestMCPContextManager:
     async def test_execute_tool_with_context_success(self, mcp_context_manager, sample_agent_context):
         """Test successful tool execution."""
         # Mock permission checker to allow execution
+        # Mock: Component isolation for controlled unit testing
         mcp_context_manager.permission_checker.can_execute_tool = Mock(return_value=True)
         
         result = await mcp_context_manager.execute_tool_with_context(
@@ -111,6 +113,7 @@ class TestMCPContextManager:
     async def test_execute_tool_permission_denied(self, mcp_context_manager, sample_agent_context):
         """Test tool execution with permission denied."""
         # Mock permission checker to deny execution
+        # Mock: Component isolation for controlled unit testing
         mcp_context_manager.permission_checker.can_execute_tool = Mock(return_value=False)
         
         with pytest.raises(Exception) as exc_info:
@@ -123,6 +126,7 @@ class TestMCPContextManager:
     def test_cleanup_context(self, mcp_context_manager):
         """Test context cleanup."""
         run_id = "test_run_123"
+        # Mock: Generic component isolation for controlled unit testing
         mcp_context_manager.active_contexts[run_id] = Mock()
         
         mcp_context_manager.cleanup_context(run_id)
@@ -261,6 +265,7 @@ class TestMCPIntegrationEndToEnd:
         )
         
         # 3. Execute tool through bridge
+        # Mock: Component isolation for controlled unit testing
         mcp_context_manager.permission_checker.can_execute_tool = Mock(return_value=True)
         
         result = await agent_mcp_bridge.execute_tool_for_agent(

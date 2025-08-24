@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <name>Atomic Change Specification</name>
+  <version>1.0.0</version>
+  <purpose>
+    Define comprehensive requirements and validation checklist for atomic changes in Netra Apex.
+    Every change must be complete, validated, and leave the system in a stable state.
+  </purpose>
+  
+  <critical_principle>
+    ATOMIC SCOPE: Every edit must represent a COMPLETE update to the system as defined by Complete Work.
+    Partial implementations, half-finished refactors, or broken intermediate states are forbidden.
+  </critical_principle>
+
+  <atomic_change_definition>
+    <concept>Complete Work</concept>
+    <description>
+      An atomic change encompasses ALL modifications required to transition the system
+      from one stable state to another stable state, with zero partial implementations.
+    </description>
+    <components>
+      <component name="code_changes">All source code modifications across all affected services</component>
+      <component name="test_updates">All test modifications to validate the change</component>
+      <component name="import_corrections">All import statement updates system-wide</component>
+      <component name="reference_updates">All references to renamed/moved entities</component>
+      <component name="legacy_removal">Complete deletion of superseded code</component>
+      <component name="documentation_sync">All spec and doc updates reflecting reality</component>
+      <component name="validation_passing">All checks and tests passing</component>
+    </components>
+  </atomic_change_definition>
+
+  <atomic_change_checklist>
+    <phase name="pre_change_analysis">
+      <task id="1.1">Review MASTER_WIP_STATUS.md for current system alignment</task>
+      <task id="1.2">Check SPEC/learnings/index.xml for related patterns</task>
+      <task id="1.3">Validate string literals: python scripts/query_string_literals.py validate</task>
+      <task id="1.4">Identify ALL files that will be affected</task>
+      <task id="1.5">Map ALL references that need updating</task>
+      <task id="1.6">Define rollback strategy if change fails</task>
+    </phase>
+
+    <phase name="scope_validation">
+      <task id="2.1">Verify change scope is manageable in single atomic operation</task>
+      <task id="2.2">If scope exceeds cognitive limits, decompose into smaller atomic changes</task>
+      <task id="2.3">Ensure no cross-service circular dependencies</task>
+      <task id="2.4">Validate that services remain 100% independent per SPEC/independent_services.xml</task>
+    </phase>
+
+    <phase name="implementation_completeness">
+      <task id="3.1">Source Code Updates
+        <subtask>All functions/classes/modules modified as needed</subtask>
+        <subtask>No placeholder code (pass, todo, etc.)</subtask>
+        <subtask>No commented-out legacy code</subtask>
+      </task>
+      <task id="3.2">Import Management
+        <subtask>ALL imports use absolute paths (no relative imports)</subtask>
+        <subtask>Run: python scripts/fix_all_import_issues.py --absolute-only</subtask>
+        <subtask>Verify: python scripts/comprehensive_import_scanner.py</subtask>
+      </task>
+      <task id="3.3">Reference Updates
+        <subtask>Find all references: Use find_references_to_file() pattern</subtask>
+        <subtask>Update ALL references to renamed/moved entities</subtask>
+        <subtask>No orphaned references remaining</subtask>
+      </task>
+      <task id="3.4">Test Coverage
+        <subtask>All modified code has corresponding tests</subtask>
+        <subtask>Tests updated to reflect new behavior</subtask>
+        <subtask>No test stubs (check SPEC/no_test_stubs.xml)</subtask>
+      </task>
+    </phase>
+
+    <phase name="legacy_cleanup">
+      <task id="4.1">Delete ALL superseded files completely</task>
+      <task id="4.2">Remove ALL old implementations (no dual systems)</task>
+      <task id="4.3">Clean up numbered/versioned files (no _v2, _old, _backup)</task>
+      <task id="4.4">Run: python scripts/cleanup_duplicate_tests.py</task>
+      <task id="4.5">Run: python scripts/prevent_numbered_files.py</task>
+    </phase>
+
+    <phase name="validation_suite">
+      <task id="5.1">Architecture Compliance
+        <command>python scripts/check_architecture_compliance.py</command>
+        <success_criteria>No critical violations</success_criteria>
+      </task>
+      <task id="5.2">Import Health
+        <command>python scripts/unified_import_manager.py check</command>
+        <success_criteria>All imports valid, no relative imports</success_criteria>
+      </task>
+      <task id="5.3">Duplicate Detection
+        <command>python scripts/duplicate_detector.py</command>
+        <success_criteria>No new duplicates introduced</success_criteria>
+      </task>
+      <task id="5.4">Boundary Enforcement
+        <command>python scripts/boundary_enforcer.py</command>
+        <success_criteria>All limits respected (450/25 rule)</success_criteria>
+      </task>
+      <task id="5.5">Test Suite
+        <command>python unified_test_runner.py --level integration --fast-fail</command>
+        <success_criteria>All tests passing</success_criteria>
+      </task>
+      <task id="5.6">String Literal Validation
+        <command>python scripts/scan_string_literals.py</command>
+        <success_criteria>Index updated with new literals</success_criteria>
+      </task>
+    </phase>
+
+    <phase name="documentation_sync">
+      <task id="6.1">Update affected XML specifications</task>
+      <task id="6.2">Update LLM_MASTER_INDEX.md if structure changed</task>
+      <task id="6.3">Add learnings to SPEC/learnings if patterns discovered</task>
+      <task id="6.4">Update string literals index if constants added</task>
+      <task id="6.5">Regenerate WIP report: python scripts/generate_wip_report.py</task>
+    </phase>
+
+    <phase name="multi_environment_validation">
+      <task id="7.1">Local validation with real services (no mocks)</task>
+      <task id="7.2">Dev environment testing if applicable</task>
+      <task id="7.3">Staging environment validation for production changes</task>
+    </phase>
+  </atomic_change_checklist>
+
+  <available_tools>
+    <category name="reference_tracking">
+      <tool>find_references_to_file() from standardize_l3_test_names.py</tool>
+      <tool>update_file_references() for automated reference updates</tool>
+    </category>
+    <category name="import_management">
+      <tool>unified_import_manager.py - Central import compliance</tool>
+      <tool>fix_all_import_issues.py - Convert to absolute imports</tool>
+      <tool>comprehensive_import_scanner.py - Deep import analysis</tool>
+    </category>
+    <category name="duplicate_detection">
+      <tool>duplicate_detector.py - AST-based duplicate detection</tool>
+      <tool>cleanup_duplicate_tests.py - Remove test duplicates</tool>
+    </category>
+    <category name="compliance_checking">
+      <tool>check_architecture_compliance.py - Main compliance checker</tool>
+      <tool>boundary_enforcer.py - Size limit enforcement</tool>
+      <tool>generate_wip_report.py - System alignment tracking</tool>
+    </category>
+    <category name="validation">
+      <tool>unified_test_runner.py - Comprehensive test execution</tool>
+      <tool>query_string_literals.py - String literal validation</tool>
+    </category>
+  </available_tools>
+
+  <missing_tools_identified>
+    <missing_tool priority="high">
+      <name>System-wide Reference Finder</name>
+      <description>
+        Tool to find ALL references to a symbol (class, function, variable) across
+        the entire codebase, including dynamic references and string-based imports.
+        Current find_references_to_file() is limited to specific directories.
+      </description>
+      <recommendation>
+        Enhance standardize_l3_test_names.py pattern to create a comprehensive
+        reference finder using AST analysis + ripgrep for string references.
+      </recommendation>
+    </missing_tool>
+    
+    <missing_tool priority="high">
+      <name>Atomic Change Validator</name>
+      <description>
+        Single command to run the complete atomic change checklist and report
+        on any incomplete aspects of a change.
+      </description>
+      <recommendation>
+        Create scripts/validate_atomic_change.py that orchestrates all validation
+        phases and produces a comprehensive report.
+      </recommendation>
+    </missing_tool>
+
+    <missing_tool priority="medium">
+      <name>Change Impact Analyzer</name>
+      <description>
+        Tool to analyze a proposed change and predict all files/modules that
+        will be affected, helping scope the atomic change properly.
+      </description>
+      <recommendation>
+        Build dependency graph analyzer that traces impact through imports,
+        inheritance, and usage patterns.
+      </recommendation>
+    </missing_tool>
+
+    <missing_tool priority="medium">
+      <name>Legacy Code Detector</name>
+      <description>
+        Tool to identify orphaned code, dead functions, and unused imports
+        after a refactoring to ensure complete cleanup.
+      </description>
+      <recommendation>
+        Enhance existing tools with dead code detection using coverage data
+        and static analysis.
+      </recommendation>
+    </missing_tool>
+
+    <missing_tool priority="low">
+      <name>Rollback Manager</name>
+      <description>
+        Tool to automatically create restore points before atomic changes
+        and rollback if validation fails.
+      </description>
+      <recommendation>
+        Integrate with git to create named stashes/branches for atomic changes
+        with automatic rollback on validation failure.
+      </recommendation>
+    </missing_tool>
+  </missing_tools_identified>
+
+  <common_atomic_violations>
+    <violation type="incomplete_import_refactor">
+      <description>Changing some but not all imports when moving modules</description>
+      <example>Moving a module but leaving relative imports in tests</example>
+      <prevention>Always run comprehensive_import_scanner.py after moves</prevention>
+    </violation>
+    
+    <violation type="partial_legacy_removal">
+      <description>Deleting main code but leaving tests for old implementation</description>
+      <example>Removing old API endpoint but keeping its tests</example>
+      <prevention>Search for ALL references before deletion</prevention>
+    </violation>
+    
+    <violation type="dual_system_coexistence">
+      <description>New and old implementations existing simultaneously</description>
+      <example>auth_config.py and auth_configuration.py both present</example>
+      <prevention>One concept = one implementation, delete old immediately</prevention>
+    </violation>
+    
+    <violation type="orphaned_references">
+      <description>References to deleted/renamed entities remaining</description>
+      <example>Config still importing from old module path</example>
+      <prevention>Use reference tracking tools before renaming</prevention>
+    </violation>
+    
+    <violation type="incomplete_test_updates">
+      <description>Tests not updated to match new implementation</description>
+      <example>Tests still mocking old function signatures</example>
+      <prevention>Run tests immediately after changes</prevention>
+    </violation>
+  </common_atomic_violations>
+
+  <enforcement_strategy>
+    <principle>Prevention over correction</principle>
+    <approach>
+      1. Pre-commit hooks block non-atomic changes
+      2. CI/CD validates atomic completeness
+      3. Automated rollback on validation failure
+      4. Required checklist completion before merge
+    </approach>
+    <responsibility>
+      Principal Engineer must enforce atomic scope for all changes,
+      including those from sub-agents. No exceptions.
+    </responsibility>
+  </enforcement_strategy>
+
+  <related_specs>
+    <spec>SPEC/core.xml - Core architecture principles</spec>
+    <spec>SPEC/code_changes.xml - Change protocol</spec>
+    <spec>SPEC/anti_regression.xml - Regression prevention</spec>
+    <spec>SPEC/audit.xml - Post-session audit requirements</spec>
+    <spec>SPEC/learnings/import_refactoring_2025-08-23.xml - Atomic violation example</spec>
+  </related_specs>
+</spec>

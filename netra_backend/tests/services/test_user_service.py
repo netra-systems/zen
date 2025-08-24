@@ -6,10 +6,8 @@ Tests user CRUD operations including password hashing
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import uuid
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,10 +24,15 @@ class TestUserService:
     @pytest.fixture
     def mock_db_session(self):
         """Create mock database session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.add = Mock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.refresh = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.execute = AsyncMock()
         return session
     
@@ -54,6 +57,7 @@ class TestUserService:
             is_superuser=False
         )
         return user
+    @pytest.mark.asyncio
     async def test_create_user(self, mock_db_session, sample_user_data):
         """Test creating a new user with password hashing"""
         # Arrange
@@ -61,6 +65,7 @@ class TestUserService:
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the get_by_email to return None (no existing user)
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalars.return_value.first.return_value = None
         mock_db_session.execute.return_value = mock_result
@@ -96,12 +101,14 @@ class TestUserService:
         mock_db_session.add.assert_called_once()
         mock_db_session.commit.assert_called_once()
         mock_db_session.refresh.assert_called_once()
+    @pytest.mark.asyncio
     async def test_get_user_by_email(self, mock_db_session, sample_user):
         """Test retrieving a user by email"""
         # Arrange
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the database query result
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalars.return_value.first.return_value = sample_user
         mock_db_session.execute.return_value = mock_result
@@ -122,12 +129,14 @@ class TestUserService:
         call_args = mock_db_session.execute.call_args[0][0]
         # The query should filter by email
         assert "email" in str(call_args)
+    @pytest.mark.asyncio
     async def test_get_user_by_email_not_found(self, mock_db_session):
         """Test retrieving a user by email when user doesn't exist"""
         # Arrange
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the database query result to return None
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalars.return_value.first.return_value = None
         mock_db_session.execute.return_value = mock_result
@@ -140,6 +149,7 @@ class TestUserService:
         
         # Verify the query was executed
         mock_db_session.execute.assert_called_once()
+    @pytest.mark.asyncio
     async def test_update_user(self, mock_db_session, sample_user):
         """Test updating user information"""
         # Arrange
@@ -150,6 +160,7 @@ class TestUserService:
         )
         
         # Mock get method to return the sample user
+        # Mock: Async component isolation for testing without real async operations
         with patch.object(crud_user, 'get', AsyncMock(return_value=sample_user)):
             # Mock the database refresh
             async def mock_refresh(obj):
@@ -173,14 +184,17 @@ class TestUserService:
             # Verify database operations
             mock_db_session.commit.assert_called()
             mock_db_session.refresh.assert_called()
+    @pytest.mark.asyncio
     async def test_delete_user(self, mock_db_session, sample_user):
         """Test deleting a user"""
         # Arrange
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the get method to return the sample user
+        # Mock: Async component isolation for testing without real async operations
         with patch.object(crud_user, 'get', AsyncMock(return_value=sample_user)):
             # Mock the database delete operation
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_db_session.delete = Mock()
             
             # Act
@@ -192,13 +206,16 @@ class TestUserService:
             # Verify database operations
             mock_db_session.delete.assert_called_once_with(sample_user)
             mock_db_session.commit.assert_called_once()
+    @pytest.mark.asyncio
     async def test_get_user_by_id(self, mock_db_session, sample_user):
         """Test retrieving a user by ID"""
         # Arrange
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the database query - need to mock scalars().first() not scalar_one_or_none()
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_scalars = Mock()
         mock_scalars.first.return_value = sample_user
         mock_result.scalars.return_value = mock_scalars
@@ -214,6 +231,7 @@ class TestUserService:
         
         # Verify the query was executed
         mock_db_session.execute.assert_called_once()
+    @pytest.mark.asyncio
     async def test_get_multiple_users(self, mock_db_session):
         """Test retrieving multiple users with pagination"""
         # Arrange
@@ -233,6 +251,7 @@ class TestUserService:
         ]
         
         # Mock the database query
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalars.return_value.all.return_value = users[:2]  # Return first 2 users
         mock_db_session.execute.return_value = mock_result
@@ -248,6 +267,7 @@ class TestUserService:
         
         # Verify the query was executed
         mock_db_session.execute.assert_called_once()
+    @pytest.mark.asyncio
     async def test_password_hashing_security(self):
         """Test that password hashing is secure and consistent"""
         # Arrange
@@ -286,6 +306,7 @@ class TestUserService:
             assert False  # Should have raised exception
         except Exception:
             assert True  # Correctly failed verification
+    @pytest.mark.asyncio
     async def test_create_user_with_duplicate_email(self, mock_db_session, sample_user_data):
         """Test that creating a user with duplicate email handles error appropriately"""
         # Arrange
@@ -293,6 +314,7 @@ class TestUserService:
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the get_by_email to return None (no existing user)
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalars.return_value.first.return_value = None
         mock_db_session.execute.return_value = mock_result

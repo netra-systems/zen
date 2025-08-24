@@ -7,8 +7,7 @@ WebSocket event propagation, and frontend state consistency.
 Business Value: $12K MRR - Data consistency and real-time synchronization
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from pathlib import Path
 import sys
 
@@ -16,7 +15,7 @@ import asyncio
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import sqlalchemy
@@ -26,7 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.fixtures import (
 
     clean_database_state,
@@ -41,6 +40,7 @@ class TestDatabaseSynchronization:
 
     """Test database synchronization and real-time updates"""
 
+    @pytest.mark.asyncio
     async def test_thread_creation_flow(self, clean_database_state):
 
         """Test complete thread creation flow with real-time updates"""
@@ -68,8 +68,10 @@ class TestDatabaseSynchronization:
         
         # Mock WebSocket connection for user
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_connection.state = MagicMock()
 
         mock_connection.state.value = 1  # CONNECTED state
@@ -144,6 +146,7 @@ class TestDatabaseSynchronization:
 
         assert sent_data["payload"]["thread_id"] == "thread-123"
 
+    @pytest.mark.asyncio
     async def test_postgres_persistence(self, clean_database_state):
 
         """Test data persistence in PostgreSQL across service restarts"""
@@ -250,6 +253,7 @@ class TestDatabaseSynchronization:
 
         assert restored_message.thread_id == restored_thread.id
 
+    @pytest.mark.asyncio
     async def test_ui_update_via_websocket(self, clean_database_state):
 
         """Test UI updates through WebSocket events"""
@@ -260,14 +264,18 @@ class TestDatabaseSynchronization:
         
         # Mock WebSocket connections for multiple users
 
+        # Mock: Generic component isolation for controlled unit testing
         user1_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         user1_connection.state = MagicMock()
 
         user1_connection.state.value = 1
         
+        # Mock: Generic component isolation for controlled unit testing
         user2_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         user2_connection.state = MagicMock()
 
         user2_connection.state.value = 1
@@ -338,6 +346,7 @@ class TestDatabaseSynchronization:
 
         assert sent_message_2["payload"]["thread_id"] == "ui-update-thread"
 
+    @pytest.mark.asyncio
     async def test_frontend_state_sync(self, clean_database_state):
 
         """Test frontend state synchronization across multiple tabs"""
@@ -364,20 +373,26 @@ class TestDatabaseSynchronization:
         
         # Mock multiple tabs for same user
 
+        # Mock: Generic component isolation for controlled unit testing
         tab1_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         tab1_connection.state = MagicMock()
 
         tab1_connection.state.value = 1
         
+        # Mock: Generic component isolation for controlled unit testing
         tab2_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         tab2_connection.state = MagicMock()
 
         tab2_connection.state.value = 1
         
+        # Mock: Generic component isolation for controlled unit testing
         tab3_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         tab3_connection.state = MagicMock()
 
         tab3_connection.state.value = 1
@@ -468,6 +483,7 @@ class TestDatabaseSynchronization:
 
             assert sent_data["payload"]["changes"]["title"] == "Updated Title"
 
+    @pytest.mark.asyncio
     async def test_concurrent_database_operations(self, clean_database_state):
 
         """Test concurrent database operations with proper synchronization"""
@@ -500,8 +516,10 @@ class TestDatabaseSynchronization:
 
         for i in range(3):
 
+            # Mock: Generic component isolation for controlled unit testing
             conn = AsyncMock()
 
+            # Mock: Generic component isolation for controlled unit testing
             conn.state = MagicMock()
 
             conn.state.value = 1
@@ -584,6 +602,7 @@ class TestDatabaseSynchronization:
 
             assert connection.send_text.call_count == 5
 
+    @pytest.mark.asyncio
     async def test_database_transaction_rollback(self, clean_database_state):
 
         """Test transaction rollback and consistency"""
@@ -662,6 +681,7 @@ class TestDatabaseSynchronization:
 
         assert rollback_thread is None
 
+    @pytest.mark.asyncio
     async def test_websocket_connection_recovery(self, clean_database_state):
 
         """Test WebSocket connection recovery and state restoration"""
@@ -702,8 +722,10 @@ class TestDatabaseSynchronization:
         
         # Mock connection
 
+        # Mock: Generic component isolation for controlled unit testing
         connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         connection.state = MagicMock()
 
         connection.state.value = 1
@@ -720,8 +742,10 @@ class TestDatabaseSynchronization:
         
         # Create new connection (recovery)
 
+        # Mock: Generic component isolation for controlled unit testing
         new_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         new_connection.state = MagicMock()
 
         new_connection.state.value = 1

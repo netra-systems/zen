@@ -5,7 +5,7 @@ Test 8: WebSocket Reconnect State Recovery - $10K MRR
 Test 9: Database Transaction Rollback Safety - $15K MRR
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -15,7 +15,7 @@ import time
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -25,13 +25,16 @@ class TestLLMManagerInit:
 
     """Test 7: LLM Manager Connection Pool Initialization"""
     
+    @pytest.mark.asyncio
     async def test_connection_pool_creation(self):
 
         """Test LLM connection pool initializes properly."""
         from netra_backend.app.services.llm_manager import LLMManager
         
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
 
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.initialize_pool = AsyncMock(return_value={
 
             "pool_size": 10,
@@ -52,6 +55,7 @@ class TestLLMManagerInit:
 
         llm_manager.initialize_pool.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_provider_health_checks(self):
 
         """Test health checks for each LLM provider."""
@@ -79,16 +83,19 @@ class TestLLMManagerInit:
 
         assert healthy_count >= 2
     
+    @pytest.mark.asyncio
     async def test_connection_pool_warmup(self):
 
         """Test connection pool warmup reduces first-call latency."""
         
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
         
         # Cold call
 
         cold_start = time.time()
 
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.ask_llm = AsyncMock(return_value="response")
 
         await asyncio.sleep(0.1)  # Simulate cold start delay
@@ -113,11 +120,13 @@ class TestWebSocketRecovery:
 
     """Test 8: WebSocket Reconnect State Recovery"""
     
+    @pytest.mark.asyncio
     async def test_state_preservation_on_disconnect(self):
 
         """Test state is preserved when WebSocket disconnects."""
-        from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+        from netra_backend.app.websocket_core.manager import WebSocketManager
         
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         ws_manager = Mock(spec=WebSocketManager)
         
         # Active state before disconnect
@@ -134,6 +143,7 @@ class TestWebSocketRecovery:
 
         }
         
+        # Mock: Async component isolation for testing without real async operations
         ws_manager.preserve_state = AsyncMock(return_value=True)
         
         # Preserve state on disconnect
@@ -142,6 +152,7 @@ class TestWebSocketRecovery:
 
         assert preserved is True
     
+    @pytest.mark.asyncio
     async def test_automatic_reconnection_logic(self):
 
         """Test automatic reconnection with exponential backoff."""
@@ -170,6 +181,7 @@ class TestWebSocketRecovery:
 
         assert reconnect_attempts[2]["delay"] == 4  # 2^2
     
+    @pytest.mark.asyncio
     async def test_message_queue_recovery(self):
 
         """Test pending messages are recovered after reconnect."""
@@ -200,6 +212,7 @@ class TestDatabaseRollback:
 
     """Test 9: Database Transaction Rollback Safety"""
     
+    @pytest.mark.asyncio
     async def test_transaction_atomicity(self):
 
         """Test database transactions are atomic."""
@@ -237,6 +250,7 @@ class TestDatabaseRollback:
             
             assert rolled_back is True
     
+    @pytest.mark.asyncio
     async def test_nested_transaction_handling(self):
 
         """Test nested transactions handle correctly."""
@@ -269,6 +283,7 @@ class TestDatabaseRollback:
 
         assert inner_transaction["status"] == "rolled_back"
     
+    @pytest.mark.asyncio
     async def test_distributed_transaction_coordination(self):
 
         """Test coordination between multiple databases."""

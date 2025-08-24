@@ -35,6 +35,7 @@ def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_d
 class TestComplexMultiObjectiveOptimization:
     """Test complex multi-objective optimization scenarios."""
     
+    @pytest.mark.asyncio
     async def test_triple_constraint_optimization(self, multi_constraint_setup):
         """Test optimization with three competing constraints."""
         setup = multi_constraint_setup
@@ -42,6 +43,7 @@ class TestComplexMultiObjectiveOptimization:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_triple_constraint_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_quality_cost_latency_tradeoff(self, multi_constraint_setup):
         """Test quality vs cost vs latency tradeoff analysis."""
         setup = multi_constraint_setup
@@ -49,6 +51,7 @@ class TestComplexMultiObjectiveOptimization:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_quality_cost_latency_results(results)
     
+    @pytest.mark.asyncio
     async def test_constraint_conflict_resolution(self, multi_constraint_setup):
         """Test resolution of conflicting constraints."""
         setup = multi_constraint_setup
@@ -57,6 +60,7 @@ class TestComplexMultiObjectiveOptimization:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_conflict_resolution_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_pareto_frontier_analysis(self, multi_constraint_setup):
         """Test Pareto frontier optimization analysis."""
         setup = multi_constraint_setup
@@ -65,6 +69,7 @@ class TestComplexMultiObjectiveOptimization:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_pareto_analysis_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_weighted_optimization_objectives(self, multi_constraint_setup):
         """Test optimization with weighted objectives."""
         setup = multi_constraint_setup

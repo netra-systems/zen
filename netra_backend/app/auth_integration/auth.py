@@ -33,7 +33,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.database import get_db_session
 from netra_backend.app.dependencies import get_db_dependency as get_db
 
 logger = logging.getLogger('auth_integration.auth')

@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """L4 Staging Critical Path Base Test Suite
 
 Business Value Justification (BVJ):
@@ -131,7 +132,7 @@ class L4StagingCriticalPathTestBase(ABC):
             # Load configuration first with error handling - skip for testing if problematic
             try:
                 # Only try to load config if not already loaded and not in test mode
-                if self.config is None and not os.getenv("TESTING"):
+                if self.config is None and not get_env().get("TESTING"):
                     self.config = get_unified_config()
                 else:
                     # Skip config loading in test environment to prevent infinite loops

@@ -22,7 +22,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import redis.asyncio as redis
@@ -79,6 +79,7 @@ class MessageQueueRedisStreamsManager:
             "dead_letter": {"max_len": 1000, "retry_limit": 0}
         }
     
+    @pytest.mark.asyncio
     async def test_producer_consumer_patterns(self, message_count: int) -> Dict[str, Any]:
         """Test basic producer-consumer patterns with Redis Streams."""
         pattern_results = {
@@ -131,6 +132,7 @@ class MessageQueueRedisStreamsManager:
         
         return pattern_results
     
+    @pytest.mark.asyncio
     async def test_acknowledgment_mechanisms(self, ack_test_count: int) -> Dict[str, Any]:
         """Test message acknowledgment mechanisms in Redis Streams."""
         ack_results = {
@@ -199,6 +201,7 @@ class MessageQueueRedisStreamsManager:
         
         return ack_results
     
+    @pytest.mark.asyncio
     async def test_retry_mechanisms(self, retry_test_count: int) -> Dict[str, Any]:
         """Test message retry mechanisms and failure handling."""
         retry_results = {
@@ -276,6 +279,7 @@ class MessageQueueRedisStreamsManager:
         
         return retry_results
     
+    @pytest.mark.asyncio
     async def test_dead_letter_queue_handling(self, dlq_test_count: int) -> Dict[str, Any]:
         """Test dead letter queue handling for failed messages."""
         dlq_results = {
@@ -354,6 +358,7 @@ class MessageQueueRedisStreamsManager:
         
         return dlq_results
     
+    @pytest.mark.asyncio
     async def test_stream_concurrent_processing(self, concurrent_count: int) -> Dict[str, Any]:
         """Test concurrent stream processing with multiple consumers."""
         concurrent_results = {
@@ -726,6 +731,7 @@ class TestMessageQueueRedisStreamsL3:
         yield manager
         await manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_producer_consumer_basic_patterns(self, streams_manager):
         """Test basic producer-consumer patterns with Redis Streams."""
         results = await streams_manager.test_producer_consumer_patterns(60)
@@ -744,6 +750,7 @@ class TestMessageQueueRedisStreamsL3:
         
         logger.info(f"Producer-consumer patterns test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_acknowledgment_mechanism_validation(self, streams_manager):
         """Test message acknowledgment mechanisms in Redis Streams."""
         results = await streams_manager.test_acknowledgment_mechanisms(25)
@@ -765,6 +772,7 @@ class TestMessageQueueRedisStreamsL3:
         
         logger.info(f"Acknowledgment mechanism test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_retry_mechanism_resilience(self, streams_manager):
         """Test message retry mechanisms and failure handling."""
         results = await streams_manager.test_retry_mechanisms(20)
@@ -786,6 +794,7 @@ class TestMessageQueueRedisStreamsL3:
         
         logger.info(f"Retry mechanism test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_dead_letter_queue_functionality(self, streams_manager):
         """Test dead letter queue handling for failed messages."""
         results = await streams_manager.test_dead_letter_queue_handling(15)
@@ -803,6 +812,7 @@ class TestMessageQueueRedisStreamsL3:
         
         logger.info(f"Dead letter queue test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_concurrent_stream_processing(self, streams_manager):
         """Test concurrent stream processing with multiple consumers."""
         results = await streams_manager.test_stream_concurrent_processing(8)
@@ -824,6 +834,7 @@ class TestMessageQueueRedisStreamsL3:
         
         logger.info(f"Concurrent stream processing test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_stream_processing_performance_comprehensive(self, streams_manager):
         """Test comprehensive stream processing performance."""
         start_time = time.time()

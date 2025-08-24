@@ -21,8 +21,11 @@ from netra_backend.app.agents.base.interface import ExecutionContext
 def mock_agents():
     """Create mock agent instances."""
     return {
+        # Mock: Agent service isolation for testing without LLM agent execution
         "researcher": AsyncMock(spec=ResearcherAgent),
+        # Mock: Agent service isolation for testing without LLM agent execution
         "analyst": AsyncMock(spec=AnalystAgent),
+        # Mock: Agent service isolation for testing without LLM agent execution
         "validator": AsyncMock(spec=ValidatorAgent)
     }
 
@@ -30,7 +33,9 @@ def mock_agents():
 @pytest.fixture
 def orchestrator_with_agents(mock_agents):
     """Create orchestrator with mocked agents."""
+    # Mock: Service component isolation for predictable testing behavior
     orchestrator = MagicMock(spec=ChatOrchestrator)
+    # Mock: Generic component isolation for controlled unit testing
     orchestrator.agent_registry = MagicMock()
     orchestrator.agent_registry.agents = mock_agents
     orchestrator.agent_registry.get_agent = lambda name: mock_agents.get(name)
@@ -41,7 +46,9 @@ def orchestrator_with_agents(mock_agents):
 async def test_tco_analysis_flow():
     """Test complete TCO analysis flow."""
     # Setup
+    # Mock: Service component isolation for predictable testing behavior
     context = MagicMock(spec=ExecutionContext)
+    # Mock: Generic component isolation for controlled unit testing
     context.state = MagicMock()
     context.state.user_request = "Calculate TCO for GPT-4"
     context.state.accumulated_data = {}
@@ -84,7 +91,9 @@ async def test_tco_analysis_flow():
 @pytest.mark.asyncio
 async def test_benchmarking_flow():
     """Test benchmarking flow with multiple agents."""
+    # Mock: Service component isolation for predictable testing behavior
     context = MagicMock(spec=ExecutionContext)
+    # Mock: Generic component isolation for controlled unit testing
     context.state = MagicMock()
     context.state.user_request = "Compare Claude vs GPT-4 performance"
     
@@ -110,7 +119,9 @@ async def test_benchmarking_flow():
 @pytest.mark.asyncio
 async def test_error_recovery_flow():
     """Test error recovery in orchestration flow."""
+    # Mock: Service component isolation for predictable testing behavior
     context = MagicMock(spec=ExecutionContext)
+    # Mock: Generic component isolation for controlled unit testing
     context.state = MagicMock()
     context.state.user_request = "Invalid request"
     

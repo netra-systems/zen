@@ -10,13 +10,21 @@ class MockWebSocket:
     def __init__(self, query_params=None, headers=None):
         self.query_params = query_params or {}
         self.headers = headers or {}
+        # Mock: Generic component isolation for controlled unit testing
         self.state = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.app = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.accept = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.close = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.send_text = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.send_json = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.receive_text = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.receive_json = AsyncMock()
 
 class MockAuthClient:
@@ -24,6 +32,7 @@ class MockAuthClient:
     
     def __init__(self, valid_response=True):
         self.valid_response = valid_response
+        # Mock: Async component isolation for testing without real async operations
         self.validate_token_jwt = AsyncMock(return_value={
             "valid": valid_response,
             "user_id": "test-user-123" if valid_response else None,
@@ -36,10 +45,15 @@ class MockWebSocketManager:
     
     def __init__(self):
         self.connections = {}
+        # Mock: Generic component isolation for controlled unit testing
         self.connect = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.disconnect = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.send_message = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.broadcast = AsyncMock()
+        # Mock: Service component isolation for predictable testing behavior
         self.get_connections = MagicMock(return_value=[])
 
 def create_mock_websocket(token="valid-token", **kwargs):

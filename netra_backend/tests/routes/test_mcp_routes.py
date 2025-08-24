@@ -12,9 +12,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -31,6 +29,7 @@ class TestMCPRoute:
         """Test MCP message handling."""
         mcp_request = TEST_MCP_REQUEST.copy()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.mcp_request_handler.handle_request') as mock_handle:
             mock_handle.return_value = {
                 "jsonrpc": "2.0",
@@ -72,11 +71,13 @@ class TestMCPRoute:
         if response.status_code not in [404]:  # Skip if not implemented
             CommonResponseValidators.validate_error_response(response, [422, 400])
     
+    @pytest.mark.asyncio
     async def test_mcp_tool_execution(self):
         """Test MCP tool execution."""
         from netra_backend.app.routes.mcp.handlers import execute_tool
         
         # Mock tool execution
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.mcp.handlers.execute_tool') as mock_execute:
             mock_execute.return_value = {
                 "result": "success",
@@ -100,6 +101,7 @@ class TestMCPRoute:
             "id": 1
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.mcp_service.get_server_info') as mock_list:
             mock_list.return_value = {
                 "tools": [
@@ -143,6 +145,7 @@ class TestMCPRoute:
             "id": 2
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.mcp_service.execute_tool') as mock_execute:
             mock_execute.side_effect = Exception("Tool not found")
             
@@ -160,11 +163,13 @@ class TestMCPRoute:
                 # MCP endpoint may not be implemented
                 assert response.status_code in [404, 500]
     
+    @pytest.mark.asyncio
     async def test_mcp_resource_management(self):
         """Test MCP resource listing and access."""
         from netra_backend.app.routes.mcp.main import list_resources, read_resource
         
         # Test resource listing
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.mcp.handlers.MCPHandlers.list_resources') as mock_list:
             mock_list.return_value = {
                 "resources": [
@@ -181,6 +186,7 @@ class TestMCPRoute:
             assert len(resources["resources"]) > 0
         
         # Test resource reading
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.mcp.handlers.MCPHandlers.read_resource') as mock_read:
             mock_read.return_value = {
                 "contents": [
@@ -214,6 +220,7 @@ class TestMCPRoute:
             "id": 1
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.mcp.handlers.MCPHandlers.get_server_info') as mock_init:
             mock_init.return_value = {
                 "protocolVersion": "2024-11-05",

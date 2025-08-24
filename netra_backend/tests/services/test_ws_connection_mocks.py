@@ -3,8 +3,7 @@ WebSocket connection test mocks and shared utilities
 Provides mock classes and fixtures for WebSocket connection testing
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from pathlib import Path
 import sys
 
@@ -13,7 +12,7 @@ import json
 import time
 from datetime import UTC, datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 from fastapi import WebSocket
@@ -31,6 +30,7 @@ class MockWebSocket:
         self.user_id = user_id or self._generate_user_id()
 
         self.state = WebSocketState.CONNECTED
+        self.application_state = WebSocketState.CONNECTED  # Add for manager compatibility
 
         self.sent_messages = []
 
@@ -75,6 +75,7 @@ class MockWebSocket:
             raise Exception("Mock accept failure")
 
         self.state = WebSocketState.CONNECTED
+        self.application_state = WebSocketState.CONNECTED
         
     async def send_text(self, data: str):
 
@@ -131,6 +132,7 @@ class MockWebSocket:
         """Set WebSocket to closed state"""
 
         self.state = WebSocketState.DISCONNECTED
+        self.application_state = WebSocketState.DISCONNECTED
 
         self.close_code = code
 

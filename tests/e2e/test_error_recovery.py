@@ -25,6 +25,7 @@ import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed
 
+from test_framework.environment_markers import env, env_requires, dev_and_staging
 from netra_backend.app.core.circuit_breaker_types import CircuitState
 from netra_backend.app.core.resilience.circuit_breaker import (
     EnterpriseCircuitConfig,
@@ -147,6 +148,7 @@ class MockDatabasePool:
             self.pool_exhausted = True
             raise Exception("Connection pool exhausted")
         self.active_connections += 1
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     async def release_connection(self, connection: Any) -> None:
@@ -172,6 +174,12 @@ class MockDatabasePool:
         }
 
 
+@env("dev", "staging")
+@env_requires(
+    services=["backend", "websocket", "postgres", "redis", "auth_service"],
+    features=["circuit_breaker", "connection_recovery", "service_monitoring"],
+    data=["error_recovery_test_data"]
+)
 class TestServiceCrashRecovery:
     """Test service crash detection and automatic recovery"""
     

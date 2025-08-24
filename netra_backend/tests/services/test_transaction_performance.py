@@ -7,13 +7,11 @@ MODULAR VERSION: <300 lines, all functions ≤8 lines
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import uuid
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
@@ -122,10 +120,15 @@ class TestTransactionPerformanceAndScaling:
         """Create mock sessions for concurrency test"""
         sessions = []
         for i in range(num_concurrent):
+            # Mock: Database session isolation for transaction testing without real database dependency
             session = AsyncMock(spec=AsyncSession)
+            # Mock: Session isolation for controlled testing without external state
             session.add = MagicMock()
+            # Mock: Session isolation for controlled testing without external state
             session.flush = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.rollback = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.refresh = AsyncMock()
             sessions.append(session)
         return sessions
@@ -150,6 +153,7 @@ class TestTransactionPerformanceAndScaling:
         for session in sessions:
             session.add.assert_called_once()
             session.flush.assert_called_once()
+    @pytest.mark.asyncio
     async def test_high_concurrency_transactions(self, performance_repository):
         """Test transaction handling under high concurrency"""
         num_concurrent = 50
@@ -161,11 +165,16 @@ class TestTransactionPerformanceAndScaling:
         execution_time = end_time - start_time
         self._assert_concurrency_performance(execution_time, results, num_concurrent)
         self._assert_all_sessions_used(sessions)
+    @pytest.mark.asyncio
     async def test_transaction_deadlock_recovery(self, performance_repository, transaction_manager):
         """Test transaction recovery from deadlock scenarios"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.add = MagicMock()
+        # Mock: Session isolation for controlled testing without external state
         session.flush = MagicMock(side_effect=transaction_manager.simulate_deadlock)
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
         
         result = await performance_repository.create(session, name='Deadlock Test Entity')
@@ -173,10 +182,14 @@ class TestTransactionPerformanceAndScaling:
         assert result == None
         assert transaction_manager.deadlock_simulations == 1
         session.rollback.assert_called_once()
+    @pytest.mark.asyncio
     async def test_connection_loss_handling(self, performance_repository, transaction_manager):
         """Test handling of connection loss during transactions"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.add = MagicMock(side_effect=transaction_manager.simulate_connection_loss)
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
         
         result = await performance_repository.create(session, name='Connection Loss Test')
@@ -186,14 +199,20 @@ class TestTransactionPerformanceAndScaling:
 
     def _create_stress_test_sessions(self, num_sessions):
         """Create sessions for stress testing"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         return [AsyncMock(spec=AsyncSession) for _ in range(num_sessions)]
 
     def _setup_stress_test_session(self, session):
         """Setup individual session for stress testing"""
+        # Mock: Session isolation for controlled testing without external state
         session.add = MagicMock()
+        # Mock: Session isolation for controlled testing without external state
         session.flush = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.refresh = AsyncMock()
+    @pytest.mark.asyncio
     async def test_stress_test_transaction_volume(self, performance_repository):
         """Test handling of high volume transactions"""
         num_transactions = 100
@@ -214,6 +233,7 @@ class TestTransactionPerformanceAndScaling:
         execution_time = end_time - start_time
         assert execution_time < 5.0  # Should complete within 5 seconds
         assert len(results) == num_transactions
+    @pytest.mark.asyncio
     async def test_transaction_state_tracking(self, performance_repository, transaction_manager):
         """Test transaction state tracking under load"""
         num_concurrent = 20
@@ -230,6 +250,7 @@ class TestTransactionPerformanceAndScaling:
         assert len(transaction_manager.transaction_states) == num_concurrent
         for i in range(num_concurrent):
             assert f'tx_{i}' in transaction_manager.transaction_states
+    @pytest.mark.asyncio
     async def test_memory_efficiency_under_load(self, performance_repository):
         """Test memory efficiency during high concurrent load"""
         num_concurrent = 75

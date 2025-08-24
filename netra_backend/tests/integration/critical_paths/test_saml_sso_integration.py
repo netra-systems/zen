@@ -39,7 +39,7 @@ import uuid
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -404,18 +404,28 @@ class SAMLSSOTestManager:
         """Initialize real services for testing."""
         try:
             # Use fake Redis for testing to avoid event loop conflicts
-            from unittest.mock import AsyncMock
+            from unittest.mock import AsyncMock, MagicMock
             
             self.redis_client = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.get = AsyncMock(return_value=None)
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.set = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.setex = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.delete = AsyncMock(return_value=0)
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.ping = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.publish = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.subscribe = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.incr = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.expire = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.exists = AsyncMock(return_value=False)
             
             # In-memory storage for Redis operations
@@ -472,6 +482,7 @@ class SAMLSSOTestManager:
             logger.error(f"Service initialization failed: {e}")
             raise
 
+    @pytest.mark.asyncio
     async def test_complete_saml_sso_flow(self, user_email: str) -> Dict[str, Any]:
         """Test complete SAML SSO authentication flow."""
         sso_flow_start = time.time()
@@ -553,6 +564,7 @@ class SAMLSSOTestManager:
         """
         return mock_response
 
+    @pytest.mark.asyncio
     async def test_jit_user_provisioning(self, user_attributes: Dict[str, Any]) -> Dict[str, Any]:
         """Test Just-In-Time user provisioning."""
         jit_start = time.time()
@@ -598,6 +610,7 @@ class SAMLSSOTestManager:
                 "jit_time": time.time() - jit_start
             }
 
+    @pytest.mark.asyncio
     async def test_assertion_replay_protection(self, assertion_id: str) -> Dict[str, Any]:
         """Test SAML assertion replay protection."""
         replay_start = time.time()
@@ -631,6 +644,7 @@ class SAMLSSOTestManager:
                 "replay_time": time.time() - replay_start
             }
 
+    @pytest.mark.asyncio
     async def test_attribute_mapping_roles(self) -> Dict[str, Any]:
         """Test SAML attribute mapping to roles and permissions."""
         mapping_start = time.time()
@@ -689,6 +703,7 @@ class SAMLSSOTestManager:
                 "mapping_time": time.time() - mapping_start
             }
 
+    @pytest.mark.asyncio
     async def test_session_management_sso(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
         """Test SSO session management."""
         session_start = time.time()
@@ -775,6 +790,7 @@ async def saml_sso_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_complete_saml_sso_authentication_flow(saml_sso_manager):
     """
     Test complete SAML SSO authentication flow.

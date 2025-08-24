@@ -14,7 +14,7 @@ from pathlib import Path
 import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -43,7 +43,9 @@ class TestDataSubAgentConsolidated:
     @pytest.fixture
     def mock_llm_manager(self):
         """Mock LLM manager for testing."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.generate_response = AsyncMock(return_value={
             "content": "Test AI insights: Optimize model selection for 20% cost reduction"
         })
@@ -52,12 +54,15 @@ class TestDataSubAgentConsolidated:
     @pytest.fixture
     def mock_tool_dispatcher(self):
         """Mock tool dispatcher for testing."""
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         return Mock(spec=ToolDispatcher)
     
     @pytest.fixture
     def mock_websocket_manager(self):
         """Mock WebSocket manager for testing."""
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_agent_update = AsyncMock()
         return websocket_manager
     
@@ -124,6 +129,7 @@ class TestDataSubAgentConsolidated:
     @pytest.fixture
     async def data_sub_agent(self, mock_llm_manager, mock_tool_dispatcher, mock_websocket_manager):
         """Create DataSubAgent instance for testing."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.ClickHouseClient') as mock_ch, \
              patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.SchemaCache') as mock_sc, \
              patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.PerformanceAnalyzer') as mock_pa, \
@@ -140,7 +146,7 @@ class TestDataSubAgentConsolidated:
             agent.clickhouse_client.is_healthy.return_value = True
             agent.schema_cache.is_available.return_value = True
             
-            return agent
+            yield agent
     
     @pytest.mark.asyncio
     async def test_data_sub_agent_initialization(self, data_sub_agent):
@@ -158,6 +164,7 @@ class TestDataSubAgentConsolidated:
     async def test_performance_analysis_execution(self, data_sub_agent, sample_workload_data):
         """Test performance analysis execution workflow."""
         # Setup mock data
+        # Mock: Async component isolation for testing without real async operations
         data_sub_agent.performance_analyzer.analyze_performance = AsyncMock(return_value={
             "summary": "Performance analysis completed",
             "data_points": 3,
@@ -197,6 +204,7 @@ class TestDataSubAgentConsolidated:
     async def test_cost_optimization_execution(self, data_sub_agent, sample_cost_breakdown):
         """Test cost optimization analysis execution."""
         # Setup mock data
+        # Mock: Async component isolation for testing without real async operations
         data_sub_agent.cost_optimizer.analyze_costs = AsyncMock(return_value={
             "summary": "Cost optimization analysis completed",
             "data_points": 500,
@@ -312,6 +320,7 @@ class TestDataSubAgentConsolidated:
     async def test_error_handling(self, data_sub_agent):
         """Test error handling in execution workflow."""
         # Setup analyzer to raise exception
+        # Mock: Async component isolation for testing without real async operations
         data_sub_agent.performance_analyzer.analyze_performance = AsyncMock(
             side_effect=Exception("ClickHouse connection failed")
         )
@@ -376,7 +385,9 @@ class TestDataSubAgentConsolidated:
     async def test_cleanup_resources(self, data_sub_agent):
         """Test resource cleanup."""
         # Setup cleanup mocks
+        # Mock: ClickHouse external database isolation for unit testing performance
         data_sub_agent.clickhouse_client.close = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         data_sub_agent.schema_cache.cleanup = AsyncMock()
         
         # Perform cleanup
@@ -429,6 +440,7 @@ class TestDataSubAgentConsolidated:
     async def test_trend_analysis_workflow(self, data_sub_agent):
         """Test trend analysis workflow execution."""
         # Setup mock trend analysis
+        # Mock: Async component isolation for testing without real async operations
         data_sub_agent.performance_analyzer.analyze_trends = AsyncMock(return_value={
             "summary": "Trend analysis over 7d with 150 data points",
             "trends": {
@@ -464,6 +476,7 @@ class TestClickHouseClient:
     async def test_connection_establishment(self, clickhouse_client):
         """Test ClickHouse connection establishment."""
         # Test connection with mock
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.agents.data_sub_agent.clickhouse_client.get_client', None):
             result = await clickhouse_client.connect()
             assert result is True  # Should succeed in mock mode
@@ -472,6 +485,7 @@ class TestClickHouseClient:
     async def test_workload_metrics_query(self, clickhouse_client, sample_workload_data):
         """Test workload metrics query execution."""
         # Mock query execution
+        # Mock: ClickHouse external database isolation for unit testing performance
         clickhouse_client.execute_query = AsyncMock(return_value=sample_workload_data)
         
         metrics = await clickhouse_client.get_workload_metrics("24h", "test_user")

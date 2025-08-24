@@ -25,7 +25,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -418,6 +418,7 @@ class LogAggregationValidator:
         self.audit_violations = audit_results["missing_fields"] + audit_results["sensitive_data_exposure"]
         return audit_results
     
+    @pytest.mark.asyncio
     async def test_log_correlation(self, log_stream: List[LogEntry]) -> Dict[str, Any]:
         """Test log correlation across services and traces."""
         correlation_results = {

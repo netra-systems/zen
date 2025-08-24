@@ -21,6 +21,7 @@ from netra_backend.app.core.exceptions import NetraException
 class TestRealTimeChatOptimization:
     """Test real-time chat model optimization workflows."""
     
+    @pytest.mark.asyncio
     async def test_real_time_chat_model_optimization(self, model_selection_setup):
         """Test: '@Netra GPT-5 is way too expensive for the real time chat feature. Move to claude 4.1 or GPT-5-mini? Validate quality impact'"""
         setup = model_selection_setup
@@ -28,6 +29,7 @@ class TestRealTimeChatOptimization:
         results = await _execute_model_selection_workflow(setup, state)
         _validate_real_time_chat_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_latency_cost_tradeoff_analysis(self, model_selection_setup):
         """Test latency vs cost tradeoff analysis for real-time features."""
         setup = model_selection_setup
@@ -88,6 +90,7 @@ def _validate_latency_cost_tradeoff_results(results: List[Dict]):
 class TestModelSelectionDataFlow:
     """Test data flow integrity in model selection workflows."""
     
+    @pytest.mark.asyncio
     async def test_model_metadata_propagation(self, model_selection_setup):
         """Test model metadata propagation through workflow."""
         setup = model_selection_setup
@@ -95,6 +98,7 @@ class TestModelSelectionDataFlow:
         results = await _execute_model_selection_workflow(setup, state)
         _validate_metadata_propagation(results, state)
     
+    @pytest.mark.asyncio
     async def test_recommendation_consistency(self, model_selection_setup):
         """Test consistency of recommendations across agents."""
         setup = model_selection_setup
@@ -132,6 +136,7 @@ def _validate_recommendation_consistency(results: List[Dict], state: DeepAgentSt
 class TestModelSelectionEdgeCases:
     """Test edge cases in model selection workflows."""
     
+    @pytest.mark.asyncio
     async def test_unavailable_model_handling(self, model_selection_setup):
         """Test handling of requests for unavailable models."""
         setup = model_selection_setup
@@ -139,6 +144,7 @@ class TestModelSelectionEdgeCases:
         results = await _execute_model_selection_workflow(setup, state)
         _validate_unavailable_model_handling(results)
     
+    @pytest.mark.asyncio
     async def test_conflicting_requirements_resolution(self, model_selection_setup):
         """Test resolution of conflicting model requirements."""
         setup = model_selection_setup
@@ -174,6 +180,7 @@ def _validate_conflicting_requirements_resolution(results: List[Dict]):
 class TestWorkflowIntegrity:
     """Test overall workflow integrity for model selection."""
     
+    @pytest.mark.asyncio
     async def test_complete_workflow_validation(self, model_selection_setup):
         """Test complete workflow validation for model selection."""
         setup = model_selection_setup
@@ -181,6 +188,7 @@ class TestWorkflowIntegrity:
         results = await _execute_model_selection_workflow(setup, state)
         _validate_complete_workflow(results, state)
     
+    @pytest.mark.asyncio
     async def test_error_recovery_in_workflow(self, model_selection_setup):
         """Test error recovery mechanisms in model selection workflow."""
         setup = model_selection_setup

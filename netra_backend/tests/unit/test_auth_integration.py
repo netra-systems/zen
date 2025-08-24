@@ -16,12 +16,10 @@ Target Coverage:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, status
@@ -49,6 +47,7 @@ class TestAuthIntegration:
     @pytest.fixture
     def mock_credentials(self):
         """Create mock HTTP authorization credentials."""
+        # Mock: Authentication service isolation for testing without real auth flows
         credentials = Mock(spec=HTTPAuthorizationCredentials)
         credentials.credentials = "valid-jwt-token-123"
         return credentials
@@ -62,8 +61,11 @@ class TestAuthIntegration:
     @pytest.fixture
     def mock_db_session(self):
         """Create mock async database session."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Database session isolation for transaction testing without real database dependency
         session.__aenter__ = AsyncMock(return_value=session)
+        # Mock: Session isolation for controlled testing without external state
         session.__aexit__ = AsyncMock(return_value=None)
         return session
     
@@ -78,6 +80,7 @@ class TestAuthIntegration:
         user.permissions = ["read", "write"]
         return user
 
+    @pytest.mark.asyncio
     async def test_get_current_user_valid_token_success(self, mock_credentials, mock_auth_client, mock_db_session, sample_user):
         """Test successful user retrieval with valid token."""
         self._setup_successful_auth_flow(mock_auth_client, mock_db_session, sample_user)
@@ -87,6 +90,7 @@ class TestAuthIntegration:
         assert result == sample_user
         mock_auth_client.assert_called_once_with("valid-jwt-token-123")
     
+    @pytest.mark.asyncio
     async def test_get_current_user_invalid_token_raises_401(self, mock_credentials, mock_auth_client, mock_db_session):
         """Test 401 error with invalid token."""
         mock_auth_client.return_value = {"valid": False}
@@ -96,6 +100,7 @@ class TestAuthIntegration:
         
         self._assert_401_unauthorized(exc_info)
 
+    @pytest.mark.asyncio
     async def test_get_current_user_no_token_validation_raises_401(self, mock_credentials, mock_auth_client, mock_db_session):
         """Test 401 error when auth service returns None."""
         mock_auth_client.return_value = None
@@ -105,6 +110,7 @@ class TestAuthIntegration:
         
         self._assert_401_unauthorized(exc_info)
 
+    @pytest.mark.asyncio
     async def test_get_current_user_missing_user_id_raises_401(self, mock_credentials, mock_auth_client, mock_db_session):
         """Test 401 error when token payload lacks user_id."""
         mock_auth_client.return_value = {"valid": True}  # No user_id
@@ -115,6 +121,7 @@ class TestAuthIntegration:
         assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
         assert "Invalid token payload" in exc_info.value.detail
 
+    @pytest.mark.asyncio
     async def test_get_current_user_user_not_found_raises_404(self, mock_credentials, mock_auth_client, mock_db_session):
         """Test 404 error when user not found in database."""
         self._setup_auth_client_valid_response(mock_auth_client)
@@ -126,8 +133,10 @@ class TestAuthIntegration:
         assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
         assert "User not found" in exc_info.value.detail
 
+    @pytest.mark.asyncio
     async def test_get_current_user_optional_valid_credentials_returns_user(self, mock_credentials, mock_auth_client, mock_db_session, sample_user):
         """Test optional auth returns user with valid credentials."""
+        # Mock: Async component isolation for testing without real async operations
         with patch('app.auth_integration.auth.get_current_user', new_callable=AsyncMock) as mock_get_user:
             mock_get_user.return_value = sample_user
             
@@ -135,14 +144,17 @@ class TestAuthIntegration:
             
             assert result == sample_user
 
+    @pytest.mark.asyncio
     async def test_get_current_user_optional_no_credentials_returns_none(self, mock_db_session):
         """Test optional auth returns None with no credentials."""
         result = await get_current_user_optional(None, mock_db_session)
         
         assert result is None
 
+    @pytest.mark.asyncio
     async def test_get_current_user_optional_invalid_credentials_returns_none(self, mock_credentials, mock_db_session):
         """Test optional auth returns None when authentication fails."""
+        # Mock: Async component isolation for testing without real async operations
         with patch('app.auth_integration.auth.get_current_user', new_callable=AsyncMock) as mock_get_user:
             mock_get_user.side_effect = HTTPException(status_code=401, detail="Invalid token")
             
@@ -150,6 +162,7 @@ class TestAuthIntegration:
             
             assert result is None
 
+    @pytest.mark.asyncio
     async def test_require_admin_with_admin_user_success(self, sample_user):
         """Test admin requirement with admin user."""
         sample_user.is_admin = True
@@ -158,6 +171,7 @@ class TestAuthIntegration:
         
         assert result == sample_user
 
+    @pytest.mark.asyncio
     async def test_require_admin_with_non_admin_user_raises_403(self, sample_user):
         """Test admin requirement with non-admin user."""
         sample_user.is_admin = False
@@ -167,6 +181,7 @@ class TestAuthIntegration:
         
         self._assert_403_forbidden(exc_info, "Admin access required")
 
+    @pytest.mark.asyncio
     async def test_require_developer_with_developer_user_success(self, sample_user):
         """Test developer requirement with developer user."""
         sample_user.is_developer = True
@@ -175,6 +190,7 @@ class TestAuthIntegration:
         
         assert result == sample_user
 
+    @pytest.mark.asyncio
     async def test_require_developer_with_non_developer_user_raises_403(self, sample_user):
         """Test developer requirement with non-developer user."""
         sample_user.is_developer = False
@@ -184,6 +200,7 @@ class TestAuthIntegration:
         
         self._assert_403_forbidden(exc_info, "Developer access required")
 
+    @pytest.mark.asyncio
     async def test_require_permission_with_valid_permission_success(self, sample_user):
         """Test permission requirement with valid permission."""
         check_permission = require_permission("read")
@@ -192,6 +209,7 @@ class TestAuthIntegration:
         
         assert result == sample_user
 
+    @pytest.mark.asyncio
     async def test_require_permission_with_invalid_permission_raises_403(self, sample_user):
         """Test permission requirement with missing permission."""
         check_permission = require_permission("admin")
@@ -262,6 +280,7 @@ class TestAuthIntegration:
         """Test JWT token validation with expired token."""
         data = {"user_id": "test-123"}
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.auth_integration.auth.datetime') as mock_datetime:
             past_time = datetime.utcnow() - timedelta(hours=1)
             mock_datetime.utcnow.return_value = past_time
@@ -286,12 +305,14 @@ class TestAuthIntegration:
 
     def _setup_db_session_with_user(self, mock_db_session, user):
         """Setup database session to return user."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db_session.execute.return_value = mock_result
 
     def _setup_db_session_no_user(self, mock_db_session):
         """Setup database session to return no user."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = None
         mock_db_session.execute.return_value = mock_result

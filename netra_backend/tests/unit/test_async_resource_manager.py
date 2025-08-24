@@ -11,12 +11,10 @@ background task handling, and shutdown procedures.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -44,15 +42,18 @@ def task_pool():
 @pytest.fixture
 def mock_resource():
     """Mock resource for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     resource = Mock()
+    # Mock: Generic component isolation for controlled unit testing
     resource.cleanup = AsyncMock()
     return resource
 
 @pytest.fixture
 async def cleanup_callback():
     """Mock cleanup callback."""
+    # Mock: Generic component isolation for controlled unit testing
     callback = AsyncMock()
-    return callback
+    yield callback
 
 # Helper functions for 25-line compliance
 def assert_resource_count(manager, expected):
@@ -307,7 +308,7 @@ class TestThreadPoolExecution:
     @pytest.mark.asyncio
     async def test_run_in_threadpool_with_args(self):
         """Thread pool execution with arguments works."""
-        def task_with_args(x, y):
+        async def task_with_args(x, y):
             return x + y
         
         result = await run_in_threadpool(task_with_args, 5, 3)
@@ -316,7 +317,7 @@ class TestThreadPoolExecution:
     @pytest.mark.asyncio
     async def test_run_in_threadpool_with_kwargs(self):
         """Thread pool execution with keyword arguments works."""
-        def task_with_kwargs(x, y=10):
+        async def task_with_kwargs(x, y=10):
             return x * y
         
         result = await run_in_threadpool(task_with_kwargs, 3, y=4)
@@ -345,6 +346,7 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_resource_cleanup_with_exceptions(self, resource_manager):
         """Resource cleanup handles exceptions gracefully."""
+        # Mock: Async component isolation for testing without real async operations
         failing_callback = AsyncMock(side_effect=Exception("Cleanup failed"))
         resource_manager._cleanup_callbacks.append(failing_callback)
         
@@ -381,6 +383,7 @@ class TestErrorHandling:
         """Resource manager uses weak references."""
         # This is a challenging test due to weak references
         # We mainly verify that the WeakSet behaves correctly
+        # Mock: Generic component isolation for controlled unit testing
         mock_resource = Mock()
         resource_manager.register_resource(mock_resource)
         assert_resource_count(resource_manager, 1)
@@ -417,6 +420,7 @@ class TestPerformanceAndScaling:
 
     def test_large_resource_count(self, resource_manager):
         """Resource manager handles many resources."""
+        # Mock: Generic component isolation for controlled unit testing
         resources = [Mock() for _ in range(100)]
         for resource in resources:
             resource_manager.register_resource(resource)

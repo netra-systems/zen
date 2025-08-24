@@ -32,6 +32,16 @@ from netra_backend.app.core.health.telemetry import (
     TelemetryManager,
     telemetry_manager,
 )
+from netra_backend.app.core.health.unified_health_checker import (
+    UnifiedHealthChecker,
+    HealthStatus,
+    HealthCheckType,
+    HealthCheckConfig,
+    HealthCheckResult,
+    check_health_simple,
+    check_readiness_simple,
+    backend_health_checker,
+)
 
 __all__ = [
     "BaseHealthChecker",
@@ -47,5 +57,13 @@ __all__ = [
     "CircuitBreakerHealthChecker",
     "EnterpriseHealthTelemetry",
     "TelemetryManager",
-    "telemetry_manager"
+    "telemetry_manager",
+    "UnifiedHealthChecker",
+    "HealthStatus",
+    "HealthCheckType",
+    "HealthCheckConfig",
+    "HealthCheckResult",
+    "check_health_simple",
+    "check_readiness_simple",
+    "backend_health_checker",
 ]

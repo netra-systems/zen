@@ -23,7 +23,7 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import aiohttp
 import pytest
@@ -833,6 +833,7 @@ class ApiTransformationManager:
                 "error": str(e)
             }
     
+    @pytest.mark.asyncio
     async def test_transformation_accuracy(self, endpoint: str, test_data: Dict[str, Any],
                                          expected_transformations: Dict[str, Any]) -> Dict[str, Any]:
         """Test transformation accuracy with known data."""
@@ -958,6 +959,7 @@ async def transformation_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_field_mapping_transformation(transformation_manager):
     """Test field mapping transformation for user data."""
     # Test data in v1 format
@@ -991,6 +993,7 @@ async def test_field_mapping_transformation(transformation_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_legacy_thread_transformation(transformation_manager):
     """Test legacy thread format transformation."""
     # Test data in legacy format
@@ -1018,6 +1021,7 @@ async def test_legacy_thread_transformation(transformation_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_agent_config_data_conversion(transformation_manager):
     """Test agent configuration data conversion and filtering."""
     result = await transformation_manager.make_transformed_request(
@@ -1051,6 +1055,7 @@ async def test_agent_config_data_conversion(transformation_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_metrics_schema_evolution(transformation_manager):
     """Test metrics API schema evolution transformation."""
     # Test data in v1 format
@@ -1081,6 +1086,7 @@ async def test_metrics_schema_evolution(transformation_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_webhook_payload_standardization(transformation_manager):
     """Test webhook payload standardization."""
     # Test data in external webhook format
@@ -1112,6 +1118,7 @@ async def test_webhook_payload_standardization(transformation_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_transformation_error_handling(transformation_manager):
     """Test transformation error handling with invalid data."""
     # Test with invalid data structure
@@ -1135,6 +1142,7 @@ async def test_transformation_error_handling(transformation_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_concurrent_transformations(transformation_manager):
     """Test concurrent transformation requests."""
     # Test data for different endpoints
@@ -1165,6 +1173,7 @@ async def test_concurrent_transformations(transformation_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_transformation_performance(transformation_manager):
     """Test transformation performance requirements."""
     # Test performance with user transformation
@@ -1211,6 +1220,7 @@ async def test_transformation_performance(transformation_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_transformation_metrics_accuracy(transformation_manager):
     """Test accuracy of transformation metrics collection."""
     # Generate test traffic across endpoints

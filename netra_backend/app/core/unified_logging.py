@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Unified, optimized logging system for Netra backend with security and performance improvements.
 
 Main logger interface providing:
@@ -52,7 +53,7 @@ class UnifiedLogger:
             return self._config
         
         # Check if secrets are still loading to prevent premature initialization
-        if os.environ.get('NETRA_SECRETS_LOADING') == 'true':
+        if get_env().get('NETRA_SECRETS_LOADING') == 'true':
             # Use fallback config during secret loading phase
             loaded_config = self._get_fallback_config()
             # Don't cache during loading phase
@@ -85,7 +86,7 @@ class UnifiedLogger:
     def _get_fallback_config(self) -> Dict[str, Any]:
         """Get fallback configuration for bootstrap phase."""
         return {
-            'log_level': os.environ.get('LOG_LEVEL', 'INFO').upper(),
+            'log_level': get_env().get('LOG_LEVEL', 'INFO').upper(),
             'enable_file_logging': False,
             'enable_json_logging': False,
             'log_file_path': 'logs/netra.log'

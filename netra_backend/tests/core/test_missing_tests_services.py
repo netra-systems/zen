@@ -15,7 +15,7 @@ import json
 import logging
 import os
 import tempfile
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from cryptography.fernet import Fernet
@@ -74,9 +74,11 @@ class TestLoggingManagerService:
         """Test filtering logs by service name."""
         filter_func = logging_manager.create_service_filter("api")
         
+        # Mock: Generic component isolation for controlled unit testing
         api_record = Mock()
         api_record.name = "api.routes"
         
+        # Mock: Generic component isolation for controlled unit testing
         other_record = Mock()
         other_record.name = "worker.tasks"
         
@@ -139,6 +141,7 @@ class TestSecretManagerService:
     
     def test_secret_access_logging(self, secret_manager):
         """Test secret access is logged for audit."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager.logger') as mock_logger:
             secret_manager.get_secret("api_key")
             mock_logger.info.assert_called_with(
@@ -248,7 +251,9 @@ class TestServiceUtilities:
         from netra_backend.app.core.service_container import ServiceContainer
         
         container = ServiceContainer()
+        # Mock: Generic component isolation for controlled unit testing
         container.register("logger", Mock())
+        # Mock: Generic component isolation for controlled unit testing
         container.register("db", Mock())
         
         logger = container.get("logger")

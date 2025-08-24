@@ -94,13 +94,15 @@ const MemoryLeakyComponent: React.FC = () => {
   useEffect(() => {
     // Simulate memory leak: continuously adding data without cleanup
     const interval = setInterval(() => {
-      setData(prev => [
-        ...prev,
-        {
-          id: Date.now(),
-          content: 'Large content string '.repeat(1000), // ~20KB per item
-        }
-      ]);
+      act(() => {
+        setData(prev => [
+          ...prev,
+          {
+            id: Date.now(),
+            content: 'Large content string '.repeat(1000), // ~20KB per item
+          }
+        ]);
+      });
     }, 10);
     intervalIds.add(interval);
 

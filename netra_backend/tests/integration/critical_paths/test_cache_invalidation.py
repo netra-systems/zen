@@ -20,7 +20,7 @@ import json
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -184,6 +184,7 @@ class CacheInvalidationManager:
         
         return consistency_check
     
+    @pytest.mark.asyncio
     async def test_multi_service_cache_invalidation(self, cache_entries: List[Dict]) -> Dict[str, Any]:
         """Test cache invalidation across multiple services."""
         test_start = time.time()
@@ -266,6 +267,7 @@ async def cache_invalidation_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_single_cache_invalidation_flow(cache_invalidation_manager):
     """Test single cache invalidation flow."""
     manager = cache_invalidation_manager
@@ -296,6 +298,7 @@ async def test_single_cache_invalidation_flow(cache_invalidation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_concurrent_cache_invalidation(cache_invalidation_manager):
     """Test concurrent cache invalidation across multiple keys."""
     manager = cache_invalidation_manager
@@ -319,6 +322,7 @@ async def test_concurrent_cache_invalidation(cache_invalidation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_cache_invalidation_error_handling(cache_invalidation_manager):
     """Test cache invalidation error handling."""
     manager = cache_invalidation_manager
@@ -348,6 +352,7 @@ async def test_cache_invalidation_error_handling(cache_invalidation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_cache_consistency_validation(cache_invalidation_manager):
     """Test cache consistency validation across services."""
     manager = cache_invalidation_manager
@@ -381,6 +386,7 @@ async def test_cache_consistency_validation(cache_invalidation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_redis_circuit_breaker_integration(cache_invalidation_manager):
     """Test L3 Redis circuit breaker integration."""
     manager = cache_invalidation_manager

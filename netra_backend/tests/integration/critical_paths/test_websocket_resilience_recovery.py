@@ -10,7 +10,7 @@ Critical Path: Connection loss detection -> State preservation -> Reconnection -
 Coverage: Connection resilience, state persistence, automatic recovery, message integrity
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -22,7 +22,7 @@ import time
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -30,7 +30,7 @@ from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.websocket_core.recovery import WebSocketRecoveryManager as ConnectionRecovery
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 logger = logging.getLogger(__name__)
 
@@ -368,6 +368,7 @@ class WebSocketResilienceManager:
 
             }
     
+    @pytest.mark.asyncio
     async def test_message_delivery_during_reconnection(self, session_id: str) -> Dict[str, Any]:
 
         """Test message delivery and queuing during reconnection process."""

@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Unified Configuration Management - Core Orchestration
 
 **CRITICAL: Single Source of Truth for All Configuration**
@@ -150,9 +151,9 @@ class UnifiedConfigManager:
         # Bootstrap-only environment detection - required for initial config load
         # This is the ONLY acceptable direct env var access in the system
         import os
-        if os.environ.get("TESTING"):
+        if get_env().get("TESTING"):
             return "testing"
-        env = os.environ.get("ENVIRONMENT", "development").lower()
+        env = get_env().get("ENVIRONMENT", "development").lower()
         # Handle empty string case - default to development
         return env if env else "development"
     
@@ -164,7 +165,7 @@ class UnifiedConfigManager:
         """
         # Bootstrap-only check - required before config is loaded
         import os
-        return os.environ.get("CONFIG_HOT_RELOAD", "false").lower() == "true"
+        return get_env().get("CONFIG_HOT_RELOAD", "false").lower() == "true"
     
     @lru_cache(maxsize=1)
     def get_config(self) -> AppConfig:
@@ -343,7 +344,7 @@ class UnifiedConfigManager:
             "DATABASE_URL", "CLICKHOUSE_URL", "REDIS_URL",
             "ENVIRONMENT", "CONFIG_HOT_RELOAD"
         ]
-        return {var: os.environ.get(var, "NOT_SET") for var in critical_vars}
+        return {var: get_env().get(var, "NOT_SET") for var in critical_vars}
 
 
 # Global instance for application use

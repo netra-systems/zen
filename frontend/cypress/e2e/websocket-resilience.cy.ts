@@ -1,5 +1,4 @@
-import { Message } from '@/types';
-import { WebSocketMessage } from '@/types/chat';
+import { Message, WebSocketMessage } from '@/types/unified';
 
 describe('WebSocket Connection Resilience', () => {
   beforeEach(() => {

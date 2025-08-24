@@ -13,7 +13,7 @@ from pathlib import Path
 
 import asyncio
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector, WebSocketMetrics
@@ -47,7 +47,8 @@ class TestWebSocketMetricsRegression:
         mock_orchestrator.get_connection_stats.return_value = mock_result
         mock_manager.orchestrator = mock_orchestrator
         
-        with patch('app.monitoring.metrics_collector.get_connection_manager', 
+        # Mock: Component isolation for testing without external dependencies
+        with patch('app.monitoring.metrics_collector.get_connection_monitor', 
                   return_value=mock_manager):
             metrics = await collector._gather_websocket_metrics()
             
@@ -64,7 +65,9 @@ class TestWebSocketMetricsRegression:
         """
         collector = MetricsCollector()
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_orchestrator = AsyncMock()
         
         # Simulate successful status but None result
@@ -77,7 +80,8 @@ class TestWebSocketMetricsRegression:
         mock_orchestrator.get_connection_stats.return_value = mock_result
         mock_manager.orchestrator = mock_orchestrator
         
-        with patch('app.monitoring.metrics_collector.get_connection_manager',
+        # Mock: Component isolation for testing without external dependencies
+        with patch('app.monitoring.metrics_collector.get_connection_monitor',
                   return_value=mock_manager):
             metrics = await collector._gather_websocket_metrics()
             
@@ -94,7 +98,9 @@ class TestWebSocketMetricsRegression:
         """
         collector = MetricsCollector()
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_orchestrator = AsyncMock()
         
         # Simulate failed result
@@ -107,7 +113,8 @@ class TestWebSocketMetricsRegression:
         mock_orchestrator.get_connection_stats.return_value = mock_result
         mock_manager.orchestrator = mock_orchestrator
         
-        with patch('app.monitoring.metrics_collector.get_connection_manager',
+        # Mock: Component isolation for testing without external dependencies
+        with patch('app.monitoring.metrics_collector.get_connection_monitor',
                   return_value=mock_manager):
             metrics = await collector._gather_websocket_metrics()
             
@@ -124,7 +131,9 @@ class TestWebSocketMetricsRegression:
         """
         collector = MetricsCollector()
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_orchestrator = AsyncMock()
         
         # Simulate successful result with proper connection_stats
@@ -148,7 +157,8 @@ class TestWebSocketMetricsRegression:
         }
         mock_manager._get_user_connection_stats.return_value = {}
         
-        with patch('app.monitoring.metrics_collector.get_connection_manager',
+        # Mock: Component isolation for testing without external dependencies
+        with patch('app.monitoring.metrics_collector.get_connection_monitor',
                   return_value=mock_manager):
             metrics = await collector._gather_websocket_metrics()
             
@@ -169,6 +179,7 @@ class TestWebSocketMetricsRegression:
         manager = ConnectionManager()
         
         # Test with None result
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.success = True
         mock_result.result = None

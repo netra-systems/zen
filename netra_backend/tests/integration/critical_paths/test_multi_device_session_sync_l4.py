@@ -26,7 +26,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -159,6 +159,7 @@ class MultiDeviceSessionL4TestSuite:
             self.metrics.update_propagations += 1
             return {"success": True, "mock_propagation": True}
     
+    @pytest.mark.asyncio
     async def test_real_time_updates(self, device_ids: List[str]) -> Dict[str, Any]:
         """Test real-time updates across devices."""
         if len(device_ids) < 2:
@@ -288,6 +289,7 @@ async def multi_device_l4_suite():
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_multi_device_session_sync_l4(multi_device_l4_suite):
     """Test session state synchronization across multiple devices."""
     suite, user_id = multi_device_l4_suite, f"user_{uuid.uuid4().hex[:8]}"
@@ -304,6 +306,7 @@ async def test_multi_device_session_sync_l4(multi_device_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_real_time_updates_propagation_l4(multi_device_l4_suite):
     """Test real-time updates across devices in staging."""
     suite, user_id = multi_device_l4_suite, f"user_{uuid.uuid4().hex[:8]}"
@@ -320,6 +323,7 @@ async def test_real_time_updates_propagation_l4(multi_device_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_preferences_sync_across_devices_l4(multi_device_l4_suite):
     """Test preference synchronization across devices."""
     suite, user_id = multi_device_l4_suite, f"user_{uuid.uuid4().hex[:8]}"
@@ -336,6 +340,7 @@ async def test_preferences_sync_across_devices_l4(multi_device_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_activity_tracking_sync_l4(multi_device_l4_suite):
     """Test activity tracking synchronization across devices."""
     suite, user_id = multi_device_l4_suite, f"user_{uuid.uuid4().hex[:8]}"
@@ -352,6 +357,7 @@ async def test_activity_tracking_sync_l4(multi_device_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_auth_consistency_across_devices_l4(multi_device_l4_suite):
     """Test authentication state consistency across devices."""
     suite, user_id = multi_device_l4_suite, f"user_{uuid.uuid4().hex[:8]}"
@@ -368,6 +374,7 @@ async def test_auth_consistency_across_devices_l4(multi_device_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_concurrent_multi_device_operations_l4(multi_device_l4_suite):
     """Test concurrent operations across multiple devices."""
     suite, user_id = multi_device_l4_suite, f"user_{uuid.uuid4().hex[:8]}"
@@ -386,6 +393,7 @@ async def test_concurrent_multi_device_operations_l4(multi_device_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_multi_device_performance_metrics_l4(multi_device_l4_suite):
     """Test multi-device session performance meets requirements."""
     suite, user_id = multi_device_l4_suite, f"user_{uuid.uuid4().hex[:8]}"
@@ -408,6 +416,7 @@ async def test_multi_device_performance_metrics_l4(multi_device_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging  
+@pytest.mark.asyncio
 async def test_device_connection_reliability_l4(multi_device_l4_suite):
     """Test device connection and reconnection reliability."""
     suite, user_id = multi_device_l4_suite, f"user_{uuid.uuid4().hex[:8]}"

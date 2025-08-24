@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Sandboxed Python interpreter for secure code execution.
 
 Date Created: 2025-01-22
@@ -28,7 +29,7 @@ class SandboxedInterpreter:
     
     def _init_sandbox_config(self, docker_image: Optional[str]) -> None:
         """Initialize sandbox configuration."""
-        self.docker_image = docker_image or os.getenv(
+        self.docker_image = docker_image or get_env().get(
             "SANDBOX_DOCKER_IMAGE", "python:3.11-slim"
         )
         self.container_name_prefix = "nacis_sandbox_"
@@ -36,8 +37,8 @@ class SandboxedInterpreter:
     
     def _init_resource_limits(self) -> None:
         """Initialize resource limits."""
-        self.max_memory = os.getenv("SANDBOX_MAX_MEMORY", "512m")
-        self.max_cpu = os.getenv("SANDBOX_MAX_CPU", "0.5")
+        self.max_memory = get_env().get("SANDBOX_MAX_MEMORY", "512m")
+        self.max_cpu = get_env().get("SANDBOX_MAX_CPU", "0.5")
         self.default_timeout = 10000  # 10 seconds
         self.network_mode = "none"  # No network access
     

@@ -463,6 +463,7 @@ class ConcurrentUserTester:
         result["response_time"] = time.time() - start_time
         return result
     
+    @pytest.mark.asyncio
     async def test_user_isolation(self, users: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test that users are properly isolated from each other."""
         result = {
@@ -595,6 +596,7 @@ class ConcurrentUserTester:
             except Exception as e:
                 self.log_event(email, "ISOLATION_MESSAGE_ERROR", str(e))
     
+    @pytest.mark.asyncio
     async def test_concurrent_scenario(self, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Test a specific concurrent scenario."""
         scenario_name = scenario["name"]
@@ -827,6 +829,7 @@ class ConcurrentUserTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.level_4
+@pytest.mark.asyncio
 async def test_dev_environment_concurrent_users():
     """Test comprehensive concurrent user functionality."""
     async with ConcurrentUserTester() as tester:

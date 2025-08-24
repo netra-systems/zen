@@ -499,6 +499,7 @@ async def concurrency_limits_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_basic_worker_concurrency_limits_l3(concurrency_limits_manager):
     """Test basic worker concurrency limits enforcement."""
     # Enqueue more jobs than worker limit allows
@@ -529,6 +530,7 @@ async def test_basic_worker_concurrency_limits_l3(concurrency_limits_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_per_user_job_limits_l3(concurrency_limits_manager):
     """Test per-user job concurrency limits."""
     # Create scenario where one user tries to exceed their limit
@@ -588,6 +590,7 @@ async def test_per_user_job_limits_l3(concurrency_limits_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_mixed_workload_concurrency_l3(concurrency_limits_manager):
     """Test concurrency limits with mixed job types and priorities."""
     # Create mixed workload with different job types
@@ -664,6 +667,7 @@ async def test_mixed_workload_concurrency_l3(concurrency_limits_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_concurrency_under_high_load_l3(concurrency_limits_manager):
     """Test concurrency limits under high load conditions."""
     # Create high load scenario
@@ -721,6 +725,7 @@ async def test_concurrency_under_high_load_l3(concurrency_limits_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_dynamic_concurrency_adjustment_l3(concurrency_limits_manager):
     """Test dynamic adjustment of concurrency limits during runtime."""
     # Start with initial jobs
@@ -768,6 +773,7 @@ async def test_dynamic_concurrency_adjustment_l3(concurrency_limits_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_resource_exhaustion_handling_l3(concurrency_limits_manager):
     """Test system behavior when approaching resource exhaustion."""
     # Create scenario that pushes system to limits

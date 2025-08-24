@@ -19,6 +19,7 @@ from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
 class TestRealClickHouseConnection:
     """Test real ClickHouse connection and basic operations"""
     
+    @pytest.mark.asyncio
     async def test_real_connection(self, real_clickhouse_client):
         """Test actual connection to ClickHouse Cloud"""
         # Test basic connection
@@ -36,6 +37,7 @@ class TestRealClickHouseConnection:
         assert 'version' in version_result[0]
         logger.info(f"Connected to ClickHouse version: {version_result[0]['version']}")
 
+    @pytest.mark.asyncio
     async def test_real_database_operations(self, real_clickhouse_client):
         """Test real database operations"""
         # Get current database
@@ -52,6 +54,7 @@ class TestRealClickHouseConnection:
         table_names = [row['name'] for row in tables_result if 'name' in row]
         logger.info(f"Available tables: {table_names}")
 
+    @pytest.mark.asyncio
     async def test_real_system_queries(self, real_clickhouse_client):
         """Test system queries for monitoring"""
         # Check if user has system.metrics permission
@@ -75,9 +78,10 @@ class TestRealClickHouseConnection:
 class TestClickHouseIntegration:
     """Integration tests for ClickHouse with the application"""
     
+    @pytest.mark.asyncio
     async def test_full_initialization_flow(self):
         """Test the full ClickHouse initialization flow"""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
         
         # Run initialization
@@ -88,7 +92,7 @@ class TestClickHouseIntegration:
 
     async def _verify_expected_tables(self):
         """Verify expected tables exist after initialization"""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             tables_result = await client.execute_query("SHOW TABLES")

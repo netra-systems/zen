@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,20 +22,29 @@ class TestSupervisorAgentStats:
     
     def test_get_stats(self):
         """Test get_stats method."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock registry and engine data
+        # Mock: Agent service isolation for testing without LLM agent execution
         supervisor.registry.agents = {"agent1": Mock(), "agent2": Mock(), "agent3": Mock()}
+        # Mock: Generic component isolation for controlled unit testing
         supervisor.engine.active_runs = {"run1": Mock(), "run2": Mock()}
+        # Mock: Generic component isolation for controlled unit testing
         supervisor.engine.run_history = [Mock(), Mock(), Mock(), Mock()]
         
         # Add some hooks
+        # Mock: Generic component isolation for controlled unit testing
         supervisor.hooks["before_agent"] = [Mock(), Mock()]
+        # Mock: Generic component isolation for controlled unit testing
         supervisor.hooks["after_agent"] = [Mock()]
         
         # Get stats
@@ -56,9 +65,13 @@ class TestSupervisorAgentEdgeCases:
     
     async def test_concurrent_execution_locking(self):
         """Test that execution lock prevents concurrent runs."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
@@ -69,7 +82,9 @@ class TestSupervisorAgentEdgeCases:
             return DeepAgentState(user_request=prompt)
         
         supervisor.state_manager.initialize_state = slow_initialize
+        # Mock: Component isolation for controlled unit testing
         supervisor.pipeline_builder.get_execution_pipeline = Mock(return_value=[])
+        # Mock: Generic component isolation for controlled unit testing
         supervisor._execute_with_context = AsyncMock()
         
         # Start two concurrent executions

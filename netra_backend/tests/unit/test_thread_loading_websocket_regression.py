@@ -9,20 +9,20 @@ This test ensures that:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.websocket_core import get_unified_manager
+from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
 manager = get_unified_manager()
 
+@pytest.mark.asyncio
 async def test_user_joins_thread_room_on_message():
     """Test that users join thread room when sending message with thread_id."""
     # Setup
+    # Mock: Generic component isolation for controlled unit testing
     supervisor_mock = MagicMock()
     thread_service = ThreadService()
     handler = MessageHandlerService(supervisor_mock, thread_service)
@@ -36,7 +36,9 @@ async def test_user_joins_thread_room_on_message():
     }
     
     # Mock database session and thread
+    # Mock: Session isolation for controlled testing without external state
     db_session = AsyncMock()
+    # Mock: Service component isolation for predictable testing behavior
     thread_mock = MagicMock(id=thread_id)
     
     # Mock the thread service methods
@@ -48,9 +50,11 @@ async def test_user_joins_thread_room_on_message():
                 
                 # Verify room joining was called
                 join_room_mock.assert_called_once_with(user_id, thread_id)
+@pytest.mark.asyncio
 async def test_switch_thread_manages_room_membership():
     """Test that switch_thread properly manages room membership."""
     # Setup
+    # Mock: Generic component isolation for controlled unit testing
     supervisor_mock = MagicMock()
     thread_service = ThreadService()
     handler = MessageHandlerService(supervisor_mock, thread_service)
@@ -68,9 +72,11 @@ async def test_switch_thread_manages_room_membership():
             # Verify room management
             leave_mock.assert_called_once_with(user_id)
             join_mock.assert_called_once_with(user_id, new_thread_id)
+@pytest.mark.asyncio
 async def test_switch_thread_requires_thread_id():
     """Test that switch_thread validates thread_id is provided."""
     # Setup
+    # Mock: Generic component isolation for controlled unit testing
     supervisor_mock = MagicMock()
     thread_service = ThreadService()
     handler = MessageHandlerService(supervisor_mock, thread_service)
@@ -85,6 +91,7 @@ async def test_switch_thread_requires_thread_id():
         
         # Verify error was sent
         error_mock.assert_called_once_with(user_id, "Thread ID required")
+@pytest.mark.asyncio
 async def test_websocket_broadcasts_to_thread_room():
     """Test that WebSocket messages are broadcast to thread room members."""
     thread_id = "test-thread-123"
@@ -102,6 +109,7 @@ async def test_websocket_broadcasts_to_thread_room():
             # Verify both users received message
             assert result is True
             assert send_mock.call_count == 2
+@pytest.mark.asyncio
 async def test_thread_room_isolation():
     """Test that messages to one thread don't reach users in other threads."""
     thread1_id = "thread-1"
@@ -110,7 +118,7 @@ async def test_thread_room_isolation():
     user2_id = "user-2"
     
     # Mock room manager - user1 in thread1, user2 in thread2
-    def get_connections(room_id):
+    async def get_connections(room_id):
         if room_id == thread1_id:
             return [user1_id]
         elif room_id == thread2_id:

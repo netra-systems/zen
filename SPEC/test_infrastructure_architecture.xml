@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Test Infrastructure Architecture</name>
+        <type>Core.TestingArchitecture</type>
+        <version>1.0</version>
+        <description>Core specification for unified test infrastructure across all services</description>
+        <created>2025-08-24</created>
+        <cross_references>
+            <ref>test_runner_guide.xml</ref>
+            <ref>TESTING.md</ref>
+            <ref>testing.xml</ref>
+            <ref>coverage_requirements.xml</ref>
+            <ref>environment_aware_testing.xml</ref>
+            <ref>learnings/testing.xml</ref>
+        </cross_references>
+    </metadata>
+
+    <core_principle>
+        <title>Unified Test Infrastructure with Service Independence</title>
+        <description>
+            The platform maintains a unified test infrastructure that provides consistent
+            testing patterns across all services while respecting service boundaries.
+            Tests are organized by service, use absolute imports exclusively, and
+            leverage centralized test utilities for common functionality.
+        </description>
+    </core_principle>
+
+    <architectural_components>
+        <component name="Unified Test Runner">
+            <purpose>Single entry point for all test operations</purpose>
+            <location>unified_test_runner.py</location>
+            <capabilities>
+                <capability>Multi-service test orchestration</capability>
+                <capability>Level-based test execution (unit, integration, e2e)</capability>
+                <capability>Environment-aware testing</capability>
+                <capability>Real service vs mock mode selection</capability>
+                <capability>Coverage reporting</capability>
+                <capability>Fast-fail mode for rapid feedback</capability>
+            </capabilities>
+        </component>
+
+        <component name="Test Framework">
+            <purpose>Centralized test utilities and fixtures</purpose>
+            <location>test_framework/</location>
+            <contents>
+                <item>setup_test_path() - Path configuration</item>
+                <item>Common fixtures and mocks</item>
+                <item>Test database factories</item>
+                <item>WebSocket test clients</item>
+                <item>Authentication helpers</item>
+            </contents>
+        </component>
+
+        <component name="Service Test Directories">
+            <purpose>Service-specific test organization</purpose>
+            <structure>
+                <service name="Backend">netra_backend/tests/</service>
+                <service name="Auth">auth_service/tests/</service>
+                <service name="Frontend">frontend/__tests__/</service>
+                <service name="DevLauncher">dev_launcher/tests/</service>
+            </structure>
+            <rule>Tests MUST stay within service boundaries</rule>
+        </component>
+    </architectural_components>
+
+    <import_requirements>
+        <requirement priority="CRITICAL">
+            <name>Absolute Imports Only</name>
+            <description>
+                ALL Python test files MUST use absolute imports starting from the
+                package root. Relative imports are FORBIDDEN and will cause test
+                infrastructure failures.
+            </description>
+            <correct_pattern>
+                from netra_backend.app.services.user_service import UserService
+                from test_framework.fixtures import create_test_user
+            </correct_pattern>
+            <incorrect_pattern>
+                from ..services.user_service import UserService  # FORBIDDEN
+                from .fixtures import create_test_user  # FORBIDDEN
+            </incorrect_pattern>
+        </requirement>
+
+        <requirement priority="CRITICAL">
+            <name>Centralized Path Setup</name>
+            <description>
+                Tests MUST use setup_test_path() from test_framework instead of
+                manual sys.path manipulation. This ensures consistent path configuration.
+            </description>
+            <implementation>
+                <code>
+import pytest
+from test_framework.setup_test_path import setup_test_path
+setup_test_path()  # Must be called before project imports
+
+from netra_backend.app.services.some_service import SomeService
+                </code>
+            </implementation>
+        </requirement>
+
+        <requirement priority="HIGH">
+            <name>Async Test Configuration</name>
+            <description>
+                Async test functions are automatically detected when asyncio_mode=auto
+                is configured in pytest.ini. This eliminates the need for @pytest.mark.asyncio
+                decorators on every async test. See learnings/testing.xml#pytest-asyncio-configuration-tradeoffs
+                for detailed analysis.
+            </description>
+            <configuration>
+                <!-- In pytest.ini -->
+                [pytest]
+                asyncio_mode = auto
+                asyncio_default_fixture_loop_scope = function
+            </configuration>
+            <pattern>
+                # With asyncio_mode=auto, no decorator needed:
+                async def test_async_operation():
+                    result = await async_function()
+                    assert result is not None
+                    
+                # Decorator still works but is optional:
+                @pytest.mark.asyncio  # Optional with auto mode
+                async def test_another_operation():
+                    pass
+            </pattern>
+            <migration_note>
+                The codebase currently has 10,833 @pytest.mark.asyncio decorators.
+                These are being gradually removed as asyncio_mode=auto is already
+                configured in all service pytest.ini files. Decorators are harmless
+                with auto mode enabled, so no immediate removal is required.
+            </migration_note>
+        </requirement>
+    </import_requirements>
+
+    <test_levels>
+        <level name="unit">
+            <description>Fast, isolated unit tests</description>
+            <characteristics>
+                <item>No external dependencies</item>
+                <item>Mock all I/O operations</item>
+                <item>Execute in milliseconds</item>
+                <item>Focus on single functions/classes</item>
+            </characteristics>
+            <command>python unified_test_runner.py --level unit</command>
+        </level>
+
+        <level name="integration">
+            <description>Component integration tests</description>
+            <characteristics>
+                <item>Test service interactions</item>
+                <item>Use test databases</item>
+                <item>May use real Redis/ClickHouse</item>
+                <item>Execute in seconds</item>
+            </characteristics>
+            <command>python unified_test_runner.py --level integration</command>
+        </level>
+
+        <level name="e2e">
+            <description>End-to-end system tests</description>
+            <characteristics>
+                <item>Full system workflows</item>
+                <item>Real service dependencies</item>
+                <item>Authentication flows</item>
+                <item>WebSocket communication</item>
+            </characteristics>
+            <command>python unified_test_runner.py --level e2e --real-llm</command>
+        </level>
+
+        <level name="agents">
+            <description>AI agent system tests</description>
+            <characteristics>
+                <item>LLM integration</item>
+                <item>Agent orchestration</item>
+                <item>Message routing</item>
+                <item>Context management</item>
+            </characteristics>
+            <command>python unified_test_runner.py --level agents --real-llm</command>
+        </level>
+    </test_levels>
+
+    <environment_aware_testing>
+        <description>
+            Tests are marked with environment compatibility to ensure safe execution
+            across test, dev, staging, and production environments.
+        </description>
+        <reference>environment_aware_testing.xml</reference>
+        <key_features>
+            <feature>Environment-specific test filtering</feature>
+            <feature>Production safety constraints</feature>
+            <feature>Progressive environment validation</feature>
+            <feature>Service dependency declaration</feature>
+        </key_features>
+        <usage>
+            <command>python unified_test_runner.py --env staging</command>
+            <command>python unified_test_runner.py --env prod --allow-prod</command>
+        </usage>
+    </environment_aware_testing>
+
+    <test_patterns>
+        <pattern name="Database Session Factory">
+            <description>Predictable test database state management</description>
+            <implementation>
+                <code>
+@pytest.fixture
+async def test_db_session():
+    """Provide clean database session for tests"""
+    async with get_test_database_session() as session:
+        yield session
+        await session.rollback()  # Ensure cleanup
+                </code>
+            </implementation>
+        </pattern>
+
+        <pattern name="Mock Mode Detection">
+            <description>Rapid testing without external dependencies</description>
+            <implementation>
+                <code>
+def is_mock_mode():
+    """Detect if running in mock mode"""
+    return os.getenv("TEST_MODE") == "mock" or not has_real_services()
+
+@pytest.mark.skipif(is_mock_mode(), reason="Requires real services")
+async def test_real_service_integration():
+    # Test that requires actual services
+    pass
+                </code>
+            </implementation>
+        </pattern>
+
+        <pattern name="Environment Isolation">
+            <description>Clean test environment for each test</description>
+            <implementation>
+                <code>
+@pytest.fixture(autouse=True)
+def isolated_test_env():
+    """Ensure test environment isolation"""
+    env = get_env()
+    env.enable_isolation()
+    yield env
+    env.reset_to_original()
+                </code>
+            </implementation>
+        </pattern>
+
+        <pattern name="WebSocket Testing">
+            <description>Testing real-time WebSocket communication</description>
+            <implementation>
+                <code>
+async def test_websocket_flow():
+    async with get_websocket_test_client() as client:
+        await client.send_json({"type": "message", "content": "test"})
+        response = await client.receive_json()
+        assert response["status"] == "success"
+                </code>
+            </implementation>
+        </pattern>
+    </test_patterns>
+
+    <common_issues_solutions>
+        <issue name="Import Errors">
+            <symptom>ModuleNotFoundError in tests</symptom>
+            <causes>
+                <cause>Relative imports instead of absolute</cause>
+                <cause>Missing setup_test_path() call</cause>
+                <cause>Incorrect PYTHONPATH</cause>
+            </causes>
+            <solution>
+                Use absolute imports and setup_test_path()
+            </solution>
+        </issue>
+
+        <issue name="Async Test Timeouts">
+            <symptom>Tests hang or timeout</symptom>
+            <causes>
+                <cause>Missing asyncio_mode=auto configuration in pytest.ini</cause>
+                <cause>Unawaited async operations</cause>
+                <cause>Deadlocks in async code</cause>
+            </causes>
+            <solution>
+                Ensure asyncio_mode=auto is configured in pytest.ini.
+                With auto mode, async tests are automatically detected without decorators.
+                Legacy @pytest.mark.asyncio decorators still work but are no longer required.
+            </solution>
+        </issue>
+
+        <issue name="Environment Pollution">
+            <symptom>Tests fail when run together but pass individually</symptom>
+            <causes>
+                <cause>Shared environment variables</cause>
+                <cause>Database state pollution</cause>
+                <cause>Global state modifications</cause>
+            </causes>
+            <solution>
+                Use isolated_test_env fixture and database rollback
+            </solution>
+        </issue>
+    </common_issues_solutions>
+
+    <ci_cd_integration>
+        <requirement>
+            CI/CD pipelines MUST run tests at appropriate levels based on
+            the change type and target branch.
+        </requirement>
+        
+        <pipeline_stages>
+            <stage name="PR Validation">
+                <tests>Unit + Integration (no coverage, fast-fail)</tests>
+                <command>python unified_test_runner.py --level integration --no-coverage --fast-fail</command>
+            </stage>
+            <stage name="Main Branch">
+                <tests>Full suite with coverage</tests>
+                <command>python unified_test_runner.py --level e2e --real-llm</command>
+            </stage>
+            <stage name="Pre-deployment">
+                <tests>E2E with staging validation</tests>
+                <command>python unified_test_runner.py --level e2e --env staging --real-llm</command>
+            </stage>
+        </pipeline_stages>
+    </ci_cd_integration>
+
+    <coverage_requirements>
+        <target>80% overall coverage</target>
+        <critical_paths>
+            <path>Authentication flows: 90%</path>
+            <path>Database operations: 85%</path>
+            <path>API endpoints: 90%</path>
+            <path>WebSocket handlers: 80%</path>
+        </critical_paths>
+        <exclusions>
+            <exclusion>Test files themselves</exclusion>
+            <exclusion>Migration scripts</exclusion>
+            <exclusion>Development utilities</exclusion>
+        </exclusions>
+    </coverage_requirements>
+
+    <business_value>
+        <segment>Platform/Internal</segment>
+        <business_goal>Quality Assurance and Development Velocity</business_goal>
+        <metrics>
+            <metric>95% test suite reliability</metric>
+            <metric>40% reduction in production bugs</metric>
+            <metric>60% faster bug detection</metric>
+            <metric>80% code coverage maintained</metric>
+        </metrics>
+    </business_value>
+
+    <compliance_checklist>
+        <check>All tests use absolute imports</check>
+        <check>setup_test_path() used consistently</check>
+        <check>asyncio_mode=auto configured in pytest.ini</check>
+        <check>Test isolation implemented</check>
+        <check>Service boundaries respected</check>
+        <check>Coverage targets met</check>
+        <check>CI/CD integration working</check>
+    </compliance_checklist>
+</specification>

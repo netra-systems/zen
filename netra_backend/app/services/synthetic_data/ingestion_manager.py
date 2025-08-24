@@ -6,7 +6,7 @@ import os
 import uuid
 from typing import Dict, List, Optional
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.synthetic_data.ingestion import (
     create_destination_table,

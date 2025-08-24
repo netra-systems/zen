@@ -121,6 +121,7 @@ describe('Layer Visibility Fixes', () => {
         },
         totalDuration: 5000,
         metrics: {
+          startTime: Date.now() - 5000,
           total_duration_ms: 5000,
           total_tokens: 1500,
           total_cost: 0.05
@@ -159,6 +160,7 @@ describe('Layer Visibility Fixes', () => {
         finalReport: null,
         totalDuration: 3000,
         metrics: {
+          startTime: Date.now() - 3000,
           total_duration_ms: 3000,
           total_tokens: 800,
           total_cost: 0.02

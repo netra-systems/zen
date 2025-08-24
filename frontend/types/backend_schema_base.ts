@@ -191,14 +191,7 @@ export interface AnalysisResult {
 
 // WebSocket types
 // WebSocketError imported from canonical source above
-
-export interface WebSocketMessage {
-  type: string;
-  payload: {
-    [k: string]: unknown;
-  };
-  sender?: string | null;
-}
+// WebSocketMessage - REMOVED: Now exported from domains/websocket.ts as the single source of truth
 
 // Response types
 export interface Response {

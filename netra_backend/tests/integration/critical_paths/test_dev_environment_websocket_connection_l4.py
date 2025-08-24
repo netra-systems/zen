@@ -104,6 +104,7 @@ class WebSocketConnectionTester:
         self.test_logs.append(log_entry)
         print(log_entry)
     
+    @pytest.mark.asyncio
     async def test_basic_connection(self) -> Dict[str, Any]:
         """Test basic WebSocket connection establishment."""
         result = {
@@ -145,6 +146,7 @@ class WebSocketConnectionTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_concurrent_connections(self) -> Dict[str, Any]:
         """Test multiple concurrent WebSocket connections."""
         result = {
@@ -203,6 +205,7 @@ class WebSocketConnectionTester:
         except Exception as e:
             return {"success": False, "time": time.time() - start_time, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_heartbeat_mechanism(self) -> Dict[str, Any]:
         """Test WebSocket heartbeat and keepalive."""
         result = {
@@ -255,6 +258,7 @@ class WebSocketConnectionTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_reconnection_logic(self) -> Dict[str, Any]:
         """Test WebSocket reconnection after disconnection."""
         result = {
@@ -294,6 +298,7 @@ class WebSocketConnectionTester:
                 
         return result
     
+    @pytest.mark.asyncio
     async def test_message_delivery(self) -> Dict[str, Any]:
         """Test message queuing and delivery."""
         result = {
@@ -357,6 +362,7 @@ class WebSocketConnectionTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_rate_limiting(self) -> Dict[str, Any]:
         """Test WebSocket rate limiting and backpressure."""
         result = {
@@ -438,6 +444,7 @@ class WebSocketConnectionTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.level_4
+@pytest.mark.asyncio
 async def test_dev_environment_websocket_connection():
     """Test WebSocket connection establishment and management."""
     async with WebSocketConnectionTester() as tester:

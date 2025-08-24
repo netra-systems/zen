@@ -11,14 +11,14 @@ from pathlib import Path
 import asyncio
 import json
 import time
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as IWebSocketService
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 class TestWebSocketMessageDeliveryL3:
     """Test WebSocket message delivery scenarios"""
@@ -26,6 +26,7 @@ class TestWebSocketMessageDeliveryL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_message_delivery_confirmation(self):
         """Test message delivery with acknowledgment"""
         uri = f"ws://localhost:{settings.WS_PORT}/ws"
@@ -55,6 +56,7 @@ class TestWebSocketMessageDeliveryL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_message_ordering_preservation(self):
         """Test message order is preserved"""
         uri = f"ws://localhost:{settings.WS_PORT}/ws"
@@ -93,6 +95,7 @@ class TestWebSocketMessageDeliveryL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_message_retry_on_failure(self):
         """Test message retry mechanism on delivery failure"""
         ws_service = WebSocketService()
@@ -113,6 +116,7 @@ class TestWebSocketMessageDeliveryL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_message_broadcast_delivery(self):
         """Test broadcast message delivery to multiple clients"""
         uri = f"ws://localhost:{settings.WS_PORT}/ws"
@@ -153,6 +157,7 @@ class TestWebSocketMessageDeliveryL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_message_queue_overflow_handling(self):
         """Test handling of message queue overflow"""
         ws_service = WebSocketService()

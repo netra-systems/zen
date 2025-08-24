@@ -11,7 +11,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 def assert_agent_service_initialized(service, supervisor):
     """Assert agent service is properly initialized."""
@@ -120,6 +120,7 @@ def assert_agent_creation_tracked(metrics, expected_created, expected_destroyed)
 
 def setup_mock_request_model(user_request="Test request", model_id="default_id", user_id="default_user"):
     """Setup mock request model for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_model = MagicMock()
     mock_model.user_request = user_request
     mock_model.id = model_id
@@ -128,6 +129,7 @@ def setup_mock_request_model(user_request="Test request", model_id="default_id",
 
 def setup_mock_request_model_with_dump(dump_data, model_id="default_id", user_id="default_user"):
     """Setup mock request model with model_dump."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_model = MagicMock()
     del mock_model.user_request
     mock_model.id = model_id

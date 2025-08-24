@@ -10,11 +10,9 @@ health monitoring, and failure recovery mechanisms.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -41,7 +39,9 @@ def circuit_config():
 @pytest.fixture
 def mock_health_checker():
     """Mock health checker returning healthy status."""
+    # Mock: Component isolation for controlled unit testing
     checker = Mock(spec=HealthChecker)
+    # Mock: Async component isolation for testing without real async operations
     checker.check_health = AsyncMock(return_value=create_health_result())
     return checker
 

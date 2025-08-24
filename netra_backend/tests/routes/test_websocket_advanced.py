@@ -1,11 +1,9 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from fastapi import WebSocket
@@ -22,7 +20,9 @@ class TestWebSocketAdvanced:
     async def test_parse_json_message_valid(self):
         """Test parsing valid JSON message"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.send_message = AsyncMock()
         
         # Test valid JSON
@@ -35,7 +35,9 @@ class TestWebSocketAdvanced:
     async def test_parse_json_message_invalid(self):
         """Test parsing invalid JSON message"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.send_message = AsyncMock()
         
         # Test invalid JSON
@@ -53,7 +55,9 @@ class TestWebSocketAdvanced:
     async def test_parse_json_message_none(self):
         """Test parsing None message"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.send_message = AsyncMock()
         
         # Test None input
@@ -66,8 +70,11 @@ class TestWebSocketAdvanced:
     async def test_handle_pong_message_raw_pong(self):
         """Test handling raw pong message"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.handle_pong = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         
         # Test raw pong
@@ -80,8 +87,11 @@ class TestWebSocketAdvanced:
     async def test_handle_pong_message_json_ping(self):
         """Test handling JSON ping message"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
         
         # Test JSON ping
@@ -98,7 +108,9 @@ class TestWebSocketAdvanced:
     async def test_handle_pong_message_not_pong(self):
         """Test handling non-pong message"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         
         # Test regular message
@@ -110,8 +122,11 @@ class TestWebSocketAdvanced:
     async def test_validate_and_handle_message_ping(self):
         """Test validate and handle ping message"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
         
         ping_message = {"type": "ping", "timestamp": 123456}
@@ -126,8 +141,11 @@ class TestWebSocketAdvanced:
     async def test_validate_and_handle_message_invalid_structure(self):
         """Test validate and handle message with invalid structure"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.send_message = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         
         # Test None message
@@ -146,6 +164,7 @@ class TestWebSocketAdvanced:
     async def test_validate_and_handle_message_missing_type(self):
         """Test validate and handle message missing type field"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
         mock_manager.send_message = AsyncMock()
         mock_websocket = MagicMock(spec=WebSocket)
@@ -167,8 +186,11 @@ class TestWebSocketAdvanced:
     async def test_validate_and_handle_message_valid_message(self):
         """Test validate and handle valid message"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_manager.handle_message = AsyncMock(return_value=True)
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         
         # Test valid message
@@ -182,7 +204,9 @@ class TestWebSocketAdvanced:
     async def test_receive_message_with_timeout_success(self):
         """Test receiving message with timeout - success case"""
         
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.receive_text = AsyncMock(return_value='{"type": "test"}')
         
         # Test successful message receive
@@ -195,6 +219,7 @@ class TestWebSocketAdvanced:
     async def test_receive_message_with_timeout_timeout(self):
         """Test receiving message with timeout - timeout case"""
         
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         
         # Mock a slow receive_text that will timeout
@@ -212,7 +237,9 @@ class TestWebSocketAdvanced:
     async def test_parse_json_message_empty_string(self):
         """Test parsing empty string message"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.send_message = AsyncMock()
         
         # Test empty string
@@ -229,7 +256,9 @@ class TestWebSocketAdvanced:
     async def test_parse_json_message_non_object(self):
         """Test parsing JSON that's not an object"""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.send_message = AsyncMock()
         
         # Test JSON array instead of object

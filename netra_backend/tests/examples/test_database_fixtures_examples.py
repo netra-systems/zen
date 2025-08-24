@@ -12,7 +12,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 
@@ -33,12 +33,17 @@ from netra_backend.tests.fixtures.database_test_fixtures import (
 class TestDatabaseFixtureExamples:
     """Examples showing how to use the new database fixtures."""
     
+    @pytest.mark.asyncio
     async def test_simple_session_mock_usage(self, async_session_mock):
         """Example: Replace basic AsyncSession mock setup."""
         # OLD WAY (duplicated 70+ times):
+        # Mock: Database session isolation for transaction testing without real database dependency
         # session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         # session.add = Mock()
+        # Mock: Session isolation for controlled testing without external state
         # session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         # session.refresh = AsyncMock()
         
         # NEW WAY (one line):
@@ -52,9 +57,11 @@ class TestDatabaseFixtureExamples:
         async_session_mock.add.assert_called_once_with(user)
         async_session_mock.commit.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_query_result_building(self, async_session_mock, query_builder):
         """Example: Replace complex query result mocking."""
         # OLD WAY (complex mock setup):
+        # Mock: Generic component isolation for controlled unit testing
         # mock_result = Mock()
         # mock_result.scalars.return_value.first.return_value = user
         # session.execute.return_value = mock_result
@@ -70,6 +77,7 @@ class TestDatabaseFixtureExamples:
         
         assert found_user.email == "user@example.com"
 
+    @pytest.mark.asyncio
     async def test_transaction_management(self, transaction_context):
         """Example: Replace transaction context mock setup."""
         # OLD WAY (manual transaction mocking):
@@ -82,6 +90,7 @@ class TestDatabaseFixtureExamples:
         
         # Transaction context properly handled commit/rollback
 
+    @pytest.mark.asyncio
     async def test_error_simulation(self, async_session_mock, error_simulator):
         """Example: Replace error condition setup."""
         # OLD WAY (manual error configuration):
@@ -94,6 +103,7 @@ class TestDatabaseFixtureExamples:
         with pytest.raises(Exception):
             await async_session_mock.commit()
 
+    @pytest.mark.asyncio
     async def test_connection_pool_usage(self, connection_pool):
         """Example: Replace connection pool mocking."""
         # OLD WAY (complex pool simulation):
@@ -111,6 +121,7 @@ class TestDatabaseFixtureExamples:
     def test_bulk_model_creation(self):
         """Example: Replace bulk model factory patterns."""
         # OLD WAY (manual bulk creation):
+        # Mock: Component isolation for controlled unit testing
         # users = [Mock(id=f"user_{i}", email=f"user{i}@test.com") for i in range(10)]
         
         # NEW WAY (factory functions):
@@ -123,6 +134,7 @@ class TestDatabaseFixtureExamples:
         assert users[0].email == "user0@test.com"
         assert users[9].email == "user9@test.com"
 
+    @pytest.mark.asyncio
     async def test_clickhouse_query_mocking(self, clickhouse_mocker):
         """Example: Replace ClickHouse query mocking."""
         # OLD WAY (manual ClickHouse mock setup):
@@ -136,6 +148,7 @@ class TestDatabaseFixtureExamples:
         assert result == expected_result
         assert len(clickhouse_mocker.query_log) == 1
 
+    @pytest.mark.asyncio
     async def test_migration_testing(self, migration_helper):
         """Example: Replace migration test patterns."""
         # OLD WAY (manual migration simulation):
@@ -151,6 +164,7 @@ class TestDatabaseFixtureExamples:
 class TestRealWorldReplacementExamples:
     """Real examples showing how to replace existing test patterns."""
     
+    @pytest.mark.asyncio
     async def test_user_crud_operations(self, async_session_mock, query_builder):
         """Replace user service test patterns."""
         # This replaces patterns from test_user_service.py
@@ -170,6 +184,7 @@ class TestRealWorldReplacementExamples:
         found_user = await async_session_mock.execute("SELECT * FROM users")
         assert found_user.scalars().first().email == "test@example.com"
 
+    @pytest.mark.asyncio
     async def test_thread_repository_patterns(self, transaction_session_mock, transaction_context):
         """Replace thread repository test patterns."""
         # This replaces patterns from thread repository tests
@@ -187,6 +202,7 @@ class TestRealWorldReplacementExamples:
         transaction_session_mock.add.assert_called_with(thread)
         transaction_session_mock.flush.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_message_processing_patterns(self, async_session_mock, query_builder):
         """Replace message processing test patterns."""
         # This replaces patterns from message processing tests

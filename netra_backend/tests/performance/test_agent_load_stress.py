@@ -6,7 +6,7 @@ Tests concurrent agent requests, resource isolation, and performance degradation
 """
 
 from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -17,11 +17,11 @@ import statistics
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import psutil
 import pytest
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -41,12 +41,16 @@ class AgentLoadTestFixtures:
 
         return {
 
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             'llm_manager': AsyncMock(spec=LLMManager),
 
+            # Mock: Tool dispatcher isolation for agent testing without real tool execution
             'tool_dispatcher': AsyncMock(spec=ToolDispatcher),
 
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             'websocket_manager': AsyncMock(spec=WebSocketManager),
 
+            # Mock: Session isolation for controlled testing without external state
             'db_session': AsyncMock()
 
         }
@@ -190,6 +194,7 @@ class TestAgentLoadScenarios:
 
     @pytest.mark.performance
 
+    @pytest.mark.asyncio
     async def test_gradual_load_ramp_up(self):
 
         """Test gradual increase in concurrent users."""
@@ -216,6 +221,7 @@ class TestAgentLoadScenarios:
 
     @pytest.mark.performance
 
+    @pytest.mark.asyncio
     async def test_sustained_peak_load(self):
 
         """Test system under sustained peak load."""
@@ -242,6 +248,7 @@ class TestAgentLoadScenarios:
 
     @pytest.mark.performance
 
+    @pytest.mark.asyncio
     async def test_burst_traffic_patterns(self):
 
         """Test handling of sudden traffic bursts."""
@@ -272,6 +279,7 @@ class TestAgentLoadScenarios:
 
     @pytest.mark.performance
 
+    @pytest.mark.asyncio
     async def test_mixed_workload_types(self):
 
         """Test mixed agent types under concurrent load."""
@@ -396,6 +404,7 @@ class TestAgentLoadScenarios:
 
             agent = SupervisorAgent(
 
+                # Mock: Generic component isolation for controlled unit testing
                 AsyncMock(), AsyncMock(), AsyncMock(), AsyncMock()
 
             )
@@ -482,6 +491,7 @@ class TestAgentStressScenarios:
 
     @pytest.mark.performance
 
+    @pytest.mark.asyncio
     async def test_beyond_capacity_limits(self):
 
         """Test system behavior beyond designed capacity."""

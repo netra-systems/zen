@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -839,6 +839,7 @@ async def cost_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_cost_tracking(cost_manager):
     """Test basic cost tracking functionality."""
     manager = cost_manager
@@ -865,6 +866,7 @@ async def test_basic_cost_tracking(cost_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_provider_pricing_calculation(cost_manager):
     """Test provider pricing calculations."""
     manager = cost_manager
@@ -896,6 +898,7 @@ async def test_provider_pricing_calculation(cost_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_cost_summary_generation(cost_manager):
     """Test cost summary generation."""
     manager = cost_manager
@@ -930,6 +933,7 @@ async def test_cost_summary_generation(cost_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_realtime_cache_updates(cost_manager):
     """Test real-time cache updates."""
     manager = cost_manager
@@ -953,6 +957,7 @@ async def test_realtime_cache_updates(cost_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_budget_creation_and_monitoring(cost_manager):
     """Test budget creation and monitoring."""
     manager = cost_manager
@@ -992,6 +997,7 @@ async def test_budget_creation_and_monitoring(cost_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_budget_alert_thresholds(cost_manager):
     """Test budget alert threshold triggering."""
     manager = cost_manager
@@ -1029,6 +1035,7 @@ async def test_budget_alert_thresholds(cost_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_budget_forecasting(cost_manager):
     """Test budget usage forecasting."""
     manager = cost_manager
@@ -1071,6 +1078,7 @@ async def test_budget_forecasting(cost_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_cost_optimization_analysis(cost_manager):
     """Test cost optimization analysis."""
     manager = cost_manager
@@ -1109,6 +1117,7 @@ async def test_cost_optimization_analysis(cost_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_cost_tracking(cost_manager):
     """Test concurrent cost tracking operations."""
     manager = cost_manager
@@ -1143,6 +1152,7 @@ async def test_concurrent_cost_tracking(cost_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_cost_tracking_performance(cost_manager):
     """Benchmark cost tracking performance."""
     manager = cost_manager

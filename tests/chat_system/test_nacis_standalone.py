@@ -17,8 +17,6 @@ from pathlib import Path
 from unittest.mock import Mock, AsyncMock
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Set minimal environment
 os.environ["NACIS_ENABLED"] = "true"
@@ -38,13 +36,17 @@ async def test_basic_components():
             IntentClassifier, IntentType
         )
         
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm = Mock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm.call_llm = AsyncMock(return_value={
             "content": "tco_analysis"
         })
         
         classifier = IntentClassifier(mock_llm)
+        # Mock: Generic component isolation for controlled unit testing
         context = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         context.state = Mock()
         context.state.user_request = "What is the TCO for GPT-4?"
         intent, confidence = await classifier.classify(context)
@@ -197,14 +199,20 @@ async def test_orchestration_mock():
         from netra_backend.app.agents.state import DeepAgentState
         
         # Create mocks
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm = Mock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm.call_llm = AsyncMock(return_value={
             "content": "TCO is approximately $12,000 annually",
             "model": "mock-model"
         })
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_update = AsyncMock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         
         # Create orchestrator

@@ -24,7 +24,7 @@ import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -308,6 +308,7 @@ class ScalabilityTester:
     def __init__(self):
         self.simulator = ConcurrentUserSimulator()
     
+    @pytest.mark.asyncio
     async def test_user_scaling(self, max_users: int = 100, step_size: int = 10, 
                                test_duration: float = 30.0) -> Dict[int, LoadTestResults]:
         """Test system performance as user count increases."""
@@ -333,6 +334,7 @@ class ScalabilityTester:
         
         return results
     
+    @pytest.mark.asyncio
     async def test_burst_capacity(self, base_users: int = 50, burst_users: int = 200, 
                                  burst_duration: float = 10.0) -> Dict[str, Any]:
         """Test system response to sudden user burst."""
@@ -374,6 +376,7 @@ class ScalabilityTester:
             }
         }
     
+    @pytest.mark.asyncio
     async def test_sustained_load(self, concurrent_users: int = 75, duration_minutes: float = 5.0) -> LoadTestResults:
         """Test system performance under sustained load."""
         duration_seconds = duration_minutes * 60.0
@@ -442,6 +445,7 @@ class TestConcurrentUserPerformance:
     
     @pytest.mark.asyncio
     @pytest.mark.slow
+    @pytest.mark.asyncio
     async def test_user_scaling_performance(self):
         """Test performance as user count scales."""
         scaling_results = await self.scalability_tester.test_user_scaling(
@@ -511,6 +515,7 @@ class TestConcurrentUserPerformance:
     
     @pytest.mark.asyncio
     @pytest.mark.slow
+    @pytest.mark.asyncio
     async def test_sustained_load_stability(self):
         """Test system stability under sustained load."""
         result = await self.scalability_tester.test_sustained_load(

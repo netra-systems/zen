@@ -100,6 +100,16 @@ repos:
         pass_filenames: false
         always_run: true
         description: 'Audits for duplicate code and legacy patterns with configurable blocking'
+        
+      # ENVIRONMENT ISOLATION: Prevent direct os.environ access in tests
+      - id: check-environment-isolation
+        name: Environment Isolation Check
+        entry: python scripts/check_environment_isolation.py --strict
+        language: system
+        files: '(test_.*\.py|.*_test\.py|tests/.*\.py|conftest\.py)$'
+        stages: [commit]
+        pass_filenames: true
+        description: 'Prevents direct os.environ access in test files - use IsolatedEnvironment instead'
 
 # Configuration for different severity levels
 # These can be toggled based on development phase

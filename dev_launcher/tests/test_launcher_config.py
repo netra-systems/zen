@@ -30,24 +30,27 @@ class TestLauncherConfig(unittest.TestCase):
         self.assertEqual(config.frontend_port, 3000)
         self.assertTrue(config.dynamic_ports)
         self.assertFalse(config.backend_reload)
-        self.assertTrue(config.load_secrets)
+        self.assertFalse(config.load_secrets)  # Changed: now default is False (local-only)
         self.assertFalse(config.no_browser)
         self.assertFalse(config.verbose)
     
     def test_config_validation_invalid_ports(self):
-        """Test port validation with invalid values."""
-        with self.assertRaises(ValueError) as cm:
-            LauncherConfig(backend_port=70000)
-        self.assertIn("Invalid backend port", str(cm.exception))
-        with self.assertRaises(ValueError) as cm:
-            LauncherConfig(frontend_port=0)
-        self.assertIn("Invalid frontend port", str(cm.exception))
+        """Test port validation with invalid values - now auto-resolves instead of raising."""
+        # With enable_port_conflict_resolution=True by default, invalid ports are auto-resolved
+        config = LauncherConfig(backend_port=70000)
+        # Should auto-resolve to None (dynamic allocation)
+        self.assertIsNone(config.backend_port)
+        
+        config = LauncherConfig(frontend_port=0)
+        # Should auto-resolve to default port
+        self.assertEqual(config.frontend_port, 3000)
     
     def test_config_validation_missing_dirs(self):
         """Test validation when required directories are missing."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tmppath = Path(tmpdir)
             # LauncherConfig now doesn't validate missing dirs by default
+            # Mock: Component isolation for testing without external dependencies
             with patch('dev_launcher.config.find_project_root', return_value=tmppath):
                 with patch.object(LauncherConfig, '_validate') as mock_validate:
                     mock_validate.side_effect = ValueError("Backend directory not found")
@@ -60,6 +63,7 @@ class TestLauncherConfig(unittest.TestCase):
     def test_config_from_args(self):
         """Test creating config from command line arguments."""
         args = self._create_mock_args()
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.config.find_project_root') as mock_root:
             mock_root.return_value = Path.cwd()
             with patch.object(LauncherConfig, '_validate'):
@@ -68,6 +72,7 @@ class TestLauncherConfig(unittest.TestCase):
     
     def _create_mock_args(self):
         """Create mock command line arguments."""
+        # Mock: Component isolation for controlled unit testing
         return Mock(
             backend_port=8080, frontend_port=3001,
             static=False, verbose=True,

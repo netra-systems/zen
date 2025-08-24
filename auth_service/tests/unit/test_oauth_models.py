@@ -15,8 +15,10 @@ from auth_service.auth_core.models.auth_models import (
     LoginResponse,
     TokenResponse,
 )
+from test_framework.environment_markers import env, test_only
 
 
+@test_only  # Pure unit tests - only need test environment
 class TestAuthProvider:
     """Test AuthProvider enum"""
     
@@ -32,6 +34,7 @@ class TestAuthProvider:
         providers = list(AuthProvider)
         assert len(providers) == 4
 
+@test_only  # Pure unit tests - only need test environment
 class TestLoginRequest:
     """Test LoginRequest model validation"""
     
@@ -77,6 +80,7 @@ class TestLoginRequest:
                 provider=AuthProvider.LOCAL
             )
 
+@test_only  # Pure unit tests - only need test environment
 class TestLoginResponse:
     """Test LoginResponse model"""
     
@@ -99,6 +103,7 @@ class TestLoginResponse:
         assert response.expires_in == 900
         assert response.user["id"] == "user_123"
 
+@test_only  # Pure unit tests - only need test environment
 class TestTokenResponse:
     """Test TokenResponse model"""
     
@@ -127,6 +132,7 @@ class TestTokenResponse:
         assert response.email is None
         assert response.permissions == []
 
+@test_only  # Pure unit tests - only need test environment
 class TestAuthEndpoints:
     """Test AuthEndpoints model"""
     
@@ -161,6 +167,7 @@ class TestAuthEndpoints:
         assert endpoints.dev_login is None
         assert endpoints.validate_token is None
 
+@test_only  # Pure unit tests - only need test environment
 class TestAuthConfigResponse:
     """Test AuthConfigResponse model"""
     
@@ -210,6 +217,7 @@ class TestAuthConfigResponse:
         assert config.endpoints.dev_login is not None
         assert "localhost" in config.authorized_javascript_origins[0]
 
+@test_only  # Pure unit tests - only need test environment
 class TestOAuthStateValidation:
     """Test OAuth state parameter handling"""
     

@@ -7,13 +7,11 @@ MODULAR VERSION: <300 lines, all functions ≤8 lines
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from langchain_core.tools import BaseTool

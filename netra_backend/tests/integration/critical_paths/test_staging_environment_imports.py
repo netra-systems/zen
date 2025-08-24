@@ -66,6 +66,7 @@ class TestStagingEnvironmentImports:
                 raise ImportError(f"No module named '{name}'")
             return original_import(name, *args, **kwargs)
         
+        # Mock: Component isolation for testing without external dependencies
         with mock.patch('builtins.__import__', side_effect=mock_import):
             yield
 
@@ -85,6 +86,7 @@ class TestStagingEnvironmentImports:
         # Verify the app has CORS middleware configured  
         # The fact that we got here without ImportError means the test passed
 
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_staging_cors_configuration(self):
         """Test CORS configuration in staging environment.
         
@@ -150,6 +152,7 @@ class TestStagingEnvironmentImports:
         app = FastAPI()
         
         # Mock the import to fail
+        # Mock: Component isolation for testing without external dependencies
         with mock.patch('builtins.__import__', side_effect=ImportError("No module named 'dev_launcher'")):
             # This should not raise an error
             _setup_custom_cors_middleware(app)
@@ -183,6 +186,7 @@ class TestStagingEnvironmentImports:
                 raise ImportError(f"No module named '{name}'")
             return __import__(name, *args, **kwargs)
         
+        # Mock: Component isolation for testing without external dependencies
         with mock.patch('builtins.__import__', side_effect=mock_import):
             _setup_custom_cors_middleware(app)
         
@@ -211,11 +215,13 @@ class TestStagingEnvironmentImports:
                 import_attempted = True
                 # Simulate successful import with mock
                 from unittest.mock import MagicMock
+                # Mock: Generic component isolation for controlled unit testing
                 module = MagicMock()
                 module.ServiceDiscovery = MagicMock
                 return module
             return __import__(name, *args, **kwargs)
         
+        # Mock: Component isolation for testing without external dependencies
         with mock.patch('builtins.__import__', side_effect=mock_import):
             _setup_custom_cors_middleware(app)
         

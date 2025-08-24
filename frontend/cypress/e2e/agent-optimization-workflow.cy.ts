@@ -1,4 +1,4 @@
-import { Message, WebSocketMessage } from '@/types/chat';
+import { Message, WebSocketMessage } from '@/types/unified';
 
 describe('Full Agent Optimization Workflow', () => {
   beforeEach(() => {

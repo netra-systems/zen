@@ -96,6 +96,7 @@ class AuthenticationFlowTester:
         self.auth_logs.append(log_entry)
         print(log_entry)
     
+    @pytest.mark.asyncio
     async def test_user_registration(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
         """Test user registration with validation."""
         result = {
@@ -157,6 +158,7 @@ class AuthenticationFlowTester:
         result["registration_time"] = time.time() - start_time
         return result
     
+    @pytest.mark.asyncio
     async def test_email_verification(self, email: str) -> Dict[str, Any]:
         """Test email verification flow."""
         result = {
@@ -198,6 +200,7 @@ class AuthenticationFlowTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_user_login(self, email: str, password: str) -> Dict[str, Any]:
         """Test user login and token generation."""
         result = {
@@ -250,6 +253,7 @@ class AuthenticationFlowTester:
         result["login_time"] = time.time() - start_time
         return result
     
+    @pytest.mark.asyncio
     async def test_token_validation(self, email: str) -> Dict[str, Any]:
         """Test JWT token validation."""
         result = {
@@ -290,6 +294,7 @@ class AuthenticationFlowTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_token_refresh(self, email: str) -> Dict[str, Any]:
         """Test token refresh mechanism."""
         result = {
@@ -341,6 +346,7 @@ class AuthenticationFlowTester:
         result["refresh_time"] = time.time() - start_time
         return result
     
+    @pytest.mark.asyncio
     async def test_cross_service_auth(self, email: str) -> Dict[str, Any]:
         """Test authentication propagation across services."""
         result = {
@@ -404,6 +410,7 @@ class AuthenticationFlowTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_session_management(self, email: str) -> Dict[str, Any]:
         """Test session creation and management."""
         result = {
@@ -454,6 +461,7 @@ class AuthenticationFlowTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_logout_flow(self, email: str) -> Dict[str, Any]:
         """Test logout and token revocation."""
         result = {
@@ -605,6 +613,7 @@ class AuthenticationFlowTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.level_4
+@pytest.mark.asyncio
 async def test_dev_environment_auth_login_complete():
     """Test complete authentication and login flow."""
     async with AuthenticationFlowTester() as tester:

@@ -27,18 +27,18 @@ class OAuthStagingTester:
             try:
                 response = await client.get(f"{self.auth_service_url}/auth/health")
                 if response.status_code != 200:
-                    print(f"❌ Auth service unhealthy: {response.status_code}")
+                    print(f"[FAIL] Auth service unhealthy: {response.status_code}")
                     return False
 
                 data = response.json()
                 if data.get("status") != "healthy":
-                    print(f"❌ Auth service status: {data.get('status')}")
+                    print(f"[FAIL] Auth service status: {data.get('status')}")
                     return False
 
-                print("✅ Auth service is healthy")
+                print("[PASS] Auth service is healthy")
                 return True
             except Exception as e:
-                print(f"❌ Auth service unreachable: {e}")
+                print(f"[FAIL] Auth service unreachable: {e}")
                 return False
 
     async def test_auth_config_endpoint(self) -> bool:
@@ -48,7 +48,7 @@ class OAuthStagingTester:
                 response = await client.get(f"{self.auth_service_url}/auth/config")
                 if response.status_code != 200:
                     print(
-                        f"❌ Auth config endpoint failed: {
+                        f"[FAIL] Auth config endpoint failed: {
                             response.status_code}"
                     )
                     return False
@@ -63,30 +63,30 @@ class OAuthStagingTester:
                 ]
                 for field in required_fields:
                     if field not in data:
-                        print(f"❌ Missing required field: {field}")
+                        print(f"[FAIL] Missing required field: {field}")
                         return False
 
                 # Verify Google client ID is set
                 if not data.get("google_client_id"):
-                    print("❌ Google client ID not configured")
+                    print("[FAIL] Google client ID not configured")
                     return False
 
                 # Verify redirect URI is correct
                 expected_callback = f"{self.auth_service_url}/auth/callback"
                 if expected_callback not in data.get("authorized_redirect_uris", []):
                     print(
-                        f"❌ Expected callback URL not in redirect URIs: {expected_callback}"
+                        f"[FAIL] Expected callback URL not in redirect URIs: {expected_callback}"
                     )
                     print(f"   Found: {data.get('authorized_redirect_uris')}")
                     return False
 
-                print("✅ Auth config is properly configured")
+                print("[PASS] Auth config is properly configured")
                 print(f"   Client ID: {data['google_client_id'][:20]}...")
                 print(f"   Redirect URIs: {data['authorized_redirect_uris']}")
                 return True
 
             except Exception as e:
-                print(f"❌ Auth config endpoint error: {e}")
+                print(f"[FAIL] Auth config endpoint error: {e}")
                 return False
 
     async def test_oauth_initiation(self) -> bool:
@@ -99,30 +99,30 @@ class OAuthStagingTester:
 
                 if response.status_code != 302:
                     print(
-                        f"❌ OAuth initiation didn't redirect: {
+                        f"[FAIL] OAuth initiation didn't redirect: {
                             response.status_code}"
                     )
                     return False
 
                 location = response.headers.get("location", "")
                 if not location.startswith("https://accounts.google.com/o/oauth2/"):
-                    print(f"❌ OAuth redirect URL incorrect: {location[:50]}...")
+                    print(f"[FAIL] OAuth redirect URL incorrect: {location[:50]}...")
                     return False
 
                 # Check for required OAuth parameters
                 if "client_id=" not in location:
-                    print("❌ Missing client_id in OAuth URL")
+                    print("[FAIL] Missing client_id in OAuth URL")
                     return False
 
                 if "redirect_uri=" not in location:
-                    print("❌ Missing redirect_uri in OAuth URL")
+                    print("[FAIL] Missing redirect_uri in OAuth URL")
                     return False
 
                 if f"{self.auth_service_url}/auth/callback" not in location:
-                    print("❌ Incorrect redirect_uri in OAuth URL")
+                    print("[FAIL] Incorrect redirect_uri in OAuth URL")
                     return False
 
-                print("✅ OAuth initiation works correctly")
+                print("[PASS] OAuth initiation works correctly")
                 print("   Redirects to Google OAuth")
                 print(
                     f"   Callback URL: {
@@ -131,7 +131,7 @@ class OAuthStagingTester:
                 return True
 
             except Exception as e:
-                print(f"❌ OAuth initiation error: {e}")
+                print(f"[FAIL] OAuth initiation error: {e}")
                 return False
 
     async def test_frontend_chat_page(self) -> bool:
@@ -142,7 +142,7 @@ class OAuthStagingTester:
                 response = await client.get(f"{self.frontend_url}/chat")
                 if response.status_code != 200:
                     print(
-                        f"❌ Chat page not accessible: {
+                        f"[FAIL] Chat page not accessible: {
                             response.status_code}"
                     )
                     return False
@@ -150,14 +150,14 @@ class OAuthStagingTester:
                 # Check if page contains necessary OAuth handling code
                 content = response.text
                 if "localStorage" not in content and "jwt_token" not in content:
-                    print("⚠️  Chat page may not have token handling code")
+                    print("[WARN] Chat page may not have token handling code")
                     # This is a warning, not a failure
 
-                print("✅ Frontend chat page is accessible")
+                print("[PASS] Frontend chat page is accessible")
                 return True
 
             except Exception as e:
-                print(f"❌ Frontend chat page error: {e}")
+                print(f"[FAIL] Frontend chat page error: {e}")
                 return False
 
     async def test_token_validation_endpoint(self) -> bool:
@@ -173,23 +173,23 @@ class OAuthStagingTester:
                 # Should return 401 for invalid token
                 if response.status_code == 401:
                     print(
-                        "✅ Token validation endpoint works (correctly rejects invalid token)"
+                        "[PASS] Token validation endpoint works (correctly rejects invalid token)"
                     )
                     return True
                 elif response.status_code == 200:
                     data = response.json()
                     if not data.get("valid"):
-                        print("✅ Token validation endpoint works (returns invalid)")
+                        print("[PASS] Token validation endpoint works (returns invalid)")
                         return True
 
                 print(
-                    f"❌ Unexpected token validation response: {
+                    f"[FAIL] Unexpected token validation response: {
                         response.status_code}"
                 )
                 return False
 
             except Exception as e:
-                print(f"❌ Token validation endpoint error: {e}")
+                print(f"[FAIL] Token validation endpoint error: {e}")
                 return False
 
     async def test_api_auth_integration(self) -> bool:
@@ -199,23 +199,23 @@ class OAuthStagingTester:
                 # Test API health endpoint (should work without auth)
                 response = await client.get(f"{self.api_url}/health")
                 if response.status_code != 200:
-                    print(f"❌ API health check failed: {response.status_code}")
+                    print(f"[FAIL] API health check failed: {response.status_code}")
                     return False
 
                 # Test protected endpoint without token (should fail)
                 response = await client.get(f"{self.api_url}/api/threads")
                 if response.status_code == 401:
-                    print("✅ API correctly requires authentication")
+                    print("[PASS] API correctly requires authentication")
                     return True
                 elif response.status_code == 200:
-                    print("⚠️  API endpoint accessible without authentication")
+                    print("[WARN] API endpoint accessible without authentication")
                     return True  # Not a failure, might be intentional
 
-                print(f"❌ Unexpected API response: {response.status_code}")
+                print(f"[FAIL] Unexpected API response: {response.status_code}")
                 return False
 
             except Exception as e:
-                print(f"❌ API integration error: {e}")
+                print(f"[FAIL] API integration error: {e}")
                 return False
 
     async def run_all_tests(self):
@@ -254,16 +254,16 @@ class OAuthStagingTester:
         total = len(results)
 
         for test_name, result in results:
-            status = "✅ PASS" if result else "❌ FAIL"
+            status = "[PASS]" if result else "[FAIL]"
             print(f"{status}: {test_name}")
 
         print(f"\nTotal: {passed}/{total} tests passed")
 
         if passed == total:
-            print("\n🎉 All OAuth staging tests passed!")
+            print("\n[SUCCESS] All OAuth staging tests passed!")
             return True
         else:
-            print(f"\n⚠️  {total - passed} test(s) failed")
+            print(f"\n[WARNING] {total - passed} test(s) failed")
             return False
 
 

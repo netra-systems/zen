@@ -3,9 +3,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -23,13 +21,16 @@ from netra_backend.tests.helpers.thread_test_helpers import (
 @pytest.fixture
 def mock_db():
     """Mock database session"""
+    # Mock: Generic component isolation for controlled unit testing
     db = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     db.commit = AsyncMock()
     return db
 
 @pytest.fixture
 def mock_user():
     """Mock authenticated user"""
+    # Mock: Generic component isolation for controlled unit testing
     user = Mock()
     user.id = "test_user_123"
     user.email = "test@example.com"
@@ -37,10 +38,12 @@ def mock_user():
 
 class TestCreateThread:
     """Test cases for POST / endpoint"""
+    @pytest.mark.asyncio
     async def test_create_thread_success(self, mock_db, mock_user):
         """Test successful thread creation"""
         mock_thread = create_mock_thread(title="New Thread")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler:
             mock_handler.return_value = mock_thread
             thread_data = ThreadCreate(
@@ -53,11 +56,13 @@ class TestCreateThread:
             assert result.id == "thread_abc123"
             assert result.metadata_["title"] == "New Thread"
             mock_handler.assert_called_once_with(mock_db, thread_data, "test_user_123")
+    @pytest.mark.asyncio
     async def test_create_thread_no_title(self, mock_db, mock_user):
         """Test thread creation without title"""
         mock_thread = create_mock_thread()
         mock_thread.metadata_ = {"user_id": "test_user_123", "status": "active"}
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler:
             mock_handler.return_value = mock_thread
             thread_data = ThreadCreate()
@@ -66,9 +71,12 @@ class TestCreateThread:
             
             assert result.metadata_["user_id"] == "test_user_123"
             mock_handler.assert_called_once_with(mock_db, thread_data, "test_user_123")
+    @pytest.mark.asyncio
     async def test_create_thread_exception(self, mock_db, mock_user):
         """Test error handling in create_thread"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler, \
+             # Mock: Component isolation for testing without external dependencies
              patch('netra_backend.app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             mock_handler.side_effect = Exception("Database error")

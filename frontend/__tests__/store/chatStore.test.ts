@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { useChatStore } from '@/store/chat';
-import { Message } from '@/types/chat';
+import { Message } from '@/types/unified';
 
 describe('useChatStore', () => {
   beforeEach(() => {

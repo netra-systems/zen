@@ -11,7 +11,7 @@ from pathlib import Path
 
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -65,6 +65,7 @@ class TestEnterpriseDomainNetwork:
                 "ttl": config["dns_configuration"]["ttl"]
             })
         
+        # Mock: Async component isolation for testing without real async operations
         infra["domain_manager"].configure_dns = AsyncMock(return_value={
             "dns_config_id": str(uuid.uuid4()),
             "dns_records": dns_records,
@@ -87,6 +88,7 @@ class TestEnterpriseDomainNetwork:
                 "certificate_status": "active"
             }
         
+        # Mock: Async component isolation for testing without real async operations
         infra["domain_manager"].provision_certificates = AsyncMock(return_value={
             "provisioning_id": str(uuid.uuid4()),
             "certificates": certificates,

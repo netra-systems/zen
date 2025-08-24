@@ -26,7 +26,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 # OAuth service replaced with mock
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import httpx
@@ -37,16 +37,20 @@ import websockets
 OAuthService = AsyncMock
 # JWT service replaced with auth_integration
 # # from app.auth_integration.auth import create_access_token
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
+# Mock: Generic component isolation for controlled unit testing
 create_access_token = AsyncMock()
 # # from app.core.unified.jwt_validator import validate_token_jwt
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
+# Mock: Generic component isolation for controlled unit testing
 validate_token_jwt = AsyncMock()
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
+# Mock: Generic component isolation for controlled unit testing
 create_access_token = AsyncMock()
+# Mock: Generic component isolation for controlled unit testing
 validate_token_jwt = AsyncMock()
 JWTService = AsyncMock
 # Session manager replaced with mock
@@ -623,6 +627,7 @@ class AuthFlowL4TestSuite:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_token_refresh_flow(self, refresh_token: str, session_id: str) -> Dict[str, Any]:
         """Test token refresh flow with staging services."""
         try:
@@ -703,6 +708,7 @@ class AuthFlowL4TestSuite:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_logout_flow(self, session_id: str, access_token: str) -> Dict[str, Any]:
         """Test complete logout flow."""
         try:
@@ -798,6 +804,7 @@ async def auth_flow_l4_suite():
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_complete_oauth_flow_enterprise_user_l4(auth_flow_l4_suite):
     """Test complete OAuth flow for enterprise user in staging."""
     # Execute complete OAuth flow for enterprise user
@@ -841,6 +848,7 @@ async def test_complete_oauth_flow_enterprise_user_l4(auth_flow_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_oauth_flow_free_tier_user_l4(auth_flow_l4_suite):
     """Test OAuth flow for free tier user with limited permissions in staging."""
     # Execute OAuth flow for free tier user
@@ -864,6 +872,7 @@ async def test_oauth_flow_free_tier_user_l4(auth_flow_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_token_refresh_flow_l4(auth_flow_l4_suite):
     """Test token refresh flow in staging."""
     # First complete an OAuth flow to get refresh token
@@ -902,6 +911,7 @@ async def test_token_refresh_flow_l4(auth_flow_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_websocket_authentication_flow_l4(auth_flow_l4_suite):
     """Test WebSocket authentication with JWT tokens in staging."""
     # Complete OAuth flow to get access token
@@ -927,6 +937,7 @@ async def test_websocket_authentication_flow_l4(auth_flow_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_session_consistency_across_services_l4(auth_flow_l4_suite):
     """Test session consistency across all services in staging."""
     # Complete OAuth flow
@@ -967,6 +978,7 @@ async def test_session_consistency_across_services_l4(auth_flow_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_logout_flow_complete_l4(auth_flow_l4_suite):
     """Test complete logout flow in staging."""
     # Complete OAuth flow
@@ -998,6 +1010,7 @@ async def test_logout_flow_complete_l4(auth_flow_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_concurrent_authentication_flows_l4(auth_flow_l4_suite):
     """Test concurrent authentication flows in staging."""
     # Execute multiple concurrent OAuth flows
@@ -1033,6 +1046,7 @@ async def test_concurrent_authentication_flows_l4(auth_flow_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_auth_flow_performance_metrics_l4(auth_flow_l4_suite):
     """Test authentication flow performance meets business requirements in staging."""
     # Execute multiple authentication flows for performance testing

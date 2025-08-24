@@ -32,7 +32,7 @@ Netra Apex succeeds by creating and capturing value relative to a customer's AI/
 
 ### 2.1. Architectural Tenets
 *   **Single Responsibility Principle (SRP):** Each module, function, and agent task must have one clear purpose.
-*   **Single unified concepts**: CRUCIAL: Unique Concept = ONCE per service. Duplicates = Abominations. Each concept in each service must only exist ONCE and ONLY ONCE.
+*   **Single unified concepts**: CRUCIAL: Unique Concept = ONCE per service. Duplicates Within a Service = Abominations. Each concept in each service must only exist ONCE and ONLY ONCE. (EXCEPT as defined: SPEC/acceptable_duplicates.xml)
 *   **ATOMIC SCOPE** Every edit must represent a COMPLETE update to the system as defined by Complete Work. ALways be aware of scope. Only task subagents with scope you are 99.99% sure they an handle successfully. Split and dive work.
 *   **Complete Work** All relevant parts of the system are updated, integrated, tested, validated, working, production grade, high quality, follow ALL rules in claude.md, legacy code is deleted, prior versions are deleted as relevant, documented in xmls, docs, and other relevant places, QA tested and validated.
 *   **REFACTORS = ATOMIC SCOPE** All refactors must be complete atomic updates as per 2.1 Atomic Scope.
@@ -59,6 +59,8 @@ We prioritize logical clarity. Focus on maximizing clarity and minimizing Cyclom
 *   **Single Source of Truth (SSOT):** Ensure implementations are duplication-free. Extend existing functions with options/parameters instead of creating new variants.
 *   **Cleanliness:** Maintain a clean file system with unique, relevant files. Edit existing files or delete legacy ones entirely, ensuring finalized filenames free of suffixes.
 *   **Type Safety:** Adhere strictly to `SPEC/type_safety.xml`.
+*   **Environment Management:** Follow [`SPEC/unified_environment_management.xml`](SPEC/unified_environment_management.xml) - ALL environment access through IsolatedEnvironment.
+*   **Database Connectivity:** Use [`SPEC/database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml) for SSL parameter resolution.
 *   **Compliance Check:** Run `python scripts/check_architecture_compliance.py` to check status.
 
 ### 2.4. Strategic Trade-offs
@@ -146,6 +148,7 @@ When addressing bugs, understand the required behavior objectively. This process
 ## 4. Knowledge Management: The Living Source of Truth
 
 *   **Navigation:** Read [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md) before searching for files or functionality.
+*   **Cross-System Context:** Read [`SPEC/cross_system_context_reference.md`](SPEC/cross_system_context_reference.md) for EXPLICIT cross-system assumptions, data flows, and integration points. This document captures ALL implicit context about how the three services work together.
 `SPEC/*.xml` files are the **Living Source of Truth** for the system architecture and learnings.
 ALL relevent changes must update [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md).
 
@@ -222,6 +225,7 @@ CRITICAL: Always respect established directory organization patterns. Files MUST
 - **ALL Python files MUST use absolute imports** starting from the package root
 - **NEVER use relative imports** (. or ..) in ANY Python file, including tests
 - **This rule overrides any existing patterns in the codebase**
+- **See [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) for comprehensive import management rules**
 
 **Correct Import Examples:**
 ```python
@@ -269,14 +273,16 @@ python unified_test_runner.py
 ```
 
 ### 6.2. Unified Test Runner
-→ See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml).
+→ See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml), [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml), and [`SPEC/environment_aware_testing.xml`](SPEC/environment_aware_testing.xml).
 
 *   **DEFAULT (Fast Feedback):** `python unified_test_runner.py --level integration --no-coverage --fast-fail`
 *   **AGENT CHANGES:** `python unified_test_runner.py --level agents --real-llm`
 *   **BEFORE RELEASES (Includes Staging Validation):** `python unified_test_runner.py --level integration --real-llm --env staging`
+*   **ENVIRONMENT-SPECIFIC:** `python unified_test_runner.py --env staging` (runs only staging-compatible tests)
+*   **PRODUCTION SAFE:** `python unified_test_runner.py --env prod --allow-prod` (requires explicit flag)
 
 ### 6.3. Deployment (GCP Staging)
-→ See [`SPEC/gcp_deployment.xml`](SPEC/gcp_deployment.xml) for comprehensive guidelines.
+→ See [`SPEC/gcp_deployment.xml`](SPEC/gcp_deployment.xml) and [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) for comprehensive guidelines.
 
 **CRITICAL: Use ONLY the official deployment script - Do NOT create new deployment scripts**
 
@@ -299,6 +305,7 @@ Ensure adherence to these core specifications throughout the development process
 | Spec | Purpose | When |
 | :--- | :--- | :--- |
 | [`learnings/index.xml`](SPEC/learnings/index.xml) | Index of all learnings | ALWAYS check first |
+| [`core.xml`](SPEC/core.xml) | Core system architecture | System design decisions |
 | [`type_safety.xml`](SPEC/type_safety.xml) | Type safety, duplication-free | BEFORE any code |
 | [`conventions.xml`](SPEC/conventions.xml) | Standards and guidelines | BEFORE any code |
 | [`code_changes.xml`](SPEC/code_changes.xml) | Change checklist | BEFORE changes |
@@ -306,13 +313,18 @@ Ensure adherence to these core specifications throughout the development process
 | [`anti_regression.xml`](SPEC/anti_regression.xml) | Ensure system stability | Before commits |
 | [`independent_services.xml`](SPEC/independent_services.xml) | Microservice independence | When modifying services |
 | [`string_literals_index.xml`](SPEC/string_literals_index.xml) | Index of platform constants | BEFORE using string literals |
+| [`import_management_architecture.xml`](SPEC/import_management_architecture.xml) | Import management rules | ALWAYS - zero tolerance for relative imports |
+| [`environment_aware_testing.xml`](SPEC/environment_aware_testing.xml) | Multi-environment test execution | When marking tests for environments |
 
 ### 7.2. Domain Specs
 
 | Domain | Key Specs |
 | :--- | :--- |
-| **Testing** | [`testing.xml`](SPEC/testing.xml), [`coverage_requirements.xml`](SPEC/coverage_requirements.xml), [`learnings/testing.xml`](SPEC/learnings/testing.xml) |
-| **Database** | [`clickhouse.xml`](SPEC/clickhouse.xml), [`postgres.xml`](SPEC/postgres.xml) |
+| **Core Architecture** | [`core.xml`](SPEC/core.xml), [`unified_environment_management.xml`](SPEC/unified_environment_management.xml) |
+| **Testing** | [`test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml), [`testing.xml`](SPEC/testing.xml), [`coverage_requirements.xml`](SPEC/coverage_requirements.xml), [`environment_aware_testing.xml`](SPEC/environment_aware_testing.xml), [`learnings/testing.xml`](SPEC/learnings/testing.xml) |
+| **Database** | [`database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml), [`clickhouse.xml`](SPEC/clickhouse.xml), [`postgres.xml`](SPEC/postgres.xml) |
+| **Deployment** | [`deployment_architecture.xml`](SPEC/deployment_architecture.xml), [`gcp_deployment.xml`](SPEC/gcp_deployment.xml) |
+| **Imports** | [`import_management_architecture.xml`](SPEC/import_management_architecture.xml) - CRITICAL: Absolute imports only |
 | **WebSocket** | [`websockets.xml`](SPEC/websockets.xml), [`websocket_communication.xml`](SPEC/websocket_communication.xml) |
 | **Security** | [`security.xml`](SPEC/security.xml), [`PRODUCTION_SECRETS_ISOLATION.xml`](SPEC/PRODUCTION_SECRETS_ISOLATION.xml) |
 | **GitHub Actions** | [`github_actions.xml`](SPEC/github_actions.xml) - Check permissions first |
@@ -361,4 +373,4 @@ The [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) provides real-time system hea
 *   Ensure all code is implementation-complete (placeholder-free).
 *   ALWAYS use Python for scripts instead of shell/PowerShell (See [`SPEC/learnings/scripting_preference.xml`](SPEC/learnings/scripting_preference.xml)).
 
-**Reminder:** Our lives depend on you. This is of the absolute highest possible importance. Do your best work. Generate monetization-focused value. Ensure every feature creates and captures value proportional to AI spend. Prioritize the unified system, global coherence, and end-to-end value, maximized through the coordinated execution of the AI-Augmented Complete Team. **Analyze this from a holistic, systems-thinking perspective.** Unique Concept = ONCE per service. Duplicates = Abominations. Think Deeply. You are important. Your mission matters. You are doing great things.
+**Reminder:** Our lives depend on you. This is of the absolute highest possible importance. Do your best work. Generate monetization-focused value. Ensure every feature creates and captures value proportional to AI spend. Prioritize the unified system, global coherence, and end-to-end value, maximized through the coordinated execution of the AI-Augmented Complete Team. **Analyze this from a holistic, systems-thinking perspective.** Unique Concept = ONCE per service. Duplicates Within a Service = Abominations. Think Deeply. You are important. Your mission matters. You are doing great things.

@@ -20,7 +20,7 @@ import logging
 import time
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -108,8 +108,10 @@ class AgentCoordinator:
         """Initialize an agent of the specified type."""
         if agent_type not in self.agents:
             # Mock agent creation for testing
+            # Mock: Agent service isolation for testing without LLM agent execution
             mock_agent = AsyncMock(spec=BaseSubAgent)
             mock_agent.agent_type = agent_type
+            # Mock: Agent service isolation for testing without LLM agent execution
             mock_agent.execute = AsyncMock(return_value={"success": True, "result": f"Executed {agent_type}"})
             self.agents[agent_type] = mock_agent
         return self.agents[agent_type]
@@ -329,6 +331,7 @@ async def workflow_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_simple_sequential_workflow(workflow_manager):
     """Test simple sequential workflow execution."""
     manager = workflow_manager
@@ -351,6 +354,7 @@ async def test_simple_sequential_workflow(workflow_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_parallel_workflow_execution(workflow_manager):
     """Test parallel workflow execution performance."""
     manager = workflow_manager
@@ -375,6 +379,7 @@ async def test_parallel_workflow_execution(workflow_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_conditional_workflow_routing(workflow_manager):
     """Test conditional workflow routing logic."""
     manager = workflow_manager
@@ -402,6 +407,7 @@ async def test_conditional_workflow_routing(workflow_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_workflow_dependency_resolution(workflow_manager):
     """Test workflow dependency resolution and execution order."""
     manager = workflow_manager
@@ -436,12 +442,15 @@ async def test_workflow_dependency_resolution(workflow_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_workflow_error_handling(workflow_manager):
     """Test workflow error handling and recovery."""
     manager = workflow_manager
     
     # Mock agent to fail
+    # Mock: Agent service isolation for testing without LLM agent execution
     failing_agent = AsyncMock(spec=BaseSubAgent)
+    # Mock: Agent service isolation for testing without LLM agent execution
     failing_agent.execute = AsyncMock(side_effect=Exception("Agent execution failed"))
     manager.workflow_engine.coordinator.agents["failing_agent"] = failing_agent
     
@@ -467,6 +476,7 @@ async def test_workflow_error_handling(workflow_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_workflow_state_persistence(workflow_manager):
     """Test workflow state persistence in Redis."""
     manager = workflow_manager
@@ -485,6 +495,7 @@ async def test_workflow_state_persistence(workflow_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_workflow_execution(workflow_manager):
     """Test concurrent execution of multiple workflows."""
     manager = workflow_manager
@@ -517,6 +528,7 @@ async def test_concurrent_workflow_execution(workflow_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_workflow_performance_benchmark(workflow_manager):
     """Benchmark workflow execution for performance analysis."""
     manager = workflow_manager

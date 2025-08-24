@@ -47,17 +47,25 @@ class TestFirstUserJourney:
 
     async def _mock_email_verification_service(self) -> MagicMock:
         """Mock email verification service."""
+        # Mock: Generic component isolation for controlled unit testing
         mock = MagicMock()
+        # Mock: Async component isolation for testing without real async operations
         mock.send_verification = AsyncMock(return_value=True)
+        # Mock: Async component isolation for testing without real async operations
         mock.verify_token = AsyncMock(return_value=True)
         return mock
 
     async def _mock_user_service_complete(self) -> MagicMock:
         """Mock complete user service with all required methods."""
+        # Mock: Generic component isolation for controlled unit testing
         mock = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock.create_user = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock.get_by_email = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock.update_verification_status = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock.get_user_plan = AsyncMock()
         return mock
 
@@ -94,12 +102,14 @@ class TestFirstUserJourney:
         user_data = self._create_test_user_data()
         user_id = str(uuid.uuid4())
         
-        with patch('app.services.user_service.CRUDUser') as mock_user_service:
+        # Mock: Component isolation for testing without external dependencies
+        with patch('netra_backend.app.services.user_service.CRUDUser') as mock_user_service:
             created_user = User(id=user_id, email=user_data["email"], name=user_data["name"], is_active=True)
             mock_user_service.return_value.create_user.return_value = created_user
             
             test_message = await self._simulate_websocket_message(user_id)
             response = {"type": "agent_response", "content": "Welcome to Netra Apex!", "user_id": user_id}
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_agent_service.handle_websocket_message = AsyncMock(return_value=response)
             
             result = await mock_agent_service.handle_websocket_message(test_message)
@@ -110,8 +120,11 @@ class TestFirstUserJourney:
         user_data = self._create_test_user_data()
         verification_token = f"verify_{uuid.uuid4().hex}"
         
-        with patch('app.services.email_service.EmailService') as mock_email_service:
+        # Mock: Component isolation for testing without external dependencies
+        with patch('netra_backend.app.services.email_service.EmailService') as mock_email_service:
+            # Mock: Async component isolation for testing without real async operations
             mock_email_service.return_value.send_verification = AsyncMock(return_value=True)
+            # Mock: Async component isolation for testing without real async operations
             mock_email_service.return_value.verify_token = AsyncMock(return_value=True)
             
             email_sent = await mock_email_service.return_value.send_verification(user_data["email"], verification_token)
@@ -123,8 +136,10 @@ class TestFirstUserJourney:
         user_data = self._create_test_user_data()
         user_id = str(uuid.uuid4())
         
-        with patch('app.clients.auth_client.auth_client') as mock_auth_client, \
-             patch('app.db.repositories.user_repository') as mock_backend_repo:
+        # Mock: Authentication service isolation for testing without real auth flows
+        with patch('netra_backend.app.clients.auth_client.auth_client') as mock_auth_client, \
+             # Mock: Component isolation for testing without external dependencies
+             patch('netra_backend.app.db.repositories.user_repository') as mock_backend_repo:
             
             mock_auth_client.create_user.return_value = {"id": user_id, **user_data}
             mock_backend_repo.create.return_value = User(id=user_id, **user_data)
@@ -138,7 +153,8 @@ class TestFirstUserJourney:
         user_id = str(uuid.uuid4())
         free_plan = self._create_free_user_plan(user_id)
         
-        with patch('app.services.user_service.CRUDUser') as mock_user_service:
+        # Mock: Component isolation for testing without external dependencies
+        with patch('netra_backend.app.services.user_service.CRUDUser') as mock_user_service:
             mock_user_service.return_value.get_user_plan.return_value = free_plan
             plan = await mock_user_service.return_value.get_user_plan(user_id)
             assert await self._check_free_tier_limits(plan)
@@ -164,10 +180,12 @@ class TestFirstUserJourney:
         """Test WebSocket auth. BVJ: Real-time features ($5K MRR value)"""
         user_id = str(uuid.uuid4())
         auth_token = create_test_token(user_id)
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock()
         mock_websocket.headers = {"authorization": f"Bearer {auth_token}"}
         
-        with patch('app.auth_dependencies.verify_token') as mock_verify:
+        # Mock: Component isolation for testing without external dependencies
+        with patch('netra_backend.app.auth_dependencies.verify_token') as mock_verify:
             mock_verify.return_value = {"user_id": user_id, "verified": True}
             mock_websocket_manager.connect.return_value = True
             
@@ -189,6 +207,7 @@ class TestFirstUserJourney:
             "type": "agent_response", "content": "Welcome to Netra Apex! I optimize AI workloads.",
             "user_id": user_id, "response_time_ms": 1500, "confidence_score": 0.95
         }
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_agent_service.handle_websocket_message = AsyncMock(return_value=expected_response)
         
         response = await mock_agent_service.handle_websocket_message(first_message)

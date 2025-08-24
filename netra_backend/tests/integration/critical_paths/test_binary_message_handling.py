@@ -11,7 +11,7 @@ L2 Test: Real internal components with mocked external services.
 Performance target: <2s upload time for 5MB files, <5% corruption rate.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -23,13 +23,13 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class BinaryMessageProcessor:
@@ -379,6 +379,7 @@ class TestBinaryMessageHandling:
 
         """Create WebSocket manager with mocked external services."""
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.ws_manager.redis_manager') as mock_redis:
 
             mock_redis.enabled = False  # Use in-memory storage
@@ -446,6 +447,7 @@ class TestBinaryMessageHandling:
 
             return data[:size_kb * 1024], "text/plain", "test_file.txt"
     
+    @pytest.mark.asyncio
     async def test_file_upload_validation(self, binary_processor):
 
         """Test file upload validation logic."""
@@ -483,6 +485,7 @@ class TestBinaryMessageHandling:
 
         assert any("Invalid filename" in error for error in invalid_filename_validation["errors"])
     
+    @pytest.mark.asyncio
     async def test_chunked_upload_creation(self, binary_processor):
 
         """Test creation of upload chunks."""
@@ -521,6 +524,7 @@ class TestBinaryMessageHandling:
 
         assert reconstructed == test_data
     
+    @pytest.mark.asyncio
     async def test_progress_tracking_functionality(self, progress_tracker):
 
         """Test upload progress tracking."""
@@ -575,6 +579,7 @@ class TestBinaryMessageHandling:
 
         assert "completed_at" in final_status
     
+    @pytest.mark.asyncio
     async def test_chunk_corruption_detection(self, binary_processor):
 
         """Test detection of corrupted chunks."""
@@ -603,6 +608,7 @@ class TestBinaryMessageHandling:
 
             binary_processor.reconstruct_from_chunks(chunks)
     
+    @pytest.mark.asyncio
     async def test_resume_capability(self, binary_processor, progress_tracker):
 
         """Test upload resume capability."""
@@ -647,13 +653,16 @@ class TestBinaryMessageHandling:
     
     @mock_justified("L2: Binary message handling with real internal components")
 
+    @pytest.mark.asyncio
     async def test_websocket_binary_transmission(self, ws_manager, binary_processor, test_user):
 
         """Test binary message transmission through WebSocket."""
         # Mock WebSocket connection
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send = AsyncMock()
         
         # Connect user
@@ -718,6 +727,7 @@ class TestBinaryMessageHandling:
 
         await ws_manager.disconnect_user(test_user.id, mock_websocket)
     
+    @pytest.mark.asyncio
     async def test_large_file_performance(self, binary_processor, progress_tracker):
 
         """Test performance with large file uploads."""
@@ -771,6 +781,7 @@ class TestBinaryMessageHandling:
 
         assert final_status["status"] == "completed"
     
+    @pytest.mark.asyncio
     async def test_concurrent_uploads(self, binary_processor, progress_tracker):
 
         """Test handling of concurrent file uploads."""

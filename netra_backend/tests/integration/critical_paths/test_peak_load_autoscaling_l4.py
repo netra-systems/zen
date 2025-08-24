@@ -31,7 +31,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -1022,6 +1022,7 @@ async def peak_load_autoscaling_test():
 @pytest.mark.L4
 @pytest.mark.staging
 @pytest.mark.slow
+@pytest.mark.asyncio
 async def test_peak_load_autoscaling_10x_traffic_spike(peak_load_autoscaling_test):
     """Test auto-scaling response to 10x traffic spike."""
     test_metrics = await peak_load_autoscaling_test.run_complete_critical_path_test()
@@ -1045,6 +1046,7 @@ async def test_peak_load_autoscaling_10x_traffic_spike(peak_load_autoscaling_tes
 @pytest.mark.L4
 @pytest.mark.staging
 @pytest.mark.slow
+@pytest.mark.asyncio
 async def test_horizontal_scaling_effectiveness(peak_load_autoscaling_test):
     """Test effectiveness of horizontal scaling decisions."""
     # Initialize test environment
@@ -1071,6 +1073,7 @@ async def test_horizontal_scaling_effectiveness(peak_load_autoscaling_test):
 @pytest.mark.L4
 @pytest.mark.staging
 @pytest.mark.slow
+@pytest.mark.asyncio
 async def test_service_discovery_updates_during_scaling(peak_load_autoscaling_test):
     """Test service discovery updates during auto-scaling operations."""
     # Initialize test environment
@@ -1095,6 +1098,7 @@ async def test_service_discovery_updates_during_scaling(peak_load_autoscaling_te
 @pytest.mark.L4
 @pytest.mark.staging
 @pytest.mark.slow
+@pytest.mark.asyncio
 async def test_cost_optimization_scale_down(peak_load_autoscaling_test):
     """Test cost optimization through intelligent scale-down."""
     # Initialize test environment
@@ -1126,6 +1130,7 @@ async def test_cost_optimization_scale_down(peak_load_autoscaling_test):
 @pytest.mark.L4
 @pytest.mark.staging
 @pytest.mark.slow
+@pytest.mark.asyncio
 async def test_performance_sla_maintenance_during_scaling(peak_load_autoscaling_test):
     """Test that performance SLAs are maintained during scaling operations."""
     # Initialize test environment

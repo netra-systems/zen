@@ -24,7 +24,6 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
 # Import centralized GCP authentication
-sys.path.insert(0, str(Path(__file__).parent))
 from gcp_auth_config import GCPAuthConfig
 
 # Fix Unicode encoding issues on Windows
@@ -78,7 +77,7 @@ class GCPDeployer:
                 name="backend",
                 directory="netra_backend",
                 port=8888,
-                dockerfile="Dockerfile.backend",
+                dockerfile="deployment/docker/Dockerfile.backend",
                 cloud_run_name="netra-backend-staging",
                 memory="1Gi",
                 cpu="2",
@@ -88,14 +87,14 @@ class GCPDeployer:
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                     "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
-                    "FRONTEND_URL": "https://frontend.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://app.staging.netrasystems.ai",
                 }
             ),
             ServiceConfig(
                 name="auth",
                 directory="auth_service",
                 port=8080,
-                dockerfile="Dockerfile.auth",
+                dockerfile="deployment/docker/Dockerfile.auth",
                 cloud_run_name="netra-auth-service",
                 memory="512Mi",
                 cpu="1",
@@ -104,21 +103,22 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "FRONTEND_URL": "https://frontend.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://app.staging.netrasystems.ai",
                 }
             ),
             ServiceConfig(
                 name="frontend",
                 directory="frontend",
                 port=3000,
-                dockerfile="Dockerfile.frontend",
+                dockerfile="deployment/docker/Dockerfile.frontend",
                 cloud_run_name="netra-frontend-staging",
-                memory="8Gi",
+                memory="2Gi",
                 cpu="1",
-                min_instances=0,
+                min_instances=1,
                 max_instances=10,
                 environment_vars={
                     "NODE_ENV": "production",
+                    "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",
                 }
             )
         ]
@@ -182,9 +182,42 @@ class GCPDeployer:
         print("🔍 Using centralized authentication configuration...")
         return GCPAuthConfig.ensure_authentication()
     
+    def validate_deployment_configuration(self) -> bool:
+        """Validate deployment configuration and environment variables."""
+        print("\n🔍 Validating deployment configuration...")
+        
+        # Required environment variables for staging deployment
+        required_env_vars = [
+            "GOOGLE_CLIENT_ID",
+            "GOOGLE_CLIENT_SECRET", 
+            "GEMINI_API_KEY"
+        ]
+        
+        missing_vars = []
+        for var in required_env_vars:
+            if not os.getenv(var):
+                missing_vars.append(var)
+        
+        if missing_vars:
+            print(f"  ❌ Missing required environment variables: {missing_vars}")
+            print("     Set these variables before deploying to staging")
+            return False
+        
+        # Validate database URL format (prevent localhost in staging)
+        database_url = os.getenv("DATABASE_URL", "")
+        if "localhost" in database_url:
+            print("  ⚠️ DATABASE_URL contains localhost - will use staging default")
+        
+        print("  ✅ Deployment configuration valid")
+        return True
+    
     def run_pre_deployment_checks(self) -> bool:
         """Run pre-deployment checks to ensure code quality."""
         print("\n🔍 Running pre-deployment checks...")
+        
+        # First validate configuration
+        if not self.validate_deployment_configuration():
+            return False
         
         checks = [
             {
@@ -553,14 +586,14 @@ CMD ["npm", "start"]
         if service.name == "backend":
             # Backend needs connections to databases and all required secrets
             cmd.extend([
-                "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=session-secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_DEFAULT_PASSWORD=clickhouse-default-password-staging:latest"
+                "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
+                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=session-secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_DEFAULT_PASSWORD=clickhouse-default-password-staging:latest,REDIS_URL=redis-url-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
             ])
         elif service.name == "auth":
             # Auth service needs database, JWT secrets, OAuth credentials, and enhanced security
             cmd.extend([
-                "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest"
+                "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
+                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,JWT_SECRET=jwt-secret-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest"
             ])
         
         try:
@@ -708,20 +741,32 @@ CMD ["npm", "start"]
         # NEVER store actual secrets in source code
         import os
         
+        # CRITICAL FIX: JWT secrets MUST be identical between services
+        jwt_secret_value = "your-secure-jwt-secret-key-staging-64-chars-minimum-for-security"
+        
         secrets = {
             # Note: Using standard psycopg2 format with sslmode=require
             # DatabaseManager will automatically convert to ssl=require for asyncpg
             "database-url-staging": "postgresql://netra_user:REPLACE_WITH_REAL_PASSWORD@34.132.142.103:5432/netra?sslmode=require",
-            "jwt-secret-key-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",
+            "jwt-secret-key-staging": jwt_secret_value,  # Backend uses JWT_SECRET_KEY
             "session-secret-key-staging": "your-secure-session-secret-key-staging-32-chars-minimum", 
             "openai-api-key-staging": "sk-REPLACE_WITH_REAL_OPENAI_KEY",
             "fernet-key-staging": "REPLACE_WITH_REAL_FERNET_KEY_BASE64_32_BYTES",
-            "jwt-secret-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",  # Auth service uses this name
+            "jwt-secret-staging": jwt_secret_value,  # Auth service uses JWT_SECRET - MUST BE SAME VALUE!
             "google-client-id-staging": os.getenv("GOOGLE_CLIENT_ID", "REPLACE_WITH_REAL_GOOGLE_CLIENT_ID"),
             "google-client-secret-staging": os.getenv("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_REAL_GOOGLE_CLIENT_SECRET"),
             # Enhanced JWT security for auth service
             "service-secret-staging": "REPLACE_WITH_SECURE_32_BYTE_HEX_STRING",
-            "service-id-staging": f"netra-auth-staging-{int(time.time())}"
+            "service-id-staging": f"netra-auth-staging-{int(time.time())}",
+            # CRITICAL: Missing secrets that were causing deployment failures
+            "redis-url-staging": "redis://default:REPLACE_WITH_REDIS_PASSWORD@10.128.0.3:6379/0",
+            "clickhouse-host-staging": "clickhouse.staging.netrasystems.ai",
+            "clickhouse-port-staging": "8123",
+            "clickhouse-default-password-staging": "REPLACE_WITH_CLICKHOUSE_PASSWORD",
+            # Additional required secrets for comprehensive staging support
+            "gemini-api-key-staging": os.getenv("GEMINI_API_KEY", "REPLACE_WITH_REAL_GEMINI_KEY"),
+            "redis-password-staging": "REPLACE_WITH_REDIS_PASSWORD",
+            "anthropic-api-key-staging": os.getenv("ANTHROPIC_API_KEY", "REPLACE_WITH_REAL_ANTHROPIC_KEY")
         }
         
         for name, value in secrets.items():

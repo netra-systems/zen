@@ -1,3 +1,4 @@
+from netra_backend.app.core.configuration.base import get_unified_config
 """
 RED TEAM TESTS 31-35: Performance Bottlenecks and Resource Management
 
@@ -42,11 +43,11 @@ from sqlalchemy.orm import sessionmaker
 # Real service imports - NO MOCKS
 from netra_backend.app.main import app
 from netra_backend.app.core.config import get_unified_config
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.database import get_db_session
 from netra_backend.app.services.agent_service import AgentService
 
 # Mock models for testing
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 User = Mock
 Thread = Mock
 AgentRun = Mock
@@ -468,7 +469,7 @@ class TestPerformanceBottlenecks:
             websocket_connections = []
             connection_results = []
             
-            def create_websocket_connection(connection_id: int):
+            async def create_websocket_connection(connection_id: int):
                 """Create a WebSocket connection for testing."""
                 try:
                     # FAILURE EXPECTED HERE - connection limits may not be enforced
@@ -579,8 +580,11 @@ class TestPerformanceBottlenecks:
                 cache_service = CacheService()
             except Exception:
                 # Mock cache service for testing if not available
+                # Mock: Generic component isolation for controlled unit testing
                 cache_service = Mock()
+                # Mock: Component isolation for controlled unit testing
                 cache_service.get = Mock(return_value=None)
+                # Mock: Generic component isolation for controlled unit testing
                 cache_service.set = Mock()
                 cache_service.delete = Mock()
                 cache_service.clear = Mock()

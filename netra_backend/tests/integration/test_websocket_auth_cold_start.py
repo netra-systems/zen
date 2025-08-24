@@ -27,7 +27,7 @@ import os
 import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -46,15 +46,20 @@ from netra_backend.app.core.exceptions_websocket import WebSocketAuthenticationE
 @pytest.fixture
 def mock_postgres():
     """Mock PostgreSQL for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_db = MagicMock()
+    # Mock: PostgreSQL database isolation for testing without real database connections
     mock_db.get_connection_url = MagicMock(return_value="postgresql://test_user:test_password@localhost/test_db")
     return mock_db
 
 @pytest.fixture
 def mock_redis():
     """Mock Redis for testing."""
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_redis = MagicMock()
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_redis.get_container_host_ip = MagicMock(return_value="localhost")
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_redis.get_exposed_port = MagicMock(return_value=6379)
     return mock_redis
 
@@ -70,6 +75,7 @@ async def auth_service_config(mock_postgres, mock_redis):
     yield auth_config
 
 @pytest.fixture
+@pytest.mark.asyncio
 async def test_jwt_token(auth_service_config):
     """Generate a valid JWT token for testing."""
     payload = {
@@ -91,7 +97,7 @@ async def expired_jwt_token(auth_service_config):
         "exp": datetime.utcnow() - timedelta(hours=1)
     }
     secret = auth_service_config["jwt_secret"]
-    return jwt.encode(payload, secret, algorithm="HS256")
+    yield jwt.encode(payload, secret, algorithm="HS256")
 
 class TestWebSocketAuthColdStartL3:
     """L3 Integration tests for WebSocket authentication during cold start."""
@@ -99,6 +105,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_with_valid_auth_token(
         self, 
         auth_service_config,
@@ -143,6 +150,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_with_expired_token(
         self,
         auth_service_config,
@@ -163,6 +171,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_with_token_refresh(
         self,
         auth_service_config,
@@ -208,6 +217,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_concurrent_auth_requests(
         self,
         auth_service_config,
@@ -252,6 +262,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="Requires actual container control")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_with_database_unavailable(
         self,
         auth_service_config,
@@ -282,6 +293,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_role_based_access(
         self,
         auth_service_config,
@@ -342,6 +354,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_session_persistence(
         self,
         auth_service_config,
@@ -379,6 +392,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_rate_limiting(
         self,
         auth_service_config,
@@ -419,6 +433,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="MFA not yet implemented")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_multi_factor(
         self,
         auth_service_config,
@@ -464,6 +479,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_cross_origin_validation(
         self,
         auth_service_config,
@@ -502,6 +518,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_token_rotation(
         self,
         auth_service_config,
@@ -544,6 +561,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_service_degradation(
         self,
         auth_service_config,
@@ -556,6 +574,7 @@ class TestWebSocketAuthColdStartL3:
         headers = {"Authorization": f"Bearer {test_jwt_token}"}
         
         # Mock auth service degradation
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             # Simulate slow response from auth service
             async def slow_validation(*args, **kwargs):
@@ -580,6 +599,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_permission_escalation_prevention(
         self,
         auth_service_config,
@@ -620,6 +640,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_geographic_restrictions(
         self,
         auth_service_config,
@@ -669,6 +690,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_device_fingerprinting(
         self,
         auth_service_config,
@@ -720,6 +742,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_adaptive_security(
         self,
         auth_service_config,
@@ -776,6 +799,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_session_hijacking_prevention(
         self,
         auth_service_config,
@@ -819,6 +843,7 @@ class TestWebSocketAuthColdStartL3:
     @pytest.mark.integration
     @pytest.mark.l3
     @pytest.mark.skip(reason="WebSocket endpoint requires full service setup")
+    @pytest.mark.asyncio
     async def test_cold_start_auth_token_binding_to_tls(
         self,
         auth_service_config,

@@ -19,13 +19,13 @@ from pathlib import Path
 import os
 from pathlib import Path
 from typing import Dict, Optional, Set
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# from scripts.dev_launcher_google_secret_manager import  # Should be mocked in tests GoogleSecretManager
-# from scripts.dev_launcher_secret_config import  # Should be mocked in tests SecretConfig
-# from scripts.dev_launcher_secret_loader import  # Should be mocked in tests SecretLoader
+# Removed broken import statement
+# Removed broken import statement
+# Removed broken import statement
 from test_framework.mock_utils import mock_justified
 
 class TestStagingSecretsManagerIntegration:
@@ -53,7 +53,9 @@ class TestStagingSecretsManagerIntegration:
     @pytest.fixture
     def mock_gsm_client(self):
         """Mock Google Secret Manager client."""
+        # Mock: Generic component isolation for controlled unit testing
         client = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         client.access_secret_version = Mock()
         return client
     
@@ -70,6 +72,7 @@ class TestStagingSecretsManagerIntegration:
     @mock_justified("Google Secret Manager is external service not available in test environment")
     def test_google_secret_manager_client_initialization(self, staging_project_id, mock_gsm_client):
         """Test Google Secret Manager client initializes correctly for staging."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('google.cloud.secretmanager.SecretManagerServiceClient') as mock_client_class:
             mock_client_class.return_value = mock_gsm_client
             
@@ -87,10 +90,12 @@ class TestStagingSecretsManagerIntegration:
     def test_secret_retrieval_from_google_secret_manager(self, staging_project_id, mock_gsm_client):
         """Test retrieving secrets from Google Secret Manager."""
         # Mock secret response
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.payload.data = b'test-secret-value'
         mock_gsm_client.access_secret_version.return_value = mock_response
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('google.cloud.secretmanager.SecretManagerServiceClient') as mock_client_class:
             mock_client_class.return_value = mock_gsm_client
             
@@ -120,6 +125,7 @@ class TestStagingSecretsManagerIntegration:
                 
                 # Mock local secret manager returning partial secrets
                 with patch.object(secret_loader.local_secret_manager, 'load_secrets_with_fallback') as mock_local:
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_validation = Mock()
                     mock_validation.is_valid = False
                     mock_validation.missing_keys = {"DATABASE_URL", "SECRET_KEY"}
@@ -137,15 +143,18 @@ class TestStagingSecretsManagerIntegration:
     def test_secret_rotation_without_disruption(self, staging_project_id, mock_gsm_client):
         """Test secret rotation doesn't disrupt running services."""
         # Mock initial secret value
+        # Mock: Generic component isolation for controlled unit testing
         initial_response = Mock()
         initial_response.payload.data = b'initial-secret-value'
         
         # Mock rotated secret value  
+        # Mock: Generic component isolation for controlled unit testing
         rotated_response = Mock()
         rotated_response.payload.data = b'rotated-secret-value'
         
         mock_gsm_client.access_secret_version.side_effect = [initial_response, rotated_response]
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('google.cloud.secretmanager.SecretManagerServiceClient') as mock_client_class:
             mock_client_class.return_value = mock_gsm_client
             
@@ -175,6 +184,7 @@ class TestStagingSecretsManagerIntegration:
             # Mock cache operations
             with patch.object(secret_loader.secret_cache, 'validate_cached_secrets') as mock_validate:
                 with patch.object(secret_loader.secret_cache, 'get_cached_secrets') as mock_get:
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_validate.return_value = (True, Mock())
                     mock_get.return_value = staging_env
                     
@@ -193,6 +203,7 @@ class TestStagingSecretsManagerIntegration:
         from google.cloud.exceptions import NotFound
         mock_gsm_client.access_secret_version.side_effect = NotFound("Secret not found")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('google.cloud.secretmanager.SecretManagerServiceClient') as mock_client_class:
             mock_client_class.return_value = mock_gsm_client
             
@@ -206,6 +217,7 @@ class TestStagingSecretsManagerIntegration:
             assert secrets == {}
     
     @mock_justified("Environment variables are external system state not available in test")
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_secret_validation_against_staging_requirements(self, secret_loader, staging_secrets):
         """Test secret validation against staging environment requirements."""
         # Test with minimal valid staging secrets
@@ -219,6 +231,7 @@ class TestStagingSecretsManagerIntegration:
         with patch.dict(os.environ, valid_staging_env, clear=True):
             # Mock validation to focus on secret requirements
             with patch.object(secret_loader.local_secret_manager, 'load_secrets_with_fallback') as mock_local:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_validation = Mock()
                 mock_validation.is_valid = True
                 mock_validation.missing_keys = set()
@@ -242,6 +255,7 @@ class TestStagingSecretsManagerIntegration:
             }
             
             with patch.object(secret_loader.local_secret_manager, 'load_secrets_with_fallback') as mock_local:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_validation = Mock()
                 mock_validation.is_valid = True
                 mock_validation.missing_keys = set()
@@ -278,6 +292,7 @@ class TestStagingSecretsManagerIntegration:
             }
             
             with patch.object(secret_loader.local_secret_manager, 'load_secrets_with_fallback') as mock_local:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_validation = Mock()
                 mock_validation.is_valid = True
                 mock_validation.missing_keys = set()

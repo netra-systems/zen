@@ -91,8 +91,11 @@ class TestPathValidationIntegration(unittest.TestCase):
             config = LauncherConfig(project_root=tmppath)
             
             # Create mocks for required dependencies
+            # Mock: Generic component isolation for controlled unit testing
             mock_services_config = MagicMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_log_manager = MagicMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_service_discovery = MagicMock()
             
             # Create backend starter with mocks

@@ -3,7 +3,7 @@
  * Enhanced with secure URL handling and centralized auth with token refresh
  */
 
-import { secureApiConfig } from '@/lib/secure-api-config';
+import { unifiedApiConfig } from '@/lib/unified-api-config';
 import { authInterceptor } from '@/lib/auth-interceptor';
 import { logger } from '@/utils/debug-logger';
 
@@ -25,12 +25,13 @@ class ApiClientWrapper {
   private baseURL: string;
   private isConnected: boolean = false;
   private connectionCheckPromise: Promise<boolean> | null = null;
+  private environment: string;
   
   constructor() {
-    // Use window.location.origin for browser, full backend URL for SSR
-    this.baseURL = typeof window !== 'undefined' 
-      ? window.location.origin 
-      : secureApiConfig.apiUrl;
+    // Use unified configuration for clear environment handling
+    this.baseURL = unifiedApiConfig.urls.api;
+    this.environment = unifiedApiConfig.environment;
+    logger.info(`API Client initialized for ${this.environment} environment`, { baseURL: this.baseURL });
     this.checkConnection();
   }
 
@@ -47,16 +48,24 @@ class ApiClientWrapper {
 
   private async performConnectionCheck(): Promise<boolean> {
     try {
-      // Use the proxied health endpoint instead of direct backend URL
-      const healthUrl = typeof window !== 'undefined' ? '/health/ready' : `${this.baseURL}/health/ready`;
+      // Use unified configuration endpoint - no rewrites in staging/production
+      const healthUrl = unifiedApiConfig.endpoints.ready;
+      logger.debug(`Checking backend connection at: ${healthUrl}`);
+      
       const response = await fetch(healthUrl, {
         method: 'GET',
         mode: 'cors',
       }).catch(() => null);
       
       this.isConnected = response?.ok || response?.status === 307 || false;
+      logger.info(`Backend connection check result:`, { 
+        connected: this.isConnected, 
+        status: response?.status,
+        environment: this.environment 
+      });
       return this.isConnected;
-    } catch {
+    } catch (error) {
+      logger.error('Backend connection check failed:', error);
       this.isConnected = false;
       return false;
     }

@@ -14,7 +14,7 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -47,9 +47,13 @@ async def test_state_persistence(supervisor_agent):
             return (True, "test_id")
     
     # Setup the supervisor's persistence mock properly
+    # Mock: Agent service isolation for testing without LLM agent execution
     supervisor_agent.state_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
+    # Mock: Async component isolation for testing without real async operations
     supervisor_agent.state_persistence.load_agent_state = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     supervisor_agent.state_persistence.get_thread_context = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     supervisor_agent.state_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     
     # Run test - this should trigger state persistence calls
@@ -70,6 +74,7 @@ async def test_state_persistence(supervisor_agent):
 async def test_error_recovery(supervisor_agent):
     """Test error handling and recovery mechanisms"""
     # Simulate error in execution pipeline
+    # Mock: Async component isolation for testing without real async operations
     supervisor_agent.engine.execute_pipeline = AsyncMock(
         side_effect=Exception("Pipeline error")
     )
@@ -89,6 +94,7 @@ async def test_error_recovery(supervisor_agent):
 
 async def test_state_recovery_from_interruption():
     """Test state recovery from interrupted execution"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_persistence = AsyncMock()
     
     # Mock interrupted state
@@ -99,7 +105,9 @@ async def test_state_recovery_from_interruption():
     )
     interrupted_state.triage_result = {"category": "optimization"}
     
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.load_agent_state = AsyncMock(return_value=interrupted_state)
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     
     # Test recovery logic
@@ -112,9 +120,11 @@ async def test_state_recovery_from_interruption():
 
 async def test_persistence_failure_handling():
     """Test handling of persistence failures"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_persistence = AsyncMock()
     
     # Mock persistence failure
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(side_effect=Exception("Database connection failed"))
     
     # Should handle persistence failure gracefully
@@ -155,6 +165,7 @@ async def test_state_serialization_consistency():
 
 async def test_concurrent_state_operations():
     """Test concurrent state save/load operations"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_persistence = AsyncMock()
     
     # Mock concurrent operations
@@ -166,7 +177,9 @@ async def test_concurrent_state_operations():
         await asyncio.sleep(0.05)  # Simulate database latency
         return None  # No existing state
     
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(side_effect=mock_save_with_delay)
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.load_agent_state = AsyncMock(side_effect=mock_load_with_delay)
     
     # Execute concurrent operations

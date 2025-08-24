@@ -489,3 +489,19 @@ async def websocket_heartbeat_context(websocket: WebSocket, interval: float = 45
         yield heartbeat
     finally:
         await heartbeat.stop()
+
+
+def check_rate_limit(client_id: str, max_requests: int = 60, window_seconds: int = 60) -> bool:
+    """
+    Utility function for backward compatibility with rate limiting.
+    
+    This function creates a temporary RateLimiter instance to check rate limits.
+    For production use, prefer using RateLimiter class directly from auth module.
+    """
+    # Import here to avoid circular imports
+    from netra_backend.app.websocket_core.auth import RateLimiter
+    
+    # Create temporary rate limiter with specified limits
+    rate_limiter = RateLimiter(max_requests=max_requests, window_seconds=window_seconds)
+    allowed, _ = rate_limiter.is_allowed(client_id)
+    return allowed

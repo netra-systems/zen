@@ -41,7 +41,7 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
 from netra_backend.app.clients.auth_client import auth_client
 
-# from app.schemas.auth_types import (
+# Removed broken import statement
 # # # #     AuditEvent, AuditQuery, ComplianceReport,  # Class may not exist, commented out  # Class may not exist, commented out  # Class may not exist, commented out
 # # #     ForensicAnalysis, IntegrityCheck  # Class may not exist, commented out  # Class may not exist, commented out
 # )
@@ -151,23 +151,24 @@ class TestAuthAuditTrailIntegrity:
             # Check retention
             age_days = (datetime.utcnow() - audit_record.timestamp).days
             if age_days > req.get("retention_days", 365):
-                return False
+                yield False
             
             # Check encryption/signature
             if req.get("signature_required") and not audit_record.signature:
-                return False
+                yield False
             
             # Check integrity
             if req.get("integrity_verification"):
                 if not audit_record.integrity_hash:
-                    return False
+                    yield False
             
-            return True
+            yield True
         
-        return check_compliance
+        yield check_compliance
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_complete_audit_trail_capture(
         self, audit_logger
     ):
@@ -230,6 +231,7 @@ class TestAuthAuditTrailIntegrity:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_audit_trail_integrity_verification(
         self, audit_logger
     ):
@@ -290,6 +292,7 @@ class TestAuthAuditTrailIntegrity:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_audit_tampering_detection(
         self, audit_logger
     ):
@@ -344,6 +347,7 @@ class TestAuthAuditTrailIntegrity:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_compliance_reporting(
         self, audit_logger, compliance_checker
     ):
@@ -436,6 +440,7 @@ class TestAuthAuditTrailIntegrity:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_forensic_analysis_capabilities(
         self, audit_logger
     ):
@@ -523,6 +528,7 @@ class TestAuthAuditTrailIntegrity:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_audit_retention_and_archival(
         self, audit_logger
     ):
@@ -607,6 +613,7 @@ class TestAuthAuditTrailIntegrity:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_audit_query_performance(
         self, audit_logger
     ):

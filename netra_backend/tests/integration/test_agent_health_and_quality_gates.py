@@ -14,7 +14,7 @@ import asyncio
 import time
 from datetime import datetime
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -22,11 +22,14 @@ import pytest
 class TestAgentHealthMonitoring:
     """Test 13: Agent Registry Health Monitoring"""
     
+    @pytest.mark.asyncio
     async def test_agent_health_check_cycle(self):
         """Test periodic health checks for all agents."""
         from netra_backend.app.agents.registry import AgentRegistry
         
+        # Mock: Agent service isolation for testing without LLM agent execution
         registry = Mock(spec=AgentRegistry)
+        # Mock: Async component isolation for testing without real async operations
         registry.health_check_all = AsyncMock(return_value={
             "triage_agent": {"status": "healthy", "latency": 50},
             "cost_optimizer": {"status": "healthy", "latency": 75},
@@ -45,6 +48,7 @@ class TestAgentHealthMonitoring:
         degraded = [name for name, r in health_results.items() if r["status"] == "degraded"]
         assert len(degraded) <= 1
     
+    @pytest.mark.asyncio
     async def test_unhealthy_agent_detection(self):
         """Test detection of unhealthy agents."""
         health_status = {
@@ -59,11 +63,14 @@ class TestAgentHealthMonitoring:
         assert "agent_2" in unhealthy
         assert len(unhealthy) == 1
     
+    @pytest.mark.asyncio
     async def test_agent_replacement_on_failure(self):
         """Test automatic agent replacement when unhealthy."""
         from netra_backend.app.agents.registry import AgentRegistry
         
+        # Mock: Agent service isolation for testing without LLM agent execution
         registry = Mock(spec=AgentRegistry)
+        # Mock: Async component isolation for testing without real async operations
         registry.replace_agent = AsyncMock(return_value={
             "old_agent": "performance_agent_v1",
             "new_agent": "performance_agent_v2",
@@ -80,11 +87,14 @@ class TestAgentHealthMonitoring:
 class TestToolDispatcherInit:
     """Test 14: Tool Dispatcher Initialization"""
     
+    @pytest.mark.asyncio
     async def test_tool_registry_population(self):
         """Test tool dispatcher registers all required tools."""
         from netra_backend.app.services.tool_dispatcher import ToolDispatcher
         
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         dispatcher = Mock(spec=ToolDispatcher)
+        # Mock: Async component isolation for testing without real async operations
         dispatcher.initialize = AsyncMock(return_value={
             "tools": [
                 "gpu_analyzer",
@@ -103,6 +113,7 @@ class TestToolDispatcherInit:
         assert len(result["tools"]) >= 5
         assert "gpu_analyzer" in result["tools"]
     
+    @pytest.mark.asyncio
     async def test_tool_availability_check(self):
         """Test checking tool availability before dispatch."""
         tools = {
@@ -116,11 +127,14 @@ class TestToolDispatcherInit:
         assert len(available_tools) == 2
         assert "legacy_tool" not in available_tools
     
+    @pytest.mark.asyncio
     async def test_tool_execution_routing(self):
         """Test proper routing of tool execution requests."""
         from netra_backend.app.services.tool_dispatcher import ToolDispatcher
         
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         dispatcher = Mock(spec=ToolDispatcher)
+        # Mock: Async component isolation for testing without real async operations
         dispatcher.dispatch = AsyncMock(return_value={
             "tool": "gpu_analyzer",
             "result": {"gpu_utilization": 0.85},
@@ -128,6 +142,7 @@ class TestToolDispatcherInit:
         })
         
         # Dispatch tool request
+        # Mock: Component isolation for testing without external dependencies
         result = await dispatcher.dispatch("gpu_analyzer", {"instance": "p3.2xlarge"})
         
         assert result["tool"] == "gpu_analyzer"
@@ -138,11 +153,14 @@ class TestToolDispatcherInit:
 class TestQualityGateValidation:
     """Test 15: Quality Gate First Response Validation"""
     
+    @pytest.mark.asyncio
     async def test_response_quality_scoring(self):
         """Test quality scoring for agent responses."""
         from netra_backend.app.services.quality_gate import QualityGate
         
+        # Mock: Component isolation for controlled unit testing
         quality_gate = Mock(spec=QualityGate)
+        # Mock: Async component isolation for testing without real async operations
         quality_gate.score_response = AsyncMock(return_value={
             "coherence": 0.85,
             "relevance": 0.90,
@@ -156,6 +174,7 @@ class TestQualityGateValidation:
         assert scores["overall"] >= 0.8
         assert scores["relevance"] >= 0.85
     
+    @pytest.mark.asyncio
     async def test_quality_gate_rejection(self):
         """Test rejection of low-quality responses."""
         quality_thresholds = {
@@ -176,10 +195,12 @@ class TestQualityGateValidation:
         
         assert passed is False  # Should be rejected
     
+    @pytest.mark.asyncio
     async def test_quality_improvement_retry(self):
         """Test retry mechanism for quality improvement."""
         from netra_backend.app.services.quality_gate import QualityGate
         
+        # Mock: Component isolation for controlled unit testing
         quality_gate = Mock(spec=QualityGate)
         
         attempts = []

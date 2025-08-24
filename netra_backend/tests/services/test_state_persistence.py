@@ -1,11 +1,9 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import json
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -13,29 +11,42 @@ from netra_backend.app.services.state_persistence import StatePersistenceService
 
 class TestStatePersistence:
     
+    @pytest.mark.asyncio
     async def test_save_agent_state(self):
         """Test saving agent state to database"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.add = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.commit = AsyncMock()
         
         # Create proper async context manager mock for db_session.begin()
+        # Mock: Generic component isolation for controlled unit testing
         mock_transaction = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_transaction.__aenter__ = AsyncMock(return_value=mock_transaction)
+        # Mock: Async component isolation for testing without real async operations
         mock_transaction.__aexit__ = AsyncMock(return_value=None)
+        # Mock: Service component isolation for predictable testing behavior
         mock_db.begin = MagicMock(return_value=mock_transaction)
         
         # Mock the async session's execute method for Run lookup  
+        # Mock: Generic component isolation for controlled unit testing
         mock_run = MagicMock()
         mock_run.metadata_ = {}
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = mock_run
+        # Mock: Async component isolation for testing without real async operations
         mock_db.execute = AsyncMock(return_value=mock_result)
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.flush = AsyncMock()
         
         persistence_service = StatePersistenceService()
         
         # Mock DeepAgentState
+        # Mock: Generic component isolation for controlled unit testing
         mock_state = MagicMock()
         mock_state.model_dump.return_value = {
             "current_step": "data_analysis",
@@ -60,11 +71,15 @@ class TestStatePersistence:
         assert result[0] == True
         assert result[1] is not None  # snapshot_id should be generated
     
+    @pytest.mark.asyncio
     async def test_restore_agent_state(self):
         """Test restoring agent state from database"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_run = MagicMock()
         mock_run.metadata_ = {
             "state": {
@@ -85,6 +100,7 @@ class TestStatePersistence:
         }
         
         mock_result.scalar_one_or_none.return_value = mock_run
+        # Mock: Async component isolation for testing without real async operations
         mock_db.execute = AsyncMock(return_value=mock_result)
         
         persistence_service = StatePersistenceService()
@@ -96,10 +112,14 @@ class TestStatePersistence:
         assert restored_state.step_count == 0
         assert restored_state.final_report == None
     
+    @pytest.mark.asyncio
     async def test_cleanup_old_states(self):
         """Test cleanup of old state records"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.execute = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.commit = AsyncMock()
         
         persistence_service = StatePersistenceService()
@@ -110,14 +130,18 @@ class TestStatePersistence:
         mock_db.execute.assert_called_once()
         assert isinstance(result, list)
     
+    @pytest.mark.asyncio
     async def test_state_versioning(self):
         """Test state versioning for rollback capability"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         
         # Mock Run objects for list_thread_runs
         mock_runs = []
         for i in range(3):
+            # Mock: Generic component isolation for controlled unit testing
             mock_run = MagicMock()
             mock_run.id = f"run-{i}"
             mock_run.status = "completed"
@@ -127,6 +151,7 @@ class TestStatePersistence:
             mock_runs.append(mock_run)
         
         mock_result.scalars.return_value.all.return_value = mock_runs
+        # Mock: Async component isolation for testing without real async operations
         mock_db.execute = AsyncMock(return_value=mock_result)
         
         persistence_service = StatePersistenceService()
@@ -136,15 +161,21 @@ class TestStatePersistence:
         assert len(history) == 3
         assert history[0]["id"] == "run-0"
     
+    @pytest.mark.asyncio
     async def test_concurrent_state_updates(self):
         """Test handling concurrent state updates"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         
         # Mock result objects
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = AsyncMock()
         mock_result.scalar_one_or_none.return_value = None
+        # Mock: Async component isolation for testing without real async operations
         mock_db.execute = AsyncMock(return_value=mock_result)
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.add = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.flush = AsyncMock()
         
         persistence_service = StatePersistenceService()

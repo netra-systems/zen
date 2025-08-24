@@ -3,9 +3,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -30,11 +28,13 @@ from netra_backend.tests.helpers.thread_test_helpers import (
 @pytest.fixture
 def mock_db():
     """Mock database session"""
+    # Mock: Generic component isolation for controlled unit testing
     return AsyncMock(commit=AsyncMock())
 
 @pytest.fixture
 def mock_user():
     """Mock authenticated user"""
+    # Mock: Generic component isolation for controlled unit testing
     user = Mock()
     user.id = "test_user_123"
     user.email = "test@example.com"
@@ -42,7 +42,9 @@ def mock_user():
 
 class TestAutoRenameThread:
     """Test cases for POST /{thread_id}/auto-rename endpoint"""
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.utils.thread_helpers.time.time')
+    @pytest.mark.asyncio
     async def test_auto_rename_success(self, mock_time, mock_db, mock_user):
         """Test successful auto-rename with LLM"""
         create_thread_update_scenario(mock_time)
@@ -53,9 +55,13 @@ class TestAutoRenameThread:
         llm_manager = setup_llm_manager_mock()
         mock_ws = setup_ws_manager_mock()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository', return_value=thread_repo), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.MessageRepository', return_value=message_repo), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.LLMManager', return_value=llm_manager), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.ws_manager', mock_ws):
             
             result = await auto_rename_thread("thread_abc123", mock_db, mock_user)
@@ -66,7 +72,9 @@ class TestAutoRenameThread:
         assert mock_thread.metadata_["updated_at"] == 1234567900
         mock_db.commit.assert_called_once()
         assert_ws_notification(mock_ws, "test_user_123", "thread_abc123", "Generated Title")
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.utils.thread_helpers.time.time')
+    @pytest.mark.asyncio
     async def test_auto_rename_llm_failure_fallback(self, mock_time, mock_db, mock_user):
         """Test auto-rename with LLM failure, using fallback"""
         create_thread_update_scenario(mock_time)
@@ -75,14 +83,21 @@ class TestAutoRenameThread:
         thread_repo = setup_thread_repo_mock(mock_thread)
         message_repo = setup_message_repo_mock(1, [mock_message])
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository', return_value=thread_repo), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.MessageRepository', return_value=message_repo), \
+             # Mock: LLM service isolation for fast testing without API calls or rate limits
              patch('app.routes.utils.thread_helpers.LLMManager') as MockLLMManager, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.ws_manager') as mock_ws, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.logger') as mock_logger:
             
             llm_manager = MockLLMManager.return_value
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             llm_manager.ask_llm = AsyncMock(side_effect=Exception("LLM error"))
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws.send_to_user = AsyncMock()
             
             result = await auto_rename_thread("thread_abc123", mock_db, mock_user)
@@ -90,9 +105,11 @@ class TestAutoRenameThread:
         assert result.title == "Chat 1234567900"
         assert mock_thread.metadata_["title"] == "Chat 1234567900"
         mock_logger.warning.assert_called_once()
+    @pytest.mark.asyncio
     async def test_auto_rename_no_user_message(self, mock_db, mock_user):
         """Test auto-rename when no user message exists"""
         mock_thread = create_mock_thread()
+        # Mock: Component isolation for controlled unit testing
         system_message = Mock(role="system", content="System message")
         thread_repo = setup_thread_repo_mock(mock_thread)
         message_repo = setup_message_repo_mock(1, [system_message])
@@ -103,51 +120,68 @@ class TestAutoRenameThread:
                 await auto_rename_thread("thread_abc123", mock_db, mock_user)
             
         assert_http_exception(exc_info, 400, "No user message found to generate title from")
+    @pytest.mark.asyncio
     async def test_auto_rename_thread_not_found(self, mock_db, mock_user):
         """Test auto-rename for non-existent thread"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
+            # Mock: Async component isolation for testing without real async operations
             thread_repo.get_by_id = AsyncMock(return_value=None)
             
             with pytest.raises(HTTPException) as exc_info:
                 await auto_rename_thread("nonexistent", mock_db, mock_user)
             
             assert_http_exception(exc_info, 404, "Thread not found")
+    @pytest.mark.asyncio
     async def test_auto_rename_access_denied(self, mock_db, mock_user):
         """Test auto-rename for thread owned by another user"""
         mock_thread = create_access_denied_thread()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
+            # Mock: Async component isolation for testing without real async operations
             thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
             
             with pytest.raises(HTTPException) as exc_info:
                 await auto_rename_thread("thread_abc123", mock_db, mock_user)
             
             assert_http_exception(exc_info, 403, "Access denied")
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.utils.thread_helpers.time.time')
+    @pytest.mark.asyncio
     async def test_auto_rename_empty_metadata(self, mock_time, mock_db, mock_user):
         """Test auto-rename when thread has no metadata"""
         create_thread_update_scenario(mock_time)
         mock_thread = setup_thread_with_special_metadata()
         mock_message = create_mock_message()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.MessageRepository') as MockMessageRepo, \
+             # Mock: LLM service isolation for fast testing without API calls or rate limits
              patch('app.routes.utils.thread_helpers.LLMManager') as MockLLMManager, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.ws_manager') as mock_ws:
             
             thread_repo = MockThreadRepo.return_value
-            def get_thread(db, thread_id):
+            async def get_thread(db, thread_id):
                 if hasattr(mock_thread.metadata_, 'call_count') and mock_thread.metadata_.call_count > 0:
                     mock_thread.metadata_ = None
                 return mock_thread
+            # Mock: Async component isolation for testing without real async operations
             thread_repo.get_by_id = AsyncMock(side_effect=get_thread)
             message_repo = MockMessageRepo.return_value
+            # Mock: Async component isolation for testing without real async operations
             message_repo.find_by_thread = AsyncMock(return_value=[mock_message])
+            # Mock: Async component isolation for testing without real async operations
             message_repo.count_by_thread = AsyncMock(return_value=1)
             llm_manager = MockLLMManager.return_value
+            # Mock: LLM provider isolation to prevent external API usage and costs
             llm_manager.ask_llm = AsyncMock(return_value="New Title")
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws.send_to_user = AsyncMock()
             
             result = await auto_rename_thread("thread_abc123", mock_db, mock_user)
@@ -156,24 +190,34 @@ class TestAutoRenameThread:
         assert mock_thread.metadata_["title"] == "New Title"
         assert mock_thread.metadata_["auto_renamed"] == True
         assert mock_thread.metadata_["updated_at"] == 1234567900
+    @pytest.mark.asyncio
     async def test_auto_rename_title_cleanup(self, mock_db, mock_user):
         """Test that generated title is cleaned up properly"""
         mock_thread = create_mock_thread()
         mock_message = create_mock_message()
         raw_title = '  "Generated Title with lots of extra characters that should be truncated"  '
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.MessageRepository') as MockMessageRepo, \
+             # Mock: LLM service isolation for fast testing without API calls or rate limits
              patch('app.routes.utils.thread_helpers.LLMManager') as MockLLMManager, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.ws_manager') as mock_ws:
             
             thread_repo = MockThreadRepo.return_value
+            # Mock: Async component isolation for testing without real async operations
             thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
             message_repo = MockMessageRepo.return_value
+            # Mock: Async component isolation for testing without real async operations
             message_repo.find_by_thread = AsyncMock(return_value=[mock_message])
+            # Mock: Async component isolation for testing without real async operations
             message_repo.count_by_thread = AsyncMock(return_value=1)
             llm_manager = MockLLMManager.return_value
+            # Mock: LLM provider isolation to prevent external API usage and costs
             llm_manager.ask_llm = AsyncMock(return_value=raw_title)
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws.send_to_user = AsyncMock()
             
             result = await auto_rename_thread("thread_abc123", mock_db, mock_user)
@@ -181,12 +225,16 @@ class TestAutoRenameThread:
         expected_title = clean_llm_title(raw_title)
         assert result.title == expected_title
         assert len(result.title) == 50
+    @pytest.mark.asyncio
     async def test_auto_rename_exception(self, mock_db, mock_user):
         """Test general exception in auto_rename_thread"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             thread_repo = MockThreadRepo.return_value
+            # Mock: Database isolation for unit testing without external database connections
             thread_repo.get_by_id = AsyncMock(side_effect=Exception("Database error"))
             
             with pytest.raises(HTTPException) as exc_info:

@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -481,7 +481,7 @@ async def redis_client():
 @pytest.fixture
 async def consistency_manager(redis_client):
     """Create cross-service configuration consistency manager."""
-    return CrossServiceConfigConsistencyManager(redis_client)
+    yield CrossServiceConfigConsistencyManager(redis_client)
 
 @pytest.mark.L3
 @pytest.mark.integration

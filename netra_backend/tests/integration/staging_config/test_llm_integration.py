@@ -8,6 +8,7 @@ with staging API keys.
 import sys
 from pathlib import Path
 
+import pytest
 # Test framework import - using pytest fixtures instead
 
 import asyncio
@@ -16,11 +17,12 @@ from typing import Dict, Optional
 
 import httpx
 
-from netra_backend.tests.integration.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 class TestLLMIntegration(StagingConfigTestBase):
     """Test LLM integrations in staging."""
     
+    @pytest.mark.asyncio
     async def test_gemini_api_connection(self):
         """Test Gemini API connectivity with staging key."""
         self.skip_if_not_staging()
@@ -52,6 +54,7 @@ class TestLLMIntegration(StagingConfigTestBase):
             self.assertIn('candidates', data,
                         "Gemini response missing candidates")
                         
+    @pytest.mark.asyncio
     async def test_openai_api_connection(self):
         """Test OpenAI API connectivity with staging key."""
         self.skip_if_not_staging()
@@ -87,6 +90,7 @@ class TestLLMIntegration(StagingConfigTestBase):
             self.assertIn('choices', data,
                         "OpenAI response missing choices")
                         
+    @pytest.mark.asyncio
     async def test_anthropic_api_connection(self):
         """Test Anthropic API connectivity with staging key."""
         self.skip_if_not_staging()
@@ -123,6 +127,7 @@ class TestLLMIntegration(StagingConfigTestBase):
             self.assertIn('content', data,
                         "Anthropic response missing content")
                         
+    @pytest.mark.asyncio
     async def test_llm_rate_limiting(self):
         """Test LLM API rate limiting handling."""
         self.skip_if_not_staging()
@@ -153,6 +158,7 @@ class TestLLMIntegration(StagingConfigTestBase):
                 self.assertIn(status, [200, 429, 503],
                             f"Unexpected status: {status}")
                             
+    @pytest.mark.asyncio
     async def test_llm_fallback(self):
         """Test LLM provider fallback mechanism."""
         self.skip_if_not_staging()
@@ -179,6 +185,7 @@ class TestLLMIntegration(StagingConfigTestBase):
                 self.assertIn('provider_used', data,
                             "Response should indicate which provider was used")
                             
+    @pytest.mark.asyncio
     async def test_llm_timeout_handling(self):
         """Test LLM timeout handling."""
         self.skip_if_not_staging()
@@ -204,6 +211,7 @@ class TestLLMIntegration(StagingConfigTestBase):
             self.assertIn(response.status_code, [408, 504],
                         "Should return timeout status")
                         
+    @pytest.mark.asyncio
     async def test_llm_context_limits(self):
         """Test LLM context limit handling."""
         self.skip_if_not_staging()

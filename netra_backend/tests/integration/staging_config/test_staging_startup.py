@@ -5,9 +5,10 @@ Validates full application startup in staging environment
 with all dependencies and configurations.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 
+import pytest
 import asyncio
 import os
 import sys
@@ -15,7 +16,7 @@ import time
 from typing import Dict, List, Optional
 from unittest.mock import MagicMock, patch
 
-from netra_backend.tests.integration.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 # Add app to path for imports
 
@@ -46,7 +47,7 @@ class TestStagingStartup(StagingConfigTestBase):
             from netra_backend.app.core.config import get_config
             from netra_backend.app.db.session import get_db
             from netra_backend.app.main import app
-            from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+            from netra_backend.app.websocket_core.manager import WebSocketManager
             
             # Initialize configuration
 
@@ -110,6 +111,7 @@ class TestStagingStartup(StagingConfigTestBase):
 
             os.environ.update(original_env)
             
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_startup_with_staging_config(self):
 
         """Test application starts with staging configuration."""
@@ -150,9 +152,11 @@ class TestStagingStartup(StagingConfigTestBase):
 
         self.require_gcp_credentials()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.config.secretmanager') as mock_secret_manager:
             # Mock secret client
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_client = MagicMock()
 
             mock_secret_manager.SecretManagerServiceClient.return_value = mock_client
@@ -169,6 +173,7 @@ class TestStagingStartup(StagingConfigTestBase):
                 
                 # Return mock secret value
 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_response = MagicMock()
 
                 mock_response.payload.data = b'mock_secret_value'
@@ -211,9 +216,11 @@ class TestStagingStartup(StagingConfigTestBase):
 
         self.skip_if_not_staging()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.config.secretmanager') as mock_secret_manager:
             # Mock secret client that throws errors
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_client = MagicMock()
 
             mock_secret_manager.SecretManagerServiceClient.return_value = mock_client
@@ -250,10 +257,13 @@ class TestStagingStartup(StagingConfigTestBase):
         
         # Patch service initializations to track order
 
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('app.database.init_db') as mock_db_init:
 
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             with patch('app.cache.init_redis') as mock_redis_init:
 
+                # Mock: WebSocket connection isolation for testing without network overhead
                 with patch('app.ws_manager.WebSocketManager.__init__') as mock_ws_init:
                     
                     def track_init(name):
@@ -262,6 +272,7 @@ class TestStagingStartup(StagingConfigTestBase):
 
                             initialization_order.append(name)
 
+                            # Mock: Generic component isolation for controlled unit testing
                             return MagicMock()
 
                         return wrapper

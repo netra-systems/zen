@@ -6,18 +6,16 @@ Tests message validation, field extraction, and error handling for malformed mes
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import json
 import uuid
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.websocket_core import ConnectionInfo
+from netra_backend.app.websocket_core.types import ConnectionInfo
 
-from netra_backend.app.websocket_core.unified.message_handlers import (
+from netra_backend.app.websocket_core.handlers import (
     MessageBuilder,
     MessageHandler,
     MessageProcessor,
@@ -29,6 +27,7 @@ class TestWebSocketMessageValidation:
     
     def test_validate_user_message_structure(self):
         """Test validation of user_message structure."""
+        # Mock: Generic component isolation for controlled unit testing
         handler = MessageHandler(Mock())
         
         # Valid message
@@ -207,6 +206,7 @@ class TestWebSocketMessageValidation:
     
     def test_message_type_variations(self):
         """Test different message type variations."""
+        # Mock: Generic component isolation for controlled unit testing
         handler = MessageHandler(Mock())
         
         # Standard types
@@ -228,6 +228,7 @@ class TestWebSocketMessageValidation:
     
     def test_malformed_json_handling(self):
         """Test handling of malformed JSON strings."""
+        # Mock: Generic component isolation for controlled unit testing
         processor = MessageProcessor(Mock(), Mock())
         
         # This would normally come as a string from WebSocket

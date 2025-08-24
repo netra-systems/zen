@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """
 Database Initializer with Auto-Creation, Migration, and Recovery
 
@@ -515,7 +516,7 @@ class DatabaseInitializer:
         from urllib.parse import urlparse
         
         # Get database URL from environment
-        database_url = os.environ.get("DATABASE_URL")
+        database_url = get_env().get("DATABASE_URL")
         if not database_url:
             # Use default development settings
             config = DatabaseConfig(

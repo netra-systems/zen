@@ -3,13 +3,11 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import hashlib
 import json
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from netra_backend.app.schemas import Corpus, CorpusCreate, CorpusUpdate
@@ -24,14 +22,21 @@ from netra_backend.tests.services.helpers.shared_test_types import (
 @pytest.fixture
 def mock_db():
     """Mock database session."""
+    # Mock: Generic component isolation for controlled unit testing
     db = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     db.commit = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     db.rollback = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     db.refresh = MagicMock()
     # Mock query chain for update_corpus
+    # Mock: Generic component isolation for controlled unit testing
     query_mock = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     filter_mock = MagicMock()
     query_mock.filter.return_value = filter_mock
+    # Mock: Service component isolation for predictable testing behavior
     filter_mock.first.return_value = MagicMock(
         id="corpus123",
         name="Test Corpus",
@@ -44,22 +49,31 @@ def mock_db():
 @pytest.fixture
 def mock_vector_store():
     """Mock vector store for embeddings."""
+    # Mock: Generic component isolation for controlled unit testing
     store = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     store.index_document = AsyncMock(return_value={"vector_id": "vec123"})
+    # Mock: Async component isolation for testing without real async operations
     store.search = AsyncMock(return_value=[
         {"document_id": "doc1", "score": 0.95, "content": "Relevant content"},
         {"document_id": "doc2", "score": 0.85, "content": "Somewhat relevant"}
     ])
+    # Mock: Generic component isolation for controlled unit testing
     store.delete_document = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     store.update_document = AsyncMock()
     return store
 
 @pytest.fixture
 def mock_llm_manager():
     """Mock LLM manager for document processing."""
+    # Mock: Generic component isolation for controlled unit testing
     llm = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     llm.generate_embeddings = AsyncMock(return_value=[0.1, 0.2, 0.3])
+    # Mock: Async component isolation for testing without real async operations
     llm.extract_keywords = AsyncMock(return_value=["keyword1", "keyword2"])
+    # Mock: Async component isolation for testing without real async operations
     llm.summarize = AsyncMock(return_value="Document summary")
     return llm
 
@@ -108,9 +122,11 @@ def corpus_service(mock_db, mock_vector_store, mock_llm_manager):
             ]
         }
     
+    # Mock: Async component isolation for testing without real async operations
     service._modular_service.batch_index_documents = AsyncMock(side_effect=mock_batch_index_documents)
     
     # Mock keyword_search for test compatibility
+    # Mock: Async component isolation for testing without real async operations
     service.keyword_search = AsyncMock(return_value=[
         {"id": "fallback_doc1", "content": "Keyword match", "fallback_method": "keyword"}
     ])
@@ -128,6 +144,7 @@ def agent_or_service(corpus_service):
 class TestCorpusDocumentIndexing:
     """Test document indexing pipeline."""
 
+    @pytest.mark.asyncio
     async def test_index_single_document(self, corpus_service, mock_vector_store, mock_llm_manager):
         """Test indexing a single document with metadata."""
         document = {
@@ -156,6 +173,7 @@ class TestCorpusDocumentIndexing:
         assert result["status"] == "indexed"
         assert result["document_id"] == "doc123"
 
+    @pytest.mark.asyncio
     async def test_batch_indexing_pipeline(self, corpus_service):
         """Test batch document indexing with progress tracking."""
         documents = [
@@ -163,6 +181,7 @@ class TestCorpusDocumentIndexing:
             for i in range(10)
         ]
         
+        # Mock: Generic component isolation for controlled unit testing
         progress_callback = AsyncMock()
         
         results = await corpus_service.batch_index_documents(
@@ -180,11 +199,13 @@ class TestCorpusDocumentIndexing:
         # Verify progress callback was called (implementation calls once at end)
         assert progress_callback.call_count >= 1
 
+    @pytest.mark.asyncio
     async def test_reindex_corpus_with_new_model(self, corpus_service):
         """Test reindexing entire corpus when embedding model changes."""
         corpus_id = "corpus789"
         
         # Mock existing documents
+        # Mock: Async component isolation for testing without real async operations
         corpus_service.get_corpus_documents = AsyncMock(return_value=[
             {"id": f"doc{i}", "content": f"Content {i}"}
             for i in range(5)
@@ -199,11 +220,13 @@ class TestCorpusDocumentIndexing:
         assert result["model_version"] == "v2"
         assert result["status"] == "completed"
 
+    @pytest.mark.asyncio
     async def test_incremental_indexing(self, corpus_service):
         """Test incremental indexing of new documents."""
         corpus_id = "corpus_incremental"
         
         # Mock checking for existing index
+        # Mock: Async component isolation for testing without real async operations
         corpus_service.get_index_status = AsyncMock(return_value={
             "indexed_count": 100,
             "last_indexed": datetime.now() - timedelta(hours=1)
@@ -222,6 +245,7 @@ class TestCorpusDocumentIndexing:
         assert result["newly_indexed"] == 2
         assert result["total_indexed"] == 102
 
+    @pytest.mark.asyncio
     async def test_document_deduplication(self, corpus_service):
         """Test document deduplication during indexing."""
         documents = [
@@ -230,6 +254,7 @@ class TestCorpusDocumentIndexing:
             {"id": "doc3", "content": "Unique content"}
         ]
         
+        # Mock: Service component isolation for predictable testing behavior
         corpus_service.compute_content_hash = MagicMock(side_effect=[
             "hash123", "hash123", "hash456"  # First two have same hash
         ])
@@ -244,11 +269,13 @@ class TestCorpusDocumentIndexing:
 class TestCorpusSearchRelevance:
     """Test search relevance and ranking."""
 
+    @pytest.mark.asyncio
     async def test_semantic_search(self, corpus_service, mock_vector_store):
         """Test semantic search with vector similarity."""
         # Skip test - semantic_search method not yet implemented
         pytest.skip("semantic_search method not yet implemented in CorpusService")
 
+    @pytest.mark.asyncio
     async def test_hybrid_search(self, corpus_service):
         """Test hybrid search combining semantic and keyword matching."""
         # Skip test - hybrid_search method not yet implemented
@@ -256,9 +283,11 @@ class TestCorpusSearchRelevance:
 
     # Removed test_search_with_filters - test stub for unimplemented search_with_filters method
 
+    @pytest.mark.asyncio
     async def test_relevance_feedback(self, corpus_service):
         """Test relevance feedback for improving search results."""
         # Add mock for query_expansion
+        # Mock: Async component isolation for testing without real async operations
         corpus_service.query_expansion = AsyncMock(return_value="expanded query with relevant terms")
         
         initial_results = [
@@ -285,6 +314,7 @@ class TestCorpusSearchRelevance:
         if hasattr(corpus_service, 'query_expansion') and corpus_service.query_expansion.called:
             assert "relevant" in str(corpus_service.query_expansion.call_args)
 
+    @pytest.mark.asyncio
     async def test_search_result_reranking(self, corpus_service):
         """Test reranking search results using advanced models."""
         initial_results = [
@@ -293,6 +323,7 @@ class TestCorpusSearchRelevance:
             {"id": "doc3", "score": 0.7, "content": "Content 3"}
         ]
         
+        # Mock: Async component isolation for testing without real async operations
         corpus_service.rerank_model = AsyncMock(return_value=[
             {"id": "doc2", "score": 0.9},  # doc2 moved to top
             {"id": "doc1", "score": 0.85},
@@ -309,6 +340,7 @@ class TestCorpusSearchRelevance:
 class TestCorpusManagement:
     """Test corpus lifecycle management."""
 
+    @pytest.mark.asyncio
     async def test_create_corpus_with_validation(self, corpus_service):
         """Test corpus creation with validation."""
         corpus_data = CorpusCreate(
@@ -323,6 +355,7 @@ class TestCorpusManagement:
         assert corpus.status == CorpusStatus.CREATING.value
         assert corpus.created_by_id == "user123"
 
+    @pytest.mark.asyncio
     async def test_update_corpus_metadata(self, corpus_service):
         """Test updating corpus metadata."""
         corpus_id = "corpus123"
@@ -355,6 +388,7 @@ class TestIndexOptimization:
 
     # Removed test_index_cache_warming - test stub for unimplemented warm_cache method
 
+    @pytest.mark.asyncio
     async def test_index_performance_monitoring(self, corpus_service):
         """Test monitoring index performance metrics."""
         corpus_id = "corpus_perf"
@@ -384,6 +418,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert True  # Test passes - CorpusService operates without Redis
 
     # Removed test_handle_indexing_failure - test expects exception that isn't raised
+    @pytest.mark.asyncio
     async def test_retry_on_failure(self, agent_or_service):
         """Override shared test - CorpusService doesn't have _process_internal."""
         # CorpusService doesn't implement retry pattern with _process_internal
@@ -391,6 +426,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         # This functionality is tested through other corpus-specific tests
         pass
 
+    @pytest.mark.asyncio
     async def test_recover_from_partial_batch_failure(self, corpus_service):
         """Test recovery from partial batch indexing failure."""
         documents = [
@@ -399,6 +435,7 @@ class TestErrorHandling(SharedTestErrorHandling):
             {"id": "doc3", "content": "More valid content"}
         ]
         
+        # Mock: Async component isolation for testing without real async operations
         corpus_service.index_document = AsyncMock(side_effect=[
             {"status": "indexed"},
             NetraException("Invalid document"),
@@ -411,16 +448,20 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert results["failed"] == 1
         assert "doc2" in results["failed_ids"]
 
+    @pytest.mark.asyncio
     async def test_database_connection_failure(self, corpus_service):
         """Test handling of database connection failures."""
+        # Mock: Service component isolation for predictable testing behavior
         corpus_service.db.commit = MagicMock(side_effect=Exception("Connection lost"))
         with pytest.raises(NetraException, match="Database connection failure during corpus creation"):
             await corpus_service.create_corpus(
                 corpus_service.db, CorpusCreate(name="Test", description="Test"), "user123"
             )
 
+    @pytest.mark.asyncio
     async def test_search_fallback_on_vector_store_failure(self, corpus_service):
         """Test fallback to keyword search when vector store fails."""
+        # Mock: Async component isolation for testing without real async operations
         corpus_service.vector_store.search = AsyncMock(
             side_effect=Exception("Vector store unavailable")
         )

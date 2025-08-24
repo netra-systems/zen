@@ -24,7 +24,7 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -36,7 +36,7 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any, AsyncContextManager, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import sqlalchemy
@@ -46,7 +46,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from netra_backend.app.db.postgres import get_postgres_session
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -322,6 +322,7 @@ class WebSocketDatabaseManager:
 
             return result.rowcount
     
+    @pytest.mark.asyncio
     async def test_transaction_isolation(self, session_id: str) -> Dict[str, Any]:
 
         """Test transaction isolation between WebSocket sessions."""
@@ -385,6 +386,7 @@ class WebSocketDatabaseManager:
         
         return test_results
     
+    @pytest.mark.asyncio
     async def test_connection_pool_behavior(self) -> Dict[str, Any]:
 
         """Test database connection pool behavior under load."""
@@ -511,6 +513,7 @@ class WebSocketTransactionManager:
         
         return results
     
+    @pytest.mark.asyncio
     async def test_deadlock_prevention(self, session_count: int = 3) -> Dict[str, Any]:
 
         """Test deadlock prevention with concurrent transactions."""
@@ -603,6 +606,7 @@ async def transaction_manager(db_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_websocket_session_lifecycle(db_manager):
 
     """Test WebSocket database session creation and cleanup."""
@@ -632,6 +636,7 @@ async def test_websocket_session_lifecycle(db_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_websocket_message_persistence(db_manager):
 
     """Test WebSocket message persistence with proper transactions."""
@@ -664,6 +669,7 @@ async def test_websocket_message_persistence(db_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_transaction_rollback_on_error(db_manager):
 
     """Test transaction rollback on database errors."""
@@ -737,6 +743,7 @@ async def test_transaction_rollback_on_error(db_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_concurrent_websocket_sessions(db_manager):
 
     """Test concurrent WebSocket sessions with proper isolation."""
@@ -779,6 +786,7 @@ async def test_concurrent_websocket_sessions(db_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_transaction_isolation_verification(db_manager):
 
     """Test transaction isolation between WebSocket sessions."""
@@ -797,6 +805,7 @@ async def test_transaction_isolation_verification(db_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_connection_pool_management(db_manager):
 
     """Test database connection pool behavior under load."""
@@ -814,6 +823,7 @@ async def test_connection_pool_management(db_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_batch_transaction_management(transaction_manager):
 
     """Test batch operations in single transaction."""
@@ -874,6 +884,7 @@ async def test_batch_transaction_management(transaction_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_websocket_session_cleanup(db_manager):
 
     """Test WebSocket session data cleanup."""
@@ -914,6 +925,7 @@ async def test_websocket_session_cleanup(db_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_websocket_session_metrics_tracking(db_manager):
 
     """Test comprehensive session metrics tracking."""

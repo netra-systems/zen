@@ -14,7 +14,6 @@ Complete test infrastructure for the auth service with comprehensive fixtures, f
 ```
 auth_service/tests/
 ├── conftest.py                    # Main pytest configuration and fixtures
-├── pytest.ini                    # Pytest configuration file
 ├── README.md                     # This file
 ├── base/                         # Base test classes
 │   ├── __init__.py

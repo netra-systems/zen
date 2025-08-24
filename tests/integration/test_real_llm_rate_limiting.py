@@ -29,6 +29,7 @@ class TestRealLlmRateLimiting:
         # and verify that the agent's retry logic is triggered.
 
         # Mock the LLM client to raise a rate limit error twice, then succeed.
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_client = AsyncMock()
         mock_llm_client.generate.side_effect = [
             httpx.ReadTimeout("Rate limit exceeded"),
@@ -37,6 +38,7 @@ class TestRealLlmRateLimiting:
         ]
 
         # Patch the agent's LLM client
+        # Mock: Component isolation for testing without external dependencies
         with patch(
             "netra_backend.app.agents.supervisor.LLMClient",
             return_value=mock_llm_client,
@@ -55,6 +57,7 @@ class TestRealLlmRateLimiting:
 
             # Assert that the agent's sleep function was called with increasing backoff times
             # This requires patching the agent's sleep function.
+            # Mock: Component isolation for testing without external dependencies
             with patch("asyncio.sleep") as mock_sleep:
                 await agent.run_workflow("Test prompt")
                 # Check that sleep was called with increasing durations

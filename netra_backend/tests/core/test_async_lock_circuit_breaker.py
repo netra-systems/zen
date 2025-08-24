@@ -26,6 +26,7 @@ class TestAsyncLock:
     @pytest.fixture
     def async_lock(self):
         return AsyncLock("test_lock")
+    @pytest.mark.asyncio
     async def test_acquire_with_timeout_success(self, async_lock):
         """Test successful lock acquisition with timeout"""
         acquired = await async_lock.acquire_with_timeout(1.0)
@@ -33,17 +34,20 @@ class TestAsyncLock:
         assert_lock_state(async_lock, True, "test_lock")
         async_lock.release()
         assert_lock_state(async_lock, False, "test_lock")
+    @pytest.mark.asyncio
     async def test_acquire_with_timeout_failure(self, async_lock):
         """Test lock acquisition timeout"""
         await async_lock.acquire_with_timeout(1.0)
         acquired = await async_lock.acquire_with_timeout(0.01)
         assert acquired == False
         assert async_lock.is_locked == True
+    @pytest.mark.asyncio
     async def test_acquire_context_manager_success(self, async_lock):
         """Test lock context manager"""
         async with async_lock.acquire(timeout=1.0):
             assert async_lock.is_locked == True
         assert async_lock.is_locked == False
+    @pytest.mark.asyncio
     async def test_acquire_context_manager_timeout(self, async_lock):
         """Test lock context manager timeout"""
         await async_lock.acquire_with_timeout(1.0)
@@ -68,6 +72,7 @@ class TestAsyncCircuitBreaker:
             timeout=0.1,
             expected_exception=(ValueError,)
         )
+    @pytest.mark.asyncio
     async def test_successful_calls(self, circuit_breaker):
         """Test successful calls keep circuit closed"""
         operation = create_circuit_breaker_operation(False)
@@ -75,6 +80,7 @@ class TestAsyncCircuitBreaker:
             result = await circuit_breaker.call(operation)
             assert result == "success"
         assert_circuit_breaker_state(circuit_breaker, "CLOSED", 0)
+    @pytest.mark.asyncio
     async def test_circuit_opens_after_failures(self, circuit_breaker):
         """Test circuit opens after failure threshold"""
         operation = create_circuit_breaker_operation(True)
@@ -84,6 +90,7 @@ class TestAsyncCircuitBreaker:
         assert_circuit_breaker_state(circuit_breaker, "OPEN", 3)
         with pytest.raises(ServiceError, match="Circuit breaker is OPEN"):
             await circuit_breaker.call(operation)
+    @pytest.mark.asyncio
     async def test_circuit_half_open_recovery(self, circuit_breaker):
         """Test circuit moves to half-open and recovers"""
         await self._open_circuit(circuit_breaker)

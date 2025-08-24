@@ -6,8 +6,6 @@ Tests compression algorithms, authentication expiry handling, and security featu
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import json
 import random
@@ -15,7 +13,7 @@ import time
 import uuid
 import zlib
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -89,6 +87,7 @@ def _verify_payload_compression(payload: bytes) -> None:
     elif isinstance(payload, bytes) and len(set(payload)) > 200:
         assert ratio < 1.5, "Random data shouldn't compress well"
 
+@pytest.mark.asyncio
 async def test_websocket_compression():
     """Test WebSocket compression with permessage-deflate extension"""
     compressible_data = _create_compressible_test_data()
@@ -193,6 +192,7 @@ class GracePeriodWebSocket(AuthenticatedWebSocket):
             'warning': 'in_grace_period',
             'expires_in': int(self.grace_expires_at - time.time())
         }
+@pytest.mark.asyncio
 async def test_authentication_expiry_during_connection():
     """Test handling of authentication expiry while connection is active"""
     await _test_immediate_expiry()

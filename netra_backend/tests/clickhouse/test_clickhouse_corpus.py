@@ -13,7 +13,7 @@ import uuid
 import pytest
 from netra_backend.app.logging_config import central_logger as logger
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
     _check_table_create_permission,
 )
@@ -21,6 +21,7 @@ from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
 class TestCorpusTableOperations:
     """Test corpus table creation and management"""
     
+    @pytest.mark.asyncio
     async def test_create_dynamic_corpus_table(self):
         """Test creating a dynamic corpus table"""
         async with get_clickhouse_client() as client:

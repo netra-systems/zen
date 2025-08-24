@@ -11,8 +11,6 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 from tests.e2e.database_test_connections import DatabaseConnectionManager
 from tests.e2e.real_services_manager import RealServicesManager

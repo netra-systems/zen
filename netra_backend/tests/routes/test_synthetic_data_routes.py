@@ -6,9 +6,7 @@ Tests for synthetic data creation - app/routes/synthetic_data.py
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -38,6 +36,7 @@ class TestSyntheticDataRoute:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.synthetic_data_service.generate_synthetic_data') as mock_gen:
             mock_gen.return_value = {
                 "job_id": "test_job_123",
@@ -67,6 +66,7 @@ class TestSyntheticDataRoute:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.validate_data') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
@@ -79,16 +79,20 @@ class TestSyntheticDataRoute:
                 result = response.json()
                 assert "valid" in result
 
+    @pytest.mark.asyncio
     async def test_synthetic_data_templates(self):
         """Test synthetic data template management."""
         from netra_backend.app.routes.synthetic_data import _fetch_templates
         
         # Mock database dependency
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         
         # Create mock for SyntheticDataService class
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.synthetic_data.SyntheticDataService') as mock_service_class:
             # Mock static method to return templates
+            # Mock: Async component isolation for testing without real async operations
             mock_service_class.get_available_templates = AsyncMock(return_value=[
                 {"name": "user_profile", "fields": 5},
                 {"name": "transaction", "fields": 8}

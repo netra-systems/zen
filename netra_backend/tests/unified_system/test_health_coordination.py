@@ -21,12 +21,10 @@ Key validations:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -129,7 +127,7 @@ async def health_coordinator(mock_services):
     coordinator.backend_service_url = mock_services.get_http_service_url("backend") or "http://localhost:8000"
     coordinator.frontend_service_url = mock_services.get_http_service_url("frontend") or "http://localhost:3000"
     
-    return coordinator
+    yield coordinator
 
 @pytest.mark.asyncio
 async def test_multi_service_health_checks(health_coordinator):
@@ -244,7 +242,9 @@ async def test_health_check_with_dependencies(health_coordinator):
     - Dependencies are properly validated
     """
     # Test backend database dependency health
+    # Mock: Component isolation for testing without external dependencies
     with patch('app.db.postgres.async_engine') as mock_engine:
+        # Mock: Generic component isolation for controlled unit testing
         mock_connection = AsyncMock()
         mock_engine.connect.return_value.__aenter__.return_value = mock_connection
         mock_connection.execute.return_value.scalar_one_or_none.return_value = 1
@@ -354,6 +354,7 @@ async def test_health_check_error_scenarios():
         "Error details should be included for failed health checks"
     
     # Test timeout scenario
+    # Mock: Component isolation for testing without external dependencies
     with patch('httpx.AsyncClient.get') as mock_get:
         # Simulate timeout
         mock_get.side_effect = asyncio.TimeoutError("Request timeout")

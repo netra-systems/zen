@@ -12,7 +12,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.monitoring.system_monitor import (
@@ -37,6 +37,7 @@ class TestPerformanceMonitoring:
         """Create metrics collector for testing."""
         return MetricsCollector(retention_period=60)
         
+    @pytest.mark.asyncio
     async def test_metrics_collection(self, metrics_collector):
         """Test basic metrics collection."""
         # Record some metrics
@@ -52,6 +53,7 @@ class TestPerformanceMonitoring:
         assert cpu_metrics[0].value == 50.0
         assert memory_metrics[0].value == 75.0
         
+    @pytest.mark.asyncio
     async def test_metric_summary_calculation(self, metrics_collector):
         """Test metric summary statistics."""
         # Record multiple values
@@ -68,6 +70,7 @@ class TestPerformanceMonitoring:
         assert summary["avg"] == 30.0
         assert summary["current"] == 50.0
         
+    @pytest.mark.asyncio
     async def test_alert_rule_evaluation(self, metrics_collector):
         """Test performance alert rule evaluation."""
         alert_manager = PerformanceAlertManager(metrics_collector)
@@ -134,6 +137,7 @@ class TestDatabaseIndexOptimization:
 class TestPerformanceOptimizationIntegration:
     """Integration tests for performance optimizations."""
     
+    @pytest.mark.asyncio
     async def test_full_optimization_pipeline(self):
         """Test complete optimization pipeline."""
         # Initialize performance manager
@@ -178,6 +182,7 @@ class TestPerformanceOptimizationIntegration:
         finally:
             await perf_manager.shutdown()
             
+    @pytest.mark.asyncio
     async def test_performance_monitoring_integration(self):
         """Test performance monitoring integration."""
         monitor = PerformanceMonitor()

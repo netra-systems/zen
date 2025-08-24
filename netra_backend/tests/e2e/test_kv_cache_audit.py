@@ -13,7 +13,7 @@ import pytest
 import pytest_asyncio
 
 from netra_backend.app.schemas import SubAgentLifecycle
-from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState
@@ -83,6 +83,7 @@ class TestKVCacheAuditWorkflow:
 
     """Test KV cache audit and optimization workflows."""
     
+    @pytest.mark.asyncio
     async def test_ep_006_kv_cache_audit_real_llm(self, kv_cache_audit_setup):
 
         """Test EP-006: KV cache audit for optimization opportunities using real LLM."""
@@ -95,6 +96,7 @@ class TestKVCacheAuditWorkflow:
 
         await _validate_ep_006_results(results, state, setup)
     
+    @pytest.mark.asyncio
     async def test_kv_cache_usage_analysis(self, kv_cache_audit_setup):
 
         """Test KV cache usage pattern analysis."""
@@ -107,6 +109,7 @@ class TestKVCacheAuditWorkflow:
 
         _validate_usage_analysis_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_kv_cache_optimization_recommendations(self, kv_cache_audit_setup):
 
         """Test KV cache optimization recommendation generation."""
@@ -336,6 +339,7 @@ class TestKVCacheAuditEdgeCases:
 
     """Test edge cases in KV cache audit workflows."""
     
+    @pytest.mark.asyncio
     async def test_empty_cache_system_audit(self, kv_cache_audit_setup):
 
         """Test audit behavior with systems that have no KV cache usage."""
@@ -348,6 +352,7 @@ class TestKVCacheAuditEdgeCases:
 
         _validate_empty_cache_handling(results, state)
     
+    @pytest.mark.asyncio
     async def test_high_cache_utilization_audit(self, kv_cache_audit_setup):
 
         """Test audit behavior with high cache utilization systems."""
@@ -410,6 +415,7 @@ class TestKVCacheWorkflowIntegrity:
 
     """Test overall workflow integrity for KV cache audit."""
     
+    @pytest.mark.asyncio
     async def test_complete_audit_workflow_validation(self, kv_cache_audit_setup):
 
         """Test complete audit workflow validation."""

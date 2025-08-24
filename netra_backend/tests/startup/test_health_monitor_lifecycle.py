@@ -7,9 +7,7 @@ COMPLIANCE: 450-line max file, 25-line max functions
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -53,6 +51,7 @@ class TestServiceRegistration:
         health_monitor.register_service(mock_service_config)
         
         # Create mock monitoring task
+        # Mock: Generic component isolation for controlled unit testing
         mock_task = Mock()
         health_monitor._monitoring_tasks["test_service"] = mock_task
         
@@ -72,17 +71,21 @@ class TestServiceRegistration:
 class TestMonitoringLifecycle:
     """Test monitoring lifecycle management."""
     
+    @pytest.mark.asyncio
     async def test_start_monitoring_unregistered_service(self, health_monitor: StagedHealthMonitor) -> None:
         """Test starting monitoring for unregistered service."""
         with pytest.raises(ValueError, match="Service .* not registered"):
             await health_monitor.start_monitoring("unregistered_service")
 
+    @pytest.mark.asyncio
     async def test_start_monitoring_registered_service(self, health_monitor: StagedHealthMonitor,
                                                       mock_service_config: ServiceConfig) -> None:
         """Test starting monitoring for registered service."""
         health_monitor.register_service(mock_service_config)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('asyncio.create_task') as mock_create_task:
+            # Mock: Generic component isolation for controlled unit testing
             mock_task = Mock()
             mock_create_task.return_value = mock_task
             
@@ -92,9 +95,12 @@ class TestMonitoringLifecycle:
             assert "test_service" in health_monitor._monitoring_tasks
             mock_create_task.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_stop_monitoring(self, health_monitor: StagedHealthMonitor) -> None:
         """Test stopping all monitoring tasks."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_task1 = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_task2 = Mock()
         health_monitor._monitoring_tasks = {"service1": mock_task1, "service2": mock_task2}
         health_monitor._running = True
@@ -102,6 +108,7 @@ class TestMonitoringLifecycle:
         async def mock_gather_func(*args, **kwargs):
             return []
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('asyncio.gather', side_effect=mock_gather_func):
             await health_monitor.stop_monitoring()
             

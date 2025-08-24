@@ -15,8 +15,6 @@ def _setup_environment():
     """Setup Python paths and environment variables"""
     current_dir = Path(__file__).parent
     app_dir = current_dir / "app"
-    sys.path.insert(0, str(current_dir))
-    sys.path.insert(0, str(app_dir))
     os.environ['TESTING'] = '1'
     os.environ['SKIP_APP_INIT'] = '1'
 

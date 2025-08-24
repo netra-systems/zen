@@ -33,17 +33,17 @@ from netra_backend.tests.integration.sso_saml_components import (
 @pytest.fixture
 async def saml_validator():
     """SAML assertion validator fixture"""
-    return SAMLAssertionValidator()
+    yield SAMLAssertionValidator()
 
 @pytest.fixture
 async def token_manager():
     """Enterprise token manager fixture"""
-    return EnterpriseTokenManager()
+    yield EnterpriseTokenManager()
 
 @pytest.fixture
 async def enterprise_tenant_id():
     """Enterprise tenant ID fixture"""
-    return "enterprise_tenant_12345"
+    yield "enterprise_tenant_12345"
 
 @pytest.fixture
 async def valid_saml_assertion():
@@ -59,12 +59,13 @@ async def valid_saml_assertion():
             "mfa_verified": True
         }
     }
-    return base64.b64encode(json.dumps(assertion_data).encode()).decode()
+    yield base64.b64encode(json.dumps(assertion_data).encode()).decode()
 
 @pytest.mark.asyncio  
 class TestSSLSAMLErrorScenarios:
     """Test error scenarios and edge cases for SSO/SAML integration"""
 
+    @pytest.mark.asyncio
     async def test_malformed_assertion_handling(self, saml_validator):
         """Test handling of malformed SAML assertions"""
         malformed_assertion = "invalid.base64.data"
@@ -72,6 +73,7 @@ class TestSSLSAMLErrorScenarios:
         with pytest.raises((ValueError, json.JSONDecodeError)):
             await saml_validator.validate_saml_assertion(malformed_assertion)
 
+    @pytest.mark.asyncio
     async def test_missing_enterprise_claims(self, saml_validator):
         """Test handling of SAML assertions missing enterprise claims"""
         minimal_assertion = await self._create_minimal_assertion()
@@ -99,6 +101,7 @@ class TestSSLSAMLErrorScenarios:
         assert claims["permissions"] == []
         assert claims["mfa_verified"] is False
 
+    @pytest.mark.asyncio
     async def test_token_expiration_handling(self, token_manager, enterprise_tenant_id):
         """Test handling of expired JWT tokens"""
         # Create expired token manually
@@ -130,6 +133,7 @@ class TestSSLSAMLErrorScenarios:
         
         token_manager.tenant_tokens[enterprise_tenant_id][expired_token_id] = expired_payload
 
+    @pytest.mark.asyncio
     async def test_concurrent_tenant_isolation(self, token_manager, saml_validator, valid_saml_assertion):
         """Test tenant isolation under concurrent access"""
         import asyncio
@@ -159,6 +163,7 @@ class TestSSLSAMLErrorScenarios:
             cross_validation = await token_manager.validate_jwt_with_tenant_check(token, wrong_tenant)
             assert cross_validation is None
 
+    @pytest.mark.asyncio
     async def test_invalid_issuer_rejection(self, saml_validator):
         """Test rejection of SAML assertions from invalid issuers"""
         invalid_assertion = await MockIdPErrorGenerator.create_invalid_assertion()
@@ -166,6 +171,7 @@ class TestSSLSAMLErrorScenarios:
         with pytest.raises(ValueError, match="Invalid issuer"):
             await saml_validator.validate_saml_assertion(invalid_assertion)
 
+    @pytest.mark.asyncio
     async def test_expired_assertion_rejection(self, saml_validator):
         """Test rejection of expired SAML assertions"""
         expired_assertion = await MockIdPErrorGenerator.create_expired_assertion()
@@ -173,6 +179,7 @@ class TestSSLSAMLErrorScenarios:
         with pytest.raises(ValueError, match="Assertion expired"):
             await saml_validator.validate_saml_assertion(expired_assertion)
 
+    @pytest.mark.asyncio
     async def test_empty_assertion_handling(self, saml_validator):
         """Test handling of empty SAML assertions"""
         empty_assertion = ""
@@ -180,6 +187,7 @@ class TestSSLSAMLErrorScenarios:
         with pytest.raises(Exception):  # Should raise some form of error
             await saml_validator.validate_saml_assertion(empty_assertion)
 
+    @pytest.mark.asyncio
     async def test_non_json_assertion_handling(self, saml_validator):
         """Test handling of non-JSON SAML assertions"""
         non_json_data = "not-json-data"
@@ -188,6 +196,7 @@ class TestSSLSAMLErrorScenarios:
         with pytest.raises(json.JSONDecodeError):
             await saml_validator.validate_saml_assertion(non_json_assertion)
 
+    @pytest.mark.asyncio
     async def test_missing_required_fields(self, saml_validator):
         """Test handling of assertions missing required fields"""
         incomplete_assertion = {
@@ -202,6 +211,7 @@ class TestSSLSAMLErrorScenarios:
         with pytest.raises(KeyError):
             await saml_validator.validate_saml_assertion(assertion_data)
 
+    @pytest.mark.asyncio
     async def test_invalid_tenant_access_patterns(self, token_manager, enterprise_tenant_id):
         """Test various invalid tenant access patterns"""
         # Test access with non-existent tenant

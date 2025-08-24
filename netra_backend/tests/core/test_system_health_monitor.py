@@ -8,7 +8,7 @@ from pathlib import Path
 import asyncio
 import time
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -40,6 +40,7 @@ class TestSystemHealthMonitor:
     
     def test_register_component_checker(self):
         """Test registering component checker."""
+        # Mock: Generic component isolation for controlled unit testing
         test_checker = Mock()
         self.monitor.register_component_checker("test_component", test_checker)
         
@@ -48,10 +49,12 @@ class TestSystemHealthMonitor:
     
     def test_register_alert_callback(self):
         """Test registering alert callback."""
+        # Mock: Generic component isolation for controlled unit testing
         callback = Mock()
         self.monitor.register_alert_callback(callback)
         
         assert callback in self.monitor.alert_manager.alert_callbacks
+    @pytest.mark.asyncio
     async def test_start_stop_monitoring(self):
         """Test starting and stopping monitoring."""
         assert not self.monitor._running
@@ -62,6 +65,7 @@ class TestSystemHealthMonitor:
         
         await self.monitor.stop_monitoring()
         assert not self.monitor._running
+    @pytest.mark.asyncio
     async def test_start_monitoring_already_running(self):
         """Test starting monitoring when already running."""
         await self.monitor.start_monitoring()
@@ -72,10 +76,12 @@ class TestSystemHealthMonitor:
         
         assert task1 == task2
         await self.monitor.stop_monitoring()
+    @pytest.mark.asyncio
     async def test_stop_monitoring_not_running(self):
         """Test stopping monitoring when not running."""
         # Should not raise exception
         await self.monitor.stop_monitoring()
+    @pytest.mark.asyncio
     async def test_execute_health_check_success(self):
         """Test executing successful health check."""
         expected_result = HealthCheckResult(
@@ -89,18 +95,20 @@ class TestSystemHealthMonitor:
         result = await self.monitor._execute_health_check("test", mock_checker)
         
         assert result == expected_result
+    @pytest.mark.asyncio
     async def test_execute_health_check_sync_function(self):
         """Test executing sync health check function."""
         expected_result = HealthCheckResult(
             component_name="test", success=True, health_score=1.0, response_time_ms=0.0
         )
         
-        def sync_checker():
+        async def sync_checker():
             return expected_result
         
         result = await self.monitor._execute_health_check("test", sync_checker)
         
         assert result == expected_result
+    @pytest.mark.asyncio
     async def test_execute_health_check_legacy_result(self):
         """Test executing health check with legacy result format."""
         legacy_result = {"health_score": 0.8, "metadata": {"key": "value"}}
@@ -115,6 +123,7 @@ class TestSystemHealthMonitor:
         assert result.health_score == 0.8
         assert result.success is True
         assert result.metadata["key"] == "value"
+    @pytest.mark.asyncio
     async def test_execute_health_check_exception(self):
         """Test executing health check that raises exception."""
         async def failing_checker():
@@ -133,6 +142,7 @@ class TestSystemHealthMonitor:
         assert self.monitor._calculate_health_status(0.6) == HealthStatus.DEGRADED
         assert self.monitor._calculate_health_status(0.3) == HealthStatus.UNHEALTHY
         assert self.monitor._calculate_health_status(0.1) == HealthStatus.CRITICAL
+    @pytest.mark.asyncio
     async def test_update_component_from_result(self):
         """Test updating component health from result."""
         result = HealthCheckResult(
@@ -153,6 +163,7 @@ class TestSystemHealthMonitor:
         assert health.error_count == 0
         assert health.metadata["response_time_ms"] == 100.0
         assert health.metadata["connections"] == 5
+    @pytest.mark.asyncio
     async def test_update_component_status_change_alert(self):
         """Test that status change generates alert."""
         # First, set initial health
@@ -162,7 +173,9 @@ class TestSystemHealthMonitor:
         await self.monitor._update_component_from_result(initial_result)
         
         # Mock alert manager
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.create_status_change_alert = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.emit_alert = AsyncMock()
         
         # Update with degraded health
@@ -201,6 +214,7 @@ class TestSystemHealthMonitor:
         false_result = self.monitor._convert_legacy_result("test", False)
         assert false_result.health_score == 0.0
         assert false_result.success is False
+    @pytest.mark.asyncio
     async def test_check_thresholds_response_time(self):
         """Test threshold checking for response time."""
         # Add component with high response time
@@ -210,7 +224,9 @@ class TestSystemHealthMonitor:
         )
         self.monitor.component_health["slow_component"] = health
         
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.create_threshold_alert = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.emit_alert = AsyncMock()
         
         await self.monitor._check_thresholds()
@@ -221,6 +237,7 @@ class TestSystemHealthMonitor:
         assert call_args[1] == "response_time"
         assert call_args[2] == 6000
         assert call_args[3] == 5000
+    @pytest.mark.asyncio
     async def test_check_thresholds_error_count(self):
         """Test threshold checking for error count."""
         # Add component with high error count
@@ -230,12 +247,15 @@ class TestSystemHealthMonitor:
         )
         self.monitor.component_health["error_component"] = health
         
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.create_threshold_alert = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.emit_alert = AsyncMock()
         
         await self.monitor._check_thresholds()
         
         self.monitor.alert_manager.create_threshold_alert.assert_called()
+    @pytest.mark.asyncio
     async def test_evaluate_system_health_critical(self):
         """Test system health evaluation with critical components."""
         # Add healthy and critical components
@@ -246,6 +266,7 @@ class TestSystemHealthMonitor:
             name="critical", status=HealthStatus.CRITICAL, health_score=0.1, last_check=datetime.now(UTC)
         )
         
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor._trigger_system_wide_alert = AsyncMock()
         
         await self.monitor._evaluate_system_health()
@@ -254,6 +275,7 @@ class TestSystemHealthMonitor:
         call_args = self.monitor._trigger_system_wide_alert.call_args[0]
         assert call_args[0] == "critical"
         assert "1 critical components" in call_args[1]
+    @pytest.mark.asyncio
     async def test_evaluate_system_health_degraded(self):
         """Test system health evaluation with degraded system."""
         # Add mostly unhealthy components
@@ -268,6 +290,7 @@ class TestSystemHealthMonitor:
             name="healthy", status=HealthStatus.HEALTHY, health_score=0.9, last_check=datetime.now(UTC)
         )
         
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor._trigger_system_wide_alert = AsyncMock()
         
         await self.monitor._evaluate_system_health()
@@ -275,8 +298,10 @@ class TestSystemHealthMonitor:
         self.monitor._trigger_system_wide_alert.assert_called_once()
         call_args = self.monitor._trigger_system_wide_alert.call_args[0]
         assert call_args[0] == "warning"
+    @pytest.mark.asyncio
     async def test_evaluate_system_health_no_components(self):
         """Test system health evaluation with no components."""
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor._trigger_system_wide_alert = AsyncMock()
         
         await self.monitor._evaluate_system_health()
@@ -319,9 +344,11 @@ class TestSystemHealthMonitor:
         assert self.monitor._determine_system_status(0.7, 0) == "degraded"
         assert self.monitor._determine_system_status(0.4, 0) == "unhealthy"
         assert self.monitor._determine_system_status(0.9, 1) == "critical"  # Critical component present
+    @pytest.mark.asyncio
     async def test_perform_health_checks_integration(self):
         """Test performing health checks integration."""
         # Register mock checker
+        # Mock: Async component isolation for testing without real async operations
         mock_checker = AsyncMock(return_value=HealthCheckResult(
             component_name="test", success=True, health_score=0.8, response_time_ms=50.0
         ))
@@ -332,6 +359,7 @@ class TestSystemHealthMonitor:
         mock_checker.assert_called_once()
         assert "test" in self.monitor.component_health
         assert self.monitor.component_health["test"].health_score == 0.8
+    @pytest.mark.asyncio
     async def test_process_check_results_with_exception(self):
         """Test processing check results with exceptions."""
         results = [

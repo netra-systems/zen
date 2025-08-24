@@ -25,7 +25,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import yaml
@@ -489,6 +489,7 @@ async def hot_reload_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_config_loading_and_validation(hot_reload_manager):
     """Test configuration loading and validation."""
     manager = hot_reload_manager
@@ -509,6 +510,7 @@ async def test_config_loading_and_validation(hot_reload_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_config_registration_and_caching(hot_reload_manager):
     """Test configuration registration and Redis caching."""
     manager = hot_reload_manager
@@ -529,6 +531,7 @@ async def test_config_registration_and_caching(hot_reload_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_config_file_watching(hot_reload_manager):
     """Test configuration file watching and hot reload."""
     manager = hot_reload_manager
@@ -558,6 +561,7 @@ async def test_config_file_watching(hot_reload_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_config_validation_rules(hot_reload_manager):
     """Test configuration validation rules."""
     manager = hot_reload_manager
@@ -585,6 +589,7 @@ async def test_config_validation_rules(hot_reload_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_agent_config_callbacks(hot_reload_manager):
     """Test agent configuration change callbacks."""
     manager = hot_reload_manager
@@ -616,6 +621,7 @@ async def test_agent_config_callbacks(hot_reload_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_config_operations(hot_reload_manager):
     """Test concurrent configuration operations."""
     manager = hot_reload_manager
@@ -656,6 +662,7 @@ async def test_concurrent_config_operations(hot_reload_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_config_reload_performance(hot_reload_manager):
     """Benchmark configuration reload performance."""
     manager = hot_reload_manager
@@ -692,6 +699,7 @@ async def test_config_reload_performance(hot_reload_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_yaml_config_support(hot_reload_manager):
     """Test YAML configuration file support."""
     manager = hot_reload_manager
@@ -712,6 +720,7 @@ async def test_yaml_config_support(hot_reload_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_config_error_handling(hot_reload_manager):
     """Test configuration error handling."""
     manager = hot_reload_manager

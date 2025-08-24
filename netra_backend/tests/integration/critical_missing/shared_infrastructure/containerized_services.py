@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """
 Containerized services for L3 realism level integration testing.
 Simplified version that uses existing database connections for testing.
@@ -35,7 +36,7 @@ class PostgreSQLContainer:
         self.container.start()
         
         # Use existing database URL for testing (test environment variable)
-        self.connection_url = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost:5432/test_db")
+        self.connection_url = get_env().get("DATABASE_URL", "postgresql://user:pass@localhost:5432/test_db")
         
         # Create connection pool for tests (optional for real testing)
         try:

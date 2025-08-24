@@ -19,7 +19,7 @@ import asyncio
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -119,6 +119,7 @@ class ToolExecutionManager:
         self.execution_history.append(execution_record)
         return execution_record
     
+    @pytest.mark.asyncio
     async def test_concurrent_tool_execution(self, tool_configs: List[Dict]) -> Dict[str, Any]:
         """Test concurrent tool execution performance."""
         start_time = time.time()
@@ -166,6 +167,7 @@ async def tool_execution_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_single_tool_execution_pipeline(tool_execution_manager):
     """Test single tool execution through agent pipeline."""
     manager = tool_execution_manager
@@ -187,6 +189,7 @@ async def test_single_tool_execution_pipeline(tool_execution_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_tool_execution_error_handling(tool_execution_manager):
     """Test tool execution error handling and recovery."""
     manager = tool_execution_manager
@@ -209,6 +212,7 @@ async def test_tool_execution_error_handling(tool_execution_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_concurrent_tool_execution_performance(tool_execution_manager):
     """Test concurrent tool execution performance and isolation."""
     manager = tool_execution_manager
@@ -236,6 +240,7 @@ async def test_concurrent_tool_execution_performance(tool_execution_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_tool_result_processing_pipeline(tool_execution_manager):
     """Test tool result processing and response formatting."""
     manager = tool_execution_manager
@@ -273,6 +278,7 @@ async def test_tool_result_processing_pipeline(tool_execution_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_tool_dependency_validation_l3(tool_execution_manager):
     """Test L3 tool dependency validation with real services."""
     manager = tool_execution_manager

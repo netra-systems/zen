@@ -35,6 +35,7 @@ class MockAdminToolDispatcher:
     def __init__(self, llm_manager, tool_dispatcher):
         self.llm_manager = llm_manager
         self.tool_dispatcher = tool_dispatcher
+        # Mock: Generic component isolation for controlled unit testing
         self.audit_logger = AsyncMock()
     
     async def dispatch_admin_operation(self, operation):

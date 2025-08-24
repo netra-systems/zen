@@ -8,7 +8,7 @@ import json
 import os
 from typing import Any, Dict, List
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Generation import DataIngestionParams
 from netra_backend.app.services.generation_job_manager import (
@@ -91,3 +91,85 @@ async def run_data_ingestion_job(job_id: str, params: dict):
         await update_job_status(job_id, "completed", summary=result)
     except Exception as e:
         await _handle_ingestion_error(job_id, e)
+
+
+class DataIngestionService:
+    """
+    Data ingestion service class wrapper.
+    
+    Provides class-based interface for data ingestion operations.
+    Currently implements minimal functionality - designed to be extended.
+    """
+    
+    async def ingest_metrics(self, metrics: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Ingest metrics data into ClickHouse.
+        
+        Args:
+            metrics: List of metric data dictionaries
+            
+        Returns:
+            Ingestion result with status and count
+        """
+        # This method is not yet implemented - will fail as expected for RED TEAM test
+        raise NotImplementedError("Metrics ingestion not yet implemented")
+    
+    async def ingest_logs(self, logs: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Ingest log data into ClickHouse.
+        
+        Args:
+            logs: List of log entry dictionaries
+            
+        Returns:
+            Ingestion result with status and count
+        """
+        # This method is not yet implemented - will fail as expected for RED TEAM test
+        raise NotImplementedError("Log ingestion not yet implemented")
+    
+    async def ingest_metrics_batch(self, metrics: List[Dict[str, Any]], batch_size: int = 100) -> Dict[str, Any]:
+        """
+        Ingest metrics data in batches.
+        
+        Args:
+            metrics: List of metric data dictionaries
+            batch_size: Size of each batch for processing
+            
+        Returns:
+            Batch ingestion result with status and count
+        """
+        # This method is not yet implemented - will fail as expected for RED TEAM test
+        raise NotImplementedError("Batch metrics ingestion not yet implemented")
+    
+    async def get_retention_policy(self) -> Dict[str, Any]:
+        """
+        Get data retention policy configuration.
+        
+        Returns:
+            Retention policy settings
+        """
+        # This method is not yet implemented - will fail as expected for RED TEAM test
+        raise NotImplementedError("Retention policy management not yet implemented")
+    
+    async def cleanup_old_data(self, older_than_days: int) -> Dict[str, Any]:
+        """
+        Clean up data older than specified days.
+        
+        Args:
+            older_than_days: Delete data older than this many days
+            
+        Returns:
+            Cleanup result with status
+        """
+        # This method is not yet implemented - will fail as expected for RED TEAM test
+        raise NotImplementedError("Data cleanup not yet implemented")
+    
+    async def get_schema_version(self) -> str:
+        """
+        Get current schema version.
+        
+        Returns:
+            Schema version string
+        """
+        # This method is not yet implemented - will fail as expected for RED TEAM test
+        raise NotImplementedError("Schema version management not yet implemented")

@@ -7,14 +7,12 @@ MODULAR VERSION: <300 lines, all functions ≤8 lines
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import uuid
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from sqlalchemy import select, text
@@ -92,16 +90,25 @@ class TestDatabaseRepositoryTransactions:
     @pytest.fixture
     def mock_session(self):
         """Create mock database session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.add = MagicMock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.flush = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.refresh = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.execute = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.close = AsyncMock()
         
         # Mock query results
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = None
         mock_result.scalars.return_value.all.return_value = []
@@ -122,6 +129,7 @@ class TestDatabaseRepositoryTransactions:
     def _setup_successful_transaction_mocks(self, mock_session, create_data):
         """Setup mocks for successful transaction"""
         created_entity = MockDatabaseModel(**create_data)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.refresh = AsyncMock(side_effect=lambda entity: setattr(entity, 'id', 'test_123'))
         return created_entity
 
@@ -137,6 +145,7 @@ class TestDatabaseRepositoryTransactions:
         assert len(mock_repository.operation_log) == 1
         assert mock_repository.operation_log[0][0] == operation_type
 
+    @pytest.mark.asyncio
     async def test_successful_transaction_commit(self, mock_session, mock_repository):
         """Test successful transaction commit"""
         create_data = self._setup_successful_transaction_data()
@@ -155,6 +164,7 @@ class TestDatabaseRepositoryTransactions:
         mock_session.add.assert_called_once()
         mock_session.flush.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_integrity_error(self, mock_session, mock_repository):
         """Test transaction rollback on integrity constraint violation"""
         self._setup_integrity_error_mock(mock_session)
@@ -165,6 +175,7 @@ class TestDatabaseRepositoryTransactions:
         """Setup mock to simulate SQL error"""
         mock_session.flush.side_effect = SQLAlchemyError("database connection failed")
 
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_sql_error(self, mock_session, mock_repository):
         """Test transaction rollback on SQL error"""
         self._setup_sql_error_mock(mock_session)
@@ -176,6 +187,7 @@ class TestDatabaseRepositoryTransactions:
         """Setup mock to simulate unexpected error"""
         mock_session.add.side_effect = ValueError("unexpected error during add")
 
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_unexpected_error(self, mock_session, mock_repository):
         """Test transaction rollback on unexpected error"""
         self._setup_unexpected_error_mock(mock_session)
@@ -185,17 +197,24 @@ class TestDatabaseRepositoryTransactions:
 
     def _create_concurrent_sessions(self):
         """Create mock sessions for concurrent operations"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session1 = AsyncMock(spec=AsyncSession)
+        # Mock: Database session isolation for transaction testing without real database dependency
         session2 = AsyncMock(spec=AsyncSession)
         return session1, session2
 
     def _setup_concurrent_session_mocks(self, session1, session2):
         """Setup mocks for concurrent sessions"""
         for session in [session1, session2]:
+            # Mock: Session isolation for controlled testing without external state
             session.add = MagicMock()
+            # Mock: Session isolation for controlled testing without external state
             session.commit = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.flush = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.rollback = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.refresh = AsyncMock()
 
     async def _create_delayed_flush(self):
@@ -211,6 +230,7 @@ class TestDatabaseRepositoryTransactions:
         session1.flush.assert_called_once()
         session2.flush.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_concurrent_transaction_isolation(self, mock_repository):
         """Test transaction isolation under concurrent operations"""
         session1, session2 = self._create_concurrent_sessions()
@@ -226,6 +246,7 @@ class TestDatabaseRepositoryTransactions:
         await asyncio.sleep(2.0)
         return None
 
+    @pytest.mark.asyncio
     async def test_transaction_timeout_handling(self, mock_session, mock_repository):
         """Test handling of transaction timeouts"""
         mock_session.flush.side_effect = self._create_slow_flush

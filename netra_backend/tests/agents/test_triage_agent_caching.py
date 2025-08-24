@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import json
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -24,21 +24,28 @@ from netra_backend.app.redis_manager import RedisManager
 @pytest.fixture
 def mock_llm_manager():
     """Create a mock LLM manager."""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock = Mock(spec=LLMManager)
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock.ask_llm = AsyncMock()
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock.ask_structured_llm = AsyncMock(side_effect=Exception("Structured generation not available in test"))
     return mock
 
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create a mock tool dispatcher."""
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     return Mock(spec=ToolDispatcher)
 
 @pytest.fixture
 def mock_redis_manager():
     """Create a mock Redis manager."""
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock = Mock(spec=RedisManager)
+    # Mock: Async component isolation for testing without real async operations
     mock.get = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.set = AsyncMock(return_value=True)
     return mock
 
@@ -63,9 +70,11 @@ class TestCaching:
             "category": "Cost Optimization",
             "metadata": {"cache_hit": False, "triage_duration_ms": 100}
         }
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_manager.get = AsyncMock(return_value=json.dumps(cached_result))
         
         # Mock LLM should not be called on cache hit
+        # Mock: LLM provider isolation to prevent external API usage and costs
         triage_agent.llm_manager.ask_llm = AsyncMock(return_value='{"category": "Different"}')
         
         await triage_agent.execute(sample_state, "test_run", stream_updates=False)
@@ -84,13 +93,16 @@ class TestCaching:
 
     async def test_cache_miss_and_store(self, triage_agent, sample_state, mock_redis_manager):
         """Test cache miss leading to LLM call and result caching."""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_manager.get = AsyncMock(return_value=None)  # Cache miss
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_manager.set = AsyncMock(return_value=True)  # Mock the set method
         
         llm_response = json.dumps({
             "category": "Cost Optimization",
             "priority": "high"
         })
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         triage_agent.llm_manager.ask_llm = AsyncMock(return_value=llm_response)
         
         await triage_agent.execute(sample_state, "test_run", stream_updates=False)
@@ -169,6 +181,7 @@ class TestExecuteMethod:
 
     async def test_execution_with_websocket_updates(self, triage_agent, sample_state):
         """Test execution with WebSocket updates enabled."""
+        # Mock: WebSocket connection isolation for testing without network overhead
         triage_agent.websocket_manager = AsyncMock()
         
         llm_response = json.dumps({"category": "Cost Optimization"})

@@ -12,10 +12,8 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -71,6 +69,7 @@ class TestThreadMessaging:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.add_message_to_thread') as mock_add:
             mock_add.return_value = {
                 "message_id": "msg456",
@@ -112,6 +111,7 @@ class TestThreadMessaging:
             "offset": 0
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.search_threads') as mock_search:
             mock_search.return_value = {
                 "threads": [
@@ -158,6 +158,7 @@ class TestThreadMessaging:
         """Test retrieving messages from a thread with pagination."""
         thread_id = "thread123"
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.get_thread_messages') as mock_get_messages:
             mock_get_messages.return_value = {
                 "messages": [
@@ -210,6 +211,7 @@ class TestThreadMessaging:
         }
         
         # Use existing function from thread_service that actually exists
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.update_thread') as mock_edit:
             mock_edit.return_value = {
                 "message_id": message_id,
@@ -254,6 +256,7 @@ class TestThreadMessaging:
             "sender_filter": "user"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.search_messages_in_thread') as mock_search:
             mock_search.return_value = {
                 "messages": [
@@ -306,6 +309,7 @@ class TestThreadMessaging:
             "user_id": "user123"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.add_message_reaction') as mock_reaction:
             mock_reaction.return_value = {
                 "message_id": message_id,
@@ -337,6 +341,7 @@ class TestThreadMessaging:
             "message_type": "reply"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.add_reply_to_message') as mock_reply:
             mock_reply.return_value = {
                 "message_id": "msg789",

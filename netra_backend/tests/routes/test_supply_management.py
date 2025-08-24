@@ -12,9 +12,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -45,6 +43,7 @@ class TestSupplyManagement:
     #         "assessment_depth": "detailed"
     #     }
     #     
+    # Mock: Component isolation for testing without external dependencies
     #     with patch('app.services.supply_risk_service.assess_risks') as mock_assess:
     #         mock_assess.return_value = {
     #             "overall_risk_score": 0.25,  # Low risk
@@ -97,6 +96,7 @@ class TestSupplyManagement:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_optimization.optimize') as mock_optimize:
             mock_optimize.return_value = {
                 "recommendations": [
@@ -162,6 +162,7 @@ class TestSupplyManagement:
             "time_period": "last_quarter"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_tracking.get_performance_data') as mock_track:
             mock_track.return_value = {
                 "performance_data": {
@@ -214,6 +215,7 @@ class TestSupplyManagement:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_contract_service.manage_contract') as mock_contract:
             mock_contract.return_value = {
                 "contract_id": "contract_456",
@@ -264,6 +266,7 @@ class TestSupplyManagement:
     #         "notification_channels": ["email", "slack", "webhook"]
     #     }
     #     
+    # Mock: Component isolation for testing without external dependencies
     #     with patch('app.services.supply_disruption_service.monitor_disruptions') as mock_monitor:
     #         mock_monitor.return_value = {
     #             "monitoring_status": "active",
@@ -316,6 +319,7 @@ class TestSupplyManagement:
             "reporting_level": "detailed"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_sustainability_service.assess_sustainability') as mock_assess:
             mock_assess.return_value = {
                 "overall_sustainability_score": 0.78,

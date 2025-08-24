@@ -34,6 +34,7 @@ def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_d
 class TestUsageIncreaseAnalysis:
     """Test analysis of usage increase impact on costs and rate limits."""
     
+    @pytest.mark.asyncio
     async def test_50_percent_usage_increase_impact(self, scaling_analysis_setup):
         """Test: 'I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?'"""
         setup = scaling_analysis_setup
@@ -41,6 +42,7 @@ class TestUsageIncreaseAnalysis:
         results = await execute_scaling_workflow(setup, state)
         validate_50_percent_increase_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_cost_impact_projection(self, scaling_analysis_setup):
         """Test detailed cost impact projection for usage increases."""
         setup = scaling_analysis_setup

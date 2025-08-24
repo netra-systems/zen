@@ -13,7 +13,7 @@ Automatic reconnection -> State recovery -> Session continuity validation
 Coverage: WebSocket resilience, state persistence, automatic recovery, cross-service coordination
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -29,7 +29,7 @@ import pytest
 import websockets
 
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
 
@@ -997,6 +997,7 @@ async def websocket_state_recovery_test():
 
 @pytest.mark.staging
 
+@pytest.mark.asyncio
 async def test_websocket_state_recovery_after_restart_l4(websocket_state_recovery_test):
 
     """Test WebSocket state recovery after service restart in staging."""
@@ -1036,6 +1037,7 @@ async def test_websocket_state_recovery_after_restart_l4(websocket_state_recover
 
 @pytest.mark.staging
 
+@pytest.mark.asyncio
 async def test_websocket_connection_resilience_l4(websocket_state_recovery_test):
 
     """Test WebSocket connection resilience during network interruptions."""
@@ -1057,6 +1059,7 @@ async def test_websocket_connection_resilience_l4(websocket_state_recovery_test)
 
 @pytest.mark.staging  
 
+@pytest.mark.asyncio
 async def test_websocket_state_consistency_validation_l4(websocket_state_recovery_test):
 
     """Test WebSocket state consistency after recovery."""

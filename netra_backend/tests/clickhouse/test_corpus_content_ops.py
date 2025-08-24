@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import ContentGenParams
@@ -27,10 +27,14 @@ from netra_backend.app.services.generation_service import (
 class TestContentGeneration:
     """Test content generation workflows"""
     
+    @pytest.mark.asyncio
     async def test_content_generation_job_flow(self):
         """Test 6: Verify content generation job workflow"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.update_job_status') as mock_update:
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.save_corpus_to_clickhouse') as mock_save:
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
                     # Mock generation results
                     mock_pool.return_value = iter([
@@ -48,11 +52,14 @@ class TestContentGeneration:
                     # Verify corpus was saved
                     _assert_corpus_saved_correctly(mock_save)
 
+    @pytest.mark.asyncio
     async def test_corpus_save_to_clickhouse(self):
         """Test 7: Verify corpus is properly saved to ClickHouse"""
         corpus = _create_test_corpus()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_db.return_value = mock_instance
             
@@ -68,9 +75,12 @@ class TestContentGeneration:
             # Should insert 4 total records
             assert len(insert_call[0][1]) == 4
 
+    @pytest.mark.asyncio
     async def test_corpus_load_from_clickhouse(self):
         """Test 8: Verify corpus is properly loaded from ClickHouse"""
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_db.return_value = mock_instance
             
@@ -87,11 +97,14 @@ class TestContentGeneration:
 class TestBatchProcessing:
     """Test batch processing capabilities"""
     
+    @pytest.mark.asyncio
     async def test_batch_content_upload(self):
         """Test 9: Verify batch content upload with buffering"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
@@ -121,21 +134,27 @@ class TestBatchProcessing:
             # Should process all buffered records
             assert result2["records_uploaded"] == 2
 
+    @pytest.mark.asyncio
     async def test_synthetic_data_batch_ingestion(self):
         """Test 10: Verify synthetic data batch ingestion"""
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_db.return_value = mock_instance
             
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.get_corpus_from_clickhouse') as mock_get:
                 mock_get.return_value = _create_source_corpus()
                 
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.generation_service.synthetic_data_main') as mock_main:
                     # Mock generated logs
                     mock_main.return_value = [
                         {"log": i} for i in range(2500)  # 2.5 batches
                     ]
                     
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.services.generation_service.ingest_records') as mock_ingest:
                         mock_ingest.return_value = 1000  # Each batch
                         
@@ -181,7 +200,9 @@ def _setup_batch_test_mocks():
     """Setup mocks for batch testing."""
     from unittest.mock import MagicMock
     
+    # Mock: Generic component isolation for controlled unit testing
     db = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     corpus = MagicMock()
     corpus.status = "available"
     corpus.table_name = "test_table"

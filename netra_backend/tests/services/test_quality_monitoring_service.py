@@ -9,8 +9,6 @@ The actual tests have been split into focused modules for better maintainability
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from netra_backend.tests.services.test_quality_monitoring_alerts import *
 from netra_backend.tests.services.test_quality_monitoring_basic import *
 from netra_backend.tests.services.test_quality_monitoring_integration import *

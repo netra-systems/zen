@@ -15,7 +15,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -62,17 +62,27 @@ class CrossServiceTransactionManager:
     
     def _mock_session_with_transaction_support(self) -> AsyncMock:
         """Create mock session with full transaction support"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.add = MagicMock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.flush = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.close = AsyncMock()
         
         # Create proper async context manager for begin()
+        # Mock: Generic component isolation for controlled unit testing
         async_context_manager = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         async_context_manager.__aenter__ = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         async_context_manager.__aexit__ = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.begin = MagicMock(return_value=async_context_manager)
         return session
     
@@ -120,6 +130,7 @@ async def real_database_setup():
     await session.close()
     await engine.dispose()
 
+@pytest.mark.asyncio
 async def test_atomic_cross_service_transaction_commit(transaction_manager):
     """Test atomic commit across both services"""
     transaction_id = str(uuid.uuid4())
@@ -128,6 +139,7 @@ async def test_atomic_cross_service_transaction_commit(transaction_manager):
         await _execute_backend_operations(sessions["backend"])
     _verify_successful_transaction(transaction_manager, transaction_id)
 
+@pytest.mark.asyncio
 async def test_cross_service_rollback_coordination(transaction_manager):
     """Test rollback coordination when either service fails"""
     transaction_id = str(uuid.uuid4())
@@ -143,6 +155,7 @@ async def test_cross_service_rollback_coordination(transaction_manager):
     assert log_entry["rollback_completed"] is True
     assert "Simulated constraint violation" in log_entry["error"]
 
+@pytest.mark.asyncio
 async def test_database_connection_pool_management(real_database_setup):
     """Test database connection pool behavior under load"""
     session = real_database_setup["session"]
@@ -150,6 +163,7 @@ async def test_database_connection_pool_management(real_database_setup):
     await connection_manager.test_concurrent_connections(pool_size=5)
     connection_manager.verify_pool_management()
 
+@pytest.mark.asyncio
 async def test_transaction_isolation_levels(transaction_manager):
     """Test transaction isolation across services"""
     isolation_tester = TransactionIsolationTester(transaction_manager)
@@ -200,6 +214,7 @@ class DatabaseConnectionPoolManager:
         self.active_connections = []
         self.connection_stats = {"created": 0, "closed": 0, "max_concurrent": 0}
     
+    @pytest.mark.asyncio
     async def test_concurrent_connections(self, pool_size: int) -> None:
         """Test concurrent database connections"""
         tasks = [self._create_connection() for _ in range(pool_size)]
@@ -232,6 +247,7 @@ class TransactionIsolationTester:
         self.transaction_manager = transaction_manager
         self.isolation_results = {}
     
+    @pytest.mark.asyncio
     async def test_read_committed_isolation(self) -> None:
         """Test READ COMMITTED isolation level"""
         transaction_id = str(uuid.uuid4())
@@ -239,6 +255,7 @@ class TransactionIsolationTester:
             await asyncio.sleep(0.1)  # Simulate transaction work
         self.isolation_results["read_committed"] = True
     
+    @pytest.mark.asyncio
     async def test_serializable_isolation(self) -> None:
         """Test SERIALIZABLE isolation level"""
         transaction_id = str(uuid.uuid4())

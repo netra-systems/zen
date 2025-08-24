@@ -119,19 +119,32 @@ class CacheConsistencyAcrossRegionsL3Manager:
                 except Exception as e:
                     logger.error(f"Failed to connect to Redis for region {region}: {e}")
                     # Fallback to mock only if connection fails
-                    from unittest.mock import AsyncMock
+                    from unittest.mock import AsyncMock, MagicMock
+                    # Mock: Generic component isolation for controlled unit testing
                     client = AsyncMock()
+                    # Mock: Generic component isolation for controlled unit testing
                     client.ping = AsyncMock()
+                    # Mock: Async component isolation for testing without real async operations
                     client.get = AsyncMock(return_value=None)
+                    # Mock: Generic component isolation for controlled unit testing
                     client.set = AsyncMock()
+                    # Mock: Generic component isolation for controlled unit testing
                     client.setex = AsyncMock()
+                    # Mock: Async component isolation for testing without real async operations
                     client.delete = AsyncMock(return_value=0)
+                    # Mock: Async component isolation for testing without real async operations
                     client.exists = AsyncMock(return_value=False)
+                    # Mock: Async component isolation for testing without real async operations
                     client.mget = AsyncMock(return_value=[])
+                    # Mock: Generic component isolation for controlled unit testing
                     client.mset = AsyncMock()
+                    # Mock: Async component isolation for testing without real async operations
                     client.info = AsyncMock(return_value={"role": "master"})
+                    # Mock: Async component isolation for testing without real async operations
                     client.scan_iter = AsyncMock(return_value=iter([]))
+                    # Mock: Async component isolation for testing without real async operations
                     client.ttl = AsyncMock(return_value=-1)
+                    # Mock: Generic component isolation for controlled unit testing
                     client.expire = AsyncMock()
                     self.redis_clients[region] = client
                     logger.warning(f"Using mock Redis client for region {region} due to connection failure")
@@ -279,6 +292,7 @@ class CacheConsistencyAcrossRegionsL3Manager:
             "sync_results": sync_results
         }
     
+    @pytest.mark.asyncio
     async def test_eventual_consistency(self, test_keys_count: int) -> Dict[str, Any]:
         """Test eventual consistency across regions."""
         test_keys = [f"consistency_test_{i}_{uuid.uuid4().hex[:8]}" for i in range(test_keys_count)]
@@ -366,6 +380,7 @@ class CacheConsistencyAcrossRegionsL3Manager:
         
         return True
     
+    @pytest.mark.asyncio
     async def test_conflict_resolution(self, conflict_scenarios: int) -> Dict[str, Any]:
         """Test conflict resolution mechanisms for concurrent updates."""
         conflict_results = {
@@ -478,6 +493,7 @@ class CacheConsistencyAcrossRegionsL3Manager:
             logger.error(f"Conflict resolution failed for key {key}: {e}")
             return False
     
+    @pytest.mark.asyncio
     async def test_cross_region_read_performance(self, read_operations: int) -> Dict[str, Any]:
         """Test performance of cross-region cache reads."""
         # Pre-populate data across regions
@@ -629,6 +645,7 @@ async def regional_consistency_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_multi_region_cache_sync(regional_consistency_manager):
     """L3: Test cache synchronization across multiple regions."""
     # Test sync for a key across all regions
@@ -653,6 +670,7 @@ async def test_multi_region_cache_sync(regional_consistency_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_eventual_consistency_convergence(regional_consistency_manager):
     """L3: Test eventual consistency convergence across regions."""
     result = await regional_consistency_manager.test_eventual_consistency(10)
@@ -667,6 +685,7 @@ async def test_eventual_consistency_convergence(regional_consistency_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cross_region_conflict_resolution(regional_consistency_manager):
     """L3: Test conflict resolution for concurrent cross-region updates."""
     result = await regional_consistency_manager.test_conflict_resolution(8)
@@ -681,6 +700,7 @@ async def test_cross_region_conflict_resolution(regional_consistency_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cross_region_read_performance(regional_consistency_manager):
     """L3: Test cross-region cache read performance."""
     result = await regional_consistency_manager.test_cross_region_read_performance(80)
@@ -699,6 +719,7 @@ async def test_cross_region_read_performance(regional_consistency_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_regional_consistency_sla_compliance(regional_consistency_manager):
     """L3: Test comprehensive regional cache consistency SLA compliance."""
     # Execute comprehensive test suite

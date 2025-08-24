@@ -11,7 +11,7 @@ L3 Test: Uses real WebSocket server, Redis pub/sub, and authentication service.
 Performance target: WebSocket connection establishment < 2 seconds with 50+ concurrent connections.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -24,12 +24,12 @@ import websockets
 import ssl
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 import httpx
 
 import redis.asyncio as redis
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.schemas import User
 from netra_backend.app.clients.auth_client import auth_client
 from test_framework.mock_utils import mock_justified
@@ -379,6 +379,7 @@ class TestWebSocketFirstLoadL3:
 
             yield "mock_jwt_token_for_testing"
     
+    @pytest.mark.asyncio
     async def test_websocket_upgrade_from_http(self, ws_manager, redis_client, mock_auth_token):
 
         """Test WebSocket upgrade from HTTP successful."""
@@ -423,6 +424,7 @@ class TestWebSocketFirstLoadL3:
 
         await ws_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_authentication_token_validation(self, ws_manager, redis_client, mock_auth_token):
 
         """Test authentication token validation before connection."""
@@ -507,6 +509,7 @@ class TestWebSocketFirstLoadL3:
 
         await ws_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_connection_establishment_performance(self, ws_manager, redis_client, connection_tracker, test_users):
 
         """Test connection establishment < 2 seconds."""
@@ -557,6 +560,7 @@ class TestWebSocketFirstLoadL3:
 
             await ws_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_heartbeat_ping_pong_mechanism(self, ws_manager, redis_client):
 
         """Test heartbeat/ping-pong mechanism."""
@@ -615,6 +619,7 @@ class TestWebSocketFirstLoadL3:
 
         await redis_client.delete(heartbeat_key)
     
+    @pytest.mark.asyncio
     async def test_message_delivery_confirmation(self, ws_manager, redis_client):
 
         """Test message delivery confirmation."""
@@ -671,6 +676,7 @@ class TestWebSocketFirstLoadL3:
 
         await ws_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_reconnection_after_disconnect(self, ws_manager, redis_client, connection_tracker):
 
         """Test reconnection after disconnect."""
@@ -743,6 +749,7 @@ class TestWebSocketFirstLoadL3:
 
         await ws_manager.disconnect_user(user.id, websocket2)
     
+    @pytest.mark.asyncio
     async def test_concurrent_connections_50_plus(self, ws_manager, redis_client, connection_tracker, test_users):
 
         """Test handling 50+ concurrent connections."""
@@ -857,6 +864,7 @@ class TestWebSocketFirstLoadL3:
     
     @mock_justified("L3: Testing real WebSocket connection performance with Redis")
 
+    @pytest.mark.asyncio
     async def test_websocket_performance_under_load(self, ws_manager, redis_client, connection_tracker, test_users):
 
         """Test WebSocket performance under sustained load."""

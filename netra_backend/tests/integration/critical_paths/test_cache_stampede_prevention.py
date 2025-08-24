@@ -273,6 +273,7 @@ class CacheStampedePreventionL3Manager:
             # Still no value - this is a failure case
             raise Exception(f"Failed to get or compute value for {key}")
     
+    @pytest.mark.asyncio
     async def test_basic_stampede_prevention(self, concurrent_requests: int) -> Dict[str, Any]:
         """Test basic stampede prevention with concurrent requests for same key."""
         test_key = f"stampede_test_{uuid.uuid4().hex[:8]}"
@@ -309,6 +310,7 @@ class CacheStampedePreventionL3Manager:
             "stampede_prevented": computations <= 1  # Should be only 1 computation
         }
     
+    @pytest.mark.asyncio
     async def test_multiple_key_stampede_prevention(self, key_count: int, requests_per_key: int) -> Dict[str, Any]:
         """Test stampede prevention across multiple keys."""
         test_keys = [f"multi_stampede_{i}_{uuid.uuid4().hex[:8]}" for i in range(key_count)]
@@ -368,6 +370,7 @@ class CacheStampedePreventionL3Manager:
             "key_results": key_results
         }
     
+    @pytest.mark.asyncio
     async def test_lock_timeout_and_recovery(self, timeout_scenario: str) -> Dict[str, Any]:
         """Test lock timeout handling and recovery scenarios."""
         test_key = f"timeout_test_{uuid.uuid4().hex[:8]}"
@@ -426,6 +429,7 @@ class CacheStampedePreventionL3Manager:
         else:
             raise ValueError(f"Unknown timeout scenario: {timeout_scenario}")
     
+    @pytest.mark.asyncio
     async def test_cache_warming_prevention(self, warming_key_count: int) -> Dict[str, Any]:
         """Test stampede prevention during cache warming scenarios."""
         warming_keys = [f"warming_{i}_{uuid.uuid4().hex[:8]}" for i in range(warming_key_count)]
@@ -540,6 +544,7 @@ async def stampede_prevention_manager(isolated_redis_client):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_basic_cache_stampede_prevention(stampede_prevention_manager):
     """L3: Test basic cache stampede prevention with concurrent requests."""
     result = await stampede_prevention_manager.test_basic_stampede_prevention(20)
@@ -555,6 +560,7 @@ async def test_basic_cache_stampede_prevention(stampede_prevention_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_multiple_key_stampede_prevention(stampede_prevention_manager):
     """L3: Test stampede prevention across multiple keys simultaneously."""
     result = await stampede_prevention_manager.test_multiple_key_stampede_prevention(10, 8)
@@ -572,6 +578,7 @@ async def test_multiple_key_stampede_prevention(stampede_prevention_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_lock_timeout_holder_dies_scenario(stampede_prevention_manager):
     """L3: Test lock timeout handling when lock holder dies."""
     result = await stampede_prevention_manager.test_lock_timeout_and_recovery("holder_dies")
@@ -586,6 +593,7 @@ async def test_lock_timeout_holder_dies_scenario(stampede_prevention_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_lock_timeout_slow_computation_scenario(stampede_prevention_manager):
     """L3: Test behavior when computation takes longer than lock TTL."""
     result = await stampede_prevention_manager.test_lock_timeout_and_recovery("slow_computation")
@@ -599,6 +607,7 @@ async def test_lock_timeout_slow_computation_scenario(stampede_prevention_manage
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cache_warming_stampede_prevention(stampede_prevention_manager):
     """L3: Test stampede prevention during cache warming scenarios."""
     result = await stampede_prevention_manager.test_cache_warming_prevention(15)
@@ -617,6 +626,7 @@ async def test_cache_warming_stampede_prevention(stampede_prevention_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cache_stampede_prevention_sla_compliance(stampede_prevention_manager):
     """L3: Test comprehensive cache stampede prevention SLA compliance."""
     # Execute comprehensive test suite

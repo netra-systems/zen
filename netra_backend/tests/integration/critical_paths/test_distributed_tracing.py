@@ -19,7 +19,7 @@ import asyncio
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 try:
@@ -30,6 +30,7 @@ try:
 except ImportError:
     # Mock OpenTelemetry components if not available
     from unittest.mock import MagicMock
+    # Mock: Generic component isolation for controlled unit testing
     trace = MagicMock()
     JaegerExporter = MagicMock
     TracerProvider = MagicMock
@@ -46,6 +47,7 @@ class OpenTelemetryService:
         return True
     
     async def get_tracer(self, name="test"):
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
 
 class SpanManager:
@@ -53,6 +55,7 @@ class SpanManager:
         pass
     
     async def create_span(self, name, **kwargs):
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
 
 logger = logging.getLogger(__name__)
@@ -136,6 +139,7 @@ class DistributedTracingManager:
             self.active_traces.append(trace_record)
             return trace_record
     
+    @pytest.mark.asyncio
     async def test_context_propagation(self, service_chain: List[str]) -> Dict[str, Any]:
         """Test trace context propagation through service chain."""
         propagation_start = time.time()
@@ -307,6 +311,7 @@ async def distributed_tracing_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_distributed_trace_creation_and_propagation(distributed_tracing_manager):
     """Test distributed trace creation and span propagation."""
     manager = distributed_tracing_manager
@@ -334,6 +339,7 @@ async def test_distributed_trace_creation_and_propagation(distributed_tracing_ma
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_trace_context_propagation_chain(distributed_tracing_manager):
     """Test trace context propagation through service chain."""
     manager = distributed_tracing_manager
@@ -353,6 +359,7 @@ async def test_trace_context_propagation_chain(distributed_tracing_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_error_tracing_and_exception_handling(distributed_tracing_manager):
     """Test error tracing and exception handling in traces."""
     manager = distributed_tracing_manager
@@ -376,6 +383,7 @@ async def test_error_tracing_and_exception_handling(distributed_tracing_manager)
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_trace_collection_and_analysis(distributed_tracing_manager):
     """Test trace collection and analysis capabilities."""
     manager = distributed_tracing_manager

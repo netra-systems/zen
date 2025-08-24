@@ -18,7 +18,7 @@ from pathlib import Path
 import asyncio
 from datetime import UTC, datetime
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -37,6 +37,7 @@ logger = central_logger.get_logger(__name__)
 class TestPreExecutionHooks:
     """Test pre-execution hooks for validation and setup."""
     
+    @pytest.mark.asyncio
     async def test_validation_hook_success(self):
         """Test successful pre-execution validation hook."""
         hook_manager = self._create_mock_hook_manager()
@@ -47,6 +48,7 @@ class TestPreExecutionHooks:
         hook_manager.quality_gate_service.validate_content.assert_called_once()
         assert state.quality_metrics.get("TestAgent") is not None
     
+    @pytest.mark.asyncio
     async def test_validation_hook_failure(self):
         """Test pre-execution validation hook failure handling."""
         hook_manager = self._create_mock_hook_manager()
@@ -64,6 +66,7 @@ class TestPreExecutionHooks:
         assert hook_manager.strict_mode is True
         assert hook_manager.quality_stats['total_validations'] == 0
     
+    @pytest.mark.asyncio
     async def test_validation_hook_with_context(self):
         """Test validation hook with execution context."""
         hook_manager = self._create_mock_hook_manager()
@@ -76,8 +79,11 @@ class TestPreExecutionHooks:
     
     def _create_mock_hook_manager(self):
         """Create mock hook manager for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         quality_gate = Mock()
+        # Mock: Async component isolation for testing without real async operations
         quality_gate.validate_content = AsyncMock(return_value=self._create_validation_result())
+        # Mock: Generic component isolation for controlled unit testing
         monitoring = Mock()
         return QualityHooksManager(quality_gate, monitoring)
     
@@ -102,6 +108,7 @@ class TestPreExecutionHooks:
 class TestPostExecutionHooks:
     """Test post-execution hooks for cleanup and logging."""
     
+    @pytest.mark.asyncio
     async def test_cleanup_hook_success(self):
         """Test successful post-execution cleanup hook."""
         hook_manager = self._create_mock_hook_manager()
@@ -111,6 +118,7 @@ class TestPostExecutionHooks:
         await hook_manager.quality_monitoring_hook(context, "TestAgent", state)
         hook_manager.monitoring_service.record_quality_event.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_cleanup_hook_no_metrics(self):
         """Test cleanup hook when no metrics exist."""
         hook_manager = self._create_mock_hook_manager()
@@ -120,6 +128,7 @@ class TestPostExecutionHooks:
         await hook_manager.quality_monitoring_hook(context, "TestAgent", state)
         hook_manager.monitoring_service.record_quality_event.assert_not_called()
     
+    @pytest.mark.asyncio
     async def test_logging_hook_formatting(self):
         """Test logging hook with proper formatting."""
         hook_manager = self._create_mock_hook_manager()
@@ -128,6 +137,7 @@ class TestPostExecutionHooks:
         hook_manager._log_validation_success(validation_result)
         # Verify logging through captured logs if needed
     
+    @pytest.mark.asyncio
     async def test_post_execution_state_cleanup(self):
         """Test state cleanup in post-execution hook."""
         hook_manager = self._create_mock_hook_manager()
@@ -140,8 +150,11 @@ class TestPostExecutionHooks:
     
     def _create_mock_hook_manager(self):
         """Create mock hook manager for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         quality_gate = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         monitoring = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         monitoring.record_quality_event = AsyncMock()
         return QualityHooksManager(quality_gate, monitoring)
     
@@ -170,6 +183,7 @@ class TestPostExecutionHooks:
 class TestHookExecutionSequence:
     """Test hook execution sequence and coordination."""
     
+    @pytest.mark.asyncio
     async def test_hook_sequence_execution(self):
         """Test proper hook execution sequence."""
         hook_manager = self._create_hook_manager()
@@ -186,6 +200,7 @@ class TestHookExecutionSequence:
         # Verify hook sequence completed
         assert hook_manager.quality_stats['total_validations'] == 1
     
+    @pytest.mark.asyncio
     async def test_hook_state_sharing(self):
         """Test state sharing between hooks."""
         hook_manager = self._create_hook_manager()
@@ -201,6 +216,7 @@ class TestHookExecutionSequence:
         # Post-hook can access modified state
         await hook_manager.quality_monitoring_hook(context, "TestAgent", state)
     
+    @pytest.mark.asyncio
     async def test_hook_error_isolation(self):
         """Test hook error isolation and recovery."""
         hook_manager = self._create_hook_manager()
@@ -215,7 +231,9 @@ class TestHookExecutionSequence:
     
     def _create_hook_manager(self) -> QualityHooksManager:
         """Create quality hook manager for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         quality_gate = Mock()
+        # Mock: Async component isolation for testing without real async operations
         quality_gate.validate_content = AsyncMock(
             return_value=ValidationResult(
                 passed=True, 
@@ -223,7 +241,9 @@ class TestHookExecutionSequence:
                 retry_suggested=False
             )
         )
+        # Mock: Generic component isolation for controlled unit testing
         monitoring = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         monitoring.record_quality_event = AsyncMock()
         return QualityHooksManager(quality_gate, monitoring)
     

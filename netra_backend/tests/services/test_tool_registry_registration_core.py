@@ -6,12 +6,10 @@ Tests basic tool registration functionality
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import json
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from langchain_core.tools import BaseTool
@@ -48,6 +46,7 @@ class TestToolRegistryRegistration:
     @pytest.fixture
     def mock_db_session(self):
         """Mock database session"""
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     @pytest.fixture
@@ -162,6 +161,7 @@ class TestToolRegistryRegistration:
     def test_register_tool_validation_failure(self, tool_registry):
         """Test tool registration with validation failure"""
         # Setup
+        # Mock: Generic component isolation for controlled unit testing
         invalid_tool = MagicMock()
         invalid_tool.name = ""  # Invalid empty name
         invalid_tool.description = "Valid description"
@@ -203,6 +203,7 @@ class TestToolRegistryRegistration:
             MockTool(name="tool_1", description="Valid tool 1"),
             MockTool(name="tool_2", description="Valid tool 2")
         ]
+        # Mock: Generic component isolation for controlled unit testing
         invalid_tool = MagicMock()
         invalid_tool.name = ""  # Invalid
         

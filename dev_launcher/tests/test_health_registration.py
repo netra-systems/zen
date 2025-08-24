@@ -16,6 +16,7 @@ class TestHealthRegistrationHelper(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
+        # Mock: Generic component isolation for controlled unit testing
         self.mock_health_monitor = Mock()
         self.helper = HealthRegistrationHelper(
             self.mock_health_monitor, 
@@ -37,6 +38,7 @@ class TestHealthRegistrationHelper(unittest.TestCase):
     
     def test_register_frontend_with_health_info(self):
         """Test frontend registration with valid health info."""
+        # Mock: Generic component isolation for controlled unit testing
         health_info = {'process': Mock()}
         self.helper.register_frontend(health_info)
         self.mock_health_monitor.register_service.assert_called_once()
@@ -48,10 +50,12 @@ class TestHealthRegistrationHelper(unittest.TestCase):
         self.helper.register_frontend(None)
         self.mock_health_monitor.register_service.assert_not_called()
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.health_registration.print_with_emoji')
     def test_register_all_services(self, mock_print):
         """Test registering all services."""
         backend_info = {'port': 8000}
+        # Mock: Generic component isolation for controlled unit testing
         frontend_info = {'process': Mock()}
         self.helper.register_all_services(backend_info, frontend_info)
         mock_print.assert_called_once()
@@ -60,6 +64,7 @@ class TestHealthRegistrationHelper(unittest.TestCase):
     def test_health_check_creation(self):
         """Test health check callback creation."""
         health_info = {'port': 8000}
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.health_registration.create_url_health_check') as mock_create:
             mock_create.return_value = lambda: True
             self.helper.register_backend(health_info)

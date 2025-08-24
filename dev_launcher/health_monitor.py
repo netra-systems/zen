@@ -17,6 +17,7 @@ Windows Enhancements:
 This module ensures processes stay running while respecting startup timing requirements.
 """
 
+import asyncio
 import logging
 import subprocess
 import sys
@@ -27,7 +28,18 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, Optional, Set
 
+# Import coordination components for integration
+try:
+    from dev_launcher.readiness_checker import ReadinessManager
+    from dev_launcher.service_registry import get_global_service_registry, ServiceStatus
+    COORDINATION_AVAILABLE = True
+except ImportError:
+    COORDINATION_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
+
+if not COORDINATION_AVAILABLE:
+    logger.warning("Coordination components not available, running in legacy mode")
 
 
 class ServiceState(Enum):

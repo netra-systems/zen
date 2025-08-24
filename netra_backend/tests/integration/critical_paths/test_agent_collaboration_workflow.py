@@ -138,6 +138,7 @@ class AgentCollaborationTester:
             print(f"[ERROR] Setup error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_supervisor_initialization(self) -> bool:
         """Test supervisor agent initialization."""
         print("\n[SUPERVISOR] Testing supervisor agent initialization...")
@@ -190,6 +191,7 @@ class AgentCollaborationTester:
             print(f"[ERROR] Supervisor init error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_sub_agent_spawning(self) -> bool:
         """Test spawning of sub-agents."""
         print("\n[SPAWN] Testing sub-agent spawning...")
@@ -264,6 +266,7 @@ class AgentCollaborationTester:
             print(f"[ERROR] Sub-agent spawning error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_task_delegation(self) -> bool:
         """Test task delegation from supervisor to sub-agents."""
         print("\n[DELEGATION] Testing task delegation...")
@@ -349,6 +352,7 @@ class AgentCollaborationTester:
             print(f"[ERROR] Task delegation error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_inter_agent_communication(self) -> bool:
         """Test communication between agents."""
         print("\n[COMMUNICATION] Testing inter-agent communication...")
@@ -443,6 +447,7 @@ class AgentCollaborationTester:
             print(f"[ERROR] Communication test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_result_aggregation(self) -> bool:
         """Test result aggregation from multiple agents."""
         print("\n[AGGREGATION] Testing result aggregation...")
@@ -523,6 +528,7 @@ class AgentCollaborationTester:
             print(f"[ERROR] Result aggregation error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_error_propagation(self) -> bool:
         """Test error propagation between agents."""
         print("\n[ERRORS] Testing error propagation...")
@@ -598,6 +604,7 @@ class AgentCollaborationTester:
             print(f"[ERROR] Error propagation test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_resource_pooling(self) -> bool:
         """Test resource pooling and sharing between agents."""
         print("\n[RESOURCES] Testing resource pooling...")
@@ -672,6 +679,7 @@ class AgentCollaborationTester:
             print(f"[ERROR] Resource pooling error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_collaborative_completion(self) -> bool:
         """Test collaborative task completion."""
         print("\n[COLLABORATION] Testing collaborative task completion...")
@@ -771,6 +779,7 @@ class AgentCollaborationTester:
             print(f"[ERROR] Collaborative completion error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_agent_health_monitoring(self) -> bool:
         """Test agent health monitoring and recovery."""
         print("\n[HEALTH] Testing agent health monitoring...")
@@ -858,6 +867,7 @@ class AgentCollaborationTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_agent_collaboration_workflow():
     """Test complete agent collaboration workflow."""
     async with AgentCollaborationTester() as tester:

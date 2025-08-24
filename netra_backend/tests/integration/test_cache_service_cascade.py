@@ -53,6 +53,7 @@ class TestCacheServiceCascade:
         
         await self.cache_manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_cache_warming_performance(self):
         """Validate cache warming performance and consistency."""
         logger.info("Testing cache warming performance")
@@ -107,6 +108,7 @@ class TestCacheServiceCascade:
         
         logger.info(f"Cache warming test passed: avg_time={avg_warming_time:.2f}ms")
     
+    @pytest.mark.asyncio
     async def test_race_condition_prevention(self):
         """Validate prevention of race conditions during concurrent invalidation."""
         logger.info("Testing race condition prevention")
@@ -191,6 +193,7 @@ class TestCacheServiceCascade:
         
         logger.info(f"Race condition test passed: {total_operations} operations, {success_operations} successful")
     
+    @pytest.mark.asyncio
     async def test_service_level_invalidation(self):
         """Test service-level cache invalidation patterns."""
         logger.info("Testing service-level invalidation")
@@ -241,6 +244,7 @@ class TestCacheServiceCascade:
         
         logger.info("Service-level invalidation test passed")
     
+    @pytest.mark.asyncio
     async def test_cascade_propagation_timing(self):
         """Test timing and performance of cascade propagation."""
         logger.info("Testing cascade propagation timing")
@@ -282,6 +286,7 @@ class TestCacheServiceCascade:
         
         logger.info(f"Cascade propagation test passed: avg={avg_propagation_time:.2f}ms, max={max_propagation_time:.2f}ms")
     
+    @pytest.mark.asyncio
     async def test_batch_invalidation_efficiency(self):
         """Test efficiency of batch invalidation operations."""
         logger.info("Testing batch invalidation efficiency")

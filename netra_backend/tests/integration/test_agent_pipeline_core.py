@@ -23,7 +23,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -71,6 +71,7 @@ class TestAgentResponsePipelineCore:
 
         agent_state = DeepAgentState(user_id=test_user_id, thread_id=str(uuid.uuid4()), current_agent="triage", redis_manager=redis_manager_mock)
 
+        # Mock: Generic component isolation for controlled unit testing
         triage_agent = Mock()
         
         async def mock_triage_process(message):
@@ -81,8 +82,10 @@ class TestAgentResponsePipelineCore:
             else:
                 return {"routing_decision": "general_assistant", "confidence": 0.7, "reasoning": "General inquiry", "estimated_complexity": "low"}
 
+        # Mock: Async component isolation for testing without real async operations
         triage_agent.process_message = AsyncMock(side_effect=mock_triage_process)
 
+        # Mock: Generic component isolation for controlled unit testing
         optimization_agent = Mock()
         
         async def mock_optimization_response(message, triage_result):
@@ -93,6 +96,7 @@ class TestAgentResponsePipelineCore:
             
             return {"response": llm_response["content"], "agent_type": "optimization_specialist", "processing_time": 0.5, "quality_metrics": {"specificity_score": 0.85, "actionability_score": 0.90, "technical_accuracy": 0.88}}
 
+        # Mock: Async component isolation for testing without real async operations
         optimization_agent.process_request = AsyncMock(side_effect=mock_optimization_response)
 
         start_time = time.time()

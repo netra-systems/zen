@@ -141,6 +141,7 @@ class TestErrorHandlingL3Integration:
                 raise ConnectionError("Service unavailable")
             return {"success": True}
         
+        # Mock: Async component isolation for testing without real async operations
         with patch('asyncio.sleep', new_callable=AsyncMock):
             result = await error_handler.retry_with_backoff(
                 failing_operation,

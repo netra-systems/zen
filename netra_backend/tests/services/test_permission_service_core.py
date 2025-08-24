@@ -6,10 +6,8 @@ Split from test_permission_service.py to maintain 450-line limit
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import os
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from sqlalchemy.orm import Session
@@ -57,6 +55,7 @@ class TestDetectDeveloperStatus:
     
     def test_detect_developer_with_dev_mode_env(self):
         """Test developer detection with DEV_MODE environment variable"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@example.com"
         
@@ -74,6 +73,7 @@ class TestDetectDeveloperStatus:
     
     def test_detect_developer_with_netra_email(self):
         """Test developer detection with @netrasystems.ai email"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         
         user.email = "developer@netrasystems.ai"
@@ -91,6 +91,7 @@ class TestDetectDeveloperStatus:
     
     def test_detect_developer_with_dev_environment(self):
         """Test developer detection with development environment"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@example.com"
         
@@ -106,6 +107,7 @@ class TestDetectDeveloperStatus:
     
     def test_detect_developer_priority_order(self):
         """Test that detection methods are checked in correct priority order"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@example.com"
         
@@ -115,6 +117,7 @@ class TestDetectDeveloperStatus:
     
     def test_detect_developer_with_none_email(self):
         """Test developer detection with None email"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = None
         
@@ -131,7 +134,9 @@ class TestUpdateUserRole:
     
     def test_update_user_role_auto_elevate_to_developer(self):
         """Test auto-elevation to developer role"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@netrasystems.ai"
         user.role = "standard_user"
@@ -146,7 +151,9 @@ class TestUpdateUserRole:
     
     def test_update_user_role_no_elevation_for_admin(self):
         """Test that admins are not downgraded to developer"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "admin@netrasystems.ai"
         user.role = "admin"
@@ -160,7 +167,9 @@ class TestUpdateUserRole:
     
     def test_update_user_role_no_elevation_for_super_admin(self):
         """Test that super admins are not changed"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "superadmin@netrasystems.ai"
         user.role = "super_admin"
@@ -174,7 +183,9 @@ class TestUpdateUserRole:
     
     def test_update_user_role_skip_developer_check(self):
         """Test skipping developer check"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@netrasystems.ai"
         user.role = "standard_user"
@@ -189,7 +200,9 @@ class TestUpdateUserRole:
     
     def test_update_user_role_already_developer(self):
         """Test that developers are not re-elevated"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "dev@netrasystems.ai"
         user.role = "developer"
@@ -203,7 +216,9 @@ class TestUpdateUserRole:
     
     def test_update_user_role_power_user_elevation(self):
         """Test power user elevation to developer"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "power@netrasystems.ai"
         user.role = "power_user"
@@ -221,6 +236,7 @@ class TestCheckPermission:
     
     def test_check_permission_standard_user(self):
         """Test permission checks for standard user"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "standard_user"
         user.permissions = None
@@ -233,6 +249,7 @@ class TestCheckPermission:
     
     def test_check_permission_super_admin(self):
         """Test permission checks for super admin (wildcard)"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "super_admin"
         user.permissions = None
@@ -246,6 +263,7 @@ class TestCheckPermission:
     
     def test_check_permission_developer(self):
         """Test permission checks for developer"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "developer"
         user.permissions = None
@@ -258,6 +276,7 @@ class TestCheckPermission:
     
     def test_check_permission_invalid_role(self):
         """Test permission check with invalid role"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "invalid_role"
         user.permissions = None
@@ -267,6 +286,7 @@ class TestCheckPermission:
     
     def test_check_permission_none_role(self):
         """Test permission check with None role"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = None
         user.permissions = None
@@ -279,6 +299,7 @@ class TestGetUserPermissions:
     
     def test_get_user_permissions_standard_user(self):
         """Test getting permissions for standard user"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "standard_user"
         user.permissions = None  # No custom permissions
@@ -288,6 +309,7 @@ class TestGetUserPermissions:
     
     def test_get_user_permissions_super_admin(self):
         """Test getting permissions for super admin"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "super_admin"
         user.permissions = None
@@ -300,6 +322,7 @@ class TestGetUserPermissions:
     
     def test_get_user_permissions_invalid_role(self):
         """Test getting permissions for invalid role"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "invalid_role"
         user.permissions = None

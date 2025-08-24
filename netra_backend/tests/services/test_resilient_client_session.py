@@ -3,9 +3,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -25,32 +23,39 @@ class TestResilientHTTPClientSession:
             base_url="https://api.example.com",
             default_headers={"User-Agent": "test-client"}
         )
+    @pytest.mark.asyncio
     async def test_get_session_new(self, client):
         """Test getting new session."""
         mock_session = create_mock_session()
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         with patch('app.services.external_api_client.ClientSession', return_value=mock_session) as mock_session_class:
             session = await client._get_session()
             verify_new_session_creation(session, mock_session, mock_session_class, client)
+    @pytest.mark.asyncio
     async def test_get_session_reuse(self, client):
         """Test reusing existing session."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_session.closed = False
         client._session = mock_session
         
         session = await client._get_session()
         assert session == mock_session
+    @pytest.mark.asyncio
     async def test_get_session_closed_recreate(self, client):
         """Test recreating closed session."""
         old_session = create_mock_session(closed=True)
         client._session = old_session
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         with patch('app.services.external_api_client.ClientSession') as mock_session_class:
             new_session = create_mock_session()
             mock_session_class.return_value = new_session
             
             session = await client._get_session()
             assert session == new_session
+    @pytest.mark.asyncio
     async def test_close_session(self, client):
         """Test closing HTTP session."""
         mock_session = self._setup_mock_session_for_close()
@@ -61,14 +66,18 @@ class TestResilientHTTPClientSession:
     
     def _setup_mock_session_for_close(self):
         """Setup mock session for close test."""
-        from unittest.mock import AsyncMock
+        from unittest.mock import AsyncMock, MagicMock
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_session.closed = False
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.close = AsyncMock()
         return mock_session
+    @pytest.mark.asyncio
     async def test_close_no_session(self, client):
         """Test closing when no session exists."""
         await client.close()  # Should not raise exception
+    @pytest.mark.asyncio
     async def test_close_already_closed_session(self, client):
         """Test closing already closed session."""
         mock_session = self._setup_closed_session_mock()
@@ -79,8 +88,10 @@ class TestResilientHTTPClientSession:
     
     def _setup_closed_session_mock(self):
         """Setup mock closed session."""
-        from unittest.mock import AsyncMock
+        from unittest.mock import AsyncMock, MagicMock
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_session.closed = True
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.close = AsyncMock()
         return mock_session

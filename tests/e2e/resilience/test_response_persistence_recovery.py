@@ -62,9 +62,13 @@ class TestResponsePersistenceRecovery:
     @mock_justified("ClickHouse is external dependency - focus on persistence logic, not ClickHouse infrastructure")
     async def clickhouse_client(self):
         """Create mocked ClickHouse client for testing"""
+        # Mock: Generic component isolation for controlled unit testing
         client_mock = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         client_mock.execute = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         client_mock.fetch = AsyncMock(return_value=[])
+        # Mock: Generic component isolation for controlled unit testing
         client_mock.close = AsyncMock()
         return client_mock
 

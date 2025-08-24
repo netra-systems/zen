@@ -186,6 +186,28 @@ loaded_count, errors = env.load_from_file(
 )
             </code_example>
         </pattern>
+        
+        <pattern name="SSL Parameter Resolution">
+            <description>Handle SSL parameter incompatibility between database drivers</description>
+            <code_example>
+from shared.database.core_database_manager import CoreDatabaseManager
+
+# Resolves asyncpg ssl= vs psycopg2 sslmode= incompatibility
+url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(database_url)
+            </code_example>
+        </pattern>
+        
+        <pattern name="Environment Validation">
+            <description>Validate staging/production configuration prevents localhost fallbacks</description>
+            <code_example>
+from shared.configuration.environment_validator import EnvironmentConfigurationValidator
+
+validator = EnvironmentConfigurationValidator()
+validation_result = validator.validate_staging_requirements()
+if not validation_result.is_valid:
+    raise ConfigurationError(f"Invalid staging config: {validation_result.errors}")
+            </code_example>
+        </pattern>
     </key_patterns>
 
     <business_value>
@@ -297,6 +319,18 @@ def test_no_pollution(isolated_env):
             DELETE ALL LEGACY CODE - When consolidating to unified config, delete 100% of legacy
             environment management code. Do not keep duplicates or wrappers.
         </takeaway>
+        <takeaway priority="CRITICAL">
+            SSL PARAMETER INCOMPATIBILITY - asyncpg driver uses ssl= parameter while psycopg2 uses sslmode=.
+            Configuration must use resolve_ssl_parameter_conflicts() to prevent connection failures.
+        </takeaway>
+        <takeaway priority="CRITICAL">
+            CLOUD SQL UNIX SOCKETS - Must have NO SSL parameters (no sslmode, no ssl).
+            SSL is handled at socket level and parameters cause connection failures.
+        </takeaway>
+        <takeaway priority="HIGH">
+            STAGING LOCALHOST PREVENTION - Services MUST NOT default to localhost in staging/production.
+            Use EnvironmentConfigurationValidator to prevent localhost fallbacks.
+        </takeaway>
         <takeaway priority="HIGH">
             ISOLATION BY DEFAULT IN DEVELOPMENT - Development mode should ONLY load from .env files,
             NOT from system environment. This prevents unpredictable behavior and conflicts.
@@ -316,6 +350,10 @@ def test_no_pollution(isolated_env):
         <takeaway priority="MEDIUM">
             FILE LOADING HIERARCHY - In development: .env files only. In production: System env
             takes precedence. This provides predictable development and secure production.
+        </takeaway>
+        <takeaway priority="MEDIUM">
+            DEPLOYMENT VALIDATION - Pre-deployment credential validation prevents 80% of staging
+            failures. Validate database connectivity before marking deployment successful.
         </takeaway>
     </critical_takeaways>
 

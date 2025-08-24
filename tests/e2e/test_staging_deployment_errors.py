@@ -15,10 +15,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from pathlib import Path
 
 # Setup test path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from test_framework.setup_test_path import setup_test_path
-setup_test_path()
 
 
 class TestStagingDeploymentErrors:
@@ -90,6 +87,7 @@ class TestStagingDeploymentErrors:
         require complete SSL parameter removal for asyncpg.
         """
         # Mock the auth service database manager
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
         
         # Test various URL formats
@@ -175,7 +173,8 @@ class TestStagingDeploymentErrors:
         assert "sslmode=" not in auth_async
 
     # Test 6: Deployment Configuration Validation
-    def test_staging_deployment_configuration(self):
+@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+        def test_staging_deployment_configuration(self):
         """
         Test that validates all required staging configuration is present.
         """

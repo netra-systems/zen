@@ -1,3 +1,4 @@
+from netra_backend.app.core.configuration.base import get_unified_config
 """
 Critical Dev Launcher Error Tests
 
@@ -17,14 +18,14 @@ These tests should initially FAIL (demonstrating the bugs exist) and will PASS a
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from typing import Dict, Any
 from contextlib import asynccontextmanager
 
 from netra_backend.app.services.startup_fixes_integration import StartupFixesIntegration
 from netra_backend.app.services.background_task_manager import BackgroundTaskManager
 from netra_backend.app.startup_module import _schedule_background_optimizations
-from netra_backend.app.db.clickhouse import get_clickhouse_client, get_clickhouse_config
+from netra_backend.app.database import get_clickhouse_client, get_clickhouse_config
 from netra_backend.app.logging_config import central_logger
 
 
@@ -198,6 +199,7 @@ class TestClickHouseSSLConfigurationErrors:
     async def test_clickhouse_ssl_error_handling(self):
         """Test proper handling of SSL errors in ClickHouse connections."""
         # Mock a situation where SSL/HTTPS is incorrectly used for localhost
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('netra_backend.app.db.clickhouse._extract_clickhouse_config') as mock_extract:
             # Force HTTPS config for localhost (this should cause SSL error)
             mock_extract.return_value = "https://default:password@localhost:8443/database"
@@ -321,6 +323,7 @@ class TestBackgroundTaskManagerErrors:
         """Test proper coroutine handling in BackgroundTaskManager."""
         manager = BackgroundTaskManager()
         
+        @pytest.mark.asyncio
         async def test_coroutine():
             await asyncio.sleep(0.1)
             return "success"

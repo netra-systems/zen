@@ -96,20 +96,33 @@ class RedisTestMixin:
     
     def create_mock_redis(self) -> AsyncMock:
         """Create mock Redis client"""
+        # Mock: Redis external service isolation for fast, deterministic test execution
         mock_redis = AsyncMock()
         
         # Setup common Redis methods
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.get = AsyncMock(return_value=None)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.set = AsyncMock(return_value=True)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.delete = AsyncMock(return_value=1)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.exists = AsyncMock(return_value=0)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.expire = AsyncMock(return_value=True)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.hget = AsyncMock(return_value=None)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.hset = AsyncMock(return_value=1)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.hdel = AsyncMock(return_value=1)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.hgetall = AsyncMock(return_value={})
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.incr = AsyncMock(return_value=1)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.decr = AsyncMock(return_value=0)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.ttl = AsyncMock(return_value=-1)
         
         return mock_redis
@@ -149,9 +162,13 @@ class AuthTestMixin:
     def setup_auth_mocks(self) -> Dict[str, MagicMock]:
         """Setup common auth-related mocks"""
         mocks = {
+            # Mock: Cryptographic operations isolation for security testing speed
             "password_hasher": MagicMock(),
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             "jwt_handler": MagicMock(),
+            # Mock: OAuth external provider isolation for network-independent testing
             "oauth_client": AsyncMock(),
+            # Mock: Session management isolation for stateless unit testing
             "session_manager": AsyncMock(),
         }
         

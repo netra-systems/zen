@@ -7,14 +7,12 @@ COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import json
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -81,6 +79,7 @@ class TestMigrationTrackerInit:
 
 class TestStateManagement:
     """Test migration state loading and saving."""
+    @pytest.mark.asyncio
     async def test_load_state_existing_file(self, migration_tracker: MigrationTracker,
                                            mock_migration_state: Dict, temp_state_path: Path) -> None:
         """Test loading existing state file."""
@@ -90,12 +89,14 @@ class TestStateManagement:
         state = await migration_tracker._load_state()
         assert state.current_version == "abc123"
         assert len(state.applied_migrations) == 2
+    @pytest.mark.asyncio
     async def test_load_state_missing_file(self, migration_tracker: MigrationTracker) -> None:
         """Test loading when state file doesn't exist."""
         state = await migration_tracker._load_state()
         assert isinstance(state, MigrationState)
         assert state.current_version is None
         assert len(state.applied_migrations) == 0
+    @pytest.mark.asyncio
     async def test_load_state_invalid_json(self, migration_tracker: MigrationTracker,
                                           temp_state_path: Path) -> None:
         """Test loading with invalid JSON returns default."""
@@ -104,6 +105,7 @@ class TestStateManagement:
         
         state = await migration_tracker._load_state()
         assert isinstance(state, MigrationState)
+    @pytest.mark.asyncio
     async def test_save_state_success(self, migration_tracker: MigrationTracker,
                                      temp_state_path: Path) -> None:
         """Test successful state saving."""
@@ -113,6 +115,7 @@ class TestStateManagement:
         await migration_tracker._save_state(state)
         saved_data = json.loads(temp_state_path.read_text())
         assert saved_data["current_version"] == "test123"
+    @pytest.mark.asyncio
     async def test_save_state_error_handling(self, migration_tracker: MigrationTracker) -> None:
         """Test save state error handling."""
         state = MigrationState()
@@ -121,6 +124,7 @@ class TestStateManagement:
 
 class TestFileOperations:
     """Test async file operations."""
+    @pytest.mark.asyncio
     async def test_read_file_async(self, migration_tracker: MigrationTracker,
                                   temp_state_path: Path) -> None:
         """Test async file reading."""
@@ -130,6 +134,7 @@ class TestFileOperations:
         
         content = await migration_tracker._read_file_async()
         assert content == test_content
+    @pytest.mark.asyncio
     async def test_write_file_async(self, migration_tracker: MigrationTracker,
                                    temp_state_path: Path) -> None:
         """Test async file writing."""
@@ -143,12 +148,15 @@ class TestFileOperations:
 class TestAlembicOperations:
     """Test Alembic configuration and operations."""
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.create_alembic_config')
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.get_sync_database_url')
     def test_get_alembic_config(self, mock_sync_url: Mock, mock_create_config: Mock,
                                migration_tracker: MigrationTracker) -> None:
         """Test Alembic configuration creation."""
         mock_sync_url.return_value = "sync_url"
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         mock_create_config.return_value = mock_config
         
@@ -157,21 +165,25 @@ class TestAlembicOperations:
         mock_create_config.assert_called_once_with("sync_url")
         assert config == mock_config
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.get_current_revision')
     def test_get_current_safely_success(self, mock_get_current: Mock,
                                        migration_tracker: MigrationTracker) -> None:
         """Test successful current revision retrieval."""
         mock_get_current.return_value = "abc123"
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         
         result = migration_tracker._get_current_safely(mock_config)
         assert result == "abc123"
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.get_current_revision')
     def test_get_current_safely_error(self, mock_get_current: Mock,
                                      migration_tracker: MigrationTracker) -> None:
         """Test current revision retrieval with error."""
         mock_get_current.side_effect = Exception("DB error")
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         
         result = migration_tracker._get_current_safely(mock_config)
@@ -179,8 +191,11 @@ class TestAlembicOperations:
 
 class TestMigrationChecking:
     """Test migration checking functionality."""
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.get_head_revision')
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.needs_migration')
+    @pytest.mark.asyncio
     async def test_check_migrations_pending(self, mock_needs: Mock, mock_head: Mock,
                                            migration_tracker: MigrationTracker) -> None:
         """Test checking with pending migrations."""
@@ -193,8 +208,11 @@ class TestMigrationChecking:
                     state = await migration_tracker.check_migrations()
                     assert len(state.pending_migrations) == 1
                     assert state.pending_migrations[0] == "def456"
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.get_head_revision')
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.needs_migration')
+    @pytest.mark.asyncio
     async def test_check_migrations_none_pending(self, mock_needs: Mock, mock_head: Mock,
                                                  migration_tracker: MigrationTracker) -> None:
         """Test checking with no pending migrations."""
@@ -206,6 +224,7 @@ class TestMigrationChecking:
                 with patch.object(migration_tracker, '_save_state'):
                     state = await migration_tracker.check_migrations()
                     assert len(state.pending_migrations) == 0
+    @pytest.mark.asyncio
     async def test_check_migrations_error_handling(self, migration_tracker: MigrationTracker) -> None:
         """Test migration check error handling."""
         with patch.object(migration_tracker, '_load_state', return_value=MigrationState()):
@@ -216,6 +235,7 @@ class TestMigrationChecking:
 
 class TestMigrationExecution:
     """Test migration execution functionality."""
+    @pytest.mark.asyncio
     async def test_run_migrations_no_pending(self, migration_tracker: MigrationTracker) -> None:
         """Test run migrations with no pending migrations."""
         state = MigrationState(pending_migrations=[])
@@ -223,6 +243,7 @@ class TestMigrationExecution:
         with patch.object(migration_tracker, 'check_migrations', return_value=state):
             result = await migration_tracker.run_migrations()
             assert result is True
+    @pytest.mark.asyncio
     async def test_run_migrations_auto_run_disabled(self, migration_tracker: MigrationTracker) -> None:
         """Test run migrations with auto-run disabled."""
         state = MigrationState(pending_migrations=["migration1"], auto_run_enabled=False)
@@ -230,6 +251,7 @@ class TestMigrationExecution:
         with patch.object(migration_tracker, 'check_migrations', return_value=state):
             result = await migration_tracker.run_migrations()
             assert result is False
+    @pytest.mark.asyncio
     async def test_run_migrations_force_execution(self, migration_tracker: MigrationTracker) -> None:
         """Test forced migration execution."""
         state = MigrationState(pending_migrations=[], auto_run_enabled=False)
@@ -249,6 +271,7 @@ class TestMigrationExecution:
         migration_tracker.environment = "prod"
         state = MigrationState(auto_run_enabled=True)
         assert migration_tracker._should_auto_run(state) is False
+    @pytest.mark.asyncio
     async def test_execute_migrations_success(self, migration_tracker: MigrationTracker) -> None:
         """Test successful migration execution."""
         state = MigrationState(pending_migrations=["migration1"])
@@ -258,6 +281,7 @@ class TestMigrationExecution:
                 result = await migration_tracker._execute_migrations(state)
                 assert result is True
                 assert len(state.pending_migrations) == 0
+    @pytest.mark.asyncio
     async def test_execute_migrations_failure(self, migration_tracker: MigrationTracker) -> None:
         """Test migration execution failure."""
         state = MigrationState(pending_migrations=["migration1"])
@@ -269,6 +293,7 @@ class TestMigrationExecution:
 
 class TestMigrationRollback:
     """Test migration rollback functionality."""
+    @pytest.mark.asyncio
     async def test_rollback_migration_success(self, migration_tracker: MigrationTracker) -> None:
         """Test successful migration rollback."""
         with patch.object(migration_tracker, '_run_alembic_downgrade'):
@@ -276,15 +301,18 @@ class TestMigrationRollback:
                 with patch.object(migration_tracker, '_save_state'):
                     result = await migration_tracker.rollback_migration(2)
                     assert result is True
+    @pytest.mark.asyncio
     async def test_rollback_migration_failure(self, migration_tracker: MigrationTracker) -> None:
         """Test migration rollback failure."""
         with patch.object(migration_tracker, '_run_alembic_downgrade', side_effect=Exception("Rollback error")):
             result = await migration_tracker.rollback_migration()
             assert result is False
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('alembic.command.downgrade')
     def test_run_alembic_downgrade(self, mock_downgrade: Mock, migration_tracker: MigrationTracker) -> None:
         """Test Alembic downgrade command execution."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         
         with patch.object(migration_tracker, '_get_alembic_config', return_value=mock_config):
@@ -293,6 +321,7 @@ class TestMigrationRollback:
 
 class TestValidationAndStatus:
     """Test validation and status methods."""
+    @pytest.mark.asyncio
     async def test_validate_schema_success(self, migration_tracker: MigrationTracker) -> None:
         """Test successful schema validation."""
         state = MigrationState(pending_migrations=[], failed_migrations=[])
@@ -300,6 +329,7 @@ class TestValidationAndStatus:
         with patch.object(migration_tracker, 'check_migrations', return_value=state):
             result = await migration_tracker.validate_schema()
             assert result is True
+    @pytest.mark.asyncio
     async def test_validate_schema_pending_migrations(self, migration_tracker: MigrationTracker) -> None:
         """Test schema validation with pending migrations."""
         state = MigrationState(pending_migrations=["migration1"])
@@ -307,6 +337,7 @@ class TestValidationAndStatus:
         with patch.object(migration_tracker, 'check_migrations', return_value=state):
             result = await migration_tracker.validate_schema()
             assert result is False
+    @pytest.mark.asyncio
     async def test_get_migration_status(self, migration_tracker: MigrationTracker) -> None:
         """Test migration status retrieval."""
         state = MigrationState(current_version="abc123", pending_migrations=["mig1"])
@@ -318,6 +349,7 @@ class TestValidationAndStatus:
 
 class TestStateModification:
     """Test state modification methods."""
+    @pytest.mark.asyncio
     async def test_clear_failed_migrations(self, migration_tracker: MigrationTracker) -> None:
         """Test clearing failed migration records."""
         failed_migration = FailedMigration(migration_id="test", error_message="error")
@@ -327,6 +359,7 @@ class TestStateModification:
             with patch.object(migration_tracker, '_save_state'):
                 await migration_tracker.clear_failed_migrations()
                 assert len(state.failed_migrations) == 0
+    @pytest.mark.asyncio
     async def test_disable_auto_run(self, migration_tracker: MigrationTracker) -> None:
         """Test disabling auto-run."""
         state = MigrationState(auto_run_enabled=True)
@@ -335,6 +368,7 @@ class TestStateModification:
             with patch.object(migration_tracker, '_save_state'):
                 await migration_tracker.disable_auto_run()
                 assert state.auto_run_enabled is False
+    @pytest.mark.asyncio
     async def test_enable_auto_run(self, migration_tracker: MigrationTracker) -> None:
         """Test enabling auto-run."""
         state = MigrationState(auto_run_enabled=False)
@@ -344,13 +378,58 @@ class TestStateModification:
                 await migration_tracker.enable_auto_run()
                 assert state.auto_run_enabled is True
 
-class TestFailureRecording:
-    """Test failure recording functionality."""
-    async def test_record_failure(self, migration_tracker: MigrationTracker) -> None:
-        """Test failure recording."""
+@pytest.mark.l3
+class TestRealFailureRecording:
+    """Test real failure recording functionality."""
+    
+    @pytest.mark.asyncio
+    async def test_record_failure_real_persistence(self, migration_tracker: MigrationTracker,
+                                                   temp_state_path: Path) -> None:
+        """Test failure recording with real file persistence."""
+        temp_state_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Create initial state
+        state = MigrationState(current_version="v1")
+        
+        # Record failure
+        await migration_tracker._record_failure(state, "test_migration", "Connection timeout")
+        
+        # Verify failure was recorded in state
+        assert len(state.failed_migrations) == 1
+        failure = state.failed_migrations[0]
+        assert failure.migration_id == "test_migration"
+        assert failure.error_message == "Connection timeout"
+        assert isinstance(failure.timestamp, datetime)
+    
+    @pytest.mark.asyncio
+    async def test_multiple_failure_recording(self, migration_tracker: MigrationTracker,
+                                             temp_state_path: Path) -> None:
+        """Test recording multiple failures over time."""
+        temp_state_path.parent.mkdir(parents=True, exist_ok=True)
+        
         state = MigrationState()
         
-        with patch.object(migration_tracker, '_save_state'):
-            await migration_tracker._record_failure(state, "test_migration", "test error")
-            assert len(state.failed_migrations) == 1
-            assert state.failed_migrations[0].migration_id == "test_migration"
+        # Record multiple failures
+        failures = [
+            ("migration_001", "Database connection failed"),
+            ("migration_002", "Syntax error in migration"),
+            ("migration_003", "Permission denied")
+        ]
+        
+        for migration_id, error_msg in failures:
+            await migration_tracker._record_failure(state, migration_id, error_msg)
+        
+        # Verify all failures recorded
+        assert len(state.failed_migrations) == 3
+        
+        # Verify failure details
+        recorded_ids = [f.migration_id for f in state.failed_migrations]
+        assert "migration_001" in recorded_ids
+        assert "migration_002" in recorded_ids
+        assert "migration_003" in recorded_ids
+        
+        # Verify timestamps are set and recent
+        for failure in state.failed_migrations:
+            assert isinstance(failure.timestamp, datetime)
+            time_diff = datetime.now() - failure.timestamp
+            assert time_diff.total_seconds() < 60  # Less than 60 seconds ago

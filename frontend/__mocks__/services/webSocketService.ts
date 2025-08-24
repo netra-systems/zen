@@ -3,16 +3,11 @@
  * Provides comprehensive mocking of WebSocket service functionality
  */
 
-export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
-export type WebSocketState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
+import { WebSocketStatus, WebSocketState, WebSocketServiceError } from '../../types/domains/websocket';
 
-export interface WebSocketServiceError {
-  code: number;
-  message: string;
-  timestamp: number;
-  type: 'connection' | 'parse' | 'auth' | 'timeout' | 'rate_limit' | 'unknown';
-  recoverable: boolean;
-}
+// WebSocketStatus, WebSocketState, and WebSocketServiceError types imported from domains/websocket.ts
+// Re-export for mock compatibility
+export type { WebSocketStatus, WebSocketState, WebSocketServiceError } from '../../types/domains/websocket';
 
 class MockWebSocketService {
   private _status: WebSocketStatus = 'CLOSED';

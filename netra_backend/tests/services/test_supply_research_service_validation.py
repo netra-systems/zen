@@ -6,10 +6,8 @@ Tests comprehensive data validation logic and boundary conditions
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from typing import Any, Dict, List
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 

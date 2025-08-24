@@ -22,7 +22,7 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import aiohttp
 import pytest
@@ -340,6 +340,7 @@ class ApiGatewayRateLimitingManager:
                 "partial_results": results
             }
     
+    @pytest.mark.asyncio
     async def test_concurrent_endpoint_requests(self, endpoints: List[str], 
                                               concurrent_users: int) -> Dict[str, Any]:
         """Test concurrent requests across multiple endpoints."""
@@ -461,6 +462,7 @@ async def api_gateway_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_endpoint_rate_limiting_enforcement(api_gateway_manager):
     """Test rate limiting enforcement at the gateway level."""
     endpoint = "/api/v1/chat"
@@ -493,6 +495,7 @@ async def test_endpoint_rate_limiting_enforcement(api_gateway_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_tier_based_rate_limit_differentiation(api_gateway_manager):
     """Test that different user tiers get different rate limits."""
     endpoint = "/api/v1/threads"
@@ -530,6 +533,7 @@ async def test_tier_based_rate_limit_differentiation(api_gateway_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_concurrent_endpoint_rate_limiting(api_gateway_manager):
     """Test rate limiting with concurrent requests across endpoints."""
     endpoints = ["/api/v1/chat", "/api/v1/threads", "/api/v1/agents"]
@@ -555,6 +559,7 @@ async def test_concurrent_endpoint_rate_limiting(api_gateway_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_burst_traffic_circuit_breaking(api_gateway_manager):
     """Test circuit breaking behavior under extreme burst traffic."""
     endpoint = "/api/v1/agents"
@@ -582,6 +587,7 @@ async def test_burst_traffic_circuit_breaking(api_gateway_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_rate_limit_header_accuracy(api_gateway_manager):
     """Test accuracy of rate limiting headers."""
     endpoint = "/api/v1/metrics"
@@ -611,6 +617,7 @@ async def test_rate_limit_header_accuracy(api_gateway_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_gateway_metrics_collection(api_gateway_manager):
     """Test collection of gateway rate limiting metrics."""
     # Generate test traffic across endpoints
@@ -644,6 +651,7 @@ async def test_gateway_metrics_collection(api_gateway_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_rate_limiting_performance_requirements(api_gateway_manager):
     """Test rate limiting performance meets requirements."""
     endpoint = "/api/v1/health"

@@ -235,6 +235,7 @@ class ThreadOperationExecutor:
         """Switch to thread and load message history."""
         # Mock thread verification
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_thread = MagicMock()
 
         mock_thread.id = thread_id
@@ -283,6 +284,7 @@ class ThreadOperationExecutor:
         """Add message to thread and update UI."""
         # Mock message creation
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_message = MagicMock()
 
         mock_message.id = f"msg_{int(time.time())}"

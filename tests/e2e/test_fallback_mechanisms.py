@@ -244,6 +244,7 @@ class TestDegradedModeActivation:
         )
         
         policy = DegradationPolicy(tier=ServiceTier.OPTIONAL, max_degradation=DegradationLevel.EMERGENCY)
+        # Mock: Generic component isolation for controlled unit testing
         mock_strategy = AsyncMock()
         degradation_manager.register_service("test_service", mock_strategy, policy)
         
@@ -255,6 +256,7 @@ class TestDegradedModeActivation:
         """Test automatic recovery when conditions improve"""
         
         policy = DegradationPolicy(tier=ServiceTier.STANDARD, max_degradation=DegradationLevel.MINIMAL)
+        # Mock: Generic component isolation for controlled unit testing
         mock_strategy = AsyncMock()
         mock_strategy.can_restore_service.return_value = True
         degradation_manager.register_service("recovery_service", mock_strategy, policy)

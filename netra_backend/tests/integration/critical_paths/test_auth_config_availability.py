@@ -24,7 +24,7 @@ import subprocess
 import httpx
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 from netra_backend.app.logging_config import central_logger
 
@@ -220,6 +220,7 @@ class AuthConfigAvailabilityManager:
             "concurrent_test_results": []
         }
     
+    @pytest.mark.asyncio
     async def test_config_endpoint_basic(self) -> Dict[str, Any]:
         """Test basic config endpoint functionality."""
         start_time = time.time()
@@ -267,6 +268,7 @@ class AuthConfigAvailabilityManager:
                 "response_time": time.time() - start_time
             }
     
+    @pytest.mark.asyncio
     async def test_concurrent_requests(self, num_requests: int = 10) -> Dict[str, Any]:
         """Test concurrent requests to config endpoint."""
         start_time = time.time()
@@ -306,6 +308,7 @@ class AuthConfigAvailabilityManager:
         self.test_metrics["concurrent_test_results"].append(concurrent_result)
         return concurrent_result
     
+    @pytest.mark.asyncio
     async def test_config_caching_behavior(self) -> Dict[str, Any]:
         """Test config endpoint caching behavior."""
         cache_results = []
@@ -332,6 +335,7 @@ class AuthConfigAvailabilityManager:
             "caching_effective": len(response_times) > 1 and response_times[0] > sum(response_times[1:]) / len(response_times[1:])
         }
     
+    @pytest.mark.asyncio
     async def test_environment_adaptation(self) -> Dict[str, Any]:
         """Test config adaptation to different environments."""
         # Test with different environment variables
@@ -366,6 +370,7 @@ class AuthConfigAvailabilityManager:
             "environment_detected": config_data.get("development_mode", False)
         }
     
+    @pytest.mark.asyncio
     async def test_resilience_with_failures(self) -> Dict[str, Any]:
         """Test config endpoint resilience with simulated failures."""
         resilience_results = []
@@ -564,6 +569,7 @@ class TestAuthConfigAvailabilityL3:
         manager = AuthConfigAvailabilityManager(service_url)
         yield manager
     
+    @pytest.mark.asyncio
     async def test_auth_service_config_endpoint_availability_l3(self, config_manager):
         """Test auth service config endpoint responds within 500ms."""
         # Test basic config endpoint
@@ -592,6 +598,7 @@ class TestAuthConfigAvailabilityL3:
         
         logger.info(f"Config endpoint test passed: {result['response_time']:.3f}s")
     
+    @pytest.mark.asyncio
     async def test_concurrent_requests_handling(self, config_manager):
         """Test config endpoint handles 10+ concurrent requests."""
         # Test concurrent load
@@ -608,6 +615,7 @@ class TestAuthConfigAvailabilityL3:
         logger.info(f"Concurrent requests test passed: {concurrent_result['successful_requests']}/12 successful, "
                    f"{concurrent_result['requests_per_second']:.1f} RPS")
     
+    @pytest.mark.asyncio
     async def test_environment_specific_urls(self, config_manager):
         """Test config adapts to environment with correct URLs."""
         # Test environment adaptation
@@ -635,6 +643,7 @@ class TestAuthConfigAvailabilityL3:
         
         logger.info(f"Environment adaptation test passed: development_mode={config_data.get('development_mode')}")
     
+    @pytest.mark.asyncio
     async def test_config_caching_and_refresh(self, config_manager):
         """Test config caching and refresh behavior."""
         # Test caching behavior  
@@ -657,6 +666,7 @@ class TestAuthConfigAvailabilityL3:
         logger.info(f"Config caching test passed: {successful_cache_requests}/5 successful, "
                    f"caching_effective={cache_result.get('caching_effective', False)}")
     
+    @pytest.mark.asyncio
     async def test_graceful_degradation_failures(self, config_manager):
         """Test graceful degradation when dependencies fail."""
         # Test resilience with various timeout scenarios
@@ -676,6 +686,7 @@ class TestAuthConfigAvailabilityL3:
         
         logger.info(f"Resilience test passed: {len(successful_timeouts)}/5 timeout scenarios successful")
     
+    @pytest.mark.asyncio
     async def test_config_endpoint_performance_requirements(self, config_manager):
         """Test config endpoint meets performance requirements."""
         # Run performance summary

@@ -10,7 +10,7 @@ L3 Test: Real JWT refresh while maintaining active WebSocket connections.
 Tests seamless token rotation without disrupting real-time features.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -22,12 +22,12 @@ import time
 import uuid
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import redis.asyncio as redis
 
 from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator, TokenType
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
@@ -525,6 +525,7 @@ class TestJWTRefreshWebSocketL3:
 
         await manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_jwt_refresh_maintains_websocket_connection(self, refresh_manager):
 
         """Test JWT refresh while maintaining active WebSocket connection."""
@@ -617,6 +618,7 @@ class TestJWTRefreshWebSocketL3:
 
         assert "agent_log" in message_types
     
+    @pytest.mark.asyncio
     async def test_concurrent_jwt_refresh_multiple_users(self, refresh_manager):
 
         """Test concurrent JWT refresh for multiple users with active WebSockets."""
@@ -709,6 +711,7 @@ class TestJWTRefreshWebSocketL3:
 
             assert success is True
     
+    @pytest.mark.asyncio
     async def test_jwt_refresh_with_expired_refresh_token(self, refresh_manager):
 
         """Test handling of expired refresh tokens during WebSocket session."""
@@ -761,6 +764,7 @@ class TestJWTRefreshWebSocketL3:
 
             logger.info(f"Expected auth failure handled gracefully: {e}")
     
+    @pytest.mark.asyncio
     async def test_jwt_refresh_performance_under_load(self, refresh_manager):
 
         """Test JWT refresh performance with high connection load."""
@@ -861,6 +865,7 @@ class TestJWTRefreshWebSocketL3:
 
                    f"total time: {total_refresh_time:.2f}s, setup: {setup_time:.2f}s")
     
+    @pytest.mark.asyncio
     async def test_jwt_refresh_redis_persistence(self, refresh_manager, redis_client):
 
         """Test JWT refresh updates session data in Redis correctly."""
@@ -929,6 +934,7 @@ class TestJWTRefreshWebSocketL3:
 
         assert success is True
     
+    @pytest.mark.asyncio
     async def test_jwt_refresh_failure_recovery(self, refresh_manager, redis_client):
 
         """Test recovery from JWT refresh failures."""

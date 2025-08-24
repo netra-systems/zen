@@ -11,7 +11,7 @@ from pathlib import Path
 import asyncio
 import json
 from datetime import datetime
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -279,6 +279,7 @@ class TestAsyncOperations:
     @pytest.mark.asyncio
     async def test_websocket_streaming_updates(self, triage_agent, complex_state):
         """Test WebSocket streaming updates during execution"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws_manager = AsyncMock()
         triage_agent.websocket_manager = mock_ws_manager
         

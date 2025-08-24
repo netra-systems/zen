@@ -7,7 +7,7 @@ from pathlib import Path
 
 import json
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_mcp.netra_mcp_server import NetraMCPServer
@@ -21,12 +21,19 @@ from netra_backend.app.services.mcp_service import (
 def mock_services():
     """Create mock services for testing"""
     return {
+        # Mock: Generic component isolation for controlled unit testing
         "agent_service": AsyncMock(),
+        # Mock: Generic component isolation for controlled unit testing
         "thread_service": AsyncMock(),
+        # Mock: Generic component isolation for controlled unit testing
         "corpus_service": AsyncMock(),
+        # Mock: Generic component isolation for controlled unit testing
         "synthetic_data_service": AsyncMock(),
+        # Mock: Security component isolation for controlled auth testing
         "security_service": AsyncMock(),
+        # Mock: Generic component isolation for controlled unit testing
         "supply_catalog_service": AsyncMock(),
+        # Mock: LLM provider isolation to prevent external API usage and costs
         "llm_manager": AsyncMock()
     }
 

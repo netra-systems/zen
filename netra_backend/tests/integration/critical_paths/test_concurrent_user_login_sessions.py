@@ -33,7 +33,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.clients.auth_client import auth_client
@@ -97,8 +97,8 @@ class TestConcurrentUserLoginSessions:
                     "password": password,
                     "username": f"user_{i}"
                 })
-            return users
-        return generate_users
+            yield users
+        yield generate_users
     
     @pytest.fixture
     async def session_monitor(self):
@@ -107,20 +107,21 @@ class TestConcurrentUserLoginSessions:
         
         async def get_active_sessions() -> int:
             sessions = await redis_manager.keys("session:*")
-            return len(sessions)
+            yield len(sessions)
         
         async def cleanup_sessions():
             sessions = await redis_manager.keys("session:test_*")
             if sessions:
                 await redis_manager.delete(*sessions)
         
-        return {
+        yield {
             "get_active": get_active_sessions,
             "cleanup": cleanup_sessions
         }
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_concurrent_login_100_users(
         self, user_generator, session_monitor
     ):
@@ -199,6 +200,7 @@ class TestConcurrentUserLoginSessions:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_login_session_isolation(self, user_generator):
         """Test that concurrent logins maintain session isolation"""
         users = user_generator(50)
@@ -257,6 +259,7 @@ class TestConcurrentUserLoginSessions:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_database_connection_pool_saturation(
         self, user_generator
     ):
@@ -302,6 +305,7 @@ class TestConcurrentUserLoginSessions:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_simultaneous_multi_device_login(self, user_generator):
         """Test same user logging in from multiple devices simultaneously"""
         user = user_generator(1)[0]
@@ -349,6 +353,7 @@ class TestConcurrentUserLoginSessions:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_login_race_condition_handling(self, user_generator):
         """Test handling of race conditions during login"""
         users = user_generator(20)

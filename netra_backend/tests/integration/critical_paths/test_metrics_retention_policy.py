@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -370,6 +370,7 @@ class MetricsRetentionValidator:
                 return policy
         return None
     
+    @pytest.mark.asyncio
     async def test_retention_policy_enforcement(self, historical_data: List[StoredDataItem]) -> RetentionAnalysis:
         """Test enforcement of retention policies."""
         enforcement_results = {
@@ -467,6 +468,7 @@ class MetricsRetentionValidator:
         
         return total_savings
     
+    @pytest.mark.asyncio
     async def test_automated_cleanup_process(self, historical_data: List[StoredDataItem]) -> Dict[str, Any]:
         """Test automated cleanup process execution."""
         cleanup_results = {
@@ -528,6 +530,7 @@ class MetricsRetentionValidator:
         import random
         return random.random() < 0.95
     
+    @pytest.mark.asyncio
     async def test_compliance_tracking(self, historical_data: List[StoredDataItem]) -> Dict[str, Any]:
         """Test compliance tracking and reporting."""
         compliance_results = {
@@ -594,6 +597,7 @@ class MetricsRetentionValidator:
         
         return compliance_results
     
+    @pytest.mark.asyncio
     async def test_cost_optimization_impact(self, historical_data: List[StoredDataItem]) -> Dict[str, Any]:
         """Test cost optimization impact of retention policies."""
         cost_analysis = {

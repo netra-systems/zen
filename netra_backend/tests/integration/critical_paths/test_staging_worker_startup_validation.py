@@ -26,7 +26,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -292,6 +292,7 @@ class StagingWorkerValidator:
 class TestStagingWorkerStartup:
     """Test suite for staging worker startup validation."""
     
+    @pytest.mark.asyncio
     async def test_worker_exit_code_3_detection(self):
         """Test detection of worker exit code 3 scenarios."""
         validator = StagingWorkerValidator()
@@ -304,6 +305,7 @@ class TestStagingWorkerStartup:
             assert len(metrics.config_errors) > 0
             assert any("Missing" in error for error in metrics.config_errors)
             
+    @pytest.mark.asyncio
     async def test_cloudsql_connection_validation(self):
         """Test Cloud SQL proxy connection validation."""
         validator = StagingWorkerValidator()
@@ -322,6 +324,7 @@ class TestStagingWorkerStartup:
             if "/cloudsql/" in os.getenv("DATABASE_URL", ""):
                 assert metrics.startup_phase in ["dependency_check", "worker_init", "config_validation"]
                 
+    @pytest.mark.asyncio
     async def test_dependency_cascade_failure(self):
         """Test cascading dependency failures."""
         validator = StagingWorkerValidator()
@@ -338,6 +341,7 @@ class TestStagingWorkerStartup:
             assert "PostgreSQL connection failed" in metrics.dependency_failures
             assert "Auth service unreachable" in metrics.dependency_failures
             
+    @pytest.mark.asyncio
     async def test_worker_configuration_requirements(self):
         """Test worker configuration requirements."""
         validator = StagingWorkerValidator()
@@ -355,6 +359,7 @@ class TestStagingWorkerStartup:
                 assert any("WORKERS" in str(issue) or "PORT" in str(issue) 
                           for issue in metrics.error_messages)
                           
+    @pytest.mark.asyncio
     async def test_multiple_worker_startup(self):
         """Test multiple worker startup scenarios."""
         validator = StagingWorkerValidator()
@@ -390,6 +395,7 @@ class TestStagingWorkerStartup:
         # Check exit codes
         assert 3 in summary["exit_codes"].values() or any(m.failed for m in results)
         
+    @pytest.mark.asyncio
     async def test_startup_timeout_handling(self):
         """Test worker startup timeout handling."""
         validator = StagingWorkerValidator()
@@ -412,6 +418,7 @@ class TestStagingWorkerStartup:
             elapsed = time.time() - start
             assert elapsed < 2  # Should timeout before slow startup completes
             
+    @pytest.mark.asyncio
     async def test_error_pattern_detection(self):
         """Test common error pattern detection."""
         validator = StagingWorkerValidator()
@@ -431,6 +438,7 @@ class TestStagingWorkerStartup:
 @pytest.mark.l3
 @pytest.mark.staging
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_staging_worker_health_check_integration():
     """Integration test for worker health check system."""
     health_checker = HealthCheckService()

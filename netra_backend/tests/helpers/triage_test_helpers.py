@@ -38,7 +38,9 @@ class MockLLMManager:
     """Enhanced mock LLM manager for comprehensive testing"""
     
     def __init__(self):
+        # Mock: Generic component isolation for controlled unit testing
         self.ask_llm = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.ask_structured_llm = AsyncMock()
         self.call_count = 0
         self.responses = []

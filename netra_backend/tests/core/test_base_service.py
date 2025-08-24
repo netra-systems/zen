@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -24,6 +24,7 @@ class TestBaseService:
         assert service.service_name == "test-service"
         assert not service.is_initialized
 
+    @pytest.mark.asyncio
     async def test_initialize_success(self):
         """Test successful service initialization."""
         service = BaseService("test-service")
@@ -38,8 +39,10 @@ class TestBaseService:
 
     def _setup_error_context_mock(self):
         """Helper: Setup error context mock."""
+        # Mock: Component isolation for testing without external dependencies
         return patch('app.core.error_context.ErrorContext.get_all_context', return_value={})
 
+    @pytest.mark.asyncio
     async def test_initialize_failure(self):
         """Test service initialization failure."""
         service = BaseService("test-service")
@@ -56,6 +59,7 @@ class TestBaseService:
         """Helper: Verify initialization call count."""
         assert mock_init.call_count == expected_calls
 
+    @pytest.mark.asyncio
     async def test_initialize_idempotent(self):
         """Test that initialize is idempotent."""
         service = BaseService("test-service")
@@ -67,6 +71,7 @@ class TestBaseService:
             
             self._verify_initialization_count(mock_init, 1)  # Should only be called once
 
+    @pytest.mark.asyncio
     async def test_shutdown(self):
         """Test service shutdown."""
         service = BaseService("test-service")
@@ -82,6 +87,7 @@ class TestBaseService:
         assert health.service_name == service_name
         assert isinstance(health.timestamp, datetime)
 
+    @pytest.mark.asyncio
     async def test_health_check_healthy(self):
         """Test health check when service is healthy."""
         service = BaseService("test-service")
@@ -101,6 +107,7 @@ class TestBaseService:
         assert health.status == "degraded"
         assert health.dependencies == expected_deps
 
+    @pytest.mark.asyncio
     async def test_health_check_with_dependencies(self):
         """Test health check with dependencies."""
         service = BaseService("test-service")
@@ -121,6 +128,7 @@ class TestBaseService:
         assert health.status == "unhealthy"
         assert error_text in health.metrics.get("error", "")
 
+    @pytest.mark.asyncio
     async def test_health_check_exception(self):
         """Test health check when an exception occurs."""
         service = BaseService("test-service")

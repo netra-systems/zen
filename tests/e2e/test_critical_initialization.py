@@ -28,8 +28,6 @@ import websocket
 from sqlalchemy import create_engine, text
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 from netra_backend.app.db.postgres import async_engine, initialize_postgres
 from test_framework.test_helpers import (

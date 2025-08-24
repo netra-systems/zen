@@ -278,7 +278,7 @@ class ComplianceReportingHelper:
 async def enterprise_security_infrastructure():
     """Setup comprehensive enterprise security audit infrastructure."""
     mock_infra = MockSecurityInfrastructure()
-    return mock_infra.to_dict()
+    yield mock_infra.to_dict()
 
 @pytest.fixture
 def auth_audit_helper():

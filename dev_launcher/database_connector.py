@@ -133,7 +133,9 @@ class DatabaseConnector:
         env_manager = get_env()
         postgres_url = env_manager.get(DatabaseConstants.DATABASE_URL)
         if postgres_url:
-            self._add_connection("main_postgres", DatabaseType.POSTGRESQL, postgres_url)
+            # Normalize the URL using shared CoreDatabaseManager
+            normalized_url = CoreDatabaseManager.normalize_postgres_url(postgres_url)
+            self._add_connection("main_postgres", DatabaseType.POSTGRESQL, normalized_url)
     
     def _discover_clickhouse_connection(self) -> None:
         """Discover ClickHouse connection."""
@@ -416,6 +418,11 @@ class DatabaseConnector:
             conn = await self._establish_postgres_connection(connection)
             await self._validate_postgres_health(conn)
             return True
+        except Exception as e:
+            # Log the actual error and URL being used for debugging
+            masked_url = self._mask_url_credentials(connection.url)
+            logger.debug(f"PostgreSQL connection attempt failed - URL: {masked_url}, Error: {str(e)}")
+            raise
         finally:
             if conn:
                 await conn.close()
@@ -439,19 +446,18 @@ class DatabaseConnector:
         """Connect to standard TCP PostgreSQL."""
         import asyncpg
         # Fix URL format - asyncpg expects 'postgresql://' not 'postgresql+asyncpg://'
-        clean_url = self._normalize_postgres_url(connection.url)
+        clean_url = CoreDatabaseManager.normalize_postgres_url(connection.url)
+        
+        # For local connections, use CoreDatabaseManager to handle SSL parameters
+        if 'localhost' in clean_url or '127.0.0.1' in clean_url or 'host.docker.internal' in clean_url:
+            # Use CoreDatabaseManager for consistent SSL parameter handling
+            clean_url = CoreDatabaseManager.convert_ssl_params_for_asyncpg(clean_url)
+        
         return await asyncio.wait_for(
             asyncpg.connect(clean_url),
             timeout=self.retry_config.timeout
         )
     
-    def _normalize_postgres_url(self, url: str) -> str:
-        """Normalize PostgreSQL URL for asyncpg driver."""
-        # Convert postgresql+asyncpg:// to postgresql:// for asyncpg
-        return url.replace(
-            DatabaseConstants.POSTGRES_ASYNC_SCHEME,
-            DatabaseConstants.POSTGRES_SCHEME
-        )
     
     async def _validate_postgres_health(self, conn) -> None:
         """Validate PostgreSQL connection health."""
@@ -557,36 +563,15 @@ class DatabaseConnector:
             return False
     
     async def _test_redis_connection(self, connection: DatabaseConnection) -> bool:
-        """Test Redis connection."""
+        """Test Redis connection directly."""
         try:
-            # Try modern redis library first (4.3+) which works with Python 3.12
-            try:
-                import redis.asyncio as redis_async
-                
-                redis = redis_async.from_url(
-                    connection.url,
-                    socket_connect_timeout=self.retry_config.timeout,
-                    socket_timeout=self.retry_config.timeout
-                )
-                
-                # Test with ping
-                await redis.ping()
-                await redis.aclose()
-                return True
-                
-            except ImportError:
-                # Fall back to aioredis for older setups
-                import aioredis
-                
-                redis = aioredis.from_url(
-                    connection.url,
-                    socket_timeout=self.retry_config.timeout
-                )
-                
-                # Test with ping
-                await redis.ping()
-                await redis.aclose()
-                return True
+            import redis.asyncio as redis
+            
+            # Test Redis connection directly
+            client = redis.from_url(connection.url, socket_connect_timeout=5)
+            await client.ping()
+            await client.close()
+            return True
             
         except ImportError:
             # No Redis libraries available, skip validation

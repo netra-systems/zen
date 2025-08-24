@@ -3,8 +3,6 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -25,6 +23,7 @@ def supply_catalog_service():
 @pytest.fixture  
 def mock_db_session():
     """Create a mock database session."""
+    # Mock: Generic component isolation for controlled unit testing
     return MagicMock()
 
 class TestSupplyCatalogService:
@@ -33,11 +32,13 @@ class TestSupplyCatalogService:
     def test_get_all_options(self, supply_catalog_service, mock_db_session):
         """Test retrieving all supply options."""
         # Mock the database response with proper attribute configuration
+        # Mock: Generic component isolation for controlled unit testing
         mock_option1 = MagicMock()
         mock_option1.id = 1
         mock_option1.name = "gpt-4"
         mock_option1.provider = "OpenAI"
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_option2 = MagicMock()
         mock_option2.id = 2
         mock_option2.name = "claude-3"
@@ -55,6 +56,7 @@ class TestSupplyCatalogService:
 
     def test_get_option_by_id(self, supply_catalog_service, mock_db_session):
         """Test retrieving supply option by ID."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_option = MagicMock()
         mock_option.id = 1
         mock_option.name = "gpt-4"
@@ -69,6 +71,7 @@ class TestSupplyCatalogService:
 
     def test_get_option_by_name(self, supply_catalog_service, mock_db_session):
         """Test retrieving supply option by name."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_option = MagicMock()
         mock_option.name = "gpt-4"
         mock_option.provider = "OpenAI"
@@ -90,9 +93,13 @@ class TestSupplyCatalogService:
             quality_score=0.95
         )
         
+        # Mock: Service component isolation for predictable testing behavior
         mock_option = MagicMock(id=1, name="gpt-4-test")
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.add = MagicMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.commit = MagicMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.refresh = MagicMock()
         
         with patch.object(models_postgres, 'SupplyOption', return_value=mock_option):
@@ -105,7 +112,9 @@ class TestSupplyCatalogService:
 
     def test_update_option(self, supply_catalog_service, mock_db_session):
         """Test updating an existing supply option."""
+        # Mock: Service component isolation for predictable testing behavior
         mock_option = MagicMock(id=1, name="gpt-4")
+        # Mock: Service component isolation for predictable testing behavior
         supply_catalog_service.get_option_by_id = MagicMock(return_value=mock_option)
         
         update_data = SupplyOptionUpdate(name="gpt-4-updated")
@@ -119,7 +128,9 @@ class TestSupplyCatalogService:
 
     def test_delete_option(self, supply_catalog_service, mock_db_session):
         """Test deleting a supply option."""
+        # Mock: Service component isolation for predictable testing behavior
         mock_option = MagicMock(id=1, name="gpt-4")
+        # Mock: Service component isolation for predictable testing behavior
         supply_catalog_service.get_option_by_id = MagicMock(return_value=mock_option)
         
         result = supply_catalog_service.delete_option(mock_db_session, 1)
@@ -130,6 +141,7 @@ class TestSupplyCatalogService:
 
     def test_delete_option_not_found(self, supply_catalog_service, mock_db_session):
         """Test deleting non-existent supply option."""
+        # Mock: Service component isolation for predictable testing behavior
         supply_catalog_service.get_option_by_id = MagicMock(return_value=None)
         
         result = supply_catalog_service.delete_option(mock_db_session, 999)
@@ -140,7 +152,9 @@ class TestSupplyCatalogService:
 
     def test_autofill_catalog_empty(self, supply_catalog_service, mock_db_session):
         """Test autofilling catalog when empty."""
+        # Mock: Service component isolation for predictable testing behavior
         supply_catalog_service.get_all_options = MagicMock(return_value=[])
+        # Mock: Generic component isolation for controlled unit testing
         supply_catalog_service.create_option = MagicMock()
         
         supply_catalog_service.autofill_catalog(mock_db_session)
@@ -150,7 +164,9 @@ class TestSupplyCatalogService:
 
     def test_autofill_catalog_existing_data(self, supply_catalog_service, mock_db_session):
         """Test autofilling catalog when data already exists."""
+        # Mock: Generic component isolation for controlled unit testing
         supply_catalog_service.get_all_options = MagicMock(return_value=[MagicMock()])
+        # Mock: Generic component isolation for controlled unit testing
         supply_catalog_service.create_option = MagicMock()
         
         supply_catalog_service.autofill_catalog(mock_db_session)

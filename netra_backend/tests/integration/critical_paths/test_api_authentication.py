@@ -23,6 +23,7 @@ class TestAPIAuthenticationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_api_requires_authentication(self):
         """Test API endpoints require authentication"""
         async with httpx.AsyncClient() as client:
@@ -38,6 +39,7 @@ class TestAPIAuthenticationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_bearer_token_authentication(self):
         """Test Bearer token authentication"""
         async with httpx.AsyncClient() as client:
@@ -58,6 +60,7 @@ class TestAPIAuthenticationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_api_key_authentication(self):
         """Test API key authentication"""
         async with httpx.AsyncClient() as client:
@@ -74,6 +77,7 @@ class TestAPIAuthenticationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_expired_token_rejection(self):
         """Test expired token is rejected"""
         async with httpx.AsyncClient() as client:
@@ -96,6 +100,7 @@ class TestAPIAuthenticationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_invalid_token_format(self):
         """Test invalid token format handling"""
         async with httpx.AsyncClient() as client:

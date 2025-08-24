@@ -11,7 +11,6 @@ import subprocess
 from pathlib import Path
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from code_audit_orchestrator import CodeAuditOrchestrator
 from audit_config import get_default_config, AuditLevel

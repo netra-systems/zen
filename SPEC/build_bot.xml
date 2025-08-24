@@ -7,12 +7,6 @@
     <created>2025-01-11</created>
     <purpose>Ensure successful npm builds by automatically fixing common TypeScript and ESLint errors</purpose>
     <last_edited>2025-08-21T08:47:28.374323</last_edited>
-    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.374323">
-      <reasons>
-        <reason>Content contains: LEGACY</reason>
-        <reason>Content contains: legacy</reason>
-      </reasons>
-    </legacy_status>
   </metadata>
   <overview>
     This specification defines the behavior of an automated build bot that can identify and fix

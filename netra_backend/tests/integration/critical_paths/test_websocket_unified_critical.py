@@ -31,7 +31,7 @@ import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from urllib.parse import urlencode
 
 import pytest
@@ -42,14 +42,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.configuration import get_configuration, unified_config_manager
 from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
-from netra_backend.app.dependencies import get_async_db
+# get_async_db doesn't exist - using get_db_session
+from netra_backend.app.dependencies import get_db_session as get_async_db
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.main import app
 from netra_backend.app.services.security_service import SecurityService
 # Import test utilities
 import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 logger = central_logger.get_logger(__name__)
 
@@ -207,12 +207,17 @@ def invalid_token():
 async def db_session():
     """Get database session for testing."""
     async with get_async_db() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            if hasattr(session, "close"):
+                await session.close()
 
 
 class TestWebSocketAuthentication:
     """CRITICAL: Authentication tests for all WebSocket endpoints."""
     
+    @pytest.mark.asyncio
     async def test_secure_websocket_jwt_header_auth(self, auth_token):
         """Test JWT authentication via Authorization header."""
         headers = {"Authorization": f"Bearer {auth_token}"}
@@ -245,6 +250,7 @@ class TestWebSocketAuthentication:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_secure_websocket_jwt_subprotocol_auth(self, auth_token):
         """Test JWT authentication via Sec-WebSocket-Protocol."""
         # Encode token as base64URL for subprotocol
@@ -279,6 +285,7 @@ class TestWebSocketAuthentication:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_secure_websocket_rejects_unauthenticated(self):
         """Test that secure WebSocket rejects connections without authentication."""
         client = WebSocketTestClient("/ws")
@@ -296,6 +303,7 @@ class TestWebSocketAuthentication:
         finally:
             await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_secure_websocket_rejects_invalid_token(self, invalid_token):
         """Test that secure WebSocket rejects invalid JWT tokens."""
         headers = {"Authorization": f"Bearer {invalid_token}"}
@@ -316,6 +324,7 @@ class TestWebSocketAuthentication:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_basic_websocket_dev_mode_bypass(self):
         """Test that basic WebSocket allows connections in development mode."""
         # Ensure we're in development mode
@@ -338,6 +347,7 @@ class TestWebSocketAuthentication:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_production_mode_blocks_dev_bypasses(self):
         """CRITICAL: Ensure dev mode bypasses are disabled in production."""
         # Force production environment
@@ -358,6 +368,7 @@ class TestWebSocketAuthentication:
 class TestWebSocketMessageFormats:
     """CRITICAL: Message format compatibility tests."""
     
+    @pytest.mark.asyncio
     async def test_regular_json_format(self, auth_token):
         """Test regular JSON message format on basic endpoint."""
         client = WebSocketTestClient("/ws")
@@ -378,6 +389,7 @@ class TestWebSocketMessageFormats:
         finally:
             await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_json_rpc_format_mcp_endpoint(self):
         """Test JSON-RPC format on MCP endpoint."""
         client = WebSocketTestClient("/ws/mcp")
@@ -413,6 +425,7 @@ class TestWebSocketMessageFormats:
         finally:
             await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_invalid_json_handling(self):
         """Test handling of invalid JSON messages."""
         client = WebSocketTestClient("/ws")
@@ -432,6 +445,7 @@ class TestWebSocketMessageFormats:
         finally:
             await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_message_type_validation(self):
         """Test validation of message structure and type field."""
         client = WebSocketTestClient("/ws")
@@ -452,6 +466,7 @@ class TestWebSocketMessageFormats:
         finally:
             await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_backward_compatibility_detection(self):
         """Test that legacy JSON format is properly detected and handled."""
         client = WebSocketTestClient("/ws")
@@ -477,6 +492,7 @@ class TestWebSocketMessageFormats:
 class TestWebSocketConnectionManagement:
     """CRITICAL: Connection lifecycle and management tests."""
     
+    @pytest.mark.asyncio
     async def test_connection_limits_per_user(self, auth_token):
         """Test that connection limits per user are enforced (max 3)."""
         connections = []
@@ -515,6 +531,7 @@ class TestWebSocketConnectionManagement:
                 for client in connections:
                     await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_heartbeat_mechanism(self, auth_token):
         """Test WebSocket heartbeat/ping-pong mechanism."""
         headers = {"Authorization": f"Bearer {auth_token}"}
@@ -551,6 +568,7 @@ class TestWebSocketConnectionManagement:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_graceful_disconnect_cleanup(self, auth_token):
         """Test that connections are properly cleaned up on disconnect."""
         headers = {"Authorization": f"Bearer {auth_token}"}
@@ -584,6 +602,7 @@ class TestWebSocketConnectionManagement:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_connection_timeout_handling(self):
         """Test handling of connection timeouts and dead connections."""
         # This test verifies the timeout mechanism works
@@ -603,6 +622,7 @@ class TestWebSocketConnectionManagement:
 class TestWebSocketSecurity:
     """CRITICAL: Security validation tests."""
     
+    @pytest.mark.asyncio
     async def test_cors_validation(self, auth_token):
         """Test CORS validation for WebSocket connections."""
         # Test with invalid origin
@@ -620,6 +640,7 @@ class TestWebSocketSecurity:
                 "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.core.websocket_cors.check_websocket_cors') as mock_cors:
                 mock_cors.return_value = False  # Simulate CORS failure
                 
@@ -633,6 +654,7 @@ class TestWebSocketSecurity:
                 finally:
                     await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_message_size_limits(self, auth_token):
         """Test message size limits are enforced."""
         headers = {"Authorization": f"Bearer {auth_token}"}
@@ -667,6 +689,7 @@ class TestWebSocketSecurity:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_rate_limiting_enforcement(self, auth_token):
         """Test that rate limiting is properly enforced."""
         headers = {"Authorization": f"Bearer {auth_token}"}
@@ -700,6 +723,7 @@ class TestWebSocketSecurity:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_jwt_token_expiry_handling(self, expired_token):
         """Test handling of expired JWT tokens."""
         headers = {"Authorization": f"Bearer {expired_token}"}
@@ -727,6 +751,7 @@ class TestWebSocketSecurity:
 class TestWebSocketEndpointRouting:
     """CRITICAL: Test routing between different WebSocket endpoints."""
     
+    @pytest.mark.asyncio
     async def test_basic_ws_endpoint_routing(self):
         """Test basic /ws endpoint handles regular JSON correctly."""
         client = WebSocketTestClient("/ws")
@@ -744,6 +769,7 @@ class TestWebSocketEndpointRouting:
         finally:
             await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_user_specific_endpoint_forwarding(self, auth_token):
         """Test /ws/{user_id} forwards to secure endpoint."""
         headers = {"Authorization": f"Bearer {auth_token}"}
@@ -771,6 +797,7 @@ class TestWebSocketEndpointRouting:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_versioned_endpoint_forwarding(self, auth_token):
         """Test /ws/v1/{user_id} forwards to secure endpoint."""
         headers = {"Authorization": f"Bearer {auth_token}"}
@@ -798,6 +825,7 @@ class TestWebSocketEndpointRouting:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_mcp_endpoint_json_rpc_validation(self):
         """Test MCP endpoint properly validates JSON-RPC format."""
         client = WebSocketTestClient("/ws/mcp")
@@ -829,6 +857,7 @@ class TestWebSocketEndpointRouting:
 class TestWebSocketConcurrency:
     """CRITICAL: Concurrent operation tests."""
     
+    @pytest.mark.asyncio
     async def test_concurrent_connections_same_user(self, auth_token):
         """Test multiple concurrent connections for the same user."""
         headers = {"Authorization": f"Bearer {auth_token}"}
@@ -874,6 +903,7 @@ class TestWebSocketConcurrency:
                 disconnect_tasks = [client.disconnect() for client in clients]
                 await asyncio.gather(*disconnect_tasks, return_exceptions=True)
     
+    @pytest.mark.asyncio
     async def test_concurrent_message_processing(self, auth_token):
         """Test concurrent message processing doesn't cause race conditions."""
         headers = {"Authorization": f"Bearer {auth_token}"}
@@ -914,6 +944,7 @@ class TestWebSocketConcurrency:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_connection_cleanup_race_conditions(self, auth_token):
         """Test that connection cleanup doesn't cause race conditions."""
         headers = {"Authorization": f"Bearer {auth_token}"}
@@ -953,6 +984,7 @@ class TestWebSocketConcurrency:
 class TestWebSocketErrorHandling:
     """CRITICAL: Error handling and recovery tests."""
     
+    @pytest.mark.asyncio
     async def test_database_session_error_recovery(self, auth_token):
         """Test WebSocket handles database session errors gracefully."""
         headers = {"Authorization": f"Bearer {auth_token}"}
@@ -967,6 +999,7 @@ class TestWebSocketErrorHandling:
             }
             
             # Mock database session failure during user validation
+            # Mock: Security component isolation for controlled auth testing
             with patch('netra_backend.app.services.security_service.SecurityService.get_user_by_id') as mock_get_user:
                 mock_get_user.side_effect = Exception("Database connection failed")
                 
@@ -989,6 +1022,7 @@ class TestWebSocketErrorHandling:
                 finally:
                     await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_auth_service_failure_handling(self):
         """Test WebSocket handles auth service failures gracefully."""
         headers = {"Authorization": "Bearer test_token"}
@@ -1011,6 +1045,7 @@ class TestWebSocketErrorHandling:
             finally:
                 await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_malformed_message_handling(self):
         """Test handling of malformed or malicious messages."""
         client = WebSocketTestClient("/ws")
@@ -1044,6 +1079,7 @@ class TestWebSocketErrorHandling:
         finally:
             await client.disconnect()
     
+    @pytest.mark.asyncio
     async def test_connection_failure_recovery(self):
         """Test recovery from various connection failure scenarios."""
         # Test connection to non-existent endpoint

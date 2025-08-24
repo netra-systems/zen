@@ -815,6 +815,7 @@ async def l4_transaction_atomicity_test():
 class TestTransactionAtomicityL4:
     """L4 critical path tests for distributed transaction atomicity."""
     
+    @pytest.mark.asyncio
     async def test_complete_transaction_atomicity_critical_path(self, l4_transaction_atomicity_test):
         """Execute complete L4 transaction atomicity critical path test."""
         test_metrics = await l4_transaction_atomicity_test.run_complete_critical_path_test()

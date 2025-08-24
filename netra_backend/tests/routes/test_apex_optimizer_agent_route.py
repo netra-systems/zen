@@ -1,10 +1,8 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -17,9 +15,12 @@ from netra_backend.app.main import app
 @pytest.mark.parametrize("prompt", [
     "I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",
 ])
+@pytest.mark.asyncio
 async def test_apex_optimizer_agent(prompt: str):
     # Create a mock supervisor
+    # Mock: Generic component isolation for controlled unit testing
     mock_supervisor = Mock()
+    # Mock: Async component isolation for testing without real async operations
     mock_supervisor.run = AsyncMock(return_value={"status": "completed"})
     
     # Override the dependency

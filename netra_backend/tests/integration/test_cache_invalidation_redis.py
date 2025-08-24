@@ -21,7 +21,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import redis.asyncio as redis
@@ -51,6 +51,7 @@ class CacheInvalidationManager:
             "sync_operations": 0
         }
     
+    @pytest.mark.asyncio
     async def test_ttl_expiration_scenarios(self, key_count: int) -> Dict[str, Any]:
         """Test TTL-based cache expiration with various scenarios."""
         ttl_scenarios = [
@@ -112,6 +113,7 @@ class CacheInvalidationManager:
         
         return expiry_results
     
+    @pytest.mark.asyncio
     async def test_manual_invalidation_patterns(self, key_count: int) -> Dict[str, Any]:
         """Test manual cache invalidation with different patterns."""
         invalidation_patterns = {
@@ -176,6 +178,7 @@ class CacheInvalidationManager:
         
         return results
     
+    @pytest.mark.asyncio
     async def test_pattern_based_clearing(self) -> Dict[str, Any]:
         """Test pattern-based cache clearing operations."""
         client = self.redis_clients["primary"]
@@ -216,6 +219,7 @@ class CacheInvalidationManager:
         
         return pattern_results
     
+    @pytest.mark.asyncio
     async def test_multi_node_sync(self) -> Dict[str, Any]:
         """Test cache synchronization across multiple Redis nodes."""
         if len(self.redis_clients) < 2:
@@ -357,6 +361,7 @@ class TestCacheInvalidationRedisL3:
         yield manager
         await manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_ttl_expiration_validation(self, cache_manager):
         """Test TTL-based cache expiration scenarios."""
         results = await cache_manager.test_ttl_expiration_scenarios(80)
@@ -373,6 +378,7 @@ class TestCacheInvalidationRedisL3:
         
         logger.info(f"TTL expiration test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_manual_invalidation_efficiency(self, cache_manager):
         """Test manual cache invalidation patterns and efficiency."""
         results = await cache_manager.test_manual_invalidation_patterns(40)
@@ -389,6 +395,7 @@ class TestCacheInvalidationRedisL3:
         
         logger.info(f"Manual invalidation test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_pattern_clearing_operations(self, cache_manager):
         """Test pattern-based cache clearing functionality."""
         results = await cache_manager.test_pattern_based_clearing()
@@ -405,6 +412,7 @@ class TestCacheInvalidationRedisL3:
         
         logger.info(f"Pattern clearing test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_multi_node_synchronization(self, cache_manager):
         """Test cache synchronization across multiple Redis nodes."""
         results = await cache_manager.test_multi_node_sync()
@@ -422,6 +430,7 @@ class TestCacheInvalidationRedisL3:
         
         logger.info(f"Multi-node sync test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_cache_invalidation_performance(self, cache_manager):
         """Test cache invalidation performance under load."""
         start_time = time.time()
@@ -444,6 +453,7 @@ class TestCacheInvalidationRedisL3:
         
         logger.info(f"Cache invalidation performance test completed in {total_time:.2f}s: {summary}")
     
+    @pytest.mark.asyncio
     async def test_cache_consistency_validation(self, cache_manager):
         """Test cache consistency after various invalidation operations."""
         client = cache_manager.redis_clients["primary"]

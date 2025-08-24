@@ -251,6 +251,7 @@ class ReadReplicaRoutingManager:
             # Default to first replica
             return self.replica_session_factories[0]
     
+    @pytest.mark.asyncio
     async def test_read_load_balancing(self, requests_count: int = 20) -> Dict[str, Any]:
         """Test read load balancing across replicas."""
         balancing_result = {
@@ -333,6 +334,7 @@ class ReadReplicaRoutingManager:
         
         return balancing_result
     
+    @pytest.mark.asyncio
     async def test_replica_failover_behavior(self) -> Dict[str, Any]:
         """Test failover behavior when a replica becomes unavailable."""
         failover_result = {
@@ -410,6 +412,7 @@ class ReadReplicaRoutingManager:
         
         return failover_result
     
+    @pytest.mark.asyncio
     async def test_read_write_separation(self) -> Dict[str, Any]:
         """Test proper separation of read and write operations."""
         separation_result = {
@@ -494,6 +497,7 @@ class ReadReplicaRoutingManager:
         
         return separation_result
     
+    @pytest.mark.asyncio
     async def test_concurrent_read_performance(self, concurrent_readers: int = 10) -> Dict[str, Any]:
         """Test performance under concurrent read load."""
         performance_result = {
@@ -626,6 +630,7 @@ async def replica_manager():
 class TestDatabaseReadReplicaRoutingL3:
     """L3 integration tests for database read replica routing and load balancing."""
     
+    @pytest.mark.asyncio
     async def test_read_load_balancing_distribution(self, replica_manager):
         """Test read load distribution across replicas."""
         result = await replica_manager.test_read_load_balancing(16)
@@ -638,6 +643,7 @@ class TestDatabaseReadReplicaRoutingL3:
         for replica_usage in result["replica_usage"].values():
             assert replica_usage > 0
     
+    @pytest.mark.asyncio
     async def test_replica_failover_resilience(self, replica_manager):
         """Test system resilience during replica failures."""
         result = await replica_manager.test_replica_failover_behavior()
@@ -650,6 +656,7 @@ class TestDatabaseReadReplicaRoutingL3:
         # Note: Recovery might not always work in containerized test environment
         # assert result["recovery_after_replica_restore"] is True
     
+    @pytest.mark.asyncio
     async def test_read_write_operation_separation(self, replica_manager):
         """Test proper separation of read and write operations."""
         result = await replica_manager.test_read_write_separation()
@@ -659,6 +666,7 @@ class TestDatabaseReadReplicaRoutingL3:
         assert result["data_consistency_after_write"] is True
         assert result["read_write_separation_maintained"] is True
     
+    @pytest.mark.asyncio
     async def test_concurrent_read_scaling_performance(self, replica_manager):
         """Test performance scaling under concurrent read load."""
         result = await replica_manager.test_concurrent_read_performance(8)

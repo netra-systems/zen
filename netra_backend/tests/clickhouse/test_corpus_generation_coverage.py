@@ -13,7 +13,7 @@ import json
 import os
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from netra_backend.app.schemas import ContentGenParams, CorpusCreate, CorpusUpdate
@@ -32,14 +32,18 @@ from netra_backend.app.services.generation_service import (
 
 class TestCorpusLifecycle:
     """Test complete corpus lifecycle from creation to deletion"""
+    @pytest.mark.asyncio
     async def test_corpus_creation_workflow(self):
         """Test 1: Verify complete corpus creation workflow"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             corpus_data = CorpusCreate(
                 name="test_corpus",
@@ -62,14 +66,18 @@ class TestCorpusLifecycle:
             metadata = json.loads(corpus.metadata_)
             assert metadata["content_source"] == ContentSource.GENERATE.value
             assert metadata["version"] == 1
+    @pytest.mark.asyncio
     async def test_corpus_status_transitions(self):
         """Test 2: Verify corpus status transitions"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             
             # Test status flow: CREATING -> AVAILABLE
@@ -87,15 +95,20 @@ class TestCorpusLifecycle:
             # Verify status update to FAILED
             calls = db.query().filter().update.call_args_list
             assert {"status": CorpusStatus.FAILED.value} in [call[0][0] for call in calls]
+    @pytest.mark.asyncio
     async def test_corpus_deletion_workflow(self):
         """Test 3: Verify complete corpus deletion workflow"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
+            # Mock: Generic component isolation for controlled unit testing
             corpus = MagicMock()
             corpus.id = "test_id"
             corpus.table_name = "test_table"
@@ -113,6 +126,7 @@ class TestCorpusLifecycle:
 
 class TestWorkloadTypesCoverage:
     """Test coverage of all workload types"""
+    @pytest.mark.asyncio
     async def test_all_workload_types_supported(self):
         """Test 4: Verify all workload types are supported"""
         service = CorpusService()
@@ -135,11 +149,14 @@ class TestWorkloadTypesCoverage:
             
             result = service._validate_records(records)
             assert result["valid"], f"Workload type {workload_type} should be valid"
+    @pytest.mark.asyncio
     async def test_workload_distribution_tracking(self):
         """Test 5: Verify workload distribution is tracked correctly"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
@@ -156,7 +173,9 @@ class TestWorkloadTypesCoverage:
                 ]  # distribution
             ]
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
+            # Mock: Generic component isolation for controlled unit testing
             corpus = MagicMock()
             corpus.status = "available"
             corpus.table_name = "test_table"
@@ -170,10 +189,14 @@ class TestWorkloadTypesCoverage:
 
 class TestContentGeneration:
     """Test content generation workflows"""
+    @pytest.mark.asyncio
     async def test_content_generation_job_flow(self):
         """Test 6: Verify content generation job workflow"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.update_job_status') as mock_update:
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.save_corpus_to_clickhouse') as mock_save:
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
                     # Mock generation results
                     mock_pool.return_value = iter([
@@ -197,6 +220,7 @@ class TestContentGeneration:
                     saved_corpus = mock_save.call_args[0][0]
                     assert "simple_chat" in saved_corpus
                     assert "rag_pipeline" in saved_corpus
+    @pytest.mark.asyncio
     async def test_corpus_save_to_clickhouse(self):
         """Test 7: Verify corpus is properly saved to ClickHouse"""
         corpus = {
@@ -205,7 +229,9 @@ class TestContentGeneration:
             "tool_use": [("p4", "r4")]
         }
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_db.return_value = mock_instance
             
@@ -220,9 +246,12 @@ class TestContentGeneration:
             
             # Should insert 4 total records
             assert len(insert_call[0][1]) == 4
+    @pytest.mark.asyncio
     async def test_corpus_load_from_clickhouse(self):
         """Test 8: Verify corpus is properly loaded from ClickHouse"""
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_db.return_value = mock_instance
             
@@ -242,15 +271,20 @@ class TestContentGeneration:
 
 class TestBatchProcessing:
     """Test batch processing capabilities"""
+    @pytest.mark.asyncio
     async def test_batch_content_upload(self):
         """Test 9: Verify batch content upload with buffering"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
+            # Mock: Generic component isolation for controlled unit testing
             corpus = MagicMock()
             corpus.status = "available"
             corpus.table_name = "test_table"
@@ -279,24 +313,30 @@ class TestBatchProcessing:
             
             # Should process all buffered records
             assert result2["records_uploaded"] == 2
+    @pytest.mark.asyncio
     async def test_synthetic_data_batch_ingestion(self):
         """Test 10: Verify synthetic data batch ingestion"""
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_db.return_value = mock_instance
             
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.get_corpus_from_clickhouse') as mock_get:
                 mock_get.return_value = {
                     "simple_chat": [("p1", "r1")],
                     "rag_pipeline": [("p2", "r2")]
                 }
                 
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.generation_service.synthetic_data_main') as mock_main:
                     # Mock generated logs
                     mock_main.return_value = [
                         {"log": i} for i in range(2500)  # 2.5 batches
                     ]
                     
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.services.generation_service.ingest_records') as mock_ingest:
                         mock_ingest.return_value = 1000  # Each batch
                         
@@ -314,17 +354,22 @@ class TestBatchProcessing:
 
 class TestCorpusCloning:
     """Test corpus cloning functionality"""
+    @pytest.mark.asyncio
     async def test_corpus_clone_workflow(self):
         """Test 11: Verify corpus cloning creates new corpus with data"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             
             # Mock source corpus
+            # Mock: Generic component isolation for controlled unit testing
             source = MagicMock()
             source.id = "source_id"
             source.name = "Original Corpus"
@@ -342,14 +387,18 @@ class TestCorpusCloning:
             assert result != None
             assert result.name == "Cloned Corpus"
             assert result.description == "Clone of Original Corpus"
+    @pytest.mark.asyncio
     async def test_corpus_content_copy(self):
         """Test 12: Verify corpus content is copied correctly"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             
             await service._copy_corpus_content(
@@ -402,10 +451,12 @@ class TestValidationAndSafety:
             assert not result["valid"]
             for expected in expected_errors:
                 assert any(expected in error for error in result["errors"])
+    @pytest.mark.asyncio
     async def test_corpus_access_control(self):
         """Test 15: Verify corpus access control"""
         service = CorpusService()
         
+        # Mock: Generic component isolation for controlled unit testing
         db = MagicMock()
         
         # Test filtering by user_id
@@ -418,10 +469,12 @@ class TestValidationAndSafety:
 
 class TestMetadataTracking:
     """Test metadata tracking throughout corpus lifecycle"""
+    @pytest.mark.asyncio
     async def test_corpus_metadata_creation(self):
         """Test 16: Verify metadata is properly initialized"""
         service = CorpusService()
         
+        # Mock: Generic component isolation for controlled unit testing
         db = MagicMock()
         corpus_data = CorpusCreate(
             name="test", 
@@ -437,11 +490,14 @@ class TestMetadataTracking:
         assert metadata["content_source"] == "upload"
         assert metadata["version"] == 1
         assert "created_at" in metadata
+    @pytest.mark.asyncio
     async def test_corpus_metadata_update(self):
         """Test 17: Verify metadata is updated correctly"""
         service = CorpusService()
         
+        # Mock: Generic component isolation for controlled unit testing
         db = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         corpus = MagicMock()
         corpus.metadata_ = json.dumps({"version": 1})
         
@@ -457,17 +513,21 @@ class TestMetadataTracking:
 
 class TestErrorRecovery:
     """Test error recovery mechanisms"""
+    @pytest.mark.asyncio
     async def test_table_creation_failure_recovery(self):
         """Test 18: Verify recovery from table creation failure"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate table creation failure
             mock_instance.execute.side_effect = Exception("Cannot create table")
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             
             await service._create_clickhouse_table("corpus_id", "table_name", db)
@@ -476,18 +536,23 @@ class TestErrorRecovery:
             db.query().filter().update.assert_called_with(
                 {"status": CorpusStatus.FAILED.value}
             )
+    @pytest.mark.asyncio
     async def test_upload_failure_recovery(self):
         """Test 19: Verify recovery from upload failure"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate insert failure
             mock_instance.execute.side_effect = Exception("Insert failed")
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
+            # Mock: Generic component isolation for controlled unit testing
             corpus = MagicMock()
             corpus.status = "available"
             corpus.table_name = "test_table"
@@ -501,18 +566,23 @@ class TestErrorRecovery:
             
             assert result["records_uploaded"] == 0
             assert "Insert failed" in str(result["validation_errors"])
+    @pytest.mark.asyncio
     async def test_deletion_failure_recovery(self):
         """Test 20: Verify recovery from deletion failure"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate drop table failure
             mock_instance.execute.side_effect = Exception("Cannot drop table")
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
+            # Mock: Generic component isolation for controlled unit testing
             corpus = MagicMock()
             corpus.status = "available"
             corpus.table_name = "test_table"

@@ -7,10 +7,8 @@ db_session_factory as an async context manager.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from contextlib import asynccontextmanager
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -31,12 +29,18 @@ class TestStateCheckpointSessionFix:
     @pytest.fixture
     def mock_session(self):
         """Create mock AsyncSession with proper async methods."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = Mock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.execute = AsyncMock(return_value=Mock(
+            # Mock: Component isolation for controlled unit testing
             scalar_one_or_none=Mock(return_value=Mock(metadata_={}))
         ))
+        # Mock: Session isolation for controlled testing without external state
         session.flush = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
         return session
     
@@ -50,6 +54,7 @@ class TestStateCheckpointSessionFix:
             step_count=0
         )
     
+    @pytest.mark.asyncio
     async def test_session_factory_context_manager(self, mock_session):
         """Test db_session_factory works as async context manager."""
         @asynccontextmanager
@@ -63,13 +68,16 @@ class TestStateCheckpointSessionFix:
             assert session == mock_session
             assert hasattr(session, 'execute')
     
+    @pytest.mark.asyncio
     async def test_checkpoint_save_with_factory(self, mock_session, mock_state):
         """Test checkpoint save with proper session factory."""
         @asynccontextmanager
         async def db_session_factory():
             yield mock_session
         
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         with patch('app.agents.supervisor.state_checkpoint_manager.state_persistence_service') as mock_persistence:
+            # Mock: Agent service isolation for testing without LLM agent execution
             mock_persistence.save_agent_state = AsyncMock(return_value=True)
             
             manager = StateCheckpointManager(db_session_factory)
@@ -87,10 +95,14 @@ class TestStateCheckpointSessionFix:
             assert isinstance(call_args[3], DeepAgentState)  # state
             assert call_args[4] == mock_session  # session
     
+    @pytest.mark.asyncio
     async def test_supervisor_state_manager_initialization(self, mock_session):
         """Test SupervisorAgent correctly initializes StateManager."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(
@@ -106,22 +118,27 @@ class TestStateCheckpointSessionFix:
         async with factory() as session:
             assert session == mock_session
     
+    @pytest.mark.asyncio
     async def test_async_sessionmaker_error_prevention(self):
         """Test that passing async_sessionmaker directly would fail."""
         # This simulates the error case
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_sessionmaker = Mock(spec=async_sessionmaker)
         
         # This should raise AttributeError if used incorrectly
         with pytest.raises(AttributeError, match="has no attribute 'execute'"):
             await mock_sessionmaker.execute("SELECT 1")
     
+    @pytest.mark.asyncio
     async def test_session_reuse_in_pipeline(self, mock_session, mock_state):
         """Test session is properly reused in pipeline execution."""
         @asynccontextmanager
         async def db_session_factory():
             yield mock_session
         
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         with patch('app.agents.supervisor.state_checkpoint_manager.state_persistence_service') as mock_persistence:
+            # Mock: Agent service isolation for testing without LLM agent execution
             mock_persistence.save_agent_state = AsyncMock(return_value=True)
             
             manager = StateCheckpointManager(db_session_factory)

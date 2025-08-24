@@ -4,7 +4,7 @@ import { createContext, useEffect, ReactNode, useState, useCallback, useRef } fr
 import { User } from '@/types';
 import { AuthConfigResponse } from '@/auth';
 import { Button } from '@/components/ui/button';
-import { authService } from '@/auth';
+import { unifiedAuthService } from '@/auth/unified-auth-service';
 import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/store/authStore';
 import { logger } from '@/lib/logger';
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    if (!authService.needsRefresh(currentToken)) {
+    if (!unifiedAuthService.needsRefresh(currentToken)) {
       return;
     }
 
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     try {
-      const refreshResult = await authService.refreshToken();
+      const refreshResult = await unifiedAuthService.refreshToken();
       if (refreshResult) {
         const newToken = refreshResult.access_token;
         setToken(newToken);
@@ -111,11 +111,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchAuthConfig = useCallback(async () => {
     try {
-      const data = await authService.getAuthConfig();
+      const data = await unifiedAuthService.getAuthConfig();
       setAuthConfig(data);
 
       // Check for existing token first (from OAuth callback or storage)
-      const storedToken = authService.getToken();
+      const storedToken = unifiedAuthService.getToken();
       
       if (storedToken) {
         // Use existing token
@@ -132,12 +132,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             component: 'AuthContext',
             action: 'token_validation_failed'
           });
-          authService.removeToken();
+          unifiedAuthService.removeToken();
           syncAuthStore(null, null);
         }
       } else if (data.development_mode) {
         // Check if user explicitly logged out in dev mode
-        const hasLoggedOut = authService.getDevLogoutFlag();
+        const hasLoggedOut = unifiedAuthService.getDevLogoutFlag();
         logger.debug('Development mode detected', {
           component: 'AuthContext',
           action: 'dev_mode_check',
@@ -150,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             component: 'AuthContext',
             action: 'auto_dev_login_attempt'
           });
-          const devLoginResponse = await authService.handleDevLogin(data);
+          const devLoginResponse = await unifiedAuthService.handleDevLogin(data);
           if (devLoginResponse) {
             setToken(devLoginResponse.access_token);
             const decodedUser = jwtDecode(devLoginResponse.access_token) as User;
@@ -218,8 +218,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       if (authConfig) {
         // Clear dev logout flag when user manually logs in
-        authService.clearDevLogoutFlag();
-        authService.handleLogin(authConfig);
+        unifiedAuthService.clearDevLogoutFlag();
+        unifiedAuthService.handleLogin(authConfig);
       }
     } catch (error) {
       logger.error('Login error in AuthContext', error as Error, {
@@ -234,9 +234,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (authConfig) {
       // Set dev logout flag in development mode
       if (authConfig.development_mode) {
-        authService.setDevLogoutFlag();
+        unifiedAuthService.setDevLogoutFlag();
       }
-      await authService.handleLogout(authConfig);
+      await unifiedAuthService.handleLogout(authConfig);
       // Clear Zustand store
       syncAuthStore(null, null);
     }

@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,15 +24,20 @@ class TestSupervisorAgentExecution:
     
     async def test_execute_method(self):
         """Test execute method (BaseSubAgent compatibility)."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock run method
         mock_state = DeepAgentState(user_request="test")
+        # Mock: Async component isolation for testing without real async operations
         supervisor.run = AsyncMock(return_value=mock_state)
         
         # Create input state
@@ -55,14 +60,19 @@ class TestSupervisorAgentExecution:
     
     async def test_execute_method_with_defaults(self):
         """Test execute method with default values."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock run method
+        # Mock: Agent service isolation for testing without LLM agent execution
         supervisor.run = AsyncMock(return_value=DeepAgentState(user_request="test"))
         
         # Create minimal state
@@ -79,9 +89,13 @@ class TestSupervisorAgentExecution:
     
     def test_create_run_context(self):
         """Test _create_run_context method."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
@@ -98,18 +112,25 @@ class TestSupervisorAgentExecution:
     
     async def test_run_method_with_execution_lock(self):
         """Test run method uses execution lock."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock components
+        # Mock: Async component isolation for testing without real async operations
         supervisor.state_manager.initialize_state = AsyncMock(
             return_value=DeepAgentState(user_request="test")
         )
+        # Mock: Component isolation for controlled unit testing
         supervisor.pipeline_builder.get_execution_pipeline = Mock(return_value=[])
+        # Mock: Generic component isolation for controlled unit testing
         supervisor._execute_with_context = AsyncMock()
         
         # Track lock usage
@@ -134,15 +155,21 @@ class TestSupervisorAgentExecution:
     
     async def test_execute_with_context(self):
         """Test _execute_with_context method."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock pipeline executor
+        # Mock: Generic component isolation for controlled unit testing
         supervisor.pipeline_executor.execute_pipeline = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         supervisor.pipeline_executor.finalize_state = AsyncMock()
         
         # Test data
@@ -163,9 +190,13 @@ class TestSupervisorAgentExecution:
     
     async def test_execute_with_state_merge(self):
         """Test execute method properly merges state results."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
@@ -175,6 +206,7 @@ class TestSupervisorAgentExecution:
             user_request="updated query",
             triage_result={"category": "optimization"}
         )
+        # Mock: Async component isolation for testing without real async operations
         supervisor.run = AsyncMock(return_value=updated_state)
         
         # Create original state
@@ -192,19 +224,27 @@ class TestSupervisorAgentExecution:
     
     async def test_run_method_component_interaction(self):
         """Test run method properly coordinates all components."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock all components
         mock_state = DeepAgentState(user_request="test query")
+        # Mock: Generic component isolation for controlled unit testing
         mock_pipeline = [Mock()]
         
+        # Mock: Async component isolation for testing without real async operations
         supervisor.state_manager.initialize_state = AsyncMock(return_value=mock_state)
+        # Mock: Component isolation for controlled unit testing
         supervisor.pipeline_builder.get_execution_pipeline = Mock(return_value=mock_pipeline)
+        # Mock: Generic component isolation for controlled unit testing
         supervisor._execute_with_context = AsyncMock()
         
         # Execute
@@ -229,15 +269,21 @@ class TestSupervisorAgentHooks:
     
     async def test_run_hooks_success(self):
         """Test successful hook execution."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Create mock handlers
+        # Mock: Generic component isolation for controlled unit testing
         handler1 = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         handler2 = AsyncMock()
         
         # Register handlers
@@ -257,15 +303,21 @@ class TestSupervisorAgentHooks:
     
     async def test_run_hooks_with_handler_failure(self):
         """Test hook execution with handler failure."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Create handlers - one fails
+        # Mock: Generic component isolation for controlled unit testing
         handler1 = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         handler2 = AsyncMock(side_effect=Exception("Handler failed"))
         
         supervisor.hooks["before_agent"] = [handler1, handler2]
@@ -282,14 +334,19 @@ class TestSupervisorAgentHooks:
     
     async def test_run_hooks_error_event_reraises(self):
         """Test hook execution for error event re-raises exceptions."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Create failing handler for error event
+        # Mock: Async component isolation for testing without real async operations
         failing_handler = AsyncMock(side_effect=Exception("Error handler failed"))
         supervisor.hooks["on_error"] = [failing_handler]
         
@@ -303,9 +360,13 @@ class TestSupervisorAgentHooks:
     
     async def test_run_hooks_nonexistent_event(self):
         """Test hook execution for non-existent event."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)

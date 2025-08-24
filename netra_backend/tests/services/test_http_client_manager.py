@@ -3,9 +3,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -63,10 +61,12 @@ class TestHTTPClientManager:
         
         assert client1 is client2
         assert len(manager._clients) == 1
+    @pytest.mark.asyncio
     async def test_health_check_all_empty(self, manager):
         """Test health check with no clients."""
         result = await manager.health_check_all()
         assert result == {}
+    @pytest.mark.asyncio
     async def test_health_check_all_with_clients(self, manager):
         """Test health check with multiple clients."""
         mock_clients = self._setup_mock_clients(manager)
@@ -76,8 +76,10 @@ class TestHTTPClientManager:
     
     def _setup_mock_clients(self, manager):
         """Setup mock clients for health check test."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client1 = AsyncMock()
         mock_client1.health_check.return_value = {"status": "healthy"}
+        # Mock: Generic component isolation for controlled unit testing
         mock_client2 = AsyncMock()
         mock_client2.health_check.return_value = {"status": "degraded"}
         
@@ -93,10 +95,12 @@ class TestHTTPClientManager:
         assert result["client2"] == {"status": "degraded"}
         mock_clients["client1"].health_check.assert_called_once_with("client1")
         mock_clients["client2"].health_check.assert_called_once_with("client2")
+    @pytest.mark.asyncio
     async def test_close_all_empty(self, manager):
         """Test closing all clients when none exist."""
         await manager.close_all()
         assert manager._clients == {}
+    @pytest.mark.asyncio
     async def test_close_all_with_clients(self, manager):
         """Test closing all clients."""
         mock_clients = self._setup_mock_clients_for_close(manager)
@@ -106,7 +110,9 @@ class TestHTTPClientManager:
     
     def _setup_mock_clients_for_close(self, manager):
         """Setup mock clients for close test."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client1 = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_client2 = AsyncMock()
         
         manager._clients = {
@@ -123,10 +129,13 @@ class TestHTTPClientManager:
 
 class TestGetHTTPClient:
     """Test get_http_client context manager."""
+    @pytest.mark.asyncio
     async def test_get_http_client_context_manager(self):
         """Test get_http_client context manager."""
-        from unittest.mock import Mock, patch
+        from unittest.mock import Mock, patch, AsyncMock, MagicMock
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.http_client_manager') as mock_manager:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client = Mock()
             mock_manager.get_client.return_value = mock_client
             

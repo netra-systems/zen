@@ -16,7 +16,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from typing import Any, Dict
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -32,6 +32,7 @@ from netra_backend.tests.integration.first_time_user_fixtures import (
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_openai_provider_connection(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -62,6 +63,7 @@ async def test_openai_provider_connection(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_anthropic_provider_connection(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -84,6 +86,7 @@ async def test_anthropic_provider_connection(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(25)
+@pytest.mark.asyncio
 async def test_provider_listing_and_management(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -110,6 +113,7 @@ async def test_provider_listing_and_management(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_provider_settings_update(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -129,6 +133,7 @@ async def test_provider_settings_update(
         "temperature": 0.7,
         "max_tokens": 2000
     }
+    # Mock: Component isolation for testing without external dependencies
     response = await async_client.patch(
         "/api/v1/providers/openai/settings",
         json=settings_update,
@@ -139,6 +144,7 @@ async def test_provider_settings_update(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_provider_key_rotation(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -164,6 +170,7 @@ async def test_provider_key_rotation(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_provider_disconnection(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -190,6 +197,7 @@ async def test_provider_disconnection(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(45)
+@pytest.mark.asyncio
 async def test_google_oauth_provider_flow(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -207,6 +215,7 @@ async def test_google_oauth_provider_flow(
     assert "google.com/o/oauth2" in oauth_data["authorization_url"]
     
     # Simulate OAuth callback
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.oauth_service.exchange_code_for_token") as mock_exchange:
         mock_exchange.return_value = {
             "access_token": "google-access-token",
@@ -226,6 +235,7 @@ async def test_google_oauth_provider_flow(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(60)
+@pytest.mark.asyncio
 async def test_optimization_workflow_with_providers(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -274,6 +284,7 @@ async def test_optimization_workflow_with_providers(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_optimization_results_validation(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -305,6 +316,7 @@ async def test_optimization_results_validation(
         "follow_up_questions": ["What are your peak usage hours?"]
     }
     
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.optimization_service.get_results") as mock_get:
         mock_get.return_value = mock_results
         
@@ -331,6 +343,7 @@ async def test_optimization_results_validation(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_optimization_follow_up_workflow(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]

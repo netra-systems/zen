@@ -11,7 +11,7 @@ from pathlib import Path
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -20,6 +20,7 @@ from netra_backend.tests.integration.test_fixtures_common import mock_infrastruc
 class TestAnalyticsComplianceIntegration:
     """Analytics and compliance integration tests"""
 
+    @pytest.mark.asyncio
     async def test_metrics_export_pipeline_to_observability(self, test_database, mock_infrastructure):
         """Data flow from collection to Prometheus/InfluxDB"""
         metrics_pipeline = await self._setup_metrics_export_pipeline()
@@ -27,6 +28,7 @@ class TestAnalyticsComplianceIntegration:
         export_flow = await self._execute_metrics_export_flow(metrics_pipeline, test_metrics)
         await self._verify_observability_integration(export_flow, test_metrics)
 
+    @pytest.mark.asyncio
     async def test_demo_service_analytics_integration(self, test_database, mock_infrastructure):
         """Customer demo tracking and ROI calculation"""
         analytics_system = await self._setup_demo_analytics_infrastructure(test_database)
@@ -34,6 +36,7 @@ class TestAnalyticsComplianceIntegration:
         analytics_flow = await self._execute_demo_analytics_pipeline(analytics_system, demo_sessions)
         await self._verify_roi_calculations(analytics_flow, demo_sessions)
 
+    @pytest.mark.asyncio
     async def test_factory_status_compliance_integration(self, test_database, mock_infrastructure):
         """Architecture compliance validation flow"""
         compliance_system = await self._setup_factory_status_infrastructure()

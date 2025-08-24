@@ -32,8 +32,11 @@ class TestWebSocketConnectionIssue:
         validator = WebSocketValidator(use_emoji=False)
         
         # Mock the websockets library
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.recv = AsyncMock()
         
         # Simulate MCP endpoint that expects JSON-RPC format
@@ -66,8 +69,11 @@ class TestWebSocketConnectionIssue:
         
         mock_websocket.recv = mock_recv
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("websockets.connect") as mock_connect:
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_connect.return_value.__aenter__ = AsyncMock(return_value=mock_websocket)
+            # Mock: Generic component isolation for controlled unit testing
             mock_connect.return_value.__aexit__ = AsyncMock()
             
             # This should fail because validator sends wrong format
@@ -109,14 +115,20 @@ class TestWebSocketConnectionIssue:
         # Mock HTTP check to succeed (server is running)
         with patch.object(validator, "_check_http_server", return_value=True):
             # Mock websocket connection
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_websocket = AsyncMock()
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_websocket.send = AsyncMock()
             
             # Simulate timeout on recv (no proper response)
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_websocket.recv = AsyncMock(side_effect=asyncio.TimeoutError)
             
+            # Mock: Component isolation for testing without external dependencies
             with patch("websockets.connect") as mock_connect:
+                # Mock: WebSocket infrastructure isolation for unit tests without real connections
                 mock_connect.return_value.__aenter__ = AsyncMock(return_value=mock_websocket)
+                # Mock: Generic component isolation for controlled unit testing
                 mock_connect.return_value.__aexit__ = AsyncMock()
                 
                 # Run the validation
@@ -141,16 +153,22 @@ class TestWebSocketConnectionIssue:
         validator = WebSocketValidator(use_emoji=False)
         
         # Mock successful JSON-RPC communication
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.recv = AsyncMock(return_value=json.dumps({
             "jsonrpc": "2.0",
             "result": {"status": "connected"},
             "id": 1
         }))
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("websockets.connect") as mock_connect:
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_connect.return_value.__aenter__ = AsyncMock(return_value=mock_websocket)
+            # Mock: Generic component isolation for controlled unit testing
             mock_connect.return_value.__aexit__ = AsyncMock()
             
             # Patch the method to send JSON-RPC format

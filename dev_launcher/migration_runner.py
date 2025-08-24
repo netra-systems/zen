@@ -254,7 +254,6 @@ class MigrationRunner:
         """
         try:
             # Try to import and use the app's table creation logic
-            sys.path.insert(0, str(self.project_root))
             
             from netra_backend.app.config import get_config
             from netra_backend.app.db.postgres import initialize_postgres

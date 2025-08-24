@@ -15,7 +15,7 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.llm.llm_response_processing import (
@@ -76,6 +76,7 @@ def llm_manager(test_llm_config):
 
 def _create_mock_openai_llm():
     """Create mock OpenAI LLM with proper response format."""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock_llm = AsyncMock()
     mock_response = _create_mock_openai_response()
     mock_llm.ainvoke.return_value = mock_response
@@ -84,6 +85,7 @@ def _create_mock_openai_llm():
 
 def _create_mock_openai_response(content: str = "Mock response"):
     """Create mock response matching OpenAI format."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_response = MagicMock()
     mock_response.content = content
     mock_response.prompt_tokens = 50
@@ -165,11 +167,13 @@ class TestRealResponsePatterns:
 
 class TestRetryMechanisms:
     """Test LLM retry logic and backoff strategies."""
+    @pytest.mark.asyncio
     async def test_exponential_backoff_rate_limit(self, llm_manager):
         """Test exponential backoff on rate limit errors."""
         rate_limit_error = Exception("Rate limit exceeded. Retry after 60 seconds")
         
         with patch.object(llm_manager, 'get_llm') as mock_get_llm:
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             mock_llm = AsyncMock()
             mock_llm.ainvoke.side_effect = [rate_limit_error, rate_limit_error, "Success"]
             mock_get_llm.return_value = mock_llm
@@ -177,6 +181,7 @@ class TestRetryMechanisms:
             start_time = time.time()
             # Would need actual retry implementation
             assert mock_llm.ainvoke.call_count <= 3
+    @pytest.mark.asyncio
     async def test_model_fallback_on_failure(self, llm_manager):
         """Test switching to fallback model on primary failure."""
         # Mock model fallback scenario
@@ -189,6 +194,7 @@ class TestRetryMechanisms:
             
             # Test would require actual fallback logic implementation
             assert True  # Placeholder for fallback verification
+    @pytest.mark.asyncio
     async def test_timeout_handling(self, llm_manager):
         """Test handling of request timeouts."""
         with patch.object(llm_manager._core, 'ask_llm_full') as mock_ask_full:
@@ -199,6 +205,7 @@ class TestRetryMechanisms:
 
 class TestCostOptimization:
     """Test cost optimization through intelligent model selection."""
+    @pytest.mark.asyncio
     async def test_cheap_model_for_simple_tasks(self, llm_manager):
         """Test using cheaper models for simple classification tasks."""
         simple_prompt = "Classify this as positive or negative: Good product"
@@ -217,6 +224,7 @@ class TestCostOptimization:
             
             result = await llm_manager.ask_llm(simple_prompt, "fallback")
             assert "positive" in result
+    @pytest.mark.asyncio
     async def test_expensive_model_for_complex_reasoning(self, llm_manager):
         """Test using expensive models for complex reasoning tasks."""
         complex_prompt = """Analyze the performance implications of switching 
@@ -239,6 +247,7 @@ class TestCostOptimization:
 
 class TestStructuredGenerationEdgeCases:
     """Test edge cases in structured generation."""
+    @pytest.mark.asyncio
     async def test_structured_output_with_string_fallback(self, llm_manager):
         """Test fallback to string parsing when structured output fails."""
         # Create a proper ResponseModel instance for fallback
@@ -249,6 +258,7 @@ class TestStructuredGenerationEdgeCases:
         )
         
         with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get_structured:
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             mock_structured_llm = AsyncMock()
             # First call fails, triggers fallback to string parsing
             mock_structured_llm.ainvoke.side_effect = Exception("JSON schema not supported")
@@ -263,6 +273,7 @@ class TestStructuredGenerationEdgeCases:
                 
                 assert result.category == "test"
                 assert result.confidence == 0.7
+    @pytest.mark.asyncio
     async def test_validation_error_handling(self, llm_manager):
         """Test handling of Pydantic validation errors."""
         invalid_json = json.dumps({
@@ -279,6 +290,7 @@ class TestTokenUsageMonitoring:
 
     def test_token_usage_calculation(self):
         """Test accurate token usage calculation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = MagicMock()
         mock_response.prompt_tokens = 100
         mock_response.completion_tokens = 50
@@ -293,6 +305,7 @@ class TestTokenUsageMonitoring:
         assert usage.prompt_tokens == 100
         assert usage.completion_tokens == 50
         assert usage.total_tokens == 150
+    @pytest.mark.asyncio
     async def test_response_with_usage_metadata(self, llm_manager):
         """Test LLM response includes proper usage metadata."""
         # Create a properly structured LLMResponse with usage metadata
@@ -314,6 +327,7 @@ class TestTokenUsageMonitoring:
 
 class TestProviderSwitching:
     """Test switching between different LLM providers."""
+    @pytest.mark.asyncio
     async def test_openai_to_anthropic_fallback(self, llm_manager):
         """Test fallback from OpenAI to Anthropic on failure."""
         # Mock provider failure scenario

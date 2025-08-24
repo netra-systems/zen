@@ -10,11 +10,6 @@
       <revenue_impact>Enables enterprise deals worth +$50K MRR through compliance requirements</revenue_impact>
     </business_value_justification>
     <last_edited>2025-08-21T08:47:28.370254</last_edited>
-    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.370254">
-      <reasons>
-        <reason>Content contains: old</reason>
-      </reasons>
-    </legacy_status>
   </metadata>
   <current_state>
     <analysis>
@@ -22,7 +17,7 @@
       <dependent_files_count>51</dependent_files_count>
       <existing_infrastructure>
                 - Terraform auth-service.tf already exists (Cloud Run config)
-                - Dockerfile.auth already exists
+                - deployment/docker/Dockerfile.auth already exists
                 - auth_service_main.py already exists
                 - Auth routes at app/routes/auth/
             </existing_infrastructure>
@@ -165,7 +160,7 @@
       <step order="2">
         <action>Update Docker configurations</action>
         <files>
-          <file>Dockerfile.auth</file>
+          <file>deployment/docker/Dockerfile.auth</file>
           <updates>
                         - Optimize for production
                         - Multi-stage build

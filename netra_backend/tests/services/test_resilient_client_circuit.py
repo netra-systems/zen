@@ -3,9 +3,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -21,16 +19,22 @@ class TestResilientHTTPClientCircuit:
     def client(self):
         """Create a ResilientHTTPClient for testing."""
         return ResilientHTTPClient(base_url="https://api.example.com")
+    @pytest.mark.asyncio
     async def test_get_circuit_new(self, client):
         """Test getting new circuit breaker."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.circuit_registry') as mock_registry:
+            # Mock: Generic component isolation for controlled unit testing
             mock_circuit = Mock()
+            # Mock: Component isolation for controlled unit testing
             mock_registry.get_breaker = Mock(return_value=mock_circuit)
             
             circuit = await client._get_circuit("test_api")
             verify_new_circuit_creation(circuit, mock_circuit, client, mock_registry)
+    @pytest.mark.asyncio
     async def test_get_circuit_existing(self, client):
         """Test getting existing circuit breaker."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_circuit = Mock()
         client._circuits["test_api"] = mock_circuit
         
@@ -52,8 +56,10 @@ class TestResilientHTTPClientCircuit:
             "url": "/test",
             "fallback": True
         }
+    @pytest.mark.asyncio
     async def test_request_success(self, client):
         """Test successful request execution."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_circuit = AsyncMock()
         mock_circuit.call.return_value = {"success": True}
         
@@ -61,6 +67,7 @@ class TestResilientHTTPClientCircuit:
             result = await client._request("GET", "/test", "test_api")
             assert result == {"success": True}
             mock_circuit.call.assert_called_once()
+    @pytest.mark.asyncio
     async def test_request_circuit_open(self, client):
         """Test request when circuit is open."""
         from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
@@ -68,6 +75,7 @@ class TestResilientHTTPClientCircuit:
         mock_circuit = self._setup_open_circuit_mock()
         
         with patch.object(client, '_get_circuit', return_value=mock_circuit), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.external_api_client.logger') as mock_logger:
             result = await client._request("GET", "/test", "test_api")
             self._verify_circuit_open_result(result, mock_logger)
@@ -75,6 +83,7 @@ class TestResilientHTTPClientCircuit:
     def _setup_open_circuit_mock(self):
         """Setup mock circuit that is open."""
         from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
+        # Mock: Generic component isolation for controlled unit testing
         mock_circuit = AsyncMock()
         mock_circuit.call.side_effect = CircuitBreakerOpenError("Circuit open")
         return mock_circuit

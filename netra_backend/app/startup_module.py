@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """
 Application startup management module.
 Handles initialization of logging, database connections, services, and health checks.
@@ -327,8 +328,14 @@ def _is_postgres_service_mock_mode() -> bool:
     except Exception:
         pass  # Ignore errors in config reading
     
-    # Also check environment variable
-    return os.environ.get("POSTGRES_MODE", "").lower() == "mock"
+    # Check configuration for postgres mode
+    try:
+        from netra_backend.app.core.configuration.base import get_unified_config
+        config = get_unified_config()
+        return getattr(config, 'postgres_mode', '').lower() == 'mock'
+    except Exception:
+        # Fallback for bootstrap
+        return get_env().get("POSTGRES_MODE", "").lower() == "mock"
 
 
 def _execute_migrations(logger: logging.Logger) -> None:

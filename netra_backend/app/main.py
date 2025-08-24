@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """
 Main FastAPI application module.
 Entry point for the Netra AI Optimization Platform.
@@ -17,7 +18,6 @@ import sys
 from pathlib import Path
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 def _load_base_env_file(root_path: Path) -> None:
     """Load base .env file if it exists."""
@@ -67,14 +67,14 @@ def _setup_environment_files() -> None:
     
     # If any dev launcher indicator is present, skip loading
     for indicator in dev_launcher_indicators:
-        if os.environ.get(indicator):
+        if get_env().get(indicator):
             print(f"Dev launcher detected via {indicator} - skipping .env loading")
             return
     
     # Check if critical environment variables are already set
     # This handles cases where env vars are set directly without dev launcher
     critical_vars = ['LLM_MODE', 'DATABASE_URL', 'GEMINI_API_KEY']
-    vars_already_set = sum(1 for var in critical_vars if os.environ.get(var))
+    vars_already_set = sum(1 for var in critical_vars if get_env().get(var))
     
     # If most critical vars are already set, assume external loading
     if vars_already_set >= len(critical_vars) // 2:

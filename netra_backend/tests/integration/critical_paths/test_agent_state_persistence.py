@@ -22,7 +22,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -334,6 +334,7 @@ async def state_persistence_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_state_save_load(state_persistence_manager):
     """Test basic state save and load operations."""
     manager = state_persistence_manager
@@ -358,6 +359,7 @@ async def test_basic_state_save_load(state_persistence_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_persistent_state_storage(state_persistence_manager):
     """Test persistent state storage in database."""
     manager = state_persistence_manager
@@ -378,6 +380,7 @@ async def test_persistent_state_storage(state_persistence_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_state_serialization_compression(state_persistence_manager):
     """Test state serialization with compression."""
     manager = state_persistence_manager
@@ -401,6 +404,7 @@ async def test_state_serialization_compression(state_persistence_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_state_recovery_validation(state_persistence_manager):
     """Test state recovery with validation."""
     manager = state_persistence_manager
@@ -420,6 +424,7 @@ async def test_state_recovery_validation(state_persistence_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_state_version_migration(state_persistence_manager):
     """Test state version migration."""
     manager = state_persistence_manager
@@ -436,6 +441,7 @@ async def test_state_version_migration(state_persistence_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_state_validation_rules(state_persistence_manager):
     """Test state validation rules."""
     manager = state_persistence_manager
@@ -460,6 +466,7 @@ async def test_state_validation_rules(state_persistence_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_state_operations(state_persistence_manager):
     """Test concurrent state save/load operations."""
     manager = state_persistence_manager
@@ -482,6 +489,7 @@ async def test_concurrent_state_operations(state_persistence_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_state_cleanup_operations(state_persistence_manager):
     """Test state cleanup and deletion."""
     manager = state_persistence_manager
@@ -504,6 +512,7 @@ async def test_state_cleanup_operations(state_persistence_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_redis_fallback_to_database(state_persistence_manager):
     """Test fallback from Redis to database storage."""
     manager = state_persistence_manager
@@ -523,6 +532,7 @@ async def test_redis_fallback_to_database(state_persistence_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_state_persistence_performance(state_persistence_manager):
     """Benchmark state persistence performance."""
     manager = state_persistence_manager

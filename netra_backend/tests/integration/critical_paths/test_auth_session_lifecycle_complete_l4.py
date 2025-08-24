@@ -12,7 +12,7 @@ import asyncio
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -58,7 +58,7 @@ class TestAuthSessionLifecycleCompleteL4:
             # Use None to trigger fallback mode in services
             redis_client = None
         
-        return {
+        yield {
             'auth_service': AuthService(),
             'session_service': SessionService(redis_client=redis_client),
             'token_service': TokenService(redis_client=redis_client),
@@ -69,6 +69,7 @@ class TestAuthSessionLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_session_creation_with_immediate_validation(self, auth_stack):
         """Test session creation followed by immediate validation attempts"""
         # Create session
@@ -100,6 +101,7 @@ class TestAuthSessionLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_token_refresh_during_active_requests(self, auth_stack):
         """Test token refresh while requests are in flight"""
         # Create initial token
@@ -149,6 +151,7 @@ class TestAuthSessionLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_session_expiry_cascade(self, auth_stack):
         """Test cascading effects of session expiry"""
         user_id = "user_789"
@@ -201,6 +204,7 @@ class TestAuthSessionLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_concurrent_login_same_user(self, auth_stack):
         """Test concurrent login attempts for same user"""
         user_id = "user_concurrent"
@@ -237,6 +241,7 @@ class TestAuthSessionLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_session_timeout_with_activity(self, auth_stack):
         """Test session timeout behavior with user activity"""
         user_id = "user_timeout"
@@ -268,6 +273,7 @@ class TestAuthSessionLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_token_validation_with_clock_skew(self, auth_stack):
         """Test token validation with system clock skew"""
         user_id = "user_clock"
@@ -279,12 +285,14 @@ class TestAuthSessionLifecycleCompleteL4:
         )
         
         # Mock time to be 30 seconds in the past (clock skew)
+        # Mock: Component isolation for testing without external dependencies
         with patch('time.time', return_value=time.time() - 30):
             # Should still validate with reasonable clock skew
             result = await auth_stack['token_service'].validate_token_jwt(token)
             assert result['valid']
         
         # Mock time to be 5 minutes in the future  
+        # Mock: Component isolation for testing without external dependencies
         with patch('time.time', return_value=time.time() + 360):
             # Token should be expired
             result = await auth_stack['token_service'].validate_token_jwt(token)
@@ -292,6 +300,7 @@ class TestAuthSessionLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_session_migration_between_devices(self, auth_stack):
         """Test session migration when user switches devices"""
         user_id = "user_migrate"
@@ -332,6 +341,7 @@ class TestAuthSessionLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_state_after_password_change(self, auth_stack):
         """Test auth state consistency after password change"""
         user_id = "user_password"
@@ -378,6 +388,7 @@ class TestAuthSessionLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_session_recovery_after_redis_failure(self, auth_stack):
         """Test session recovery after Redis connection failure"""
         user_id = "user_recovery"
@@ -409,6 +420,7 @@ class TestAuthSessionLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_jwt_signature_rotation(self, auth_stack):
         """Test JWT validation during signature key rotation"""
         user_id = "user_rotation"

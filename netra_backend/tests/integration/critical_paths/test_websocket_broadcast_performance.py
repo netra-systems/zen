@@ -11,7 +11,7 @@ L3 Test: Uses real Redis for broadcast performance validation.
 Performance target: 1000+ concurrent connections with <100ms broadcast latency.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -23,12 +23,12 @@ import time
 import statistics
 from typing import Dict, Any, List, Tuple
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 from concurrent.futures import ThreadPoolExecutor
 
 import redis.asyncio as redis
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified
@@ -147,6 +147,7 @@ class TestWebSocketBroadcastPerformanceL3:
 
         _, redis_url = redis_container
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
@@ -199,6 +200,7 @@ class TestWebSocketBroadcastPerformanceL3:
 
         return BroadcastPerformanceTracker()
     
+    @pytest.mark.asyncio
     async def test_small_scale_broadcast_baseline(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance baseline with small user count."""
@@ -297,6 +299,7 @@ class TestWebSocketBroadcastPerformanceL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_medium_scale_broadcast_performance(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance with medium user count."""
@@ -407,6 +410,7 @@ class TestWebSocketBroadcastPerformanceL3:
         
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     
+    @pytest.mark.asyncio
     async def test_large_scale_broadcast_performance(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance with large user count."""
@@ -552,6 +556,7 @@ class TestWebSocketBroadcastPerformanceL3:
             
             await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     
+    @pytest.mark.asyncio
     async def test_broadcast_latency_measurement(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast latency with timing measurements."""
@@ -636,6 +641,7 @@ class TestWebSocketBroadcastPerformanceL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_concurrent_broadcast_handling(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test handling of concurrent broadcast operations."""
@@ -760,6 +766,7 @@ class TestWebSocketBroadcastPerformanceL3:
     
     @mock_justified("L3: Broadcast performance testing with real Redis infrastructure")
 
+    @pytest.mark.asyncio
     async def test_broadcast_memory_efficiency(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test memory efficiency during broadcast operations."""

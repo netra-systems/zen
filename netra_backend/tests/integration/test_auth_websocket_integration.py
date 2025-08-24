@@ -5,7 +5,7 @@ Components: Auth Service → Backend → WebSocket Manager
 Critical: Users can't interact without successful auth→WS flow
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -14,7 +14,7 @@ import asyncio
 import json
 from datetime import datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import jwt
 import pytest
@@ -66,24 +66,30 @@ class TestAuthToWebSocketFlow:
 
         )
     
+    @pytest.mark.asyncio
     async def test_successful_auth_to_websocket(self, auth_token, mock_user):
 
         """Test successful auth flow leading to WS connection."""
         from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
-        from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+        from netra_backend.app.websocket_core.manager import WebSocketManager
         
         # Setup mocks
 
+        # Mock: Authentication service isolation for testing without real auth flows
         auth_service = Mock(spec=AuthService)
 
+        # Mock: Async component isolation for testing without real async operations
         auth_service.validate_token = AsyncMock(return_value=mock_user)
         
         ws_manager = WebSocketManager()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.accept = AsyncMock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
         
         # Execute auth validation
@@ -116,16 +122,20 @@ class TestAuthToWebSocketFlow:
         
         mock_websocket.send_json.assert_called()
     
+    @pytest.mark.asyncio
     async def test_invalid_token_blocks_websocket(self):
 
         """Test invalid token prevents WS connection."""
         
+        # Mock: Authentication service isolation for testing without real auth flows
         auth_service = Mock(spec=AuthService)
 
+        # Mock: Async component isolation for testing without real async operations
         auth_service.validate_token = AsyncMock(side_effect=ValueError("Invalid token"))
         
         ws_manager = WebSocketManager()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         
         # Attempt connection with invalid token
@@ -138,6 +148,7 @@ class TestAuthToWebSocketFlow:
 
         assert len(ws_manager.active_connections) == 0
     
+    @pytest.mark.asyncio
     async def test_expired_token_handling(self):
 
         """Test expired token gracefully handled."""
@@ -160,8 +171,10 @@ class TestAuthToWebSocketFlow:
 
         )
         
+        # Mock: Authentication service isolation for testing without real auth flows
         auth_service = Mock(spec=AuthService)
 
+        # Mock: Async component isolation for testing without real async operations
         auth_service.validate_token = AsyncMock(
 
             side_effect=jwt.ExpiredSignatureError("Token expired")
@@ -172,6 +185,7 @@ class TestAuthToWebSocketFlow:
 
             await auth_service.validate_token_jwt(expired_token)
     
+    @pytest.mark.asyncio
     async def test_auth_service_unavailable_fallback(self):
 
         """Test fallback when auth service is unavailable."""
@@ -185,8 +199,10 @@ class TestAuthToWebSocketFlow:
 
         )
         
+        # Mock: Authentication service isolation for testing without real auth flows
         auth_service = Mock(spec=AuthService)
 
+        # Mock: Async component isolation for testing without real async operations
         auth_service.validate_token = AsyncMock(
 
             side_effect=ConnectionError("Auth service unavailable")
@@ -213,12 +229,15 @@ class TestAuthToWebSocketFlow:
 
             await circuit_breaker.call(auth_service.validate_token, "token")
     
+    @pytest.mark.asyncio
     async def test_concurrent_auth_requests(self, auth_token, mock_user):
 
         """Test system handles concurrent auth requests."""
         
+        # Mock: Authentication service isolation for testing without real auth flows
         auth_service = Mock(spec=AuthService)
 
+        # Mock: Async component isolation for testing without real async operations
         auth_service.validate_token = AsyncMock(return_value=mock_user)
 
         ws_manager = WebSocketManager()
@@ -229,8 +248,10 @@ class TestAuthToWebSocketFlow:
 
         for i in range(10):
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = Mock()
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws.accept = AsyncMock()
 
             user_id = f"user_{i}"
@@ -247,15 +268,19 @@ class TestAuthToWebSocketFlow:
 
         assert len(ws_manager.active_connections) == 10
     
+    @pytest.mark.asyncio
     async def test_auth_to_websocket_with_redis_session(self, auth_token, mock_user):
 
         """Test auth flow with Redis session storage."""
         from netra_backend.app.services.redis_manager import RedisManager
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         redis_manager = Mock(spec=RedisManager)
 
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_manager.set = AsyncMock(return_value=True)
 
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_manager.get = AsyncMock(return_value=json.dumps({
 
             "user_id": mock_user.id,
@@ -286,16 +311,19 @@ class TestAuthToWebSocketFlow:
 
         assert json.loads(session_data)["user_id"] == mock_user.id
     
+    @pytest.mark.asyncio
     async def test_websocket_auth_header_validation(self, auth_token):
 
         """Test WebSocket connection validates auth headers."""
         
         ws_manager = WebSocketManager()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
 
         mock_websocket.headers = {"Authorization": f"Bearer {auth_token}"}
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.accept = AsyncMock()
         
         # Extract and validate token from headers

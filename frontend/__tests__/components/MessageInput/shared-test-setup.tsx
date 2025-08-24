@@ -14,7 +14,7 @@ jest.mock('@/components/chat/utils/messageInputUtils', () => ({
     if (!isAuth) return 'Please sign in to send messages';
     if (isProc) return 'Agent is thinking...';
     if (msgLen > 9000) return `${10000 - msgLen} characters remaining`;
-    return 'Type a message... (Shift+Enter for new line)';
+    return 'Start typing your AI optimization request... (Shift+Enter for new line)';
   }),
   getTextareaClassName: jest.fn(() => 'mock-textarea-class'),
   getCharCountClassName: jest.fn(() => 'mock-char-count-class'),

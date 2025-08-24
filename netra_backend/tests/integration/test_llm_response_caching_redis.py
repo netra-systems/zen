@@ -22,9 +22,10 @@ from typing import Any, Dict, List, Optional
 import docker
 import pytest
 import redis.asyncio as aioredis
-from caching.cache_strategies import CacheStrategy
-from caching.llm_cache_manager import LLMCacheManager
-from netra_backend.app.llm.response_processor import LLMResponseProcessor
+from netra_backend.app.services.api_gateway.cache_strategies import CacheStrategy
+# from caching.llm_cache_manager import LLMCacheManager  # Module doesn't exist, use available cache manager
+from netra_backend.app.services.cache.cache_manager import LLMCacheManager
+# from netra_backend.app.llm.response_processor import LLMResponseProcessor  # Module doesn't exist
 
 @pytest.mark.L3
 class TestLLMResponseCachingRedisL3:
@@ -124,7 +125,7 @@ class TestLLMResponseCachingRedisL3:
                 "cost": 0.0009
             }
         }
-        return responses
+        yield responses
     
     @pytest.mark.asyncio
     async def test_basic_cache_store_and_retrieve(

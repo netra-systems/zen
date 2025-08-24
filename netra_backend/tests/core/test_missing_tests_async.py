@@ -14,7 +14,7 @@ from pathlib import Path
 
 import asyncio
 from typing import Any, Dict
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,6 +68,7 @@ class TestAsyncErrorHandlers:
                     raise
         
         return MockErrorHandler()
+    @pytest.mark.asyncio
     async def test_retry_on_transient_error(self, error_handler):
         """Test retry mechanism for transient errors."""
         call_count = 0
@@ -82,6 +83,7 @@ class TestAsyncErrorHandlers:
         result = await error_handler.with_retry(failing_func, max_retries=3)
         assert result == "success"
         assert call_count == 3
+    @pytest.mark.asyncio
     async def test_fallback_strategy_activation(self, error_handler):
         """Test fallback strategy when primary fails."""
         async def failing_primary():
@@ -92,6 +94,7 @@ class TestAsyncErrorHandlers:
         
         result = await error_handler.with_fallback(failing_primary, fallback)
         assert result == "fallback_result"
+    @pytest.mark.asyncio
     async def test_circuit_breaker_opens(self, error_handler):
         """Test circuit breaker opens after threshold."""
         async def always_fails():
@@ -116,6 +119,7 @@ class TestAsyncResourceManager:
     def resource_manager(self):
         from netra_backend.app.core.resource_manager import ResourceManager
         return ResourceManager()
+    @pytest.mark.asyncio
     async def test_async_resource_allocation(self, resource_manager):
         """Test async resource allocation within limits."""
         resource_manager.set_limit("connections", 10)
@@ -127,6 +131,7 @@ class TestAsyncResourceManager:
         # Should fail when limit reached
         with pytest.raises(Exception, match="Resource limit exceeded"):
             await resource_manager.acquire("connections", "conn_11")
+    @pytest.mark.asyncio
     async def test_async_resource_cleanup(self, resource_manager):
         """Test async cleanup when resources exhausted."""
         resource_manager.set_limit("memory", 100)
@@ -140,6 +145,7 @@ class TestAsyncResourceManager:
         
         # Should be able to allocate again
         assert await resource_manager.acquire("memory", "new_block", size=50)
+    @pytest.mark.asyncio
     async def test_async_resource_release(self, resource_manager):
         """Test async resource release."""
         resource_manager.set_limit("threads", 5)
@@ -158,8 +164,10 @@ class TestAsyncSchemaSync:
     def schema_sync(self):
         from netra_backend.app.core.schema_sync import SchemaSync
         return SchemaSync()
+    @pytest.mark.asyncio
     async def test_async_schema_validation(self, schema_sync):
         """Test async schema validation against database."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         mock_db.execute.return_value.fetchall.return_value = [
             ("users", "id", "integer"),
@@ -168,6 +176,7 @@ class TestAsyncSchemaSync:
         
         is_valid = await schema_sync.validate_schema(mock_db)
         assert is_valid or not is_valid  # Just check it runs
+    @pytest.mark.asyncio
     async def test_async_migration_execution(self, schema_sync):
         """Test async migration execution."""
         migration = {
@@ -175,9 +184,11 @@ class TestAsyncSchemaSync:
             "sql": "ALTER TABLE users ADD COLUMN age INTEGER;"
         }
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         result = await schema_sync.execute_migration(mock_db, migration)
         assert result is not None
+    @pytest.mark.asyncio
     async def test_async_schema_diff_detection(self, schema_sync):
         """Test async detection of schema differences."""
         expected_schema = {
@@ -202,13 +213,16 @@ class TestAsyncStartupChecks:
     def startup_checker(self):
         from netra_backend.app.startup_checks import StartupChecker
         return StartupChecker()
+    @pytest.mark.asyncio
     async def test_async_database_connectivity(self, startup_checker):
         """Test async database connectivity validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         mock_db.execute.return_value.scalar.return_value = 1
         
         is_connected = await startup_checker.check_database(mock_db)
         assert is_connected
+    @pytest.mark.asyncio
     async def test_async_external_service_health(self, startup_checker):
         """Test async external service health checks."""
         services = {
@@ -216,11 +230,13 @@ class TestAsyncStartupChecks:
             "clickhouse": {"host": "localhost", "port": 9000}
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.startup_checks.check_service') as mock_check:
             mock_check.return_value = True
             
             results = await startup_checker.check_external_services(services)
             assert all(results.values())
+    @pytest.mark.asyncio
     async def test_async_graceful_degradation(self, startup_checker):
         """Test async graceful degradation when services fail."""
         critical_services = ["database", "auth"]
@@ -240,6 +256,7 @@ class TestAsyncStartupChecks:
         )
         
         assert can_start  # Should start with optional services down
+    @pytest.mark.asyncio
     async def test_async_service_dependency_check(self, startup_checker):
         """Test async service dependency validation."""
         dependencies = {

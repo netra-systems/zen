@@ -6,8 +6,6 @@ Tests performance characteristics, scaling behavior, and resource management
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import json
 import time
@@ -15,7 +13,7 @@ import tracemalloc
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from netra_backend.app.schemas import AppConfig, RequestModel
@@ -60,7 +58,9 @@ class TestApexOptimizerPerformanceAndScaling:
     @pytest.fixture
     def mock_context(self):
         """Create mock context for performance testing"""
+        # Mock: Service component isolation for predictable testing behavior
         return MagicMock(spec=ToolContext)
+    @pytest.mark.asyncio
     async def test_tool_selection_performance(self, performance_tools, mock_context):
         """Test tool selection performance under load"""
         # Execute many tool selections rapidly
@@ -86,6 +86,7 @@ class TestApexOptimizerPerformanceAndScaling:
         assert len(results) == num_selections
         assert throughput > 100  # At least 100 selections per second
         assert total_time < 2.0   # Complete within reasonable time
+    @pytest.mark.asyncio
     async def test_concurrent_tool_execution_scaling(self, performance_tools, mock_context):
         """Test scaling with concurrent tool executions"""
         # Test different concurrency levels
@@ -112,6 +113,7 @@ class TestApexOptimizerPerformanceAndScaling:
         # Use max() to handle timing precision edge cases where results[1] might be very small
         baseline_time = max(results[1], 0.001)  # Minimum 1ms baseline
         assert results[50] < baseline_time * 10  # Should scale reasonably well
+    @pytest.mark.asyncio
     async def test_tool_chain_optimization_performance(self, performance_tools, mock_context):
         """Test optimization of tool chain execution performance"""
         # Create optimized chain that considers tool performance
@@ -144,6 +146,7 @@ class TestApexOptimizerPerformanceAndScaling:
         
         # Simulate multiple executions
         for _ in range(10):
+            # Mock: Service component isolation for predictable testing behavior
             asyncio.run(tool.run(MagicMock(spec=ToolContext)))
         
         # Get metrics
@@ -155,6 +158,7 @@ class TestApexOptimizerPerformanceAndScaling:
         assert metrics['category'] == OptimizationCategory.LATENCY_OPTIMIZATION.value
         assert metrics['average_execution_time'] == 0.1
         assert metrics['success_rate'] == 1.0
+    @pytest.mark.asyncio
     async def test_tool_load_balancing(self, performance_tools, mock_context):
         """Test load balancing across multiple tool instances"""
         # Create multiple instances of the same tool type
@@ -183,6 +187,7 @@ class TestApexOptimizerPerformanceAndScaling:
         # Each tool should handle 5 requests
         for tool in tool_instances:
             assert tool.execution_count == 5
+    @pytest.mark.asyncio
     async def test_tool_resource_management(self, performance_tools, mock_context):
         """Test resource management for tool execution"""
         # Start memory tracking

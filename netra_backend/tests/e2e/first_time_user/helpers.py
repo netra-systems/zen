@@ -91,7 +91,7 @@ class FirstTimeUserTestHelpers:
 @pytest.fixture
 async def conversion_environment():
     """Setup complete conversion test environment"""
-    return await FirstTimeUserTestHelpers.create_conversion_environment()
+    yield await FirstTimeUserTestHelpers.create_conversion_environment()
 
 @pytest.fixture
 def cost_savings_calculator():

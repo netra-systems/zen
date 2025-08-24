@@ -11,7 +11,7 @@ L3 Test: Uses real Redis containers and connection pooling for WebSocket validat
 Performance target: 1000+ concurrent connections with <100ms message latency.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -22,10 +22,10 @@ import json
 import time
 from typing import Dict, Any, List
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import redis.asyncio as redis
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified
@@ -86,6 +86,7 @@ class TestWebSocketConnectionPoolingL3:
 
         _, redis_url = redis_container
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
@@ -130,6 +131,7 @@ class TestWebSocketConnectionPoolingL3:
 
         ]
     
+    @pytest.mark.asyncio
     async def test_connection_pool_initialization(self, websocket_manager, redis_client):
 
         """Test WebSocket connection pool initialization with Redis."""
@@ -153,6 +155,7 @@ class TestWebSocketConnectionPoolingL3:
 
         assert websocket_manager is not None
     
+    @pytest.mark.asyncio
     async def test_concurrent_connection_establishment(self, websocket_manager, redis_client, test_users):
 
         """Test concurrent WebSocket connection establishment."""
@@ -213,6 +216,7 @@ class TestWebSocketConnectionPoolingL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_connection_pool_scaling(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool scaling under load."""
@@ -259,6 +263,7 @@ class TestWebSocketConnectionPoolingL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_connection_pool_message_distribution(self, websocket_manager, redis_client, test_users):
 
         """Test message distribution across connection pool."""
@@ -315,6 +320,7 @@ class TestWebSocketConnectionPoolingL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_connection_pool_failover_handling(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool resilience during Redis issues."""
@@ -361,6 +367,7 @@ class TestWebSocketConnectionPoolingL3:
     
     @mock_justified("L3: Connection pool stress testing with real Redis")
 
+    @pytest.mark.asyncio
     async def test_connection_pool_resource_management(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool resource management and cleanup."""

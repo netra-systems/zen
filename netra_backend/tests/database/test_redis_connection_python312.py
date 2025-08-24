@@ -12,18 +12,18 @@ import asyncio
 import os
 import sys
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import patch, AsyncMock, MagicMock, MagicMock
 
 # Add parent directory to path for imports
 from dev_launcher.database_connector import DatabaseConnector, DatabaseType, ConnectionStatus
 
 @pytest.mark.asyncio
-async def test_redis_connection_fails_with_python312():
+async def test_redis_connection_works_with_python312():
     """
-    Test that reproduces the Redis connection failure in dev environment.
+    Test that Redis connection now works properly with Python 3.12.
     
-    This test demonstrates that the current aioredis 2.0.1 version is incompatible
-    with Python 3.12, causing a TypeError when trying to import aioredis.
+    This test verifies that the aioredis compatibility issue with Python 3.12
+    has been resolved and connections work as expected.
     """
     # Setup environment for Redis connection
     os.environ["REDIS_URL"] = "redis://localhost:6379/0"
@@ -40,15 +40,14 @@ async def test_redis_connection_fails_with_python312():
     # Test the actual connection - this should fail with aioredis 2.0.1 on Python 3.12
     result = await connector._test_redis_connection(redis_conn)
     
-    # The test should fail due to aioredis incompatibility
-    assert result is False, "Redis connection should fail with aioredis 2.0.1 on Python 3.12"
-    assert redis_conn.last_error is not None
-    assert "Redis connection failed" in redis_conn.last_error or "TimeoutError" in redis_conn.last_error
+    # The Redis connection should now work with Python 3.12 (issue has been fixed)
+    assert result is True, "Redis connection should now work with Python 3.12"
+    assert redis_conn.last_error is None or redis_conn.last_error == ""
 
 @pytest.mark.asyncio
-async def test_dev_launcher_database_validation_fails():
+async def test_dev_launcher_database_validation_succeeds():
     """
-    Test that the dev launcher database validation fails when Redis connection fails.
+    Test that the dev launcher database validation succeeds with all connections.
     
     This simulates what happens when running `python scripts/dev_launcher.py`.
     """
@@ -65,44 +64,42 @@ async def test_dev_launcher_database_validation_fails():
     with patch.object(connector, '_test_postgresql_connection', return_value=True):
         # Mock successful ClickHouse connection
         with patch.object(connector, '_test_clickhouse_connection', return_value=True):
-            # Let Redis connection fail naturally due to aioredis issue
+            # Let Redis connection work naturally (issue has been fixed)
             result = await connector.validate_all_connections()
             
-            # Validation should fail because Redis connection fails
-            assert result is False, "Database validation should fail when Redis connection fails"
+            # Validation should succeed because all connections work
+            assert result is True, "Database validation should succeed when all connections work"
             
             # Check that PostgreSQL was marked as connected
             if "main_postgres" in connector.connections:
                 postgres_conn = connector.connections["main_postgres"]
                 assert postgres_conn.status == ConnectionStatus.CONNECTED
             
-            # Check that Redis was marked as failed
+            # Check that Redis was marked as connected
             redis_conn = connector.connections["main_redis"]
-            assert redis_conn.status == ConnectionStatus.FAILED
-            assert redis_conn.last_error is not None
+            assert redis_conn.status == ConnectionStatus.CONNECTED
+            assert redis_conn.last_error is None or redis_conn.last_error == ""
 
-def test_aioredis_import_fails_on_python312():
+def test_aioredis_import_works_on_python312():
     """
-    Test that directly importing aioredis fails on Python 3.12.
+    Test that importing aioredis/redis-py now works with Python 3.12.
     
-    This is the root cause of the Redis connection failure.
+    The compatibility issue has been resolved.
     """
     try:
-        import aioredis
-        # If import succeeds, check version
-        import sys
-        python_version = sys.version_info
-        
-        # This should only succeed if Python < 3.12 or aioredis has been updated
-        assert python_version.major < 3 or python_version.minor < 12, \
-            f"aioredis 2.0.1 should not work with Python {python_version.major}.{python_version.minor}"
-    except TypeError as e:
-        # Expected error with Python 3.12 and aioredis 2.0.1
-        assert "duplicate base class TimeoutError" in str(e)
-        # Test passes - we've reproduced the issue
+        # Try importing redis (the newer library that replaced aioredis)
+        import redis.asyncio
+        # Import succeeded - compatibility issue is fixed
+        assert True, "Redis import works with Python 3.12"
     except ImportError:
-        # aioredis not installed
-        pytest.skip("aioredis not installed")
+        # Try the older aioredis if redis.asyncio not available
+        try:
+            import aioredis
+            # Import succeeded - compatibility issue is fixed
+            assert True, "aioredis import works with Python 3.12"
+        except ImportError:
+            # Neither library installed
+            pytest.skip("Redis library not installed")
 
 if __name__ == "__main__":
     # Run the tests

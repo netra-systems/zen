@@ -221,7 +221,7 @@
       <tool>pytest-cov</tool>
       <format>html,json,terminal</format>
       <fail_under>90</fail_under>
-      <report_location>test_reports/coverage/</report_location>
+      <report_location>tests/test_reports/coverage/</report_location>
     </coverage_reporting>
   </automated_enforcement>
   <test_data_strategy>
@@ -269,7 +269,7 @@
   <references>
     <reference>SPEC/testing.xml - Overall testing strategy</reference>
     <reference>SPEC/code_changes.xml - Code change checklist</reference>
-    <reference>test_reports/top_100_missing_tests.md - Gap analysis</reference>
+    <reference>tests/test_reports/top_100_missing_tests.md - Gap analysis</reference>
     <reference>test_runner.py - Unified test execution</reference>
   </references>
 </specification>

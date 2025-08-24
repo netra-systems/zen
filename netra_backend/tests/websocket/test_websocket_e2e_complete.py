@@ -16,14 +16,12 @@ Business Value: Ensures WebSocket infrastructure supports real-time AI optimizat
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import json
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import websockets
@@ -118,6 +116,7 @@ def sample_example_message():
 class TestWebSocketAuthenticationFlow:
     """Test JWT authentication handshake."""
     
+    @pytest.mark.asyncio
     async def test_connection_with_valid_jwt(self, ws_client):
         """Test connection establishes with valid JWT."""
         token = await ws_client.connect_with_auth("auth_test_user")
@@ -128,12 +127,14 @@ class TestWebSocketAuthenticationFlow:
         assert len(connection_msgs) == 1
         assert "user_id" in connection_msgs[0]["payload"]
         
+    @pytest.mark.asyncio
     async def test_connection_rejected_invalid_jwt(self):
         """Test connection rejected with invalid JWT."""
         with pytest.raises(Exception):
             ws = await websockets.connect("ws://localhost:8001/ws/enhanced?token=invalid")
             await ws.close()
             
+    @pytest.mark.asyncio
     async def test_connection_rejected_missing_jwt(self):
         """Test connection rejected without JWT."""  
         with pytest.raises(Exception):
@@ -144,6 +145,7 @@ class TestWebSocketAuthenticationFlow:
 class TestWebSocketMessageFlow:
     """Test message flow and field consistency."""
     
+    @pytest.mark.asyncio
     async def test_user_message_content_field_handling(self, ws_client, sample_user_message):
         """Test user message uses 'content' field (not 'text')."""
         await ws_client.connect_with_auth("message_test_user")
@@ -158,6 +160,7 @@ class TestWebSocketMessageFlow:
         field_errors = [e for e in error_msgs if "content" in str(e) or "text" in str(e)]
         assert len(field_errors) == 0
         
+    @pytest.mark.asyncio
     async def test_example_message_processing(self, ws_client, sample_example_message):
         """Test example message processing flow."""
         await ws_client.connect_with_auth("example_test_user") 
@@ -172,6 +175,7 @@ class TestWebSocketMessageFlow:
                         ["agent_update", "message_processed", "example_response"]]
         assert len(response_msgs) >= 1
         
+    @pytest.mark.asyncio
     async def test_json_first_enforcement(self, ws_client):
         """Test only JSON messages accepted (no strings)."""
         await ws_client.connect_with_auth("json_test_user")
@@ -190,6 +194,7 @@ class TestWebSocketMessageFlow:
 class TestAgentResponseStreaming:
     """Test agent response streaming."""
     
+    @pytest.mark.asyncio
     async def test_agent_startup_on_first_message(self, ws_client, sample_user_message):
         """Test agent starts on first message without thread context."""
         await ws_client.connect_with_auth("agent_startup_user")
@@ -203,6 +208,7 @@ class TestAgentResponseStreaming:
         agent_msgs = ws_client.get_messages_by_type("agent_update")
         assert len(agent_msgs) >= 1
         
+    @pytest.mark.asyncio
     async def test_agent_response_streaming_format(self, ws_client):
         """Test agent response streaming follows JSON format."""
         await ws_client.connect_with_auth("streaming_test_user")
@@ -227,6 +233,7 @@ class TestAgentResponseStreaming:
 class TestConnectionResilience:
     """Test connection persistence and recovery."""
     
+    @pytest.mark.asyncio
     async def test_connection_survives_component_rerender(self, ws_client):
         """Test connection persists through component re-renders."""
         await ws_client.connect_with_auth("rerender_test_user")
@@ -244,6 +251,7 @@ class TestConnectionResilience:
         pong_msgs = ws_client.get_messages_by_type("pong")
         assert len(pong_msgs) >= 1
         
+    @pytest.mark.asyncio
     async def test_graceful_error_recovery(self, ws_client):
         """Test connection recovers from recoverable errors."""
         await ws_client.connect_with_auth("error_test_user")
@@ -269,6 +277,7 @@ class TestConnectionResilience:
 class TestServiceDiscovery:
     """Test WebSocket service discovery."""
     
+    @pytest.mark.asyncio
     async def test_websocket_config_discovery(self):
         """Test backend provides WebSocket configuration."""
         from netra_backend.app.routes.websocket import (
@@ -287,9 +296,12 @@ class TestServiceDiscovery:
 class TestErrorHandlingAndLogging:
     """Test comprehensive error scenarios."""
     
+    @pytest.mark.asyncio
     async def test_connection_rejection_logged_clearly(self):
         """Test rejected connections are logged clearly."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.logging_config.central_logger') as mock_logger:
+            # Mock: Generic component isolation for controlled unit testing
             mock_log = Mock()
             mock_logger.get_logger.return_value = mock_log
             
@@ -301,6 +313,7 @@ class TestErrorHandlingAndLogging:
             # Should have logged the rejection reason clearly
             assert mock_log.error.called or mock_log.warning.called
             
+    @pytest.mark.asyncio
     async def test_empty_message_validation(self, ws_client):
         """Test empty messages are rejected early."""
         await ws_client.connect_with_auth("empty_msg_user")
@@ -322,6 +335,7 @@ class TestErrorHandlingAndLogging:
 class TestConcurrentConnections:
     """Test concurrent connection handling."""
     
+    @pytest.mark.asyncio
     async def test_multiple_connections_same_user(self):
         """Test multiple connections from same user handled correctly."""
         clients = []
@@ -350,6 +364,7 @@ class TestConcurrentConnections:
 class TestRealTimeFeatures:
     """Test real-time WebSocket features."""
     
+    @pytest.mark.asyncio
     async def test_heartbeat_keepalive(self, ws_client):
         """Test heartbeat keeps connection alive."""
         await ws_client.connect_with_auth("heartbeat_user")
@@ -363,6 +378,7 @@ class TestRealTimeFeatures:
         assert len(pong_msgs) >= 1
         assert "server_time" in pong_msgs[0]
         
+    @pytest.mark.asyncio
     async def test_message_ordering_preservation(self, ws_client):
         """Test messages maintain order during high throughput."""
         await ws_client.connect_with_auth("ordering_user")
@@ -386,9 +402,12 @@ class TestRealTimeFeatures:
 class TestManualDatabaseSessions:
     """Test manual database session handling (not Depends())."""
     
+    @pytest.mark.asyncio
     async def test_websocket_manual_db_sessions(self, ws_client):
         """Test WebSocket endpoints use manual DB sessions."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__.return_value = mock_session
             
@@ -398,9 +417,12 @@ class TestManualDatabaseSessions:
             # Should have called manual session creation
             assert mock_db.called
             
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.routes.websocket_enhanced.get_async_db')
+    @pytest.mark.asyncio
     async def test_auth_validation_manual_session(self, mock_db):
         """Test auth validation uses manual database session."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
         mock_db.return_value.__aenter__.return_value = mock_session
         
@@ -410,8 +432,11 @@ class TestManualDatabaseSessions:
         
         session_info = {"user_id": "test_user", "email": "test@example.com"}
         
+        # Mock: Security service isolation for auth testing without real token validation
         with patch('netra_backend.app.services.security_service.SecurityService') as mock_security:
+            # Mock: Security service isolation for auth testing without real token validation
             mock_security_instance = AsyncMock()
+            # Mock: Security service isolation for auth testing without real token validation
             mock_security_instance.get_user_by_id.return_value = Mock(is_active=True)
             mock_security.return_value = mock_security_instance
             

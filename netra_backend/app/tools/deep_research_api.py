@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Deep Research API integration for NACIS.
 
 Date Created: 2025-01-22
@@ -27,8 +28,8 @@ class DeepResearchAPI:
     
     def _init_api_config(self, api_key: Optional[str], base_url: Optional[str]) -> None:
         """Initialize API configuration."""
-        self.api_key = api_key or os.getenv("DEEP_RESEARCH_API_KEY", "")
-        self.base_url = base_url or os.getenv(
+        self.api_key = api_key or get_env().get("DEEP_RESEARCH_API_KEY", "")
+        self.base_url = base_url or get_env().get(
             "DEEP_RESEARCH_API_URL", 
             "https://api.deepresearch.google.com/v1"
         )

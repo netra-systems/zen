@@ -1,9 +1,30 @@
+import os
+import asyncio
 import pytest
 from fastapi.testclient import TestClient
 
+# Set environment to development for dev login endpoint to work
+os.environ["NETRA_ENVIRONMENT"] = "development"
+
 from auth_service.main import app
+from auth_service.auth_core.database.connection import auth_db
 
 client = TestClient(app)
+
+
+@pytest.fixture(scope="module", autouse=True)
+def setup_database():
+    """Setup database tables before running tests."""
+    async def create_tables():
+        # Initialize the database connection first
+        await auth_db.initialize()
+        # Now create tables
+        await auth_db.create_tables()
+    
+    # Create tables before tests
+    asyncio.run(create_tables())
+    yield
+    # Cleanup is handled by the database connection itself
 
 
 @pytest.fixture(scope="module")
@@ -15,9 +36,20 @@ def test_user():
 
 
 def test_dev_login():
-    response = client.post("/auth/dev/login")
-    assert response.status_code == 200
-    assert "access_token" in response.json()
+    # Ensure environment is set to development for this test
+    original_env = os.environ.get("NETRA_ENVIRONMENT")
+    os.environ["NETRA_ENVIRONMENT"] = "development"
+    
+    try:
+        response = client.post("/auth/dev/login")
+        assert response.status_code == 200
+        assert "access_token" in response.json()
+    finally:
+        # Restore original environment
+        if original_env:
+            os.environ["NETRA_ENVIRONMENT"] = original_env
+        elif "NETRA_ENVIRONMENT" in os.environ:
+            del os.environ["NETRA_ENVIRONMENT"]
 
 
 def test_login_logout(test_user):

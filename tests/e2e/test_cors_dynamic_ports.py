@@ -80,6 +80,7 @@ class TestPlaceholder:
 #     @staticmethod
 #     def mock_service_discovery(config):
 #         """Mock service discovery with dynamic port configuration."""
+# Mock: Generic component isolation for controlled unit testing
 #         mock_discovery = MagicMock()
 #         mock_discovery.read_backend_info.return_value = {
 #             "port": config.backend_port,
@@ -96,6 +97,7 @@ class TestPlaceholder:
 #             "api_url": config.auth_url,
 #         }
 # 
+# Mock: Component isolation for testing without external dependencies
 #     with patch(
 #         "app.core.middleware_setup.ServiceDiscovery", return_value=mock_discovery
 #     ):
@@ -135,9 +137,11 @@ class TestPlaceholder:
 #         with patch.dict(os.environ, {"ENVIRONMENT": "testing", "CORS_ORIGINS": ""}):
 #             # Mock the pattern matching to return False to simulate restrictive
 #             # env
+# Mock: Component isolation for testing without external dependencies
 #             with patch(
 #                 "app.core.middleware_setup._check_pattern_matches", return_value=False
 #             ):
+# Mock: Component isolation for testing without external dependencies
 #                 with patch(
 #                     "app.core.middleware_setup._check_wildcard_match",
 #                     return_value=False,
@@ -222,7 +226,9 @@ class TestPlaceholder:
 #                 from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
 # 
 #                 # Mock FastAPI app and service discovery
+# Mock: Generic component isolation for controlled unit testing
 #                 mock_app = MagicMock()
+# Mock: Generic component isolation for controlled unit testing
 #                 mock_service_discovery_instance = MagicMock()
 #                 mock_service_discovery_instance.read_frontend_info.return_value = {
 #                     "port": config.frontend_port,
@@ -234,6 +240,7 @@ class TestPlaceholder:
 #                 )
 # 
 #                 # Create mock request with dynamic frontend origin
+# Mock: Service component isolation for predictable testing behavior
 #                 mock_request = MagicMock(spec=Request)
 #                 mock_request.headers = {"origin": config.frontend_url}
 #                 mock_request.method = "GET"
@@ -337,6 +344,7 @@ class TestPlaceholder:
 #                         config.backend_port}"
 # 
 #                 # But CORS integration will fail
+# Mock: Generic component isolation for controlled unit testing
 #                 mock_app = MagicMock()
 #                 middleware = CustomCORSMiddleware(
 #                     app=mock_app, service_discovery=discovery
@@ -510,6 +518,7 @@ class TestPlaceholder:
 #                         config.auth_port}"
 # 
 #                 # Test CORS integration
+# Mock: Generic component isolation for controlled unit testing
 #                 mock_app = MagicMock()
 #                 middleware = CustomCORSMiddleware(
 #                     app=mock_app, service_discovery=discovery
@@ -592,9 +601,11 @@ class TestPlaceholder:
 #     # "CORS_ORIGINS": "http://localhost:3000,http://localhost:8000",
 #     # },
 #     # ):
+# Mock: Component isolation for testing without external dependencies
 #     # with patch(
 #     # "app.core.middleware_setup._check_pattern_matches", return_value=False
 #     # ):
+# Mock: Component isolation for testing without external dependencies
 #     # with patch(
 #     # "app.core.middleware_setup._check_wildcard_match",
 #     # return_value=False,
@@ -650,6 +661,7 @@ class TestPlaceholder:
 #         # Simulate production-like environment where wildcards are not allowed
 #         # with credentials
 #         with patch.dict(os.environ, {"ENVIRONMENT": "staging", "CORS_ORIGINS": ""}):
+# Mock: Component isolation for testing without external dependencies
 #             with patch(
 #                 "app.core.middleware_setup._check_wildcard_match", return_value=False
 #             ):

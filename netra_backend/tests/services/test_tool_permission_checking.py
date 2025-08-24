@@ -6,10 +6,8 @@ Functions refactored to ≤8 lines each using helper functions
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import UTC, datetime
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -45,6 +43,7 @@ def service_with_redis(mock_redis):
 class TestCheckToolPermission:
     """Test main tool permission checking"""
     
+    @pytest.mark.asyncio
     async def test_check_tool_permission_allowed(self, service):
         """Test tool permission check when allowed"""
         context = ToolExecutionContext(
@@ -61,6 +60,7 @@ class TestCheckToolPermission:
         assert_permission_allowed(result)
         assert "basic" in result.required_permissions
     
+    @pytest.mark.asyncio
     async def test_check_tool_permission_denied_missing_permissions(self, service):
         """Test tool permission check when permission is missing"""
         context = ToolExecutionContext(
@@ -77,6 +77,7 @@ class TestCheckToolPermission:
         assert_permission_denied(result)
         assert_missing_permissions(result, ["analytics"])
     
+    @pytest.mark.asyncio
     async def test_check_tool_permission_rate_limit_exceeded(self, service_with_redis):
         """Test tool permission check when rate limit is exceeded"""
         context = ToolExecutionContext(
@@ -95,6 +96,7 @@ class TestCheckToolPermission:
         assert_permission_denied(result)
         assert "Rate limit exceeded" in result.reason
     
+    @pytest.mark.asyncio
     async def test_check_tool_permission_no_requirements(self, service):
         """Test tool permission check for tool with no requirements"""
         context = ToolExecutionContext(
@@ -109,6 +111,7 @@ class TestCheckToolPermission:
         assert_permission_allowed(result)
         assert result.required_permissions == []
     
+    @pytest.mark.asyncio
     async def test_check_tool_permission_error_handling(self, service):
         """Test tool permission check error handling"""
         context = ToolExecutionContext(

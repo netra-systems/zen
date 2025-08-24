@@ -529,6 +529,7 @@ async def l3_recovery_manager(testcontainer_infrastructure):
 class TestAgentFailureRecoveryCascadeL3:
     """L3 integration tests for agent failure recovery cascade."""
     
+    @pytest.mark.asyncio
     async def test_single_agent_failure_recovery(self, l3_recovery_manager):
         """Test recovery from single agent failure."""
         # Create agent network
@@ -557,6 +558,7 @@ class TestAgentFailureRecoveryCascadeL3:
         assert recovery_steps["replacement"]["success"] is True
         assert recovery_steps["stability"]["success"] is True
     
+    @pytest.mark.asyncio
     async def test_cascade_failure_prevention(self, l3_recovery_manager):
         """Test prevention of cascading failures."""
         # Create larger network prone to cascades
@@ -585,6 +587,7 @@ class TestAgentFailureRecoveryCascadeL3:
         assert l3_recovery_manager.recovery_metrics["cascade_prevented"] >= 1
         assert l3_recovery_manager.recovery_metrics["successful_recoveries"] >= 1
     
+    @pytest.mark.asyncio
     async def test_concurrent_failure_recovery(self, l3_recovery_manager):
         """Test recovery from concurrent multiple failures."""
         # Create network
@@ -619,6 +622,7 @@ class TestAgentFailureRecoveryCascadeL3:
         max_recovery_time = max(r["recovery_time"] for r in recovery_results)
         assert max_recovery_time < 15.0
     
+    @pytest.mark.asyncio
     async def test_system_stability_after_recovery(self, l3_recovery_manager):
         """Test system stability after multiple recovery cycles."""
         # Create network
@@ -649,6 +653,7 @@ class TestAgentFailureRecoveryCascadeL3:
         assert report["resilience_score"] >= 0.7  # High resilience score
         assert report["average_recovery_time"] < 5.0  # Fast recovery
     
+    @pytest.mark.asyncio
     async def test_recovery_with_resource_constraints(self, l3_recovery_manager):
         """Test recovery under resource constraints."""
         # Create network

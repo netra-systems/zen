@@ -6,9 +6,7 @@ Functions refactored to ≤8 lines each using helper functions
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -42,6 +40,7 @@ def service_with_redis(mock_redis):
 class TestGetUserToolAvailability:
     """Test user tool availability functionality"""
     
+    @pytest.mark.asyncio
     async def test_get_user_tool_availability(self, service):
         """Test getting tool availability for user"""
         user_id = "test_user"
@@ -54,6 +53,7 @@ class TestGetUserToolAvailability:
         assert_tool_availability(availability, "create_thread", True)
         assert_tool_availability(availability, "analyze_workload", True)
     
+    @pytest.mark.asyncio
     async def test_get_user_tool_availability_with_rate_limits(self, service_with_redis):
         """Test tool availability including rate limit information"""
         user_id = "test_user"
@@ -71,6 +71,7 @@ class TestGetUserToolAvailability:
         assert tool.available == True
         assert tool.rate_limits.per_hour == 100
     
+    @pytest.mark.asyncio
     async def test_get_user_tool_availability_error_handling(self, service):
         """Test tool availability error handling"""
         user_id = "test_user"
@@ -79,6 +80,7 @@ class TestGetUserToolAvailability:
             availability = await service.get_user_tool_availability(user_id, tool_registry)
         assert availability == []
     
+    @pytest.mark.asyncio
     async def test_empty_tool_registry(self, service):
         """Test tool availability with empty tool registry"""
         availability = await service.get_user_tool_availability("test_user", {})

@@ -22,7 +22,7 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import asyncpg
 import clickhouse_connect
@@ -264,6 +264,7 @@ class DatabasePoolInitializationManager:
             ORDER BY id
         """)
     
+    @pytest.mark.asyncio
     async def test_pool_initialization_timing(self) -> Dict[str, Any]:
         """Test pool initialization within time limits."""
         results = {
@@ -289,6 +290,7 @@ class DatabasePoolInitializationManager:
         logger.info(f"Pool initialization times: {results}")
         return results
     
+    @pytest.mark.asyncio
     async def test_connection_acquisition_performance(self, num_connections: int = 10) -> Dict[str, Any]:
         """Test connection acquisition performance."""
         results = {
@@ -340,6 +342,7 @@ class DatabasePoolInitializationManager:
         logger.info(f"Connection acquisition performance: {results}")
         return results
     
+    @pytest.mark.asyncio
     async def test_pool_size_limits_enforcement(self) -> Dict[str, Any]:
         """Test that pool size limits are enforced."""
         results = {
@@ -427,6 +430,7 @@ class DatabasePoolInitializationManager:
         logger.info(f"Pool limits enforcement results: {results}")
         return results
     
+    @pytest.mark.asyncio
     async def test_connection_recycling_and_health(self) -> Dict[str, Any]:
         """Test connection recycling and health checks."""
         results = {
@@ -477,6 +481,7 @@ class DatabasePoolInitializationManager:
         logger.info(f"Connection recycling results: {results}")
         return results
     
+    @pytest.mark.asyncio
     async def test_failover_to_standby(self) -> Dict[str, Any]:
         """Test failover to standby database."""
         results = {
@@ -538,6 +543,7 @@ class DatabasePoolInitializationManager:
         logger.info(f"Failover test results: {results}")
         return results
     
+    @pytest.mark.asyncio
     async def test_connection_leak_detection(self) -> Dict[str, Any]:
         """Test connection leak detection and prevention."""
         results = {
@@ -645,6 +651,7 @@ async def pool_manager():
 class TestDatabasePoolInitializationL3:
     """L3 integration tests for database connection pool initialization."""
     
+    @pytest.mark.asyncio
     async def test_database_connection_pool_initialization_l3(self, pool_manager):
         """Test that database pools initialize within required time limits."""
         results = await pool_manager.test_pool_initialization_timing()
@@ -655,6 +662,7 @@ class TestDatabasePoolInitializationL3:
         assert results["clickhouse_init_time"] > 0
         assert results["total_init_time"] <= 10.0
     
+    @pytest.mark.asyncio
     async def test_connection_acquisition_performance_l3(self, pool_manager):
         """Test connection acquisition performance under load."""
         results = await pool_manager.test_connection_acquisition_performance(15)
@@ -666,6 +674,7 @@ class TestDatabasePoolInitializationL3:
         assert len(results["postgres_acquisition_times"]) == 15
         assert len(results["clickhouse_acquisition_times"]) == 15
     
+    @pytest.mark.asyncio
     async def test_pool_size_limits_enforcement_l3(self, pool_manager):
         """Test that pool size limits are properly enforced."""
         results = await pool_manager.test_pool_size_limits_enforcement()
@@ -676,6 +685,7 @@ class TestDatabasePoolInitializationL3:
         assert results["overflow_within_limits"] is True
         assert results["recovery_successful"] is True
     
+    @pytest.mark.asyncio
     async def test_connection_recycling_and_health_checks_l3(self, pool_manager):
         """Test connection recycling and health check mechanisms."""
         results = await pool_manager.test_connection_recycling_and_health()
@@ -685,6 +695,7 @@ class TestDatabasePoolInitializationL3:
         assert results["health_checks_pass"] is True
         assert results["pre_ping_effective"] is True
     
+    @pytest.mark.asyncio
     async def test_failover_to_standby_database_l3(self, pool_manager):
         """Test failover to standby database within time limits."""
         results = await pool_manager.test_failover_to_standby()
@@ -696,6 +707,7 @@ class TestDatabasePoolInitializationL3:
         assert results["within_time_limit"] is True
         assert results["failover_time"] <= 30.0
     
+    @pytest.mark.asyncio
     async def test_connection_leak_detection_l3(self, pool_manager):
         """Test connection leak detection and pool recovery."""
         results = await pool_manager.test_connection_leak_detection()
@@ -706,6 +718,7 @@ class TestDatabasePoolInitializationL3:
         assert results["pool_recovered"] is True
         assert results["sessions_not_closed"] > 0
     
+    @pytest.mark.asyncio
     async def test_concurrent_pool_access_l3(self, pool_manager):
         """Test concurrent access to connection pools."""
         async def concurrent_database_access(worker_id: int) -> Dict[str, Any]:
@@ -749,6 +762,7 @@ class TestDatabasePoolInitializationL3:
         total_operations = sum(r["operations"] for r in successful_workers)
         assert total_operations >= 40  # At least 80% of expected operations
     
+    @pytest.mark.asyncio
     async def test_pool_metrics_collection_l3(self, pool_manager):
         """Test pool metrics collection and monitoring."""
         # Generate some pool activity

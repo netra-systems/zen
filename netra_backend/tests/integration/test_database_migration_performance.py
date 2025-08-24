@@ -59,6 +59,7 @@ class TestDatabaseMigrationPerformance:
             
             yield migrations_path
     
+    @pytest.mark.asyncio
     async def test_concurrent_migration_prevention(self, containerized_databases, temp_migration_dir):
         """Test prevention of concurrent migration execution."""
         migration = self._create_test_migrations(temp_migration_dir)[0]
@@ -87,6 +88,7 @@ class TestDatabaseMigrationPerformance:
         if errors:
             assert any('lock' in err.lower() or 'concurrent' in err.lower() for err in errors), "Concurrent migration not properly blocked with lock error"
     
+    @pytest.mark.asyncio
     async def test_migration_performance_validation(self, containerized_databases, migration_validator, temp_migration_dir):
         """Test migration performance under various conditions."""
         migrations = [("simple", self._create_simple_migration(temp_migration_dir)), ("complex", self._create_complex_migration(temp_migration_dir)), ("large_data", self._create_large_data_migration(temp_migration_dir))]

@@ -108,6 +108,7 @@ class TestSupervisorLifecycleManager:
     
     def test_register_lifecycle_hook(self, lifecycle_manager):
         """Test lifecycle hook registration."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = Mock()
         lifecycle_manager.register_lifecycle_hook("pre_execution", mock_handler)
         
@@ -116,6 +117,7 @@ class TestSupervisorLifecycleManager:
     @pytest.mark.asyncio
     async def test_execute_lifecycle_hooks(self, lifecycle_manager, valid_context):
         """Test lifecycle hook execution."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         lifecycle_manager.register_lifecycle_hook("pre_execution", mock_handler)
         
@@ -130,8 +132,11 @@ class TestWorkflowOrchestrator:
     @pytest.fixture
     def mock_dependencies(self):
         return {
+            # Mock: Generic component isolation for controlled unit testing
             "agent_registry": Mock(),
+            # Mock: Generic component isolation for controlled unit testing
             "execution_engine": AsyncMock(),
+            # Mock: WebSocket connection isolation for testing without network overhead
             "websocket_manager": AsyncMock()
         }
     
@@ -324,9 +329,13 @@ class TestSupervisorAgent:
     @pytest.fixture
     def mock_dependencies(self):
         return {
+            # Mock: Session isolation for controlled testing without external state
             "db_session": AsyncMock(),
+            # Mock: LLM provider isolation to prevent external API usage and costs
             "llm_manager": Mock(),
+            # Mock: WebSocket connection isolation for testing without network overhead
             "websocket_manager": AsyncMock(),
+            # Mock: Tool execution isolation for predictable agent testing
             "tool_dispatcher": Mock()
         }
     

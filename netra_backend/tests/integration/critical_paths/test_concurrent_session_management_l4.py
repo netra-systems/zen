@@ -15,7 +15,7 @@ import time
 from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -31,7 +31,7 @@ class TestConcurrentSessionManagementL4:
     @pytest.fixture
     async def session_infrastructure(self):
         """Session infrastructure setup"""
-        return {
+        yield {
             'session_service': SessionService(),
             'auth_service': AuthService(),
             'resource_manager': ResourceManager(),
@@ -48,6 +48,7 @@ class TestConcurrentSessionManagementL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_concurrent_session_creation_same_user(self, session_infrastructure):
         """Test concurrent session creation for the same user"""
         user_id = "user_concurrent_create"
@@ -86,6 +87,7 @@ class TestConcurrentSessionManagementL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_resource_contention_between_sessions(self, session_infrastructure):
         """Test resource contention when multiple sessions access same resources"""
         resource_id = "shared_resource_1"
@@ -154,6 +156,7 @@ class TestConcurrentSessionManagementL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_session_state_consistency_under_concurrent_updates(self, session_infrastructure):
         """Test session state consistency with concurrent updates"""
         session_id = "session_consistency_test"
@@ -212,6 +215,7 @@ class TestConcurrentSessionManagementL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_session_cleanup_with_active_operations(self, session_infrastructure):
         """Test session cleanup while operations are in progress"""
         user_id = "user_cleanup"
@@ -270,6 +274,7 @@ class TestConcurrentSessionManagementL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_deadlock_detection_and_resolution(self, session_infrastructure):
         """Test deadlock detection and resolution in concurrent sessions"""
         
@@ -351,6 +356,7 @@ class TestConcurrentSessionManagementL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_session_priority_scheduling(self, session_infrastructure):
         """Test priority-based session request scheduling"""
         
@@ -413,6 +419,7 @@ class TestConcurrentSessionManagementL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_session_migration_under_load(self, session_infrastructure):
         """Test session migration between servers under load"""
         
@@ -478,6 +485,7 @@ class TestConcurrentSessionManagementL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_session_rate_limiting_fairness(self, session_infrastructure):
         """Test fair rate limiting across concurrent sessions"""
         

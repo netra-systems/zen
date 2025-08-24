@@ -36,6 +36,7 @@ class TestProcessManager(unittest.TestCase):
     
     def _create_mock_process(self, pid, running=True):
         """Create a mock process with specified PID."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.pid = pid
         mock_process.poll.return_value = None if running else 0
@@ -46,6 +47,7 @@ class TestProcessManager(unittest.TestCase):
         mock_process = self._create_mock_process(12345)
         mock_process.wait.return_value = None
         self.manager.add_process("TestService", mock_process)
+        # Mock: Component isolation for testing without external dependencies
         with patch('subprocess.run') as mock_run:
             result = self.manager.terminate_process("TestService")
         self._assert_process_terminated(result, mock_run)
@@ -64,6 +66,7 @@ class TestProcessManager(unittest.TestCase):
     
     def test_is_running(self):
         """Test checking if a process is running."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.pid = 12345
         mock_process.poll.side_effect = [None, 0]
@@ -117,6 +120,7 @@ class TestAdvancedProcessManager(unittest.TestCase):
         """Create multiple mock processes."""
         processes = []
         for i in range(5):
+            # Mock: Component isolation for controlled unit testing
             mock_process = Mock(spec=subprocess.Popen)
             mock_process.pid = 12345 + i
             mock_process.poll.return_value = None
@@ -155,6 +159,7 @@ class TestAdvancedProcessManager(unittest.TestCase):
     
     def _create_failing_process(self):
         """Create a process that fails after running."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.pid = 12345
         mock_process.poll.side_effect = [None, None, 1]
@@ -168,6 +173,7 @@ class TestAdvancedProcessManager(unittest.TestCase):
     
     def _restart_failed_process(self):
         """Restart a failed process."""
+        # Mock: Component isolation for controlled unit testing
         new_process = Mock(spec=subprocess.Popen)
         new_process.pid = 12346
         new_process.poll.return_value = None
@@ -182,6 +188,7 @@ class TestAdvancedProcessManager(unittest.TestCase):
     
     def _create_timeout_process(self):
         """Create a process that times out on wait."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.pid = 12345
         mock_process.poll.return_value = None
@@ -190,6 +197,7 @@ class TestAdvancedProcessManager(unittest.TestCase):
     
     def _test_forced_termination(self, mock_process):
         """Test forced termination after timeout."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('subprocess.run') as mock_run:
             result = self.manager.terminate_process("TimeoutService")
         if sys.platform == "win32":
@@ -219,8 +227,11 @@ class TestLogStreaming(unittest.TestCase):
     
     def _create_process_with_output(self, index):
         """Create a single mock process with output."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
+        # Mock: Generic component isolation for controlled unit testing
         mock_process.stdout = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_process.stderr = Mock()
         mock_process.stdout.readline.return_value = f"Service{index} output\n".encode()
         mock_process.stderr.readline.return_value = b""
@@ -243,14 +254,18 @@ class TestLogStreaming(unittest.TestCase):
     def test_log_streamer_error_handling(self):
         """Test log streamer error handling."""
         mock_process = self._create_process_with_error()
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.print'):
             streamer = LogStreamer(mock_process, "ErrorService")
             self._test_error_recovery(streamer)
     
     def _create_process_with_error(self):
         """Create a process that causes read errors."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
+        # Mock: Generic component isolation for controlled unit testing
         mock_process.stdout = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_process.stderr = Mock()
         mock_process.stdout.readline.side_effect = IOError("Read error")
         mock_process.stderr.readline.return_value = b""
@@ -271,8 +286,11 @@ class TestLogStreaming(unittest.TestCase):
     
     def _create_process_with_unicode(self):
         """Create a process that outputs unicode."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
+        # Mock: Generic component isolation for controlled unit testing
         mock_process.stdout = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_process.stderr = Mock()
         unicode_logs = [
             "Hello 世界\n".encode('utf-8'),
@@ -289,6 +307,7 @@ class TestLogStreaming(unittest.TestCase):
         captured = []
         def capture(*args, **kwargs):
             captured.append(args[0] if args else "")
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.print', side_effect=capture):
             streamer = LogStreamer(mock_process, "UnicodeService")
             streamer.start()
@@ -314,6 +333,7 @@ class TestResourceManagement(unittest.TestCase):
     def _add_and_remove_many_processes(self, manager):
         """Add and remove many processes to test cleanup."""
         for i in range(100):
+            # Mock: Component isolation for controlled unit testing
             mock_process = Mock(spec=subprocess.Popen)
             mock_process.pid = 10000 + i
             mock_process.poll.return_value = 0
@@ -329,6 +349,7 @@ class TestResourceManagement(unittest.TestCase):
     
     def _create_running_process(self):
         """Create a mock running process."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.pid = 12345
         mock_process.poll.return_value = None

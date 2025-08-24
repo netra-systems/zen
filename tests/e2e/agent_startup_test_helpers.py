@@ -46,17 +46,21 @@ class AgentStartupE2EManager:
         """Configure auth service response patterns."""
         user_data = {"id": self.test_user.id, "email": self.test_user.email}
         token_data = {"access_token": "test-jwt-token", "user": user_data}
+        # Mock: Async component isolation for testing without real async operations
         self.auth_service.authenticate = AsyncMock(return_value=token_data)
     
     async def _setup_agent_mocks(self) -> None:
         """Setup agent system mocks."""
+        # Mock: Generic component isolation for controlled unit testing
         self.agent_system = MagicMock()
         self._configure_agent_responses()
     
     def _configure_agent_responses(self) -> None:
         """Configure agent system response patterns."""
         response_data = self._create_meaningful_agent_response()
+        # Mock: Async component isolation for testing without real async operations
         self.agent_system.process_message = AsyncMock(return_value=response_data)
+        # Mock: Async component isolation for testing without real async operations
         self.agent_system.initialize = AsyncMock(return_value=True)
     
     async def _setup_websocket_mocks(self) -> None:
@@ -168,15 +172,13 @@ class AgentStartupValidator:
         if status != "active":
             self._add_error(f"LLM provider status is '{status}', expected 'active'")
     
-    def validate_fallback_capability(self, fallback_response: Dict[str, Any]) -> None:
-        """Validate fallback provider capability."""
-        metadata = fallback_response.get("agent_metadata", {})
+    def validate_error_handling(self, error_response: Dict[str, Any]) -> None:
+        """Validate error handling when provider unavailable."""
+        if error_response.get("type") != "error":
+            self._add_error("Expected error response type")
         
-        if not metadata.get("fallback_activated"):
-            self._add_error("Fallback mechanism not properly activated")
-        
-        if not fallback_response.get("content"):
-            self._add_error("Fallback response has no content")
+        if "unavailable" not in error_response.get("content", "").lower():
+            self._add_error("Error response should indicate service unavailable")
     
     def _add_error(self, error: str) -> None:
         """Add validation error to list."""
@@ -207,18 +209,20 @@ class LLMProviderTestHelper:
     
     async def simulate_provider_failure(self) -> None:
         """Simulate primary provider failure."""
-        # Update mock to simulate failure and fallback
-        failure_response = self._create_fallback_response()
+        # Fail immediately - no fallback
+        # Mock: Async component isolation for testing without real async operations
         self.manager.agent_system.process_message = AsyncMock(
-            return_value=failure_response
+            side_effect=RuntimeError("Primary provider unavailable - no fallback configured")
         )
     
-    async def test_fallback_provider(self) -> Dict[str, Any]:
-        """Test fallback to secondary provider."""
+    async def test_provider_failure(self) -> Dict[str, Any]:
+        """Test that provider failure is handled correctly."""
         await self.simulate_provider_failure()
-        message = "Test fallback provider after primary failure"
-        response = await self.manager.send_first_message(message)
-        return response
+        message = "Test provider failure handling"
+        # This should raise an error - no fallback
+        with pytest.raises(RuntimeError, match="Primary provider unavailable"):
+            await self.manager.send_first_message(message)
+        return {"status": "failed", "reason": "Provider unavailable"}
     
     def _ensure_provider_metadata(self, response: Dict[str, Any], 
                                 expected_provider: str) -> None:
@@ -228,18 +232,17 @@ class LLMProviderTestHelper:
         if actual_provider != expected_provider:
             metadata["llm_provider"] = expected_provider
     
-    def _create_fallback_response(self) -> Dict[str, Any]:
-        """Create fallback provider response."""
+    def _create_error_response(self) -> Dict[str, Any]:
+        """Create error response for unavailable provider."""
         return {
-            "type": "agent_response",
-            "content": "I'm still available to help via backup systems.",
+            "type": "error",
+            "content": "Service unavailable - required provider not accessible",
             "agent_metadata": {
                 "agent_type": "supervisor",
-                "llm_provider": self.fallback_provider,
-                "provider_status": "active",
-                "fallback_activated": True,
-                "primary_provider_failed": True
+                "llm_provider": None,
+                "provider_status": "unavailable",
+                "error": "No provider available"
             },
             "timestamp": time.time(),
-            "response_id": "fallback-response-001"
+            "response_id": "error-response-001"
         }

@@ -22,7 +22,7 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -35,7 +35,7 @@ from sqlalchemy.orm import sessionmaker
 # Real service imports - NO MOCKS
 from netra_backend.app.main import app
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.database import get_db_session
 from netra_backend.app.services.user_auth_service import UserAuthService
 
 
@@ -83,12 +83,13 @@ class TestUserRolePropagation:
             await redis_client.close()
 
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_user_cleanup(self, real_db_session):
         """Clean up test users after each test."""
         test_user_ids = []
         test_emails = []
         
-        def register_cleanup(user_id: str = None, email: str = None):
+        async def register_cleanup(user_id: str = None, email: str = None):
             if user_id:
                 test_user_ids.append(user_id)
             if email:

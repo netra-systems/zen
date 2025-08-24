@@ -37,7 +37,7 @@ import pytest
 import redis.asyncio as aioredis
 
 from netra_backend.app.core.configuration.database import DatabaseConfigManager
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.postgres_core import async_engine, async_session_factory
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.redis_service import RedisService
@@ -610,6 +610,7 @@ class CrossRegionConsistencyL4Test(L4StagingCriticalPathTestBase):
             "sync_results": sync_results
         }
     
+    @pytest.mark.asyncio
     async def test_eventual_consistency(self, test_operations: int) -> Dict[str, Any]:
         """Test eventual consistency across all regions."""
         consistency_results = {
@@ -705,6 +706,7 @@ class CrossRegionConsistencyL4Test(L4StagingCriticalPathTestBase):
         
         return True
     
+    @pytest.mark.asyncio
     async def test_conflict_resolution(self, conflict_scenarios: int) -> Dict[str, Any]:
         """Test conflict resolution for concurrent writes across regions."""
         conflict_results = {
@@ -910,6 +912,7 @@ class CrossRegionConsistencyL4Test(L4StagingCriticalPathTestBase):
         
         return partition_test_results
     
+    @pytest.mark.asyncio
     async def test_region_failover(self, failed_region: str) -> Dict[str, Any]:
         """Test failover when a region becomes unavailable."""
         failover_start = time.time()
@@ -1221,6 +1224,7 @@ async def cross_region_consistency_l4_test():
 @pytest.mark.asyncio
 @pytest.mark.l4
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_l4_cross_region_consistency_critical_path(cross_region_consistency_l4_test):
     """L4: Execute comprehensive cross-region data consistency critical path test."""
     logger.info("Starting L4 cross-region consistency critical path test")
@@ -1273,6 +1277,7 @@ async def test_l4_cross_region_consistency_critical_path(cross_region_consistenc
 @pytest.mark.asyncio
 @pytest.mark.l4
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_l4_cross_region_basic_operations(cross_region_consistency_l4_test):
     """L4: Test basic cross-region read/write operations."""
     # Test basic cross-region operations
@@ -1291,6 +1296,7 @@ async def test_l4_cross_region_basic_operations(cross_region_consistency_l4_test
 @pytest.mark.asyncio
 @pytest.mark.l4
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_l4_cross_region_eventual_consistency(cross_region_consistency_l4_test):
     """L4: Test eventual consistency across regions."""
     # Test eventual consistency with reduced load for focused testing
@@ -1304,6 +1310,7 @@ async def test_l4_cross_region_eventual_consistency(cross_region_consistency_l4_
 @pytest.mark.asyncio
 @pytest.mark.l4
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_l4_cross_region_conflict_resolution(cross_region_consistency_l4_test):
     """L4: Test conflict resolution for concurrent cross-region updates."""
     # Test conflict resolution with focused scenarios
@@ -1318,6 +1325,7 @@ async def test_l4_cross_region_conflict_resolution(cross_region_consistency_l4_t
 @pytest.mark.asyncio
 @pytest.mark.l4
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_l4_cross_region_network_partition_handling(cross_region_consistency_l4_test):
     """L4: Test network partition handling and recovery."""
     # Simulate network partition with short duration
@@ -1337,6 +1345,7 @@ async def test_l4_cross_region_network_partition_handling(cross_region_consisten
 @pytest.mark.asyncio
 @pytest.mark.l4
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_l4_cross_region_failover_capability(cross_region_consistency_l4_test):
     """L4: Test region failover and recovery capabilities."""
     # Test failover scenario

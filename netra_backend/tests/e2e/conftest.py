@@ -4,23 +4,29 @@ import pytest
 import asyncio
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
+from test_framework.containers_utils import TestcontainerHelper
+from dev_launcher.isolated_environment import get_env
 
 # Basic test setup fixtures
 @pytest.fixture
 async def mock_agent_service():
     """Mock agent service for E2E tests."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_service = AsyncMock()
     mock_service.process_message.return_value = {
         "response": "Test response",
         "metadata": {"test": True}
     }
-    return mock_service
+    yield mock_service
 
 @pytest.fixture
 def mock_websocket_manager():
     """Mock WebSocket manager for E2E tests."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_manager = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_manager.send_message = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_manager.broadcast = AsyncMock()
     return mock_manager
 
@@ -28,7 +34,9 @@ def mock_websocket_manager():
 def model_selection_setup():
     """Basic setup for model selection tests."""
     return {
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         "mock_llm_service": AsyncMock(),
+        # Mock: Database isolation for unit testing without external database connections
         "mock_database": AsyncMock(),
         "test_config": {"environment": "test"}
     }
@@ -37,12 +45,19 @@ def model_selection_setup():
 @pytest.fixture
 def mock_database_factory():
     """Mock database session factory for E2E tests."""
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.commit = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.rollback = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.close = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.add = MagicMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.execute = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.get = AsyncMock()
     mock_session.id = "mock_session_id"  # Add session ID
     
@@ -64,7 +79,7 @@ def setup_database_mocking(mock_database_factory):
     """Auto-setup database mocking for all E2E tests."""
     # Skip during collection mode to avoid heavy imports
     import os
-    if os.environ.get("TEST_COLLECTION_MODE"):
+    if get_env().get("TEST_COLLECTION_MODE"):
         yield
         return
         
@@ -79,6 +94,7 @@ def setup_database_mocking(mock_database_factory):
         return
     
     # Mock thread and run objects with all required attributes
+    # Mock: Generic component isolation for controlled unit testing
     mock_thread = MagicMock()
     mock_thread.id = "test_thread_123"
     mock_thread.user_id = "test_user_001"
@@ -86,6 +102,7 @@ def setup_database_mocking(mock_database_factory):
     mock_thread.created_at = 1640995200  # timestamp
     mock_thread.object = "thread"
     
+    # Mock: Generic component isolation for controlled unit testing
     mock_run = MagicMock()
     mock_run.id = "test_run_123"  
     mock_run.thread_id = "test_thread_123"
@@ -99,13 +116,20 @@ def setup_database_mocking(mock_database_factory):
         with patch.object(postgres_module, 'async_session_factory', mock_database_factory):
             # Wrap in try-except to handle missing modules gracefully
             try:
+                # Mock: Async component isolation for testing without real async operations
                 with patch('netra_backend.app.services.thread_service.ThreadService.get_thread', new_callable=AsyncMock, return_value=mock_thread):
+                    # Mock: Async component isolation for testing without real async operations
                     with patch('netra_backend.app.services.thread_service.ThreadService.get_or_create_thread', new_callable=AsyncMock, return_value=mock_thread):
+                        # Mock: Async component isolation for testing without real async operations
                         with patch('netra_backend.app.services.thread_service.ThreadService.create_run', new_callable=AsyncMock, return_value=mock_run):
+                            # Mock: Async component isolation for testing without real async operations
                             with patch('netra_backend.app.services.thread_service.ThreadService.create_message', new_callable=AsyncMock, return_value=None):
                                 # Mock WebSocket manager broadcasting functionality
+                                # Mock: Generic component isolation for controlled unit testing
                                 mock_broadcasting = MagicMock()
+                                # Mock: Generic component isolation for controlled unit testing
                                 mock_broadcasting.join_room = AsyncMock()
+                                # Mock: Generic component isolation for controlled unit testing
                                 mock_broadcasting.leave_all_rooms = AsyncMock()
                                 
                                 try:
@@ -125,7 +149,15 @@ def real_llm_config():
     """Configuration for real LLM testing."""
     import os
     return {
-        "enabled": os.environ.get("ENABLE_REAL_LLM_TESTING") == "true",
-        "timeout": float(os.environ.get("LLM_TEST_TIMEOUT", "30.0")),
-        "max_retries": int(os.environ.get("LLM_TEST_RETRIES", "3"))
+        "enabled": get_env().get("ENABLE_REAL_LLM_TESTING") == "true",
+        "timeout": float(get_env().get("LLM_TEST_TIMEOUT", "30.0")),
+        "max_retries": int(get_env().get("LLM_TEST_RETRIES", "3"))
     }
+
+# Container management for L3/L4 testing
+@pytest.fixture
+def container_helper():
+    """Provide containerized services for L3/L4 testing."""
+    helper = TestcontainerHelper()
+    yield helper
+    helper.stop_all_containers()

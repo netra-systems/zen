@@ -153,7 +153,9 @@ def patch_service_method(service_path: str, method_name: str, return_value: Any 
     """Create service method patch with return value or side effect."""
     full_path = f"{service_path}.{method_name}"
     if side_effect:
+        # Mock: Component isolation for testing without external dependencies
         return patch(full_path, side_effect=side_effect)
+    # Mock: Component isolation for testing without external dependencies
     return patch(full_path, return_value=return_value)
 
 def create_config_update_data():

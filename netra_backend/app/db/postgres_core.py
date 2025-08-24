@@ -1,9 +1,11 @@
+from dev_launcher.isolated_environment import get_env
 """PostgreSQL core connection and engine setup module.
 
 Handles database engine creation, connection management, and initialization.
 Focused module adhering to 25-line function limit and modular architecture.
 """
 
+import asyncio
 from contextlib import contextmanager
 from typing import Generator, Optional
 
@@ -17,21 +19,19 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import AsyncAdaptedQueuePool, NullPool, QueuePool
 
-from netra_backend.app.db.postgres_config import DatabaseConfig
 from netra_backend.app.db.postgres_events import (
     setup_async_engine_events,
     setup_sync_engine_events,
 )
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.configuration.base import get_unified_config
 
 
 # Import settings lazily to avoid circular dependency
 def get_settings():
     """Get settings lazily to avoid circular import."""
-    from netra_backend.app.config import get_config
-    settings = get_config()
-    return settings
+    return get_unified_config()
 
 logger = central_logger.get_logger(__name__)
 
@@ -46,23 +46,26 @@ class Database:
     def _get_pool_size(self, pool_class) -> int:
         """Get pool size based on pool class with resilient defaults."""
         # Increase pool size for better resilience
-        base_size = DatabaseConfig.POOL_SIZE if pool_class == QueuePool else 0
+        config = get_unified_config()
+        base_size = config.db_pool_size if pool_class == QueuePool else 0
         return max(base_size, 10) if pool_class == QueuePool else 0
 
     def _get_max_overflow(self, pool_class) -> int:
         """Get max overflow based on pool class with resilient defaults."""
         # Increase overflow for better resilience
-        base_overflow = DatabaseConfig.MAX_OVERFLOW if pool_class == QueuePool else 0
+        config = get_unified_config()
+        base_overflow = config.db_max_overflow if pool_class == QueuePool else 0
         return max(base_overflow, 20) if pool_class == QueuePool else 0
 
     def _create_engine(self, db_url: str, pool_class):
         """Create database engine with resilient pooling configuration."""
+        config = get_unified_config()
         return create_engine(
-            db_url, echo=DatabaseConfig.ECHO, echo_pool=DatabaseConfig.ECHO_POOL,
+            db_url, echo=config.db_echo, echo_pool=config.db_echo_pool,
             poolclass=pool_class, pool_size=self._get_pool_size(pool_class),
             max_overflow=self._get_max_overflow(pool_class), 
-            pool_timeout=max(DatabaseConfig.POOL_TIMEOUT, 60),  # Increased timeout for resilience
-            pool_recycle=DatabaseConfig.POOL_RECYCLE, 
+            pool_timeout=max(config.db_pool_timeout, 60),  # Increased timeout for resilience
+            pool_recycle=config.db_pool_recycle, 
             pool_pre_ping=True,  # Always enable pre-ping for resilience
             # Additional resilience settings
             pool_reset_on_return='rollback',  # Reset connections safely
@@ -161,6 +164,187 @@ async_engine: Optional[AsyncEngine] = None
 async_session_factory: Optional[async_sessionmaker] = None
 
 
+class AsyncDatabase:
+    """Asynchronous database connection manager with proper pooling and resilience.
+    
+    Provides async database operations with connection pool management,
+    retry logic, and graceful error handling for cold start scenarios.
+    """
+    
+    def __init__(self, db_url: str = None):
+        """Initialize AsyncDatabase with optional URL override.
+        
+        Args:
+            db_url: Optional database URL override. If None, uses DatabaseManager.
+        """
+        self.db_url = db_url or DatabaseManager.get_application_url_async()
+        self._engine: Optional[AsyncEngine] = None
+        self._session_factory: Optional[async_sessionmaker] = None
+        self._connection_lock = asyncio.Lock()
+        self._initialization_complete = False
+        
+    async def _ensure_initialized(self):
+        """Ensure database is initialized with thread-safe lazy loading."""
+        if self._initialization_complete and self._engine and self._session_factory:
+            return
+            
+        async with self._connection_lock:
+            # Double-check after acquiring lock
+            if self._initialization_complete and self._engine and self._session_factory:
+                return
+                
+            await self._initialize_engine()
+            self._initialization_complete = True
+    
+    async def _initialize_engine(self):
+        """Initialize async engine with resilient pool configuration."""
+        pool_class = AsyncAdaptedQueuePool if "sqlite" not in self.db_url else NullPool
+        
+        # Validate URL for asyncpg compatibility
+        if not DatabaseManager.validate_application_url(self.db_url):
+            raise RuntimeError(f"Database URL validation failed for asyncpg: {self.db_url}")
+        
+        engine_args = {
+            "echo": False,  # Disable for production resilience
+            "poolclass": pool_class,
+            "pool_pre_ping": True,  # Enable connection health checks
+            "pool_reset_on_return": "rollback",  # Safe connection resets
+        }
+        
+        # Add pool sizing for non-NullPool connections
+        if pool_class != NullPool:
+            config = get_unified_config()
+            engine_args.update({
+                "pool_size": max(config.db_pool_size, 15),  # Increased for cold start resilience
+                "max_overflow": max(config.db_max_overflow, 25),  # Handle concurrent startup
+                "pool_timeout": max(config.db_pool_timeout, 90),  # Longer timeout for startup
+                "pool_recycle": config.db_pool_recycle,
+            })
+            
+            # Add connection arguments for PostgreSQL
+            engine_args["connect_args"] = {
+                "server_settings": {
+                    "application_name": "netra_async_db",
+                    "tcp_keepalives_idle": "600",
+                    "tcp_keepalives_interval": "30",
+                    "tcp_keepalives_count": "3",
+                }
+            }
+        
+        self._engine = create_async_engine(self.db_url, **engine_args)
+        self._session_factory = async_sessionmaker(
+            bind=self._engine,
+            class_=AsyncSession,
+            expire_on_commit=False,
+            autocommit=False,
+            autoflush=False
+        )
+        
+        setup_async_engine_events(self._engine)
+        logger.info("AsyncDatabase engine initialized with resilient configuration")
+    
+    async def test_connection_with_retry(self, max_retries: int = 5, base_delay: float = 1.0) -> bool:
+        """Test database connection with exponential backoff retry logic.
+        
+        Args:
+            max_retries: Maximum number of retry attempts
+            base_delay: Base delay between retries in seconds
+            
+        Returns:
+            True if connection successful, False otherwise
+        """
+        await self._ensure_initialized()
+        
+        for attempt in range(max_retries):
+            try:
+                # Use timeout to prevent hanging
+                async with asyncio.wait_for(self._engine.begin(), timeout=15.0) as conn:
+                    await conn.execute("SELECT 1")
+                    logger.debug(f"Database connection test successful on attempt {attempt + 1}")
+                    return True
+                    
+            except Exception as e:
+                delay = base_delay * (2 ** attempt)  # Exponential backoff
+                if attempt < max_retries - 1:
+                    logger.warning(f"Connection attempt {attempt + 1} failed: {e}. Retrying in {delay}s...")
+                    await asyncio.sleep(delay)
+                else:
+                    logger.error(f"All {max_retries} connection attempts failed: {e}")
+        
+        return False
+    
+    async def get_session(self) -> AsyncSession:
+        """Get async database session with connection validation.
+        
+        Returns:
+            Configured AsyncSession instance
+        """
+        await self._ensure_initialized()
+        return self._session_factory()
+    
+    async def execute_with_retry(self, query, params=None, max_retries: int = 3):
+        """Execute query with retry logic for connection failures.
+        
+        Args:
+            query: SQL query to execute
+            params: Optional query parameters
+            max_retries: Maximum retry attempts
+            
+        Returns:
+            Query result
+        """
+        for attempt in range(max_retries):
+            try:
+                async with self.get_session() as session:
+                    if params:
+                        result = await session.execute(query, params)
+                    else:
+                        result = await session.execute(query)
+                    await session.commit()
+                    return result
+                    
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    delay = 1.0 * (2 ** attempt)
+                    logger.warning(f"Query execution attempt {attempt + 1} failed: {e}. Retrying in {delay}s...")
+                    await asyncio.sleep(delay)
+                    # Force re-initialization on connection errors
+                    if "connection" in str(e).lower() or "pool" in str(e).lower():
+                        self._initialization_complete = False
+                        await self._ensure_initialized()
+                else:
+                    logger.error(f"Query execution failed after {max_retries} attempts: {e}")
+                    raise
+    
+    async def get_pool_status(self) -> dict:
+        """Get connection pool status for monitoring.
+        
+        Returns:
+            Dictionary with pool statistics
+        """
+        await self._ensure_initialized()
+        
+        if hasattr(self._engine.pool, 'size'):
+            return {
+                "pool_size": self._engine.pool.size(),
+                "checked_in": self._engine.pool.checkedin(),
+                "checked_out": self._engine.pool.checkedout(),
+                "overflow": self._engine.pool.overflow(),
+                "invalid": self._engine.pool.invalid(),
+                "engine_disposed": self._engine.pool._invalidate_time is not None,
+            }
+        return {"status": "Pool status unavailable"}
+    
+    async def close(self):
+        """Close database connections gracefully."""
+        if self._engine:
+            await self._engine.dispose()
+            logger.info("AsyncDatabase connections closed")
+            self._engine = None
+            self._session_factory = None
+            self._initialization_complete = False
+
+
 
 
 def _get_pool_class_for_async(async_db_url: str):
@@ -170,24 +354,27 @@ def _get_pool_class_for_async(async_db_url: str):
 
 def _get_base_engine_args(pool_class):
     """Get base engine arguments for all pool types."""
+    config = get_unified_config()
     return {
-        "echo": DatabaseConfig.ECHO,
-        "echo_pool": DatabaseConfig.ECHO_POOL,
+        "echo": config.db_echo,
+        "echo_pool": config.db_echo_pool,
         "poolclass": pool_class,
     }
 
 def _get_pool_sizing_args():
     """Get pool sizing arguments with resilient defaults."""
+    config = get_unified_config()
     return {
-        "pool_size": max(DatabaseConfig.POOL_SIZE, 10),  # Minimum 10 for resilience
-        "max_overflow": max(DatabaseConfig.MAX_OVERFLOW, 20),  # Minimum 20 for resilience
+        "pool_size": max(config.db_pool_size, 10),  # Minimum 10 for resilience
+        "max_overflow": max(config.db_max_overflow, 20),  # Minimum 20 for resilience
     }
 
 def _get_pool_timing_args():
     """Get pool timing arguments with resilient defaults."""
+    config = get_unified_config()
     return {
-        "pool_timeout": max(DatabaseConfig.POOL_TIMEOUT, 60),  # Minimum 60s for resilience
-        "pool_recycle": DatabaseConfig.POOL_RECYCLE,
+        "pool_timeout": max(config.db_pool_timeout, 60),  # Minimum 60s for resilience
+        "pool_recycle": config.db_pool_recycle,
         "pool_pre_ping": True,  # Always enable for resilience
         "pool_reset_on_return": "rollback",  # Safe connection reset
     }
@@ -321,7 +508,7 @@ def initialize_postgres():
     global async_engine, async_session_factory
     
     # Skip initialization during test collection to prevent hanging
-    if os.environ.get('TEST_COLLECTION_MODE') == '1':
+    if get_env().get('TEST_COLLECTION_MODE') == '1':
         logger.debug("Skipping PostgreSQL initialization during test collection")
         return None
         
@@ -353,3 +540,22 @@ def initialize_postgres():
     
     logger.debug(f"initialize_postgres returning: {async_session_factory}")
     return async_session_factory
+
+
+def create_async_database(db_url: str = None) -> AsyncDatabase:
+    """Create AsyncDatabase instance with optional URL override.
+    
+    Args:
+        db_url: Optional database URL override
+        
+    Returns:
+        Configured AsyncDatabase instance
+    """
+    return AsyncDatabase(db_url)
+
+
+# Compatibility exports for existing code
+__all__ = [
+    "Database", "AsyncDatabase", "initialize_postgres", "create_async_database",
+    "get_converted_async_db_url", "async_engine", "async_session_factory"
+]

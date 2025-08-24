@@ -11,7 +11,7 @@ L3 Test: Uses real Redis for connection draining and graceful shutdown.
 Draining target: 100% connection preservation during graceful shutdown.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -22,11 +22,11 @@ import json
 import time
 from typing import Dict, Any, List
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 
 import redis.asyncio as redis
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified
@@ -85,6 +85,7 @@ class TestWebSocketConnectionDrainingL3:
 
         _, redis_url = redis_container
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
@@ -103,6 +104,7 @@ class TestWebSocketConnectionDrainingL3:
             
             await test_redis_mgr.redis_client.close()
     
+    @pytest.mark.asyncio
     async def test_graceful_connection_draining(self, websocket_manager, redis_client):
 
         """Test graceful draining of WebSocket connections."""
@@ -153,6 +155,7 @@ class TestWebSocketConnectionDrainingL3:
 
         assert len(websocket_manager.active_connections) == 0
 
+    @pytest.mark.asyncio
     async def test_connection_migration_during_draining(self, redis_client):
 
         """Test connection migration during draining process."""
@@ -226,6 +229,7 @@ class TestWebSocketLoadBalancerAffinityL3:
 
         await container.stop()
     
+    @pytest.mark.asyncio
     async def test_sticky_session_management(self, redis_container):
 
         """Test sticky session management for load balancing."""
@@ -303,6 +307,7 @@ class TestWebSocketRedisFailoverL3:
 
         await container.stop()
     
+    @pytest.mark.asyncio
     async def test_redis_failover_resilience(self, redis_container):
 
         """Test WebSocket resilience during Redis failover."""
@@ -371,6 +376,7 @@ class TestWebSocketMessageReplayL3:
 
         await container.stop()
     
+    @pytest.mark.asyncio
     async def test_message_replay_after_reconnection(self, redis_container):
 
         """Test message replay for reconnected users."""
@@ -447,6 +453,7 @@ class TestWebSocketConcurrentMutationsL3:
 
         await container.stop()
     
+    @pytest.mark.asyncio
     async def test_concurrent_state_updates(self, redis_container):
 
         """Test concurrent WebSocket state updates."""
@@ -510,6 +517,7 @@ class TestWebSocketMemoryLeakPreventionL3:
 
         await container.stop()
     
+    @pytest.mark.asyncio
     async def test_long_running_connection_stability(self, redis_container):
 
         """Test long-running connection memory stability."""
@@ -577,6 +585,7 @@ class TestWebSocketProtocolUpgradeL3:
 
         await container.stop()
     
+    @pytest.mark.asyncio
     async def test_protocol_version_negotiation(self, redis_container):
 
         """Test WebSocket protocol version negotiation."""

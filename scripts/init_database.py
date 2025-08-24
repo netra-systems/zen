@@ -11,7 +11,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Add the parent directory to sys.path to import app modules
-sys.path.insert(0, str(Path(__file__).parent))
 
 # Load environment variables
 load_dotenv('.env')

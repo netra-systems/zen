@@ -9,7 +9,7 @@ from pathlib import Path
 # Add netra_backend to path  
 
 import asyncio
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 

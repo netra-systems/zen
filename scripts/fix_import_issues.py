@@ -104,7 +104,7 @@ def fix_connection_manager_specs(file_path: str) -> bool:
             
             content = re.sub(
                 r'ConnectionManager\(\)',
-                r'get_connection_manager()',
+                r'get_connection_monitor()',
                 content
             )
         

@@ -28,7 +28,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -326,6 +326,7 @@ class MetricsAggregationPipelineL4TestSuite:
                 "insertion_rate": 0
             }
     
+    @pytest.mark.asyncio
     async def test_time_series_aggregation_l4(self) -> Dict[str, Any]:
         """Test time-series aggregation accuracy and performance."""
         aggregation_results = {
@@ -403,6 +404,7 @@ class MetricsAggregationPipelineL4TestSuite:
         
         return aggregation_results
     
+    @pytest.mark.asyncio
     async def test_rollup_computations_l4(self) -> Dict[str, Any]:
         """Test rollup computations for time-series data."""
         rollup_results = {
@@ -479,6 +481,7 @@ class MetricsAggregationPipelineL4TestSuite:
         
         return rollup_results
     
+    @pytest.mark.asyncio
     async def test_retention_policy_enforcement_l4(self) -> Dict[str, Any]:
         """Test retention policy enforcement for time-series data."""
         retention_results = {
@@ -567,6 +570,7 @@ class MetricsAggregationPipelineL4TestSuite:
         
         return retention_results
     
+    @pytest.mark.asyncio
     async def test_query_optimization_l4(self) -> Dict[str, Any]:
         """Test query optimization for aggregated time-series data."""
         optimization_results = {
@@ -689,6 +693,7 @@ async def metrics_aggregation_pipeline_l4_suite():
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_time_series_data_generation_l4(metrics_aggregation_pipeline_l4_suite):
     """Test time-series data generation and ingestion."""
     # Generate realistic time-series data
@@ -708,6 +713,7 @@ async def test_time_series_data_generation_l4(metrics_aggregation_pipeline_l4_su
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_time_series_aggregation_accuracy_l4(metrics_aggregation_pipeline_l4_suite):
     """Test time-series aggregation accuracy and performance."""
     # First generate test data
@@ -734,6 +740,7 @@ async def test_time_series_aggregation_accuracy_l4(metrics_aggregation_pipeline_
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_rollup_computations_accuracy_l4(metrics_aggregation_pipeline_l4_suite):
     """Test rollup computations for multi-level aggregation."""
     # Generate test data and perform initial aggregation
@@ -758,6 +765,7 @@ async def test_rollup_computations_accuracy_l4(metrics_aggregation_pipeline_l4_s
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_retention_policy_enforcement_l4(metrics_aggregation_pipeline_l4_suite):
     """Test retention policy enforcement for time-series data."""
     # Generate test data
@@ -781,6 +789,7 @@ async def test_retention_policy_enforcement_l4(metrics_aggregation_pipeline_l4_s
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_query_optimization_performance_l4(metrics_aggregation_pipeline_l4_suite):
     """Test query optimization for aggregated time-series data."""
     # Generate test data and perform aggregation
@@ -808,6 +817,7 @@ async def test_query_optimization_performance_l4(metrics_aggregation_pipeline_l4
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_metrics_aggregation_pipeline_e2e_l4(metrics_aggregation_pipeline_l4_suite):
     """Test end-to-end metrics aggregation pipeline performance."""
     e2e_start = time.time()

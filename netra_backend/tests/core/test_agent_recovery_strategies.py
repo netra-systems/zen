@@ -27,7 +27,7 @@ from pathlib import Path
 import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -482,7 +482,7 @@ class TestRecoveryStrategyErrorHandling:
         
         with patch.object(strategy, '_create_optimized_analysis_result') as mock_analysis:
             # Simulate long-running operation
-            def slow_analysis(*args, **kwargs):
+            async def slow_analysis(*args, **kwargs):
                 return {"status": "completed", "recovery_method": "optimized_query"}
             
             mock_analysis.side_effect = slow_analysis

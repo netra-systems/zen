@@ -2,7 +2,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
-import { Message } from '@/types/chat';
+import { Message } from '@/types/unified';
 import { ThreadService } from '@/services/threadService';
 import { generateUniqueId } from '@/lib/utils';
 import { MESSAGE_INPUT_CONSTANTS } from '../constants';

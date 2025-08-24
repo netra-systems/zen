@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """
 Backend-specific test configuration.
 Uses consolidated test framework infrastructure with backend-specific customizations.
@@ -15,14 +16,11 @@ import sys
 from pathlib import Path
 
 # Add project root to Python path for netra_backend imports
-project_root = Path(__file__).parent.parent.parent
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
 
 import os
 
 # Import constants at module level only if not in collection mode  
-if not os.environ.get("TEST_COLLECTION_MODE"):
+if not get_env().get("TEST_COLLECTION_MODE"):
     from netra_backend.app.core.network_constants import (
         DatabaseConstants,
         HostConstants,
@@ -35,34 +33,31 @@ if not os.environ.get("TEST_COLLECTION_MODE"):
 # CRITICAL: Set test collection mode to skip heavy initialization during pytest collection
 # Only set if we're actually running tests to prevent affecting dev launcher
 import sys
-if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
-    os.environ["TEST_COLLECTION_MODE"] = "1"
+if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
+    get_env().set("TEST_COLLECTION_MODE", "1", source="netra_backend_conftest")
 
 # Only set environment variables if we're actually running tests
-if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
-    if os.environ.get("TEST_ISOLATION") == "1":
+if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
+    # Use IsolatedEnvironment for all test configuration
+    env = get_env()
+    
+    if env.get("TEST_ISOLATION") == "1":
         # When using test isolation, environment is already configured
         # Just ensure critical test flags are set
-
-        os.environ.setdefault("TESTING", "1")
-
-        os.environ.setdefault("ENVIRONMENT", "testing")
-
-        os.environ.setdefault("LOG_LEVEL", "ERROR")
-
-        os.environ.setdefault("DEV_MODE_DISABLE_CLICKHOUSE", "true")
-
-        os.environ.setdefault("CLICKHOUSE_ENABLED", "false")
-        
+        env.set("TESTING", "1", source="netra_backend_conftest")
+        env.set("ENVIRONMENT", "testing", source="netra_backend_conftest")
+        env.set("LOG_LEVEL", "ERROR", source="netra_backend_conftest")
+        env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", source="netra_backend_conftest")
+        env.set("CLICKHOUSE_ENABLED", "false", source="netra_backend_conftest")
         # Ensure SERVICE_SECRET is set for test isolation mode
-        os.environ.setdefault("SERVICE_SECRET", "test-service-secret-for-cross-service-auth-32-chars-minimum-length")
+        env.set("SERVICE_SECRET", "test-service-secret-for-cross-service-auth-32-chars-minimum-length", source="netra_backend_conftest")
 
     else:
-        # Standard test environment setup
-
-        os.environ["TESTING"] = "1"
+        # Standard test environment setup using IsolatedEnvironment
+        env.set("TESTING", "1", source="netra_backend_conftest")
+        
         # Import network constants lazily only if not in collection mode
-        if not os.environ.get("TEST_COLLECTION_MODE"):
+        if not env.get("TEST_COLLECTION_MODE"):
             from netra_backend.app.core.network_constants import (
                 DatabaseConstants,
                 HostConstants, 
@@ -70,63 +65,55 @@ if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
             )
         
         # Use PostgreSQL URL format even for tests to satisfy validator
-        if not os.environ.get("TEST_COLLECTION_MODE"):
-            os.environ["DATABASE_URL"] = DatabaseConstants.build_postgres_url(
+        if not env.get("TEST_COLLECTION_MODE"):
+            database_url = DatabaseConstants.build_postgres_url(
                 user="test", password="test", 
                 port=ServicePorts.POSTGRES_DEFAULT,
                 database="netra_test"
             )
-
-            os.environ["REDIS_URL"] = DatabaseConstants.build_redis_url(
+            redis_url = DatabaseConstants.build_redis_url(
                 database=DatabaseConstants.REDIS_TEST_DB
             )
-
-            os.environ["REDIS_HOST"] = HostConstants.LOCALHOST
-
-            os.environ["REDIS_PORT"] = str(ServicePorts.REDIS_DEFAULT)
+            env.set("DATABASE_URL", database_url, source="netra_backend_conftest")
+            env.set("REDIS_URL", redis_url, source="netra_backend_conftest")
+            env.set("REDIS_HOST", HostConstants.LOCALHOST, source="netra_backend_conftest")
+            env.set("REDIS_PORT", str(ServicePorts.REDIS_DEFAULT), source="netra_backend_conftest")
         else:
             # Use simple defaults during collection mode
-            os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/netra_test"
-            os.environ["REDIS_URL"] = "redis://localhost:6379/1"
-            os.environ["REDIS_HOST"] = "localhost"
-            os.environ["REDIS_PORT"] = "6379"
+            env.set("DATABASE_URL", "postgresql://test:test@localhost:5432/netra_test", source="netra_backend_conftest")
+            env.set("REDIS_URL", "redis://localhost:6379/1", source="netra_backend_conftest")
+            env.set("REDIS_HOST", "localhost", source="netra_backend_conftest")
+            env.set("REDIS_PORT", "6379", source="netra_backend_conftest")
 
-        os.environ["REDIS_USERNAME"] = ""
-
-        os.environ["REDIS_PASSWORD"] = ""
-
-        os.environ["TEST_DISABLE_REDIS"] = "true"
-
-        os.environ["SECRET_KEY"] = "test-secret-key-for-testing-only"
-
-        os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-key-for-testing-only-must-be-32-chars"
-
-        os.environ["SERVICE_SECRET"] = "test-service-secret-for-cross-service-auth-32-chars-minimum-length"
-
-        os.environ["FERNET_KEY"] = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
-
-        os.environ["ENVIRONMENT"] = "testing"
-
-        os.environ["LOG_LEVEL"] = "ERROR"
+        env.set("REDIS_USERNAME", "", source="netra_backend_conftest")
+        env.set("REDIS_PASSWORD", "", source="netra_backend_conftest")
+        env.set("TEST_DISABLE_REDIS", "true", source="netra_backend_conftest")
+        env.set("SECRET_KEY", "test-secret-key-for-testing-only", source="netra_backend_conftest")
+        env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars", source="netra_backend_conftest")
+        env.set("SERVICE_SECRET", "test-service-secret-for-cross-service-auth-32-chars-minimum-length", source="netra_backend_conftest")
+        env.set("FERNET_KEY", "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=", source="netra_backend_conftest")
+        
+        # Set test values for all required secrets from SecretManager
+        env.set("GOOGLE_CLIENT_ID", "test-google-client-id-for-integration-testing", source="netra_backend_conftest")
+        env.set("GOOGLE_CLIENT_SECRET", "test-google-client-secret-for-integration-testing", source="netra_backend_conftest")
+        env.set("CLICKHOUSE_DEFAULT_PASSWORD", "test-clickhouse-password-for-integration-testing", source="netra_backend_conftest")
+        env.set("ENVIRONMENT", "testing", source="netra_backend_conftest")
+        env.set("LOG_LEVEL", "ERROR", source="netra_backend_conftest")
+        
         # Disable ClickHouse for tests
-
-        os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
-
-        os.environ["CLICKHOUSE_ENABLED"] = "false"
+        env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", source="netra_backend_conftest")
+        env.set("CLICKHOUSE_ENABLED", "false", source="netra_backend_conftest")
         
         # Handle real LLM testing configuration
-
-        if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
+        if env.get("ENABLE_REAL_LLM_TESTING") == "true":
             # When real LLM testing is enabled, use actual API keys
             # These should be passed from the test runner
             # Ensure GOOGLE_API_KEY mirrors GEMINI_API_KEY for compatibility
-
-            if os.environ.get("GEMINI_API_KEY") and not os.environ.get("GOOGLE_API_KEY"):
-
-                os.environ["GOOGLE_API_KEY"] = os.environ["GEMINI_API_KEY"]
+            if env.get("GEMINI_API_KEY") and not env.get("GOOGLE_API_KEY"):
+                env.set("GOOGLE_API_KEY", env.get("GEMINI_API_KEY"), source="netra_backend_conftest")
             
             # Validate that at least Gemini key is available for real LLM testing
-            gemini_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+            gemini_key = env.get("GEMINI_API_KEY") or env.get("GOOGLE_API_KEY")
             if not gemini_key or gemini_key.startswith("test-"):
                 import warnings
                 warnings.warn(
@@ -134,17 +121,16 @@ if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
                     "Real LLM tests will fail. Set GEMINI_API_KEY or GOOGLE_API_KEY environment variable.",
                     stacklevel=2
                 )
-
         else:
             # Use mock keys for regular testing
-
-            os.environ.setdefault("GEMINI_API_KEY", "test-gemini-api-key")
-
-            os.environ.setdefault("GOOGLE_API_KEY", "test-gemini-api-key")  # Same as GEMINI
-
-            os.environ.setdefault("OPENAI_API_KEY", "test-openai-api-key")
-
-            os.environ.setdefault("ANTHROPIC_API_KEY", "test-anthropic-api-key")
+            if not env.get("GEMINI_API_KEY"):
+                env.set("GEMINI_API_KEY", "test-gemini-api-key", source="netra_backend_conftest")
+            if not env.get("GOOGLE_API_KEY"):
+                env.set("GOOGLE_API_KEY", "test-gemini-api-key", source="netra_backend_conftest")  # Same as GEMINI
+            if not env.get("OPENAI_API_KEY"):
+                env.set("OPENAI_API_KEY", "test-openai-api-key", source="netra_backend_conftest")
+            if not env.get("ANTHROPIC_API_KEY"):
+                env.set("ANTHROPIC_API_KEY", "test-anthropic-api-key", source="netra_backend_conftest")
 
 import pytest
 import asyncio
@@ -155,7 +141,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 # Only import heavy modules if not in collection mode
-if not os.environ.get("TEST_COLLECTION_MODE"):
+if not get_env().get("TEST_COLLECTION_MODE"):
     from fastapi.testclient import TestClient
     from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
     from sqlalchemy.pool import StaticPool
@@ -207,19 +193,27 @@ class MockRedisService:
         return False
 
 # Skip importing backend modules during collection to avoid side effects
-if not os.environ.get("TEST_COLLECTION_MODE"):
+if not get_env().get("TEST_COLLECTION_MODE"):
     # Event loop configuration
-    @pytest.fixture(scope="session")
+    @pytest.fixture(scope="function")
     def event_loop():
-        """Create event loop for async tests."""
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            # No running loop, create new one
-            loop = asyncio.new_event_loop()
+        """Create a new event loop for each test function to prevent async issues."""
+        # Always create a new event loop for each test to prevent contamination
+        policy = asyncio.get_event_loop_policy()
+        loop = policy.new_event_loop()
+        asyncio.set_event_loop(loop)
         yield loop
-        if not loop.is_closed():
-            loop.close()
+        # Proper cleanup: cancel all tasks and close the loop
+        try:
+            # Cancel any remaining tasks
+            pending_tasks = [task for task in asyncio.all_tasks(loop) if not task.done()]
+            if pending_tasks:
+                loop.run_until_complete(asyncio.gather(*pending_tasks, return_exceptions=True))
+        except Exception:
+            pass
+        finally:
+            if not loop.is_closed():
+                loop.close()
 
     # Database fixture delegates to single source of truth from test_framework
     # REMOVED: Duplicate db_session implementation 

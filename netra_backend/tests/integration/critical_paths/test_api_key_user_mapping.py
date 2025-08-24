@@ -37,7 +37,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as aioredis
@@ -241,18 +241,28 @@ class APIKeyUserMappingTestManager:
         """Initialize real services for testing."""
         try:
             # Use fake Redis for testing to avoid event loop conflicts
-            from unittest.mock import AsyncMock
+            from unittest.mock import AsyncMock, MagicMock
             
             self.redis_client = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.get = AsyncMock(return_value=None)
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.set = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.setex = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.delete = AsyncMock(return_value=0)
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.ping = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.publish = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.subscribe = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.incr = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.expire = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.exists = AsyncMock(return_value=False)
             
             # In-memory storage for Redis operations
@@ -310,6 +320,7 @@ class APIKeyUserMappingTestManager:
             logger.error(f"Service initialization failed: {e}")
             raise
 
+    @pytest.mark.asyncio
     async def test_api_key_validation_flow(self, user_id: str, permissions: List[str]) -> Dict[str, Any]:
         """Test complete API key validation flow."""
         validation_start = time.time()
@@ -367,6 +378,7 @@ class APIKeyUserMappingTestManager:
                 "validation_time": time.time() - validation_start
             }
 
+    @pytest.mark.asyncio
     async def test_rate_limiting_behavior(self, api_key: str, user_limit: int) -> Dict[str, Any]:
         """Test rate limiting behavior for API key."""
         rate_test_start = time.time()
@@ -410,6 +422,7 @@ class APIKeyUserMappingTestManager:
                 "rate_test_time": time.time() - rate_test_start
             }
 
+    @pytest.mark.asyncio
     async def test_user_context_caching(self, user_id: str) -> Dict[str, Any]:
         """Test user context caching behavior."""
         cache_start = time.time()
@@ -447,6 +460,7 @@ class APIKeyUserMappingTestManager:
                 "cache_test_time": time.time() - cache_start
             }
 
+    @pytest.mark.asyncio
     async def test_audit_trail_integrity(self) -> Dict[str, Any]:
         """Test audit trail integrity and querying."""
         audit_start = time.time()
@@ -489,6 +503,7 @@ class APIKeyUserMappingTestManager:
                 "audit_test_time": time.time() - audit_start
             }
 
+    @pytest.mark.asyncio
     async def test_error_scenarios(self) -> List[Dict[str, Any]]:
         """Test error scenarios in API key mapping."""
         error_tests = []
@@ -585,6 +600,7 @@ async def api_key_mapping_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_complete_api_key_user_mapping_flow(api_key_mapping_manager):
     """
     Test complete API key to user mapping flow.

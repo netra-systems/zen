@@ -11,7 +11,7 @@ from pathlib import Path
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -20,6 +20,7 @@ from netra_backend.tests.integration.test_fixtures_common import mock_infrastruc
 class TestMessageHealthIntegration:
     """Message handling and health monitoring integration tests"""
 
+    @pytest.mark.asyncio
     async def test_message_queue_overflow_handling(self, test_database, mock_infrastructure):
         """WebSocket message buffering under pressure"""
         queue_system = await self._setup_message_queue_infrastructure()
@@ -27,6 +28,7 @@ class TestMessageHealthIntegration:
         overflow_handling = await self._execute_queue_overflow_test(queue_system, overflow_scenario)
         await self._verify_message_preservation_and_recovery(overflow_handling)
 
+    @pytest.mark.asyncio
     async def test_health_check_cascade(self, test_database, mock_infrastructure):
         """Dependency health propagation"""
         health_system = await self._setup_health_check_infrastructure()

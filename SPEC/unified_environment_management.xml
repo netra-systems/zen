@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Unified Environment Management</name>
+        <type>Core.EnvironmentManagement</type>
+        <version>1.0</version>
+        <description>Core specification for unified environment variable management across the platform</description>
+        <created>2025-08-24</created>
+        <cross_references>
+            <ref>environment_aware_testing.xml</ref>
+            <ref>deployment_architecture.xml</ref>
+            <ref>test_infrastructure_architecture.xml</ref>
+            <ref>database_connectivity_architecture.xml</ref>
+        </cross_references>
+    </metadata>
+
+    <core_principle>
+        <title>Single Source of Truth for Environment Management</title>
+        <description>
+            ALL environment variable access across the entire platform MUST go through the
+            centralized IsolatedEnvironment system. This ensures consistency, isolation,
+            traceability, and prevents environment pollution during development and testing.
+        </description>
+    </core_principle>
+
+    <architectural_requirements>
+        <requirement priority="CRITICAL">
+            <name>Centralized Access Pattern</name>
+            <description>
+                Every service, module, and test MUST use IsolatedEnvironment for ALL environment
+                variable operations. Direct os.environ access is FORBIDDEN outside the unified
+                config module.
+            </description>
+            <implementation>dev_launcher.isolated_environment.IsolatedEnvironment</implementation>
+            <enforcement>Pre-commit hooks and CI/CD validation</enforcement>
+        </requirement>
+
+        <requirement priority="CRITICAL">
+            <name>Isolation by Default</name>
+            <description>
+                Development and test environments MUST use isolation mode to prevent
+                os.environ pollution. Variables are stored in internal dictionary,
+                not system environment.
+            </description>
+            <benefits>
+                <benefit>Prevents environment conflicts during development</benefit>
+                <benefit>Ensures clean test environments</benefit>
+                <benefit>Enables predictable behavior</benefit>
+            </benefits>
+        </requirement>
+
+        <requirement priority="HIGH">
+            <name>Source Tracking</name>
+            <description>
+                Every environment variable modification MUST include source information
+                indicating which component made the change. This enables rapid debugging
+                of environment conflicts.
+            </description>
+            <pattern>env.set("KEY", "value", "component_name")</pattern>
+        </requirement>
+
+        <requirement priority="HIGH">
+            <name>Thread Safety</name>
+            <description>
+                All environment operations MUST be thread-safe using RLock to support
+                concurrent access in multi-threaded applications.
+            </description>
+        </requirement>
+
+        <requirement priority="MEDIUM">
+            <name>Subprocess Environment Management</name>
+            <description>
+                Subprocess launches MUST use get_subprocess_env() to maintain
+                isolation boundaries while providing complete environment.
+            </description>
+        </requirement>
+    </architectural_requirements>
+
+    <implementation_patterns>
+        <pattern name="Service Initialization">
+            <description>How services should initialize environment management</description>
+            <code>
+from dev_launcher.isolated_environment import get_env
+
+class ServiceConfig:
+    def __init__(self):
+        self.env = get_env()
+        self.env.enable_isolation()  # For development
+        self._load_config()
+    
+    def _load_config(self):
+        # Load from .env file
+        self.env.load_from_file(Path(".env"), "service_config")
+        
+        # Get configuration values
+        self.database_url = self.env.get("DATABASE_URL")
+        self.redis_url = self.env.get("REDIS_URL")
+            </code>
+        </pattern>
+
+        <pattern name="Test Environment Isolation">
+            <description>How tests should ensure environment isolation</description>
+            <code>
+import pytest
+from dev_launcher.isolated_environment import get_env
+
+@pytest.fixture(autouse=True)
+def isolated_test_env():
+    """Ensure test environment isolation"""
+    env = get_env()
+    env.enable_isolation()
+    original_state = env.get_all_variables()
+    yield env
+    env.reset_to_original()
+            </code>
+        </pattern>
+
+        <pattern name="Configuration Validation">
+            <description>Validate environment for staging/production</description>
+            <code>
+from shared.configuration.environment_validator import EnvironmentConfigurationValidator
+
+def validate_deployment_environment():
+    validator = EnvironmentConfigurationValidator()
+    result = validator.validate_staging_requirements()
+    
+    if not result.is_valid:
+        raise ConfigurationError(f"Invalid configuration: {result.errors}")
+    
+    # No localhost fallbacks allowed in staging/production
+    if "localhost" in env.get("DATABASE_URL", ""):
+        raise ConfigurationError("Localhost not allowed in staging")
+            </code>
+        </pattern>
+    </implementation_patterns>
+
+    <migration_requirements>
+        <requirement>
+            <description>
+                When migrating to unified environment management, DELETE 100% of legacy
+                environment management code. Do not keep duplicates or wrappers.
+            </description>
+            <files_to_delete>
+                <file>environment_manager.py (if duplicated)</file>
+                <file>local_secrets.py</file>
+                <file>secret_loader.py (if duplicated)</file>
+                <file>Any module with direct os.environ access</file>
+            </files_to_delete>
+        </requirement>
+    </migration_requirements>
+
+    <validation_rules>
+        <rule name="No Direct Access">
+            <description>os.environ must not be accessed directly</description>
+            <detection>grep -r "os\.environ" --exclude-dir=isolated_environment</detection>
+            <fix>Replace with get_env().get() or get_env().set()</fix>
+        </rule>
+
+        <rule name="Source Tracking Required">
+            <description>All set operations must include source</description>
+            <detection>Search for env.set() calls without third parameter</detection>
+            <fix>Add meaningful source name as third parameter</fix>
+        </rule>
+
+        <rule name="Test Isolation Required">
+            <description>All tests must use isolation mode</description>
+            <detection>Check test fixtures for isolation setup</detection>
+            <fix>Add isolated_test_env fixture to conftest.py</fix>
+        </rule>
+    </validation_rules>
+
+    <business_value>
+        <segment>Platform/Internal</segment>
+        <business_goal>Development Velocity and System Stability</business_goal>
+        <metrics>
+            <metric>60% reduction in environment-related debugging time</metric>
+            <metric>100% test isolation preventing flaky tests</metric>
+            <metric>Zero environment pollution in production</metric>
+            <metric>Complete traceability of configuration changes</metric>
+        </metrics>
+    </business_value>
+
+    <compliance_checklist>
+        <check>All services use IsolatedEnvironment for environment access</check>
+        <check>No direct os.environ references outside unified config</check>
+        <check>All environment modifications include source tracking</check>
+        <check>Test environments use isolation mode</check>
+        <check>Subprocess launches use get_subprocess_env()</check>
+        <check>Thread-safe operations with RLock</check>
+        <check>Legacy environment management code deleted</check>
+    </compliance_checklist>
+</specification>

@@ -19,7 +19,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Any
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import httpx
@@ -29,24 +29,27 @@ from redis.asyncio import Redis
 
 from netra_backend.app.models.user import User
 # ConversionEvent model - creating mock for tests
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 ConversionEvent = Mock
 from netra_backend.app.services.user_service import UserService as UsageService
 
 # UserFlowTestBase - using unittest.TestCase
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 UserFlowTestBase = unittest.TestCase
 assert_successful_registration = Mock
 assert_plan_compliance = Mock
 # User journey data - creating mocks
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
+# Mock: Generic component isolation for controlled unit testing
 UserTestData = Mock()
+# Mock: Generic component isolation for controlled unit testing
 UserJourneyScenarios = Mock()
 
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(60)
+@pytest.mark.asyncio
 async def test_complete_free_to_enterprise_conversion_journey(
     async_client: httpx.AsyncClient,
     async_session: AsyncSession,
@@ -135,6 +138,7 @@ async def test_complete_free_to_enterprise_conversion_journey(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(45)
+@pytest.mark.asyncio
 async def test_usage_based_conversion_triggers(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -172,6 +176,7 @@ async def test_usage_based_conversion_triggers(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_conversion_analytics_tracking(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -225,6 +230,7 @@ async def test_conversion_analytics_tracking(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_trial_and_retention_mechanisms(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -257,6 +263,7 @@ async def test_trial_and_retention_mechanisms(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_referral_and_campaign_conversion(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]

@@ -19,8 +19,8 @@ from typing import Any, Dict, List, Optional
 import asyncpg
 import docker
 import pytest
-from netra_backend.app.database.migration_manager import MigrationManager
-from netra_backend.app.database.postgres_connection import PostgresConnection
+from netra_backend.app.db.migration_manager import MigrationLockManager as MigrationManager
+from netra_backend.app.db.postgres_core import AsyncDatabase as PostgresConnection
 
 @pytest.mark.L3
 class TestDatabaseMigrationRollbackL3:
@@ -95,6 +95,7 @@ class TestDatabaseMigrationRollbackL3:
         await manager.cleanup()
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_migrations(self):
         """Create test migration scripts."""
         migrations = {

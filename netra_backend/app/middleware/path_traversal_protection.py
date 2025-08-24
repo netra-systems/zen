@@ -1,5 +1,4 @@
 """Path traversal protection middleware."""
-import logging
 import os
 import re
 from typing import List
@@ -7,7 +6,9 @@ from typing import List
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
 
-logger = logging.getLogger(__name__)
+from netra_backend.app.core.unified_logging import get_logger
+
+logger = get_logger(__name__)
 
 # Patterns that might indicate path traversal attempts
 SUSPICIOUS_PATTERNS = [

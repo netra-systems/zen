@@ -18,7 +18,7 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 from netra_backend.app.schemas.UserPlan import PlanTier
 
@@ -29,27 +29,39 @@ class TestBillingDataIsolation:
     @pytest.fixture
     def mock_tenant_service(self):
         """Mock multi-tenant service for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_tenant_context = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_tenant_access = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.isolate_billing_data = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_invoice_service(self):
         """Mock invoice service for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.generate_invoice = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.deliver_invoice = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_invoice_data = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_cancellation_service(self):
         """Mock subscription cancellation service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.initiate_cancellation = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.process_final_billing = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.handle_data_retention = AsyncMock()
         return service
     

@@ -7,12 +7,10 @@ Test classes: TestBusinessRequirements, TestRateLimiting, TestRecordToolUsage
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List, Set
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -228,6 +226,7 @@ class TestBusinessRequirements:
 class TestRateLimiting:
     """Test rate limiting functionality"""
     
+    @pytest.mark.asyncio
     async def test_check_rate_limits_no_limits(self, service, sample_context):
         """Test rate limit check when no limits are defined"""
         result = await service._check_rate_limits(sample_context, [])
@@ -236,6 +235,7 @@ class TestRateLimiting:
         assert result.remaining_requests is None
         assert result.reset_time is None
     
+    @pytest.mark.asyncio
     async def test_check_rate_limits_within_limit(self, service_with_redis, sample_context):
         """Test rate limit check within allowed limits"""
         rate_limits = [
@@ -251,6 +251,7 @@ class TestRateLimiting:
         assert result.allowed == True
         assert isinstance(result.remaining_requests, dict)
     
+    @pytest.mark.asyncio
     async def test_check_rate_limits_exceeded(self, service_with_redis, sample_context):
         """Test rate limit check when limit is exceeded"""
         rate_limits = [
@@ -270,6 +271,7 @@ class TestRateLimiting:
         # Depending on implementation, this might be allowed or not
         assert isinstance(result.allowed, bool)
     
+    @pytest.mark.asyncio
     async def test_check_rate_limits_different_users(self, service_with_redis, sample_context):
         """Test rate limits are tracked per user"""
         rate_limits = [
@@ -291,6 +293,7 @@ class TestRateLimiting:
 class TestRecordToolUsage:
     """Test tool usage recording functionality"""
     
+    @pytest.mark.asyncio
     async def test_record_tool_usage(self, service_with_redis):
         """Test recording tool usage"""
         context = ToolExecutionContext(
@@ -315,6 +318,7 @@ class TestRecordToolUsage:
         # Verify usage was recorded (implementation dependent)
         assert True  # Basic test that method completes without error
     
+    @pytest.mark.asyncio
     async def test_record_tool_usage_denied(self, service_with_redis):
         """Test recording denied tool usage"""
         context = ToolExecutionContext(

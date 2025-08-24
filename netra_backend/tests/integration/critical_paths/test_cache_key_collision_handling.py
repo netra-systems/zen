@@ -126,19 +126,30 @@ class CacheKeyCollisionHandlingL3Manager:
                 redis_urls[name] = url
                 
                 # Use mock Redis client to avoid event loop conflicts
-                from unittest.mock import AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
                 client = AsyncMock()
                 client.ping = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.get = AsyncMock(return_value=None)
+                # Mock: Generic component isolation for controlled unit testing
                 client.set = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 client.setex = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.delete = AsyncMock(return_value=0)
+                # Mock: Async component isolation for testing without real async operations
                 client.exists = AsyncMock(return_value=False)
+                # Mock: Async component isolation for testing without real async operations
                 client.mget = AsyncMock(return_value=[])
+                # Mock: Generic component isolation for controlled unit testing
                 client.mset = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.info = AsyncMock(return_value={"role": "master"})
+                # Mock: Async component isolation for testing without real async operations
                 client.scan_iter = AsyncMock(return_value=iter([]))
+                # Mock: Async component isolation for testing without real async operations
                 client.ttl = AsyncMock(return_value=-1)
+                # Mock: Generic component isolation for controlled unit testing
                 client.expire = AsyncMock()
                 self.redis_clients[name] = client
                 
@@ -251,6 +262,7 @@ class CacheKeyCollisionHandlingL3Manager:
             logger.error(f"Collision resolution failed for key {original_key}: {e}")
             return f"{original_key}_emergency_{int(time.time())}"
     
+    @pytest.mark.asyncio
     async def test_birthday_paradox_collisions(self, key_count: int, hash_length: int = 6) -> Dict[str, Any]:
         """Test collision probability using birthday paradox with truncated hashes."""
         client = self.redis_clients["collision_primary"]
@@ -327,6 +339,7 @@ class CacheKeyCollisionHandlingL3Manager:
         
         return collision_results
     
+    @pytest.mark.asyncio
     async def test_namespace_collision_handling(self, namespace_count: int, keys_per_namespace: int) -> Dict[str, Any]:
         """Test collision handling across different namespaces."""
         client = self.redis_clients["namespace_cache"]
@@ -404,6 +417,7 @@ class CacheKeyCollisionHandlingL3Manager:
         
         return namespace_results
     
+    @pytest.mark.asyncio
     async def test_data_integrity_during_collisions(self, integrity_test_count: int) -> Dict[str, Any]:
         """Test data integrity during collision scenarios."""
         client = self.redis_clients["integrity_cache"]
@@ -485,6 +499,7 @@ class CacheKeyCollisionHandlingL3Manager:
         
         return integrity_results
     
+    @pytest.mark.asyncio
     async def test_concurrent_collision_handling(self, concurrent_workers: int, operations_per_worker: int) -> Dict[str, Any]:
         """Test collision handling under concurrent operations."""
         
@@ -640,6 +655,7 @@ async def collision_handling_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_birthday_paradox_hash_collisions(collision_handling_manager):
     """L3: Test hash collision handling using birthday paradox."""
     result = await collision_handling_manager.test_birthday_paradox_collisions(100, 6)  # 6-char hash for collisions
@@ -664,6 +680,7 @@ async def test_birthday_paradox_hash_collisions(collision_handling_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_namespace_collision_isolation(collision_handling_manager):
     """L3: Test namespace collision isolation and handling."""
     result = await collision_handling_manager.test_namespace_collision_handling(5, 20)
@@ -682,6 +699,7 @@ async def test_namespace_collision_isolation(collision_handling_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_data_integrity_during_collisions(collision_handling_manager):
     """L3: Test data integrity maintenance during collision scenarios."""
     result = await collision_handling_manager.test_data_integrity_during_collisions(50)
@@ -699,6 +717,7 @@ async def test_data_integrity_during_collisions(collision_handling_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_concurrent_collision_handling_performance(collision_handling_manager):
     """L3: Test collision handling performance under concurrent operations."""
     result = await collision_handling_manager.test_concurrent_collision_handling(10, 25)
@@ -718,6 +737,7 @@ async def test_concurrent_collision_handling_performance(collision_handling_mana
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_key_collision_handling_sla_compliance(collision_handling_manager):
     """L3: Test comprehensive key collision handling SLA compliance."""
     # Execute comprehensive test suite

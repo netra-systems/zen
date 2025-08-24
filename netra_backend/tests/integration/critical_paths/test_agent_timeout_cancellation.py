@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Awaitable, Callable, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -467,6 +467,7 @@ async def timeout_cancellation_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_timeout_detection(timeout_cancellation_manager):
     """Test basic timeout detection and handling."""
     manager = timeout_cancellation_manager
@@ -490,6 +491,7 @@ async def test_basic_timeout_detection(timeout_cancellation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_successful_task_completion(timeout_cancellation_manager):
     """Test successful task completion before timeout."""
     manager = timeout_cancellation_manager
@@ -513,6 +515,7 @@ async def test_successful_task_completion(timeout_cancellation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_manual_cancellation(timeout_cancellation_manager):
     """Test manual cancellation request."""
     manager = timeout_cancellation_manager
@@ -539,6 +542,7 @@ async def test_manual_cancellation(timeout_cancellation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_graceful_cleanup_execution(timeout_cancellation_manager):
     """Test graceful cleanup execution during cancellation."""
     manager = timeout_cancellation_manager
@@ -575,6 +579,7 @@ async def test_graceful_cleanup_execution(timeout_cancellation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_multiple_timeout_types(timeout_cancellation_manager):
     """Test multiple timeout types for the same agent."""
     manager = timeout_cancellation_manager
@@ -600,6 +605,7 @@ async def test_multiple_timeout_types(timeout_cancellation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_timeout_configuration_override(timeout_cancellation_manager):
     """Test timeout configuration override."""
     manager = timeout_cancellation_manager
@@ -627,6 +633,7 @@ async def test_timeout_configuration_override(timeout_cancellation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_agent_timeouts(timeout_cancellation_manager):
     """Test concurrent timeout handling for multiple agents."""
     manager = timeout_cancellation_manager
@@ -658,6 +665,7 @@ async def test_concurrent_agent_timeouts(timeout_cancellation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_cleanup_timeout_handling(timeout_cancellation_manager):
     """Test cleanup timeout handling for slow cleanup tasks."""
     manager = timeout_cancellation_manager
@@ -687,12 +695,14 @@ async def test_cleanup_timeout_handling(timeout_cancellation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_cancellation_hook_execution(timeout_cancellation_manager):
     """Test cancellation hook execution and error handling."""
     manager = timeout_cancellation_manager
     
     hook_calls = []
     
+    @pytest.mark.asyncio
     async def test_hook(cancellation_event: CancellationEvent):
         hook_calls.append(cancellation_event.agent_id)
     
@@ -715,6 +725,7 @@ async def test_cancellation_hook_execution(timeout_cancellation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_timeout_cancellation_performance(timeout_cancellation_manager):
     """Benchmark timeout and cancellation performance."""
     manager = timeout_cancellation_manager

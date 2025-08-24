@@ -51,4 +51,4 @@ export const MESSAGE_INPUT_CONSTANTS = {
 } as const;
 
 // Re-export consolidated types from single source of truth
-export type { MessageRole, ChatMessage } from '@/types/chat';
+export type { MessageRole, ChatMessage } from '@/types/unified';

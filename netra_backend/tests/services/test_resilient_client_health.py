@@ -3,9 +3,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -23,6 +21,7 @@ class TestResilientHTTPClientHealth:
     def client(self):
         """Create a ResilientHTTPClient for testing."""
         return ResilientHTTPClient(base_url="https://api.example.com")
+    @pytest.mark.asyncio
     async def test_health_check_success(self, client):
         """Test successful health check."""
         mock_circuit = create_healthy_circuit_mock()
@@ -31,18 +30,22 @@ class TestResilientHTTPClientHealth:
              patch.object(client, '_test_connectivity', return_value={"status": "healthy"}):
             result = await client.health_check("test_api")
             verify_successful_health_check(result)
+    @pytest.mark.asyncio
     async def test_health_check_error(self, client):
         """Test health check with error."""
         with patch.object(client, '_get_circuit', side_effect=Exception("Circuit error")), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.external_api_client.logger') as mock_logger:
             result = await client.health_check("test_api")
             verify_error_health_check(result, mock_logger)
+    @pytest.mark.asyncio
     async def test_test_connectivity_no_base_url(self):
         """Test connectivity test without base URL."""
         client = ResilientHTTPClient()
         result = await client._test_connectivity()
         
         assert result == {"status": "skipped", "reason": "no_base_url"}
+    @pytest.mark.asyncio
     async def test_test_connectivity_success(self, client):
         """Test successful connectivity test."""
         mock_session = self._setup_successful_connectivity_test()
@@ -61,6 +64,7 @@ class TestResilientHTTPClientHealth:
             def __init__(self, status):
                 self.status = status
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_response = MockResponse(200)
         mock_session.get.return_value = MockAsyncContextManager(mock_response)
@@ -70,8 +74,10 @@ class TestResilientHTTPClientHealth:
         """Verify successful connectivity test results."""
         assert result["status"] == "healthy"
         assert result["response_code"] == 200
+    @pytest.mark.asyncio
     async def test_test_connectivity_failure(self, client):
         """Test failed connectivity test."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_session.get.side_effect = Exception("Connection failed")
         

@@ -11,7 +11,6 @@ from typing import List
 
 # Add scripts directory to path for imports
 script_dir = Path(__file__).parent
-sys.path.insert(0, str(script_dir))
 
 from env_checker import check_command_exists, get_version_from_output, run_command
 from installer_types import InstallerResult

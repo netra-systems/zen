@@ -6,8 +6,6 @@ Ensures all state models can be instantiated with minimal required data.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from typing import Any, Dict
 
 import pytest

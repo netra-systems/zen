@@ -482,7 +482,9 @@ class TestWebSocketCrossSystemFailures:
                 
                 # Agent should route this message to WebSocket
                 # Simulate the agent service sending message
+                # Mock: WebSocket connection isolation for testing without network overhead
                 with patch('netra_backend.app.services.websocket.ws_manager.manager') as mock_manager:
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_manager.send_to_user = AsyncMock()
                     
                     # Send message through agent pipeline

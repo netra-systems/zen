@@ -136,6 +136,7 @@ class MultiServiceAuthManager:
             validation_results["error"] = str(e)
             return validation_results
     
+    @pytest.mark.asyncio
     async def test_token_invalidation_propagation(self, token: str) -> Dict[str, Any]:
         """Test token invalidation across all services."""
         try:
@@ -178,6 +179,7 @@ class MultiServiceAuthManager:
         except Exception as e:
             return {"invalidation_success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_concurrent_token_access(self, token: str, concurrent_requests: int = 10) -> Dict[str, Any]:
         """Test concurrent token access across services."""
         try:
@@ -290,6 +292,7 @@ class TestMultiServiceAuthTokenPropagationL3:
         manager = MultiServiceAuthManager(simulator, redis_client, postgres_session)
         yield manager
     
+    @pytest.mark.asyncio
     async def test_jwt_token_generation_and_storage(self, auth_manager, redis_client):
         """Test JWT token generation through auth service and Redis storage."""
         user_id = f"test_user_{uuid.uuid4().hex[:8]}"
@@ -299,6 +302,7 @@ class TestMultiServiceAuthTokenPropagationL3:
         assert json.loads(token_data)["user_id"] == user_id
         logger.info(f"Token generated successfully for user {user_id}")
     
+    @pytest.mark.asyncio
     async def test_cross_service_token_validation(self, auth_manager):
         """Test token validation across backend and WebSocket services."""
         user_id = f"validation_user_{uuid.uuid4().hex[:8]}"
@@ -308,6 +312,7 @@ class TestMultiServiceAuthTokenPropagationL3:
         assert validation_results["backend_validation"]["valid"] is True
         logger.info(f"Cross-service validation successful")
     
+    @pytest.mark.asyncio
     async def test_token_invalidation_propagation(self, auth_manager):
         """Test token invalidation propagates to all services."""
         user_id = f"invalidation_user_{uuid.uuid4().hex[:8]}"
@@ -317,6 +322,7 @@ class TestMultiServiceAuthTokenPropagationL3:
         invalidation_result = await auth_manager.test_token_invalidation_propagation(token_result["token"])
         assert invalidation_result["invalidation_success"] is True
     
+    @pytest.mark.asyncio
     async def test_concurrent_token_access_across_services(self, auth_manager):
         """Test concurrent token access from multiple services."""
         user_id = f"concurrent_user_{uuid.uuid4().hex[:8]}"
@@ -326,6 +332,7 @@ class TestMultiServiceAuthTokenPropagationL3:
         assert concurrent_result["all_websocket_succeeded"] is True
         assert concurrent_result["total_duration"] < 5.0
     
+    @pytest.mark.asyncio
     async def test_websocket_message_flow_with_auth(self, auth_manager):
         """Test WebSocket message flow with authenticated token."""
         user_id = f"websocket_user_{uuid.uuid4().hex[:8]}"
@@ -335,6 +342,7 @@ class TestMultiServiceAuthTokenPropagationL3:
         success = await auth_manager.websocket_simulator.send_message_to_user(user_id, {"type": "test"})
         assert success is True and len(ws_auth["websocket"].messages) > 0
     
+    @pytest.mark.asyncio
     async def test_service_interaction_tracking(self, auth_manager):
         """Test tracking of interactions across services."""
         user_id = f"tracking_user_{uuid.uuid4().hex[:8]}"
@@ -344,6 +352,7 @@ class TestMultiServiceAuthTokenPropagationL3:
         interactions = auth_manager.service_interactions
         assert len(interactions) >= 4 and len({i["service"] for i in interactions}) >= 3
     
+    @pytest.mark.asyncio
     async def test_token_expiry_handling_across_services(self, auth_manager, redis_client):
         """Test token expiry handling across all services."""
         user_id = f"expiry_user_{uuid.uuid4().hex[:8]}"

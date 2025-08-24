@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -503,7 +503,7 @@ async def redis_client():
 @pytest.fixture
 async def config_validator(redis_client):
     """Create configuration validation pipeline."""
-    return ConfigurationValidationPipeline(redis_client)
+    yield ConfigurationValidationPipeline(redis_client)
 
 @pytest.mark.L3
 @pytest.mark.integration

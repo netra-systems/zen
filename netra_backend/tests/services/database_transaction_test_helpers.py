@@ -16,22 +16,31 @@ from netra_backend.app.db.base import Base
 
 def create_mock_session() -> AsyncMock:
     """Create a mock database session with standard configuration"""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     _configure_session_methods(session)
     return session
 
 def _configure_session_methods(session: AsyncMock) -> None:
     """Configure session methods for mocking"""
+    # Mock: Session isolation for controlled testing without external state
     session.add = MagicMock()
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.flush = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.refresh = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.execute = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.close = AsyncMock()
 
 def configure_mock_query_results(session: AsyncMock) -> None:
     """Configure mock query results for session"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_result = MagicMock()
     _setup_result_methods(mock_result)
     session.execute.return_value = mock_result
@@ -47,6 +56,7 @@ def _setup_result_methods(mock_result: MagicMock) -> None:
 def create_mock_session_factory() -> tuple[MagicMock, AsyncMock]:
     """Create mock async session factory with context manager"""
     session = create_mock_session()
+    # Mock: Session isolation for controlled testing without external state
     session.begin = AsyncMock()
     session_context = _create_session_context(session)
     factory = _create_factory(session_context)
@@ -54,13 +64,17 @@ def create_mock_session_factory() -> tuple[MagicMock, AsyncMock]:
 
 def _create_session_context(session: AsyncMock) -> AsyncMock:
     """Create session context manager"""
+    # Mock: Generic component isolation for controlled unit testing
     context = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     context.__aenter__ = AsyncMock(return_value=session)
+    # Mock: Async component isolation for testing without real async operations
     context.__aexit__ = AsyncMock(return_value=None)
     return context
 
 def _create_factory(session_context: AsyncMock) -> MagicMock:
     """Create session factory"""
+    # Mock: Generic component isolation for controlled unit testing
     factory = MagicMock()
     factory.return_value = session_context
     return factory

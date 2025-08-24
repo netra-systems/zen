@@ -70,6 +70,7 @@ class TestLLMManagerLoadBalancing:
         response_times = [0.05, 0.2, 0.1]  # Fast, Slow, Medium
         for (key, client), time_val in zip(providers, response_times):
             client.response_time = time_val
+    @pytest.mark.asyncio
     async def test_weighted_provider_selection(self, load_balanced_manager):
         """Test weighted provider selection"""
         manager, providers = load_balanced_manager
@@ -100,6 +101,7 @@ class TestLLMManagerLoadBalancing:
         
         # OpenAI should have roughly 60% (4/7) of selections
         assert openai_count > total_others * 0.4  # Allow variance
+    @pytest.mark.asyncio
     async def test_response_time_based_load_balancing(self, load_balanced_manager):
         """Test load balancing based on provider response times"""
         manager, providers = load_balanced_manager
@@ -125,6 +127,7 @@ class TestLLMManagerLoadBalancing:
         provider_usage = count_provider_usage(results)
         assert len(results) == 30
         assert total_time < 2.0  # Should complete quickly due to load balancing
+    @pytest.mark.asyncio
     async def test_adaptive_load_balancing(self, load_balanced_manager):
         """Test adaptive load balancing based on success rates"""
         manager, providers = load_balanced_manager
@@ -166,6 +169,7 @@ class TestLLMManagerLoadBalancing:
         # Check that the failing provider has recorded failures
         slow_provider_client = providers['SLOW_openai']
         assert slow_provider_client.failed_requests > 0
+    @pytest.mark.asyncio
     async def test_geographic_load_balancing(self, load_balanced_manager):
         """Test geographic/regional load balancing simulation"""
         manager, providers = load_balanced_manager

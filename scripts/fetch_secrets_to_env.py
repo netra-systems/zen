@@ -8,7 +8,6 @@ from typing import Dict, List, Optional
 from google.cloud import secretmanager
 
 # Import our centralized GCP auth config
-sys.path.insert(0, str(Path(__file__).parent))
 from gcp_auth_config import GCPAuthConfig
 
 

@@ -4,10 +4,11 @@ Provides robust JSON parsing with fallbacks for Pydantic pre-validators.
 """
 
 import json
-import logging
 from typing import Any, Dict, List, Optional, Union
 
-logger = logging.getLogger(__name__)
+from netra_backend.app.core.unified_logging import get_logger
+
+logger = get_logger(__name__)
 
 
 def safe_json_parse(value: Any, fallback: Any = None) -> Any:

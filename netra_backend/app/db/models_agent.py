@@ -64,6 +64,7 @@ class Thread(Base):
     object = Column(String, nullable=False, default="thread")
     created_at = Column(Integer, nullable=False)
     metadata_ = Column(JSON, nullable=True)
+    deleted_at = Column(DateTime, nullable=True)  # Add soft delete support
     messages = relationship("Message", back_populates="thread")
     runs = relationship("Run", back_populates="thread")
 

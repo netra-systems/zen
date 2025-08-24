@@ -6,7 +6,7 @@
 import { jest } from '@jest/globals';
 import { renderHook } from '@testing-library/react';
 import { useChatStore } from '@/store/chat';
-import { Message, MessageRole } from '@/types/chat';
+import { Message, MessageRole } from '@/types/unified';
 
 export class GlobalTestUtils {
   static setupStoreTestEnvironment() {

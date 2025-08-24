@@ -16,8 +16,6 @@ from urllib.parse import urlparse, urlunparse
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.pool import NullPool, AsyncAdaptedQueuePool
 
-from shared.database.core_database_manager import CoreDatabaseManager
-
 logger = logging.getLogger(__name__)
 
 
@@ -30,8 +28,13 @@ class AuthDatabaseManager:
         if not url:
             return url
         
-        # Use shared core database manager for URL conversion
-        return CoreDatabaseManager.format_url_for_async_driver(url)
+        # Convert to async driver format for auth service
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://")
+        elif url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://")
+        
+        return url
     
     @classmethod
     def create_async_engine(
@@ -99,8 +102,11 @@ class AuthDatabaseManager:
         
         logger.debug(f"Converting database URL for async: {database_url[:20]}...")
         
+        # CRITICAL FIX: Resolve SSL parameter conflicts first (staging deployment issue)
+        resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(database_url, "asyncpg")
+        
         # Use shared core database manager for URL conversion
-        converted_url = CoreDatabaseManager.format_url_for_async_driver(database_url)
+        converted_url = CoreDatabaseManager.format_url_for_async_driver(resolved_url)
         
         logger.debug(f"Converted async database URL: {converted_url[:20]}...")
         return converted_url
@@ -193,24 +199,61 @@ class AuthDatabaseManager:
     
     @staticmethod
     def _normalize_postgres_url(url: str) -> str:
-        """Normalize PostgreSQL URL format for consistency.
-        
-        Args:
-            url: Database URL to normalize
-            
-        Returns:
-            Normalized PostgreSQL URL
-        """
+        """Normalize PostgreSQL URL using shared CoreDatabaseManager."""
         return CoreDatabaseManager.normalize_postgres_url(url)
     
     @staticmethod
     def _convert_sslmode_to_ssl(url: str) -> str:
-        """Convert sslmode parameter to ssl parameter for asyncpg.
-        
-        Args:
-            url: Database URL with sslmode parameter
-            
-        Returns:
-            URL with ssl parameter for asyncpg compatibility
-        """
+        """Convert sslmode parameter using shared CoreDatabaseManager."""
         return CoreDatabaseManager.convert_ssl_params_for_asyncpg(url)
+    
+    @staticmethod
+    def _normalize_database_url(url: str) -> str:
+        """Normalize database URL using shared CoreDatabaseManager."""
+        resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(url, "asyncpg")
+        return CoreDatabaseManager.format_url_for_async_driver(resolved_url)
+    
+    @staticmethod
+    def get_connection_url() -> str:
+        """Get normalized connection URL for auth service.
+        
+        Returns:
+            Database URL ready for asyncpg connection
+        """
+        return AuthDatabaseManager.get_auth_database_url_async()
+    
+    @staticmethod
+    def validate_staging_readiness() -> bool:
+        """Validate auth service database configuration for staging deployment.
+        
+        Performs comprehensive validation including:
+        - Database URL format and SSL parameter handling
+        - Credential validation
+        - Cloud SQL compatibility checks
+        
+        Returns:
+            True if ready for staging deployment
+        """
+        try:
+            from auth_service.auth_core.database.staging_validation import StagingDatabaseValidator
+            
+            logger.info("Validating auth service for staging deployment...")
+            report = StagingDatabaseValidator.pre_deployment_validation()
+            
+            if report["overall_status"] == "failed":
+                logger.error("Staging validation failed:")
+                for issue in report.get("critical_issues", []):
+                    logger.error(f"  - {issue}")
+                return False
+            elif report["overall_status"] == "warning":
+                logger.warning("Staging validation passed with warnings:")
+                for warning in report.get("warnings", []):
+                    logger.warning(f"  - {warning}")
+            else:
+                logger.info("Staging validation passed successfully")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Staging validation failed with error: {e}")
+            return False

@@ -34,6 +34,7 @@ def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_d
 class TestMultiConstraintEdgeCases:
     """Test edge cases in multi-constraint optimization."""
     
+    @pytest.mark.asyncio
     async def test_impossible_constraint_combination(self, multi_constraint_setup):
         """Test handling of impossible constraint combinations."""
         setup = multi_constraint_setup
@@ -41,6 +42,7 @@ class TestMultiConstraintEdgeCases:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_impossible_constraints_handling(results)
     
+    @pytest.mark.asyncio
     async def test_minimal_constraint_optimization(self, multi_constraint_setup):
         """Test optimization with minimal or single constraints."""
         setup = multi_constraint_setup
@@ -48,6 +50,7 @@ class TestMultiConstraintEdgeCases:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_minimal_constraint_results(results)
     
+    @pytest.mark.asyncio
     async def test_contradictory_constraint_handling(self, multi_constraint_setup):
         """Test handling of contradictory constraints."""
         setup = multi_constraint_setup
@@ -59,6 +62,7 @@ class TestMultiConstraintEdgeCases:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_contradictory_constraint_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_constraint_boundary_conditions(self, multi_constraint_setup):
         """Test constraint boundary conditions."""
         setup = multi_constraint_setup
@@ -70,6 +74,7 @@ class TestMultiConstraintEdgeCases:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_boundary_condition_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_zero_constraint_scenario(self, multi_constraint_setup):
         """Test scenario with no explicit constraints."""
         setup = multi_constraint_setup
@@ -78,6 +83,7 @@ class TestMultiConstraintEdgeCases:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_zero_constraint_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_constraint_overflow_handling(self, multi_constraint_setup):
         """Test handling of constraint overflow scenarios."""
         setup = multi_constraint_setup

@@ -188,8 +188,10 @@ class OAuthIntegrationTestRunner(OAuthFlowTestRunner):
         
         # Scenario 1: Invalid authorization code
         try:
+            # Mock: Component isolation for testing without external dependencies
             with patch('httpx.AsyncClient.post') as mock_post:
                 # Mock failed token exchange
+                # Mock: Generic component isolation for controlled unit testing
                 mock_response = AsyncMock()
                 mock_response.status_code = 400
                 mock_response.json.return_value = {
@@ -213,6 +215,7 @@ class OAuthIntegrationTestRunner(OAuthFlowTestRunner):
         
         # Scenario 2: Provider service unavailable
         try:
+            # Mock: Component isolation for testing without external dependencies
             with patch('httpx.AsyncClient.post') as mock_post:
                 # Mock service unavailable
                 mock_post.side_effect = asyncio.TimeoutError("Provider service timeout")

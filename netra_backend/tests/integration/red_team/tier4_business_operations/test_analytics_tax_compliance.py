@@ -18,7 +18,7 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 from netra_backend.app.services.billing.revenue_calculator import RevenueCalculator
 
@@ -29,27 +29,39 @@ class TestAnalyticsTaxCompliance:
     @pytest.fixture
     def mock_analytics_service(self):
         """Mock subscription analytics service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.generate_mrr_report = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.calculate_churn_metrics = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.track_conversion_funnels = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_tax_service(self):
         """Mock tax calculation service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.calculate_tax = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_tax_exempt_status = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.generate_tax_reports = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_refund_service(self):
         """Mock refund processing service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.calculate_refund_amount = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.process_refund = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_refund_eligibility = AsyncMock()
         return service
     

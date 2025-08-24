@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -18,13 +18,17 @@ async def test_database_connectivity_check_success():
     )
     
     # Create mock engine
+    # Mock: Service component isolation for predictable testing behavior
     mock_engine = MagicMock(spec=AsyncEngine)
+    # Mock: Generic component isolation for controlled unit testing
     mock_conn = AsyncMock()
     # Create a mock result where scalar() is NOT async (use MagicMock instead of AsyncMock)
+    # Mock: Generic component isolation for controlled unit testing
     mock_result = MagicMock()
     mock_result.scalar.return_value = 1
     
     # Mock the execute method to return the mock_result when awaited
+    # Mock: Async component isolation for testing without real async operations
     mock_conn.execute = AsyncMock(return_value=mock_result)
     
     # Mock the async context manager properly
@@ -44,6 +48,7 @@ async def test_database_connectivity_check_failure():
     )
     
     # Create mock engine that raises exception
+    # Mock: Service component isolation for predictable testing behavior
     mock_engine = MagicMock(spec=AsyncEngine)
     mock_engine.connect.side_effect = Exception("Connection failed")
     
@@ -71,7 +76,9 @@ async def test_startup_schema_validation_with_uninitialized_engine():
     
     logger = logging.getLogger(__name__)
     
+    # Mock: Component isolation for testing without external dependencies
     with patch('app.startup_module.initialize_postgres') as mock_init:
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.startup_module.async_engine', None):
             # Should not raise error, just log warning
             await validate_schema(logger)
@@ -85,13 +92,17 @@ async def test_comprehensive_validation_with_engine():
     )
     
     # Create mock engine
+    # Mock: Service component isolation for predictable testing behavior
     mock_engine = MagicMock(spec=AsyncEngine)
+    # Mock: Generic component isolation for controlled unit testing
     mock_conn = AsyncMock()
     # Create a mock result where scalar() is NOT async (use MagicMock instead of AsyncMock)
+    # Mock: Generic component isolation for controlled unit testing
     mock_result = MagicMock()
     mock_result.scalar.return_value = 1
     
     # Mock the execute method to return the mock_result when awaited
+    # Mock: Async component isolation for testing without real async operations
     mock_conn.execute = AsyncMock(return_value=mock_result)
     
     # Mock the async context manager properly
@@ -99,10 +110,13 @@ async def test_comprehensive_validation_with_engine():
     mock_engine.connect.return_value.__aexit__.return_value = None
     
     # Mock inspector for schema validation
+    # Mock: Component isolation for testing without external dependencies
     with patch('netra_backend.app.services.schema_validation_service.inspect') as mock_inspect:
+        # Mock: Generic component isolation for controlled unit testing
         mock_inspector = MagicMock()
         mock_inspector.get_table_names.return_value = []
         mock_inspect.return_value = mock_inspector
+        # Mock: Async component isolation for testing without real async operations
         mock_conn.run_sync = AsyncMock(return_value={})
         
         # Run validation

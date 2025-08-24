@@ -5,7 +5,7 @@ Test 5: Multi-Agent Coordination First Response - $15K MRR
 Test 6: Session State Cross-Service Sync - $10K MRR
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -15,7 +15,7 @@ import json
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -39,15 +39,22 @@ class TestMessagePersistence:
 
         async with async_session() as session:
 
-            yield session
+            try:
+                yield session
+            finally:
+                if hasattr(session, "close"):
+                    await session.close()
     
+    @pytest.mark.asyncio
     async def test_message_saved_before_processing(self, db_session):
 
         """Ensure messages persist before agent processing."""
         from netra_backend.app.services.message_service import MessageService
         
+        # Mock: Component isolation for controlled unit testing
         message_service = Mock(spec=MessageService)
 
+        # Mock: Async component isolation for testing without real async operations
         message_service.save_message = AsyncMock(return_value={
 
             "id": str(uuid.uuid4()),
@@ -76,6 +83,7 @@ class TestMessagePersistence:
 
         message_service.save_message.assert_called_once_with(message)
     
+    @pytest.mark.asyncio
     async def test_message_recovery_after_crash(self, db_session):
 
         """Test message recovery after system crash."""
@@ -106,17 +114,22 @@ class TestMessagePersistence:
 
         assert all(m["status"] == "pending" for m in recovered)
     
+    @pytest.mark.asyncio
     async def test_message_queue_durability(self):
 
         """Test message queue persists during processing."""
         from netra_backend.app.services.queue_service import QueueService
         
+        # Mock: Component isolation for controlled unit testing
         queue = Mock(spec=QueueService)
 
+        # Mock: Generic component isolation for controlled unit testing
         queue.enqueue = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         queue.dequeue = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         queue.persist = AsyncMock()
         
         # Add messages to queue
@@ -139,6 +152,7 @@ class TestMultiAgentCoordination:
 
     """Test 5: Multi-Agent Coordination First Response"""
     
+    @pytest.mark.asyncio
     async def test_agent_orchestration_flow(self):
 
         """Test supervisor orchestrates multiple agents."""
@@ -148,16 +162,21 @@ class TestMultiAgentCoordination:
 
         mock_agents = {
 
+            # Mock: Async component isolation for testing without real async operations
             "triage": Mock(process=AsyncMock(return_value={"category": "cost"})),
 
+            # Mock: Async component isolation for testing without real async operations
             "cost_optimizer": Mock(process=AsyncMock(return_value={"savings": 0.3})),
 
+            # Mock: Async component isolation for testing without real async operations
             "performance": Mock(process=AsyncMock(return_value={"latency": 200}))
 
         }
         
+        # Mock: Agent service isolation for testing without LLM agent execution
         supervisor = Mock(spec=SupervisorAgent)
 
+        # Mock: Async component isolation for testing without real async operations
         supervisor.coordinate_agents = AsyncMock(return_value={
 
             "triage_result": mock_agents["triage"].process.return_value,
@@ -178,6 +197,7 @@ class TestMultiAgentCoordination:
 
         assert result["performance"]["latency"] == 200
     
+    @pytest.mark.asyncio
     async def test_parallel_agent_execution(self):
 
         """Test agents execute in parallel for speed."""
@@ -213,6 +233,7 @@ class TestMultiAgentCoordination:
 
         assert len(results) == 3
     
+    @pytest.mark.asyncio
     async def test_agent_response_aggregation(self):
 
         """Test proper aggregation of multi-agent responses."""
@@ -257,13 +278,16 @@ class TestSessionStateSync:
 
     """Test 6: Session State Cross-Service Sync"""
     
+    @pytest.mark.asyncio
     async def test_session_sync_auth_to_backend(self):
 
         """Test session syncs from auth service to backend."""
         from netra_backend.app.services.session_service import SessionService
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         session_service = Mock(spec=SessionService)
 
+        # Mock: Session isolation for controlled testing without external state
         session_service.sync_session = AsyncMock(return_value=True)
         
         session_data = {
@@ -294,15 +318,19 @@ class TestSessionStateSync:
 
         session_service.sync_session.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_redis_session_consistency(self):
 
         """Test Redis maintains session consistency."""
         from netra_backend.app.services.redis_manager import RedisManager
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         redis = Mock(spec=RedisManager)
 
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.set = AsyncMock(return_value=True)
 
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.get = AsyncMock()
         
         session_key = "session:user_123"
@@ -327,13 +355,16 @@ class TestSessionStateSync:
 
         assert parsed["active"] is True
     
+    @pytest.mark.asyncio
     async def test_websocket_state_synchronization(self):
 
         """Test WebSocket connection state syncs across services."""
-        from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+        from netra_backend.app.websocket_core.manager import WebSocketManager
         
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         ws_manager = Mock(spec=WebSocketManager)
 
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.sync_connection_state = AsyncMock()
         
         connection_state = {

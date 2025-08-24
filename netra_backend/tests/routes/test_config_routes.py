@@ -12,9 +12,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -49,6 +47,7 @@ class TestConfigRoute:
         response = basic_test_client.put("/api/config", json=invalid_config)
         CommonResponseValidators.validate_error_response(response, [422, 400, 404, 403])
     
+    @pytest.mark.asyncio
     async def test_config_persistence(self):
         """Test configuration persistence."""
         from netra_backend.app.routes.config import update_config
@@ -138,11 +137,13 @@ class TestConfigRoute:
         else:
             assert response.status_code in [404, 401]
     
+    @pytest.mark.asyncio
     async def test_config_backup_and_restore(self):
         """Test configuration backup and restore functionality."""
         from netra_backend.app.routes.config import backup_config, restore_config
         
         # Mock config backup
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.config_service.create_backup') as mock_backup:
             mock_backup.return_value = {
                 "backup_id": "backup_123",
@@ -154,6 +155,7 @@ class TestConfigRoute:
             assert "backup_id" in backup_result
         
         # Mock config restore
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.config_service.restore_from_backup') as mock_restore:
             mock_restore.return_value = {"success": True, "restored_config": {}}
             

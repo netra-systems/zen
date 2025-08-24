@@ -11,15 +11,13 @@ error messages, including recovery mechanisms and notification channels.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import json
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -201,9 +199,10 @@ async def error_test_services():
             RetryConfig(max_retries=3, delay=1.0, backoff_factor=1.5)
         )
     }
-    return services
+    yield services
 
 @pytest.fixture
+@pytest.mark.asyncio
 async def test_user():
     """Create test user for error scenarios."""
     return TestUser(
@@ -217,12 +216,16 @@ async def test_user():
 @pytest.fixture
 async def websocket_connection():
     """Mock WebSocket connection for testing."""
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket = AsyncMock()
     mock_websocket.client_state = "OPEN"
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket.send = AsyncMock()
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket.receive = AsyncMock()
-    return mock_websocket
+    yield mock_websocket
 
+@pytest.mark.asyncio
 async def test_agent_error_to_user_flow(error_test_services, test_user, websocket_connection):
     """
     Test complete error flow from agent processing failure to user notification.
@@ -294,6 +297,7 @@ async def test_agent_error_to_user_flow(error_test_services, test_user, websocke
     assert "connection_id" in websocket_notification
     assert "message" in websocket_notification
 
+@pytest.mark.asyncio
 async def test_error_message_formatting(error_test_services, test_user):
     """
     Test user-friendly error message formatting.
@@ -360,6 +364,7 @@ async def test_error_message_formatting(error_test_services, test_user):
         if case["error_type"] in [ErrorType.AGENT_ERROR, ErrorType.UNKNOWN_ERROR]:
             assert "support" in user_message.lower()
 
+@pytest.mark.asyncio
 async def test_error_recovery_options(error_test_services, test_user, websocket_connection):
     """
     Test error recovery mechanisms and user options.
@@ -415,6 +420,7 @@ async def test_error_recovery_options(error_test_services, test_user, websocket_
     support_option = next(opt for opt in sent_message["recovery_options"] if opt["action"] == "support")
     assert support_option["enabled"] is True
 
+@pytest.mark.asyncio
 async def test_cascading_error_prevention(error_test_services, test_user):
     """
     Test prevention of cascading failures through circuit breakers.
@@ -463,6 +469,7 @@ async def test_cascading_error_prevention(error_test_services, test_user):
                              if "service_degraded" in json.loads(n.get("message", "{}")).get("type", "")]
     assert len(degraded_notifications) > 0
 
+@pytest.mark.asyncio
 async def test_error_notification_channels(error_test_services, test_user):
     """
     Test multiple error notification channels.
@@ -532,6 +539,7 @@ async def test_error_notification_channels(error_test_services, test_user):
     slack_notification = next(n for n in notification_service.notifications_sent if n["type"] == "slack")
     assert "CRITICAL" in slack_notification["error_summary"]
 
+@pytest.mark.asyncio
 async def test_error_context_preservation(error_test_services, test_user):
     """
     Test error context tracking and preservation.
@@ -701,6 +709,7 @@ def create_error_scenarios() -> List[ErrorScenario]:
         )
     ]
 
+@pytest.mark.asyncio
 async def test_comprehensive_error_scenarios():
     """
     Test all predefined error scenarios for complete coverage.

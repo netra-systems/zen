@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -54,12 +54,14 @@ class TestProductionTool:
     def _setup_arun_success_test(self) -> ProductionTool:
         """Setup arun success test."""
         tool = ProductionTool("test_tool")
+        # Mock: Async component isolation for testing without real async operations
         tool.execute = AsyncMock(return_value={"success": True, "data": "test_result"})
         return tool
     
     async def _execute_arun_with_mocks(self, tool: ProductionTool):
         """Execute arun with reliability mocks."""
         with patch.object(tool, 'reliability') as mock_reliability:
+            # Mock: Async component isolation for testing without real async operations
             mock_reliability.execute_safely = AsyncMock(return_value=ToolExecuteResponse(success=True, data="test_result"))
             return await tool.arun({"param": "value"})
     
@@ -72,6 +74,7 @@ class TestProductionTool:
     def _setup_execute_success_test(self) -> ProductionTool:
         """Setup execute success test."""
         tool = ProductionTool("test_tool")
+        # Mock: Async component isolation for testing without real async operations
         tool._execute_with_reliability_wrapper = AsyncMock(return_value={"success": True, "data": "result"})
         return tool
     
@@ -83,6 +86,7 @@ class TestProductionTool:
     def _setup_execute_failure_test(self) -> ProductionTool:
         """Setup execute failure test."""
         tool = ProductionTool("test_tool")
+        # Mock: Async component isolation for testing without real async operations
         tool._execute_with_reliability_wrapper = AsyncMock(side_effect=Exception("Tool failed"))
         return tool
     
@@ -116,6 +120,7 @@ class TestProductionToolInternalExecution:
     async def test_try_synthetic_tools_batch_generation(self):
         """Test _try_synthetic_tools with batch generation."""
         tool = self._setup_batch_generation_test()
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data.synthetic_data_service.generate_batch') as mock_service:
             mock_service.return_value = [{"data": "item1"}, {"data": "item2"}]
             result = await tool._try_synthetic_tools({"batch_size": 100})
@@ -136,8 +141,10 @@ class TestProductionToolInternalExecution:
     async def test_try_corpus_tools_create(self):
         """Test _try_corpus_tools with create operation."""
         tool = self._setup_corpus_create_test()
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus.corpus_service.create_corpus') as mock_service:
-            from unittest.mock import Mock
+            from unittest.mock import Mock, AsyncMock, MagicMock
+            # Mock: Generic component isolation for controlled unit testing
             mock_corpus = Mock()
             mock_corpus.id = "test_corpus_123"
             mock_corpus.name = "test_corpus"
@@ -148,6 +155,7 @@ class TestProductionToolInternalExecution:
     async def test_try_corpus_tools_search(self):
         """Test _try_corpus_tools with search operation."""
         tool = self._setup_corpus_search_test()
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus.corpus_service.search_corpus_content') as mock_service:
             mock_service.return_value = {"results": ["doc1", "doc2"], "total": 2}
             result = await tool._try_corpus_tools({"corpus_id": "123", "query": "test"})
@@ -162,6 +170,7 @@ class TestProductionToolInternalExecution:
     def _setup_synthetic_tool_test(self) -> ProductionTool:
         """Setup synthetic tool test."""
         tool = ProductionTool("generate_synthetic_data_batch")
+        # Mock: Async component isolation for testing without real async operations
         tool._try_synthetic_tools = AsyncMock(return_value={"success": True, "data": "synthetic_data"})
         return tool
     
@@ -173,7 +182,9 @@ class TestProductionToolInternalExecution:
     def _setup_corpus_tool_test(self) -> ProductionTool:
         """Setup corpus tool test."""
         tool = ProductionTool("create_corpus")
+        # Mock: Async component isolation for testing without real async operations
         tool._try_synthetic_tools = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         tool._try_corpus_tools = AsyncMock(return_value={"success": True, "data": "corpus_created"})
         return tool
     
@@ -185,13 +196,16 @@ class TestProductionToolInternalExecution:
     def _setup_default_tool_test(self) -> ProductionTool:
         """Setup default tool test."""
         tool = ProductionTool("unknown_tool")
+        # Mock: Async component isolation for testing without real async operations
         tool._try_synthetic_tools = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         tool._try_corpus_tools = AsyncMock(return_value=None)
         return tool
     
     def _setup_batch_generation_test(self) -> ProductionTool:
         """Setup batch generation test."""
         tool = ProductionTool("generate_synthetic_data_batch")
+        # Mock: Async component isolation for testing without real async operations
         tool._execute_synthetic_data_batch = AsyncMock(return_value={"success": True, "batch_size": 100})
         return tool
     
@@ -204,18 +218,21 @@ class TestProductionToolInternalExecution:
     def _setup_validation_test(self) -> ProductionTool:
         """Setup validation test."""
         tool = ProductionTool("validate_synthetic_data")
+        # Mock: Async component isolation for testing without real async operations
         tool._execute_validate_synthetic_data = AsyncMock(return_value={"success": True, "valid": True})
         return tool
     
     def _setup_storage_test(self) -> ProductionTool:
         """Setup storage test."""
         tool = ProductionTool("store_synthetic_data")
+        # Mock: Async component isolation for testing without real async operations
         tool._execute_store_synthetic_data = AsyncMock(return_value={"success": True, "stored": True})
         return tool
     
     def _setup_corpus_create_test(self) -> ProductionTool:
         """Setup corpus create test."""
         tool = ProductionTool("create_corpus")
+        # Mock: Async component isolation for testing without real async operations
         tool._execute_create_corpus = AsyncMock(return_value={"success": True, "corpus_id": "123"})
         return tool
     
@@ -228,5 +245,6 @@ class TestProductionToolInternalExecution:
     def _setup_corpus_search_test(self) -> ProductionTool:
         """Setup corpus search test."""
         tool = ProductionTool("search_corpus")
+        # Mock: Async component isolation for testing without real async operations
         tool._execute_search_corpus = AsyncMock(return_value={"success": True, "results": []})
         return tool

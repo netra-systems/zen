@@ -6,8 +6,6 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import pytest
 
 from netra_backend.app.core.exceptions_base import NetraException
@@ -25,6 +23,7 @@ def orchestrator():
 class TestUnifiedToolRegistryOrchestration:
     """Test advanced orchestration features"""
     
+    @pytest.mark.asyncio
     async def test_conditional_tool_execution(self, orchestrator):
         """Test conditional tool execution based on results"""
         condition_tool, success_tool, failure_tool = _create_conditional_tools()
@@ -37,6 +36,7 @@ class TestUnifiedToolRegistryOrchestration:
         result = await orchestrator.execute_chain(chain_config)
         _verify_conditional_execution(condition_tool, success_tool, failure_tool)
     
+    @pytest.mark.asyncio
     async def test_tool_chain_error_handling(self, orchestrator):
         """Test error handling in tool chains"""
         working_tool = MockAdvancedTool("working_tool", "Working tool")
@@ -47,6 +47,7 @@ class TestUnifiedToolRegistryOrchestration:
         
         await _test_chain_failure_handling(orchestrator, chain_config, working_tool)
     
+    @pytest.mark.asyncio
     async def test_parallel_tool_execution(self, orchestrator):
         """Test parallel execution of independent tools"""
         tools = _create_parallel_execution_tools()
@@ -56,6 +57,7 @@ class TestUnifiedToolRegistryOrchestration:
         
         _verify_parallel_execution(tools, result)
     
+    @pytest.mark.asyncio
     async def test_tool_dependency_resolution(self, orchestrator):
         """Test tool dependency resolution and ordering"""
         dependent_tools = _create_dependent_tools()
@@ -65,6 +67,7 @@ class TestUnifiedToolRegistryOrchestration:
         
         _verify_dependency_execution_order(dependent_tools)
     
+    @pytest.mark.asyncio
     async def test_chain_performance_metrics(self, orchestrator):
         """Test chain performance metrics collection"""
         performance_tools = _create_performance_test_tools()
@@ -74,6 +77,7 @@ class TestUnifiedToolRegistryOrchestration:
         
         _verify_performance_metrics(orchestrator, chain_config['chain_id'])
     
+    @pytest.mark.asyncio
     async def test_tool_chain_composition(self, orchestrator):
         """Test composition of multiple tool chains"""
         chain_tools = _create_composition_tools()
@@ -88,6 +92,7 @@ class TestUnifiedToolRegistryOrchestration:
         
         _verify_chain_composition(orchestrator, result_1, result_2)
     
+    @pytest.mark.asyncio
     async def test_dynamic_tool_registration(self, orchestrator):
         """Test dynamic tool registration during execution"""
         base_tools = _create_base_tools()

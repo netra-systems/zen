@@ -26,7 +26,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -822,6 +822,7 @@ class DashboardPerformanceValidator:
 
         )
     
+    @pytest.mark.asyncio
     async def test_cache_effectiveness(self, cache_test_duration: int = 20) -> Dict[str, Any]:
 
         """Test effectiveness of query caching strategies."""
@@ -901,6 +902,7 @@ class DashboardPerformanceValidator:
         
         return cache_results
     
+    @pytest.mark.asyncio
     async def test_concurrent_user_scaling(self, max_users: int = 20) -> Dict[str, Any]:
 
         """Test dashboard performance under increasing concurrent user load."""

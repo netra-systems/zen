@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.clients.auth_client import auth_client
-from netra_backend.app.websocket_core import get_websocket_manager
+from netra_backend.app.websocket_core.manager import get_websocket_manager
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.services.demo_service import DemoService
 

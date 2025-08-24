@@ -11,7 +11,7 @@ L2 Test: Real internal circuit breaker components with mocked external services.
 Performance target: <100ms failure detection, <30s recovery time.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -23,13 +23,13 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class CircuitState(Enum):
@@ -728,6 +728,7 @@ class TestWebSocketCircuitBreaker:
 
         """Create WebSocket manager with mocked external services."""
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis:
 
             mock_redis.enabled = False  # Use in-memory storage
@@ -820,6 +821,7 @@ class TestWebSocketCircuitBreaker:
 
         return {"success": True, "timestamp": time.time()}
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_basic_functionality(self, circuit_breaker):
 
         """Test basic circuit breaker functionality."""
@@ -845,6 +847,7 @@ class TestWebSocketCircuitBreaker:
 
         assert state_info["metrics"]["failed_requests"] == 0
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_opens_on_failures(self, circuit_breaker):
 
         """Test circuit breaker opens after threshold failures."""
@@ -882,6 +885,7 @@ class TestWebSocketCircuitBreaker:
 
         assert state_info["metrics"]["blocked_requests"] > 0
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_half_open_transition(self, circuit_breaker):
 
         """Test circuit breaker transitions to half-open state."""
@@ -927,6 +931,7 @@ class TestWebSocketCircuitBreaker:
 
         assert state_info["state"] == CircuitState.HALF_OPEN.value
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_recovery_flow(self, circuit_breaker):
 
         """Test complete circuit breaker recovery flow."""
@@ -968,6 +973,7 @@ class TestWebSocketCircuitBreaker:
 
         assert result["success"] is True
     
+    @pytest.mark.asyncio
     async def test_fallback_handler_functionality(self, fallback_handler, test_users):
 
         """Test fallback handler operations."""
@@ -1022,6 +1028,7 @@ class TestWebSocketCircuitBreaker:
 
         assert stats["cache_hit_rate"] > 0
     
+    @pytest.mark.asyncio
     async def test_recovery_detector_functionality(self, recovery_detector, circuit_breaker):
 
         """Test recovery detector operations."""
@@ -1061,12 +1068,14 @@ class TestWebSocketCircuitBreaker:
     
     @mock_justified("L2: Circuit breaker with real internal components")
 
+    @pytest.mark.asyncio
     async def test_websocket_integration_with_circuit_breaker(self, websocket_manager, circuit_breaker, fallback_handler, test_users):
 
         """Test WebSocket integration with circuit breaker protection."""
 
         user = test_users[0]
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Connect user
@@ -1176,6 +1185,7 @@ class TestWebSocketCircuitBreaker:
 
         await websocket_manager.disconnect_user(user.id, mock_websocket)
     
+    @pytest.mark.asyncio
     async def test_concurrent_circuit_breaker_operations(self, circuit_breaker):
 
         """Test circuit breaker under concurrent load."""
@@ -1252,6 +1262,7 @@ class TestWebSocketCircuitBreaker:
 
             assert blocked_count > 0
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_performance_benchmarks(self, circuit_breaker):
 
         """Test circuit breaker performance benchmarks."""

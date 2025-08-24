@@ -7,11 +7,9 @@ Tests for JWT token creation, validation, and claims extraction.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from jose import JWTError, jwt
@@ -24,6 +22,7 @@ from netra_backend.app.core.exceptions_base import ValidationError
 @pytest.fixture
 def mock_config():
     """Mock configuration with JWT secret."""
+    # Mock: Generic component isolation for controlled unit testing
     config = Mock()
     config.jwt_secret_key = "test_secret_key_12345"
     return config
@@ -31,9 +30,12 @@ def mock_config():
 @pytest.fixture
 def mock_redis_manager():
     """Mock Redis manager with enabled state."""
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis = AsyncMock()
     redis.enabled = True
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.get = AsyncMock(return_value=None)
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.set = AsyncMock()
     return redis
 
@@ -92,30 +94,42 @@ class TestJWTTokenGeneration:
     """Test cases for JWT token generation and validation."""
 
     # Test JWT generation
+    # Mock: Component isolation for testing without external dependencies
     @patch('uuid.uuid4')
+    @pytest.mark.asyncio
     async def test_generate_jwt_success(self, mock_uuid, jwt_manager, sample_user_data):
         """Test successful JWT token generation."""
+        # Mock: Component isolation for controlled unit testing
         mock_uuid.return_value = Mock(return_value="mock_jti")
+        # Mock: Component isolation for controlled unit testing
         mock_uuid.return_value.__str__ = Mock(return_value="mock_jti")
         
         token = await jwt_manager.generate_jwt(sample_user_data, "development")
         assert isinstance(token, str)
         assert len(token.split('.')) == 3  # JWT has 3 parts
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('uuid.uuid4')
+    @pytest.mark.asyncio
     async def test_generate_jwt_with_pr_number(self, mock_uuid, jwt_manager, sample_user_data):
         """Test JWT generation with PR number included."""
+        # Mock: Component isolation for controlled unit testing
         mock_uuid.return_value = Mock(return_value="mock_jti")
+        # Mock: Component isolation for controlled unit testing
         mock_uuid.return_value.__str__ = Mock(return_value="mock_jti")
         
         token = await jwt_manager.generate_jwt(sample_user_data, "development", "PR-123")
         claims = jwt.decode(token, jwt_manager._get_secret_key(), algorithms=["HS256"])
         assert claims["pr_number"] == "PR-123"
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('uuid.uuid4')
+    @pytest.mark.asyncio
     async def test_generate_jwt_no_pr_number(self, mock_uuid, jwt_manager, sample_user_data):
         """Test JWT generation without PR number."""
+        # Mock: Component isolation for controlled unit testing
         mock_uuid.return_value = Mock(return_value="mock_jti")
+        # Mock: Component isolation for controlled unit testing
         mock_uuid.return_value.__str__ = Mock(return_value="mock_jti")
         
         token = await jwt_manager.generate_jwt(sample_user_data, "production")
@@ -123,19 +137,23 @@ class TestJWTTokenGeneration:
         assert claims["pr_number"] is None
 
     # Test JWT validation
+    @pytest.mark.asyncio
     async def test_validate_jwt_success(self, jwt_manager, valid_jwt_token):
         """Test successful JWT token validation."""
         claims = await jwt_manager.validate_jwt(valid_jwt_token)
         assert_token_claims_match(claims, "user_123", "test@example.com")
 
+    @pytest.mark.asyncio
     async def test_validate_jwt_expired(self, jwt_manager):
         """Test validation fails for expired token."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('jose.jwt.decode') as mock_decode:
             mock_decode.side_effect = JWTError("Token has expired")
             
             with pytest.raises(AuthenticationError, match="Invalid JWT token"):
                 await jwt_manager.validate_jwt("expired_token")
 
+    @pytest.mark.asyncio
     async def test_validate_jwt_invalid_signature(self, jwt_manager, sample_token_claims):
         """Test validation fails for invalid signature."""
         invalid_token = jwt.encode(sample_token_claims, "wrong_secret", algorithm="HS256")
@@ -143,19 +161,23 @@ class TestJWTTokenGeneration:
         with pytest.raises(AuthenticationError, match="Invalid JWT token"):
             await jwt_manager.validate_jwt(invalid_token)
 
+    @pytest.mark.asyncio
     async def test_validate_jwt_revoked_token(self, jwt_manager, valid_jwt_token):
         """Test validation fails for revoked token."""
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         jwt_manager.redis_manager.get = AsyncMock(return_value="revoked")
         
         with pytest.raises(AuthenticationError, match="Token has been revoked"):
             await jwt_manager.validate_jwt(valid_jwt_token)
 
     # Test JWT claims extraction
+    @pytest.mark.asyncio
     async def test_get_jwt_claims_success(self, jwt_manager, valid_jwt_token):
         """Test successful JWT claims extraction."""
         claims = await jwt_manager.get_jwt_claims(valid_jwt_token)
         assert_token_claims_match(claims, "user_123", "test@example.com")
 
+    @pytest.mark.asyncio
     async def test_get_jwt_claims_malformed(self, jwt_manager):
         """Test claims extraction fails for malformed token."""
         malformed_token = create_malformed_token()
@@ -164,9 +186,11 @@ class TestJWTTokenGeneration:
             await jwt_manager.get_jwt_claims(malformed_token)
 
     # Test token expiry time
+    @pytest.mark.asyncio
     async def test_token_expiry_time(self, jwt_manager, sample_user_data):
         """Test token contains correct expiry time."""
         from datetime import timezone
+        # Mock: Component isolation for controlled unit testing
         with patch('uuid.uuid4', return_value=Mock(__str__=Mock(return_value="test_jti"))):
             now = datetime.now(timezone.utc)
             token = await jwt_manager.generate_jwt(sample_user_data, "test")
@@ -176,6 +200,7 @@ class TestJWTTokenGeneration:
             assert abs(claims.exp - expected_exp) <= 5  # 5 second tolerance
 
     # Test token claims structure
+    @pytest.mark.asyncio
     async def test_token_claims_structure(self, jwt_manager, valid_jwt_token):
         """Test token claims have all required fields."""
         claims = await jwt_manager.get_jwt_claims(valid_jwt_token)
@@ -185,16 +210,19 @@ class TestJWTTokenGeneration:
             assert getattr(claims, field) is not None
 
     # Additional security tests
+    @pytest.mark.asyncio
     async def test_validate_jwt_empty_token(self, jwt_manager):
         """Test validation fails for empty token."""
         with pytest.raises(AuthenticationError, match="Invalid JWT token"):
             await jwt_manager.validate_jwt("")
 
+    @pytest.mark.asyncio
     async def test_validate_jwt_none_token(self, jwt_manager):
         """Test validation fails for None token."""
         with pytest.raises(Exception):
             await jwt_manager.validate_jwt(None)
 
+    @pytest.mark.asyncio
     async def test_token_signature_verification(self, jwt_manager, sample_token_claims):
         """Test that tokens with wrong signature are rejected."""
         # Create token with wrong secret

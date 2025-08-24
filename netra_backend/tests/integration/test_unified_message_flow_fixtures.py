@@ -12,7 +12,7 @@ import tracemalloc
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -35,22 +35,31 @@ def mock_websocket():
 
 def mock_db_session():
     """Create mock database session."""
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.execute = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.commit = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.rollback = AsyncMock()
     return mock_session
 
 def mock_security_service():
     """Create mock security service."""
+    # Mock: Generic component isolation for controlled unit testing
     service = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     service.decode_access_token = AsyncMock(return_value={"user_id": "test_user_123"})
+    # Mock: Async component isolation for testing without real async operations
     service.get_user_by_id = AsyncMock(return_value=Mock(id="test_user_123", is_active=True))
     return service
 
 def mock_agent_service():
     """Create mock agent service."""
+    # Mock: Generic component isolation for controlled unit testing
     service = AsyncMock() 
+    # Mock: Generic component isolation for controlled unit testing
     service.handle_websocket_message = AsyncMock()
     return service
 # )  # Orphaned closing parenthesis

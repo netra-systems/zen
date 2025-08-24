@@ -84,6 +84,7 @@ class BackpressureTestHarness:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_comprehensive_rate_limiting_integration():
     """CRITICAL: Comprehensive rate limiting protecting $75K infrastructure."""
     # Validate token bucket core functionality
@@ -97,6 +98,7 @@ async def test_comprehensive_rate_limiting_integration():
 
 @pytest.mark.asyncio
 @pytest.mark.integration 
+@pytest.mark.asyncio
 async def test_rate_limiting_fairness_validation():
     """Test fairness algorithms ensuring equitable resource allocation."""
     total_requests = 30
@@ -110,6 +112,7 @@ async def test_rate_limiting_fairness_validation():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_rate_limiting_metrics_collection():
     """Test metrics collection for business monitoring."""
     metrics = RateLimitMetrics()
@@ -139,9 +142,11 @@ def test_token_bucket_refill_mechanics():
     """Test token bucket refill over time."""
     bucket = TokenBucket(capacity=10.0, tokens=0.0, refill_rate=2.0)
     initial_time = time.time()
+    # Mock: Component isolation for testing without external dependencies
     with patch('time.time', return_value=initial_time + 1.0):
         bucket._refill()
         assert bucket.get_available_tokens() == 2.0
+    # Mock: Component isolation for testing without external dependencies
     with patch('time.time', return_value=initial_time + 10.0):
         bucket._refill()
         assert bucket.get_available_tokens() == 10.0
@@ -165,8 +170,9 @@ def test_token_bucket_reset():
 @pytest.mark.asyncio
 async def test_rate_limiter_basic_throttling():
     """Test basic rate limiting throttling functionality."""
-    from netra_backend.app.websocket_core import ConnectionInfo
+    from netra_backend.app.websocket_core.types import ConnectionInfo
     rate_limiter = RateLimiter(max_requests=5, window_seconds=60)
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket = MagicMock()
     conn_info = ConnectionInfo(websocket=mock_websocket, user_id="test_user", connection_id="test_conn_001")
     for i in range(5):
@@ -228,8 +234,9 @@ async def test_sliding_window_counter():
 @pytest.mark.asyncio
 async def test_adaptive_rate_limiter_behavior():
     """Test adaptive rate limiter with dynamic adjustment."""
-    from netra_backend.app.websocket_core import ConnectionInfo
+    from netra_backend.app.websocket_core.types import ConnectionInfo
     adaptive_limiter = AdaptiveRateLimiter(base_max_requests=10, window_seconds=60)
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket = MagicMock()
     conn_info = ConnectionInfo(websocket=mock_websocket, user_id="adaptive_user", connection_id="adaptive_test_conn")
     for i in range(10):

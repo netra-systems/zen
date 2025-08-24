@@ -64,6 +64,7 @@ class TestServiceDiscoveryHealthChecksL3:
         container.remove()
     
     @pytest.fixture(scope="class")
+    @pytest.mark.asyncio
     async def test_services(self, docker_client):
         """Start test service containers."""
         services = {}

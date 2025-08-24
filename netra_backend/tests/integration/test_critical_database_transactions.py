@@ -10,7 +10,7 @@ from pathlib import Path
 
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -23,6 +23,7 @@ from netra_backend.tests.integration.test_fixtures_common import (
 class TestDatabaseTransactionIntegration:
     """Database transaction and state management integration tests"""
 
+    @pytest.mark.asyncio
     async def test_database_transaction_rollback_coordination(self, test_database, mock_infrastructure):
         """Multi-database transaction coordination (Postgres + ClickHouse)"""
         postgres_session = test_database["session"]
@@ -31,6 +32,7 @@ class TestDatabaseTransactionIntegration:
         await self._execute_distributed_transaction(postgres_session, clickhouse_mock, transaction_scenario)
         await self._simulate_partial_failure_and_rollback(postgres_session, clickhouse_mock)
 
+    @pytest.mark.asyncio
     async def test_state_migration_and_recovery(self, test_database, mock_infrastructure):
         """System state preservation across restarts"""
         state_manager = await self._setup_state_migration_infrastructure(test_database)
@@ -39,6 +41,7 @@ class TestDatabaseTransactionIntegration:
         recovered_state = await self._execute_state_recovery(state_manager)
         await self._verify_state_integrity(pre_shutdown_state, recovered_state)
 
+    @pytest.mark.asyncio
     async def test_cache_invalidation_propagation(self, test_database, mock_infrastructure):
         """Cross-service cache consistency during updates"""
         cache_topology = await self._setup_distributed_cache_topology()

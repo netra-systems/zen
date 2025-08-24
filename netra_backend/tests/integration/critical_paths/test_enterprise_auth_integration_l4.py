@@ -93,6 +93,7 @@ class EnterpriseAuthTester:
         if self.session:
             await self.session.close()
             
+    @pytest.mark.asyncio
     async def test_saml_sso(self) -> bool:
         """Test SAML 2.0 SSO integration."""
         print("\n[SAML] Testing SAML 2.0 SSO...")
@@ -160,6 +161,7 @@ class EnterpriseAuthTester:
         }
         return base64.b64encode(json.dumps(saml_response).encode()).decode()
         
+    @pytest.mark.asyncio
     async def test_oauth_flow(self) -> bool:
         """Test OAuth 2.0 / OpenID Connect flow."""
         print("\n[OAUTH] Testing OAuth 2.0 flow...")
@@ -221,6 +223,7 @@ class EnterpriseAuthTester:
             
         return False
         
+    @pytest.mark.asyncio
     async def test_ldap_integration(self) -> bool:
         """Test Active Directory / LDAP integration."""
         print("\n[LDAP] Testing LDAP integration...")
@@ -272,6 +275,7 @@ class EnterpriseAuthTester:
             
         return False
         
+    @pytest.mark.asyncio
     async def test_mfa(self) -> bool:
         """Test multi-factor authentication."""
         print("\n[MFA] Testing multi-factor authentication...")
@@ -340,6 +344,7 @@ class EnterpriseAuthTester:
         # In real implementation, use pyotp or similar
         return "123456"
         
+    @pytest.mark.asyncio
     async def test_rbac(self) -> bool:
         """Test role-based access control."""
         print("\n[RBAC] Testing role-based access control...")
@@ -413,6 +418,7 @@ class EnterpriseAuthTester:
             
         return False
         
+    @pytest.mark.asyncio
     async def test_api_key_management(self) -> bool:
         """Test API key management."""
         print("\n[API_KEYS] Testing API key management...")
@@ -472,6 +478,7 @@ class EnterpriseAuthTester:
             
         return False
         
+    @pytest.mark.asyncio
     async def test_session_management(self) -> bool:
         """Test session management across services."""
         print("\n[SESSION] Testing session management...")
@@ -529,6 +536,7 @@ class EnterpriseAuthTester:
             
         return False
         
+    @pytest.mark.asyncio
     async def test_token_refresh(self) -> bool:
         """Test token refresh and revocation."""
         print("\n[TOKEN] Testing token refresh...")
@@ -598,6 +606,7 @@ class EnterpriseAuthTester:
             
         return False
         
+    @pytest.mark.asyncio
     async def test_audit_logging(self) -> bool:
         """Test authentication audit logging."""
         print("\n[AUDIT] Testing audit logging...")
@@ -662,6 +671,7 @@ class EnterpriseAuthTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_enterprise_auth_integration():
     """Test complete enterprise authentication integration."""
     async with EnterpriseAuthTester() as tester:

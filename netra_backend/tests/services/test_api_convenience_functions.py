@@ -3,9 +3,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -16,8 +14,10 @@ from netra_backend.app.services.external_api_client import (
 
 class TestConvenienceFunctions:
     """Test convenience functions for common APIs."""
+    @pytest.mark.asyncio
     async def test_call_google_api_get(self):
         """Test calling Google API with GET method."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.get_http_client') as mock_context:
             mock_client = self._setup_mock_client_get()
             mock_context.return_value.__aenter__.return_value = mock_client
@@ -27,6 +27,7 @@ class TestConvenienceFunctions:
     
     def _setup_mock_client_get(self):
         """Setup mock client for GET request."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         mock_client.get.return_value = {"success": True}
         return mock_client
@@ -37,8 +38,10 @@ class TestConvenienceFunctions:
         mock_client.get.assert_called_once_with(
             "/test", "google_api", headers={"Auth": "token"}, params={"q": "test"}
         )
+    @pytest.mark.asyncio
     async def test_call_google_api_post(self):
         """Test calling Google API with POST method."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.get_http_client') as mock_context:
             mock_client = self._setup_mock_client_post()
             mock_context.return_value.__aenter__.return_value = mock_client
@@ -48,6 +51,7 @@ class TestConvenienceFunctions:
     
     def _setup_mock_client_post(self):
         """Setup mock client for POST request."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         mock_client.post.return_value = {"success": True}
         return mock_client
@@ -58,8 +62,10 @@ class TestConvenienceFunctions:
         mock_client.post.assert_called_once_with(
             "/test", "google_api", headers={"Auth": "token"}, json_data={"data": "value"}
         )
+    @pytest.mark.asyncio
     async def test_call_google_api_other_method(self):
         """Test calling Google API with other HTTP method."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.get_http_client') as mock_context:
             mock_client = self._setup_mock_client_request()
             mock_context.return_value.__aenter__.return_value = mock_client
@@ -69,6 +75,7 @@ class TestConvenienceFunctions:
     
     def _setup_mock_client_request(self):
         """Setup mock client for _request method."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         mock_client._request.return_value = {"success": True}
         return mock_client
@@ -79,8 +86,10 @@ class TestConvenienceFunctions:
         mock_client._request.assert_called_once_with(
             "PUT", "/test", "google_api", headers={"Auth": "token"}, data={"data": "value"}
         )
+    @pytest.mark.asyncio
     async def test_call_openai_api_post(self):
         """Test calling OpenAI API with POST method."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.get_http_client') as mock_context:
             mock_client = self._setup_mock_client_post()
             mock_context.return_value.__aenter__.return_value = mock_client
@@ -94,8 +103,10 @@ class TestConvenienceFunctions:
         mock_client.post.assert_called_once_with(
             "/test", "openai_api", headers={"Auth": "Bearer token"}, json_data={"prompt": "test"}
         )
+    @pytest.mark.asyncio
     async def test_call_openai_api_get(self):
         """Test calling OpenAI API with GET method."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.get_http_client') as mock_context:
             mock_client = self._setup_mock_client_get()
             mock_context.return_value.__aenter__.return_value = mock_client
@@ -109,8 +120,10 @@ class TestConvenienceFunctions:
         mock_client.get.assert_called_once_with(
             "/models", "openai_api", headers={"Auth": "Bearer token"}
         )
+    @pytest.mark.asyncio
     async def test_call_openai_api_other_method(self):
         """Test calling OpenAI API with other HTTP method."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.get_http_client') as mock_context:
             mock_client = self._setup_mock_client_request()
             mock_context.return_value.__aenter__.return_value = mock_client

@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -19,22 +19,34 @@ class TestFallbackCoordinatorExecution:
     @pytest.fixture
     def coordinator(self):
         """Create a fresh FallbackCoordinator instance for testing."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
              patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
             # Create mock instances
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance = Mock()
+            # Mock: Async component isolation for testing without real async operations
             mock_health_instance.is_emergency_mode_active = AsyncMock(return_value=False)
+            # Mock: Async component isolation for testing without real async operations
             mock_health_instance.should_prevent_cascade = AsyncMock(return_value=False)
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.record_success = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.record_failure = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.update_circuit_breaker_status = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.update_system_health = AsyncMock()
+            # Mock: Component isolation for controlled unit testing
             mock_health_instance.get_system_status = Mock(return_value={"status": "healthy"})
             mock_health_instance.system_health_history = []
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_emergency_instance = Mock()
+            # Mock: Async component isolation for testing without real async operations
             mock_emergency_instance.execute_emergency_fallback = AsyncMock(return_value={"emergency": True})
+            # Mock: Async component isolation for testing without real async operations
             mock_emergency_instance.execute_limited_fallback = AsyncMock(return_value={"limited": True})
             
             mock_health_monitor.return_value = mock_health_instance
@@ -46,6 +58,7 @@ class TestFallbackCoordinatorExecution:
             
             return coordinator
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_success(self, coordinator):
         """Test successful operation execution with coordination."""
         # Setup
@@ -56,6 +69,7 @@ class TestFallbackCoordinatorExecution:
             return {"success": True}
         
         # Setup agent handler
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         mock_handler.execute_with_fallback.return_value = {"success": True}
         coordinator.agent_handlers[agent_name] = mock_handler
@@ -76,6 +90,7 @@ class TestFallbackCoordinatorExecution:
         # Verify success was recorded
         coordinator.health_monitor.record_success.assert_called_once_with(agent_name)
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_emergency_mode(self, coordinator):
         """Test execution during emergency mode."""
         # Setup emergency mode
@@ -98,6 +113,7 @@ class TestFallbackCoordinatorExecution:
             agent_name, operation_name, "critical"
         )
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_cascade_prevention(self, coordinator):
         """Test execution with cascade prevention active."""
         # Setup cascade prevention
@@ -120,6 +136,7 @@ class TestFallbackCoordinatorExecution:
             agent_name, operation_name
         )
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_unregistered_agent(self, coordinator):
         """Test execution with unregistered agent."""
         agent_name = "UnregisteredAgent"
@@ -134,6 +151,7 @@ class TestFallbackCoordinatorExecution:
                 agent_name, mock_operation, operation_name
             )
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_failure(self, coordinator):
         """Test execution with operation failure."""
         # Setup
@@ -145,6 +163,7 @@ class TestFallbackCoordinatorExecution:
             raise test_error
         
         # Setup agent handler to raise error
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         mock_handler.execute_with_fallback.side_effect = test_error
         coordinator.agent_handlers[agent_name] = mock_handler
@@ -160,6 +179,7 @@ class TestFallbackCoordinatorExecution:
         coordinator.health_monitor.update_circuit_breaker_status.assert_called_once_with(agent_name)
         coordinator.health_monitor.update_system_health.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_custom_fallback_type(self, coordinator):
         """Test execution with custom fallback type."""
         agent_name = "TestAgent"
@@ -170,6 +190,7 @@ class TestFallbackCoordinatorExecution:
             return {"success": True}
         
         # Setup agent handler
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         mock_handler.execute_with_fallback.return_value = {"success": True}
         coordinator.agent_handlers[agent_name] = mock_handler
@@ -184,6 +205,7 @@ class TestFallbackCoordinatorExecution:
             mock_operation, operation_name, agent_name, fallback_type
         )
     
+    @pytest.mark.asyncio
     async def test_concurrent_operations(self, coordinator):
         """Test concurrent operations on different agents."""
         # Setup multiple agents
@@ -191,6 +213,7 @@ class TestFallbackCoordinatorExecution:
         handlers = {}
         
         for agent in agents:
+            # Mock: Generic component isolation for controlled unit testing
             mock_handler = AsyncMock()
             mock_handler.execute_with_fallback.return_value = f"result_{agent}"
             coordinator.agent_handlers[agent] = mock_handler
@@ -215,12 +238,14 @@ class TestFallbackCoordinatorExecution:
             assert results[i] == f"result_{agent}"
             handlers[agent].execute_with_fallback.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_error_handling_in_health_monitoring(self, coordinator):
         """Test error handling when health monitoring fails."""
         agent_name = "TestAgent"
         test_error = ValueError("Test error")
         
         # Setup handler to succeed but health monitoring to fail
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         mock_handler.execute_with_fallback.return_value = {"success": True}
         coordinator.agent_handlers[agent_name] = mock_handler
@@ -246,6 +271,7 @@ class TestFallbackCoordinatorIntegration:
     @pytest.fixture
     def full_coordinator(self):
         """Create coordinator with full mock setup."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
              patch('app.core.fallback_coordinator.CircuitBreaker') as mock_cb_class, \
              patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_class, \
@@ -254,11 +280,13 @@ class TestFallbackCoordinatorIntegration:
             coordinator = FallbackCoordinator()
             return coordinator, mock_handler_class, mock_cb_class, mock_health_class, mock_emergency_class
     
+    @pytest.mark.asyncio
     async def test_full_workflow_success(self, full_coordinator):
         """Test complete workflow from registration to execution."""
         coordinator, mock_handler_class, mock_cb_class, mock_health_class, mock_emergency_class = full_coordinator
         
         # Setup mocks
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         mock_handler.execute_with_fallback.return_value = {"success": True, "data": "test_result"}
         mock_handler_class.return_value = mock_handler
@@ -273,6 +301,7 @@ class TestFallbackCoordinatorIntegration:
         assert agent_name in coordinator.get_registered_agents()
         
         # Execute operation
+        @pytest.mark.asyncio
         async def test_operation():
             return {"raw": "data"}
         
@@ -289,16 +318,19 @@ class TestFallbackCoordinatorIntegration:
         # Verify health monitoring
         coordinator.health_monitor.record_success.assert_called_once_with(agent_name)
     
+    @pytest.mark.asyncio
     async def test_full_workflow_with_failure_and_reset(self, full_coordinator):
         """Test workflow including failure handling and reset."""
         coordinator, mock_handler_class, mock_cb_class, mock_health_class, mock_emergency_class = full_coordinator
         
         # Setup mocks
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         test_error = RuntimeError("Execution failed")
         mock_handler.execute_with_fallback.side_effect = test_error
         mock_handler_class.return_value = mock_handler
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_cb = Mock()
         mock_cb_class.return_value = mock_cb
         

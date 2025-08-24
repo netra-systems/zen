@@ -13,14 +13,12 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import json
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -30,7 +28,7 @@ from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.services.agent_service_core import AgentService
-from netra_backend.app.websocket_core import get_unified_manager
+from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
 manager = get_unified_manager()
 
 logger = central_logger.get_logger(__name__)
@@ -88,19 +86,27 @@ async def agent_service_with_mocks():
     config = AppConfig()
     
     # Create LLM manager mock
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager = Mock()
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.ask_llm = AsyncMock(return_value="Mock agent response for optimization request")
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.generate_streaming_response = AsyncMock()
     
     # Create tool dispatcher mock
+    # Mock: Tool execution isolation for predictable agent testing
     tool_dispatcher = Mock()
+    # Mock: Tool execution isolation for predictable agent testing
     tool_dispatcher.get_available_tools = Mock(return_value=["analysis", "optimization"])
     
     # Create WebSocket manager mock
+    # Mock: WebSocket connection isolation for testing without network overhead
     websocket_manager = Mock()
+    # Mock: WebSocket connection isolation for testing without network overhead
     websocket_manager.send_message = AsyncMock()
     
     # Create database session mock
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_db_session = AsyncMock()
     
     # Create supervisor with mocked components
@@ -113,12 +119,13 @@ async def agent_service_with_mocks():
     
     # Create and return agent service
     agent_service = AgentService(supervisor)
-    return agent_service, supervisor, llm_manager
+    yield agent_service, supervisor, llm_manager
 
 @pytest.mark.asyncio
 class TestMessagePipeline:
     """Test complete message processing pipeline."""
     
+    @pytest.mark.asyncio
     async def test_first_message_agent_activation(self, agent_service_with_mocks, message_helper):
         """Test first user message triggers agent pipeline.
         
@@ -148,12 +155,18 @@ class TestMessagePipeline:
         }
         
         # Mock WebSocket messaging
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.ws_manager.manager.send_message', new=message_helper.mock_send_message):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.ws_manager.manager.send_error', new=message_helper.mock_send_error):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.db.postgres.get_async_db') as mock_db:
                     # Mock database session
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_session = AsyncMock()
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+                    # Mock: Async component isolation for testing without real async operations
                     mock_db.return_value.__aexit__ = AsyncMock(return_value=None)
                     
                     # Execute the message pipeline
@@ -185,6 +198,7 @@ class TestMessagePipeline:
         
         logger.info(f"✅ First message pipeline completed in {response_time:.2f}s")
     
+    @pytest.mark.asyncio
     async def test_message_routing_to_supervisor(self, agent_service_with_mocks, message_helper):
         """Test message routing logic.
         
@@ -224,11 +238,17 @@ class TestMessagePipeline:
             }
         ]
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.ws_manager.manager.send_message', new=message_helper.mock_send_message):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.ws_manager.manager.send_error', new=message_helper.mock_send_error):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.db.postgres.get_async_db') as mock_db:
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_session = AsyncMock()
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+                    # Mock: Async component isolation for testing without real async operations
                     mock_db.return_value.__aexit__ = AsyncMock(return_value=None)
                     
                     # Send all messages
@@ -255,6 +275,7 @@ class TestMessagePipeline:
         
         logger.info(f"✅ Message routing test completed - {len(test_messages)} messages routed successfully")
     
+    @pytest.mark.asyncio
     async def test_streaming_response_flow(self, agent_service_with_mocks, message_helper):
         """Test streaming responses.
         
@@ -280,6 +301,7 @@ class TestMessagePipeline:
                 yield chunk
                 await asyncio.sleep(0.1)  # Simulate streaming delay
         
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.generate_streaming_response = AsyncMock(return_value=mock_streaming_response())
         
         # Test message requesting streaming response
@@ -301,11 +323,17 @@ class TestMessagePipeline:
                 streaming_chunks.append(message.get("content", ""))
             await message_helper.mock_send_message(user_id, message)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.ws_manager.manager.send_message', new=track_streaming_message):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.ws_manager.manager.send_error', new=message_helper.mock_send_error):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.db.postgres.get_async_db') as mock_db:
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_session = AsyncMock()
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+                    # Mock: Async component isolation for testing without real async operations
                     mock_db.return_value.__aexit__ = AsyncMock(return_value=None)
                     
                     start_time = time.time()
@@ -330,6 +358,7 @@ class TestMessagePipeline:
         
         logger.info(f"✅ Streaming response test completed in {response_time:.2f}s")
     
+    @pytest.mark.asyncio
     async def test_concurrent_message_processing(self, agent_service_with_mocks, message_helper):
         """Test concurrent message processing from multiple users.
         
@@ -355,9 +384,13 @@ class TestMessagePipeline:
                     }
                 }
                 
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.db.postgres.get_async_db') as mock_db:
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_session = AsyncMock()
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+                    # Mock: Async component isolation for testing without real async operations
                     mock_db.return_value.__aexit__ = AsyncMock(return_value=None)
                     
                     await agent_service.handle_websocket_message(
@@ -366,7 +399,9 @@ class TestMessagePipeline:
                         db_session=mock_session
                     )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.ws_manager.manager.send_message', new=message_helper.mock_send_message):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.ws_manager.manager.send_error', new=message_helper.mock_send_error):
                 
                 start_time = time.time()
@@ -388,6 +423,7 @@ class TestMessagePipeline:
         
         logger.info(f"✅ Concurrent processing test: {concurrent_users} users, {messages_per_user} msgs/user in {total_time:.2f}s")
     
+    @pytest.mark.asyncio
     async def test_error_handling_and_recovery(self, agent_service_with_mocks, message_helper):
         """Test error handling in message pipeline.
         
@@ -404,6 +440,7 @@ class TestMessagePipeline:
                 raise Exception("Simulated LLM failure")
             return "Recovery successful - cost optimization analysis complete"
         
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager.ask_llm = AsyncMock(side_effect=mock_llm_with_retry)
         
         # Test message that should trigger error then recovery
@@ -416,11 +453,17 @@ class TestMessagePipeline:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.ws_manager.manager.send_message', new=message_helper.mock_send_message):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.ws_manager.manager.send_error', new=message_helper.mock_send_error):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.db.postgres.get_async_db') as mock_db:
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_session = AsyncMock()
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+                    # Mock: Async component isolation for testing without real async operations
                     mock_db.return_value.__aexit__ = AsyncMock(return_value=None)
                     
                     # This should handle the error gracefully
@@ -443,6 +486,7 @@ class TestMessagePipeline:
         
         logger.info(f"✅ Error handling test completed - {len(message_helper.sent_messages)} messages handled")
     
+    @pytest.mark.asyncio
     async def test_message_validation_and_rejection(self, agent_service_with_mocks, message_helper):
         """Test message validation and rejection of invalid messages."""
         agent_service, supervisor, llm_manager = agent_service_with_mocks
@@ -461,11 +505,17 @@ class TestMessagePipeline:
             {"type": "user_message", "payload": {"content": ""}},
         ]
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.ws_manager.manager.send_message', new=message_helper.mock_send_message):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.ws_manager.manager.send_error', new=message_helper.mock_send_error):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.db.postgres.get_async_db') as mock_db:
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_session = AsyncMock()
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+                    # Mock: Async component isolation for testing without real async operations
                     mock_db.return_value.__aexit__ = AsyncMock(return_value=None)
                     
                     # Send each invalid message

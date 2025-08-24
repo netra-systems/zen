@@ -80,7 +80,7 @@ def _get_alembic_ini_path() -> str:
         </startup-integration>
         
         <docker-integration>
-            <dockerfile>Dockerfile.backend</dockerfile>
+            <dockerfile>deployment/docker/Dockerfile.backend</dockerfile>
             <copy-command>COPY config/alembic.ini ./config/alembic.ini</copy-command>
             <note>Ensure Docker maintains the same directory structure</note>
         </docker-integration>

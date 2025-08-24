@@ -4,9 +4,10 @@ Extracted from test_first_time_user_flows_comprehensive.py to comply with size l
 """
 
 # Test data generation
+from collections import defaultdict
 from datetime import datetime, timedelta
 from fastapi import status
-from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, List, Optional

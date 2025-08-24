@@ -7,8 +7,7 @@ concurrent operations, search, permissions, and access control.
 Business Value: Data integrity and proper thread state management
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from pathlib import Path
 import sys
 
@@ -16,7 +15,7 @@ import asyncio
 import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import sqlalchemy
@@ -25,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.fixtures import (
 
     clean_database_state,
@@ -40,6 +39,7 @@ class TestThreadLifecycle:
 
     """Test complete thread lifecycle operations"""
 
+    @pytest.mark.asyncio
     async def test_thread_lifecycle(self, clean_database_state):
 
         """Test complete thread lifecycle from creation to deletion"""
@@ -231,6 +231,7 @@ class TestThreadLifecycle:
 
         assert len(remaining_messages) == 0
 
+    @pytest.mark.asyncio
     async def test_concurrent_thread_updates(self, clean_database_state):
 
         """Test concurrent modifications with optimistic locking"""
@@ -273,8 +274,10 @@ class TestThreadLifecycle:
 
         for i in range(3):
 
+            # Mock: Generic component isolation for controlled unit testing
             conn = AsyncMock()
 
+            # Mock: Generic component isolation for controlled unit testing
             conn.state = MagicMock()
 
             conn.state.value = 1
@@ -397,6 +400,7 @@ class TestThreadLifecycle:
 
             assert connection.send_text.call_count == len(saved_messages)
 
+    @pytest.mark.asyncio
     async def test_thread_search_and_filtering(self, clean_database_state):
 
         """Test thread search capabilities"""
@@ -613,6 +617,7 @@ class TestThreadLifecycle:
 
         assert page_1_ids.isdisjoint(page_2_ids)
 
+    @pytest.mark.asyncio
     async def test_thread_permissions(self, clean_database_state):
 
         """Test thread access control and permissions"""
@@ -855,6 +860,7 @@ class TestThreadLifecycle:
 
         assert audit_messages[0].content[0]["audit"]["action"] == "permission_granted"
 
+    @pytest.mark.asyncio
     async def test_thread_metadata_updates(self, clean_database_state):
 
         """Test thread metadata updates and versioning"""
@@ -954,6 +960,7 @@ class TestThreadLifecycle:
 
         assert final_thread.metadata_["version"] == 5  # Started at 1, 4 updates
 
+    @pytest.mark.asyncio
     async def test_thread_recovery_and_restoration(self, clean_database_state):
 
         """Test thread recovery and soft delete restoration"""

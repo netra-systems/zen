@@ -13,7 +13,7 @@ import asyncio
 import json
 import time
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from netra_backend.app.schemas import (
@@ -107,6 +107,7 @@ class TestQualitySupervisorValidation:
         """Test quality improvement through retry"""
         mocks = create_quality_supervisor_mocks()
         quality_supervisor = QualitySupervisor(mocks['llm_manager'], mocks['websocket_manager'])
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mocks['llm_manager'].ask_llm = AsyncMock()
         mocks['llm_manager'].ask_llm.side_effect = [
             json.dumps({"quality_score": 0.5, "approved": False, "issues": ["Too brief"]}),
@@ -155,6 +156,7 @@ class TestAdminToolDispatcherRouting:
         """Test audit logging for admin operations"""
         mocks = create_admin_dispatcher_mocks()
         admin_dispatcher = MockAdminToolDispatcher(mocks['llm_manager'], mocks['tool_dispatcher'])
+        # Mock: Generic component isolation for controlled unit testing
         admin_dispatcher.audit_logger = AsyncMock()
         setup_tool_dispatcher_mock(mocks['tool_dispatcher'], {"success": True, "result": "Config updated"})
         operation = create_admin_operation("system_config", {"setting": "debug_mode", "value": True}, user_id="admin-123")

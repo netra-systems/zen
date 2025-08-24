@@ -353,12 +353,16 @@ class ServiceAvailabilityChecker:
         
         for base_path in base_paths:
             if base_path.exists():
-                # Look for version directories (e.g., 12, 13, 14, 15, 16, 17)
-                for version_dir in base_path.iterdir():
-                    if version_dir.is_dir():
-                        bin_path = version_dir / 'bin'
-                        if bin_path.exists():
-                            paths.append(bin_path)
+                try:
+                    # Look for version directories (e.g., 12, 13, 14, 15, 16, 17)
+                    for version_dir in base_path.iterdir():
+                        if version_dir.is_dir():
+                            bin_path = version_dir / 'bin'
+                            if bin_path.exists():
+                                paths.append(bin_path)
+                except (PermissionError, FileNotFoundError, OSError):
+                    # Skip paths we can't access
+                    continue
         
         return paths
     

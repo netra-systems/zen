@@ -14,6 +14,7 @@ from cryptography.fernet import Fernet
 
 def create_mock_config():
     """Create a mock configuration object with all required fields."""
+    # Mock: Generic component isolation for controlled unit testing
     config = Mock()
     _set_basic_config_fields(config)
     _set_service_configs(config)
@@ -30,17 +31,24 @@ def _set_basic_config_fields(config):
 
 def _set_service_configs(config):
     """Set service configuration fields."""
+    # Mock: ClickHouse external database isolation for unit testing performance
     config.clickhouse_logging = Mock(enabled=True)
+    # Mock: ClickHouse external database isolation for unit testing performance
     config.clickhouse_native = Mock(host="localhost", password="pass")
+    # Mock: ClickHouse external database isolation for unit testing performance
     config.clickhouse_https = Mock(host="localhost", password="pass")
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     config.redis = Mock(host="localhost", password="pass")
 
 def _set_auth_configs(config):
     """Set authentication configuration fields."""
+    # Mock: Component isolation for controlled unit testing
     config.oauth_config = Mock(client_id="id", client_secret="secret")
     config.llm_configs = {
+        # Mock: OpenAI API isolation for testing without external service dependencies
         "default": Mock(api_key="key", model_name="model", provider="openai")
     }
+    # Mock: Component isolation for controlled unit testing
     config.langfuse = Mock(secret_key="key", public_key="pub")
 
 def create_failing_async_func(fail_count: int, success_result: str = "success"):
@@ -51,6 +59,7 @@ def create_failing_async_func(fail_count: int, success_result: str = "success"):
 
 def create_mock_database():
     """Create a mock database with standard methods."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_db = AsyncMock()
     _setup_mock_database_results(mock_db)
     

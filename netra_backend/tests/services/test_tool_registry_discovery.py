@@ -6,10 +6,8 @@ Tests tool discovery and search functionality
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from langchain_core.tools import BaseTool
@@ -23,6 +21,7 @@ class TestToolRegistryDiscovery:
     @pytest.fixture
     def mock_db_session(self):
         """Mock database session"""
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     @pytest.fixture

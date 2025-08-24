@@ -37,6 +37,7 @@ class AccountDeletionE2ETester:
         
     async def _setup_auth_service_mock(self) -> None:
         """Setup auth service with real user deletion logic."""
+        # Mock: Auth service isolation for controlled GDPR deletion testing
         self.mock_services["auth"] = MagicMock()
         self.mock_services["auth"].delete_user = AsyncMock(return_value=True)
         self.mock_services["auth"].verify_user_deleted = AsyncMock(return_value=True)
@@ -47,6 +48,7 @@ class AccountDeletionE2ETester:
     
     async def _setup_backend_service_mock(self) -> None:
         """Setup backend service with profile deletion logic."""
+        # Mock: Backend service isolation for controlled profile deletion testing
         self.mock_services["backend"] = MagicMock()
         self.mock_services["backend"].delete_user_profile = AsyncMock(return_value=True)
         self.mock_services["backend"].delete_user_threads = AsyncMock(return_value=True)
@@ -58,6 +60,7 @@ class AccountDeletionE2ETester:
         
     async def _setup_clickhouse_mock(self) -> None:
         """Setup ClickHouse service with usage data deletion."""
+        # Mock: ClickHouse isolation for controlled usage data deletion testing
         self.mock_services["clickhouse"] = MagicMock()
         self.mock_services["clickhouse"].delete_user_usage = AsyncMock(return_value=True)
         self.mock_services["clickhouse"].delete_billing_data = AsyncMock(return_value=True)
@@ -68,6 +71,7 @@ class AccountDeletionE2ETester:
 
     async def _setup_websocket_manager_mock(self) -> None:
         """Setup WebSocket manager for deletion notifications."""
+        # Mock: WebSocket isolation for controlled connection management testing
         self.mock_services["websocket"] = MagicMock()
         self.mock_services["websocket"].close_user_connections = AsyncMock(return_value=True)
         self.mock_services["websocket"].notify_deletion = AsyncMock(return_value=True)

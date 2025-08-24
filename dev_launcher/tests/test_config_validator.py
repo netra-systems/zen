@@ -168,18 +168,24 @@ class TestValidateServiceConfig:
     """Test main validation function."""
     
     @pytest.mark.asyncio
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.config_validator.ServiceConfigValidator')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.config_validator.ConfigDecisionEngine')
     async def test_main_validation_flow(self, mock_engine_class, mock_validator_class):
         """Test main validation flow."""
         # Setup mocks
+        # Mock: Generic component isolation for controlled unit testing
         mock_validator = Mock()
         mock_validator_class.return_value = mock_validator
         
         mock_result = ConfigValidationResult(status=ConfigStatus.VALID)
+        # Mock: Async component isolation for testing without real async operations
         mock_validator.validate_config = AsyncMock(return_value=mock_result)
+        # Mock: Generic component isolation for controlled unit testing
         mock_validator._load_config.return_value = Mock()
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_engine = Mock()
         mock_engine_class.return_value = mock_engine
         mock_engine.should_use_existing_config.return_value = True

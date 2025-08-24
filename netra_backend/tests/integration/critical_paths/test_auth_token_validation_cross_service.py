@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical - security incidents destroy customer trust
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -21,7 +21,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -119,6 +119,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_valid_token_accepted_by_api_endpoint(self, async_client, valid_jwt_token):
 
         """Test 1: Valid token should be accepted by protected API endpoints."""
@@ -127,8 +128,10 @@ class TestAuthTokenValidationCrossService:
         
         # Mock user lookup
 
+        # Mock: Generic component isolation for controlled unit testing
         with patch('app.services.user_service.UserService.get_user', return_value=MagicMock()):
 
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.validate_token', return_value=True):
                 
                 response = await async_client.get("/api/user/profile", headers=headers)
@@ -141,6 +144,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_expired_token_rejected(self, async_client, expired_jwt_token):
 
         """Test 2: Expired tokens should be rejected."""
@@ -161,6 +165,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_malformed_token_rejected(self, async_client):
 
         """Test 3: Malformed tokens should be rejected."""
@@ -191,6 +196,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_token_with_invalid_signature_rejected(self, async_client):
 
         """Test 4: Tokens with invalid signatures should be rejected."""
@@ -230,6 +236,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_service_to_service_token_propagation(self):
 
         """Test 5: Tokens should propagate correctly in service-to-service calls."""
@@ -240,8 +247,10 @@ class TestAuthTokenValidationCrossService:
         
         # Mock service clients
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_service_a = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_service_b = AsyncMock()
         
         # Service A calls Service B with token
@@ -272,6 +281,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_websocket_token_validation(self, async_client, valid_jwt_token):
 
         """Test 6: WebSocket connections should validate tokens."""
@@ -279,6 +289,7 @@ class TestAuthTokenValidationCrossService:
 
         headers = {"Authorization": f"Bearer {valid_jwt_token}"}
         
+        # Mock: WebSocket connection isolation for testing without network overhead
         with patch('app.websocket.manager.WebSocketManager.validate_token', return_value=True) as mock_validate:
             # Mock WebSocket connection attempt
 
@@ -296,6 +307,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_token_permissions_enforcement(self, async_client):
 
         """Test 7: Token permissions should be enforced at endpoint level."""
@@ -326,6 +338,7 @@ class TestAuthTokenValidationCrossService:
         
         # Try to access write endpoint
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.middleware.auth_middleware.AuthMiddleware.check_permissions', return_value=False):
 
             response = await async_client.post("/api/data/create", headers=headers, json={})
@@ -338,6 +351,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_token_refresh_maintains_user_context(self, async_client):
 
         """Test 8: Token refresh should maintain user context and permissions."""
@@ -382,6 +396,7 @@ class TestAuthTokenValidationCrossService:
 
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.auth_service.AuthService.refresh_tokens', return_value=refreshed_payload):
             # Verify user context is maintained
 
@@ -395,6 +410,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_concurrent_token_validation_performance(self, async_client, valid_jwt_token):
 
         """Test 9: System should handle concurrent token validations efficiently."""
@@ -405,6 +421,7 @@ class TestAuthTokenValidationCrossService:
 
         async def make_request():
 
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.validate_token', return_value=True):
 
                 return await async_client.get("/api/health", headers=headers)
@@ -433,6 +450,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_token_blacklist_enforcement(self, async_client, valid_jwt_token):
 
         """Test 10: Blacklisted tokens should be rejected even if valid."""
@@ -440,6 +458,7 @@ class TestAuthTokenValidationCrossService:
 
         blacklisted_token = valid_jwt_token
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.auth_service.AuthService.is_token_blacklisted', return_value=True):
 
             headers = {"Authorization": f"Bearer {blacklisted_token}"}

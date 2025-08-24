@@ -24,7 +24,7 @@ import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import User
@@ -187,7 +187,7 @@ class TestAgentQualityGatePipelineL3:
     @pytest.fixture
     async def quality_test_manager(self):
         """Create quality gate test manager."""
-        return QualityGateTestManager()
+        yield QualityGateTestManager()
         
     @pytest.fixture
     def test_user(self):
@@ -206,6 +206,7 @@ class TestAgentQualityGatePipelineL3:
         agent = MockQualityAwareAgent("quality_agent_1", quality_gate_service)
         yield agent
         
+    @pytest.mark.asyncio
     async def test_quality_score_threshold_enforcement(self, quality_gate_service, quality_test_manager, quality_aware_agent):
         """Test quality score threshold enforcement (≥0.6)."""
         # Test requests with different quality expectations
@@ -246,6 +247,7 @@ class TestAgentQualityGatePipelineL3:
         avg_quality = quality_test_manager.get_average_quality_score()
         assert avg_quality >= 0.5  # Allow some low quality for testing
         
+    @pytest.mark.asyncio
     async def test_multi_dimensional_quality_validation(self, quality_gate_service, quality_test_manager):
         """Test multi-dimensional quality validation."""
         test_contents = [
@@ -290,6 +292,7 @@ class TestAgentQualityGatePipelineL3:
             assert hasattr(result, 'metrics')
             assert result.overall_score is not None
             
+    @pytest.mark.asyncio
     async def test_quality_improvement_loop(self, quality_aware_agent, quality_test_manager):
         """Test quality improvement loop for failed responses."""
         # Request that will initially fail quality gate
@@ -315,6 +318,7 @@ class TestAgentQualityGatePipelineL3:
         # Final result should either pass or show improvement attempt
         assert result["quality_score"] > 0.0
         
+    @pytest.mark.asyncio
     async def test_performance_quality_tradeoff(self, quality_gate_service, quality_test_manager):
         """Test performance vs quality trade-off monitoring."""
         start_time = time.time()
@@ -358,6 +362,7 @@ class TestAgentQualityGatePipelineL3:
         avg_quality = sum(quality_scores) / len(quality_scores)
         assert avg_quality > 0.4  # Maintain reasonable quality
         
+    @pytest.mark.asyncio
     async def test_real_time_quality_monitoring(self, quality_gate_service, quality_test_manager):
         """Test real-time quality monitoring and alerting."""
         # Simulate continuous quality monitoring
@@ -407,6 +412,7 @@ class TestAgentQualityGatePipelineL3:
         # Should maintain reasonable pass rate
         assert pass_rate >= 0.5  # At least 50% should pass
         
+    @pytest.mark.asyncio
     async def test_quality_gate_bypass_for_emergencies(self, quality_gate_service, quality_test_manager):
         """Test quality gate bypass mechanism for emergency situations."""
         emergency_content = "Emergency alert: System issue detected."
@@ -450,6 +456,7 @@ class TestAgentQualityGatePipelineL3:
         assert emergency_result.overall_score is not None
         
     @mock_justified("L3: Quality gate pipeline testing with real service components")
+    @pytest.mark.asyncio
     async def test_batch_quality_validation(self, quality_gate_service, quality_test_manager):
         """Test batch quality validation for high-throughput scenarios."""
         # Generate batch of content for validation

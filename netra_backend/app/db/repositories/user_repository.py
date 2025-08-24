@@ -19,52 +19,94 @@ logger = central_logger.get_logger(__name__)
 class UserRepository(BaseRepository[User]):
     """Repository for User entity operations."""
     
-    def __init__(self, session: AsyncSession):
-        super().__init__(User, session)
+    def __init__(self):
+        super().__init__(User)
     
-    async def get_by_email(self, email: str) -> Optional[User]:
+    async def get_by_email(self, db: AsyncSession, email: str) -> Optional[User]:
         """Get user by email address."""
-        return await self.get_by_field("email", email)
+        try:
+            result = await db.execute(
+                select(User).where(User.email == email)
+            )
+            return result.scalar_one_or_none()
+        except SQLAlchemyError as e:
+            logger.error(f"Error getting user by email: {e}")
+            return None
     
-    async def _execute_active_users_query(self, limit: int) -> List[User]:
+    async def _execute_active_users_query(self, db: AsyncSession, limit: int) -> List[User]:
         """Execute query for active users."""
-        result = await self.session.execute(
+        result = await db.execute(
             select(User).where(User.is_active == True).limit(limit)
         )
         return list(result.scalars().all())
     
-    async def get_active_users(self, limit: int = 100) -> List[User]:
+    async def get_active_users(self, db: AsyncSession, limit: int = 100) -> List[User]:
         """Get all active users."""
         try:
-            return await self._execute_active_users_query(limit)
+            return await self._execute_active_users_query(db, limit)
         except SQLAlchemyError as e:
             logger.error(f"Error getting active users: {e}")
             return []
     
-    async def _execute_plan_tier_query(self, plan_tier: str) -> List[User]:
+    async def _execute_plan_tier_query(self, db: AsyncSession, plan_tier: str) -> List[User]:
         """Execute query for users by plan tier."""
-        result = await self.session.execute(
+        result = await db.execute(
             select(User).where(User.plan_tier == plan_tier)
         )
         return list(result.scalars().all())
     
-    async def get_by_plan_tier(self, plan_tier: str) -> List[User]:
+    async def get_by_plan_tier(self, db: AsyncSession, plan_tier: str) -> List[User]:
         """Get users by plan tier."""
         try:
-            return await self._execute_plan_tier_query(plan_tier)
+            return await self._execute_plan_tier_query(db, plan_tier)
         except SQLAlchemyError as e:
             logger.error(f"Error getting users by plan tier: {e}")
             return []
     
-    async def update_plan(self, user_id: str, plan_tier: str, **kwargs) -> bool:
+    async def update_plan(self, db: AsyncSession, user_id: str, plan_tier: str, **kwargs) -> bool:
         """Update user plan tier and related fields."""
         update_data = {"plan_tier": plan_tier, **kwargs}
-        return await self.update_by_id(user_id, **update_data)
+        result = await self.update(db, user_id, **update_data)
+        return result is not None
     
     async def find_by_user(self, db: AsyncSession, user_id: str) -> List[User]:
         """Find users by user ID (returns list for consistency with base class)."""
-        user = await self.get_by_id(user_id)
+        user = await self.get_by_id(db, user_id)
         return [user] if user else []
+    
+    async def create_user(self, db: AsyncSession, user_data: dict) -> Optional[User]:
+        """Create a new user with hashed password."""
+        try:
+            # Hash password if provided
+            if 'password' in user_data:
+                from argon2 import PasswordHasher
+                ph = PasswordHasher()
+                password_hash = ph.hash(user_data.pop('password'))
+                user_data['password_hash'] = password_hash
+            
+            return await self.create(db=db, **user_data)
+        except Exception as e:
+            logger.error(f"Error creating user: {e}")
+            return None
+    
+    async def authenticate(self, db: AsyncSession, email: str, password: str) -> Optional[User]:
+        """Authenticate user with email and password."""
+        try:
+            user = await self.get_by_email(db, email)
+            if not user or not user.password_hash:
+                return None
+            
+            from argon2 import PasswordHasher, exceptions as argon2_exceptions
+            ph = PasswordHasher()
+            
+            try:
+                ph.verify(user.password_hash, password)
+                return user
+            except argon2_exceptions.VerifyMismatchError:
+                return None
+        except Exception as e:
+            logger.error(f"Error authenticating user: {e}")
+            return None
 
 
 class SecretRepository(BaseRepository[Secret]):

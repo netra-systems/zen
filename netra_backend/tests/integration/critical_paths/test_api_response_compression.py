@@ -422,6 +422,7 @@ class ApiCompressionManager:
                 "accept_encoding": accept_encoding
             }
     
+    @pytest.mark.asyncio
     async def test_compression_effectiveness(self, endpoints: List[str]) -> Dict[str, Any]:
         """Test compression effectiveness across endpoints."""
         results = []
@@ -568,6 +569,7 @@ async def compression_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_gzip_compression_enabled(compression_manager):
     """Test gzip compression for large responses."""
     result = await compression_manager.make_compressed_request(
@@ -587,6 +589,7 @@ async def test_gzip_compression_enabled(compression_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_compression_content_negotiation(compression_manager):
     """Test compression content negotiation."""
     # Test different Accept-Encoding headers
@@ -615,6 +618,7 @@ async def test_compression_content_negotiation(compression_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_compression_size_threshold(compression_manager):
     """Test compression size thresholds."""
     # Large data should be compressed
@@ -632,6 +636,7 @@ async def test_compression_size_threshold(compression_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_compression_disabled_for_images(compression_manager):
     """Test that compression is disabled for image content."""
     result = await compression_manager.make_compressed_request(
@@ -648,6 +653,7 @@ async def test_compression_disabled_for_images(compression_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_compression_effectiveness(compression_manager):
     """Test compression effectiveness across different endpoints."""
     test_endpoints = [
@@ -679,6 +685,7 @@ async def test_compression_effectiveness(compression_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_compression_performance_impact(compression_manager):
     """Test compression performance impact."""
     # Test response times with and without compression
@@ -717,6 +724,7 @@ async def test_compression_performance_impact(compression_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_concurrent_compression_requests(compression_manager):
     """Test concurrent compression handling."""
     # Make concurrent requests with compression
@@ -746,6 +754,7 @@ async def test_concurrent_compression_requests(compression_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_compression_headers_correctness(compression_manager):
     """Test correctness of compression-related headers."""
     result = await compression_manager.make_compressed_request(
@@ -776,6 +785,7 @@ async def test_compression_headers_correctness(compression_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_compression_metrics_accuracy(compression_manager):
     """Test accuracy of compression metrics collection."""
     # Generate test requests

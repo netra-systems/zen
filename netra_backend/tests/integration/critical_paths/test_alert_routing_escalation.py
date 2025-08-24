@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -254,6 +254,7 @@ class AlertRoutingValidator:
         
         return test_alerts
     
+    @pytest.mark.asyncio
     async def test_alert_routing_accuracy(self, test_alerts: List[SystemAlert]) -> Dict[str, Any]:
         """Test accuracy of alert routing based on configured rules."""
         routing_results = {
@@ -353,6 +354,7 @@ class AlertRoutingValidator:
         
         return validation
     
+    @pytest.mark.asyncio
     async def test_escalation_timing(self, critical_alerts: List[SystemAlert]) -> Dict[str, Any]:
         """Test escalation timing and workflow accuracy."""
         escalation_results = {
@@ -418,6 +420,7 @@ class AlertRoutingValidator:
         
         return escalation_results
     
+    @pytest.mark.asyncio
     async def test_notification_delivery_reliability(self, test_alerts: List[SystemAlert]) -> Dict[str, Any]:
         """Test reliability of notification delivery across channels."""
         delivery_results = {

@@ -78,6 +78,7 @@ class DatabaseMigrationTester:
             print(f"[ERROR] Database connection failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_current_schema_version(self) -> bool:
         """Check current database schema version."""
         print("\n[VERSION] STEP 2: Checking current schema version...")
@@ -128,6 +129,7 @@ class DatabaseMigrationTester:
             print(f"[ERROR] Version check failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_backup_critical_data(self) -> bool:
         """Backup critical data before migration."""
         print("\n[BACKUP] STEP 3: Backing up critical data...")
@@ -168,6 +170,7 @@ class DatabaseMigrationTester:
             print(f"[ERROR] Backup failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_forward_migration(self) -> bool:
         """Apply forward migration."""
         print("\n[FORWARD] STEP 4: Applying forward migration...")
@@ -248,6 +251,7 @@ class DatabaseMigrationTester:
             print(f"[ERROR] Forward migration failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_schema_verification(self) -> bool:
         """Verify schema changes after migration."""
         print("\n[VERIFY] STEP 5: Verifying schema changes...")
@@ -295,6 +299,7 @@ class DatabaseMigrationTester:
             print(f"[ERROR] Schema verification failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_data_integrity(self) -> bool:
         """Test data integrity after migration."""
         print("\n[INTEGRITY] STEP 6: Testing data integrity...")
@@ -342,6 +347,7 @@ class DatabaseMigrationTester:
             print(f"[ERROR] Integrity check failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_migration_failure_simulation(self) -> bool:
         """Simulate a migration failure."""
         print("\n[FAILURE] STEP 7: Simulating migration failure...")
@@ -398,6 +404,7 @@ class DatabaseMigrationTester:
             print(f"[ERROR] Failure simulation error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_rollback_execution(self) -> bool:
         """Execute rollback to previous version."""
         print("\n[ROLLBACK] STEP 8: Executing rollback...")
@@ -472,6 +479,7 @@ class DatabaseMigrationTester:
             print(f"[ERROR] Rollback execution failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_rollback_verification(self) -> bool:
         """Verify rollback completeness."""
         print("\n[VERIFY] STEP 9: Verifying rollback completeness...")
@@ -527,6 +535,7 @@ class DatabaseMigrationTester:
             print(f"[ERROR] Rollback verification failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_zero_downtime_migration(self) -> bool:
         """Test zero-downtime migration strategy."""
         print("\n[ZERO-DT] STEP 10: Testing zero-downtime migration...")
@@ -625,6 +634,7 @@ class DatabaseMigrationTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_database_migration_rollback():
     """Test database migration and rollback flow."""
     async with DatabaseMigrationTester() as tester:

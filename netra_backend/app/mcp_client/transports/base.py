@@ -3,11 +3,12 @@ Base transport class for MCP (Model Context Protocol) clients.
 Defines the abstract interface that all transport implementations must follow.
 """
 
-import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
-logger = logging.getLogger(__name__)
+from netra_backend.app.core.unified_logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class MCPTransport(ABC):

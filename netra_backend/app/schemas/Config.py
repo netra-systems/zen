@@ -1,16 +1,16 @@
 """Configuration schemas and data models.
 
-**DEPRECATION NOTICE**: This file is legacy and should be migrated
-to use the unified configuration system. For new code, use:
-from netra_backend.app.core.configuration import unified_config_manager
+**UPDATED**: This file has been migrated to use IsolatedEnvironment
+for unified environment management. Follows SPEC/unified_environment_management.xml.
 
-This file contains direct os.environ access that should be replaced
-with the centralized configuration management.
+For new code, use:
+from netra_backend.app.core.configuration import unified_config_manager
 """
 
-import os
 from enum import Enum
 from typing import Any, Dict, List, Optional
+
+from dev_launcher.isolated_environment import get_env
 
 from pydantic import BaseModel, Field, validator
 
@@ -42,14 +42,13 @@ class SecretReference(BaseModel):
     def _get_project_id_safe() -> str:
         """Get project ID safely without causing recursion during config initialization.
         
-        CRITICAL: This method CANNOT call get_unified_config() during configuration
-        initialization as it would cause infinite recursion. Use direct env access.
+        Uses IsolatedEnvironment for consistent environment access.
         """
-        import os
-        # Direct environment access to prevent recursion during config loading
-        return os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
-                             os.environ.get("SECRET_MANAGER_PROJECT_ID", 
-                             "701982941522" if os.environ.get("ENVIRONMENT", "").lower() == "staging" else "304612253870"))
+        env = get_env()
+        # Use IsolatedEnvironment for project ID loading
+        return env.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
+                       env.get("SECRET_MANAGER_PROJECT_ID", 
+                       "701982941522" if env.get("ENVIRONMENT", "").lower() == "staging" else "304612253870"))
 
 
 SECRET_CONFIG: List[SecretReference] = [
@@ -235,10 +234,24 @@ class AppConfig(BaseModel):
         description="GitHub token for repository access"
     )
     
-    # CORS configuration
-    cors_origins: Optional[List[str]] = Field(
+    # LLM API Keys
+    gemini_api_key: Optional[str] = Field(
         default=None,
-        description="Allowed CORS origins - can be list or comma-separated string"
+        description="Gemini API key for Google AI models"
+    )
+    anthropic_api_key: Optional[str] = Field(
+        default=None,
+        description="Anthropic API key for Claude models"
+    )
+    openai_api_key: Optional[str] = Field(
+        default=None,
+        description="OpenAI API key for GPT models"
+    )
+    
+    # CORS configuration
+    cors_origins: Optional[str] = Field(
+        default=None,
+        description="Allowed CORS origins - comma-separated string or '*' for all"
     )
     
     # Additional middleware configuration
@@ -288,7 +301,8 @@ class AppConfig(BaseModel):
     pr_number: Optional[str] = Field(default=None, description="Pull request number for PR environments")
     
     # OAuth client ID fallback variables
-    google_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID fallback")
+    google_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID")
+    google_client_secret: Optional[str] = Field(default=None, description="Google OAuth client secret")
     google_oauth_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID alternative")
     
     # Google App Engine environment variables
@@ -297,6 +311,39 @@ class AppConfig(BaseModel):
     
     # Google Kubernetes Engine environment variables  
     kubernetes_service_host: Optional[str] = Field(default=None, description="Kubernetes service host for GKE detection")
+    
+    # PostgreSQL Database Configuration (consolidated from postgres_config.py)
+    db_pool_size: int = Field(default=20, description="Database connection pool size")
+    db_max_overflow: int = Field(default=30, description="Maximum overflow connections")
+    db_pool_timeout: int = Field(default=30, description="Pool timeout in seconds")
+    db_pool_recycle: int = Field(default=1800, description="Recycle connections every N seconds")
+    db_pool_pre_ping: bool = Field(default=True, description="Test connections before using")
+    db_echo: bool = Field(default=False, description="Echo SQL statements")
+    db_echo_pool: bool = Field(default=False, description="Echo connection pool events")
+    db_max_connections: int = Field(default=100, description="Hard limit on total connections")
+    db_connection_timeout: int = Field(default=10, description="Connection establishment timeout")
+    db_statement_timeout: int = Field(default=30000, description="Max statement execution time in ms")
+    db_enable_read_write_split: bool = Field(default=False, description="Enable read/write splitting")
+    db_read_url: Optional[str] = Field(default=None, description="Read database URL")
+    db_write_url: Optional[str] = Field(default=None, description="Write database URL")
+    db_enable_query_cache: bool = Field(default=True, description="Enable query caching")
+    db_query_cache_ttl: int = Field(default=300, description="Query cache TTL in seconds")
+    db_query_cache_size: int = Field(default=1000, description="Max cached queries")
+    db_transaction_retry_attempts: int = Field(default=3, description="Transaction retry attempts")
+    db_transaction_retry_delay: float = Field(default=0.1, description="Base retry delay in seconds")
+    db_transaction_retry_backoff: float = Field(default=2.0, description="Exponential backoff multiplier")
+    
+    # Query Cache Configuration (consolidated from cache_config.py)
+    cache_enabled: bool = Field(default=True, description="Enable caching system")
+    cache_default_ttl: int = Field(default=300, description="Default cache TTL in seconds")
+    cache_max_size: int = Field(default=1000, description="Maximum cache entries")
+    cache_strategy: str = Field(default="adaptive", description="Cache strategy: lru, ttl, or adaptive")
+    cache_prefix: str = Field(default="db_query_cache:", description="Cache key prefix")
+    cache_metrics_enabled: bool = Field(default=True, description="Enable cache metrics")
+    cache_frequent_query_threshold: int = Field(default=5, description="Queries executed N+ times")
+    cache_frequent_query_ttl_multiplier: float = Field(default=2.0, description="TTL multiplier for frequent queries")
+    cache_slow_query_threshold: float = Field(default=1.0, description="Queries taking N+ seconds")
+    cache_slow_query_ttl_multiplier: float = Field(default=3.0, description="TTL multiplier for slow queries")
     
     # Startup control environment variables
     fast_startup_mode: str = Field(default="false", description="Fast startup mode flag")
@@ -415,12 +462,11 @@ class DevelopmentConfig(AppConfig):
     def _load_database_url_from_unified_config(self, data: dict) -> None:
         """Load database URL from environment with fallback.
         
-        CRITICAL: Cannot use get_unified_config() during config initialization 
-        as it would cause infinite recursion. Use direct env access.
+        Uses IsolatedEnvironment for consistent environment access.
         """
-        # Direct env access to prevent recursion during config loading
-        import os
-        env_db_url = os.environ.get('DATABASE_URL')
+        # Use IsolatedEnvironment for database URL loading
+        env = get_env()
+        env_db_url = env.get('DATABASE_URL')
         if env_db_url:
             data['database_url'] = env_db_url
         elif 'database_url' not in data or data.get('database_url') is None:
@@ -429,15 +475,14 @@ class DevelopmentConfig(AppConfig):
     def _get_service_modes_from_unified_config(self) -> dict:
         """Get service modes from environment with fallback.
         
-        CRITICAL: Cannot use get_unified_config() during config initialization 
-        as it would cause infinite recursion. Use direct env access.
+        Uses IsolatedEnvironment for consistent environment access.
         """
-        # Direct env access to prevent recursion during config loading
-        import os
+        # Use IsolatedEnvironment for service mode configuration
+        env = get_env()
         return {
-            'redis': os.environ.get("REDIS_MODE", "shared").lower(),
-            'clickhouse': os.environ.get("CLICKHOUSE_MODE", "shared").lower(),
-            'llm': os.environ.get("LLM_MODE", "shared").lower()
+            'redis': env.get("REDIS_MODE", "shared").lower(),
+            'clickhouse': env.get("CLICKHOUSE_MODE", "shared").lower(),
+            'llm': env.get("LLM_MODE", "shared").lower()
         }
     
     def _configure_service_flags(self, data: dict, service_modes: dict) -> None:
@@ -483,13 +528,12 @@ class StagingConfig(AppConfig):
     def _load_database_url_from_unified_config_staging(self, data: dict) -> None:
         """Load database URL from environment for staging with fallback.
         
-        CRITICAL: Cannot use get_unified_config() during config initialization 
-        as it would cause infinite recursion. Use direct env access.
+        Uses IsolatedEnvironment for consistent environment access.
         """
-        # Direct env access to prevent recursion during config loading
-        import os
-        if 'database_url' not in data and os.environ.get('DATABASE_URL'):
-            data['database_url'] = os.environ.get('DATABASE_URL')
+        # Use IsolatedEnvironment for staging database URL
+        env = get_env()
+        if 'database_url' not in data and env.get('DATABASE_URL'):
+            data['database_url'] = env.get('DATABASE_URL')
 
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""

@@ -1,6 +1,6 @@
 """Fixtures Tests - Split from test_critical_integration.py"""
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -13,7 +13,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import jwt
 import pytest
@@ -40,7 +40,7 @@ from netra_backend.app.services.database.run_repository import RunRepository
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 @pytest.fixture
 
@@ -98,10 +98,13 @@ def setup_integration_infrastructure():
         
         # Mock LLM Manager with realistic responses
 
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
 
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager.call_llm = AsyncMock(side_effect=self._mock_llm_response)
 
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager.ask_llm = AsyncMock(side_effect=self._mock_ask_llm_response)
         
         # Real state persistence service

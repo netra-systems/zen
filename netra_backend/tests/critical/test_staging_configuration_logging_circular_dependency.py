@@ -62,6 +62,7 @@ class TestConfigurationLoggingCircularDependency:
         but logger initialization fails because config isn't available yet.
         """
         # Mock the scenario where config is being loaded but logger needs config
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.unified_logging.UnifiedLogger._load_config') as mock_load_config:
             # Make _load_config try to import configuration which isn't ready
             mock_load_config.side_effect = ImportError("Configuration not ready during logger init")
@@ -97,6 +98,7 @@ class TestConfigurationLoggingCircularDependency:
             # Simulate logger being called during config load
             from netra_backend.app.core.unified_logging import central_logger
             central_logger.info("Loading configuration...")  # This triggers recursion
+            # Mock: Generic component isolation for controlled unit testing
             return Mock()
         
         def mock_logger_setup(self):
@@ -106,7 +108,9 @@ class TestConfigurationLoggingCircularDependency:
             # Try to load config during logger setup
             self._load_config()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.UnifiedConfigManager._load_complete_configuration', side_effect=mock_config_load):
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.core.unified_logging.UnifiedLogger._setup_logging', side_effect=mock_logger_setup):
                 from netra_backend.app.core.configuration.base import UnifiedConfigManager
                 
@@ -126,6 +130,7 @@ class TestConfigurationLoggingCircularDependency:
         `/usr/local/lib/python3.11/site-packages/loguru/_handler.py:133`
         """
         # Mock loguru handler to simulate emission failure during config load
+        # Mock: Component isolation for testing without external dependencies
         with patch('loguru.logger') as mock_loguru:
             # Setup mock to fail when trying to emit log during config initialization
             mock_loguru.info.side_effect = RuntimeError("Handler emission failed during config initialization")
@@ -162,6 +167,7 @@ class TestConfigurationBootstrapWithoutLogger:
                 raise ImportError(f"No module named '{name}' - logging not available")
             return original_import(name, *args, **kwargs)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.__import__', side_effect=mock_import):
             from netra_backend.app.core.configuration.base import UnifiedConfigManager
             
@@ -209,6 +215,7 @@ class TestConfigurationBootstrapWithoutLogger:
         
         # Mock the fallback config loading to fail
         with patch.object(logger, '_get_fallback_log_level', side_effect=Exception("Fallback config unavailable")):
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.core.unified_logging.os.environ.get', return_value=None):
                 # This should fail when trying to get fallback configuration
                 with pytest.raises(Exception) as exc_info:

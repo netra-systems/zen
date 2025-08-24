@@ -22,7 +22,7 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import aiohttp
 import pytest
@@ -364,6 +364,7 @@ class ApiRoutingManager:
                 "response_time": time.time() - start_time
             }
     
+    @pytest.mark.asyncio
     async def test_load_balancing_distribution(self, service_name: str, 
                                              request_count: int) -> Dict[str, Any]:
         """Test load balancing distribution across service endpoints."""
@@ -568,6 +569,7 @@ async def api_routing_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_exact_path_routing(api_routing_manager):
     """Test exact path routing to correct services."""
     test_cases = [
@@ -587,6 +589,7 @@ async def test_exact_path_routing(api_routing_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_wildcard_path_routing(api_routing_manager):
     """Test wildcard and regex pattern routing."""
     test_cases = [
@@ -611,6 +614,7 @@ async def test_wildcard_path_routing(api_routing_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_version_based_routing(api_routing_manager):
     """Test API version-based routing."""
     # Test v1 agent endpoint
@@ -630,6 +634,7 @@ async def test_version_based_routing(api_routing_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_load_balancing_strategies(api_routing_manager):
     """Test different load balancing strategies."""
     # Test round-robin distribution (user service)
@@ -658,6 +663,7 @@ async def test_load_balancing_strategies(api_routing_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_routing_priority_handling(api_routing_manager):
     """Test routing priority when multiple patterns could match."""
     # Admin routes should have higher priority than wildcard routes
@@ -677,6 +683,7 @@ async def test_routing_priority_handling(api_routing_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_concurrent_routing_requests(api_routing_manager):
     """Test concurrent requests across different routes."""
     # Create concurrent requests to different services
@@ -705,6 +712,7 @@ async def test_concurrent_routing_requests(api_routing_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_route_not_found_handling(api_routing_manager):
     """Test handling of requests to non-existent routes."""
     non_existent_paths = [
@@ -724,6 +732,7 @@ async def test_route_not_found_handling(api_routing_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_service_health_check_integration(api_routing_manager):
     """Test integration with service health checks."""
     # Test that healthy services receive requests
@@ -748,6 +757,7 @@ async def test_service_health_check_integration(api_routing_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_routing_performance_requirements(api_routing_manager):
     """Test routing performance meets requirements."""
     # Test response time for route resolution
@@ -784,6 +794,7 @@ async def test_routing_performance_requirements(api_routing_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_routing_metrics_accuracy(api_routing_manager):
     """Test accuracy of routing metrics collection."""
     # Generate test traffic

@@ -13,7 +13,6 @@ from pathlib import Path
 import uvicorn
 
 # Add project root to path (parent of scripts directory)
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Set environment variables
 os.environ['BACKEND_PORT'] = '8001'

@@ -12,7 +12,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -32,6 +32,7 @@ class TestBatchProcessor:
         """Create batch processor for testing."""
         return BatchProcessor(max_batch_size=5, flush_interval=0.1)
         
+    @pytest.mark.asyncio
     async def test_batch_size_flushing(self, processor):
         """Test batch flushing when size limit is reached."""
         processed_batches = []
@@ -50,6 +51,7 @@ class TestBatchProcessor:
         assert len(processed_batches) == 1
         assert len(processed_batches[0]) == 5
         
+    @pytest.mark.asyncio
     async def test_time_based_flushing(self, processor):
         """Test batch flushing based on time interval."""
         processed_batches = []
@@ -68,6 +70,7 @@ class TestBatchProcessor:
         assert len(processed_batches) == 1
         assert len(processed_batches[0]) == 3
         
+    @pytest.mark.asyncio
     async def test_multiple_batch_keys(self, processor):
         """Test handling multiple batch keys."""
         processed_batches = {"batch1": [], "batch2": []}
@@ -98,12 +101,17 @@ class TestMessageBatcher:
     @pytest.fixture
     def mock_connection_manager(self):
         """Create mock connection manager."""
+        # Mock: Generic component isolation for controlled unit testing
         manager = Mock()
         manager.get_user_connections.return_value = [
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             Mock(connection_id="conn_1", websocket=AsyncMock()),
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             Mock(connection_id="conn_2", websocket=AsyncMock())
         ]
+        # Mock: Component isolation for controlled unit testing
         manager.get_connection_by_id.return_value = Mock(
+            # Mock: Generic component isolation for controlled unit testing
             websocket=AsyncMock(),
             message_count=0
         )
@@ -115,6 +123,7 @@ class TestMessageBatcher:
         config = BatchConfig(max_batch_size=3, max_wait_time=0.1)
         return MessageBatcher(config, mock_connection_manager)
         
+    @pytest.mark.asyncio
     async def test_message_batching_size_trigger(self, batcher, mock_connection_manager):
         """Test message batching triggered by size."""
         # Queue messages
@@ -128,6 +137,7 @@ class TestMessageBatcher:
         conn_mock = mock_connection_manager.get_connection_by_id.return_value
         assert conn_mock.websocket.send_text.called
         
+    @pytest.mark.asyncio
     async def test_priority_message_handling(self, batcher, mock_connection_manager):
         """Test high-priority message handling."""
         # Queue high-priority message
@@ -140,6 +150,7 @@ class TestMessageBatcher:
         conn_mock = mock_connection_manager.get_connection_by_id.return_value
         assert conn_mock.websocket.send_text.called
         
+    @pytest.mark.asyncio
     async def test_adaptive_batching(self, batcher, mock_connection_manager):
         """Test adaptive batching strategy."""
         batcher.config.strategy = BatchingStrategy.ADAPTIVE

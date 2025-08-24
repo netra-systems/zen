@@ -8,8 +8,6 @@ Tests to prevent:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import datetime, timezone
 
 import pytest

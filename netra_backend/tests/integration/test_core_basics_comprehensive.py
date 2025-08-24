@@ -3,7 +3,7 @@ L3 Integration Tests - Core Basic Functionality (120 Tests)
 Designed to reveal system flaws in auth, login, websockets, and core operations
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 
 import asyncio
@@ -14,7 +14,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import aiohttp
 import jwt
@@ -1004,7 +1004,9 @@ class MockPostgresConnection:
         
     async def __aenter__(self):
         # Create a mock connection with async execute method
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn = MagicMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_conn.execute = AsyncMock(return_value=True)
         self.manager.connections.append(mock_conn)
         return mock_conn
@@ -1043,6 +1045,7 @@ class MockPostgresManager:
 
         """Start transaction context"""
 
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     async def query(self, sql: str, *args, **kwargs):
@@ -1125,6 +1128,7 @@ class MockPostgresManager:
 
         """Internal get connection"""
 
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     def get_connection_leaks(self) -> List:
@@ -1213,24 +1217,28 @@ async def create_connection():
 
     """Create a connection"""
 
+    # Mock: Generic component isolation for controlled unit testing
     return MagicMock()
 
 async def create_user(name: str):
 
     """Create a user"""
 
+    # Mock: Service component isolation for predictable testing behavior
     return MagicMock(id=str(uuid.uuid4()), name=name)
 
 async def get_user(user_id: str):
 
     """Get a user"""
 
+    # Mock: Service component isolation for predictable testing behavior
     return MagicMock(id=user_id, name="Test User")
 
 async def create_event(time):
 
     """Create an event"""
 
+    # Mock: Service component isolation for predictable testing behavior
     return MagicMock(time=time)
 
 def calculate_price(a, b):
@@ -1321,6 +1329,7 @@ class ProcessManager:
 
     async def spawn_worker(self):
 
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     async def cleanup_zombies(self):
@@ -1339,6 +1348,7 @@ class UserService:
 
             return None
 
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     async def update_user(self, user_id, data):
@@ -1347,6 +1357,7 @@ class UserService:
 
             return None
 
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
 
 class NetworkSimulator:
@@ -1693,6 +1704,7 @@ class TestAPIEndpointsCore:
 
     @pytest.mark.skip(reason="Requires running server")
 
+    @pytest.mark.asyncio
     async def test_api_versioning_backward_compatibility(self):
 
         """Test API maintains backward compatibility"""

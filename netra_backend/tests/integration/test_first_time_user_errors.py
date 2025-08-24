@@ -16,7 +16,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from typing import Any, Dict
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -25,6 +25,7 @@ from fastapi import status
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_validation_error_handling(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -47,6 +48,7 @@ async def test_validation_error_handling(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_rate_limit_error_handling(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -56,6 +58,7 @@ async def test_rate_limit_error_handling(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Mock rate limiter to trigger error
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.rate_limiter.check_rate_limit") as mock_limit:
         mock_limit.return_value = False
         
@@ -72,6 +75,7 @@ async def test_rate_limit_error_handling(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_service_unavailable_error_handling(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -81,6 +85,7 @@ async def test_service_unavailable_error_handling(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Mock LLM service failure
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     with patch("app.services.llm_manager.generate_response") as mock_llm:
         mock_llm.side_effect = Exception("LLM service unavailable")
         
@@ -97,6 +102,7 @@ async def test_service_unavailable_error_handling(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_support_options_access(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -116,6 +122,7 @@ async def test_support_options_access(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_support_ticket_creation(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -143,6 +150,7 @@ async def test_support_ticket_creation(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(25)
+@pytest.mark.asyncio
 async def test_error_recovery_with_retry(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -157,6 +165,7 @@ async def test_error_recovery_with_retry(
     
     # Simulate retry pattern
     while retry_count < max_retries:
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch("app.services.llm_manager.generate_response") as mock_llm:
             if retry_count < 2:
                 mock_llm.side_effect = Exception("Temporary failure")
@@ -181,6 +190,7 @@ async def test_error_recovery_with_retry(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_error_logging_and_debugging(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -198,6 +208,7 @@ async def test_error_logging_and_debugging(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_graceful_degradation_features(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -207,6 +218,7 @@ async def test_graceful_degradation_features(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Mock feature unavailability
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.feature_service.is_available") as mock_feature:
         mock_feature.return_value = False
         
@@ -222,6 +234,7 @@ async def test_graceful_degradation_features(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_timeout_error_handling(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -231,6 +244,7 @@ async def test_timeout_error_handling(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Mock timeout on optimization request
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.optimization_service.analyze") as mock_optimize:
         mock_optimize.side_effect = asyncio.TimeoutError("Operation timed out")
         
@@ -253,6 +267,7 @@ async def test_timeout_error_handling(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_authentication_error_recovery(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]

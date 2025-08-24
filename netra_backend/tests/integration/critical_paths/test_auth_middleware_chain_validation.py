@@ -31,7 +31,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import httpx
 import jwt
@@ -128,7 +128,7 @@ class TestAuthMiddlewareChainValidation:
             audit_middleware
         ]
         
-        return middleware_chain
+        yield middleware_chain
     
     @pytest.fixture
     async def token_generator(self):
@@ -151,12 +151,13 @@ class TestAuthMiddlewareChainValidation:
                     timedelta(hours=-1) if expired else timedelta(hours=1)
                 )
             }
-            return jwt.encode(payload, settings.jwt_secret_key, algorithm="HS256")
+            yield jwt.encode(payload, settings.jwt_secret_key, algorithm="HS256")
         
-        return generate_token
+        yield generate_token
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_complete_middleware_chain_execution(
         self, middleware_stack, token_generator
     ):
@@ -181,6 +182,7 @@ class TestAuthMiddlewareChainValidation:
         # Execute middleware chain
         handler_reached = False
         
+        @pytest.mark.asyncio
         async def test_handler(ctx: RequestContext):
             nonlocal handler_reached
             handler_reached = True
@@ -228,6 +230,7 @@ class TestAuthMiddlewareChainValidation:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_auth_middleware_token_validation(
         self, middleware_stack, token_generator
     ):
@@ -322,6 +325,7 @@ class TestAuthMiddlewareChainValidation:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_rate_limit_middleware_enforcement(
         self
     ):
@@ -386,6 +390,7 @@ class TestAuthMiddlewareChainValidation:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_cors_middleware_headers(
         self, middleware_stack
     ):
@@ -433,6 +438,7 @@ class TestAuthMiddlewareChainValidation:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_audit_middleware_logging(
         self, middleware_stack, token_generator
     ):
@@ -501,6 +507,7 @@ class TestAuthMiddlewareChainValidation:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_middleware_chain_error_handling(
         self, middleware_stack
     ):
@@ -543,6 +550,7 @@ class TestAuthMiddlewareChainValidation:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_middleware_performance_under_load(
         self, middleware_stack, token_generator
     ):

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import uuid
 from typing import Dict, List
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -28,8 +28,11 @@ class TestBusinessValueCore(BusinessValueFixtures):
 
     async def _execute_with_mocked_state(self, supervisor, user_request: str, run_id: str):
         """Execute supervisor with mocked state persistence"""
+        # Mock: Generic component isolation for controlled unit testing
         save_mock = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         load_mock = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         context_mock = AsyncMock(return_value=None)
         return await self._execute_with_patches(supervisor, user_request, run_id, 
                                                save_mock, load_mock, context_mock)
@@ -37,8 +40,11 @@ class TestBusinessValueCore(BusinessValueFixtures):
     async def _execute_with_patches(self, supervisor, user_request, run_id, 
                                    save_mock, load_mock, context_mock):
         """Execute with specific state persistence patches"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', save_mock):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', load_mock):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', context_mock):
                     return await supervisor.run(user_request, "test_thread", "test_user", run_id)
 
@@ -70,6 +76,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         return [call for call in tool_calls 
                 if "cost" in str(call).lower()]
 
+    @pytest.mark.asyncio
     async def test_1_cost_optimization_request(self, setup_test_infrastructure):
         """
         Business Value Test 1: Cost Optimization Analysis
@@ -98,6 +105,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         return [call for call in tool_dispatcher.dispatch_tool.call_args_list
                 if "bottleneck" in str(call).lower()]
 
+    @pytest.mark.asyncio
     async def test_2_performance_bottleneck_identification(self, setup_test_infrastructure):
         """
         Business Value Test 2: Performance Bottleneck Analysis
@@ -118,6 +126,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         """Verify model comparison analysis was performed"""
         assert llm_manager.ask_llm.call_count > 0
 
+    @pytest.mark.asyncio
     async def test_3_model_comparison_and_selection(self, setup_test_infrastructure):
         """
         Business Value Test 3: Model Comparison for Use Case
@@ -138,6 +147,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         """Setup streaming message capture"""
         streamed_messages = []
         capture_stream = self._create_capture_stream(streamed_messages)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_message = AsyncMock(side_effect=capture_stream)
         return streamed_messages
 
@@ -153,6 +163,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         message_types = [msg.get("type") for msg in streamed_messages]
         assert "agent_started" in message_types
 
+    @pytest.mark.asyncio
     async def test_4_real_time_streaming_updates(self, setup_test_infrastructure):
         """
         Business Value Test 4: Real-time Progress Updates
@@ -174,6 +185,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         return [call for call in llm_manager.ask_llm.call_args_list
                 if "batch" in str(call).lower() or "optimiz" in str(call).lower()]
 
+    @pytest.mark.asyncio
     async def test_5_batch_processing_optimization(self, setup_test_infrastructure):
         """
         Business Value Test 5: Batch Processing Recommendations

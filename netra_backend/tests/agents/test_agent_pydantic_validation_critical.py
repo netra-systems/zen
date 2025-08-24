@@ -10,7 +10,7 @@ import sys
 
 import json
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from pydantic import ValidationError
@@ -79,6 +79,7 @@ class TestPydanticValidationCritical:
 
         """Create mock LLM manager"""
 
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm = Mock(spec=LLMManager)
 
         return llm
@@ -90,6 +91,7 @@ class TestPydanticValidationCritical:
         """Create mock tool dispatcher"""
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         return Mock(spec=ToolDispatcher)
 
     @pytest.mark.asyncio
@@ -515,6 +517,7 @@ class TestPydanticValidationCritical:
 
         valid_response = TriageResult(category="Cost Optimization")
 
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager.ask_structured_llm = AsyncMock(side_effect=[
 
             ValidationError.from_exception_data("ValidationError", []),
@@ -527,11 +530,13 @@ class TestPydanticValidationCritical:
         
         # Mock ask_llm for fallback scenarios
 
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager.ask_llm = AsyncMock(return_value='{"category": "General Inquiry"}')
         
         # Should retry and succeed on second attempt
         from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         agent = TriageSubAgent(mock_llm_manager, Mock())
 
         state = DeepAgentState(user_request="test")

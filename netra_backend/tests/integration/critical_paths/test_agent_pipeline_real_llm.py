@@ -24,7 +24,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import websockets
@@ -45,7 +45,7 @@ from netra_backend.app.schemas.registry import ServerMessage as WSResponse
 from netra_backend.app.schemas.registry import WebSocketMessage as WSMessage
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.e2e.real_client_types import (
 
     ClientConfig,
@@ -401,6 +401,7 @@ class AgentPipelineRealLLMTester:
         
         self.websocket_client = RealWebSocketClient(client_config)
     
+    @pytest.mark.asyncio
     async def test_end_to_end_agent_pipeline(self, test_prompt: Dict[str, Any], 
 
                                            llm_config: str) -> Dict[str, Any]:
@@ -599,24 +600,30 @@ class AgentPipelineRealLLMTester:
 
         """Initialize supervisor agent for test session."""
         # Create mock dependencies for supervisor agent
-        from unittest.mock import AsyncMock, MagicMock
+        from unittest.mock import AsyncMock, MagicMock, MagicMock
 
         from sqlalchemy.ext.asyncio import AsyncSession
         
         # Create mock database session
 
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session = MagicMock(spec=AsyncSession)
 
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.execute = AsyncMock()
 
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.commit = AsyncMock()
 
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.rollback = AsyncMock()
         
         # Create mock tool dispatcher
 
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = MagicMock()
 
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher.dispatch = AsyncMock()
         
         # Initialize supervisor agent with all required parameters
@@ -884,6 +891,7 @@ async def l4_pipeline_tester():
 
 @pytest.mark.l4_staging
 
+@pytest.mark.asyncio
 async def test_supervisor_agent_real_llm_initialization(l4_pipeline_tester):
 
     """Test supervisor agent initialization with real LLM providers."""
@@ -909,6 +917,7 @@ async def test_supervisor_agent_real_llm_initialization(l4_pipeline_tester):
 
 @pytest.mark.l4_staging
 
+@pytest.mark.asyncio
 async def test_multi_provider_llm_pipeline(l4_pipeline_tester):
 
     """Test agent pipeline with multiple LLM providers."""
@@ -947,6 +956,7 @@ async def test_multi_provider_llm_pipeline(l4_pipeline_tester):
 
 @pytest.mark.l4_staging
 
+@pytest.mark.asyncio
 async def test_agent_pipeline_quality_gates(l4_pipeline_tester):
 
     """Test quality gate validation with various prompt types."""
@@ -981,6 +991,7 @@ async def test_agent_pipeline_quality_gates(l4_pipeline_tester):
 
 @pytest.mark.l4_staging  
 
+@pytest.mark.asyncio
 async def test_cost_tracking_accuracy(l4_pipeline_tester):
 
     """Test LLM cost tracking accuracy and metering."""
@@ -1019,6 +1030,7 @@ async def test_cost_tracking_accuracy(l4_pipeline_tester):
 
 @pytest.mark.l4_staging
 
+@pytest.mark.asyncio
 async def test_websocket_resilience_real_environment(l4_pipeline_tester):
 
     """Test WebSocket connection resilience in staging environment."""
@@ -1052,6 +1064,7 @@ async def test_websocket_resilience_real_environment(l4_pipeline_tester):
 
 @pytest.mark.l4_staging
 
+@pytest.mark.asyncio
 async def test_concurrent_agent_pipeline_load(l4_pipeline_tester):
 
     """Test agent pipeline under concurrent load in staging."""
@@ -1097,6 +1110,7 @@ async def test_concurrent_agent_pipeline_load(l4_pipeline_tester):
 
 @pytest.mark.l4_staging
 
+@pytest.mark.asyncio
 async def test_error_recovery_scenarios(l4_pipeline_tester):
 
     """Test agent pipeline error recovery in staging environment."""
@@ -1140,6 +1154,7 @@ async def test_error_recovery_scenarios(l4_pipeline_tester):
 
 @pytest.mark.l4_staging
 
+@pytest.mark.asyncio
 async def test_staging_environment_performance_slas(l4_pipeline_tester):
 
     """Test that staging environment meets all performance SLAs."""
@@ -1178,6 +1193,7 @@ async def test_staging_environment_performance_slas(l4_pipeline_tester):
 
 @pytest.mark.l4_staging
 
+@pytest.mark.asyncio
 async def test_complete_test_suite_summary(l4_pipeline_tester):
 
     """Generate comprehensive test suite summary and metrics."""

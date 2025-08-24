@@ -200,12 +200,12 @@ class MockWebSocketManager:
 @pytest.fixture
 async def mock_websocket():
     """Create a mock WebSocket for testing"""
-    return MockWebSocket()
+    yield MockWebSocket()
 
 @pytest.fixture  
 async def mock_websocket_manager():
     """Create a mock WebSocket manager for testing"""
-    return MockWebSocketManager()
+    yield MockWebSocketManager()
 
 @pytest.fixture
 async def websocket_test_client():
@@ -221,7 +221,7 @@ async def websocket_test_client():
             self.connection = await WebSocketTestHelpers.create_test_websocket_connection(
                 url, headers
             )
-            return self.connection
+            yield self.connection
             
         async def send_message(self, message: Dict[str, Any]):
             """Send message through connection"""
@@ -233,7 +233,7 @@ async def websocket_test_client():
             """Receive message from connection"""
             if not self.connection:
                 raise RuntimeError("Not connected to WebSocket")
-            return await WebSocketTestHelpers.receive_test_message(self.connection)
+            yield await WebSocketTestHelpers.receive_test_message(self.connection)
             
         async def close(self):
             """Close WebSocket connection"""
@@ -241,7 +241,7 @@ async def websocket_test_client():
                 await WebSocketTestHelpers.close_test_connection(self.connection)
                 self.connection = None
     
-    return WebSocketTestClient()
+    yield WebSocketTestClient()
 
 # =============================================================================
 # PERFORMANCE TESTING UTILITIES

@@ -2,8 +2,6 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import pytest
 from pydantic import ValidationError
 from netra_backend.app.schemas import AppConfig

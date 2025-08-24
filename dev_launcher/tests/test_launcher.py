@@ -32,19 +32,20 @@ class TestLauncherConfig(unittest.TestCase):
         self.assertEqual(config.frontend_port, 3000)
         self.assertTrue(config.dynamic_ports)  # Changed: now default is True
         self.assertFalse(config.backend_reload)  # Changed: now default is False
-        self.assertTrue(config.load_secrets)
+        self.assertFalse(config.load_secrets)  # Changed: now default is False (local-only)
         self.assertFalse(config.no_browser)
         self.assertFalse(config.verbose)
     
     def test_config_validation_invalid_ports(self):
-        """Test port validation with invalid values."""
-        with self.assertRaises(ValueError) as cm:
-            LauncherConfig(backend_port=70000)
-        self.assertIn("Invalid backend port", str(cm.exception))
+        """Test port validation with invalid values - now auto-resolves instead of raising."""
+        # With enable_port_conflict_resolution=True by default, invalid ports are auto-resolved
+        config = LauncherConfig(backend_port=70000)
+        # Should auto-resolve to None (dynamic allocation)
+        self.assertIsNone(config.backend_port)
         
-        with self.assertRaises(ValueError) as cm:
-            LauncherConfig(frontend_port=0)
-        self.assertIn("Invalid frontend port", str(cm.exception))
+        config = LauncherConfig(frontend_port=0)
+        # Should auto-resolve to default port
+        self.assertEqual(config.frontend_port, 3000)
     
     def disabled_test_config_validation_missing_dirs(self):
         """Test validation when required directories are missing."""
@@ -53,6 +54,7 @@ class TestLauncherConfig(unittest.TestCase):
             tmppath = Path(tmpdir)
             
             # Create project root but not app/frontend directories
+            # Mock: Component isolation for testing without external dependencies
             with patch('dev_launcher.config.find_project_root', return_value=tmppath):
                 # The LauncherConfig should raise an error for missing directories
                 with self.assertRaises(ValueError) as cm:
@@ -67,6 +69,7 @@ class TestLauncherConfig(unittest.TestCase):
     
     def test_config_from_args(self):
         """Test creating config from command line arguments."""
+        # Mock: Component isolation for controlled unit testing
         args = Mock(
             backend_port=8080,
             frontend_port=3001,
@@ -81,6 +84,7 @@ class TestLauncherConfig(unittest.TestCase):
             dev=False  # Added: dev mode flag
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.config.find_project_root') as mock_root:
             mock_root.return_value = Path.cwd()
             with patch.object(LauncherConfig, '_validate'):
@@ -102,6 +106,7 @@ class TestProcessManager(unittest.TestCase):
     
     def test_add_process(self):
         """Test adding a process to the manager."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.pid = 12345
         
@@ -111,6 +116,7 @@ class TestProcessManager(unittest.TestCase):
     
     def test_terminate_process_running(self):
         """Test terminating a running process."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.pid = 12345
         mock_process.poll.return_value = None  # Process is running
@@ -118,6 +124,7 @@ class TestProcessManager(unittest.TestCase):
         
         self.manager.add_process("TestService", mock_process)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('subprocess.run') as mock_run:
             result = self.manager.terminate_process("TestService")
         
@@ -133,6 +140,7 @@ class TestProcessManager(unittest.TestCase):
     
     def test_is_running(self):
         """Test checking if a process is running."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.pid = 12345  # Add pid attribute
         mock_process.poll.return_value = None  # Running
@@ -145,12 +153,14 @@ class TestProcessManager(unittest.TestCase):
     
     def test_wait_for_all_with_failures(self):
         """Test waiting for processes with error handling."""
+        # Mock: Component isolation for controlled unit testing
         mock_process1 = Mock(spec=subprocess.Popen)
         mock_process1.pid = 12345  # Add pid attribute
         # Process exits with error immediately
         mock_process1.poll.return_value = 1
         mock_process1.returncode = 1
         
+        # Mock: Component isolation for controlled unit testing
         mock_process2 = Mock(spec=subprocess.Popen)
         mock_process2.pid = 12346  # Add pid attribute
         # Process exits successfully immediately
@@ -183,7 +193,9 @@ class TestHealthMonitor(unittest.TestCase):
     
     def test_register_service(self):
         """Test registering a service for monitoring."""
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=True)
+        # Mock: Generic component isolation for controlled unit testing
         recovery = Mock()
         
         self.monitor.register_service(
@@ -198,6 +210,7 @@ class TestHealthMonitor(unittest.TestCase):
     
     def test_health_check_success(self):
         """Test successful health checks."""
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=True)
         
         self.monitor.register_service("TestService", health_check)
@@ -209,7 +222,9 @@ class TestHealthMonitor(unittest.TestCase):
     
     def disabled_test_health_check_failure_and_recovery(self):
         """Test health check failures triggering recovery."""
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=False)
+        # Mock: Generic component isolation for controlled unit testing
         recovery = Mock()
         
         self.monitor.register_service(
@@ -234,6 +249,7 @@ class TestHealthMonitor(unittest.TestCase):
     
     def disabled_test_monitoring_thread(self):
         """Test the monitoring thread operation."""
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=True)
         
         self.monitor.register_service("TestService", health_check)
@@ -264,10 +280,12 @@ class TestDevLauncher(unittest.TestCase):
     def test_check_environment_success(self):
         """Test successful environment check."""
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_config.load_or_create_config'):
             launcher = DevLauncher(self.config)
         
         # Mock the validation result to return success
+        # Mock: Generic component isolation for controlled unit testing
         mock_validation_result = Mock()
         mock_validation_result.is_valid = True
         mock_validation_result.errors = []
@@ -282,10 +300,12 @@ class TestDevLauncher(unittest.TestCase):
     def test_check_environment_missing_deps(self):
         """Test environment check with missing dependencies."""
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_config.load_or_create_config'):
             launcher = DevLauncher(self.config)
         
         # Mock the validation result to return failure
+        # Mock: Generic component isolation for controlled unit testing
         mock_validation_result = Mock()
         mock_validation_result.is_valid = False
         
@@ -293,21 +313,26 @@ class TestDevLauncher(unittest.TestCase):
             with patch.object(launcher.environment_validator, 'print_validation_summary'):
                 with patch.object(launcher.environment_validator, 'get_fix_suggestions', return_value=[]):
                     with patch.object(launcher.cache_manager, 'has_environment_changed', return_value=True):
+                        # Mock: Component isolation for testing without external dependencies
                         with patch('builtins.print'):
                             result = launcher.check_environment()
         
         self.assertFalse(result)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.create_subprocess')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.create_process_env')
     def disabled_test_start_backend_success(self, mock_env, mock_subprocess):
         """Test successful backend startup."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.poll.return_value = None  # Process is running
         mock_process.pid = 12345
         mock_subprocess.return_value = mock_process
         mock_env.return_value = {}
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_config.load_or_create_config'):
             launcher = DevLauncher(self.config)
         
@@ -319,18 +344,23 @@ class TestDevLauncher(unittest.TestCase):
         self.assertEqual(process, mock_process)
         mock_subprocess.assert_called_once()
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.create_subprocess')
     def disabled_test_start_backend_failure(self, mock_subprocess):
         """Test backend startup failure."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.poll.return_value = 1  # Process failed
+        # Mock: Generic component isolation for controlled unit testing
         mock_process.stderr = Mock()
         mock_process.stderr.read.return_value = b"Error: Port in use"
         mock_subprocess.return_value = mock_process
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_config.load_or_create_config'):
             launcher = DevLauncher(self.config)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.print'):
             with patch.object(launcher.log_manager, 'add_streamer'):
                 process, streamer = launcher.start_backend()
@@ -343,10 +373,15 @@ class TestIntegration(unittest.TestCase):
     """Integration tests for the launcher system."""
     __test__ = False  # Disable until start_backend functionality is implemented
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.check_dependencies')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.check_project_structure')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.create_subprocess')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.wait_for_service')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.open_browser')
     def test_full_launch_cycle(self, mock_browser, mock_wait, mock_subprocess,
                                mock_structure, mock_deps):
@@ -362,15 +397,19 @@ class TestIntegration(unittest.TestCase):
         }
         
         # Mock process creation
+        # Mock: Component isolation for controlled unit testing
         mock_backend = Mock(spec=subprocess.Popen)
         mock_backend.poll.return_value = None
         mock_backend.pid = 12345
+        # Mock: Generic component isolation for controlled unit testing
         mock_backend.stdout = Mock()
         mock_backend.stdout.readline.return_value = b''
         
+        # Mock: Component isolation for controlled unit testing
         mock_frontend = Mock(spec=subprocess.Popen)
         mock_frontend.poll.return_value = None
         mock_frontend.pid = 12346
+        # Mock: Generic component isolation for controlled unit testing
         mock_frontend.stdout = Mock()
         mock_frontend.stdout.readline.return_value = b''
         

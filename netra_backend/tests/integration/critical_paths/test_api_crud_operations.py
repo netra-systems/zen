@@ -10,7 +10,7 @@ from pathlib import Path
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -23,6 +23,7 @@ class TestAPICRUDOperationsL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_create_resource(self):
         """Test creating a new resource via API"""
         async with httpx.AsyncClient() as client:
@@ -48,6 +49,7 @@ class TestAPICRUDOperationsL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_read_resource(self):
         """Test reading an existing resource"""
         async with httpx.AsyncClient() as client:
@@ -67,6 +69,7 @@ class TestAPICRUDOperationsL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_update_resource(self):
         """Test updating an existing resource"""
         async with httpx.AsyncClient() as client:
@@ -91,6 +94,7 @@ class TestAPICRUDOperationsL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_delete_resource(self):
         """Test deleting a resource"""
         async with httpx.AsyncClient() as client:
@@ -115,6 +119,7 @@ class TestAPICRUDOperationsL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_list_resources_with_pagination(self):
         """Test listing resources with pagination"""
         async with httpx.AsyncClient() as client:

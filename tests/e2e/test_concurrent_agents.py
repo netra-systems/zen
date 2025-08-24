@@ -40,6 +40,7 @@ class TestConcurrentAgentStartup:
     async def test_concurrent_agent_startup_isolation(self, mock_supervisor_agent):
         """Test 10 concurrent user sessions with complete isolation"""
         # Setup mock execute method properly before test
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_supervisor_agent.execute = AsyncMock()
         
         concurrent_sessions = 10
@@ -96,6 +97,7 @@ class TestConcurrentAgentStartup:
         
         # Add execute method if it doesn't exist and configure it properly
         if not hasattr(supervisor, 'execute'):
+            # Mock: Async component isolation for testing without real async operations
             supervisor.execute = AsyncMock(return_value=mock_response)
         else:
             supervisor.execute.return_value = mock_response
@@ -147,6 +149,7 @@ class TestAgentStateIsolation:
     async def test_no_shared_state_between_users(self, mock_supervisor_agent):
         """Test no state contamination between concurrent users"""
         # Setup mock execute method properly before test
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_supervisor_agent.execute = AsyncMock()
         
         user_states = await self._create_distinct_user_states()
@@ -190,6 +193,7 @@ class TestAgentStateIsolation:
         
         # Add execute method if it doesn't exist and configure it properly
         if not hasattr(supervisor, 'execute'):
+            # Mock: Async component isolation for testing without real async operations
             supervisor.execute = AsyncMock(return_value=expected_response)
         else:
             supervisor.execute.return_value = expected_response
@@ -212,6 +216,7 @@ class TestConcurrentMessageRouting:
     async def test_concurrent_message_routing_accuracy(self, mock_supervisor_agent, mock_sub_agents):
         """Test messages route correctly under concurrent load"""
         # Setup mock route_request method properly before test
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_supervisor_agent.route_request = AsyncMock()
         
         routing_scenarios = await self._create_routing_scenarios()
@@ -272,6 +277,7 @@ class TestPerformanceUnderConcurrentLoad:
     async def test_performance_metrics_concurrent_agents(self, mock_supervisor_agent):
         """Test system performance under concurrent agent load"""
         # Setup mock execute method properly before test
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_supervisor_agent.execute = AsyncMock()
         
         load_scenarios = self._create_load_test_scenarios()
@@ -314,6 +320,7 @@ class TestPerformanceUnderConcurrentLoad:
         
         # Add execute method if it doesn't exist and configure it properly
         if not hasattr(supervisor, 'execute'):
+            # Mock: Async component isolation for testing without real async operations
             supervisor.execute = AsyncMock(return_value=mock_response)
         else:
             supervisor.execute.return_value = mock_response

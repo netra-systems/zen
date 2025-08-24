@@ -36,9 +36,12 @@ class TestSupervisorE2EWithRealLLM:
     def mock_dependencies(self, llm_manager):
         """Mock dependencies for supervisor."""
         return {
+            # Mock: Session isolation for controlled testing without external state
             "db_session": AsyncMock(),
             "llm_manager": llm_manager,
+            # Mock: WebSocket connection isolation for testing without network overhead
             "websocket_manager": AsyncMock(),
+            # Mock: Tool execution isolation for predictable agent testing
             "tool_dispatcher": Mock()
         }
     

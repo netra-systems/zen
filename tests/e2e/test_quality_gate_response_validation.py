@@ -53,9 +53,13 @@ class TestQualityGateResponseValidation:
     @mock_justified("Redis is external dependency - focus on quality gate logic, not Redis infrastructure")
     async def redis_manager(self):
         """Create mocked Redis manager for testing"""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         redis_mock = AsyncMock(spec=RedisManager)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock.set = AsyncMock()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock.get = AsyncMock(return_value=None)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock.delete = AsyncMock()
         return redis_mock
 

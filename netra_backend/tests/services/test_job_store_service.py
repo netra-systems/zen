@@ -3,13 +3,11 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -18,11 +16,13 @@ from netra_backend.app.services.job_store import JobStore, job_store
 class TestJobStore:
     """Test basic job store functionality."""
 
+    @pytest.mark.asyncio
     async def test_job_store_initialization(self):
         """Test job store can be initialized."""
         store = JobStore()
         assert store._jobs == {}
 
+    @pytest.mark.asyncio
     async def test_set_and_get_job(self):
         """Test setting and getting job data."""
         store = JobStore()
@@ -41,6 +41,7 @@ class TestJobStore:
         assert retrieved["id"] == "test_job_123"
         assert retrieved["status"] == "pending"
 
+    @pytest.mark.asyncio
     async def test_update_job_status(self):
         """Test updating job status."""
         store = JobStore()
@@ -57,12 +58,14 @@ class TestJobStore:
         assert updated["status"] == "running"
         assert "started_at" in updated
 
+    @pytest.mark.asyncio
     async def test_nonexistent_job(self):
         """Test getting a job that doesn't exist."""
         store = JobStore()
         result = await store.get("nonexistent_job")
         assert result == None
 
+    @pytest.mark.asyncio
     async def test_global_job_store(self):
         """Test the global job store instance."""
         assert job_store != None

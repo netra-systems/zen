@@ -10,7 +10,7 @@ Critical Path: WebSocket message -> Authentication -> Routing -> Agent processin
 Coverage: End-to-end message flow, error handling, performance validation, state consistency
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -22,7 +22,7 @@ import time
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -31,7 +31,7 @@ from netra_backend.app.auth_integration.auth import create_access_token, validat
 
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 JWTService = AsyncMock
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -340,8 +340,10 @@ class MessagePipelineTestManager:
             else:
                 # Create mock agent for other types
 
+                # Mock: Generic component isolation for controlled unit testing
                 agent = MagicMock()
 
+                # Mock: Async component isolation for testing without real async operations
                 agent.process_message = AsyncMock(return_value={
 
                     "response": f"Processed by {agent_type}",

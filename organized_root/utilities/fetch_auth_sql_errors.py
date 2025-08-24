@@ -12,7 +12,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 # Add the project root to path
-sys.path.append(str(Path(__file__).parent))
 
 from test_framework.gcp_integration.base import GCPConfig
 from test_framework.gcp_integration.log_reader import GCPLogReader, LogFilter

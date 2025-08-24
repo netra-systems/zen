@@ -313,6 +313,10 @@ async def _send_pong_response(websocket: WebSocket) -> None:
 
 async def process_agent_message(user_id_str: str, data: str, agent_service):
     """Process message through agent service with proper database session lifecycle."""
+    # Validate user_id
+    if not user_id_str or not user_id_str.strip():
+        raise ValueError("user_id cannot be empty")
+    
     # Create dedicated session for each message processing to avoid long-running sessions
     max_retries = 2
     for attempt in range(max_retries + 1):

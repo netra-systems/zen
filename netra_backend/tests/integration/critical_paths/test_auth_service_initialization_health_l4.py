@@ -21,7 +21,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 
@@ -65,12 +65,17 @@ class TestAuthServiceInitializationHealth:
         deps = AuthServiceDependencies()
         
         # Mock database
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.execute = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.commit = AsyncMock()
         
         # Mock Redis
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.get = AsyncMock(return_value=None)
         mock_redis.set = AsyncMock(return_value=True)
         mock_redis.ping = AsyncMock(return_value=True)
@@ -79,7 +84,7 @@ class TestAuthServiceInitializationHealth:
         mock_oauth = AsyncMock()
         mock_oauth.verify = AsyncMock(return_value=True)
         
-        return {
+        yield {
             "database": mock_db,
             "redis": mock_redis,
             "oauth": mock_oauth,
@@ -88,6 +93,7 @@ class TestAuthServiceInitializationHealth:
     
     @pytest.mark.integration
     @pytest.mark.L4
+    @pytest.mark.asyncio
     async def test_auth_service_initialization_sequence(self, auth_service, mock_dependencies):
         """Test 1: Auth service should initialize components in correct order."""
         initialization_log = []
@@ -145,6 +151,7 @@ class TestAuthServiceInitializationHealth:
     
     @pytest.mark.integration
     @pytest.mark.L4
+    @pytest.mark.asyncio
     async def test_auth_service_health_check_comprehensive(self, auth_service, mock_dependencies):
         """Test 2: Health check should verify all auth service components."""
         health_checker = HealthChecker()
@@ -187,6 +194,7 @@ class TestAuthServiceInitializationHealth:
     
     @pytest.mark.integration
     @pytest.mark.L4
+    @pytest.mark.asyncio
     async def test_auth_service_dependency_failure_handling(self, auth_service, mock_dependencies):
         """Test 3: Auth service should handle dependency failures gracefully."""
         # Simulate database failure
@@ -213,6 +221,7 @@ class TestAuthServiceInitializationHealth:
     
     @pytest.mark.integration
     @pytest.mark.L4
+    @pytest.mark.asyncio
     async def test_auth_service_connection_pool_management(self, auth_service):
         """Test 4: Auth service should manage connection pools efficiently."""
         # Track connection pool metrics
@@ -251,6 +260,7 @@ class TestAuthServiceInitializationHealth:
     
     @pytest.mark.integration
     @pytest.mark.L4
+    @pytest.mark.asyncio
     async def test_auth_service_circuit_breaker_activation(self, auth_service):
         """Test 5: Circuit breaker should activate on repeated failures."""
         failure_count = 0
@@ -279,6 +289,7 @@ class TestAuthServiceInitializationHealth:
     
     @pytest.mark.integration
     @pytest.mark.L4
+    @pytest.mark.asyncio
     async def test_auth_service_metrics_collection(self, auth_service):
         """Test 6: Auth service should collect comprehensive metrics."""
         metrics = {
@@ -313,6 +324,7 @@ class TestAuthServiceInitializationHealth:
     
     @pytest.mark.integration
     @pytest.mark.L4
+    @pytest.mark.asyncio
     async def test_auth_service_graceful_shutdown(self, auth_service, mock_dependencies):
         """Test 7: Auth service should shut down gracefully."""
         shutdown_log = []
@@ -355,6 +367,7 @@ class TestAuthServiceInitializationHealth:
     
     @pytest.mark.integration
     @pytest.mark.L4
+    @pytest.mark.asyncio
     async def test_auth_service_auto_recovery(self, auth_service):
         """Test 8: Auth service should auto-recover from transient failures."""
         recovery_attempts = []
@@ -384,6 +397,7 @@ class TestAuthServiceInitializationHealth:
     
     @pytest.mark.integration
     @pytest.mark.L4
+    @pytest.mark.asyncio
     async def test_auth_service_load_balancing(self):
         """Test 9: Auth service should distribute load across instances."""
         # Simulate multiple auth service instances
@@ -426,6 +440,7 @@ class TestAuthServiceInitializationHealth:
     
     @pytest.mark.integration
     @pytest.mark.L4
+    @pytest.mark.asyncio
     async def test_auth_service_configuration_hot_reload(self, auth_service):
         """Test 10: Auth service should support configuration hot reload."""
         initial_config = {

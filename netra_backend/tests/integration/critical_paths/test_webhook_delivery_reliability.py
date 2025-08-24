@@ -88,6 +88,7 @@ class WebhookReliabilityTester:
         await asyncio.sleep(5)
         return web.Response(status=200, text="OK")
         
+    @pytest.mark.asyncio
     async def test_webhook_registration(self) -> bool:
         """Test webhook registration and validation."""
         print("\n[REGISTRATION] Testing webhook registration...")
@@ -122,6 +123,7 @@ class WebhookReliabilityTester:
             print(f"[ERROR] Webhook registration failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_event_triggering(self) -> bool:
         """Test event triggering and payload generation."""
         print("\n[TRIGGER] Testing event triggering...")
@@ -177,6 +179,7 @@ class WebhookReliabilityTester:
             print(f"[ERROR] Event triggering failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_delivery_retries(self) -> bool:
         """Test webhook delivery retries."""
         print("\n[RETRY] Testing delivery retries...")
@@ -231,6 +234,7 @@ class WebhookReliabilityTester:
             print(f"[ERROR] Delivery retry test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_exponential_backoff(self) -> bool:
         """Test exponential backoff handling."""
         print("\n[BACKOFF] Testing exponential backoff...")
@@ -292,6 +296,7 @@ class WebhookReliabilityTester:
             print(f"[ERROR] Exponential backoff test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_dead_letter_queue(self) -> bool:
         """Test dead letter queue for failed webhooks."""
         print("\n[DLQ] Testing dead letter queue...")
@@ -324,6 +329,7 @@ class WebhookReliabilityTester:
             print(f"[ERROR] DLQ test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_signature_verification(self) -> bool:
         """Test webhook signature verification."""
         print("\n[SIGNATURE] Testing signature verification...")
@@ -380,6 +386,7 @@ class WebhookReliabilityTester:
             print(f"[ERROR] Signature verification test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_concurrent_processing(self) -> bool:
         """Test concurrent webhook processing."""
         print("\n[CONCURRENT] Testing concurrent processing...")
@@ -433,6 +440,7 @@ class WebhookReliabilityTester:
             print(f"[ERROR] Concurrent processing test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_circuit_breaker(self) -> bool:
         """Test circuit breaker for failing endpoints."""
         print("\n[CIRCUIT] Testing circuit breaker...")
@@ -503,6 +511,7 @@ class WebhookReliabilityTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_webhook_delivery_reliability():
     """Test webhook delivery reliability."""
     async with WebhookReliabilityTester() as tester:

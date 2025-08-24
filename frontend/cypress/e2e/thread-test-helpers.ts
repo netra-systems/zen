@@ -1,4 +1,4 @@
-import { Message, WebSocketMessage } from '@/types/chat';
+import { Message, WebSocketMessage } from '@/types/unified';
 
 /**
  * Thread Test Helpers

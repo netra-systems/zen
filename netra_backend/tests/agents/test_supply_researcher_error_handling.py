@@ -7,7 +7,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -23,26 +23,36 @@ class TestSupplyResearcherErrorHandling:
     @pytest.fixture
     def mock_db(self):
         """Create mock database session"""
+        # Mock: Generic component isolation for controlled unit testing
         db = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         db.query = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         db.add = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         db.commit = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         db.rollback = AsyncMock()
         return db
     
     @pytest.fixture
     def mock_llm_manager(self):
         """Create mock LLM manager"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm = Mock(spec=LLMManager)
         return llm
     
     @pytest.fixture
     def mock_supply_service(self, mock_db):
         """Create mock supply research service"""
+        # Mock: Component isolation for controlled unit testing
         service = Mock(spec=SupplyResearchService)
         service.db = mock_db
+        # Mock: Component isolation for controlled unit testing
         service.get_supply_items = Mock(return_value=[])
+        # Mock: Generic component isolation for controlled unit testing
         service.create_or_update_supply_item = Mock()
+        # Mock: Component isolation for controlled unit testing
         service.validate_supply_data = Mock(return_value=(True, []))
         return service
     
@@ -64,6 +74,7 @@ class TestSupplyResearcherErrorHandling:
         )
         
         with patch.object(agent.research_engine, 'call_deep_research_api', side_effect=Exception("API Error")):
+            # Mock: Component isolation for controlled unit testing
             mock_db.query().filter().first.return_value = Mock(status="failed")
             
             with pytest.raises(Exception):

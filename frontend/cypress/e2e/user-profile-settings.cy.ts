@@ -40,7 +40,7 @@
  * npx cypress run --spec "cypress/e2e/user-*.cy.ts"
  */
 
-import { WebSocketMessage } from '@/types/chat';
+import { WebSocketMessage } from '@/types/unified';
 
 describe('User Profile and Settings - Integration Tests', () => {
   beforeEach(() => {

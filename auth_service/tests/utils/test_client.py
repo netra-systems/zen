@@ -17,6 +17,7 @@ class AuthTestClient:
     """Test client with authentication helpers"""
     
     def __init__(self, client: Union[TestClient, httpx.AsyncClient] = None):
+        # Mock: Generic component isolation for controlled unit testing
         self.client = client or MagicMock()
         self.auth_token = None
         self.base_headers = {
@@ -223,6 +224,7 @@ class MockAuthTestClient(AuthTestClient):
     """Mock auth test client for unit tests without HTTP server"""
     
     def __init__(self):
+        # Mock: Generic component isolation for controlled unit testing
         super().__init__(client=MagicMock())
         self.mock_users = {}
         self.mock_sessions = {}

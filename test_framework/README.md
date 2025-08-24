@@ -279,7 +279,7 @@ TEST_VERBOSE=true
 ### Report Structure
 
 ```
-test_reports/modular/
+tests/test_reports/modular/
 ├── test_report_unit_20250813_120000.json
 ├── test_report_unit_20250813_120000.md
 ├── analysis/

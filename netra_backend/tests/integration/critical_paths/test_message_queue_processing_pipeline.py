@@ -44,6 +44,7 @@ class MessageQueueTester:
         if self.session:
             await self.session.close()
             
+    @pytest.mark.asyncio
     async def test_queue_health(self) -> bool:
         """Test queue service health."""
         print("\n[HEALTH] Testing queue service...")
@@ -60,6 +61,7 @@ class MessageQueueTester:
             print(f"[ERROR] Queue health check failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_message_publishing(self) -> bool:
         """Test message publishing to queue."""
         print("\n[PUBLISH] Testing message publishing...")
@@ -88,6 +90,7 @@ class MessageQueueTester:
             print(f"[ERROR] Message publishing failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_consumer_groups(self) -> bool:
         """Test consumer group management."""
         print("\n[CONSUMERS] Testing consumer groups...")
@@ -127,6 +130,7 @@ class MessageQueueTester:
             print(f"[ERROR] Consumer group test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_message_ordering(self) -> bool:
         """Test message ordering guarantees."""
         print("\n[ORDERING] Testing message ordering...")
@@ -169,6 +173,7 @@ class MessageQueueTester:
             print(f"[ERROR] Message ordering test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_dead_letter_queue(self) -> bool:
         """Test dead letter queue handling."""
         print("\n[DLQ] Testing dead letter queue...")
@@ -211,6 +216,7 @@ class MessageQueueTester:
             print(f"[ERROR] DLQ test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_retry_mechanisms(self) -> bool:
         """Test message retry mechanisms."""
         print("\n[RETRY] Testing retry mechanisms...")
@@ -248,6 +254,7 @@ class MessageQueueTester:
             print(f"[ERROR] Retry test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_batch_processing(self) -> bool:
         """Test batch message processing."""
         print("\n[BATCH] Testing batch processing...")
@@ -283,6 +290,7 @@ class MessageQueueTester:
             print(f"[ERROR] Batch processing test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_queue_overflow(self) -> bool:
         """Test queue overflow handling."""
         print("\n[OVERFLOW] Testing queue overflow...")
@@ -315,6 +323,7 @@ class MessageQueueTester:
             print(f"[ERROR] Queue overflow test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_priority_processing(self) -> bool:
         """Test priority message processing."""
         print("\n[PRIORITY] Testing priority processing...")
@@ -376,6 +385,7 @@ class MessageQueueTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_message_queue_processing_pipeline():
     """Test message queue processing pipeline."""
     async with MessageQueueTester() as tester:

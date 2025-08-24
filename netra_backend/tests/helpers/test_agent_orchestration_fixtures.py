@@ -14,7 +14,7 @@ import asyncio
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 from netra_backend.app.core.exceptions_base import NetraException
 

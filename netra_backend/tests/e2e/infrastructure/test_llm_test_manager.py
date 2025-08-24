@@ -11,7 +11,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import os
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -67,6 +67,7 @@ class TestLLMTestManager:
             assert manager.config.enabled
             assert LLMTestModel.GPT_4 in manager.config.models
             
+    @pytest.mark.asyncio
     async def test_mock_response_generation(self, llm_manager, sample_request):
         """Test mock response generation when real LLMs disabled."""
         response = await llm_manager.generate_response(sample_request)
@@ -96,6 +97,7 @@ class TestLLMTestManager:
         assert "available_models" in stats
         assert "cache_enabled" in stats
         
+    @pytest.mark.asyncio
     async def test_fallback_behavior(self, llm_manager):
         """Test fallback to mock when real clients unavailable."""
         request = LLMTestRequest(
@@ -114,6 +116,7 @@ class TestLLMTestManager:
         # Should fallback to mocks when no real API keys
         assert len(manager._clients) > 0  # Mock clients created
         
+    @pytest.mark.asyncio
     async def test_response_time_tracking(self, llm_manager, sample_request):
         """Test response time tracking in responses."""
         response = await llm_manager.generate_response(sample_request)

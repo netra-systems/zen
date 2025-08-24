@@ -30,7 +30,7 @@ import httpx
 import jwt
 import pytest
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 # Import from correct e2e path or use mocks if not available
 try:
@@ -40,14 +40,16 @@ except ImportError:
     get_staging_suite = AsyncMock
 # from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
 # from app.auth_integration.auth import create_access_token
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.redis_manager import RedisManager
 
+# Mock: Generic component isolation for controlled unit testing
 create_access_token = AsyncMock()
 # from app.core.unified.jwt_validator import validate_token_jwt
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
+# Mock: Generic component isolation for controlled unit testing
 validate_token_jwt = AsyncMock()
 from netra_backend.app.core.health_checkers import HealthChecker
 
@@ -326,6 +328,7 @@ class APIGatewayOrchestrationL4TestSuite:
                 "response_time": request_duration
             }
     
+    @pytest.mark.asyncio
     async def test_authentication_flow_l4(self) -> Dict[str, Any]:
         """Test authentication flow through API gateway."""
         auth_test_results = {
@@ -379,6 +382,7 @@ class APIGatewayOrchestrationL4TestSuite:
         
         return auth_test_results
     
+    @pytest.mark.asyncio
     async def test_rate_limiting_l4(self) -> Dict[str, Any]:
         """Test rate limiting enforcement through API gateway."""
         rate_limit_results = {
@@ -426,6 +430,7 @@ class APIGatewayOrchestrationL4TestSuite:
         
         return rate_limit_results
     
+    @pytest.mark.asyncio
     async def test_response_caching_l4(self) -> Dict[str, Any]:
         """Test response caching through API gateway."""
         caching_results = {
@@ -492,6 +497,7 @@ class APIGatewayOrchestrationL4TestSuite:
         
         return caching_results
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_l4(self) -> Dict[str, Any]:
         """Test circuit breaker functionality through API gateway."""
         circuit_breaker_results = {
@@ -548,6 +554,7 @@ class APIGatewayOrchestrationL4TestSuite:
         
         return circuit_breaker_results
     
+    @pytest.mark.asyncio
     async def test_request_routing_l4(self) -> Dict[str, Any]:
         """Test request routing accuracy through API gateway."""
         routing_results = {
@@ -633,6 +640,7 @@ async def api_gateway_orchestration_l4_suite():
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_api_gateway_authentication_flow_l4(api_gateway_orchestration_l4_suite):
     """Test API gateway authentication flow with real JWT validation."""
     # Test authentication flow
@@ -651,6 +659,7 @@ async def test_api_gateway_authentication_flow_l4(api_gateway_orchestration_l4_s
 @pytest.mark.asyncio
 @pytest.mark.staging  
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_api_gateway_rate_limiting_l4(api_gateway_orchestration_l4_suite):
     """Test API gateway rate limiting enforcement."""
     # Test rate limiting
@@ -671,6 +680,7 @@ async def test_api_gateway_rate_limiting_l4(api_gateway_orchestration_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_api_gateway_response_caching_l4(api_gateway_orchestration_l4_suite):
     """Test API gateway response caching functionality."""
     # Test response caching
@@ -686,6 +696,7 @@ async def test_api_gateway_response_caching_l4(api_gateway_orchestration_l4_suit
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_api_gateway_circuit_breaker_l4(api_gateway_orchestration_l4_suite):
     """Test API gateway circuit breaker functionality."""
     # Test circuit breaker
@@ -706,6 +717,7 @@ async def test_api_gateway_circuit_breaker_l4(api_gateway_orchestration_l4_suite
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_api_gateway_request_routing_l4(api_gateway_orchestration_l4_suite):
     """Test API gateway request routing accuracy."""
     # Test request routing
@@ -723,6 +735,7 @@ async def test_api_gateway_request_routing_l4(api_gateway_orchestration_l4_suite
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_api_gateway_performance_under_load_l4(api_gateway_orchestration_l4_suite):
     """Test API gateway performance under realistic load conditions."""
     performance_start = time.time()

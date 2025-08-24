@@ -22,7 +22,6 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, List, Optional
 
 # Add project root to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.frontend_starter import FrontendStarter
@@ -84,16 +83,27 @@ class TestCriticalDevLauncherIssues(unittest.TestCase):
     
     def _create_launcher_with_mocks(self, config):
         """Helper to create launcher with all necessary mocks."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.launcher.setup_logging'):
+            # Mock: Component isolation for testing without external dependencies
             with patch('dev_launcher.launcher.check_emoji_support', return_value=False):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('dev_launcher.launcher.HealthMonitor'):
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('dev_launcher.launcher.ProcessManager'):
+                        # Mock: Component isolation for testing without external dependencies
                         with patch('dev_launcher.launcher.LogManager'):
+                            # Mock: Component isolation for testing without external dependencies
                             with patch('dev_launcher.launcher.ServiceDiscovery'):
+                                # Mock: Component isolation for testing without external dependencies
                                 with patch('dev_launcher.launcher.EnvironmentChecker'):
+                                    # Mock: Component isolation for testing without external dependencies
                                     with patch('dev_launcher.launcher.ServiceStartupCoordinator'):
+                                        # Mock: Component isolation for testing without external dependencies
                                         with patch('dev_launcher.launcher.SummaryDisplay'):
+                                            # Mock: Component isolation for testing without external dependencies
                                             with patch('dev_launcher.launcher.StartupOptimizer'):
+                                                # Mock: Component isolation for testing without external dependencies
                                                 with patch('dev_launcher.launcher.CacheManager'):
                                                     return DevLauncher(config)
     
@@ -122,6 +132,7 @@ class TestCriticalDevLauncherIssues(unittest.TestCase):
         args.no_turbopack = True
         args.no_parallel = False
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.config.find_project_root', return_value=self.test_path):
             config = LauncherConfig.from_args(args)
             config.project_root = self.test_path
@@ -136,14 +147,17 @@ JWT_SECRET_KEY=super_secret_key_at_least_64_characters_long_for_testing_purposes
 ''')
             
             # Mock service discovery to return None (simulating missing backend info)
+            # Mock: Generic component isolation for controlled unit testing
             mock_service_discovery = MagicMock()
             mock_service_discovery.read_backend_info.return_value = None
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_log_manager = MagicMock()
             
             # Create FrontendStarter
             frontend_starter = FrontendStarter(
                 config=config,
+                # Mock: Generic component isolation for controlled unit testing
                 services_config=MagicMock(),
                 log_manager=mock_log_manager,
                 service_discovery=mock_service_discovery,
@@ -208,12 +222,16 @@ JWT_SECRET_KEY=super_secret_key_at_least_64_characters_long_for_testing_purposes
                 super().__init__(message)
         
         # Mock database connector that attempts ClickHouse connection
+        # Mock: Generic component isolation for controlled unit testing
         mock_connector = MagicMock()
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_connector.validate_clickhouse_connection = Mock(
             side_effect=MockClickHouseError("Password incorrect", 194)
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.config.find_project_root', return_value=self.test_path):
+            # Mock: Generic component isolation for controlled unit testing
             args = MagicMock()
             args.backend_port = None
             args.frontend_port = 3000
@@ -411,6 +429,7 @@ JWT_SECRET_KEY=super_secret_key_at_least_64_characters_long_for_testing_purposes
         have been fully loaded from .env files and secret sources.
         """
         # Create launcher config
+        # Mock: Generic component isolation for controlled unit testing
         args = MagicMock()
         args.backend_port = None
         args.frontend_port = 3000
@@ -436,6 +455,7 @@ CLICKHOUSE_PASSWORD=test_password
 REDIS_URL=redis://localhost:6379
 ''')
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.config.find_project_root', return_value=self.test_path):
             config = LauncherConfig.from_args(args)
             config.project_root = self.test_path
@@ -513,19 +533,21 @@ REDIS_URL=redis://localhost:6379
         env_local = self.test_path / '.env.local'
         env_local.write_text(f'{test_var_name}=from_env_local')
         
-        # Layer 4: OS environment (highest priority)
-        os.environ[test_var_name] = 'from_os_environment'
-        
         # Load using unified config
         env = get_env()
         env.reset_to_original()
         env.disable_isolation()
         
+        # Layer 4: OS environment (highest priority)
+        # Must set AFTER reset_to_original() which clears the environment
+        os.environ[test_var_name] = 'from_os_environment'
+        
         # Load files in priority order (reversed for proper layering)
+        # Later files override earlier ones
         for file_name in ['.secrets', '.env', '.env.local']:
             file_path = self.test_path / file_name
             if file_path.exists():
-                env.load_from_file(str(file_path))
+                env.load_from_file(str(file_path), override_existing=True)
         
         secrets = {test_var_name: env.get(test_var_name)}
         
@@ -542,7 +564,7 @@ REDIS_URL=redis://localhost:6379
         for file_name in ['.secrets', '.env', '.env.local']:
             file_path = self.test_path / file_name
             if file_path.exists():
-                env.load_from_file(str(file_path))
+                env.load_from_file(str(file_path), override_existing=True)
         secrets = {test_var_name: env.get(test_var_name)}
         
         self.assertEqual(
@@ -557,7 +579,7 @@ REDIS_URL=redis://localhost:6379
         for file_name in ['.secrets', '.env', '.env.local']:
             file_path = self.test_path / file_name
             if file_path.exists():
-                env.load_from_file(str(file_path))
+                env.load_from_file(str(file_path), override_existing=True)
         secrets = {test_var_name: env.get(test_var_name)}
         
         self.assertEqual(
@@ -572,7 +594,7 @@ REDIS_URL=redis://localhost:6379
         for file_name in ['.secrets', '.env', '.env.local']:
             file_path = self.test_path / file_name
             if file_path.exists():
-                env.load_from_file(str(file_path))
+                env.load_from_file(str(file_path), override_existing=True)
         secrets = {test_var_name: env.get(test_var_name)}
         
         self.assertEqual(
@@ -589,6 +611,7 @@ REDIS_URL=redis://localhost:6379
         time to complete, especially during parallel pre-checks.
         """
         # Create minimal config for async testing
+        # Mock: Generic component isolation for controlled unit testing
         args = MagicMock()
         args.backend_port = None
         args.frontend_port = 3000
@@ -605,6 +628,7 @@ REDIS_URL=redis://localhost:6379
         args.no_turbopack = True
         args.no_parallel = True  # Disable parallel for this test
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.config.find_project_root', return_value=self.test_path):
             config = LauncherConfig.from_args(args)
             config.project_root = self.test_path
@@ -697,7 +721,9 @@ FRONTEND_PORT=3000
             return result
         
         with patch.object(env, 'load_from_file', timed_load):
+            # Mock: Component isolation for testing without external dependencies
             with patch('dev_launcher.config.find_project_root', return_value=self.test_path):
+                # Mock: Generic component isolation for controlled unit testing
                 args = MagicMock()
                 args.backend_port = None
                 args.frontend_port = 3000
@@ -720,6 +746,7 @@ FRONTEND_PORT=3000
                 track_operation("config_created")
                 
                 # Track frontend starter creation timing
+                # Mock: Generic component isolation for controlled unit testing
                 mock_launcher = MagicMock()
                 
                 # Track when errors would be displayed
@@ -743,12 +770,15 @@ FRONTEND_PORT=3000
                     env.load_from_file(str(env_file_path))
                 
                 # Now test component initialization timing
+                # Mock: Generic component isolation for controlled unit testing
                 mock_service_discovery = MagicMock()
                 mock_service_discovery.read_backend_info.return_value = None
                 
                 frontend_starter = FrontendStarter(
                     config=config,
+                    # Mock: Generic component isolation for controlled unit testing
                     services_config=MagicMock(),
+                    # Mock: Generic component isolation for controlled unit testing
                     log_manager=MagicMock(),
                     service_discovery=mock_service_discovery,
                     use_emoji=False

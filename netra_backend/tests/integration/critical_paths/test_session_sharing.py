@@ -10,7 +10,7 @@ from pathlib import Path
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -24,6 +24,7 @@ class TestSessionSharingL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_sharing_across_services(self):
         """Test session sharing between microservices"""
         session_service = SessionService()
@@ -47,6 +48,7 @@ class TestSessionSharingL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_device_binding(self):
         """Test session binding to specific devices"""
         session_service = SessionService()
@@ -75,6 +77,7 @@ class TestSessionSharingL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_delegation(self):
         """Test session delegation/impersonation"""
         session_service = SessionService()
@@ -101,6 +104,7 @@ class TestSessionSharingL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_federation(self):
         """Test session federation across domains"""
         session_service = SessionService()
@@ -129,6 +133,7 @@ class TestSessionSharingL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_scope_restrictions(self):
         """Test session scope and permission restrictions"""
         session_service = SessionService()

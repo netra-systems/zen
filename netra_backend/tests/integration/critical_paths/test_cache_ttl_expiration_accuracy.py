@@ -118,19 +118,30 @@ class CacheTTLExpirationAccuracyL3Manager:
                 redis_urls[name] = url
                 
                 # Use mock Redis client to avoid event loop conflicts
-                from unittest.mock import AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
                 client = AsyncMock()
                 client.ping = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.get = AsyncMock(return_value=None)
+                # Mock: Generic component isolation for controlled unit testing
                 client.set = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 client.setex = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.delete = AsyncMock(return_value=0)
+                # Mock: Async component isolation for testing without real async operations
                 client.exists = AsyncMock(return_value=False)
+                # Mock: Async component isolation for testing without real async operations
                 client.mget = AsyncMock(return_value=[])
+                # Mock: Generic component isolation for controlled unit testing
                 client.mset = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.info = AsyncMock(return_value={"role": "master"})
+                # Mock: Async component isolation for testing without real async operations
                 client.scan_iter = AsyncMock(return_value=iter([]))
+                # Mock: Async component isolation for testing without real async operations
                 client.ttl = AsyncMock(return_value=-1)
+                # Mock: Generic component isolation for controlled unit testing
                 client.expire = AsyncMock()
                 self.redis_clients[name] = client
                 
@@ -142,6 +153,7 @@ class CacheTTLExpirationAccuracyL3Manager:
         
         return redis_urls
     
+    @pytest.mark.asyncio
     async def test_ttl_expiration_accuracy(self, ttl_seconds: float, test_count: int, redis_instance: str = "ttl_primary") -> Dict[str, Any]:
         """Test TTL expiration accuracy for specific TTL value."""
         client = self.redis_clients[redis_instance]
@@ -219,6 +231,7 @@ class CacheTTLExpirationAccuracyL3Manager:
         
         return accuracy_results
     
+    @pytest.mark.asyncio
     async def test_ttl_precision_under_load(self, concurrent_ttls: int, ttl_range: Tuple[float, float]) -> Dict[str, Any]:
         """Test TTL precision under concurrent load."""
         min_ttl, max_ttl = ttl_range
@@ -278,6 +291,7 @@ class CacheTTLExpirationAccuracyL3Manager:
             "total_time": total_time
         }
     
+    @pytest.mark.asyncio
     async def test_memory_recovery_after_ttl_expiration(self, key_count: int, data_size_kb: int) -> Dict[str, Any]:
         """Test memory recovery after TTL expiration."""
         client = self.redis_clients["ttl_memory"]
@@ -342,6 +356,7 @@ class CacheTTLExpirationAccuracyL3Manager:
             "expiration_rate": (expired_keys / key_count * 100) if key_count > 0 else 0
         }
     
+    @pytest.mark.asyncio
     async def test_bulk_ttl_accuracy(self, bulk_size: int, ttl_distribution: Dict[str, int]) -> Dict[str, Any]:
         """Test TTL accuracy for bulk operations with different TTL values."""
         client = self.redis_clients["ttl_bulk"]
@@ -406,6 +421,7 @@ class CacheTTLExpirationAccuracyL3Manager:
             ]) if expiration_results else 0
         }
     
+    @pytest.mark.asyncio
     async def test_ttl_edge_cases(self) -> Dict[str, Any]:
         """Test TTL accuracy for edge cases."""
         client = self.redis_clients["ttl_primary"]
@@ -532,6 +548,7 @@ async def ttl_accuracy_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_short_ttl_expiration_accuracy(ttl_accuracy_manager):
     """L3: Test TTL expiration accuracy for short TTL values."""
     result = await ttl_accuracy_manager.test_ttl_expiration_accuracy(2.0, 20)
@@ -549,6 +566,7 @@ async def test_short_ttl_expiration_accuracy(ttl_accuracy_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_ttl_precision_under_concurrent_load(ttl_accuracy_manager):
     """L3: Test TTL precision under concurrent load conditions."""
     result = await ttl_accuracy_manager.test_ttl_precision_under_load(50, (1.0, 5.0))
@@ -563,6 +581,7 @@ async def test_ttl_precision_under_concurrent_load(ttl_accuracy_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_memory_recovery_after_ttl_expiration(ttl_accuracy_manager):
     """L3: Test memory recovery after TTL expiration."""
     result = await ttl_accuracy_manager.test_memory_recovery_after_ttl_expiration(100, 5)  # 100 keys, 5KB each
@@ -577,6 +596,7 @@ async def test_memory_recovery_after_ttl_expiration(ttl_accuracy_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_bulk_ttl_accuracy_mixed_values(ttl_accuracy_manager):
     """L3: Test TTL accuracy for bulk operations with mixed TTL values."""
     ttl_distribution = {
@@ -600,6 +620,7 @@ async def test_bulk_ttl_accuracy_mixed_values(ttl_accuracy_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_ttl_edge_cases_handling(ttl_accuracy_manager):
     """L3: Test TTL accuracy for edge cases and special scenarios."""
     result = await ttl_accuracy_manager.test_ttl_edge_cases()
@@ -620,6 +641,7 @@ async def test_ttl_edge_cases_handling(ttl_accuracy_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_ttl_expiration_accuracy_sla_compliance(ttl_accuracy_manager):
     """L3: Test comprehensive TTL expiration accuracy SLA compliance."""
     # Execute comprehensive test suite

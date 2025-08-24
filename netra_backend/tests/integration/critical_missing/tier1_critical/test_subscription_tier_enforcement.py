@@ -53,9 +53,10 @@ async def permission_service(l2_services):
     """Tool permission service with mock Redis"""
     orchestrator, connections = l2_services
     # Use mock Redis client for testing
-    return ToolPermissionService(None)
+    yield ToolPermissionService(None)
 
 @pytest.fixture
+@pytest.mark.asyncio
 async def test_users():
     """Test users for different subscription tiers"""
     return {
@@ -86,6 +87,7 @@ async def reset_services(l2_services):
 class TestSubscriptionTierEnforcement:
     """Test subscription tier enforcement across service boundaries"""
 
+    @pytest.mark.asyncio
     async def test_free_tier_tool_limits(self, permission_service, test_users, reset_services):
         """Test free tier tool access limitations < 10ms"""
         user = test_users["free_user"]
@@ -102,6 +104,7 @@ class TestSubscriptionTierEnforcement:
         assert not result.allowed
         assert "upgrade" in result.reason.lower()
 
+    @pytest.mark.asyncio
     async def test_pro_tier_feature_access(self, permission_service, test_users, reset_services):
         """Test pro tier feature access validation"""
         user = test_users["pro_user"]
@@ -112,6 +115,7 @@ class TestSubscriptionTierEnforcement:
         result = await permission_service.check_tool_permission(context)
         assert result.allowed
 
+    @pytest.mark.asyncio
     async def test_enterprise_tier_unlimited_access(self, permission_service, test_users, reset_services):
         """Test enterprise tier unlimited tool access"""
         user = test_users["enterprise_user"]
@@ -122,6 +126,7 @@ class TestSubscriptionTierEnforcement:
         result = await permission_service.check_tool_permission(context)
         assert result.allowed
 
+    @pytest.mark.asyncio
     async def test_expired_subscription_enforcement(self, permission_service, test_users, reset_services):
         """Test expired subscription tier enforcement"""
         user = test_users["expired_user"]
@@ -133,6 +138,7 @@ class TestSubscriptionTierEnforcement:
         assert not result.allowed
         assert "expired" in result.reason.lower()
 
+    @pytest.mark.asyncio
     async def test_tier_upgrade_immediate_effect(self, permission_service, test_users, reset_services):
         """Test tier upgrade takes immediate effect"""
         user = test_users["free_user"]
@@ -149,6 +155,7 @@ class TestSubscriptionTierEnforcement:
         result_after = await permission_service.check_tool_permission(context)
         assert result_after.allowed
 
+    @pytest.mark.asyncio
     async def test_tier_downgrade_enforcement(self, permission_service, test_users, reset_services):
         """Test tier downgrade enforcement"""
         user = test_users["pro_user"]
@@ -165,6 +172,7 @@ class TestSubscriptionTierEnforcement:
         result_after = await permission_service.check_tool_permission(context)
         assert not result_after.allowed
 
+    @pytest.mark.asyncio
     async def test_feature_gating_per_tier(self, permission_service, test_users, reset_services):
         """Test feature gating based on subscription tier"""
         contexts = [
@@ -182,6 +190,7 @@ class TestSubscriptionTierEnforcement:
             result = await permission_service.check_tool_permission(context)
             assert result.allowed == expected_allowed
 
+    @pytest.mark.asyncio
     async def test_cross_service_tier_validation(self, permission_service, test_users, reset_services):
         """Test tier validation consistency across services"""
         user = test_users["pro_user"]

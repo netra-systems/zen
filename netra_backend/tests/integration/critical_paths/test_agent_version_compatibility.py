@@ -23,7 +23,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -354,6 +354,7 @@ async def version_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_version_registration_and_retrieval(version_manager):
     """Test version registration and retrieval."""
     manager = version_manager
@@ -375,6 +376,7 @@ async def test_version_registration_and_retrieval(version_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_version_compatibility_check(version_manager):
     """Test version compatibility checking."""
     manager = version_manager
@@ -395,6 +397,7 @@ async def test_version_compatibility_check(version_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_upgrade_path_calculation(version_manager):
     """Test upgrade path calculation."""
     manager = version_manager
@@ -411,6 +414,7 @@ async def test_upgrade_path_calculation(version_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_migration_planning(version_manager):
     """Test migration planning."""
     manager = version_manager
@@ -429,6 +433,7 @@ async def test_migration_planning(version_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_migration_execution(version_manager):
     """Test migration step execution."""
     manager = version_manager
@@ -453,6 +458,7 @@ async def test_migration_execution(version_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_migration_rollback(version_manager):
     """Test migration rollback."""
     manager = version_manager
@@ -472,6 +478,7 @@ async def test_migration_rollback(version_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_version_operations(version_manager):
     """Test concurrent version operations."""
     manager = version_manager
@@ -511,6 +518,7 @@ async def test_concurrent_version_operations(version_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_version_compatibility_performance(version_manager):
     """Benchmark version compatibility performance."""
     manager = version_manager
@@ -540,6 +548,7 @@ async def test_version_compatibility_performance(version_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_version_registry_persistence(version_manager):
     """Test version registry persistence."""
     manager = version_manager

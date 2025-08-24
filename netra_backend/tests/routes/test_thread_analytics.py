@@ -12,10 +12,8 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -35,6 +33,7 @@ class TestThreadAnalytics:
             "include_breakdown": True
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.get_thread_statistics') as mock_stats:
             mock_stats.return_value = {
                 "total_threads": 45,
@@ -107,6 +106,7 @@ class TestThreadAnalytics:
             "dry_run": False
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.cleanup_old_threads') as mock_cleanup:
             mock_cleanup.return_value = {
                 "processed_threads": 23,
@@ -170,6 +170,7 @@ class TestThreadAnalytics:
             "aggregation": "daily"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_analytics.get_dashboard_data') as mock_analytics:
             mock_analytics.return_value = {
                 "time_range": "last_quarter",
@@ -252,6 +253,7 @@ class TestThreadAnalytics:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.bulk_operation') as mock_bulk:
             mock_bulk.return_value = {
                 "operation": "archive",
@@ -311,6 +313,7 @@ class TestThreadAnalytics:
             "language": "auto"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.analyze_sentiment') as mock_sentiment:
             mock_sentiment.return_value = {
                 "analysis_id": "sentiment_456",
@@ -397,6 +400,7 @@ class TestThreadAnalytics:
             "granularity": "hourly"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.get_performance_metrics') as mock_metrics:
             mock_metrics.return_value = {
                 "timeframe": "last_7_days",

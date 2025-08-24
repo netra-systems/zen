@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.database.connection_manager import get_connection_manager
+from netra_backend.app.services.database.connection_manager import get_connection_monitor
 
 logger = central_logger.get_logger(__name__)
 
@@ -157,7 +157,7 @@ class MigrationRollbackService:
         """Create a comprehensive snapshot before migration execution."""
         logger.info(f"Creating migration snapshot for {migration_id}")
         
-        connection_manager = get_connection_manager()
+        connection_manager = get_connection_monitor()
         
         async with connection_manager.get_session() as session:
             # Get table schemas
@@ -300,7 +300,7 @@ class MigrationRollbackService:
             raise ValueError(f"No snapshot found for migration {migration_id}")
         
         snapshot = self._snapshots[migration_id]
-        connection_manager = get_connection_manager()
+        connection_manager = get_connection_monitor()
         
         results = {
             "migration_id": migration_id,
@@ -497,7 +497,7 @@ class MigrationRollbackService:
         phase: str
     ) -> None:
         """Run safety checks during rollback."""
-        connection_manager = get_connection_manager()
+        connection_manager = get_connection_monitor()
         
         async with connection_manager.get_session() as session:
             for check in checks:
@@ -530,7 +530,7 @@ class MigrationRollbackService:
     
     async def _execute_rollback_sql(self, execution: RollbackExecution, rollback_sql: List[str]) -> None:
         """Execute rollback SQL statements."""
-        connection_manager = get_connection_manager()
+        connection_manager = get_connection_monitor()
         
         async with connection_manager.get_session() as session:
             for i, sql in enumerate(rollback_sql):
@@ -551,7 +551,7 @@ class MigrationRollbackService:
     async def _verify_rollback_success(self, execution: RollbackExecution, migration_id: str) -> None:
         """Verify that rollback was successful."""
         # Basic verification - could be enhanced with specific checks
-        connection_manager = get_connection_manager()
+        connection_manager = get_connection_monitor()
         
         async with connection_manager.get_session() as session:
             # Test basic connectivity

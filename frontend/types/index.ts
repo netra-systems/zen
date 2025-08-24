@@ -1,6 +1,6 @@
 // frontend/types/index.ts
 
-// Export backend auto-generated types from modular files (split from original backend_schema_auto_generated)
+// Export backend types from canonical modular files
 export * from './backend_schema_config';
 export * from './backend_schema_auth';
 export * from './backend_schema_tools';
@@ -33,5 +33,5 @@ export * from './domains/threads';
 export { createMessage, Message, MessageRole } from './domains/messages';
 export { getThreadTitle, createThread, Thread } from './domains/threads';
 
-// Only export from other files if they have unique types not in backend_schema_auto_generated
-// Most types are already defined in backend_schema_auto_generated
+// Export from canonical sources following SSOT principle
+// All types use single source of truth from backend-sync and domains

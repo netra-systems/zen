@@ -115,6 +115,7 @@ class MalformedPayloadTestClient:
         """Connect to WebSocket server."""
         try:
             # Mock connection for testing
+            # Mock: Generic component isolation for controlled unit testing
             self.websocket = AsyncMock()
             self.is_connected = True
             logger.info(f"MalformedPayloadTestClient connected: {self.connection_id}")

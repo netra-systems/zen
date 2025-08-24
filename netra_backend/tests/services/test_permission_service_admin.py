@@ -7,8 +7,6 @@ Split from test_permission_service.py to maintain 450-line limit
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import os
 from unittest.mock import MagicMock, Mock, patch
 
@@ -29,6 +27,7 @@ class TestAdminChecks:
     
     def test_is_admin_or_higher(self):
         """Test is_admin_or_higher checks"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "admin"
         user.is_superuser = False
@@ -46,6 +45,7 @@ class TestAdminChecks:
     
     def test_is_developer_or_higher(self):
         """Test is_developer_or_higher checks"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "developer"
         user.is_developer = True
@@ -64,6 +64,7 @@ class TestPermissionGroups:
     
     def test_has_any_permission(self):
         """Test has_any_permission checks"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "developer"
         user.permissions = None
@@ -78,6 +79,7 @@ class TestPermissionGroups:
     
     def test_has_all_permissions(self):
         """Test has_all_permissions checks"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "developer"
         user.permissions = None
@@ -95,6 +97,7 @@ class TestSecurityEdgeCases:
     
     def test_sql_injection_in_permission_check(self):
         """Test that SQL injection attempts don't bypass permissions"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "standard_user'; DROP TABLE users; --"
         user.permissions = None
@@ -104,6 +107,7 @@ class TestSecurityEdgeCases:
     
     def test_case_sensitivity_in_roles(self):
         """Test that role checks are case-sensitive"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "ADMIN"  # Uppercase
         user.permissions = None
@@ -113,7 +117,9 @@ class TestSecurityEdgeCases:
     
     def test_permission_escalation_attempt(self):
         """Test that users cannot escalate their own permissions"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "hacker@evil.com"
         user.role = "standard_user"
@@ -134,7 +140,9 @@ class TestRoleManagement:
     
     def test_grant_permission(self):
         """Test granting additional permissions to user"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@example.com"
         user.permissions = None
@@ -147,7 +155,9 @@ class TestRoleManagement:
     
     def test_grant_permission_existing_permissions(self):
         """Test granting permission when user already has permissions"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@example.com"
         user.permissions = {"additional": ["existing_perm"]}
@@ -160,7 +170,9 @@ class TestRoleManagement:
     
     def test_grant_permission_duplicate(self):
         """Test granting permission that user already has"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@example.com"
         user.permissions = {"additional": ["existing_perm"]}
@@ -173,7 +185,9 @@ class TestRoleManagement:
     
     def test_revoke_permission(self):
         """Test revoking permissions from user"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@example.com"
         user.permissions = None
@@ -186,7 +200,9 @@ class TestRoleManagement:
     
     def test_revoke_permission_existing(self):
         """Test revoking permission when user already has revoked permissions"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@example.com"
         user.permissions = {"revoked": ["old_revoked"]}
@@ -199,7 +215,9 @@ class TestRoleManagement:
     
     def test_set_user_role_valid(self):
         """Test setting user role to valid role"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@example.com"
         user.role = "standard_user"
@@ -214,7 +232,9 @@ class TestRoleManagement:
     
     def test_set_user_role_invalid(self):
         """Test setting user role to invalid role"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@example.com"
         user.role = "standard_user"
@@ -239,6 +259,7 @@ class TestPermissionLogic:
     
     def test_custom_permissions_override_role(self):
         """Test that custom permissions can override role permissions"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "standard_user"
         user.permissions = {
@@ -254,6 +275,7 @@ class TestPermissionLogic:
     
     def test_super_admin_permissions_comprehensive(self):
         """Test that super admin gets comprehensive permission set"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "super_admin"
         user.permissions = None

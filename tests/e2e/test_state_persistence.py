@@ -206,8 +206,11 @@ def reconnection_manager(persistence_tester):
 @pytest.fixture
 def mock_db_session():
     """Mock database session for state operations."""
+    # Mock: Session isolation for controlled testing without external state
     session = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.begin.return_value.__aenter__ = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.begin.return_value.__aexit__ = AsyncMock()
     return session
 

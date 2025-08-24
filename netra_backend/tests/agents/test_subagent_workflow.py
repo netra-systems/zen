@@ -4,7 +4,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -16,10 +16,12 @@ from netra_backend.app.llm.llm_manager import LLMManager
 
 @pytest.fixture
 def mock_db_session():
+    # Mock: Generic component isolation for controlled unit testing
     return AsyncMock()
 
 @pytest.fixture
 def mock_llm_manager():
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = MagicMock(spec=LLMManager)
     # Create AsyncMock with proper return values
     async def mock_ask_llm(*args, **kwargs):
@@ -46,10 +48,12 @@ def mock_llm_manager():
 
 @pytest.fixture
 def mock_websocket_manager():
+    # Mock: Generic component isolation for controlled unit testing
     return AsyncMock()
 
 @pytest.fixture
 def mock_tool_dispatcher():
+    # Mock: Generic component isolation for controlled unit testing
     return AsyncMock()
 
 # @pytest.mark.skip(reason="Complex mock setup issues with coroutines - needs refactoring")
@@ -60,6 +64,7 @@ async def test_subagent_workflow_end_to_end(mock_db_session, mock_llm_manager, m
     with patch('app.agents.supervisor_consolidated.state_persistence_service') as mock_state_persistence:
         mock_state_persistence.save_agent_state = AsyncMock()
         mock_state_persistence.load_agent_state = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         mock_state_persistence.get_thread_context = AsyncMock(return_value=None)
         
         supervisor = Supervisor(mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher)

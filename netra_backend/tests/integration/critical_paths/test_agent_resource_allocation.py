@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, NamedTuple, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
@@ -479,6 +479,7 @@ async def resource_allocation_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_resource_allocation(resource_allocation_manager):
     """Test basic resource allocation and release."""
     manager = resource_allocation_manager
@@ -509,6 +510,7 @@ async def test_basic_resource_allocation(resource_allocation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_resource_quota_limits(resource_allocation_manager):
     """Test resource allocation with quota limits."""
     manager = resource_allocation_manager
@@ -535,6 +537,7 @@ async def test_resource_quota_limits(resource_allocation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_priority_based_allocation(resource_allocation_manager):
     """Test priority-based resource allocation."""
     manager = resource_allocation_manager
@@ -561,6 +564,7 @@ async def test_priority_based_allocation(resource_allocation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_resource_usage_monitoring(resource_allocation_manager):
     """Test resource usage monitoring and efficiency calculation."""
     manager = resource_allocation_manager
@@ -588,6 +592,7 @@ async def test_resource_usage_monitoring(resource_allocation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_auto_scaling_evaluation(resource_allocation_manager):
     """Test auto-scaling evaluation and recommendations."""
     manager = resource_allocation_manager
@@ -627,6 +632,7 @@ async def test_auto_scaling_evaluation(resource_allocation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_allocation_expiration_cleanup(resource_allocation_manager):
     """Test automatic cleanup of expired allocations."""
     manager = resource_allocation_manager
@@ -653,6 +659,7 @@ async def test_allocation_expiration_cleanup(resource_allocation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_resource_requests(resource_allocation_manager):
     """Test concurrent resource allocation requests."""
     manager = resource_allocation_manager
@@ -683,6 +690,7 @@ async def test_concurrent_resource_requests(resource_allocation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_resource_allocation_fairness(resource_allocation_manager):
     """Test fair resource allocation across agents."""
     manager = resource_allocation_manager
@@ -714,6 +722,7 @@ async def test_resource_allocation_fairness(resource_allocation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_resource_allocation_summary(resource_allocation_manager):
     """Test resource allocation summary reporting."""
     manager = resource_allocation_manager
@@ -744,6 +753,7 @@ async def test_resource_allocation_summary(resource_allocation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_resource_allocation_performance(resource_allocation_manager):
     """Benchmark resource allocation performance."""
     manager = resource_allocation_manager

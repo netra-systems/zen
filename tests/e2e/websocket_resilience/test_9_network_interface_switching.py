@@ -88,6 +88,7 @@ class NetworkSwitchingTestClient:
             current_interface = self.simulator.get_current_interface()
             
             # Mock connection with current network interface
+            # Mock: Generic component isolation for controlled unit testing
             self.websocket = AsyncMock()
             self.websocket.local_address = (current_interface['ip'], 12345)
             self.websocket.remote_address = ("server.example.com", 8000)

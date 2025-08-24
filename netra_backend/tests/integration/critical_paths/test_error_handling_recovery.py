@@ -25,6 +25,7 @@ from test_framework.test_patterns import L3IntegrationTest
 class TestErrorHandlingRecovery(L3IntegrationTest):
     """Test error handling and recovery from multiple angles."""
     
+    @pytest.mark.asyncio
     async def test_database_connection_failure_recovery(self):
         """Test recovery from database connection failures."""
         user_data = await self.create_test_user("error1@test.com")
@@ -47,6 +48,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
                     assert "error" in data
                     assert "temporarily unavailable" in data["error"].lower()
                     
+    @pytest.mark.asyncio
     async def test_redis_connection_failure_handling(self):
         """Test handling of Redis connection failures."""
         user_data = await self.create_test_user("error2@test.com")
@@ -61,6 +63,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
                 # Should work even if Redis cache is down
                 assert resp.status in [200, 503]
                 
+    @pytest.mark.asyncio
     async def test_circuit_breaker_activation(self):
         """Test circuit breaker activation on repeated failures."""
         user_data = await self.create_test_user("error3@test.com")
@@ -88,6 +91,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             # Circuit breaker should activate after failures
             assert circuit_opened or failures < 5
             
+    @pytest.mark.asyncio
     async def test_retry_with_exponential_backoff(self):
         """Test retry mechanism with exponential backoff."""
         user_data = await self.create_test_user("error4@test.com")
@@ -111,6 +115,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
                 # Should take time due to backoff
                 assert duration > 1  # At least some retry delay
                 
+    @pytest.mark.asyncio
     async def test_timeout_handling(self):
         """Test request timeout handling."""
         user_data = await self.create_test_user("error5@test.com")
@@ -130,6 +135,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
                 # Expected behavior
                 pass
                 
+    @pytest.mark.asyncio
     async def test_graceful_degradation(self):
         """Test graceful degradation when services are unavailable."""
         user_data = await self.create_test_user("error6@test.com")
@@ -151,6 +157,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
                     assert data["degraded"] is True
                     assert "unavailable_services" in data
                     
+    @pytest.mark.asyncio
     async def test_error_cascade_prevention(self):
         """Test prevention of error cascades."""
         user_data = await self.create_test_user("error7@test.com")
@@ -181,6 +188,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
                 )
                 assert healthy_count >= len(data["services"]) - 1
                 
+    @pytest.mark.asyncio
     async def test_deadlock_detection_recovery(self):
         """Test deadlock detection and recovery."""
         user_data = await self.create_test_user("error8@test.com")
@@ -214,6 +222,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             
             assert success_count >= 1  # Deadlock was prevented/resolved
             
+    @pytest.mark.asyncio
     async def test_memory_leak_prevention(self):
         """Test memory leak prevention in long-running operations."""
         user_data = await self.create_test_user("error9@test.com")
@@ -251,6 +260,7 @@ class TestErrorHandlingRecovery(L3IntegrationTest):
             memory_growth = final_memory["used"] - initial_memory["used"]
             assert memory_growth < 100 * 1024 * 1024  # Less than 100MB growth
             
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_error(self):
         """Test transaction rollback on errors."""
         user_data = await self.create_test_user("error10@test.com")

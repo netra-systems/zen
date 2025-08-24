@@ -33,6 +33,7 @@ from netra_backend.tests.integration.first_time_user_fixtures import (
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_user_profile_setup_and_update(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -56,6 +57,7 @@ async def test_user_profile_setup_and_update(
         "phone": "+1-555-0123"
     }
     
+    # Mock: Component isolation for testing without external dependencies
     response = await async_client.patch("/api/v1/user/profile", json=profile_update, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     updated_profile = response.json()
@@ -65,6 +67,7 @@ async def test_user_profile_setup_and_update(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_user_preferences_management(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -107,6 +110,7 @@ async def test_user_preferences_management(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_privacy_settings_enforcement(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -140,6 +144,7 @@ async def test_privacy_settings_enforcement(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_api_key_generation_and_usage(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -175,6 +180,7 @@ async def test_api_key_generation_and_usage(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_api_key_rate_limiting(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -200,6 +206,7 @@ async def test_api_key_rate_limiting(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_api_key_management_operations(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -241,6 +248,7 @@ async def test_api_key_management_operations(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_data_export_capabilities(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -283,6 +291,7 @@ async def test_data_export_capabilities(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_workspace_analytics_access(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]

@@ -10,10 +10,8 @@ security breaches and enabling secure secret rotation.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -32,9 +30,13 @@ class TestSecretManagerCore:
     @pytest.fixture
     def secret_manager(self):
         """Create secret manager with mocked dependencies."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager_core.SecretEncryption'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretLoader'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretManagerAuth'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.central_logger'):
             
             manager = EnhancedSecretManager(EnvironmentType.DEVELOPMENT)
@@ -164,9 +166,13 @@ class TestSecretManagerCore:
     
     def test_initialization_with_environment(self):
         """Test secret manager initialization with different environments."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager_core.SecretEncryption'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretLoader'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretManagerAuth'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.central_logger'):
             
             manager = EnhancedSecretManager(EnvironmentType.PRODUCTION)

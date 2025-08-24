@@ -134,7 +134,6 @@ class ColdStartValidator:
         
         try:
             # Add project to path
-            sys.path.insert(0, str(self.project_root))
             
             async def test_db():
                 from netra_backend.app.dependencies import get_async_db

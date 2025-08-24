@@ -13,8 +13,6 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
 # Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
 class TestCategorizer:
     """Analyzes test files to categorize them based on dependencies"""

@@ -14,7 +14,7 @@ import json
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -31,7 +31,7 @@ class TestAPIRequestLifecycleCompleteL4:
     @pytest.fixture
     async def api_infrastructure(self):
         """API infrastructure setup"""
-        return {
+        yield {
             'gateway': ApiGatewayManager(),
             'rate_limiter': RateLimiter(),
             'validator': RequestValidator(),
@@ -47,6 +47,7 @@ class TestAPIRequestLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_request_validation_pipeline(self, api_infrastructure):
         """Test complete request validation pipeline"""
         
@@ -114,6 +115,7 @@ class TestAPIRequestLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_middleware_chain_execution(self, api_infrastructure):
         """Test middleware chain execution order and error handling"""
         
@@ -176,6 +178,7 @@ class TestAPIRequestLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_request_rate_limiting_per_endpoint(self, api_infrastructure):
         """Test rate limiting per endpoint and per user"""
         
@@ -219,6 +222,7 @@ class TestAPIRequestLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_request_timeout_handling(self, api_infrastructure):
         """Test request timeout and cancellation"""
         
@@ -263,6 +267,7 @@ class TestAPIRequestLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_request_retry_with_backoff(self, api_infrastructure):
         """Test request retry logic with exponential backoff"""
         
@@ -302,6 +307,7 @@ class TestAPIRequestLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_request_body_size_limits(self, api_infrastructure):
         """Test request body size limit enforcement"""
         
@@ -345,6 +351,7 @@ class TestAPIRequestLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_request_deduplication(self, api_infrastructure):
         """Test request deduplication for idempotency"""
         
@@ -385,6 +392,7 @@ class TestAPIRequestLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_request_circuit_breaker_per_service(self, api_infrastructure):
         """Test circuit breaker per backend service"""
         
@@ -420,6 +428,7 @@ class TestAPIRequestLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_response_caching_strategy(self, api_infrastructure):
         """Test response caching with cache invalidation"""
         
@@ -466,6 +475,7 @@ class TestAPIRequestLifecycleCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_request_tracing_and_correlation(self, api_infrastructure):
         """Test distributed tracing and request correlation"""
         

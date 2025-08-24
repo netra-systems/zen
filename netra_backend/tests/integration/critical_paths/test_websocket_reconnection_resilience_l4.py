@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
 # from app.services.websocket_service import WebSocketService
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -32,7 +32,7 @@ class TestWebSocketReconnectionResilienceL4:
     @pytest.fixture
     async def ws_system(self):
         """WebSocket system setup"""
-        return {
+        yield {
             'ws_service': WebSocketService(),
             'session_service': SessionService(),
             'queue_service': MessageQueueService(),
@@ -44,12 +44,14 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_graceful_reconnection(self, ws_system):
         """Test graceful WebSocket reconnection with state preservation"""
         client_id = "client_graceful"
         user_id = "user_123"
         
         # Initial connection
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = MagicMock()
         initial_state = {
             'user_id': user_id,
@@ -80,8 +82,10 @@ class TestWebSocketReconnectionResilienceL4:
             messages_sent.append(msg)
         
         # Reconnect with new websocket
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         received_messages = []
+        # Mock: Async component isolation for testing without real async operations
         ws2.send = AsyncMock(side_effect=lambda msg: received_messages.append(json.loads(msg)))
         
         conn2 = await ws_system['ws_service'].reconnect(
@@ -104,6 +108,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_exponential_backoff_reconnection(self, ws_system):
         """Test exponential backoff for reconnection attempts"""
         client_id = "client_backoff"
@@ -156,11 +161,13 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_message_replay_on_reconnect(self, ws_system):
         """Test message replay functionality on reconnection"""
         client_id = "client_replay"
         
         # Initial connection
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = MagicMock()
         conn1 = await ws_system['ws_service'].connect(
             websocket=ws1,
@@ -183,8 +190,10 @@ class TestWebSocketReconnectionResilienceL4:
         await ws_system['ws_service'].handle_disconnect(client_id)
         
         # Reconnect and request replay
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         replayed_messages = []
+        # Mock: Async component isolation for testing without real async operations
         ws2.send = AsyncMock(side_effect=lambda msg: replayed_messages.append(json.loads(msg)))
         
         conn2 = await ws_system['ws_service'].reconnect(
@@ -204,6 +213,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_connection_state_machine(self, ws_system):
         """Test WebSocket connection state machine transitions"""
         client_id = "client_state_machine"
@@ -223,6 +233,7 @@ class TestWebSocketReconnectionResilienceL4:
         assert await ws_system['ws_service'].get_connection_state(client_id) == 'DISCONNECTED'
         
         # Connect: DISCONNECTED -> CONNECTING -> CONNECTED
+        # Mock: Generic component isolation for controlled unit testing
         ws = MagicMock()
         await ws_system['ws_service'].connect(websocket=ws, client_id=client_id)
         
@@ -230,6 +241,7 @@ class TestWebSocketReconnectionResilienceL4:
         await ws_system['ws_service'].handle_network_issue(client_id)
         
         # Reconnect attempt: RECONNECTING -> CONNECTED
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         await ws_system['ws_service'].reconnect(websocket=ws2, client_id=client_id)
         
@@ -248,11 +260,13 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_heartbeat_failure_detection(self, ws_system):
         """Test heartbeat-based connection failure detection"""
         client_id = "client_heartbeat"
         
         # Connect with heartbeat
+        # Mock: Generic component isolation for controlled unit testing
         ws = MagicMock()
         ping_count = 0
         
@@ -263,6 +277,7 @@ class TestWebSocketReconnectionResilienceL4:
                 raise websockets.exceptions.ConnectionClosed(None, None)
             return True
         
+        # Mock: Async component isolation for testing without real async operations
         ws.ping = AsyncMock(side_effect=mock_ping)
         
         conn = await ws_system['ws_service'].connect(
@@ -290,12 +305,14 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_reconnect_with_auth_refresh(self, ws_system):
         """Test reconnection with auth token refresh"""
         client_id = "client_auth_refresh"
         user_id = "user_456"
         
         # Initial connection with auth token
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = MagicMock()
         initial_token = "initial_token_expires_soon"
         
@@ -310,6 +327,7 @@ class TestWebSocketReconnectionResilienceL4:
         await asyncio.sleep(2.5)
         
         # Attempt reconnection with expired token
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         
         # Mock auth refresh
@@ -332,6 +350,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_parallel_reconnection_prevention(self, ws_system):
         """Test prevention of parallel reconnection attempts"""
         client_id = "client_parallel"
@@ -341,6 +360,7 @@ class TestWebSocketReconnectionResilienceL4:
         
         async def attempt_reconnect(attempt_id):
             try:
+                # Mock: Generic component isolation for controlled unit testing
                 ws = MagicMock()
                 result = await ws_system['ws_service'].reconnect(
                     websocket=ws,
@@ -373,11 +393,13 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_subscription_restoration(self, ws_system):
         """Test subscription restoration after reconnection"""
         client_id = "client_subscriptions"
         
         # Initial connection with subscriptions
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = MagicMock()
         subscriptions = {
             'market_data': {'symbols': ['AAPL', 'GOOGL']},
@@ -406,6 +428,7 @@ class TestWebSocketReconnectionResilienceL4:
         await ws_system['ws_service'].handle_disconnect(client_id)
         
         # Reconnect
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         conn2 = await ws_system['ws_service'].reconnect(
             websocket=ws2,
@@ -421,6 +444,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_reconnect_quota_limits(self, ws_system):
         """Test reconnection attempt quota and rate limiting"""
         client_id = "client_quota"
@@ -437,6 +461,7 @@ class TestWebSocketReconnectionResilienceL4:
         # Rapid reconnection attempts
         attempts = []
         for i in range(5):
+            # Mock: Generic component isolation for controlled unit testing
             ws = MagicMock()
             try:
                 result = await ws_system['ws_service'].reconnect(
@@ -462,6 +487,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_state_diff_sync(self, ws_system):
         """Test state differential synchronization on reconnect"""
         client_id = "client_diff_sync"
@@ -473,6 +499,7 @@ class TestWebSocketReconnectionResilienceL4:
             'cache': {'data1': 'value1', 'data2': 'value2'}
         }
         
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = MagicMock()
         conn1 = await ws_system['ws_service'].connect(
             websocket=ws1,
@@ -494,6 +521,7 @@ class TestWebSocketReconnectionResilienceL4:
         await ws_system['ws_service'].handle_disconnect(client_id)
         
         # Reconnect with partial state (client sends what it has)
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         client_state = {
             'user_prefs': {'theme': 'dark', 'lang': 'en'},  # Outdated theme
@@ -502,6 +530,7 @@ class TestWebSocketReconnectionResilienceL4:
         }
         
         state_diff = []
+        # Mock: Async component isolation for testing without real async operations
         ws2.send = AsyncMock(side_effect=lambda msg: state_diff.append(json.loads(msg)))
         
         conn2 = await ws_system['ws_service'].reconnect(

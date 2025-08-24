@@ -48,6 +48,7 @@ class AuthenticationSessionTester:
         if self.session:
             await self.session.close()
             
+    @pytest.mark.asyncio
     async def test_initial_authentication(self) -> bool:
         """Test initial authentication and token issuance."""
         print("\n[AUTH] Testing initial authentication...")
@@ -85,6 +86,7 @@ class AuthenticationSessionTester:
                 
         return False
         
+    @pytest.mark.asyncio
     async def test_token_validation(self) -> bool:
         """Test token validation before expiry."""
         print("\n[VALIDATE] Testing token validation...")
@@ -107,6 +109,7 @@ class AuthenticationSessionTester:
                 
         return False
         
+    @pytest.mark.asyncio
     async def test_token_refresh(self) -> bool:
         """Test token refresh mechanism."""
         print("\n[REFRESH] Testing token refresh...")
@@ -141,6 +144,7 @@ class AuthenticationSessionTester:
                         
         return False
         
+    @pytest.mark.asyncio
     async def test_expired_token_rejection(self) -> bool:
         """Test that expired tokens are rejected."""
         print("\n[EXPIRE] Testing expired token rejection...")
@@ -161,6 +165,7 @@ class AuthenticationSessionTester:
                 print(f"[ERROR] Invalid token not rejected: {response.status}")
                 return False
                 
+    @pytest.mark.asyncio
     async def test_refresh_token_rotation(self) -> bool:
         """Test refresh token rotation for security."""
         print("\n[ROTATE] Testing refresh token rotation...")
@@ -200,6 +205,7 @@ class AuthenticationSessionTester:
                 print("[WARNING] Old refresh token still valid")
                 return False
                 
+    @pytest.mark.asyncio
     async def test_session_invalidation(self) -> bool:
         """Test explicit session invalidation."""
         print("\n[LOGOUT] Testing session invalidation...")
@@ -231,6 +237,7 @@ class AuthenticationSessionTester:
                         
         return False
         
+    @pytest.mark.asyncio
     async def test_multi_device_sessions(self) -> bool:
         """Test multi-device session management."""
         print("\n[MULTI] Testing multi-device sessions...")
@@ -290,6 +297,7 @@ class AuthenticationSessionTester:
                         
         return False
         
+    @pytest.mark.asyncio
     async def test_automatic_refresh_before_expiry(self) -> bool:
         """Test automatic refresh before token expiry."""
         print("\n[AUTO] Testing automatic refresh...")
@@ -336,6 +344,7 @@ class AuthenticationSessionTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_authentication_session_expiry():
     """Test authentication session expiry and refresh."""
     async with AuthenticationSessionTester() as tester:

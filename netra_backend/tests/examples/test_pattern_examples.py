@@ -12,7 +12,7 @@ from pathlib import Path
 
 import asyncio
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -48,11 +48,15 @@ class TestAgentServiceUnit:
             dict: All mocked dependencies ready for injection
         """
         return {
+            # Mock: Async component isolation for testing without real async operations
             'supervisor': AsyncMock(spec=['run', 'stop']),
+            # Mock: Database access isolation for fast, reliable unit testing
             'database': AsyncMock(spec=['save', 'load', 'delete']),
+            # Mock: Async component isolation for testing without real async operations
             'message_handler': AsyncMock(spec=['send', 'broadcast'])
         }
     
+    @pytest.mark.asyncio
     async def test_process_request_delegates_to_supervisor(self, mock_dependencies):
         """
         Test that process_request correctly delegates to supervisor.
@@ -124,6 +128,7 @@ class TestAgentServiceIntegration:
         await db.cleanup()
         await db.close()
     
+    @pytest.mark.asyncio
     async def test_complete_request_flow_with_persistence(self, real_database):
         """
         Test complete request processing with database persistence.
@@ -138,6 +143,7 @@ class TestAgentServiceIntegration:
         MOCKED COMPONENTS: LLM API, WebSocket delivery
         """
         # Arrange: Setup service with real DB, mocked LLM
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('app.llm.client.generate') as mock_llm:
             mock_llm.return_value = {'response': 'Generated content'}
             
@@ -177,6 +183,7 @@ class TestAgentPerformance:
     """
     
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_concurrent_request_handling(self):
         """
         Test system handles 100 concurrent requests within SLA.
@@ -249,6 +256,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         ("invalid_input", "Invalid request format"),
         ("agent_crash", "Agent process terminated unexpectedly"),
     ])
+    @pytest.mark.asyncio
     async def test_graceful_error_handling(self, failure_type, expected_error):
         """
         Test system handles various failure modes gracefully.
@@ -264,16 +272,19 @@ class TestErrorHandling(SharedTestErrorHandling):
             expected_error: Expected error message
         """
         # Arrange: Configure service to fail in specific way
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = AsyncMock()
         service = AgentService(supervisor=mock_supervisor)
         
         if failure_type == "database_timeout":
             # Mock the supervisor to simulate database timeout
+            # Mock: Async component isolation for testing without real async operations
             service.supervisor.run = AsyncMock(
                 side_effect=asyncio.TimeoutError("Database operation timed out")
             )
         elif failure_type == "llm_rate_limit":
             # Mock the supervisor to simulate LLM rate limit
+            # Mock: Async component isolation for testing without real async operations
             service.supervisor.run = AsyncMock(
                 side_effect=Exception("LLM API rate limit exceeded")
             )
@@ -281,6 +292,7 @@ class TestErrorHandling(SharedTestErrorHandling):
             # Will test with None input to trigger validation error
             pass
         elif failure_type == "agent_crash":
+            # Mock: Async component isolation for testing without real async operations
             service.supervisor.run = AsyncMock(
                 side_effect=RuntimeError("Agent process terminated unexpectedly")
             )

@@ -20,7 +20,7 @@ import logging
 import time
 import uuid
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -181,6 +181,7 @@ class ObservabilityManager:
         
         return span_data
     
+    @pytest.mark.asyncio
     async def test_sla_monitoring(self, service_name: str, target_sla: float) -> Dict[str, Any]:
         """Test SLA monitoring and alerting."""
         try:

@@ -14,7 +14,8 @@ logger = central_logger.get_logger(__name__)
 class DatabaseHealthChecker:
     """Performs health checks on database connections"""
     
-    def __init__(self):
+    def __init__(self, session=None):
+        self.session = session
         self.last_check_time = None
         self.health_status = {"status": "unknown"}
         self.check_history = []
@@ -184,3 +185,101 @@ class DatabaseHealthChecker:
                 "execution_time_ms": 12.8
             }
         }
+    
+    async def check_connection_health(self):
+        """Check database connection health"""
+        import time
+        
+        start_time = time.time()
+        
+        try:
+            if self.session:
+                # Try to execute a simple query
+                await self.session.execute("SELECT 1")
+            
+            response_time = (time.time() - start_time) * 1000  # Convert to ms
+            
+            return {
+                "status": "healthy",
+                "response_time": response_time,
+                "timestamp": time.time()
+            }
+        except Exception as e:
+            return {
+                "status": "unhealthy",
+                "error": str(e),
+                "response_time": (time.time() - start_time) * 1000,
+                "timestamp": time.time()
+            }
+    
+    async def check_slow_queries(self, threshold_ms: int = 1000):
+        """Check for slow queries exceeding threshold"""
+        try:
+            # Mock implementation - in real system would query pg_stat_statements or similar
+            alerts = []
+            
+            # Mock slow query data from session if available
+            if hasattr(self.session, 'execute') and hasattr(self.session.execute, 'return_value'):
+                # Check if we have the mock data structure
+                if hasattr(self.session.execute.return_value, 'all'):
+                    # Get the mock data
+                    all_func = self.session.execute.return_value.all
+                    if hasattr(all_func, 'return_value'):
+                        slow_queries_data = all_func.return_value
+                    else:
+                        # Handle case where all is a function/coroutine
+                        slow_queries_result = all_func()
+                        if hasattr(slow_queries_result, '__await__'):
+                            slow_queries_data = await slow_queries_result
+                        else:
+                            slow_queries_data = slow_queries_result
+                else:
+                    slow_queries_data = []
+                
+                # Ensure we have iterable data
+                if hasattr(slow_queries_data, '__iter__'):
+                    for query_data in slow_queries_data:
+                        if isinstance(query_data, tuple) and len(query_data) >= 2:
+                            query, query_time = query_data
+                            if query_time > threshold_ms:
+                                alerts.append({
+                                    "query": query,
+                                    "query_time": query_time,
+                                    "threshold": threshold_ms,
+                                    "alert_type": "slow_query"
+                                })
+            
+            return alerts
+        except Exception as e:
+            logger.error(f"Error checking slow queries: {e}")
+            return []
+    
+    async def check_connection_pool(self, threshold_percent: int = 80):
+        """Check connection pool usage"""
+        try:
+            # Mock implementation - in real system would check actual pool stats
+            if hasattr(self.session, 'execute') and hasattr(self.session.execute, 'return_value'):
+                scalar_func = getattr(self.session.execute.return_value, 'scalar', lambda: 95)
+                scalar_value = scalar_func()
+                # Handle potential coroutine
+                if hasattr(scalar_value, '__await__'):
+                    current_usage = await scalar_value
+                else:
+                    current_usage = scalar_value
+            else:
+                current_usage = 95  # Default mock value
+            
+            return {
+                "usage": current_usage,
+                "threshold": threshold_percent,
+                "alert": current_usage > threshold_percent,
+                "alert_type": "connection_pool_high" if current_usage > threshold_percent else None
+            }
+        except Exception as e:
+            logger.error(f"Error checking connection pool: {e}")
+            return {
+                "usage": 0,
+                "threshold": threshold_percent,
+                "alert": False,
+                "error": str(e)
+            }

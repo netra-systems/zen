@@ -10,8 +10,6 @@ import sys
 from pathlib import Path
 
 # Add parent directory to path to find dev_launcher module
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
 
 # Import and run the new launcher
 from dev_launcher.__main__ import main

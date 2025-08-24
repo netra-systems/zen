@@ -64,8 +64,11 @@ def generate_llm_metrics(count: int) -> List[Dict]:
 
 def create_mock_clickhouse_client():
     """Create mock ClickHouse client for testing"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_client = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     mock_client.execute_query = AsyncMock(return_value=[{"result": "success"}])
+    # Mock: Generic component isolation for controlled unit testing
     mock_client.execute = AsyncMock()
     return mock_client
 

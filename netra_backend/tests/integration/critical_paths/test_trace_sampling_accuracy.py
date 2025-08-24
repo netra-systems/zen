@@ -26,7 +26,7 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -493,6 +493,7 @@ class TraceSamplingValidator:
         efficiency_scores = [analysis.cost_efficiency_score for analysis in rule_analyses.values()]
         return statistics.mean(efficiency_scores)
     
+    @pytest.mark.asyncio
     async def test_sampling_consistency(self, iterations: int = 5) -> Dict[str, Any]:
         """Test sampling consistency across multiple iterations."""
         consistency_results = {
@@ -541,6 +542,7 @@ class TraceSamplingValidator:
         
         return consistency_results
     
+    @pytest.mark.asyncio
     async def test_sampling_performance_impact(self, trace_count: int = 2000) -> Dict[str, Any]:
         """Test performance impact of sampling decisions."""
         performance_results = {

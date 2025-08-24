@@ -9,7 +9,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
@@ -29,24 +29,38 @@ def mock_supervisor():
 @pytest.fixture
 def mock_thread_service():
     """Create mock thread service."""
+    # Mock: Service component isolation for predictable testing behavior
     service = MagicMock(spec=ThreadService)
+    # Mock: Generic component isolation for controlled unit testing
     service.get_or_create_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.get_thread_history = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.create_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.delete_thread = AsyncMock()
     return service
 
 @pytest.fixture
 def mock_message_handler():
     """Create mock message handler service."""
+    # Mock: Service component isolation for predictable testing behavior
     handler = MagicMock(spec=MessageHandlerService)
+    # Mock: Generic component isolation for controlled unit testing
     handler.handle_start_agent = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     handler.handle_user_message = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     handler.handle_thread_history = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     handler.handle_stop_agent = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     handler.handle_create_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     handler.handle_switch_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     handler.handle_delete_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     handler.handle_list_threads = AsyncMock()
     return handler
 
@@ -54,14 +68,23 @@ def mock_message_handler():
 def agent_service(mock_supervisor):
     """Create agent service with mocked dependencies."""
     service = AgentService(mock_supervisor)
+    # Mock: Service component isolation for predictable testing behavior
     service.message_handler = MagicMock(spec=MessageHandlerService)
+    # Mock: Generic component isolation for controlled unit testing
     service.message_handler.handle_thread_history = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.message_handler.handle_create_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.message_handler.handle_switch_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.message_handler.handle_delete_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.message_handler.handle_list_threads = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.message_handler.handle_start_agent = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.message_handler.handle_user_message = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.message_handler.handle_stop_agent = AsyncMock()
     return service
 

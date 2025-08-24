@@ -20,8 +20,6 @@ from typing import Dict, List, Tuple
 import pytest
 
 # Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
 
 class AgentOrchestrationTestRunner:

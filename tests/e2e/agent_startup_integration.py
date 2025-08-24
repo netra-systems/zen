@@ -23,8 +23,6 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 # Add project root to path for imports
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
 # FIXME: tests.run_agent_startup_tests module does not exist
 # from tests.run_agent_startup_tests import (

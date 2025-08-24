@@ -124,6 +124,7 @@ class TestOAuthComprehensiveFailures:
             "verified_email": True,
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient.post") as mock_post:
             mock_post.return_value.json.return_value = {
                 "access_token": "valid_google_token",
@@ -190,8 +191,10 @@ class TestOAuthComprehensiveFailures:
         redis_client.set.return_value = None  # SET with NX returns None when key already exists
         
         # Mock successful OAuth responses to isolate nonce testing
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
             # Patch the OAuth security manager to use our mock Redis
+            # Mock: OAuth external provider isolation for network-independent testing
             with patch("auth_service.auth_core.routes.auth_routes.oauth_security") as mock_oauth_security:
                 from auth_service.auth_core.security.oauth_security import OAuthSecurityManager
                 
@@ -201,10 +204,12 @@ class TestOAuthComprehensiveFailures:
                 mock_oauth_security.track_authorization_code = lambda x: True  # Always allow code for this test
                 mock_oauth_security.validate_cors_origin = lambda x: True  # Allow CORS for test
                 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_async_client = AsyncMock()
                 mock_client.return_value.__aenter__.return_value = mock_async_client
                 
                 # Mock token exchange response
+                # Mock: Generic component isolation for controlled unit testing
                 mock_token_response = Mock()
                 mock_token_response.status_code = 200
                 mock_token_response.json.return_value = {
@@ -214,6 +219,7 @@ class TestOAuthComprehensiveFailures:
                 mock_async_client.post.return_value = mock_token_response
                 
                 # Mock user info response
+                # Mock: Generic component isolation for controlled unit testing
                 mock_user_response = Mock()
                 mock_user_response.status_code = 200
                 mock_user_response.json.return_value = {
@@ -243,6 +249,7 @@ class TestOAuthComprehensiveFailures:
         state = secrets.token_urlsafe(32)
         
         # First use should succeed (mocked)
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient.post") as mock_post:
             mock_post.return_value.json.return_value = {
                 "access_token": "token1",
@@ -342,11 +349,14 @@ class TestOAuthComprehensiveFailures:
     @pytest.mark.asyncio
     async def test_08_malformed_id_token(self):
         """Test 8: Malformed ID token from OAuth provider"""
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock token exchange response with malformed ID token
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = Mock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -357,6 +367,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.post.return_value = mock_token_response
             
             # Mock user info response (should succeed if we get this far)
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = Mock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = {
@@ -388,11 +399,14 @@ class TestOAuthComprehensiveFailures:
             algorithm="HS256"
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock token exchange response
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = Mock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -403,6 +417,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.post.return_value = mock_token_response
             
             # Mock user info response
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = Mock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = {
@@ -445,6 +460,7 @@ class TestOAuthComprehensiveFailures:
             algorithm="HS256"
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient.post") as mock_post:
             mock_post.return_value.json.return_value = {
                 "access_token": "valid_token",
@@ -468,11 +484,14 @@ class TestOAuthComprehensiveFailures:
     @pytest.mark.asyncio
     async def test_11_missing_email_in_oauth_response(self):
         """Test 11: Missing email in OAuth provider response"""
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock successful token exchange
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = Mock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -505,11 +524,14 @@ class TestOAuthComprehensiveFailures:
     @pytest.mark.asyncio
     async def test_12_unverified_email_address(self):
         """Test 12: Unverified email address from OAuth provider"""
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock successful token exchange
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = Mock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -519,6 +541,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.post.return_value = mock_token_response
             
             # Mock user info response with unverified email
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = Mock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = {
@@ -542,11 +565,14 @@ class TestOAuthComprehensiveFailures:
     @pytest.mark.asyncio
     async def test_13_blocked_email_domain(self):
         """Test 13: Blocked email domain (spam/disposable)"""
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock successful token exchange
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = Mock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -556,6 +582,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.post.return_value = mock_token_response
             
             # Mock user info response with blocked domain
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = Mock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = {
@@ -596,6 +623,7 @@ class TestOAuthComprehensiveFailures:
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock successful token exchange
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = Mock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -605,6 +633,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.post.return_value = mock_token_response
             
             # Mock user info response
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = Mock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = {
@@ -645,7 +674,9 @@ class TestOAuthComprehensiveFailures:
         
         # Simulate multiple failures to trigger circuit breaker
         for i in range(5):
+            # Mock: Component isolation for testing without external dependencies
             with patch("httpx.AsyncClient") as mock_client:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_async_client = AsyncMock()
                 mock_client.return_value.__aenter__.return_value = mock_async_client
                 
@@ -676,7 +707,9 @@ class TestOAuthComprehensiveFailures:
     @pytest.mark.asyncio
     async def test_16_network_connection_failure(self):
         """Test 16: Network connection failure to OAuth provider"""
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             mock_async_client.post.side_effect = httpx.ConnectError("Connection failed")
@@ -698,11 +731,14 @@ class TestOAuthComprehensiveFailures:
     async def test_17_database_connection_failure(self):
         """Test 17: Database connection failure during user creation"""
         # Mock the OAuth flow first so we can reach the database operation
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock successful token exchange
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = Mock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -713,6 +749,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.post.return_value = mock_token_response
             
             # Mock successful user info response
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = Mock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = {
@@ -724,6 +761,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.get.return_value = mock_user_response
             
             # Now mock the database connection failure
+            # Mock: Session isolation for controlled testing without external state
             with patch("auth_service.auth_core.database.connection.auth_db.get_session") as mock_db:
                 mock_db.side_effect = Exception("Database connection failed")
                 
@@ -742,11 +780,14 @@ class TestOAuthComprehensiveFailures:
     async def test_18_session_storage_failure(self, mock_auth_redis):
         """Test 18: Redis session storage failure"""
         # Mock the OAuth flow first so we can reach the session storage operation
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock successful token exchange
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = Mock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -757,6 +798,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.post.return_value = mock_token_response
             
             # Mock successful user info response
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = Mock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = {
@@ -768,6 +810,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.get.return_value = mock_user_response
             
             # Mock session storage failure
+            # Mock: Session state isolation for predictable testing
             with patch("auth_service.auth_core.core.session_manager.SessionManager.create_session") as mock_session:
                 mock_session.side_effect = Exception("Redis connection failed")
                 
@@ -792,11 +835,14 @@ class TestOAuthComprehensiveFailures:
         email = "raceuser@example.com"
         
         async def create_user(attempt_num):
+            # Mock: Component isolation for testing without external dependencies
             with patch("httpx.AsyncClient") as mock_client:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_async_client = AsyncMock()
                 mock_client.return_value.__aenter__.return_value = mock_async_client
                 
                 # Mock successful token exchange
+                # Mock: Generic component isolation for controlled unit testing
                 mock_token_response = Mock()
                 mock_token_response.status_code = 200
                 mock_token_response.json.return_value = {
@@ -806,6 +852,7 @@ class TestOAuthComprehensiveFailures:
                 mock_async_client.post.return_value = mock_token_response
                 
                 # Mock user info response with same email
+                # Mock: Generic component isolation for controlled unit testing
                 mock_user_response = Mock()
                 mock_user_response.status_code = 200
                 mock_user_response.json.return_value = {
@@ -1023,11 +1070,14 @@ class TestOAuthComprehensiveFailures:
         """Test 26: Extremely long email address handling"""
         long_email = "a" * 200 + "@example.com"
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock successful token exchange
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = Mock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -1037,6 +1087,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.post.return_value = mock_token_response
             
             # Mock user info response with extremely long email
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = Mock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = {
@@ -1063,11 +1114,14 @@ class TestOAuthComprehensiveFailures:
     @pytest.mark.asyncio
     async def test_27_unicode_and_special_chars_in_name(self):
         """Test 27: Unicode and special characters in user name"""
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock successful token exchange
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = Mock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -1077,6 +1131,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.post.return_value = mock_token_response
             
             # Mock user info response with special characters
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = Mock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = {
@@ -1106,11 +1161,14 @@ class TestOAuthComprehensiveFailures:
     @pytest.mark.asyncio
     async def test_28_null_values_in_oauth_response(self):
         """Test 28: Null values in OAuth provider response"""
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock successful token exchange
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = Mock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -1120,6 +1178,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.post.return_value = mock_token_response
             
             # Mock user info response with null values
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = Mock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = {
@@ -1152,11 +1211,14 @@ class TestOAuthComprehensiveFailures:
         email = "concurrent@example.com"
         
         async def login_attempt(attempt_num):
+            # Mock: Component isolation for testing without external dependencies
             with patch("httpx.AsyncClient") as mock_client:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_async_client = AsyncMock()
                 mock_client.return_value.__aenter__.return_value = mock_async_client
                 
                 # Mock successful token exchange
+                # Mock: Generic component isolation for controlled unit testing
                 mock_token_response = Mock()
                 mock_token_response.status_code = 200
                 mock_token_response.json.return_value = {
@@ -1166,6 +1228,7 @@ class TestOAuthComprehensiveFailures:
                 mock_async_client.post.return_value = mock_token_response
                 
                 # Mock user info response
+                # Mock: Generic component isolation for controlled unit testing
                 mock_user_response = Mock()
                 mock_user_response.status_code = 200
                 mock_user_response.json.return_value = {
@@ -1243,6 +1306,7 @@ class TestOAuthComprehensiveFailures:
 
     @pytest.mark.asyncio
     @pytest.mark.staging
+    @pytest.mark.asyncio
     async def test_staging_multi_service_oauth_flow(self, staging_env_config):
         """Test complete OAuth flow across all three services in staging"""
         try:
@@ -1286,6 +1350,7 @@ class TestOAuthComprehensiveFailures:
 
     @pytest.mark.asyncio
     @pytest.mark.staging
+    @pytest.mark.asyncio
     async def test_staging_oauth_provider_failover(self, staging_env_config):
         """Test OAuth provider failover in staging environment"""
         try:

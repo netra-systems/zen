@@ -17,7 +17,7 @@ from netra_backend.app.core.error_recovery import (
     recovery_executor,
     recovery_manager,
 )
-from netra_backend.app.error_recovery_helpers import (
+from netra_backend.app.middleware.error_recovery_helpers import (
     build_error_data,
     build_recovery_context,
     determine_operation_type,
@@ -26,7 +26,7 @@ from netra_backend.app.error_recovery_helpers import (
     extract_request_metadata,
     log_by_severity,
 )
-from netra_backend.app.error_response_builder import (
+from netra_backend.app.middleware.error_response_builder import (
     add_success_headers,
     create_circuit_breaker_response,
     create_error_response,

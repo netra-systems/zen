@@ -32,6 +32,7 @@ class TestServiceCommunicationFailure:
         # Patch httpx.post to simulate the auth service being down
         # NOTE: This assumes the backend uses httpx.post to validate the token.
         # The actual path to patch may be different.
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.post", side_effect=httpx.ConnectError("Connection refused")):
             with httpx.Client() as client:
                 response = client.get(protected_endpoint, headers=headers)

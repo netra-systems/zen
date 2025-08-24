@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -26,6 +26,7 @@ class TestDatabaseService:
     def test_set_session_factory(self):
         """Test setting session factory."""
         service = DatabaseService("db-service")
+        # Mock: Generic component isolation for controlled unit testing
         mock_factory = Mock()
         
         service.set_session_factory(mock_factory)
@@ -36,6 +37,7 @@ class TestDatabaseService:
         """Helper: Verify session error message."""
         assert expected_message in str(exc_info.value)
 
+    @pytest.mark.asyncio
     async def test_get_db_session_no_factory(self):
         """Test getting DB session without factory configured."""
         service = DatabaseService("db-service")
@@ -48,7 +50,9 @@ class TestDatabaseService:
 
     def _create_mock_session(self):
         """Helper: Create mock session with close method."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.close = AsyncMock()
         return mock_session
 
@@ -76,6 +80,7 @@ class TestDatabaseService:
         """Helper: Verify session close was called."""
         mock_session.close.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_get_db_session_success(self):
         """Test successful DB session acquisition."""
         service = DatabaseService("db-service")
@@ -91,13 +96,17 @@ class TestDatabaseService:
 
     def _create_error_handling_session(self):
         """Helper: Create session with error handling methods."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.rollback = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.close = AsyncMock()
         return mock_session
 
     def _setup_error_context_mock(self):
         """Helper: Setup error context mock."""
+        # Mock: Component isolation for testing without external dependencies
         return patch('app.schemas.shared_types.ErrorContext.get_all_context', return_value={})
 
     def _verify_error_handling(self, mock_session):
@@ -105,6 +114,7 @@ class TestDatabaseService:
         mock_session.rollback.assert_called_once()
         mock_session.close.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_get_db_session_exception(self):
         """Test DB session with exception handling."""
         service = DatabaseService("db-service")

@@ -126,7 +126,9 @@ class TestAuthLoginL3Integration:
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.side_effect = httpx.HTTPStatusError(
                 "401 Unauthorized",
+                # Mock: Generic component isolation for controlled unit testing
                 request=Mock(),
+                # Mock: Component isolation for controlled unit testing
                 response=Mock(status_code=401)
             )
             
@@ -259,7 +261,9 @@ class TestAuthLoginL3Integration:
             # After multiple attempts, rate limit kicks in
             mock_request.side_effect = httpx.HTTPStatusError(
                 "429 Too Many Requests",
+                # Mock: Generic component isolation for controlled unit testing
                 request=Mock(),
+                # Mock: Component isolation for controlled unit testing
                 response=Mock(status_code=429, headers={"Retry-After": "60"})
             )
             
@@ -360,7 +364,9 @@ class TestAuthLoginL3Integration:
         with patch.object(auth_client, '_make_request') as mock_request:
             mock_request.side_effect = httpx.HTTPStatusError(
                 "423 Locked",
+                # Mock: Generic component isolation for controlled unit testing
                 request=Mock(),
+                # Mock: Component isolation for controlled unit testing
                 response=Mock(
                     status_code=423,
                     json=lambda: {"error": "account_locked", "locked_until": "2024-01-01T00:00:00Z"}
@@ -684,7 +690,9 @@ class TestAuthLoginL3Integration:
             # Old refresh token should fail
             mock_request.side_effect = httpx.HTTPStatusError(
                 "401 Unauthorized",
+                # Mock: Generic component isolation for controlled unit testing
                 request=Mock(),
+                # Mock: Component isolation for controlled unit testing
                 response=Mock(status_code=401)
             )
             

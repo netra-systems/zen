@@ -13,7 +13,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -26,13 +26,20 @@ class TestPaymentGatewayIntegration:
     @pytest.fixture
     async def payment_infrastructure(self):
         """Setup payment gateway infrastructure"""
-        return {
+        yield {
+            # Mock: Generic component isolation for controlled unit testing
             "stripe_client": Mock(),  # Stripe client is sync, keep as Mock
+            # Mock: Generic component isolation for controlled unit testing
             "payment_processor": AsyncMock(),
+            # Mock: Generic component isolation for controlled unit testing
             "subscription_manager": AsyncMock(),
+            # Mock: Generic component isolation for controlled unit testing
             "webhook_handler": AsyncMock(),
+            # Mock: Generic component isolation for controlled unit testing
             "billing_service": AsyncMock(),
+            # Mock: Generic component isolation for controlled unit testing
             "refund_processor": AsyncMock(),
+            # Mock: Generic component isolation for controlled unit testing
             "payment_method_manager": AsyncMock()
         }
 
@@ -41,6 +48,7 @@ class TestPaymentGatewayIntegration:
         """BVJ: Protects successful payment processing worth $50K+ MRR"""
         request = {"amount": Decimal("49.99"), "currency": "usd"}
         intent = {"id": f"pi_{uuid.uuid4().hex}", "status": "succeeded", "amount_received": 4999}
+        # Mock: Component isolation for controlled unit testing
         payment_infrastructure["stripe_client"].PaymentIntent.create = Mock(return_value=intent)  # Sync Stripe call
         payment_infrastructure["payment_processor"].complete_transaction.return_value = intent
         result = await payment_infrastructure["payment_processor"].complete_transaction(intent)
@@ -89,6 +97,7 @@ class TestPaymentGatewayIntegration:
         refund_amount = Decimal("49.99")
         stripe_refund = {"id": f"re_{uuid.uuid4().hex}", "status": "succeeded", "amount": 4999}
         accounting = {"refund_id": stripe_refund["id"], "revenue_adjustment": -refund_amount}
+        # Mock: Component isolation for controlled unit testing
         payment_infrastructure["stripe_client"].Refund.create = Mock(return_value=stripe_refund)  # Sync Stripe call
         payment_infrastructure["billing_service"].record_refund.return_value = accounting
         result = await payment_infrastructure["billing_service"].record_refund(stripe_refund)

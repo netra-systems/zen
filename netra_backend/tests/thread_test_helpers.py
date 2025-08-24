@@ -26,6 +26,7 @@ def create_mock_thread(
 
 def setup_thread_repo_mock() -> AsyncMock:
     """Setup a mock thread repository."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_repo = AsyncMock()
     
     # Setup default return values
@@ -40,13 +41,19 @@ def setup_thread_repo_mock() -> AsyncMock:
 
 def setup_ws_manager_mock() -> MagicMock:
     """Setup a mock WebSocket manager."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_manager = MagicMock()
     
     # Setup default behaviors
+    # Mock: Generic component isolation for controlled unit testing
     mock_manager.send_message = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_manager.broadcast = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_manager.disconnect = AsyncMock()
+    # Mock: Service component isolation for predictable testing behavior
     mock_manager.is_connected = MagicMock(return_value=True)
+    # Mock: Service component isolation for predictable testing behavior
     mock_manager.get_connections = MagicMock(return_value=[])
     
     return mock_manager

@@ -11,7 +11,7 @@ L2 Test: Real internal auth handshake components with mocked external auth servi
 Performance target: <200ms handshake completion, 99.9% auth accuracy.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -22,14 +22,14 @@ import time
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from uuid import uuid4
 
 import jwt
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class HandshakeState(Enum):
@@ -1147,8 +1147,10 @@ class TestWebSocketAuthHandshake:
 
         """Create mock WebSocket for testing."""
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send = AsyncMock()
 
         websocket.messages_sent = []
@@ -1215,6 +1217,7 @@ class TestWebSocketAuthHandshake:
         
         return base_headers
     
+    @pytest.mark.asyncio
     async def test_successful_jwt_handshake(self, auth_handshake, test_users):
 
         """Test successful JWT authentication handshake."""
@@ -1255,6 +1258,7 @@ class TestWebSocketAuthHandshake:
 
         assert result["duration"] < 0.2  # Less than 200ms
     
+    @pytest.mark.asyncio
     async def test_api_key_authentication(self, auth_handshake, test_users):
 
         """Test API key authentication."""
@@ -1273,6 +1277,7 @@ class TestWebSocketAuthHandshake:
 
         assert result["auth_data"]["token"].endswith("_key")
     
+    @pytest.mark.asyncio
     async def test_session_token_authentication(self, auth_handshake, test_users):
 
         """Test session token authentication."""
@@ -1291,6 +1296,7 @@ class TestWebSocketAuthHandshake:
 
         assert result["auth_data"]["session_id"].startswith("sess_")
     
+    @pytest.mark.asyncio
     async def test_expired_token_rejection(self, auth_handshake):
 
         """Test rejection of expired tokens."""
@@ -1337,6 +1343,7 @@ class TestWebSocketAuthHandshake:
 
         assert stats["token_expired"] > 0
     
+    @pytest.mark.asyncio
     async def test_inactive_user_rejection(self, auth_handshake, test_users):
 
         """Test rejection of inactive users."""
@@ -1359,6 +1366,7 @@ class TestWebSocketAuthHandshake:
 
         assert stats["unauthorized_users"] > 0
     
+    @pytest.mark.asyncio
     async def test_insufficient_permissions_rejection(self, auth_handshake, test_users):
 
         """Test rejection of users without WebSocket permissions."""
@@ -1375,6 +1383,7 @@ class TestWebSocketAuthHandshake:
 
         assert any("not authorized" in error for error in result["errors"])
     
+    @pytest.mark.asyncio
     async def test_missing_auth_token_failure(self, auth_handshake):
 
         """Test failure when no auth token is provided."""
@@ -1402,6 +1411,7 @@ class TestWebSocketAuthHandshake:
 
         assert any("no authentication token" in error.lower() for error in result["errors"])
     
+    @pytest.mark.asyncio
     async def test_protocol_validation(self, auth_handshake):
 
         """Test WebSocket protocol validation."""
@@ -1426,6 +1436,7 @@ class TestWebSocketAuthHandshake:
 
         assert stats["protocol_mismatches"] > 0
     
+    @pytest.mark.asyncio
     async def test_token_verification_and_refresh(self, token_verifier, auth_handshake):
 
         """Test token verification and refresh functionality."""
@@ -1466,6 +1477,7 @@ class TestWebSocketAuthHandshake:
 
         assert new_verification["valid"] is True
     
+    @pytest.mark.asyncio
     async def test_token_expiration_warning(self, token_verifier, auth_handshake):
 
         """Test token expiration warning."""
@@ -1482,6 +1494,7 @@ class TestWebSocketAuthHandshake:
 
         assert verification["expires_soon"] is True
     
+    @pytest.mark.asyncio
     async def test_upgrade_request_validation(self, upgrade_handler):
 
         """Test WebSocket upgrade request validation."""
@@ -1524,6 +1537,7 @@ class TestWebSocketAuthHandshake:
 
         assert len(result["invalid_headers"]) > 0
     
+    @pytest.mark.asyncio
     async def test_protocol_negotiation(self, upgrade_handler):
 
         """Test WebSocket protocol negotiation."""
@@ -1548,6 +1562,7 @@ class TestWebSocketAuthHandshake:
     
     @mock_justified("L2: WebSocket auth handshake with real internal components")
 
+    @pytest.mark.asyncio
     async def test_complete_handshake_flow_integration(self, auth_handshake, upgrade_handler, test_users):
 
         """Test complete handshake flow integration."""
@@ -1598,6 +1613,7 @@ class TestWebSocketAuthHandshake:
 
         assert upgrade_stats["successful_upgrades"] > 0
     
+    @pytest.mark.asyncio
     async def test_concurrent_handshake_performance(self, auth_handshake, test_users):
 
         """Test concurrent handshake performance."""

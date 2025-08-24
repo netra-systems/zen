@@ -6,11 +6,9 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from cryptography.fernet import Fernet
@@ -29,6 +27,7 @@ from netra_backend.tests.services.security_service_test_mocks import (
 @pytest.fixture
 def key_manager():
     """Create key manager for testing"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_settings = MagicMock()
     mock_settings.jwt_secret_key = "test_jwt_secret_key_that_is_long_enough_for_testing_purposes_and_security"
     mock_settings.fernet_key = Fernet.generate_key()
@@ -42,10 +41,15 @@ def enhanced_security_service(key_manager):
 @pytest.fixture
 def mock_db_session():
     """Create mock database session"""
+    # Mock: Session isolation for controlled testing without external state
     session = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.add = MagicMock()
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.refresh = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.execute = AsyncMock()
     return session
 
@@ -71,6 +75,7 @@ def sample_users(enhanced_security_service):
 class TestSecurityServiceAuthenticationEnhanced:
     """Enhanced tests for security service authentication"""
     
+    @pytest.mark.asyncio
     async def test_successful_authentication_admin(self, enhanced_security_service, sample_users):
         """Test successful authentication for admin user"""
         admin_user = sample_users[0]
@@ -83,6 +88,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         assert_authentication_success(result)
         _assert_admin_permissions(result)
     
+    @pytest.mark.asyncio
     async def test_successful_authentication_regular_user(self, enhanced_security_service, sample_users):
         """Test successful authentication for regular user"""
         regular_user = sample_users[1]
@@ -95,6 +101,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         assert_authentication_success(result)
         _assert_user_permissions(result)
     
+    @pytest.mark.asyncio
     async def test_failed_authentication_wrong_password(self, enhanced_security_service, sample_users):
         """Test failed authentication with wrong password"""
         admin_user = sample_users[0]
@@ -106,6 +113,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         
         assert_authentication_failure(result)
     
+    @pytest.mark.asyncio
     async def test_failed_authentication_nonexistent_user(self, enhanced_security_service):
         """Test failed authentication for nonexistent user"""
         with patch.object(enhanced_security_service, '_get_user_by_email', return_value=None):
@@ -115,6 +123,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         
         assert_authentication_failure(result)
     
+    @pytest.mark.asyncio
     async def test_locked_account_authentication(self, enhanced_security_service, sample_users):
         """Test authentication attempt on locked account"""
         locked_user = sample_users[2]
@@ -127,6 +136,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         assert_authentication_failure(result)
         assert "locked" in result.get('error', '').lower()
     
+    @pytest.mark.asyncio
     async def test_token_generation_and_validation(self, enhanced_security_service, sample_users):
         """Test token generation and validation"""
         admin_user = sample_users[0]
@@ -139,6 +149,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         validation_result = await enhanced_security_service.validate_token_jwt(token)
         _assert_token_validation_success(validation_result, admin_user)
     
+    @pytest.mark.asyncio
     async def test_expired_token_validation(self, enhanced_security_service, sample_users):
         """Test validation of expired token"""
         admin_user = sample_users[0]
@@ -151,6 +162,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         validation_result = await enhanced_security_service.validate_token_jwt(token)
         _assert_token_validation_failure(validation_result)
     
+    @pytest.mark.asyncio
     async def test_session_caching_functionality(self, enhanced_security_service, sample_users):
         """Test session caching functionality"""
         admin_user = sample_users[0]
@@ -165,6 +177,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         
         _assert_cached_session_consistency(result1, result2)
     
+    @pytest.mark.asyncio
     async def test_rate_limiting_functionality(self, enhanced_security_service):
         """Test rate limiting functionality"""
         identifier = "test_user_ip"

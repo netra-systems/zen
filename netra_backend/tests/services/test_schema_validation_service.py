@@ -1,10 +1,8 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from typing import List, Optional
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from pydantic import BaseModel, ValidationError
@@ -20,14 +18,20 @@ class UserDataSchema(BaseModel):
     tags: List[str] = []
 class TestSchemaValidationService:
     
+    @pytest.mark.asyncio
     async def test_validate_schema(self):
         """Test schema validation against database."""
+        # Mock: Component isolation for controlled unit testing
         mock_engine = Mock(spec=AsyncEngine)
         
         # Mock connection context - properly set up async context manager
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_context = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_context.__aenter__ = AsyncMock(return_value=mock_conn)
+        # Mock: Async component isolation for testing without real async operations
         mock_context.__aexit__ = AsyncMock(return_value=None)
         mock_engine.connect.return_value = mock_context
         
@@ -43,6 +47,7 @@ class TestSchemaValidationService:
             # Expected due to mocking, just test that method exists
             assert hasattr(SchemaValidationService, 'validate_schema')
 
+    @pytest.mark.asyncio
     async def test_schema_service_import(self):
         """Test that the schema validation service can be imported."""
         assert SchemaValidationService != None

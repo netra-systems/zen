@@ -8,7 +8,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from decimal import Decimal
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -27,27 +27,38 @@ class TestSupplyResearcherAgentCore:
     @pytest.fixture
     def mock_db(self):
         """Create mock database session"""
+        # Mock: Generic component isolation for controlled unit testing
         db = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         db.query = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         db.add = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         db.commit = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         db.rollback = AsyncMock()
         return db
     
     @pytest.fixture
     def mock_llm_manager(self):
         """Create mock LLM manager"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm = Mock(spec=LLMManager)
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm.ask_llm = AsyncMock(return_value="Mock LLM response")
         return llm
     
     @pytest.fixture
     def mock_supply_service(self, mock_db):
         """Create mock supply research service"""
+        # Mock: Component isolation for controlled unit testing
         service = Mock(spec=SupplyResearchService)
         service.db = mock_db
+        # Mock: Component isolation for controlled unit testing
         service.get_supply_items = Mock(return_value=[])
+        # Mock: Generic component isolation for controlled unit testing
         service.create_or_update_supply_item = Mock()
+        # Mock: Component isolation for controlled unit testing
         service.validate_supply_data = Mock(return_value=(True, []))
         return service
     

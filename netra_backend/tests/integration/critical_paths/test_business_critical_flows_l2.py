@@ -25,7 +25,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -79,9 +79,13 @@ class BusinessCriticalFlowsTester:
     async def _setup_billing_services(self):
         """Setup billing and revenue services."""
         # Mock services for L2 testing with realistic behavior
+        # Mock: Generic component isolation for controlled unit testing
         self.usage_metering = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.payment_processor = MagicMock() 
+        # Mock: Generic component isolation for controlled unit testing
         self.subscription_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.revenue_calculator = MagicMock()
         
         # Configure realistic mock behaviors
@@ -382,6 +386,7 @@ class BusinessCriticalFlowsTester:
         pass
     
     # Test 97: Usage Metering Pipeline
+    @pytest.mark.asyncio
     async def test_usage_metering_pipeline(self) -> Dict[str, Any]:
         """Test usage metering collection, aggregation, and billing pipeline."""
         test_id = str(uuid.uuid4())
@@ -485,6 +490,7 @@ class BusinessCriticalFlowsTester:
             }
     
     # Test 98: Payment Webhook Processing
+    @pytest.mark.asyncio
     async def test_payment_webhook_processing(self) -> Dict[str, Any]:
         """Test payment webhook processing and transaction handling."""
         test_id = str(uuid.uuid4())
@@ -670,6 +676,7 @@ class BusinessCriticalFlowsTester:
             }
     
     # Test 99: Subscription Lifecycle
+    @pytest.mark.asyncio
     async def test_subscription_lifecycle(self) -> Dict[str, Any]:
         """Test complete subscription lifecycle management."""
         test_id = str(uuid.uuid4())
@@ -825,6 +832,7 @@ class BusinessCriticalFlowsTester:
             }
     
     # Test 100: Revenue Recognition
+    @pytest.mark.asyncio
     async def test_revenue_recognition(self) -> Dict[str, Any]:
         """Test revenue recognition and financial reporting accuracy."""
         test_id = str(uuid.uuid4())
@@ -1063,6 +1071,7 @@ async def business_flows_tester():
 class TestBusinessCriticalFlows:
     """L2 integration tests for business critical flows (Tests 97-100)."""
     
+    @pytest.mark.asyncio
     async def test_usage_metering_pipeline_accuracy(self, business_flows_tester):
         """Test 97: Usage metering collection and billing pipeline."""
         result = await business_flows_tester.test_usage_metering_pipeline()
@@ -1073,6 +1082,7 @@ class TestBusinessCriticalFlows:
         assert result["pipeline_validation"]["free_tier_zero_cost"] is True
         assert result["execution_time"] < 15.0
     
+    @pytest.mark.asyncio
     async def test_payment_webhook_processing_reliability(self, business_flows_tester):
         """Test 98: Payment webhook processing and transaction handling."""
         result = await business_flows_tester.test_payment_webhook_processing()
@@ -1083,6 +1093,7 @@ class TestBusinessCriticalFlows:
         assert result["webhook_validation"]["failed_payments_handled"] is True
         assert result["execution_time"] < 10.0
     
+    @pytest.mark.asyncio
     async def test_subscription_lifecycle_management(self, business_flows_tester):
         """Test 99: Complete subscription lifecycle operations."""
         result = await business_flows_tester.test_subscription_lifecycle()
@@ -1093,6 +1104,7 @@ class TestBusinessCriticalFlows:
         assert result["lifecycle_validation"]["final_state_correct"] is True
         assert result["execution_time"] < 10.0
     
+    @pytest.mark.asyncio
     async def test_revenue_recognition_accuracy(self, business_flows_tester):
         """Test 100: Revenue recognition and financial reporting."""
         result = await business_flows_tester.test_revenue_recognition()
@@ -1104,6 +1116,7 @@ class TestBusinessCriticalFlows:
         assert result["total_monthly_revenue"] > 0
         assert result["execution_time"] < 10.0
     
+    @pytest.mark.asyncio
     async def test_comprehensive_business_flows_integration(self, business_flows_tester):
         """Comprehensive test covering all business critical flows."""
         # Run all business critical flow tests

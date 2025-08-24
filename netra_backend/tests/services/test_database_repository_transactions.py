@@ -6,11 +6,9 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from typing import Any, Dict
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
@@ -51,6 +49,7 @@ def transaction_manager():
 class TestDatabaseRepositoryTransactions:
     """Test database repository transaction management"""
     
+    @pytest.mark.asyncio
     async def test_successful_transaction_commit(self, mock_session, mock_repository):
         """Test successful transaction commit"""
         create_data = {'name': 'Test Entity', 'description': 'Test Description'}
@@ -60,6 +59,7 @@ class TestDatabaseRepositoryTransactions:
         
         _assert_successful_transaction(result, mock_session, mock_repository)
     
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_integrity_error(self, mock_session, mock_repository):
         """Test transaction rollback on integrity constraint violation"""
         _setup_integrity_error(mock_session)
@@ -68,6 +68,7 @@ class TestDatabaseRepositoryTransactions:
         
         _assert_rollback_on_error(result, mock_session)
     
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_sql_error(self, mock_session, mock_repository):
         """Test transaction rollback on SQL error"""
         _setup_sql_error(mock_session)
@@ -77,6 +78,7 @@ class TestDatabaseRepositoryTransactions:
         assert result is None
         mock_session.rollback.assert_called()
     
+    @pytest.mark.asyncio
     async def test_concurrent_transaction_handling(self, mock_repository):
         """Test handling of concurrent transactions"""
         created_sessions = []
@@ -87,6 +89,7 @@ class TestDatabaseRepositoryTransactions:
         assert_all_sessions_closed(created_sessions)
         assert len(created_sessions) == 5
     
+    @pytest.mark.asyncio
     async def test_connection_loss_during_transaction(self, mock_session, mock_repository):
         """Test handling of connection loss during transaction"""
         _setup_connection_loss(mock_session)
@@ -94,6 +97,7 @@ class TestDatabaseRepositoryTransactions:
         with pytest.raises(DisconnectionError):
             await mock_repository.create(mock_session, name='Connection Test')
     
+    @pytest.mark.asyncio
     async def test_deadlock_detection_and_retry(self, mock_session, mock_repository, transaction_manager):
         """Test deadlock detection and retry logic"""
         transaction_manager.simulate_deadlock(mock_session)
@@ -111,6 +115,7 @@ class TestDatabaseRepositoryTransactions:
         stats = transaction_manager.get_transaction_stats()
         assert stats['deadlocks'] >= 1
     
+    @pytest.mark.asyncio
     async def test_transaction_state_tracking(self, mock_repository, transaction_manager):
         """Test transaction state tracking"""
         transaction_id = "test_tx_123"
@@ -119,6 +124,7 @@ class TestDatabaseRepositoryTransactions:
         
         assert transaction_manager.transaction_states[transaction_id] == "COMMITTED"
     
+    @pytest.mark.asyncio
     async def test_repository_operation_logging(self, mock_session, mock_repository):
         """Test that repository operations are properly logged"""
         test_data = {'name': 'Logged Entity'}
@@ -132,6 +138,7 @@ class TestDatabaseRepositoryTransactions:
 def _setup_successful_creation(mock_session: AsyncMock, create_data: Dict[str, Any]) -> None:
     """Setup mock session for successful creation"""
     created_entity = MockDatabaseModel(**create_data)
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.refresh = AsyncMock(
         side_effect=lambda entity: setattr(entity, 'id', 'test_123')
     )

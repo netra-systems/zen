@@ -3,12 +3,10 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import UTC, datetime
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.llm.client import ResilientLLMClient
@@ -75,6 +73,7 @@ class TestSyntaxFix:
         from netra_backend.app.core.circuit_breaker import circuit_registry
         circuit_registry.cleanup_all()
         
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         self.mock_llm_manager = MagicMock()
         self.llm_client = ResilientLLMClient(self.mock_llm_manager)
 

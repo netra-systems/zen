@@ -168,6 +168,7 @@ class TestBackgroundJobsRedisQueueL3:
         results = []
         
         # Define job handler
+        @pytest.mark.asyncio
         async def test_job_handler(job_data):
             results.append(job_data["payload"])
             return {"status": "completed", "result": job_data["payload"]["value"] * 2}

@@ -10,7 +10,7 @@ L3 Test: Real Redis-backed session synchronization across multiple devices.
 Tests cross-device state consistency and conflict resolution.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -22,19 +22,19 @@ import time
 import uuid
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import redis.asyncio as redis
 
 # JWT service replaced with auth_integration
 from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 JWTService = AsyncMock
 # Session manager replaced with mock
 
 SessionManager = AsyncMock
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
@@ -179,6 +179,7 @@ class MultiDeviceSessionManager:
 
         websocket = MockWebSocketForRedis(f"{user_id}_{device_id}")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.ws_manager.verify_jwt_token') as mock_verify:
 
             mock_verify.return_value = {
@@ -547,6 +548,7 @@ class TestMultiDeviceSessionSyncL3:
 
         service = JWTService()
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -565,6 +567,7 @@ class TestMultiDeviceSessionSyncL3:
 
         manager = SessionManager()
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -581,6 +584,7 @@ class TestMultiDeviceSessionSyncL3:
 
         """Create WebSocket manager."""
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.ws_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
@@ -609,6 +613,7 @@ class TestMultiDeviceSessionSyncL3:
 
         await manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_create_multiple_device_sessions(self, multi_device_manager):
 
         """Test creating multiple device sessions for the same user."""
@@ -671,6 +676,7 @@ class TestMultiDeviceSessionSyncL3:
 
         assert set(stored_device_ids) == set(device_ids)
     
+    @pytest.mark.asyncio
     async def test_cross_device_state_synchronization(self, multi_device_manager):
 
         """Test state synchronization across multiple devices."""
@@ -753,6 +759,7 @@ class TestMultiDeviceSessionSyncL3:
 
         assert not sync_to_desktop
     
+    @pytest.mark.asyncio
     async def test_concurrent_device_state_conflicts(self, multi_device_manager):
 
         """Test handling of concurrent state changes across devices."""
@@ -823,6 +830,7 @@ class TestMultiDeviceSessionSyncL3:
 
         assert latest_conflict["conflict_id"] == conflict_result["conflict_id"]
     
+    @pytest.mark.asyncio
     async def test_device_session_limit_enforcement(self, multi_device_manager):
 
         """Test enforcement of maximum device sessions per user."""
@@ -865,6 +873,7 @@ class TestMultiDeviceSessionSyncL3:
 
         assert len(stored_sessions) == 5
     
+    @pytest.mark.asyncio
     async def test_device_disconnection_and_reconnection(self, multi_device_manager):
 
         """Test device disconnection and reconnection scenarios."""
@@ -935,6 +944,7 @@ class TestMultiDeviceSessionSyncL3:
 
         assert sync_received
     
+    @pytest.mark.asyncio
     async def test_cross_device_message_ordering(self, multi_device_manager):
 
         """Test message ordering consistency across devices."""

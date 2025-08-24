@@ -53,7 +53,7 @@ async def agent_service(l3_services):
     """Agent service with L3 real dependencies"""
     orchestrator, connections = l3_services
     supervisor = SupervisorAgent()
-    return AgentService(supervisor)
+    yield AgentService(supervisor)
 
 @pytest.fixture
 async def reset_services(l3_services):
@@ -64,6 +64,7 @@ async def reset_services(l3_services):
 class TestAgentToolExecutionPipeline:
     """Test end-to-end agent tool execution pipeline"""
 
+    @pytest.mark.asyncio
     async def test_basic_tool_execution_pipeline(self, agent_service, reset_services):
         """Test basic end-to-end tool execution < 2 seconds"""
         start_time = time.time()
@@ -74,6 +75,7 @@ class TestAgentToolExecutionPipeline:
         assert execution_time < 2.0
         assert result is not None
 
+    @pytest.mark.asyncio
     async def test_permission_failure_handling(self, agent_service, reset_services):
         """Test permission failure handling in tool execution"""
         request = RequestModel(query="Execute admin tool", user_request="test_permission")
@@ -81,6 +83,7 @@ class TestAgentToolExecutionPipeline:
         with pytest.raises(AgentPermissionError):
             await agent_service.run(request, "test_run_permission", False)
 
+    @pytest.mark.asyncio
     async def test_timeout_handling(self, agent_service, reset_services):
         """Test timeout handling in long-running tool execution"""
         request = RequestModel(query="Long running task", user_request="test_timeout")
@@ -91,6 +94,7 @@ class TestAgentToolExecutionPipeline:
                 timeout=1.0
             )
 
+    @pytest.mark.asyncio
     async def test_concurrent_tool_executions(self, agent_service, reset_services):
         """Test concurrent tool executions performance"""
         start_time = time.time()
@@ -109,6 +113,7 @@ class TestAgentToolExecutionPipeline:
         assert execution_time < 2.0
         assert len(results) == 5
 
+    @pytest.mark.asyncio
     async def test_supervisor_to_subagent_delegation(self, agent_service, reset_services):
         """Test supervisor delegation to sub-agents"""
         request = RequestModel(query="Analyze data", user_request="test_delegation")
@@ -116,6 +121,7 @@ class TestAgentToolExecutionPipeline:
         
         assert result is not None
 
+    @pytest.mark.asyncio
     async def test_tool_execution_with_database_recovery(self, agent_service, reset_services):
         """Test tool execution continues after database recovery"""
         recovery_strategy = ConnectionPoolRefreshStrategy()
@@ -124,12 +130,14 @@ class TestAgentToolExecutionPipeline:
         result = await agent_service.run(request, "test_run_recovery", False)
         assert result is not None
 
+    @pytest.mark.asyncio
     async def test_websocket_message_handling(self, agent_service, reset_services):
         """Test WebSocket message handling in tool execution"""
         message = {"type": "start_agent", "payload": {"query": "Test WebSocket"}}
         
         await agent_service.handle_websocket_message("test_user", message, None)
 
+    @pytest.mark.asyncio
     async def test_streaming_tool_execution(self, agent_service, reset_services):
         """Test streaming tool execution pipeline"""
         message = "Stream test execution"

@@ -6,9 +6,7 @@ Tests for integration with message queue system.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
@@ -23,12 +21,17 @@ class TestMessageQueueIntegration:
     @pytest.fixture
     def mock_message_queue(self):
         """Create mock message queue for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         queue = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         queue.enqueue = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         queue.dequeue = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         queue.get_queue_stats = MagicMock()
         return queue
 
+    @pytest.mark.asyncio
     async def test_message_queueing_for_routing(self, mock_message_queue):
         """Test message queueing before routing."""
         # Create queued message
@@ -45,6 +48,7 @@ class TestMessageQueueIntegration:
         # Verify enqueue was called
         mock_message_queue.enqueue.assert_called_once_with(message)
 
+    @pytest.mark.asyncio
     async def test_priority_queue_processing(self, mock_message_queue):
         """Test priority-based queue processing."""
         # Setup queue to return messages in priority order

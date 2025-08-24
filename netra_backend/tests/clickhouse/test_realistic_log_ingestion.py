@@ -8,7 +8,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -21,11 +21,13 @@ from netra_backend.tests.fixtures.realistic_test_fixtures import (
 class TestRealisticLogIngestion:
     """Test realistic log ingestion patterns"""
     
+    @pytest.mark.asyncio
     async def test_streaming_log_ingestion(self):
         """Test streaming ingestion of logs"""
         logs = generate_realistic_logs(1000)
         mock_clickhouse_client = create_mock_clickhouse_client()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_client:
             mock_client.return_value.__aenter__.return_value = mock_clickhouse_client
             
@@ -46,6 +48,7 @@ class TestRealisticLogIngestion:
             # Verify batches were inserted
             assert mock_clickhouse_client.execute.call_count == 10  # 1000 logs / 100 batch size
 
+    @pytest.mark.asyncio
     async def test_log_pattern_recognition(self):
         """Test pattern recognition across large log volumes"""
         # Simulate pattern detection query

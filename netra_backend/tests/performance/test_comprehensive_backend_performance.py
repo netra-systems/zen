@@ -23,7 +23,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -103,16 +103,21 @@ class DatabasePerformanceTester:
         
         return corpus
     
+    @pytest.mark.asyncio
     async def test_bulk_insert_performance(self, record_count: int = 50000) -> float:
         """Test database bulk insert performance."""
         test_corpus = self._generate_test_corpus(record_count)
         table_name = f'perf_test_{uuid.uuid4().hex[:8]}'
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_db.return_value = mock_instance
             
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_interceptor_instance = AsyncMock()
                 mock_interceptor.return_value = mock_interceptor_instance
                 
@@ -123,11 +128,14 @@ class DatabasePerformanceTester:
                 self.metrics.record_metric('db_bulk_insert_50k', duration)
                 return duration
     
+    @pytest.mark.asyncio
     async def test_concurrent_query_performance(self, concurrent_queries: int = 10) -> float:
         """Test concurrent database query performance."""
         tasks = []
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.db.clickhouse.ClickHouseDatabase') as mock_db:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_instance.execute_query.return_value = [
                 {'id': i, 'data': f'test_data_{i}'} for i in range(1000)
@@ -153,6 +161,7 @@ class WebSocketPerformanceTester:
     def __init__(self):
         self.metrics = PerformanceTestMetrics()
     
+    @pytest.mark.asyncio
     async def test_message_throughput(self, message_count: int = 10000) -> float:
         """Test WebSocket message throughput."""
         messages_processed = 0
@@ -181,8 +190,10 @@ class WebSocketPerformanceTester:
         self.metrics.record_metric('websocket_throughput', throughput)
         return throughput
     
+    @pytest.mark.asyncio
     async def test_broadcast_performance(self, connection_count: int = 100, message_count: int = 1000) -> float:
         """Test WebSocket broadcast performance."""
+        # Mock: Generic component isolation for controlled unit testing
         connections = [AsyncMock() for _ in range(connection_count)]
         
         async def broadcast_message(message, connections_list):
@@ -215,6 +226,7 @@ class AgentPerformanceTester:
     def __init__(self):
         self.metrics = PerformanceTestMetrics()
     
+    @pytest.mark.asyncio
     async def test_agent_processing_speed(self, request_count: int = 100) -> float:
         """Test agent processing speed under load."""
         async def mock_agent_process(request):
@@ -241,6 +253,7 @@ class AgentPerformanceTester:
         self.metrics.record_metric('agent_processing', duration)
         return duration
     
+    @pytest.mark.asyncio
     async def test_concurrent_agent_processing(self, concurrent_agents: int = 5, requests_per_agent: int = 20) -> float:
         """Test concurrent agent processing performance."""
         async def agent_batch_processor(agent_id, request_count):
@@ -277,6 +290,7 @@ class APIPerformanceTester:
     def __init__(self):
         self.metrics = PerformanceTestMetrics()
     
+    @pytest.mark.asyncio
     async def test_api_response_times(self, request_count: int = 1000) -> List[float]:
         """Test API endpoint response times."""
         async def mock_api_call():
@@ -295,6 +309,7 @@ class APIPerformanceTester:
         
         return response_times
     
+    @pytest.mark.asyncio
     async def test_concurrent_api_load(self, concurrent_requests: int = 50, total_requests: int = 1000) -> float:
         """Test API performance under concurrent load."""
         async def api_request_batch(batch_size):
@@ -328,6 +343,7 @@ class MemoryPerformanceTester:
     def __init__(self):
         self.metrics = PerformanceTestMetrics()
     
+    @pytest.mark.asyncio
     async def test_memory_usage_patterns(self, data_size_mb: int = 100) -> Dict[str, float]:
         """Test memory usage under different load patterns."""
         # Simulate memory-intensive operations
@@ -380,6 +396,7 @@ class MemoryPerformanceTester:
         
         return metrics
     
+    @pytest.mark.asyncio
     async def test_memory_cleanup_patterns(self, cycles: int = 10) -> List[float]:
         """Test memory cleanup and garbage collection patterns."""
         cleanup_times = []
@@ -415,6 +432,7 @@ class CachePerformanceTester:
         """Generate cache key."""
         return f"{operation}:{hash(json.dumps(params, sort_keys=True))}"
     
+    @pytest.mark.asyncio
     async def test_cache_hit_rates(self, operations: int = 1000, cache_size: int = 100) -> Dict[str, float]:
         """Test cache hit rates under different patterns."""
         cache_hits = 0
@@ -459,6 +477,7 @@ class CachePerformanceTester:
             'total_operations': operations
         }
     
+    @pytest.mark.asyncio
     async def test_cache_performance_under_load(self, concurrent_operations: int = 50, operations_per_thread: int = 100) -> float:
         """Test cache performance under concurrent load."""
         async def cache_operations_batch(batch_id: int, operation_count: int):

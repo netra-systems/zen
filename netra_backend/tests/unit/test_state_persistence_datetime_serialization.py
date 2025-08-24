@@ -3,11 +3,9 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import json
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,6 +21,7 @@ from netra_backend.app.services.state_serialization import DateTimeEncoder
 
 class TestDateTimeSerialization:
     """Test datetime serialization in state persistence."""
+    @pytest.mark.asyncio
     async def test_datetime_encoder_handles_datetime_objects(self):
         """Test DateTimeEncoder properly serializes datetime objects."""
         data = {
@@ -47,6 +46,7 @@ class TestDateTimeSerialization:
         # Verify ISO format
         assert "T" in deserialized["timestamp"]
         assert deserialized["created_at"] == "2025-08-15T10:30:00+00:00"
+    @pytest.mark.asyncio
     async def test_save_agent_state_serializes_datetime_in_state_data(self):
         """Test save_agent_state properly serializes datetime objects in state_data."""
         service = StatePersistenceService()
@@ -70,12 +70,19 @@ class TestDateTimeSerialization:
         )
         
         # Mock database session
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
+        # Mock: Generic component isolation for controlled unit testing
         mock_begin = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_begin.__aenter__ = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         mock_begin.__aexit__ = AsyncMock(return_value=None)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.begin = MagicMock(return_value=mock_begin)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.add = MagicMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.flush = AsyncMock()
         
         # Mock internal methods
@@ -106,6 +113,7 @@ class TestDateTimeSerialization:
                         assert isinstance(snapshot.state_data["metrics"]["last_update"], str)
                         assert isinstance(snapshot.state_data["checkpoint_time"], str)
                         assert snapshot.state_data["checkpoint_time"] == "2025-08-15T12:00:00+00:00"
+    @pytest.mark.asyncio
     async def test_state_persistence_handles_mixed_data_types(self):
         """Test state persistence handles mixed data types including datetime."""
         service = StatePersistenceService()
@@ -132,12 +140,19 @@ class TestDateTimeSerialization:
         )
         
         # Mock session
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
+        # Mock: Generic component isolation for controlled unit testing
         mock_begin = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_begin.__aenter__ = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         mock_begin.__aexit__ = AsyncMock(return_value=None)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.begin = MagicMock(return_value=mock_begin)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.add = MagicMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.flush = AsyncMock()
         
         # Mock methods

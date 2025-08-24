@@ -301,6 +301,56 @@ class AgentExecutionResult:
         }
 
 
+@dataclass
+class PipelineStep:
+    """Pipeline step definition for agent execution."""
+    
+    step_id: str
+    name: str
+    description: str = ""
+    required: bool = True
+    timeout: Optional[float] = None
+    retry_count: int = 0
+    dependencies: List[str] = field(default_factory=list)
+    parameters: Dict[str, Any] = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    
+    def __post_init__(self):
+        if not self.step_id:
+            raise ValueError("step_id is required")
+        if not self.name:
+            raise ValueError("name is required")
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert pipeline step to dictionary."""
+        return {
+            "step_id": self.step_id,
+            "name": self.name,
+            "description": self.description,
+            "required": self.required,
+            "timeout": self.timeout,
+            "retry_count": self.retry_count,
+            "dependencies": self.dependencies,
+            "parameters": self.parameters,
+            "metadata": self.metadata
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'PipelineStep':
+        """Create pipeline step from dictionary."""
+        return cls(
+            step_id=data["step_id"],
+            name=data["name"],
+            description=data.get("description", ""),
+            required=data.get("required", True),
+            timeout=data.get("timeout"),
+            retry_count=data.get("retry_count", 0),
+            dependencies=data.get("dependencies", []),
+            parameters=data.get("parameters", {}),
+            metadata=data.get("metadata", {})
+        )
+
+
 # Global context manager instance
 _context_manager: Optional[ContextManager] = None
 

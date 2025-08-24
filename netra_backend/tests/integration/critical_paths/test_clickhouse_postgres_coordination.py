@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 
 from netra_backend.app.db.postgres import get_postgres_session, initialize_postgres
 from netra_backend.app.logging_config import central_logger
@@ -248,6 +248,7 @@ async def coordinator():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_coordinated_write_commit(coordinator):
     """Test coordinated write to both databases with commit."""
     data = coordinator.create_test_data("success")
@@ -260,6 +261,7 @@ async def test_coordinated_write_commit(coordinator):
 @pytest.mark.asyncio 
 @pytest.mark.integration
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_clickhouse_failure_rollback(coordinator):
     """Test rollback on ClickHouse failure preserves PostgreSQL consistency."""
     data = coordinator.create_test_data("clickhouse_failure")
@@ -272,6 +274,7 @@ async def test_clickhouse_failure_rollback(coordinator):
 @pytest.mark.asyncio
 @pytest.mark.integration  
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_postgres_failure_rollback(coordinator):
     """Test rollback on PostgreSQL failure preserves ClickHouse consistency."""
     data = coordinator.create_test_data("postgres_failure")
@@ -284,6 +287,7 @@ async def test_postgres_failure_rollback(coordinator):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism  
+@pytest.mark.asyncio
 async def test_read_consistency(coordinator):
     """Test read consistency across both databases."""
     data = coordinator.create_test_data("read_test")
@@ -296,6 +300,7 @@ async def test_read_consistency(coordinator):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_concurrent_transaction_isolation(coordinator):
     """Test concurrent transaction isolation."""
     data_list = [coordinator.create_test_data(f"concurrent_{i}") for i in range(3)]

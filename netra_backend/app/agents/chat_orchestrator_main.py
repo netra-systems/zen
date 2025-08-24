@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """NACIS Chat Orchestrator Agent - Central control for AI optimization consultation.
 
 Date Created: 2025-01-22
@@ -56,7 +57,7 @@ class ChatOrchestrator(SupervisorAgent):
         self.description = "NACIS orchestrator for AI optimization consultation"
         self.cache_manager = cache_manager
         self.semantic_cache_enabled = semantic_cache_enabled
-        self.nacis_enabled = os.getenv("NACIS_ENABLED", "false").lower() == "true"
+        self.nacis_enabled = get_env().get("NACIS_ENABLED", "false").lower() == "true"
     
     def _init_helper_modules(self) -> None:
         """Initialize helper modules for orchestration."""

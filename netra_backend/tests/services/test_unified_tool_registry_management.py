@@ -6,8 +6,6 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from unittest.mock import MagicMock
 
 import pytest
@@ -34,6 +32,7 @@ def unified_registry():
     
     # Add multiple registries
     for name in ['primary', 'secondary', 'specialized']:
+        # Mock: Generic component isolation for controlled unit testing
         registry = ToolRegistry(MagicMock())
         unified.add_registry(name, registry)
         
@@ -62,6 +61,7 @@ class TestUnifiedToolRegistryManagement:
     def test_registry_addition_and_management(self, unified_registry):
         """Test adding and managing multiple registries"""
         # Add new registry
+        # Mock: Generic component isolation for controlled unit testing
         new_registry = ToolRegistry(MagicMock())
         unified_registry.add_registry('experimental', new_registry)
         
@@ -81,6 +81,7 @@ class TestUnifiedToolRegistryManagement:
         assert orchestrator is not None
         assert hasattr(orchestrator, 'execute_chain')
     
+    @pytest.mark.asyncio
     async def test_tool_chain_execution(self, sample_tools):
         """Test execution of tool chains"""
         orchestrator = ToolOrchestrator()
@@ -145,6 +146,7 @@ def _assert_management_components_initialized(unified_registry) -> None:
 
 def _test_registry_replacement(unified_registry) -> None:
     """Test registry replacement functionality"""
+    # Mock: Generic component isolation for controlled unit testing
     replacement_registry = ToolRegistry(MagicMock())
     unified_registry.add_registry('primary', replacement_registry)
     

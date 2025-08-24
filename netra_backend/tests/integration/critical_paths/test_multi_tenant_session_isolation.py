@@ -128,6 +128,7 @@ class MultiTenantIsolationTester:
         for tenant in self.tenants:
             await tenant.cleanup()
             
+    @pytest.mark.asyncio
     async def test_tenant_setup(self) -> bool:
         """Setup all tenant sessions."""
         print("\n[SETUP] STEP 1: Setting up tenant sessions...")
@@ -144,6 +145,7 @@ class MultiTenantIsolationTester:
         print(f"[OK] All {len(self.tenants)} tenants setup successfully")
         return True
         
+    @pytest.mark.asyncio
     async def test_isolated_data_creation(self) -> bool:
         """Test that each tenant can create isolated data."""
         print("\n[CREATE] STEP 2: Creating isolated data for each tenant...")
@@ -178,6 +180,7 @@ class MultiTenantIsolationTester:
             
         return True
         
+    @pytest.mark.asyncio
     async def test_data_isolation_verification(self) -> bool:
         """Verify that tenants cannot access each other's data."""
         print("\n[ISOLATE] STEP 3: Verifying data isolation between tenants...")
@@ -208,6 +211,7 @@ class MultiTenantIsolationTester:
             
         return True
         
+    @pytest.mark.asyncio
     async def test_concurrent_operations(self) -> bool:
         """Test concurrent operations across tenants."""
         print("\n[CONCURRENT] STEP 4: Testing concurrent operations...")
@@ -251,6 +255,7 @@ class MultiTenantIsolationTester:
             print(f"[ERROR] Some concurrent operations failed")
             return False
             
+    @pytest.mark.asyncio
     async def test_websocket_isolation(self) -> bool:
         """Test WebSocket connection isolation."""
         print("\n[WEBSOCKET] STEP 5: Testing WebSocket isolation...")
@@ -329,6 +334,7 @@ class MultiTenantIsolationTester:
         print(f"[OK] WebSocket message isolation verified")
         return True
         
+    @pytest.mark.asyncio
     async def test_resource_quotas(self) -> bool:
         """Test resource quota enforcement per tenant."""
         print("\n[QUOTA] STEP 6: Testing resource quota enforcement...")
@@ -371,6 +377,7 @@ class MultiTenantIsolationTester:
                 
         return True
         
+    @pytest.mark.asyncio
     async def test_session_cleanup(self) -> bool:
         """Test proper session cleanup and data isolation after logout."""
         print("\n[CLEANUP] STEP 7: Testing session cleanup...")
@@ -402,6 +409,7 @@ class MultiTenantIsolationTester:
                     
         return True
         
+    @pytest.mark.asyncio
     async def test_cross_tenant_security(self) -> bool:
         """Test cross-tenant security vulnerabilities."""
         print("\n[SECURITY] STEP 8: Testing cross-tenant security...")
@@ -462,6 +470,7 @@ class MultiTenantIsolationTester:
         print(f"[OK] All security vectors properly blocked")
         return True
         
+    @pytest.mark.asyncio
     async def test_tenant_data_cleanup(self) -> bool:
         """Test complete data cleanup for a tenant."""
         print("\n[DELETE] STEP 9: Testing tenant data cleanup...")
@@ -517,6 +526,7 @@ class MultiTenantIsolationTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_multi_tenant_session_isolation():
     """Test multi-tenant session isolation."""
     async with MultiTenantIsolationTester() as tester:

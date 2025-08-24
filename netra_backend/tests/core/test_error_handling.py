@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from fastapi import HTTPException, Request
@@ -243,6 +243,7 @@ class TestApiErrorHandler:
             {"loc": ("field1",), "msg": "field required", "type": "value_error.missing"},
             {"loc": ("field2",), "msg": "invalid format", "type": "value_error.format"}
         ]
+        # Mock: Generic component isolation for controlled unit testing
         exc = Mock()
         exc.errors.return_value = errors
         exc.__class__ = PydanticValidationError
@@ -398,8 +399,10 @@ class TestApiErrorHandlerFunctions:
         """Test global get_http_status_code function."""
         status_code = get_http_status_code(ErrorCode.AUTHENTICATION_FAILED)
         assert status_code == 401
+    @pytest.mark.asyncio
     async def test_netra_exception_handler(self):
         """Test FastAPI NetraException handler."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.state.request_id = "test-request-123"
         request.state.trace_id = "test-trace-123"
@@ -409,11 +412,14 @@ class TestApiErrorHandlerFunctions:
         
         assert isinstance(response, JSONResponse)
         assert response.status_code == 401
+    @pytest.mark.asyncio
     async def test_validation_exception_handler(self):
         """Test FastAPI validation exception handler."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.state.request_id = "test-request-123"
         request.state.trace_id = "test-trace-123"
+        # Mock: Generic component isolation for controlled unit testing
         exc = Mock()
         exc.errors.return_value = [{"loc": ("field",), "msg": "required", "type": "value_error"}]
         exc.__class__ = PydanticValidationError
@@ -422,8 +428,10 @@ class TestApiErrorHandlerFunctions:
         
         assert isinstance(response, JSONResponse)
         assert response.status_code == 422
+    @pytest.mark.asyncio
     async def test_http_exception_handler(self):
         """Test FastAPI HTTP exception handler."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.state.request_id = "test-request-123"
         request.state.trace_id = "test-trace-123"
@@ -433,8 +441,10 @@ class TestApiErrorHandlerFunctions:
         
         assert isinstance(response, JSONResponse)
         assert response.status_code == 404
+    @pytest.mark.asyncio
     async def test_general_exception_handler(self):
         """Test FastAPI general exception handler."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.state.request_id = "test-request-123"
         request.state.trace_id = "test-trace-123"

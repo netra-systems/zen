@@ -139,24 +139,30 @@ class RealServiceConfigManager:
         Returns:
             DatabaseConfig with appropriate settings
         """
-        # PostgreSQL configuration
-        if availability.postgresql.available and availability.use_real_services:
+        # PostgreSQL configuration - fail if not available when required
+        if availability.use_real_services:
+            if not availability.postgresql.available:
+                raise RuntimeError("PostgreSQL service is not available for E2E tests")
             postgres_url = self._get_real_postgres_url(availability)
             using_real_postgres = True
         else:
             postgres_url = self._get_test_postgres_url()
             using_real_postgres = False
         
-        # Redis configuration  
-        if availability.redis.available and availability.use_real_services:
+        # Redis configuration - fail if not available when required
+        if availability.use_real_services:
+            if not availability.redis.available:
+                raise RuntimeError("Redis service is not available for E2E tests")
             redis_url = self._get_real_redis_url(availability)
             using_real_redis = True
         else:
             redis_url = self._get_test_redis_url()
             using_real_redis = False
         
-        # ClickHouse configuration
-        if availability.clickhouse.available and availability.use_real_services:
+        # ClickHouse configuration - fail if not available when required
+        if availability.use_real_services:
+            if not availability.clickhouse.available:
+                raise RuntimeError("ClickHouse service is not available for E2E tests")
             clickhouse_url = self._get_real_clickhouse_url(availability)
             using_real_clickhouse = True
         else:
@@ -296,14 +302,14 @@ class RealServiceConfigManager:
         return "clickhouse://localhost:8123"
     
     def _get_test_clickhouse_url(self) -> str:
-        """Get test ClickHouse URL (mock fallback)."""
-        # For tests, use mock or file-based ClickHouse
+        """Get test ClickHouse URL."""
+        # For tests, use explicitly configured test ClickHouse
         test_ch_url = os.getenv("TEST_CLICKHOUSE_URL")
         if test_ch_url:
             return test_ch_url
         
-        # Default to mock ClickHouse for testing
-        return "clickhouse://localhost:8124"  # Different port to avoid conflicts
+        # No fallback - must be explicitly configured
+        raise RuntimeError("TEST_CLICKHOUSE_URL not configured for test environment")
 
 
 class ServiceConfigHelper:

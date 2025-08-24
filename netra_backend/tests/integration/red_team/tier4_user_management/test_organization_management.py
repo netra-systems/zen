@@ -21,7 +21,7 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as redis
@@ -31,7 +31,7 @@ from sqlalchemy.orm import sessionmaker
 
 # Real service imports - NO MOCKS
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.database import get_db_session
 
 
 class TestMultiUserOrganizationManagement:
@@ -63,13 +63,14 @@ class TestMultiUserOrganizationManagement:
             await engine.dispose()
 
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_organization_cleanup(self, real_db_session):
         """Clean up test organizations and users after each test."""
         test_org_ids = []
         test_user_ids = []
         test_emails = []
         
-        def register_cleanup(org_id: str = None, user_id: str = None, email: str = None):
+        async def register_cleanup(org_id: str = None, user_id: str = None, email: str = None):
             if org_id:
                 test_org_ids.append(org_id)
             if user_id:

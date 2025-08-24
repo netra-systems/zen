@@ -117,10 +117,11 @@ class TestJWTTokenExpiryHandling:
                 "timestamp": notification.timestamp
             })
         
-        return {"send": send_notification, "notifications": notifications}
+        yield {"send": send_notification, "notifications": notifications}
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_token_natural_expiry_flow(
         self, token_manager, notification_tracker
     ):
@@ -179,6 +180,7 @@ class TestJWTTokenExpiryHandling:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_grace_period_allowance(
         self, token_manager
     ):
@@ -218,6 +220,7 @@ class TestJWTTokenExpiryHandling:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_automatic_token_refresh(
         self, token_manager
     ):
@@ -263,6 +266,7 @@ class TestJWTTokenExpiryHandling:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_sliding_window_expiry(
         self, token_manager
     ):
@@ -298,6 +302,7 @@ class TestJWTTokenExpiryHandling:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_bulk_token_expiry_handling(
         self, token_manager
     ):
@@ -345,6 +350,7 @@ class TestJWTTokenExpiryHandling:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_refresh_token_rotation(
         self, token_manager
     ):
@@ -391,6 +397,7 @@ class TestJWTTokenExpiryHandling:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_expiry_during_request_processing(
         self, token_manager
     ):
@@ -443,6 +450,7 @@ class TestJWTTokenExpiryHandling:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_token_family_expiry(
         self, token_manager
     ):
@@ -476,6 +484,7 @@ class TestJWTTokenExpiryHandling:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
+    @pytest.mark.asyncio
     async def test_expiry_notification_schedule(
         self, token_manager, notification_tracker
     ):

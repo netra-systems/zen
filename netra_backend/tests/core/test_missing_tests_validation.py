@@ -11,7 +11,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 from cryptography.fernet import Fernet
@@ -28,19 +28,27 @@ class TestConfigValidator:
     
     @pytest.fixture
     def mock_config(self):
+        # Mock: Generic component isolation for controlled unit testing
         config = Mock()
         config.environment = "production"
         config.database_url = "postgresql://user:pass@localhost/db"
         config.jwt_secret_key = "a" * 32
         config.fernet_key = Fernet.generate_key()
+        # Mock: ClickHouse external database isolation for unit testing performance
         config.clickhouse_logging = Mock(enabled=True)
+        # Mock: ClickHouse external database isolation for unit testing performance
         config.clickhouse_native = Mock(host="localhost", password="pass")
+        # Mock: ClickHouse external database isolation for unit testing performance
         config.clickhouse_https = Mock(host="localhost", password="pass")
+        # Mock: Component isolation for controlled unit testing
         config.oauth_config = Mock(client_id="id", client_secret="secret")
         config.llm_configs = {
+            # Mock: OpenAI API isolation for testing without external service dependencies
             "default": Mock(api_key="key", model_name="model", provider="openai")
         }
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         config.redis = Mock(host="localhost", password="pass")
+        # Mock: Component isolation for controlled unit testing
         config.langfuse = Mock(secret_key="key", public_key="pub")
         return config
     

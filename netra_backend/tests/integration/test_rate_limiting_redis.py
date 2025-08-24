@@ -22,7 +22,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import redis.asyncio as redis
@@ -67,6 +67,7 @@ class RateLimitingManager:
             "sliding_window_enforced": 0
         }
     
+    @pytest.mark.asyncio
     async def test_request_limits_enforcement(self, user_count: int, requests_per_user: int) -> Dict[str, Any]:
         """Test request limit enforcement across different user tiers."""
         limit_results = {}
@@ -123,6 +124,7 @@ class RateLimitingManager:
         
         return limit_results
     
+    @pytest.mark.asyncio
     async def test_sliding_window_implementation(self, window_tests: int) -> Dict[str, Any]:
         """Test sliding window rate limiting implementation."""
         sliding_results = {
@@ -182,6 +184,7 @@ class RateLimitingManager:
         
         return sliding_results
     
+    @pytest.mark.asyncio
     async def test_burst_handling_capacity(self, burst_tests: int) -> Dict[str, Any]:
         """Test burst request handling with different capacities."""
         burst_results = {
@@ -253,6 +256,7 @@ class RateLimitingManager:
         
         return burst_results
     
+    @pytest.mark.asyncio
     async def test_per_user_rate_limiting(self, user_count: int, concurrent_requests: int) -> Dict[str, Any]:
         """Test per-user rate limiting with concurrent requests."""
         per_user_results = {
@@ -500,6 +504,7 @@ class TestRateLimitingRedisL3:
         yield manager
         await manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_request_limits_tier_enforcement(self, rate_limiting_manager):
         """Test request limits enforcement across user tiers."""
         results = await rate_limiting_manager.test_request_limits_enforcement(12, 80)
@@ -527,6 +532,7 @@ class TestRateLimitingRedisL3:
         
         logger.info(f"Request limits enforcement test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_sliding_window_accuracy(self, rate_limiting_manager):
         """Test sliding window rate limiting implementation."""
         results = await rate_limiting_manager.test_sliding_window_implementation(10)
@@ -546,6 +552,7 @@ class TestRateLimitingRedisL3:
         
         logger.info(f"Sliding window test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_burst_handling_validation(self, rate_limiting_manager):
         """Test burst request handling with different capacities."""
         results = await rate_limiting_manager.test_burst_handling_capacity(12)
@@ -565,6 +572,7 @@ class TestRateLimitingRedisL3:
         
         logger.info(f"Burst handling test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_per_user_isolation_enforcement(self, rate_limiting_manager):
         """Test per-user rate limiting with concurrent requests."""
         results = await rate_limiting_manager.test_per_user_rate_limiting(15, 50)
@@ -584,6 +592,7 @@ class TestRateLimitingRedisL3:
         
         logger.info(f"Per-user isolation test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_rate_limiting_performance_load(self, rate_limiting_manager):
         """Test rate limiting performance under load."""
         start_time = time.time()
@@ -606,6 +615,7 @@ class TestRateLimitingRedisL3:
         
         logger.info(f"Rate limiting performance test completed in {total_time:.2f}s: {summary}")
     
+    @pytest.mark.asyncio
     async def test_rate_limiting_redis_consistency(self, rate_limiting_manager):
         """Test rate limiting consistency with Redis operations."""
         client = rate_limiting_manager.redis_client

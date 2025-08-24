@@ -6,11 +6,9 @@ Testing performance optimization and scalability
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -25,6 +23,7 @@ def perf_service():
 
 class TestPerformanceScalability:
     """Test performance optimization and scalability"""
+    @pytest.mark.asyncio
     async def test_high_throughput_generation(self, perf_service):
         """Test high-throughput data generation"""
         start_time = asyncio.get_event_loop().time()
@@ -41,6 +40,7 @@ class TestPerformanceScalability:
         
         throughput = len(records) / duration
         assert throughput > 1000  # Should generate >1000 records/second
+    @pytest.mark.asyncio
     async def test_memory_efficient_streaming(self, perf_service):
         """Test memory-efficient streaming generation"""
         memory_usage = []
@@ -70,6 +70,7 @@ class TestPerformanceScalability:
         # Memory should not grow linearly with data size
         max_memory = max(memory_usage)
         assert max_memory < 500  # Should stay under 500MB
+    @pytest.mark.asyncio
     async def test_horizontal_scaling(self, perf_service):
         """Test horizontal scaling with multiple workers"""
         worker_counts = [1, 5, 10, 20]
@@ -90,6 +91,7 @@ class TestPerformanceScalability:
         # Throughput should increase with workers (with diminishing returns)
         for i in range(1, len(throughputs)):
             assert throughputs[i] > throughputs[i-1]
+    @pytest.mark.asyncio
     async def test_batch_size_optimization(self, perf_service):
         """Test optimal batch size determination"""
         batch_sizes = [10, 50, 100, 500, 1000, 5000]
@@ -113,6 +115,7 @@ class TestPerformanceScalability:
         
         # Optimal batch size should be in middle range
         assert 100 <= optimal_batch_size <= 1000
+    @pytest.mark.asyncio
     async def test_connection_pooling_efficiency(self, perf_service):
         """Test connection pool efficiency"""
         pool_metrics = await perf_service.test_connection_pool(
@@ -124,6 +127,7 @@ class TestPerformanceScalability:
         assert pool_metrics.pool_utilization > 0.7
         assert pool_metrics.connection_wait_time_avg < 100  # ms
         assert pool_metrics.connection_reuse_rate > 0.9
+    @pytest.mark.asyncio
     async def test_cache_effectiveness(self, perf_service):
         """Test corpus cache effectiveness"""
         # First access - cache miss
@@ -138,6 +142,7 @@ class TestPerformanceScalability:
         
         assert corpus1 == corpus2
         assert time2 < time1 * 0.1  # Cache hit should be >10x faster
+    @pytest.mark.asyncio
     async def test_auto_scaling_behavior(self, perf_service):
         """Test auto-scaling based on load"""
         config = GenerationConfig(
@@ -163,6 +168,7 @@ class TestPerformanceScalability:
         
         assert len(scale_up_events) > 0
         assert len(scale_down_events) > 0
+    @pytest.mark.asyncio
     async def test_resource_limit_handling(self, perf_service):
         """Test behavior at resource limits"""
         config = GenerationConfig(
@@ -176,6 +182,7 @@ class TestPerformanceScalability:
         assert result["completed"] == True
         assert result["memory_exceeded_count"] == 0
         assert result["cpu_throttle_events"] > 0
+    @pytest.mark.asyncio
     async def test_query_optimization(self, perf_service):
         """Test ClickHouse query optimization"""
         # Unoptimized query
@@ -191,6 +198,7 @@ class TestPerformanceScalability:
         )
         
         assert optimized_time < unoptimized_time * 0.5
+    @pytest.mark.asyncio
     async def test_burst_load_handling(self, perf_service):
         """Test handling of burst loads"""
         # Normal load

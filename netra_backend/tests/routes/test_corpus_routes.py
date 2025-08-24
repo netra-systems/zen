@@ -12,8 +12,6 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from contextlib import asynccontextmanager
 from unittest.mock import MagicMock, patch
 
@@ -75,12 +73,14 @@ class TestCorpusRoute:
             # Document endpoint may not be fully implemented
             assert response.status_code in [404, 422, 500]
     
+    @pytest.mark.asyncio
     async def test_corpus_search(self):
         """Test corpus search functionality."""
         from netra_backend.app.db.models_postgres import User
         from netra_backend.app.routes.corpus import search_corpus
         
         # Mock the corpus service search method
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus_service.corpus_service_instance.search_with_fallback') as mock_search:
             mock_search.return_value = [
                 {"id": "1", "title": "Result 1", "score": 0.95},
@@ -105,6 +105,7 @@ class TestCorpusRoute:
             assert result[0]["id"] == "1"
             assert result[0]["score"] == 0.95
     
+    @pytest.mark.asyncio
     async def test_corpus_bulk_operations(self):
         """Test bulk corpus operations."""
         from netra_backend.app.routes.corpus import (
@@ -132,6 +133,7 @@ class TestCorpusRoute:
             "metadata": {"updated": True}
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus_service.corpus_service_instance.update_corpus') as mock_update:
             mock_update.return_value = {"id": document_id, **update_data}
             
@@ -146,6 +148,7 @@ class TestCorpusRoute:
         """Test deleting corpus documents."""
         document_id = "doc123"
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus_service.corpus_service_instance.delete_corpus') as mock_delete:
             mock_delete.return_value = {"deleted": True, "id": document_id}
             
@@ -172,6 +175,7 @@ class TestCorpusRoute:
             "offset": 0
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus_service.corpus_service_instance.search_corpus_content') as mock_search:
             mock_search.return_value = {
                 "results": [
@@ -197,6 +201,7 @@ class TestCorpusRoute:
             "extract_metadata": True
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus_service.corpus_service_instance.batch_index_documents') as mock_extract:
             mock_extract.return_value = {
                 "id": "doc456",
@@ -225,6 +230,7 @@ class TestCorpusRoute:
             "limit": 5
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus_service.corpus_service_instance.rerank_results') as mock_similar:
             mock_similar.return_value = [
                 {"id": "doc124", "similarity": 0.85, "title": "Similar Doc 1"},
@@ -269,6 +275,7 @@ class TestCorpusRoute:
         
         validation_request = {"documents": documents, "validate_only": True}
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus_service.corpus_service_instance.batch_index_documents') as mock_validate:
             mock_validate.return_value = {
                 "valid": 2,

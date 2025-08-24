@@ -6,8 +6,6 @@ Tests unusual scenarios, boundary conditions, and error recovery
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any, Dict, List, Tuple
@@ -26,6 +24,7 @@ from netra_backend.tests.services.helpers.shared_test_types import (
 def service():
     """Create SupplyResearchService instance with mocked database"""
     from unittest.mock import MagicMock
+    # Mock: Generic component isolation for controlled unit testing
     mock_db = MagicMock()
     return SupplyResearchService(mock_db)
 
@@ -59,6 +58,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         with patch.object(service.db, 'query') as mock_query:
             mock_query.return_value.filter.return_value.first.return_value = None
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.AISupplyItem', 
                        side_effect=Exception("Item creation failed")):
                 with pytest.raises(Exception):
@@ -79,6 +79,7 @@ class TestErrorHandling(SharedTestErrorHandling):
     def test_memory_pressure_large_datasets(self, service):
         """Test handling of memory pressure with large datasets"""
         # Simulate very large result set
+        # Mock: Service component isolation for predictable testing behavior
         large_dataset = [MagicMock(spec=AISupplyItem) for _ in range(10000)]
         
         with patch.object(service.db, 'query') as mock_query:
@@ -90,6 +91,7 @@ class TestErrorHandling(SharedTestErrorHandling):
     
     def _create_malformed_json_log(self) -> SupplyUpdateLog:
         """Helper to create log with malformed JSON"""
+        # Mock: Service component isolation for predictable testing behavior
         log = MagicMock(spec=SupplyUpdateLog)
         log.supply_item_id = "item-1"
         log.field_updated = "pricing_input"
@@ -150,6 +152,7 @@ class TestEdgeCaseScenarios:
         with patch.object(service.db, 'query') as mock_query:
             self._setup_price_query_mock(mock_query, [zero_old_log])
             
+            # Mock: Generic component isolation for controlled unit testing
             with patch.object(service, 'get_supply_item_by_id', return_value=MagicMock()):
                 result: Dict[str, Any] = service.calculate_price_changes()
         
@@ -164,6 +167,7 @@ class TestEdgeCaseScenarios:
         with patch.object(service.db, 'query') as mock_query:
             mock_query.return_value.filter.return_value.first.return_value = sample_item
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.SupplyUpdateLog'):
                 # Simulate concurrent updates
                 result1 = service.create_or_update_supply_item("openai", "gpt-4", update_data_1)
@@ -200,6 +204,7 @@ class TestEdgeCaseScenarios:
     
     def _create_null_value_log(self) -> SupplyUpdateLog:
         """Helper to create log with null values"""
+        # Mock: Service component isolation for predictable testing behavior
         log = MagicMock(spec=SupplyUpdateLog)
         log.supply_item_id = "item-1"
         log.field_updated = "pricing_input"
@@ -210,6 +215,7 @@ class TestEdgeCaseScenarios:
     
     def _create_extreme_price_log(self) -> SupplyUpdateLog:
         """Helper to create extreme price change log"""
+        # Mock: Service component isolation for predictable testing behavior
         log = MagicMock(spec=SupplyUpdateLog)
         log.supply_item_id = "item-1"
         log.field_updated = "pricing_input"
@@ -220,6 +226,7 @@ class TestEdgeCaseScenarios:
     
     def _create_extreme_test_item(self) -> AISupplyItem:
         """Helper to create test item for extreme scenarios"""
+        # Mock: Service component isolation for predictable testing behavior
         item = MagicMock(spec=AISupplyItem)
         item.provider = "test-provider"
         item.model_name = "extreme-model"
@@ -227,6 +234,7 @@ class TestEdgeCaseScenarios:
     
     def _create_zero_old_value_log(self) -> SupplyUpdateLog:
         """Helper to create log with zero old value"""
+        # Mock: Service component isolation for predictable testing behavior
         log = MagicMock(spec=SupplyUpdateLog)
         log.supply_item_id = "item-1"
         log.field_updated = "pricing_input"
@@ -237,6 +245,7 @@ class TestEdgeCaseScenarios:
     
     def _create_concurrent_test_item(self) -> AISupplyItem:
         """Helper to create item for concurrent testing"""
+        # Mock: Service component isolation for predictable testing behavior
         item = MagicMock(spec=AISupplyItem)
         item.id = "item-1"
         item.pricing_input = Decimal("0.03")
@@ -264,7 +273,9 @@ class TestDataConsistency:
         with patch.object(service.db, 'query') as mock_query:
             mock_query.return_value.filter.return_value.first.return_value = existing_item
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.SupplyUpdateLog') as mock_log:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_log_instance = MagicMock()
                 mock_log.return_value = mock_log_instance
                 
@@ -277,6 +288,7 @@ class TestDataConsistency:
         """Test that timestamps are handled consistently"""
         current_time = datetime.now(UTC)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_research_service.datetime') as mock_datetime:
             mock_datetime.now.return_value = current_time
             mock_datetime.UTC = UTC
@@ -287,6 +299,7 @@ class TestDataConsistency:
     
     def _create_existing_item(self) -> AISupplyItem:
         """Helper to create existing item for consistency testing"""
+        # Mock: Service component isolation for predictable testing behavior
         item = MagicMock(spec=AISupplyItem)
         item.pricing_input = Decimal("0.02")
         item.confidence_score = 0.8
@@ -304,6 +317,7 @@ class TestPerformanceBoundaries:
     
     def test_large_result_set_handling(self, service):
         """Test handling of large result sets"""
+        # Mock: Service component isolation for predictable testing behavior
         large_item_list = [MagicMock(spec=AISupplyItem) for _ in range(1000)]
         
         with patch.object(service.db, 'query') as mock_query:
@@ -316,6 +330,7 @@ class TestPerformanceBoundaries:
     
     def test_custom_result_limits(self, service):
         """Test custom limits on result sets"""
+        # Mock: Service component isolation for predictable testing behavior
         many_logs = [MagicMock(spec=SupplyUpdateLog) for _ in range(100)]
         
         with patch.object(service.db, 'query') as mock_query:

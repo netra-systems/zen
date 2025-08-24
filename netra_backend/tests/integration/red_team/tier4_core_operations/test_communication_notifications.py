@@ -25,7 +25,7 @@ import pytest
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 import uuid
 import json
 import time
@@ -39,19 +39,28 @@ class TestEmailDeliveryReliability:
     @pytest.fixture
     def mock_email_service(self):
         """Mock email service for delivery testing."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.send_email = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.track_delivery_status = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.handle_bounces = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_delivery_analytics = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_email_queue(self):
         """Mock email queue for batch processing."""
+        # Mock: Generic component isolation for controlled unit testing
         queue = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         queue.enqueue_email = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         queue.process_email_batch = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         queue.handle_failed_emails = AsyncMock()
         return queue
     
@@ -194,18 +203,26 @@ class TestRealtimeNotificationDelivery:
     @pytest.fixture
     def mock_notification_service(self):
         """Mock real-time notification service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.send_realtime_notification = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.track_notification_delivery = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.handle_delivery_failures = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_websocket_manager(self):
         """Mock WebSocket manager for real-time delivery."""
+        # Mock: Generic component isolation for controlled unit testing
         manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.send_to_user = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.broadcast_to_channel = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.get_active_connections = AsyncMock()
         return manager
     
@@ -362,10 +379,15 @@ class TestNotificationPreferenceManagement:
     @pytest.fixture
     def mock_preference_service(self):
         """Mock notification preference service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_user_preferences = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.update_user_preferences = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_preferences = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.apply_preference_filters = AsyncMock()
         return service
     
@@ -576,18 +598,26 @@ class TestSmsAndPushNotificationIntegration:
     @pytest.fixture
     def mock_sms_service(self):
         """Mock SMS service for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.send_sms = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_phone_number = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.track_delivery_status = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_push_service(self):
         """Mock push notification service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.send_push_notification = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.register_device = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.handle_delivery_failures = AsyncMock()
         return service
     
@@ -785,10 +815,15 @@ class TestNotificationTemplateManagement:
     @pytest.fixture
     def mock_template_service(self):
         """Mock template management service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.create_template = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.update_template = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_template = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.render_template = AsyncMock()
         return service
     
@@ -992,10 +1027,15 @@ class TestNotificationDeliveryAnalytics:
     @pytest.fixture
     def mock_analytics_service(self):
         """Mock analytics service for notification tracking."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.track_notification_sent = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.track_notification_delivered = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_delivery_analytics = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.generate_delivery_report = AsyncMock()
         return service
     
@@ -1045,10 +1085,15 @@ class TestAlertEscalationOnCallManagement:
     @pytest.fixture
     def mock_escalation_service(self):
         """Mock alert escalation service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.trigger_alert = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.escalate_alert = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_oncall_schedule = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.acknowledge_alert = AsyncMock()
         return service
     
@@ -1092,10 +1137,15 @@ class TestWebhookDeliveryRetryLogic:
     @pytest.fixture
     def mock_webhook_service(self):
         """Mock webhook delivery service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.deliver_webhook = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.retry_failed_webhook = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_webhook_status = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.configure_retry_policy = AsyncMock()
         return service
     
@@ -1141,10 +1191,15 @@ class TestCommunicationChannelHealthMonitoring:
     @pytest.fixture
     def mock_health_monitor(self):
         """Mock communication health monitor."""
+        # Mock: Generic component isolation for controlled unit testing
         monitor = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         monitor.check_channel_health = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         monitor.get_health_metrics = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         monitor.detect_issues = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         monitor.trigger_health_alert = AsyncMock()
         return monitor
     
@@ -1185,10 +1240,15 @@ class TestMessageQueueProcessingDeadLetterHandling:
     @pytest.fixture
     def mock_queue_service(self):
         """Mock message queue service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.process_message_queue = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.handle_dead_letter = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_queue_metrics = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.retry_dead_letters = AsyncMock()
         return service
     

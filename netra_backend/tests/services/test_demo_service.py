@@ -3,11 +3,9 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import json
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import numpy as np
 import pytest
@@ -20,6 +18,7 @@ class TestDemoService:
     @pytest.fixture
     def mock_agent_service(self):
         """Create a mock agent service."""
+        # Mock: Generic component isolation for controlled unit testing
         return AsyncMock()
     
     @pytest.fixture
@@ -28,6 +27,7 @@ class TestDemoService:
         # Create a storage dict to simulate Redis behavior
         storage = {}
         
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis = AsyncMock()
         
         async def mock_get(key):
@@ -50,10 +50,15 @@ class TestDemoService:
             return True
         
         # Wrap the functions with AsyncMock to preserve mock behavior
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.get = AsyncMock(side_effect=mock_get)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.setex = AsyncMock(side_effect=mock_setex)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.lrange = AsyncMock(side_effect=mock_lrange)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.lpush = AsyncMock(side_effect=mock_lpush)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.expire = AsyncMock(side_effect=mock_expire)
         return redis
     
@@ -73,6 +78,7 @@ class TestDemoService:
         service.analytics_tracker.redis_client = mock_redis_client
         service.report_generator.redis_client = mock_redis_client
         return service
+    @pytest.mark.asyncio
     async def test_process_demo_chat_new_session(self, demo_service, mock_redis_client):
         """Test processing demo chat for a new session."""
         # Execute
@@ -106,6 +112,7 @@ class TestDemoService:
         call_args = mock_redis_client.setex.call_args
         assert call_args[0][0] == "demo:session:test-session-123"
         assert call_args[0][1] == 3600 * 24  # 24 hour expiry
+    @pytest.mark.asyncio
     async def test_process_demo_chat_existing_session(self, demo_service, mock_redis_client):
         """Test processing demo chat for an existing session."""
         # Setup existing session data
@@ -137,6 +144,7 @@ class TestDemoService:
         call_args = mock_redis_client.setex.call_args
         session_data = json.loads(call_args[0][2])
         assert len(session_data["messages"]) == 2  # user + assistant (original gets replaced)
+    @pytest.mark.asyncio
     async def test_get_industry_templates_valid(self, demo_service):
         """Test getting templates for a valid industry."""
         # Execute
@@ -153,12 +161,14 @@ class TestDemoService:
             assert len(template["optimization_scenarios"]) == 3
             assert "baseline" in template["typical_metrics"]
             assert "optimized" in template["typical_metrics"]
+    @pytest.mark.asyncio
     async def test_get_industry_templates_invalid(self, demo_service):
         """Test getting templates for an invalid industry."""
         with pytest.raises(ValueError) as exc_info:
             await demo_service.get_industry_templates("invalid_industry")
         
         assert "Unknown industry: invalid_industry" in str(exc_info.value)
+    @pytest.mark.asyncio
     async def test_calculate_roi_financial(self, demo_service):
         """Test ROI calculation for financial industry."""
         # Execute
@@ -183,6 +193,7 @@ class TestDemoService:
         assert perf["throughput_increase_factor"] == 2.5
         assert perf["accuracy_improvement_percentage"] == 8.0
         assert perf["error_rate_reduction_percentage"] == 50.0
+    @pytest.mark.asyncio
     async def test_calculate_roi_different_industries(self, demo_service):
         """Test ROI calculation varies by industry."""
         # Test multiple industries
@@ -207,6 +218,7 @@ class TestDemoService:
             assert result["annual_savings"] > 0
             assert 0 < result["savings_percentage"] <= 100
             assert result["roi_months"] > 0
+    @pytest.mark.asyncio
     async def test_generate_synthetic_metrics(self, demo_service):
         """Test synthetic metrics generation."""
         # Execute
@@ -235,6 +247,7 @@ class TestDemoService:
         baseline_lat = metrics["values"]["baseline_latency"]
         optimized_lat = metrics["values"]["optimized_latency"]
         assert optimized_lat[0] > optimized_lat[-1]  # Latency should decrease
+    @pytest.mark.asyncio
     async def test_generate_report(self, demo_service, mock_redis_client):
         """Test report generation."""
         # Setup session data
@@ -264,6 +277,7 @@ class TestDemoService:
         call_args = mock_redis_client.setex.call_args_list[-1]
         assert "demo:report:" in call_args[0][0]
         assert call_args[0][1] == 3600 * 24  # 24 hour expiry
+    @pytest.mark.asyncio
     async def test_generate_report_session_not_found(self, demo_service, mock_redis_client):
         """Test report generation with invalid session."""
         mock_redis_client.get.return_value = None
@@ -275,6 +289,7 @@ class TestDemoService:
             )
         
         assert "Session not found: invalid-session" in str(exc_info.value)
+    @pytest.mark.asyncio
     async def test_get_session_status(self, demo_service, mock_redis_client):
         """Test getting session status."""
         # Setup session data
@@ -301,6 +316,7 @@ class TestDemoService:
         assert status["progress_percentage"] == 50.0  # 3 messages / 6 expected steps
         assert status["status"] == "active"
         assert status["last_interaction"] != None
+    @pytest.mark.asyncio
     async def test_get_session_status_not_found(self, demo_service, mock_redis_client):
         """Test getting status for non-existent session."""
         mock_redis_client.get.return_value = None
@@ -309,6 +325,7 @@ class TestDemoService:
             await demo_service.get_session_status("invalid-session")
         
         assert "Session not found: invalid-session" in str(exc_info.value)
+    @pytest.mark.asyncio
     async def test_submit_feedback(self, demo_service, mock_redis_client):
         """Test submitting demo feedback."""
         # Execute
@@ -329,6 +346,7 @@ class TestDemoService:
         feedback_data = json.loads(call_args[0][2])
         assert feedback_data["session_id"] == "test-session"
         assert feedback_data["feedback"] == feedback
+    @pytest.mark.asyncio
     async def test_track_demo_interaction(self, demo_service, mock_redis_client):
         """Test tracking demo interactions."""
         # Execute
@@ -352,6 +370,7 @@ class TestDemoService:
         assert interaction_data["session_id"] == "test-session"
         assert interaction_data["type"] == "chat"
         assert interaction_data["data"]["industry"] == "financial"
+    @pytest.mark.asyncio
     async def test_get_analytics_summary(self, demo_service, mock_redis_client):
         """Test getting analytics summary."""
         # Setup mock analytics data
@@ -394,6 +413,7 @@ class TestDemoService:
         assert "healthcare" in summary["industries"]
         assert summary["avg_interactions_per_session"] > 0
         assert summary["report_exports"] >= 1
+    @pytest.mark.asyncio
     async def test_generate_demo_response(self, demo_service):
         """Test demo response generation."""
         # Import the function directly for testing
@@ -426,6 +446,7 @@ class TestDemoService:
         assert "4 weeks" in response
         assert "92.00%" in response or "0.92" in response
         assert "Recommendation Engine" in response or "Search Optimization" in response or "Inventory Prediction" in response
+    @pytest.mark.asyncio
     async def test_error_handling_redis_failure(self, demo_service):
         """Test error handling when Redis operations fail."""
         # Make Redis operations fail

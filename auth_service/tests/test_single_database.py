@@ -11,7 +11,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Add auth_service to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 @pytest.mark.asyncio
 async def test_no_main_db_sync_module():
@@ -34,6 +33,7 @@ async def test_single_database_initialization():
         mock_init.return_value = None
         
         # Import main after patching to test startup
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('auth_service.auth_core.database.connection.auth_db.initialize', mock_init):
             # Set environment to staging to test real initialization, but with AUTH_FAST_TEST_MODE to bypass SERVICE_ID
             os.environ['AUTH_FAST_TEST_MODE'] = 'false'
@@ -47,7 +47,6 @@ async def test_single_database_initialization():
             # Add auth_service directory to path for imports
             auth_service_path = Path(__file__).parent.parent
             if str(auth_service_path) not in sys.path:
-                sys.path.insert(0, str(auth_service_path))
             
             from main import lifespan
             
@@ -77,6 +76,7 @@ async def test_auth_routes_no_duplicate_sync():
     from auth_service.auth_core.routes.auth_routes import _sync_user_to_main_db
     
     # Create a mock user
+    # Mock: Generic component isolation for controlled unit testing
     mock_user = MagicMock()
     mock_user.id = "test-user-123"
     
@@ -99,10 +99,13 @@ async def test_database_url_configuration():
     test_db_url = "postgresql://test:test@localhost:5432/test_db"
     os.environ['DATABASE_URL'] = test_db_url
     
-    # Get database URL from config
-    db_url = AuthConfig.get_database_url()
+    # Get raw database URL from config (should be unchanged)
+    raw_db_url = AuthConfig.get_raw_database_url()
+    assert raw_db_url == test_db_url, "Should use raw DATABASE_URL from environment"
     
-    assert db_url == test_db_url, "Should use DATABASE_URL from environment"
+    # Get normalized database URL (should be converted for asyncpg)
+    normalized_db_url = AuthConfig.get_database_url()
+    assert normalized_db_url == "postgresql+asyncpg://test:test@localhost:5432/test_db", "Should normalize URL for asyncpg"
     
     # Clean up
     del os.environ['DATABASE_URL']

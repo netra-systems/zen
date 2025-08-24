@@ -20,7 +20,7 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -75,6 +75,7 @@ async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
 async def test_llm_response_parsing(mock_llm_manager):
     """Test LLM response parsing and error handling"""
     # Test valid JSON response
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock_llm_manager.ask_llm = AsyncMock(return_value=json.dumps({
         "analysis": "Valid response",
         "recommendations": ["rec1", "rec2"]
@@ -86,6 +87,7 @@ async def test_llm_response_parsing(mock_llm_manager):
     assert len(parsed["recommendations"]) == 2
     
     # Test invalid JSON handling
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock_llm_manager.ask_llm = AsyncMock(return_value="Invalid JSON {")
     response = await mock_llm_manager.ask_llm("Test prompt")
     
@@ -116,7 +118,9 @@ async def test_agent_state_creation():
 
 async def test_basic_llm_call():
     """Test basic LLM call functionality"""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.call_llm = AsyncMock(return_value={
         "content": "Test response",
         "tool_calls": []
@@ -130,6 +134,7 @@ async def test_basic_llm_call():
 
 async def test_structured_llm_call():
     """Test structured LLM call functionality"""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
     
     expected_result = {
@@ -138,6 +143,7 @@ async def test_structured_llm_call():
         "requires_analysis": True
     }
     
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.ask_structured_llm = AsyncMock(return_value=expected_result)
     
     result = await llm_manager.ask_structured_llm("Test prompt", {})
@@ -149,7 +155,9 @@ async def test_structured_llm_call():
 
 async def test_agent_registry():
     """Test agent registry functionality"""
+    # Mock: Database session isolation for transaction testing without real database dependency
     db_session = AsyncMock(spec=AsyncSession)
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
     ws_manager = Mock()
     tool_dispatcher = Mock()
@@ -159,6 +167,7 @@ async def test_agent_registry():
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
     
+    # Mock: Agent supervisor isolation for testing without spawning real agents
     with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         supervisor = SupervisorAgent(db_session, llm_manager, ws_manager, tool_dispatcher)
         
@@ -173,18 +182,27 @@ async def test_agent_registry():
 
 async def test_basic_error_handling():
     """Test basic error handling in supervisor"""
+    # Mock: Database session isolation for transaction testing without real database dependency
     db_session = AsyncMock(spec=AsyncSession)
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
+    # Mock: Generic component isolation for controlled unit testing
     ws_manager = Mock()
+    # Mock: Tool execution isolation for predictable agent testing
     tool_dispatcher = Mock()
     
     # Mock LLM to raise exception
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager.call_llm = AsyncMock(side_effect=Exception("LLM error"))
     
+    # Mock: Generic component isolation for controlled unit testing
     mock_persistence = AsyncMock()
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
     
+    # Mock: Agent supervisor isolation for testing without spawning real agents
     with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         supervisor = SupervisorAgent(db_session, llm_manager, ws_manager, tool_dispatcher)
         supervisor.thread_id = str(uuid.uuid4())
@@ -231,7 +249,9 @@ def _create_test_state():
 
 def _setup_basic_llm_mock():
     """Setup basic LLM mock"""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.call_llm = AsyncMock(return_value={
         "content": "Basic response",
         "tool_calls": []
@@ -240,9 +260,13 @@ def _setup_basic_llm_mock():
 
 def _setup_basic_persistence_mock():
     """Setup basic persistence mock"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_persistence = AsyncMock()
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock_persistence.get_thread_context = AsyncMock(return_value=None)
     return mock_persistence
 

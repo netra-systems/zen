@@ -39,6 +39,7 @@ def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_d
 class TestKVCachingAuditWorkflows:
     """Test KV caching audit and optimization workflows."""
     
+    @pytest.mark.asyncio
     async def test_kv_cache_optimization_audit(self, multi_constraint_setup):
         """Test: 'I want to audit all uses of KV caching in my system to find optimization opportunities.'"""
         setup = multi_constraint_setup
@@ -46,6 +47,7 @@ class TestKVCachingAuditWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_kv_cache_audit_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_comprehensive_cache_analysis(self, multi_constraint_setup):
         """Test comprehensive cache analysis across system components."""
         setup = multi_constraint_setup
@@ -53,6 +55,7 @@ class TestKVCachingAuditWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_comprehensive_cache_results(results)
     
+    @pytest.mark.asyncio
     async def test_cache_audit_with_error_recovery(self, multi_constraint_setup):
         """Test KV cache audit with error recovery mechanisms."""
         setup = multi_constraint_setup
@@ -62,6 +65,7 @@ class TestKVCachingAuditWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_error_recovery_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_cache_optimization_prioritization(self, multi_constraint_setup):
         """Test cache optimization with priority handling."""
         setup = multi_constraint_setup

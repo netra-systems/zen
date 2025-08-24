@@ -31,7 +31,7 @@ import time
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.auth_integration.auth import get_current_user
@@ -40,7 +40,7 @@ from sqlalchemy import select
 
 from netra_backend.app.db.models_postgres import User
 
-from netra_backend.app.db.postgres import get_postgres_db
+from netra_backend.app.database import get_postgres_db
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.agent_service import get_agent_service
 
@@ -119,6 +119,7 @@ class TokenPropagationTestManager:
         except Exception as e:
             return {"success": False, "error": str(e), "creation_time": time.time() - session_start}
     
+    @pytest.mark.asyncio
     async def test_backend_token_validation(self, token: str) -> Dict[str, Any]:
         """Test token validation in backend main service."""
         validation_start = time.time()
@@ -148,6 +149,7 @@ class TokenPropagationTestManager:
                 "validation_time": time.time() - validation_start, "propagated": False
             }
     
+    @pytest.mark.asyncio
     async def test_database_user_context(self, token: str) -> Dict[str, Any]:
         """Test database queries with user context from token."""
         db_start = time.time()
@@ -180,6 +182,7 @@ class TokenPropagationTestManager:
                 "query_time": time.time() - db_start, "propagated": False
             }
     
+    @pytest.mark.asyncio
     async def test_redis_cache_user_context(self, token: str) -> Dict[str, Any]:
         """Test Redis cache operations with user-specific keys."""
         redis_start = time.time()
@@ -217,6 +220,7 @@ class TokenPropagationTestManager:
                 "cache_time": time.time() - redis_start, "propagated": False
             }
     
+    @pytest.mark.asyncio
     async def test_agent_service_propagation(self, token: str) -> Dict[str, Any]:
         """Test token propagation to agent services."""
         agent_start = time.time()
@@ -248,6 +252,7 @@ class TokenPropagationTestManager:
                 "operation_time": time.time() - agent_start, "propagated": False
             }
     
+    @pytest.mark.asyncio
     async def test_concurrent_token_propagation(self, tokens: List[str]) -> Dict[str, Any]:
         """Test concurrent token propagation across multiple services."""
         concurrent_start = time.time()
@@ -324,6 +329,7 @@ async def token_propagation_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_multi_service_token_propagation_flow(token_propagation_manager):
     """Test complete multi-service token propagation flow."""
     start_time = time.time()

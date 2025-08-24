@@ -14,11 +14,9 @@ usage tracking, and upgrade prompts. Critical for conversion funnel and cost con
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import redis
@@ -33,6 +31,7 @@ from netra_backend.app.services.tool_permissions.rate_limiter import (
 @pytest.fixture
 def mock_redis():
     """Mock Redis client."""
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     redis_mock = AsyncMock(spec=redis.Redis)
     return redis_mock
 
@@ -49,6 +48,7 @@ def rate_limiter_no_redis():
 @pytest.fixture
 def free_tier_context():
     """Free tier execution context."""
+    # Mock: Component isolation for controlled unit testing
     context = Mock(spec=ToolExecutionContext)
     context.user_id = "free_user_123"
     context.tool_name = "data_analyzer"
@@ -58,6 +58,7 @@ def free_tier_context():
 @pytest.fixture
 def pro_tier_context():
     """Pro tier execution context."""
+    # Mock: Component isolation for controlled unit testing
     context = Mock(spec=ToolExecutionContext)
     context.user_id = "pro_user_456"
     context.tool_name = "advanced_analyzer"
@@ -67,11 +68,13 @@ def pro_tier_context():
 @pytest.fixture
 def free_tier_permission_definitions():
     """Free tier permission definitions with strict limits."""
+    # Mock: Generic component isolation for controlled unit testing
     rate_limits = Mock()
     rate_limits.per_minute = 5
     rate_limits.per_hour = 50
     rate_limits.per_day = 100
     
+    # Mock: Generic component isolation for controlled unit testing
     permission_def = Mock()
     permission_def.rate_limits = rate_limits
     
@@ -82,11 +85,13 @@ def free_tier_permission_definitions():
 @pytest.fixture
 def pro_tier_permission_definitions():
     """Pro tier permission definitions with higher limits."""
+    # Mock: Generic component isolation for controlled unit testing
     rate_limits = Mock()
     rate_limits.per_minute = 50
     rate_limits.per_hour = 500
     rate_limits.per_day = 2000
     
+    # Mock: Generic component isolation for controlled unit testing
     permission_def = Mock()
     permission_def.rate_limits = rate_limits
     
@@ -97,11 +102,13 @@ def pro_tier_permission_definitions():
 @pytest.fixture
 def unlimited_permission_definitions():
     """Unlimited permission definitions."""
+    # Mock: Generic component isolation for controlled unit testing
     rate_limits = Mock()
     rate_limits.per_minute = None
     rate_limits.per_hour = None
     rate_limits.per_day = None
     
+    # Mock: Generic component isolation for controlled unit testing
     permission_def = Mock()
     permission_def.rate_limits = rate_limits
     
@@ -112,10 +119,12 @@ def unlimited_permission_definitions():
 # Helper functions for 25-line compliance
 def create_mock_permission_def(per_minute=None, per_hour=None, per_day=None):
     """Create mock permission definition with rate limits."""
+    # Mock: Generic component isolation for controlled unit testing
     rate_limits = Mock()
     rate_limits.per_minute = per_minute
     rate_limits.per_hour = per_hour
     rate_limits.per_day = per_day
+    # Mock: Generic component isolation for controlled unit testing
     permission_def = Mock()
     permission_def.rate_limits = rate_limits
     return permission_def
@@ -375,6 +384,7 @@ class TestPermissionDefinitionProcessing:
 
     def test_get_applicable_rate_limits_no_rate_limits(self, rate_limiter):
         """Get applicable rate limits handles permissions without rate limits."""
+        # Mock: Generic component isolation for controlled unit testing
         permission_def = Mock()
         permission_def.rate_limits = None
         permission_defs = {"no_limits": permission_def}

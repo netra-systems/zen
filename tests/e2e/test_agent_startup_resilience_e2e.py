@@ -341,6 +341,7 @@ async def test_agent_startup_database_connectivity_failure_recovery():
     """
     # Mock database manager for focused testing
 
+    # Mock: Generic component isolation for controlled unit testing
     db_manager = MagicMock()
 
     db_failure_simulator = DatabaseFailureSimulator(db_manager)

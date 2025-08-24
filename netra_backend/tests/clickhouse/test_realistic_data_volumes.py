@@ -18,6 +18,7 @@ from netra_backend.app.db.clickhouse_query_fixer import (
 class TestRealisticDataVolumes:
     """Test with realistic data volumes"""
     
+    @pytest.mark.asyncio
     async def test_large_scale_aggregation(self):
         """Test aggregation over large data volumes"""
         # Simulate a query over 1TB of data
@@ -46,6 +47,7 @@ class TestRealisticDataVolumes:
         is_valid, error = validate_clickhouse_query(fixed_query)
         assert is_valid, f"Large scale aggregation failed: {error}"
     
+    @pytest.mark.asyncio
     async def test_materialized_view_creation(self):
         """Test creation of materialized views for performance"""
         view_query = """

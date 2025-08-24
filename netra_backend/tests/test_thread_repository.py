@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,13 +18,21 @@ from netra_backend.app.services.database.thread_repository import ThreadReposito
 @pytest.fixture
 def mock_db():
     """Create a mock database session"""
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock = AsyncMock(spec=AsyncSession)
+    # Mock: Generic component isolation for controlled unit testing
     mock.execute = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.add = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.commit = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.rollback = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.refresh = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.flush = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.delete = AsyncMock()
     return mock
 
@@ -32,6 +40,7 @@ def mock_db():
 def thread_repo():
     """Create a thread repository instance"""
     return ThreadRepository()
+@pytest.mark.asyncio
 async def test_create_thread_success(mock_db, thread_repo):
     """Test successful thread creation"""
     # Setup
@@ -58,6 +67,7 @@ async def test_create_thread_success(mock_db, thread_repo):
     assert result.metadata_['title'] == 'Test Thread'
     mock_db.add.assert_called_once()
     mock_db.flush.assert_called_once()  # Repository uses flush, not commit
+@pytest.mark.asyncio
 async def test_get_by_id_with_correct_parameter_order(mock_db, thread_repo):
     """Test get_by_id with correct parameter order (db first, then entity_id)"""
     # Setup
@@ -68,6 +78,7 @@ async def test_get_by_id_with_correct_parameter_order(mock_db, thread_repo):
         metadata_={'user_id': 'test_user'}
     )
     
+    # Mock: Generic component isolation for controlled unit testing
     mock_result = MagicMock()
     mock_result.scalar_one_or_none.return_value = mock_thread
     mock_db.execute.return_value = mock_result
@@ -79,6 +90,7 @@ async def test_get_by_id_with_correct_parameter_order(mock_db, thread_repo):
     assert result != None
     assert result.id == 'thread_test123'
     mock_db.execute.assert_called_once()
+@pytest.mark.asyncio
 async def test_find_by_user(mock_db, thread_repo):
     """Test finding threads by user"""
     # Setup
@@ -89,7 +101,9 @@ async def test_find_by_user(mock_db, thread_repo):
                metadata_={'user_id': 'user123'})
     ]
     
+    # Mock: Generic component isolation for controlled unit testing
     mock_result = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_scalars = MagicMock()
     mock_scalars.all.return_value = mock_threads
     mock_result.scalars.return_value = mock_scalars
@@ -103,6 +117,7 @@ async def test_find_by_user(mock_db, thread_repo):
     assert result[0].id == 'thread_1'
     assert result[1].id == 'thread_2'
     mock_db.execute.assert_called_once()
+@pytest.mark.asyncio
 async def test_archive_thread(mock_db, thread_repo):
     """Test archiving a thread"""
     # Setup
@@ -114,6 +129,7 @@ async def test_archive_thread(mock_db, thread_repo):
     )
     
     # Mock get_by_id to return the thread
+    # Mock: Generic component isolation for controlled unit testing
     mock_result = MagicMock()
     mock_result.scalar_one_or_none.return_value = mock_thread
     mock_db.execute.return_value = mock_result
@@ -126,6 +142,7 @@ async def test_archive_thread(mock_db, thread_repo):
     assert mock_thread.metadata_['status'] == 'archived'
     assert 'archived_at' in mock_thread.metadata_
     mock_db.commit.assert_called_once()
+@pytest.mark.asyncio
 async def test_parameter_order_regression():
     """
     Regression test to ensure get_by_id parameter order is correct.

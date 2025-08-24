@@ -11,7 +11,7 @@ Coverage: Production configuration management, real service coordination, zero-d
 L4 Realism: Tests against real staging services, real Redis propagation, real secret management, production-like config updates
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -27,14 +27,14 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 # from app.agents.supervisor_consolidated import SupervisorAgent
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 SupervisorAgent = AsyncMock
 from netra_backend.app.services.health_check_service import HealthCheckService
@@ -1161,6 +1161,7 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
+    @pytest.mark.asyncio
     async def test_secret_rotation_hot_reload(self, secret_name: str, new_secret_value: str) -> Dict[str, Any]:
 
         """Test secret rotation with hot reload in staging."""
@@ -2141,7 +2142,7 @@ async def test_l4_disaster_recovery_and_rollback(l4_hot_reload_manager):
     }
     
     # Patch a service to fail on this config to simulate disaster
-    from unittest.mock import patch
+    from unittest.mock import patch, AsyncMock, MagicMock
     
     with patch.object(l4_hot_reload_manager.services["health_service"], 'reload_config', 
 

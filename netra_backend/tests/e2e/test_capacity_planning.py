@@ -41,6 +41,7 @@ def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_d
 class TestCapacityPlanningWorkflows:
     """Test capacity planning workflows for different scaling scenarios."""
     
+    @pytest.mark.asyncio
     async def test_gradual_scaling_capacity_plan(self, scaling_analysis_setup):
         """Test gradual scaling capacity planning."""
         setup = scaling_analysis_setup
@@ -48,6 +49,7 @@ class TestCapacityPlanningWorkflows:
         results = await execute_scaling_workflow(setup, state)
         validate_gradual_scaling_plan(results)
     
+    @pytest.mark.asyncio
     async def test_sudden_spike_handling(self, scaling_analysis_setup):
         """Test sudden traffic spike handling strategies."""
         setup = scaling_analysis_setup
@@ -59,6 +61,7 @@ class TestCapacityPlanningWorkflows:
 class TestExamplePromptsCapacityPlanning:
     """Test specific example prompt EP-003 with real LLM validation."""
     
+    @pytest.mark.asyncio
     async def test_ep_003_usage_increase_impact_real_llm(self, scaling_analysis_setup):
         """Test EP-003: Usage increase impact analysis using real LLM."""
         setup = scaling_analysis_setup

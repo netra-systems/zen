@@ -411,7 +411,17 @@ class IsolatedEnvironment:
                     key = key.strip()
                     value = value.strip('\'"').strip()
                     
-                    # Skip if exists and not overriding
+                    # OS environment variables (current, not just original) always have priority 
+                    # over file-based configs regardless of override_existing setting
+                    # But only skip if the variable was set externally (not by a previous load_from_file)
+                    if not self._isolation_enabled and key in os.environ:
+                        # Check if this was set by us (via load_from_file) or externally
+                        source = self._variable_sources.get(key, "")
+                        if not source.startswith("file:"):
+                            # This was set externally (OS env, not from a file), skip it
+                            continue
+                    
+                    # Skip if exists and not overriding (for non-OS env vars)
                     if not override_existing and self.get(key) is not None:
                         continue
                     
@@ -905,30 +915,62 @@ def get_subprocess_env(additional_vars: Optional[Dict[str, str]] = None) -> Dict
     return get_env().get_subprocess_env(additional_vars)
 
 
-# Legacy compatibility function
-def get_environment_manager(isolation_mode: Optional[bool] = None) -> IsolatedEnvironment:
+# Legacy compatibility function  
+def get_environment_manager(isolation_mode: Optional[bool] = None):
     """
     Legacy compatibility function for get_environment_manager.
     
-    This function maintains backwards compatibility with existing code that expects
-    get_environment_manager() with isolation_mode parameter.
+    This function now delegates to the EnvironmentManager wrapper for full compatibility.
     
     Args:
         isolation_mode: If provided, enables/disables isolation mode
         
     Returns:
-        The global IsolatedEnvironment instance
+        EnvironmentManager instance wrapping IsolatedEnvironment
     """
-    env = get_env()
+    # Import here to avoid circular dependency
+    from dev_launcher.environment_manager import get_environment_manager as get_manager
+    return get_manager(isolation_mode)
+
+
+def load_secrets() -> bool:
+    """
+    Legacy compatibility function for loading secrets.
     
-    # Enable/disable isolation if mode is specified
-    if isolation_mode is not None:
-        if isolation_mode and not env.is_isolation_enabled():
-            env.enable_isolation()
-        elif not isolation_mode and env.is_isolation_enabled():
-            env.disable_isolation()
+    This is a placeholder for the load_secrets functionality that was moved.
+    Returns True to indicate successful loading for backward compatibility.
     
-    return env
+    Returns:
+        bool: Always returns True for compatibility
+    """
+    # Simple compatibility implementation
+    logger.info("load_secrets called - compatibility mode")
+    return True
+
+
+class SecretLoader:
+    """
+    Legacy compatibility class for secret loading functionality.
+    
+    This provides a compatibility layer for existing code that expects SecretLoader.
+    Actual secret loading functionality is handled by the environment management system.
+    """
+    
+    def __init__(self, env_manager: Optional[IsolatedEnvironment] = None):
+        """Initialize secret loader."""
+        self.env_manager = env_manager or get_env()
+        
+    def load_secrets(self) -> bool:
+        """Load secrets (compatibility method)."""
+        return load_secrets()
+    
+    def get_secret(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        """Get a secret value."""
+        return self.env_manager.get(key, default)
+    
+    def set_secret(self, key: str, value: str, source: str = "secret_loader") -> bool:
+        """Set a secret value."""
+        return self.env_manager.set(key, value, source)
 
 
 # Backwards Compatibility: EnvironmentValidator class

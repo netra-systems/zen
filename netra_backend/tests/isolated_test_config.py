@@ -31,7 +31,7 @@ from netra_backend.tests.clickhouse_isolation import ClickHouseTestIsolator
 from netra_backend.tests.database_snapshots import snapshot_manager
 from netra_backend.tests.database_state_validator import db_state_validator
 
-# from .test_database_manager import test_db_manager  # TODO: Fix this import
+# from netra_backend.tests.test_database_manager import test_db_manager  # TODO: Fix this import
 from netra_backend.tests.postgres_isolation import PostgreSQLTestIsolator
 from netra_backend.tests.seed_data_manager import seed_data_manager
 
@@ -204,7 +204,11 @@ async def isolated_postgres(isolated_test_config):
     session_factory = db_config["session_factory"]
     
     async with session_factory() as session:
-        yield session, isolated_test_config
+        try:
+            yield session
+        finally:
+            if hasattr(session, "close"):
+                await session.close()
 
 @pytest.fixture
 async def isolated_clickhouse(isolated_test_config):

@@ -282,6 +282,7 @@ class ApiVersioningManager:
                 "requested_version": version
             }
     
+    @pytest.mark.asyncio
     async def test_version_compatibility(self, path: str, 
                                        version_tests: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test compatibility across API versions."""
@@ -386,6 +387,7 @@ async def versioning_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_url_based_versioning(versioning_manager):
     """Test URL-based API versioning."""
     versions_to_test = ["v1", "v2", "v3"]
@@ -414,6 +416,7 @@ async def test_url_based_versioning(versioning_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_header_based_versioning(versioning_manager):
     """Test header-based API versioning."""
     result = await versioning_manager.make_versioned_request(
@@ -431,6 +434,7 @@ async def test_header_based_versioning(versioning_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_accept_header_versioning(versioning_manager):
     """Test Accept header-based versioning."""
     result = await versioning_manager.make_versioned_request(
@@ -448,6 +452,7 @@ async def test_accept_header_versioning(versioning_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_deprecated_version_warnings(versioning_manager):
     """Test deprecated version warning headers."""
     result = await versioning_manager.make_versioned_request(
@@ -462,6 +467,7 @@ async def test_deprecated_version_warnings(versioning_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_version_compatibility_matrix(versioning_manager):
     """Test compatibility across different API versions."""
     version_tests = [
@@ -493,6 +499,7 @@ async def test_version_compatibility_matrix(versioning_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_unsupported_version_handling(versioning_manager):
     """Test handling of unsupported API versions."""
     result = await versioning_manager.make_versioned_request(
@@ -506,6 +513,7 @@ async def test_unsupported_version_handling(versioning_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_concurrent_version_requests(versioning_manager):
     """Test concurrent requests to different API versions."""
     concurrent_tasks = []
@@ -530,6 +538,7 @@ async def test_concurrent_version_requests(versioning_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_versioning_metrics_accuracy(versioning_manager):
     """Test accuracy of versioning metrics."""
     # Generate test traffic across versions

@@ -6,12 +6,10 @@ Testing synthetic data generation core functionality
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import uuid
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -22,6 +20,7 @@ from netra_backend.tests.services.test_synthetic_data_service_fixtures import Ge
 
 class TestDataGenerationEngine:
     """Test synthetic data generation core functionality"""
+    @pytest.mark.asyncio
     async def test_workload_distribution_generation(self, generation_service, generation_config):
         """Test generating data with specified workload distribution"""
         records = await generation_service.generate_synthetic_data(
@@ -38,6 +37,7 @@ class TestDataGenerationEngine:
         for workload, expected_ratio in generation_config.workload_distribution.items():
             actual_ratio = workload_counts.get(workload, 0) / len(records)
             assert abs(actual_ratio - expected_ratio) < 0.05  # 5% tolerance
+    @pytest.mark.asyncio
     async def test_temporal_pattern_generation(self, generation_service):
         """Test generating data with realistic temporal patterns"""
         config = GenerationConfig(
@@ -55,6 +55,7 @@ class TestDataGenerationEngine:
         )
         
         assert business_hours_count > len(records) * 0.6  # Most traffic during business hours
+    @pytest.mark.asyncio
     async def test_tool_invocation_patterns(self, generation_service):
         """Test generating realistic tool invocation patterns"""
         patterns = await generation_service.generate_tool_invocations(
@@ -69,6 +70,7 @@ class TestDataGenerationEngine:
             # Output of current should be input to next
             assert current["trace_id"] == next_inv["trace_id"]
             assert current["end_time"] <= next_inv["start_time"]
+    @pytest.mark.asyncio
     async def test_error_scenario_generation(self, generation_service):
         """Test generating error scenarios and failures"""
         config = GenerationConfig(
@@ -87,6 +89,7 @@ class TestDataGenerationEngine:
         # Check error types
         error_types = [r.get("error_type") for r in records if r.get("status") == "failed"]
         assert all(et in config.error_patterns for et in error_types)
+    @pytest.mark.asyncio
     async def test_trace_hierarchy_generation(self, generation_service):
         """Test generating valid trace and span hierarchies"""
         traces = await generation_service.generate_trace_hierarchies(
@@ -107,6 +110,7 @@ class TestDataGenerationEngine:
                     # Child span must be within parent time bounds
                     assert span["start_time"] >= parent["start_time"]
                     assert span["end_time"] <= parent["end_time"]
+    @pytest.mark.asyncio
     async def test_domain_specific_generation(self, generation_service):
         """Test domain-specific data generation"""
         domains = ["e-commerce", "healthcare", "finance"]
@@ -126,6 +130,7 @@ class TestDataGenerationEngine:
                 assert all("patient_id" in r["metadata"] for r in records)
             elif domain == "finance":
                 assert all("transaction_amount" in r["metadata"] for r in records)
+    @pytest.mark.asyncio
     async def test_statistical_distribution_generation(self, generation_service):
         """Test generating data with specific statistical distributions"""
         distributions = ["normal", "exponential", "uniform", "bimodal"]
@@ -145,6 +150,7 @@ class TestDataGenerationEngine:
                 mean = sum(latencies) / len(latencies)
                 within_std = sum(1 for l in latencies if abs(l - mean) < 100)
                 assert within_std > len(latencies) * 0.68  # ~68% within 1 std
+    @pytest.mark.asyncio
     async def test_custom_tool_catalog_generation(self, generation_service):
         """Test generation with custom tool catalog"""
         custom_tools = [
@@ -167,6 +173,7 @@ class TestDataGenerationEngine:
                 tool_names.update(record["tool_invocations"])
         
         assert all(tool["name"] in tool_names for tool in custom_tools)
+    @pytest.mark.asyncio
     async def test_incremental_generation(self, generation_service):
         """Test incremental data generation with checkpoints"""
         config = GenerationConfig(
@@ -186,6 +193,7 @@ class TestDataGenerationEngine:
         
         assert len(checkpoints) == 10  # 10000 / 1000
         assert all(cp["records_generated"] % 1000 == 0 for cp in checkpoints)
+    @pytest.mark.asyncio
     async def test_generation_with_corpus_sampling(self, generation_service):
         """Test generation using corpus content sampling"""
         corpus_content = [

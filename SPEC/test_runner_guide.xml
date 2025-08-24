@@ -1,17 +1,21 @@
 <?xml version='1.0' encoding='utf-8'?>
 <spec>
   <metadata>
-    <last_edited>2025-08-23T10:00:00.000000</last_edited>
+    <last_edited>2025-08-24T12:00:00.000000</last_edited>
   </metadata>
   <meta>
     <title>Unified Test Runner Specification</title>
     <category>testing</category>
     <created>2025-08-18</created>
-    <updated>2025-08-23</updated>
+    <updated>2025-08-24</updated>
     <cross_references>
       <ref>CLAUDE.md#unified-test-runner</ref>
+      <ref>TESTING.md</ref>
+      <ref>README.md#testing</ref>
       <ref>testing.xml</ref>
       <ref>learnings/testing.xml</ref>
+      <ref>test_infrastructure_architecture.xml</ref>
+      <ref>coverage_requirements.xml</ref>
     </cross_references>
   </meta>
   <test_runner>
@@ -241,26 +245,50 @@
     </real_llm_testing>
     <speed_optimizations>
       <flag name="--fast-fail">
-        <purpose>Stop on first failure</purpose>
+        <purpose>Stop on first failure for rapid feedback</purpose>
         <safe>true</safe>
+        <usage_note>Essential for development workflow - saves time by failing fast</usage_note>
+        <examples>
+          <example purpose="Development testing">python -m test_framework.runner --level integration --fast-fail</example>
+          <example purpose="Pre-commit validation">python -m test_framework.runner --level smoke --fast-fail</example>
+        </examples>
+      </flag>
+      <flag name="--fail-fast">
+        <purpose>Alias for --fast-fail (backward compatibility)</purpose>
+        <safe>true</safe>
+        <aliases>--fast-fail, -x (pytest compatibility)</aliases>
       </flag>
       <flag name="--no-coverage">
-        <purpose>Skip coverage collection</purpose>
+        <purpose>Skip coverage collection for 30-50% speed improvement</purpose>
         <safe>true</safe>
+        <performance_impact>Significant speed boost, especially for large test suites</performance_impact>
+        <when_to_use>During development when coverage metrics are not needed</when_to_use>
       </flag>
       <flag name="--no-warnings">
-        <purpose>Suppress warning output</purpose>
+        <purpose>Suppress warning output for cleaner test results</purpose>
         <safe>true</safe>
+        <effect>Reduces console noise, focuses on test failures</effect>
       </flag>
       <flag name="--ci">
         <purpose>CI mode with safe optimizations</purpose>
         <safe>true</safe>
         <enables>--fast-fail --no-warnings --parallel auto</enables>
+        <optimized_for>Continuous Integration pipelines</optimized_for>
       </flag>
       <flag name="--speed">
         <purpose>Aggressive speed mode</purpose>
         <safe>false</safe>
-        <warning>May skip slower tests</warning>
+        <warning>May skip slower tests - use only for quick validation</warning>
+        <skips>Tests marked with @slow decorator</skips>
+      </flag>
+      <flag name="--max-failures">
+        <purpose>Stop after N failures (configurable fail-fast)</purpose>
+        <safe>true</safe>
+        <parameter>integer</parameter>
+        <examples>
+          <example>python -m test_framework.runner --max-failures 3</example>
+          <example>python -m test_framework.runner --level integration --max-failures 5</example>
+        </examples>
       </flag>
     </speed_optimizations>
     <test_selection>
@@ -417,16 +445,44 @@
         python -m test_framework.runner --staging --staging-url https://staging.example.com
       </command>
     </staging_testing>
+    <recommended_defaults>
+      <default name="DEVELOPMENT">
+        <command>python -m test_framework.runner --level integration --no-coverage --fast-fail</command>
+        <purpose>Fast feedback during active development</purpose>
+        <time>&lt;2min with early exit on failure</time>
+      </default>
+      <default name="PRE-COMMIT">
+        <command>python -m test_framework.runner --level smoke --fast-fail</command>
+        <purpose>Quick validation before committing</purpose>
+        <time>&lt;30s</time>
+      </default>
+      <default name="AGENT-CHANGES">
+        <command>python -m test_framework.runner --level agents --real-llm --fast-fail</command>
+        <purpose>Validate agent changes with real LLMs</purpose>
+        <time>2-3min with early exit</time>
+      </default>
+      <default name="PRE-RELEASE">
+        <command>python -m test_framework.runner --level integration --real-llm --env staging</command>
+        <purpose>Full validation including staging environment</purpose>
+        <time>5-10min</time>
+      </default>
+    </recommended_defaults>
     <workflows>
       <workflow name="development">
-        <step>1. python -m test_framework.runner --level unit --fast-fail</step>
-        <step>2. python -m test_framework.runner --level integration --no-coverage</step>
-        <step>3. python -m test_framework.runner --level smoke (before commit)</step>
+        <step>1. python -m test_framework.runner --level unit --fast-fail --no-coverage</step>
+        <step>2. python -m test_framework.runner --level integration --fast-fail --no-coverage</step>
+        <step>3. python -m test_framework.runner --level smoke --fast-fail (before commit)</step>
+      </workflow>
+      <workflow name="rapid-iteration">
+        <description>For quick development cycles with immediate feedback</description>
+        <step>1. python -m test_framework.runner --pattern "specific_test" --fast-fail</step>
+        <step>2. python -m test_framework.runner --level unit --max-failures 3 --no-coverage</step>
+        <step>3. python -m test_framework.runner --level critical --fast-fail</step>
       </workflow>
       <workflow name="agent-development">
         <step>1. python -m test_framework.runner --level agents --fast-fail</step>
-        <step>2. python -m test_framework.runner --level agents --real-llm</step>
-        <step>3. python -m test_framework.runner --level integration</step>
+        <step>2. python -m test_framework.runner --level agents --real-llm --fast-fail</step>
+        <step>3. python -m test_framework.runner --level integration --no-coverage</step>
       </workflow>
       <workflow name="pre-release">
         <step>1. python -m test_framework.runner --level comprehensive</step>
@@ -436,8 +492,14 @@
       </workflow>
       <workflow name="hotfix">
         <step>1. python -m test_framework.runner --level critical --fast-fail</step>
-        <step>2. python -m test_framework.runner --level smoke</step>
-        <step>3. python -m test_framework.runner --level integration --component affected</step>
+        <step>2. python -m test_framework.runner --level smoke --fast-fail</step>
+        <step>3. python -m test_framework.runner --level integration --component affected --fast-fail</step>
+      </workflow>
+      <workflow name="debugging">
+        <description>For investigating test failures</description>
+        <step>1. python -m test_framework.runner --show-failing (view last failures)</step>
+        <step>2. python -m test_framework.runner --run-failing --verbose (re-run with details)</step>
+        <step>3. python -m test_framework.runner --pattern "failing_test" --parallel 1 (run serially)</step>
       </workflow>
     </workflows>
   </test_runner>

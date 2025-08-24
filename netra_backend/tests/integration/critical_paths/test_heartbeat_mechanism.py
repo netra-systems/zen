@@ -11,7 +11,7 @@ L2 Test: Real internal heartbeat components with mocked external services.
 Performance target: <30s zombie detection, 99% heartbeat reliability.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -23,13 +23,13 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class HeartbeatState(Enum):
@@ -946,8 +946,10 @@ class TestHeartbeatMechanism:
 
         """Create mock WebSocket for testing."""
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send = AsyncMock()
 
         websocket.messages_sent = []
@@ -988,6 +990,7 @@ class TestHeartbeatMechanism:
 
         return websocket
     
+    @pytest.mark.asyncio
     async def test_basic_heartbeat_functionality(self, heartbeat_manager, test_users):
 
         """Test basic heartbeat registration and monitoring."""
@@ -1040,6 +1043,7 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
+    @pytest.mark.asyncio
     async def test_heartbeat_response_handling(self, heartbeat_manager, test_users):
 
         """Test handling of heartbeat responses."""
@@ -1088,6 +1092,7 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
+    @pytest.mark.asyncio
     async def test_missed_heartbeat_detection(self, heartbeat_manager, test_users):
 
         """Test detection of missed heartbeats."""
@@ -1098,8 +1103,10 @@ class TestHeartbeatMechanism:
         
         # Create websocket that doesn't respond
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send = AsyncMock()
         
         # Register connection
@@ -1130,6 +1137,7 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
+    @pytest.mark.asyncio
     async def test_zombie_connection_detection(self, heartbeat_manager, test_users):
 
         """Test zombie connection detection and cleanup."""
@@ -1140,8 +1148,10 @@ class TestHeartbeatMechanism:
         
         # Create unresponsive websocket
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send = AsyncMock()
         
         # Register connection
@@ -1174,6 +1184,7 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
+    @pytest.mark.asyncio
     async def test_adaptive_heartbeat_intervals(self, heartbeat_manager, test_users):
 
         """Test adaptive heartbeat interval adjustment."""
@@ -1214,6 +1225,7 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
+    @pytest.mark.asyncio
     async def test_multiple_user_connections(self, heartbeat_manager, test_users):
 
         """Test heartbeat management for multiple users and connections."""
@@ -1264,6 +1276,7 @@ class TestHeartbeatMechanism:
 
             await heartbeat_manager.unregister_connection(connection_id)
     
+    @pytest.mark.asyncio
     async def test_timeout_detection_and_analysis(self, heartbeat_manager, timeout_detector, test_users):
 
         """Test timeout detection and network condition analysis."""
@@ -1306,6 +1319,7 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
+    @pytest.mark.asyncio
     async def test_system_health_monitoring(self, heartbeat_manager, test_users):
 
         """Test overall system health monitoring."""
@@ -1333,8 +1347,10 @@ class TestHeartbeatMechanism:
 
             connection_id = f"problematic_{i}"
 
+            # Mock: Generic component isolation for controlled unit testing
             websocket = AsyncMock()
 
+            # Mock: Generic component isolation for controlled unit testing
             websocket.send = AsyncMock()  # Doesn't respond
 
             await heartbeat_manager.register_connection(connection_id, test_users[1].id, websocket)
@@ -1365,6 +1381,7 @@ class TestHeartbeatMechanism:
     
     @mock_justified("L2: Heartbeat mechanism with real internal components")
 
+    @pytest.mark.asyncio
     async def test_websocket_integration_with_heartbeat(self, heartbeat_manager, test_users):
 
         """Test WebSocket integration with heartbeat mechanism."""
@@ -1440,6 +1457,7 @@ class TestHeartbeatMechanism:
 
         await heartbeat_manager.unregister_connection(connection_id)
     
+    @pytest.mark.asyncio
     async def test_heartbeat_performance_under_load(self, heartbeat_manager, test_users):
 
         """Test heartbeat performance with many concurrent connections."""

@@ -140,6 +140,7 @@ class TestDevLauncherUtilities:
         config.set_emoji_support(False)
         assert config._use_emoji is False
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.config.logger')
     def test_config_logging(self, mock_logger):
         """Test config logging functionality."""

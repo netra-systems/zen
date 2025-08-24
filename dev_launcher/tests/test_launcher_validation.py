@@ -146,6 +146,7 @@ def test_process_manager_basic():
     manager = ProcessManager()
     
     # Create a mock process
+    # Mock: Component isolation for controlled unit testing
     mock_process = Mock(spec=subprocess.Popen)
     mock_process.pid = 12345
     mock_process.poll.return_value = None
@@ -190,6 +191,7 @@ def test_error_messages():
     launcher = DevLauncher(config)
     
     # Test environment check with missing deps
+    # Mock: Component isolation for testing without external dependencies
     with patch('dev_launcher.launcher.check_dependencies') as mock_deps:
         mock_deps.return_value = {
             'uvicorn': False,
@@ -198,6 +200,7 @@ def test_error_messages():
             'npm': True
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.print') as mock_print:
             result = launcher.check_environment()
             

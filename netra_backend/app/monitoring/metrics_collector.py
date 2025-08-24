@@ -21,6 +21,7 @@ import psutil
 from netra_backend.app.core.performance_optimization_manager import performance_manager
 from netra_backend.app.db.observability_metrics import DatabaseMetrics
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.monitoring.resource_monitor import get_resource_monitor
 
 logger = central_logger.get_logger(__name__)
 
@@ -297,10 +298,10 @@ class MetricsCollector:
     async def _gather_websocket_metrics(self) -> WebSocketMetrics:
         """Gather WebSocket metrics from connection manager."""
         try:
-            from netra_backend.app.websocket_core_manager import (
-                get_connection_manager,
+            from netra_backend.app.websocket_core.utils import (
+                get_connection_monitor,
             )
-            conn_manager = get_connection_manager()
+            conn_manager = get_connection_monitor()
             if conn_manager is None:
                 return self._build_empty_websocket_metrics()
             conn_stats = await conn_manager.get_stats()

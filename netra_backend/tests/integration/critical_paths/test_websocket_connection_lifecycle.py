@@ -10,14 +10,14 @@ from pathlib import Path
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as IWebSocketService
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 class TestWebSocketConnectionLifecycleL3:
     """Test WebSocket connection lifecycle scenarios"""
@@ -25,6 +25,7 @@ class TestWebSocketConnectionLifecycleL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_websocket_initial_connection(self):
         """Test initial WebSocket connection establishment"""
         uri = f"ws://localhost:{settings.WS_PORT}/ws"
@@ -42,6 +43,7 @@ class TestWebSocketConnectionLifecycleL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_websocket_authentication_required(self):
         """Test WebSocket requires authentication"""
         uri = f"ws://localhost:{settings.WS_PORT}/ws"
@@ -62,6 +64,7 @@ class TestWebSocketConnectionLifecycleL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_websocket_authentication_flow(self):
         """Test WebSocket authentication with token"""
         uri = f"ws://localhost:{settings.WS_PORT}/ws"
@@ -82,6 +85,7 @@ class TestWebSocketConnectionLifecycleL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_websocket_graceful_disconnect(self):
         """Test graceful WebSocket disconnection"""
         uri = f"ws://localhost:{settings.WS_PORT}/ws"
@@ -104,6 +108,7 @@ class TestWebSocketConnectionLifecycleL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_websocket_reconnection_handling(self):
         """Test WebSocket reconnection with session recovery"""
         uri = f"ws://localhost:{settings.WS_PORT}/ws"

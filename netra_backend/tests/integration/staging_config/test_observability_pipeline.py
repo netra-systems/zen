@@ -8,6 +8,7 @@ in the staging environment.
 import sys
 from pathlib import Path
 
+import pytest
 # Test framework import - using pytest fixtures instead
 
 import asyncio
@@ -17,11 +18,12 @@ from typing import Dict, List
 
 import httpx
 
-from netra_backend.tests.integration.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 class TestObservabilityPipeline(StagingConfigTestBase):
     """Test observability pipeline in staging."""
     
+    @pytest.mark.asyncio
     async def test_structured_logging(self):
         """Test structured logging configuration."""
         self.skip_if_not_staging()
@@ -43,6 +45,7 @@ class TestObservabilityPipeline(StagingConfigTestBase):
             self.assertEqual(response.status_code, 200,
                            "Request should succeed for log generation")
                            
+    @pytest.mark.asyncio
     async def test_prometheus_metrics(self):
         """Test Prometheus metrics export."""
         self.skip_if_not_staging()
@@ -81,6 +84,7 @@ class TestObservabilityPipeline(StagingConfigTestBase):
             self.assertIn('# HELP', metrics_text, "Missing metric help text")
             self.assertIn('# TYPE', metrics_text, "Missing metric type definitions")
             
+    @pytest.mark.asyncio
     async def test_distributed_tracing(self):
         """Test distributed tracing with OpenTelemetry."""
         self.skip_if_not_staging()
@@ -108,6 +112,7 @@ class TestObservabilityPipeline(StagingConfigTestBase):
                 self.assertIn(trace_id, response.headers['traceparent'],
                             "Trace ID should be propagated")
                             
+    @pytest.mark.asyncio
     async def test_custom_metrics(self):
         """Test custom application metrics."""
         self.skip_if_not_staging()
@@ -150,6 +155,7 @@ class TestObservabilityPipeline(StagingConfigTestBase):
                             self.assertRegex(line, r'\d+(\.\d+)?',
                                           f"Metric {metric} has no value")
                                           
+    @pytest.mark.asyncio
     async def test_error_tracking(self):
         """Test error tracking and reporting."""
         self.skip_if_not_staging()
@@ -176,6 +182,7 @@ class TestObservabilityPipeline(StagingConfigTestBase):
             self.assertIn('http_requests_total{.*status="404"', metrics_text,
                         "404 errors should be tracked")
                         
+    @pytest.mark.asyncio
     async def test_grafana_dashboards(self):
         """Test Grafana dashboard data sources."""
         self.skip_if_not_staging()
@@ -199,6 +206,7 @@ class TestObservabilityPipeline(StagingConfigTestBase):
                 # Grafana might not be publicly accessible
                 pass
                 
+    @pytest.mark.asyncio
     async def test_log_correlation(self):
         """Test log correlation across services."""
         self.skip_if_not_staging()
@@ -228,6 +236,7 @@ class TestObservabilityPipeline(StagingConfigTestBase):
                                    correlation_id,
                                    f"Correlation ID not preserved by {service}")
                                    
+    @pytest.mark.asyncio
     async def test_alerting_webhooks(self):
         """Test alerting webhook endpoints."""
         self.skip_if_not_staging()

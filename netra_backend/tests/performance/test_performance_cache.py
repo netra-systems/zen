@@ -13,7 +13,7 @@ import asyncio
 import statistics
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -30,6 +30,7 @@ class TestMemoryCache:
         """Create cache instance for testing."""
         return MemoryCache(max_size=100, default_ttl=60)
         
+    @pytest.mark.asyncio
     async def test_cache_basic_operations(self, cache):
         """Test basic cache operations."""
         # Test set and get
@@ -41,6 +42,7 @@ class TestMemoryCache:
         result = await cache.get("nonexistent")
         assert result is None
         
+    @pytest.mark.asyncio
     async def test_cache_ttl_expiration(self, cache):
         """Test TTL expiration functionality."""
         # Set with short TTL
@@ -57,6 +59,7 @@ class TestMemoryCache:
         result = await cache.get("temp_key")
         assert result is None
         
+    @pytest.mark.asyncio
     async def test_cache_lru_eviction(self, cache):
         """Test LRU eviction when cache is full."""
         # Fill cache to capacity
@@ -74,6 +77,7 @@ class TestMemoryCache:
         result = await cache.get("overflow_key")
         assert result == "overflow_value"
         
+    @pytest.mark.asyncio
     async def test_cache_performance(self, cache):
         """Test cache performance under load."""
         # Populate cache
@@ -110,6 +114,7 @@ class TestQueryOptimizer:
         """Create query optimizer for testing."""
         return QueryOptimizer(cache_size=100, cache_ttl=300)
         
+    @pytest.mark.asyncio
     async def test_query_caching(self, optimizer):
         """Test query result caching."""
         query = "SELECT * FROM users WHERE id = %s"
@@ -117,6 +122,7 @@ class TestQueryOptimizer:
         
         # Mock executor
         mock_result = {"id": 123, "name": "Test User"}
+        # Mock: Async component isolation for testing without real async operations
         executor = AsyncMock(return_value=mock_result)
         
         # First execution should call executor
@@ -129,6 +135,7 @@ class TestQueryOptimizer:
         assert result2 == mock_result
         assert executor.call_count == 1  # Still 1, not called again
         
+    @pytest.mark.asyncio
     async def test_query_metrics_tracking(self, optimizer):
         """Test query performance metrics tracking."""
         # Use different queries to avoid caching

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import time
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -65,12 +65,16 @@ class TestHealthCheckerHelpers:
 
 class TestPostgresHealthChecker:
     """Test PostgreSQL health checker."""
+    @pytest.mark.asyncio
     async def test_postgres_health_success(self):
         """Test successful PostgreSQL health check."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_engine = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn = AsyncMock()
         mock_engine.begin.return_value.__aenter__.return_value = mock_conn
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("app.core.health_checkers.async_engine", mock_engine):
             result = await check_postgres_health()
         
@@ -80,8 +84,10 @@ class TestPostgresHealthChecker:
         assert result.health_score == 1.0
         assert result.response_time_ms > 0
         mock_conn.execute.assert_called_once_with("SELECT 1")
+    @pytest.mark.asyncio
     async def test_postgres_health_no_engine(self):
         """Test PostgreSQL health check with no engine."""
+        # Mock: Component isolation for testing without external dependencies
         with patch("app.core.health_checkers.async_engine", None):
             result = await check_postgres_health()
         
@@ -89,11 +95,14 @@ class TestPostgresHealthChecker:
         assert result.success is False
         assert result.health_score == 0.0
         assert "not initialized" in result.error_message
+    @pytest.mark.asyncio
     async def test_postgres_health_connection_error(self):
         """Test PostgreSQL health check with connection error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_engine = Mock()
         mock_engine.begin.side_effect = Exception("Connection failed")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("app.core.health_checkers.async_engine", mock_engine):
             result = await check_postgres_health()
         
@@ -103,12 +112,16 @@ class TestPostgresHealthChecker:
 
 class TestClickHouseHealthChecker:
     """Test ClickHouse health checker."""
+    @pytest.mark.asyncio
     async def test_clickhouse_health_success(self):
         """Test successful ClickHouse health check."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_get_client = AsyncMock()
         mock_get_client.return_value.__aenter__.return_value = mock_client
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch("app.core.health_checkers.get_clickhouse_client", mock_get_client):
             result = await check_clickhouse_health()
         
@@ -116,11 +129,14 @@ class TestClickHouseHealthChecker:
         assert result.success is True
         assert result.health_score == 1.0
         mock_client.execute.assert_called_once_with("SELECT 1")
+    @pytest.mark.asyncio
     async def test_clickhouse_health_error(self):
         """Test ClickHouse health check with error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_get_client = AsyncMock()
         mock_get_client.side_effect = Exception("ClickHouse unavailable")
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch("app.core.health_checkers.get_clickhouse_client", mock_get_client):
             result = await check_clickhouse_health()
         
@@ -129,13 +145,17 @@ class TestClickHouseHealthChecker:
 
 class TestRedisHealthChecker:
     """Test Redis health checker."""
+    @pytest.mark.asyncio
     async def test_redis_health_success(self):
         """Test successful Redis health check."""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_manager = Mock()
         mock_redis_manager.enabled = True
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         mock_redis_manager.get_client.return_value = mock_client
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch("app.core.health_checkers.redis_manager", mock_redis_manager):
             result = await check_redis_health()
         
@@ -143,11 +163,14 @@ class TestRedisHealthChecker:
         assert result.success is True
         assert result.health_score == 1.0
         mock_client.ping.assert_called_once()
+    @pytest.mark.asyncio
     async def test_redis_health_disabled(self):
         """Test Redis health check when disabled."""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_manager = Mock()
         mock_redis_manager.enabled = False
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch("app.core.health_checkers.redis_manager", mock_redis_manager):
             result = await check_redis_health()
         
@@ -155,25 +178,32 @@ class TestRedisHealthChecker:
         assert result.success is True
         assert result.health_score == 1.0
         assert result.metadata["status"] == "disabled"
+    @pytest.mark.asyncio
     async def test_redis_health_no_client(self):
         """Test Redis health check with no client."""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_manager = Mock()
         mock_redis_manager.enabled = True
         mock_redis_manager.get_client.return_value = None
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch("app.core.health_checkers.redis_manager", mock_redis_manager):
             result = await check_redis_health()
         
         assert result.success is False
         assert "not available" in result.error_message
+    @pytest.mark.asyncio
     async def test_redis_health_ping_error(self):
         """Test Redis health check with ping error."""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_manager = Mock()
         mock_redis_manager.enabled = True
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         mock_client.ping.side_effect = Exception("Redis connection failed")
         mock_redis_manager.get_client.return_value = mock_client
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch("app.core.health_checkers.redis_manager", mock_redis_manager):
             result = await check_redis_health()
         
@@ -182,8 +212,10 @@ class TestRedisHealthChecker:
 
 class TestWebSocketHealthChecker:
     """Test WebSocket health checker."""
+    @pytest.mark.asyncio
     async def test_websocket_health_success(self):
         """Test successful WebSocket health check."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_connection_manager = Mock()
         mock_stats = {
             "active_connections": 50,
@@ -192,6 +224,7 @@ class TestWebSocketHealthChecker:
         }
         mock_connection_manager.get_stats.return_value = mock_stats
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("app.core.health_checkers.connection_manager", mock_connection_manager):
             result = await check_websocket_health()
         
@@ -199,18 +232,23 @@ class TestWebSocketHealthChecker:
         assert result.success is True
         assert result.health_score > 0.7  # Should be high with reasonable connection count
         assert result.metadata == mock_stats
+    @pytest.mark.asyncio
     async def test_websocket_health_high_connections(self):
         """Test WebSocket health check with high connection count."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_connection_manager = Mock()
         mock_stats = {"active_connections": 800}  # High connection count
         mock_connection_manager.get_stats.return_value = mock_stats
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("app.core.health_checkers.connection_manager", mock_connection_manager):
             result = await check_websocket_health()
         
         assert result.health_score < 1.0  # Should be lower due to high connections
+    @pytest.mark.asyncio
     async def test_websocket_health_error(self):
         """Test WebSocket health check with error."""
+        # Mock: Component isolation for testing without external dependencies
         with patch("app.core.health_checkers.connection_manager") as mock_manager:
             mock_manager.get_stats.side_effect = Exception("WebSocket manager error")
             result = await check_websocket_health()
@@ -223,17 +261,20 @@ class TestSystemResourcesChecker:
     
     def test_system_resources_success(self):
         """Test successful system resources check."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_memory = Mock()
         mock_memory.percent = 60.0
         mock_memory.available = 4 * (1024**3)  # 4GB
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_disk = Mock()
         mock_disk.percent = 45.0
         mock_disk.free = 100 * (1024**3)  # 100GB
         
-        with patch("app.core.health_checkers.psutil.cpu_percent", return_value=25.0), \
-             patch("app.core.health_checkers.psutil.virtual_memory", return_value=mock_memory), \
-             patch("app.core.health_checkers.psutil.disk_usage", return_value=mock_disk):
+        # Mock: Component isolation for testing without external dependencies
+        with patch("app.core.health_checkers.psutil.cpu_percent", return_value=25.0) as mock_cpu, \
+             patch("app.core.health_checkers.psutil.virtual_memory", return_value=mock_memory) as mock_vm, \
+             patch("app.core.health_checkers.psutil.disk_usage", return_value=mock_disk) as mock_disk_usage:
             
             result = check_system_resources()
         
@@ -246,17 +287,20 @@ class TestSystemResourcesChecker:
     
     def test_system_resources_high_usage(self):
         """Test system resources check with high usage."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_memory = Mock()
         mock_memory.percent = 95.0
         mock_memory.available = 0.5 * (1024**3)  # 0.5GB
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_disk = Mock()
         mock_disk.percent = 90.0
         mock_disk.free = 1 * (1024**3)  # 1GB
         
-        with patch("app.core.health_checkers.psutil.cpu_percent", return_value=98.0), \
-             patch("app.core.health_checkers.psutil.virtual_memory", return_value=mock_memory), \
-             patch("app.core.health_checkers.psutil.disk_usage", return_value=mock_disk):
+        # Mock: Component isolation for testing without external dependencies
+        with patch("app.core.health_checkers.psutil.cpu_percent", return_value=98.0) as mock_cpu, \
+             patch("app.core.health_checkers.psutil.virtual_memory", return_value=mock_memory) as mock_vm, \
+             patch("app.core.health_checkers.psutil.disk_usage", return_value=mock_disk) as mock_disk_usage:
             
             result = check_system_resources()
         
@@ -264,6 +308,7 @@ class TestSystemResourcesChecker:
     
     def test_system_resources_error(self):
         """Test system resources check with error."""
+        # Mock: Component isolation for testing without external dependencies
         with patch("app.core.health_checkers.psutil.cpu_percent", side_effect=Exception("psutil error")):
             result = check_system_resources()
         
@@ -272,17 +317,20 @@ class TestSystemResourcesChecker:
     
     def test_system_resources_response_time(self):
         """Test that response time is measured."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_memory = Mock()
         mock_memory.percent = 50.0
         mock_memory.available = 2 * (1024**3)
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_disk = Mock()
         mock_disk.percent = 50.0
         mock_disk.free = 50 * (1024**3)
         
-        with patch("app.core.health_checkers.psutil.cpu_percent", return_value=50.0), \
-             patch("app.core.health_checkers.psutil.virtual_memory", return_value=mock_memory), \
-             patch("app.core.health_checkers.psutil.disk_usage", return_value=mock_disk):
+        # Mock: Component isolation for testing without external dependencies
+        with patch("app.core.health_checkers.psutil.cpu_percent", return_value=50.0) as mock_cpu, \
+             patch("app.core.health_checkers.psutil.virtual_memory", return_value=mock_memory) as mock_vm, \
+             patch("app.core.health_checkers.psutil.disk_usage", return_value=mock_disk) as mock_disk_usage:
             
             result = check_system_resources()
         

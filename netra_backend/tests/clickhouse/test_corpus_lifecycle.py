@@ -11,7 +11,7 @@ from pathlib import Path
 
 import json
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import CorpusCreate
@@ -25,14 +25,18 @@ from netra_backend.app.services.corpus_service import (
 class TestCorpusLifecycle:
     """Test complete corpus lifecycle from creation to deletion"""
     
+    @pytest.mark.asyncio
     async def test_corpus_creation_workflow(self):
         """Test 1: Verify complete corpus creation workflow"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             corpus_data = _create_test_corpus_data()
             
@@ -44,14 +48,18 @@ class TestCorpusLifecycle:
             # Verify corpus attributes
             _assert_corpus_created_correctly(corpus)
 
+    @pytest.mark.asyncio
     async def test_corpus_status_transitions(self):
         """Test 2: Verify corpus status transitions"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             
             # Test status flow: CREATING -> AVAILABLE
@@ -70,14 +78,18 @@ class TestCorpusLifecycle:
             calls = db.query().filter().update.call_args_list
             assert {"status": CorpusStatus.FAILED.value} in [call[0][0] for call in calls]
 
+    @pytest.mark.asyncio
     async def test_corpus_deletion_workflow(self):
         """Test 3: Verify complete corpus deletion workflow"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             corpus = _create_mock_corpus()
             
@@ -94,6 +106,7 @@ class TestCorpusLifecycle:
 class TestWorkloadTypesCoverage:
     """Test coverage of all workload types"""
     
+    @pytest.mark.asyncio
     async def test_all_workload_types_supported(self):
         """Test 4: Verify all workload types are supported"""
         service = CorpusService()
@@ -110,17 +123,21 @@ class TestWorkloadTypesCoverage:
             result = service._validate_records(records)
             assert result["valid"], f"Workload type {workload_type} should be valid"
 
+    @pytest.mark.asyncio
     async def test_workload_distribution_tracking(self):
         """Test 5: Verify workload distribution is tracked correctly"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Mock distribution query result
             _setup_distribution_mock(mock_instance)
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             corpus = _create_available_corpus()
             db.query().filter().first.return_value = corpus
@@ -153,6 +170,7 @@ def _assert_corpus_created_correctly(corpus):
 
 def _create_mock_corpus():
     """Create mock corpus for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     corpus = MagicMock()
     corpus.id = "test_id"
     corpus.table_name = "test_table"
@@ -186,6 +204,7 @@ def _setup_distribution_mock(mock_instance):
 
 def _create_available_corpus():
     """Create available corpus for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     corpus = MagicMock()
     corpus.status = "available"
     corpus.table_name = "test_table"

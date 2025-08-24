@@ -3,7 +3,7 @@ Common fixtures and utilities for integration tests.
 Extracted from oversized test_critical_missing_integration.py
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -14,7 +14,7 @@ import tempfile
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -24,10 +24,11 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.db.base import Base
 
 from netra_backend.app.db.models_postgres import Message, Run, Thread, User
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 @pytest.fixture
 
+@pytest.mark.asyncio
 async def test_database():
 
     """Setup test database for integration testing"""
@@ -60,16 +61,21 @@ def mock_infrastructure():
 
     """Setup mock infrastructure components"""
 
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager = Mock()
 
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.call_llm = AsyncMock(return_value={"content": "test response"})
 
     ws_manager = WebSocketManager()
 
+    # Mock: Generic component isolation for controlled unit testing
     cache_service = Mock()
 
+    # Mock: Async component isolation for testing without real async operations
     cache_service.get = AsyncMock(return_value=None)
 
+    # Mock: Async component isolation for testing without real async operations
     cache_service.set = AsyncMock(return_value=True)
     
     return {
@@ -128,14 +134,19 @@ async def setup_clickhouse_mock():
 
     """Setup ClickHouse mock for transaction testing"""
 
+    # Mock: Generic component isolation for controlled unit testing
     ch_mock = Mock()
 
+    # Mock: Generic component isolation for controlled unit testing
     ch_mock.execute = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     ch_mock.begin_transaction = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     ch_mock.commit = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     ch_mock.rollback = AsyncMock()
 
     return ch_mock

@@ -6,9 +6,7 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -37,6 +35,7 @@ class TestClickHouseQueryValidator:
         """Test warning for nested field access without array functions"""
         warning_queries = _get_warning_queries()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.db.clickhouse_query_fixer.logger') as mock_logger:
             for query in warning_queries:
                 _assert_warning_query(query, mock_logger)

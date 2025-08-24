@@ -6,12 +6,10 @@ Testing data quality and validation mechanisms
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import uuid
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -37,6 +35,7 @@ def validation_service():
 
 class TestDataQualityValidation:
     """Test data quality and validation mechanisms"""
+    @pytest.mark.asyncio
     async def test_schema_validation(self, validation_service):
         """Test schema validation of generated records"""
         valid_record = {
@@ -56,6 +55,7 @@ class TestDataQualityValidation:
         
         assert validation_service.validate_schema(valid_record) == True
         assert validation_service.validate_schema(invalid_record) == False
+    @pytest.mark.asyncio
     async def test_statistical_distribution_validation(self, validation_service):
         """Test validation of statistical distributions"""
         records = await validation_service.generate_synthetic_data(
@@ -71,6 +71,7 @@ class TestDataQualityValidation:
         assert validation_result.chi_square_p_value > 0.05
         assert validation_result.ks_test_p_value > 0.05
         assert validation_result.distribution_match == True
+    @pytest.mark.asyncio
     async def test_referential_integrity_validation(self, validation_service):
         """Test referential integrity in trace hierarchies"""
         traces = await validation_service.generate_trace_hierarchies(num_traces=10)
@@ -80,6 +81,7 @@ class TestDataQualityValidation:
         assert validation_result.valid_parent_child_relationships == True
         assert validation_result.temporal_ordering_valid == True
         assert validation_result.orphaned_spans == 0
+    @pytest.mark.asyncio
     async def test_temporal_consistency_validation(self, validation_service):
         """Test temporal consistency of generated data"""
         records = await validation_service.generate_synthetic_data(
@@ -94,6 +96,7 @@ class TestDataQualityValidation:
         assert validation_result.all_within_window == True
         assert validation_result.chronological_order == True
         assert validation_result.no_future_timestamps == True
+    @pytest.mark.asyncio
     async def test_data_completeness_validation(self, validation_service):
         """Test data completeness and required fields"""
         records = await validation_service.generate_synthetic_data(
@@ -109,6 +112,7 @@ class TestDataQualityValidation:
         
         assert validation_result.all_required_fields_present == True
         assert validation_result.null_value_percentage < 0.01
+    @pytest.mark.asyncio
     async def test_anomaly_detection_in_generated_data(self, validation_service):
         """Test anomaly detection in generated data"""
         config = GenerationConfig(
@@ -131,6 +135,7 @@ class TestDataQualityValidation:
         # Should detect approximately 5% anomalies
         anomaly_rate = len(detected_anomalies) / len(records)
         assert 0.04 <= anomaly_rate <= 0.06
+    @pytest.mark.asyncio
     async def test_correlation_preservation(self, validation_service):
         """Test preservation of correlations in generated data"""
         records = await validation_service.generate_synthetic_data(
@@ -145,6 +150,7 @@ class TestDataQualityValidation:
         )
         
         assert correlation > 0.5  # Positive correlation expected
+    @pytest.mark.asyncio
     async def test_quality_metrics_calculation(self, validation_service):
         """Test calculation of quality metrics"""
         records = await validation_service.generate_synthetic_data(
@@ -157,6 +163,7 @@ class TestDataQualityValidation:
         assert metrics.distribution_divergence < 0.1
         assert metrics.temporal_consistency > 0.98
         assert metrics.corpus_coverage > 0.5
+    @pytest.mark.asyncio
     async def test_data_diversity_validation(self, validation_service):
         """Test diversity of generated data"""
         records = await validation_service.generate_synthetic_data(
@@ -168,6 +175,7 @@ class TestDataQualityValidation:
         assert diversity_metrics.unique_traces == 1000
         assert diversity_metrics.workload_type_entropy > 1.0
         assert diversity_metrics.tool_usage_variety > 10
+    @pytest.mark.asyncio
     async def test_validation_report_generation(self, validation_service):
         """Test comprehensive validation report generation"""
         records = await validation_service.generate_synthetic_data(

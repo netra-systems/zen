@@ -28,6 +28,11 @@ from netra_backend.app.websocket_core.types import (
     ErrorMessage,
     JsonRpcMessage,
     BroadcastMessage,
+    PendingMessage,
+    MessageBatch,
+    BatchConfig,
+    MessageState,
+    BatchingStrategy,
     create_standard_message,
     create_error_message,
     create_server_message,
@@ -329,6 +334,151 @@ class ErrorHandler(BaseMessageHandler):
     def get_stats(self) -> Dict[str, Any]:
         """Get error handler statistics."""
         return self.error_stats.copy()
+
+
+class BatchMessageHandler(BaseMessageHandler):
+    """Handler for batched message processing."""
+    
+    def __init__(self, config: Optional[BatchConfig] = None):
+        super().__init__([MessageType.BROADCAST, MessageType.ROOM_MESSAGE])
+        self.config = config or BatchConfig()
+        self.pending_messages: Dict[str, List[PendingMessage]] = {}
+        self.batch_timers: Dict[str, asyncio.Task] = {}
+        self.batch_stats = {
+            "batches_created": 0,
+            "messages_batched": 0,
+            "batch_send_successes": 0,
+            "batch_send_failures": 0
+        }
+    
+    async def handle_message(self, user_id: str, websocket: WebSocket,
+                           message: WebSocketMessage) -> bool:
+        """Handle message by adding to batch queue."""
+        try:
+            # Create pending message
+            pending_msg = PendingMessage(
+                content=message.payload,
+                connection_id=f"ws_{user_id}",
+                user_id=user_id,
+                thread_id=message.thread_id,
+                priority=message.payload.get("priority", 0)
+            )
+            
+            # Add to batch queue
+            await self._add_to_batch(user_id, pending_msg)
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error handling batch message from {user_id}: {e}")
+            return False
+    
+    async def _add_to_batch(self, user_id: str, message: PendingMessage) -> None:
+        """Add message to user's batch queue."""
+        if user_id not in self.pending_messages:
+            self.pending_messages[user_id] = []
+        
+        self.pending_messages[user_id].append(message)
+        
+        # Check if batch is ready to send
+        if await self._should_send_batch(user_id):
+            await self._send_batch(user_id)
+        elif user_id not in self.batch_timers:
+            # Start timer for this user's batch
+            self.batch_timers[user_id] = asyncio.create_task(
+                self._batch_timer(user_id)
+            )
+    
+    async def _should_send_batch(self, user_id: str) -> bool:
+        """Check if batch should be sent now."""
+        messages = self.pending_messages.get(user_id, [])
+        
+        if not messages:
+            return False
+            
+        # Size-based batching
+        if len(messages) >= self.config.max_batch_size:
+            return True
+            
+        # Priority-based batching
+        high_priority_count = sum(1 for msg in messages 
+                                if msg.priority >= self.config.priority_threshold)
+        if high_priority_count > 0:
+            return True
+            
+        return False
+    
+    async def _batch_timer(self, user_id: str) -> None:
+        """Timer for sending batch after max wait time."""
+        try:
+            await asyncio.sleep(self.config.max_wait_time)
+            
+            # Clean up timer reference
+            if user_id in self.batch_timers:
+                del self.batch_timers[user_id]
+                
+            # Send batch if messages are still pending
+            if user_id in self.pending_messages and self.pending_messages[user_id]:
+                await self._send_batch(user_id)
+                
+        except asyncio.CancelledError:
+            # Timer was cancelled, batch was sent early
+            pass
+        except Exception as e:
+            logger.error(f"Error in batch timer for user {user_id}: {e}")
+    
+    async def _send_batch(self, user_id: str) -> bool:
+        """Send batched messages for user."""
+        try:
+            messages = self.pending_messages.get(user_id, [])
+            if not messages:
+                return True
+            
+            # Cancel timer if running
+            if user_id in self.batch_timers:
+                self.batch_timers[user_id].cancel()
+                del self.batch_timers[user_id]
+            
+            # Create batch
+            import uuid
+            batch = MessageBatch(
+                messages=messages,
+                connection_id=f"ws_{user_id}",
+                user_id=user_id,
+                batch_id=str(uuid.uuid4()),
+                total_size_bytes=sum(len(json.dumps(msg.content)) for msg in messages)
+            )
+            
+            # Update stats
+            self.batch_stats["batches_created"] += 1
+            self.batch_stats["messages_batched"] += len(messages)
+            
+            # Clear pending messages
+            self.pending_messages[user_id] = []
+            
+            # Send batch (simplified - in real implementation would send to actual WebSocket)
+            logger.info(f"Sending batch {batch.batch_id} with {len(messages)} messages to {user_id}")
+            self.batch_stats["batch_send_successes"] += 1
+            
+            return True
+            
+        except Exception as e:
+            self.batch_stats["batch_send_failures"] += 1
+            logger.error(f"Error sending batch for user {user_id}: {e}")
+            return False
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get batch handler statistics."""
+        stats = self.batch_stats.copy()
+        stats["pending_message_count"] = sum(len(msgs) for msgs in self.pending_messages.values())
+        stats["active_timers"] = len(self.batch_timers)
+        return stats
+    
+    async def flush_all_batches(self) -> None:
+        """Force send all pending batches."""
+        users_to_flush = list(self.pending_messages.keys())
+        for user_id in users_to_flush:
+            if self.pending_messages.get(user_id):
+                await self._send_batch(user_id)
 
 
 class MessageRouter:

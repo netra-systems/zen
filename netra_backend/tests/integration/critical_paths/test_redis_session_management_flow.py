@@ -49,6 +49,7 @@ class RedisSessionTester:
         if self.session:
             await self.session.close()
             
+    @pytest.mark.asyncio
     async def test_redis_health(self) -> bool:
         """Test Redis cluster health."""
         print("\n[HEALTH] Testing Redis health...")
@@ -77,6 +78,7 @@ class RedisSessionTester:
             print(f"[ERROR] Redis health check failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_session_creation(self) -> bool:
         """Test session creation and storage."""
         print("\n[CREATE] Testing session creation...")
@@ -110,6 +112,7 @@ class RedisSessionTester:
             print(f"[ERROR] Session creation failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_session_retrieval(self) -> bool:
         """Test session retrieval and validation."""
         print("\n[RETRIEVE] Testing session retrieval...")
@@ -140,6 +143,7 @@ class RedisSessionTester:
             print(f"[ERROR] Session retrieval failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_session_expiration(self) -> bool:
         """Test session expiration and TTL."""
         print("\n[EXPIRATION] Testing session expiration...")
@@ -182,6 +186,7 @@ class RedisSessionTester:
             print(f"[ERROR] Session expiration test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_concurrent_sessions(self) -> bool:
         """Test concurrent session handling."""
         print("\n[CONCURRENT] Testing concurrent sessions...")
@@ -233,6 +238,7 @@ class RedisSessionTester:
             print(f"[ERROR] Concurrent session test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_session_migration(self) -> bool:
         """Test session migration between Redis nodes."""
         print("\n[MIGRATION] Testing session migration...")
@@ -272,6 +278,7 @@ class RedisSessionTester:
             print(f"[ERROR] Session migration test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_data_consistency(self) -> bool:
         """Test session data consistency."""
         print("\n[CONSISTENCY] Testing data consistency...")
@@ -291,6 +298,7 @@ class RedisSessionTester:
                     update_tasks = []
                     
                     async def update_session(i):
+                        # Mock: Component isolation for testing without external dependencies
                         async with self.session.patch(
                             f"{BACKEND_URL}/api/v1/sessions/{consistency_session_id}",
                             json={"increment_counter": 1, "append_value": i}
@@ -326,6 +334,7 @@ class RedisSessionTester:
             print(f"[ERROR] Data consistency test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_cluster_failover(self) -> bool:
         """Test Redis cluster failover handling."""
         print("\n[FAILOVER] Testing cluster failover...")
@@ -367,6 +376,7 @@ class RedisSessionTester:
             print(f"[ERROR] Cluster failover test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_session_locking(self) -> bool:
         """Test session locking for atomic operations."""
         print("\n[LOCKING] Testing session locking...")
@@ -438,6 +448,7 @@ class RedisSessionTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_redis_session_management_flow():
     """Test Redis session management flow."""
     async with RedisSessionTester() as tester:

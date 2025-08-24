@@ -11,7 +11,7 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,6 +31,7 @@ from netra_backend.app.services.thread_service import ThreadService
 
 class ContextPreservationTests:
     """Tests for context preservation across messages."""
+    @pytest.mark.asyncio
     async def test_context_preservation_across_messages(self, db_session: AsyncSession):
         """Test context maintains state across multiple messages."""
         service = ThreadService()
@@ -71,6 +72,7 @@ class ContextPreservationTests:
         # Verify chronological ordering
         timestamps = [msg.created_at for msg in retrieved_messages]
         assert timestamps == sorted(timestamps)
+    @pytest.mark.asyncio
     async def test_context_state_validation(self, db_session: AsyncSession):
         """Test context state validation and integrity."""
         service = ThreadService()
@@ -96,6 +98,7 @@ class ContextPreservationTests:
 
 class MessageHistoryTests:
     """Tests for message history loading and management."""
+    @pytest.mark.asyncio
     async def test_message_history_chronological_order(self, db_session: AsyncSession):
         """Test message history loads in chronological order."""
         service = ThreadService()
@@ -118,6 +121,7 @@ class MessageHistoryTests:
         
         created_messages = []
         for role, content, timestamp in messages_data:
+            # Mock: Component isolation for testing without external dependencies
             with patch('time.time', return_value=timestamp):
                 msg = await service.create_message(thread.id, role, content, db=db_session)
                 created_messages.append(msg)
@@ -133,6 +137,7 @@ class MessageHistoryTests:
         # Verify chronological order
         for i in range(1, len(messages)):
             assert messages[i].created_at >= messages[i-1].created_at
+    @pytest.mark.asyncio
     async def test_message_history_pagination(self, db_session: AsyncSession):
         """Test message history pagination functionality."""
         service = ThreadService()
@@ -161,6 +166,7 @@ class MessageHistoryTests:
 
 class StateIsolationTests:
     """Tests for state isolation between threads."""
+    @pytest.mark.asyncio
     async def test_thread_state_isolation(self, db_session: AsyncSession):
         """Test threads maintain isolated states."""
         service = ThreadService()
@@ -218,6 +224,7 @@ class StateIsolationTests:
 
 class ThreadResumeTests:
     """Tests for thread resume after interruption."""
+    @pytest.mark.asyncio
     async def test_thread_resume_after_interruption(self, db_session: AsyncSession):
         """Test thread can resume after interruption with state recovery."""
         service = ThreadService()
@@ -292,6 +299,7 @@ class ThreadResumeTests:
 
 class ContextLimitsTests:
     """Tests for context limits and truncation."""
+    @pytest.mark.asyncio
     async def test_context_limits_and_truncation(self, db_session: AsyncSession):
         """Test context limits and proper truncation."""
         service = ThreadService()
@@ -341,27 +349,44 @@ class ContextLimitsTests:
 @pytest.fixture
 async def db_session():
     """Mock database session for testing."""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
+    # Mock: Session isolation for controlled testing without external state
     session.begin = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
-    return session
+    try:
+        yield session
+    finally:
+        if hasattr(session, "close"):
+            await session.close()
 
 @pytest.fixture
 def mock_agent_service():
     """Mock agent service for testing."""
+    # Mock: Agent service isolation for testing without LLM agent execution
     service = Mock(spec=AgentService)
+    # Mock: Generic component isolation for controlled unit testing
     service.handle_websocket_message = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.create_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.switch_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.delete_thread = AsyncMock()
     return service
 
 @pytest.fixture
 def mock_state_persistence():
     """Mock state persistence service."""
+    # Mock: Generic component isolation for controlled unit testing
     service = Mock()
+    # Mock: Async component isolation for testing without real async operations
     service.save_agent_state = AsyncMock(return_value=(True, "snapshot_id"))
+    # Mock: Generic component isolation for controlled unit testing
     service.load_agent_state = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     service.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     return service

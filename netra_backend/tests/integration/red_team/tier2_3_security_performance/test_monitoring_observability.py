@@ -1,3 +1,4 @@
+from netra_backend.app.core.configuration.base import get_unified_config
 """
 RED TEAM TESTS 36-40: Monitoring, Observability, and Configuration
 
@@ -23,7 +24,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 import tempfile
 
 import pytest

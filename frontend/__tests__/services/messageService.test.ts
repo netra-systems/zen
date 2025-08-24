@@ -2,7 +2,7 @@
 jest.unmock('@/auth/service');
 
 import { messageService } from '@/services/messageService';
-import { Message } from '@/types/chat';
+import { Message } from '@/types/unified';
 
 // Mock fetch
 global.fetch = jest.fn();

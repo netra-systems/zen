@@ -24,7 +24,6 @@ from typing import Any, Dict, List, Optional, Tuple
 from loguru import logger
 
 # Import existing monitoring infrastructure
-sys.path.append(str(Path(__file__).parent.parent))
 from netra_backend.app.schemas.monitoring_schemas import (
     ErrorQuery,
     ErrorResponse,

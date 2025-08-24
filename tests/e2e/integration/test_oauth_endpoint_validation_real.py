@@ -164,10 +164,12 @@ class OAuthEndpointValidator:
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Mock Google OAuth API responses
+            # Mock: Generic component isolation for controlled unit testing
             token_response = AsyncMock()
             token_response.json.return_value = GoogleOAuthProvider.get_oauth_response()
             token_response.status_code = 200
             
+            # Mock: Generic component isolation for controlled unit testing
             user_response = AsyncMock()
             user_response.json.return_value = GoogleOAuthProvider.get_user_info()
             user_response.status_code = 200
@@ -440,11 +442,14 @@ class TestOAuthEndpointValidationReal:
         validator = oauth_endpoint_validator
         
         # Test invalid OAuth code scenario
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate OAuth provider error
+            # Mock: Generic component isolation for controlled unit testing
             error_response = AsyncMock()
             error_response.status_code = 400
             error_response.json.return_value = {"error": "invalid_grant"}

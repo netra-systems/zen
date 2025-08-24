@@ -8,6 +8,7 @@ in the staging environment.
 import sys
 from pathlib import Path
 
+import pytest
 # Test framework import - using pytest fixtures instead
 
 import os
@@ -19,7 +20,7 @@ import psycopg2
 from alembic import command
 from alembic.config import Config
 
-from netra_backend.tests.integration.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 class TestDatabaseMigrations(StagingConfigTestBase):
     """Test database migrations in staging."""

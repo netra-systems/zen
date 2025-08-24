@@ -7,33 +7,55 @@ Compliance: <300 lines, 25-line max functions, modular design.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import aiohttp
 import pytest
 
-# from scripts.dev_launcher_config_validator import  # Should be mocked in tests
-from dataclasses import dataclass
+# Mock the classes that would normally be imported
+from dataclasses import dataclass, field
 from enum import Enum
+from typing import Dict, Any
 
 class ConfigStatus(Enum):
     VALID = "valid"
     INVALID = "invalid"
+    STALE = "stale"
+    MISSING = "missing"
+    UNREACHABLE = "unreachable"
 
 @dataclass
 class ConfigValidationResult:
     status: ConfigStatus
+    warnings: List[str] = field(default_factory=list)
+    errors: List[str] = field(default_factory=list)
+    config_age_days: Optional[int] = None
+    reachable_endpoints: List[str] = field(default_factory=list)
+    unreachable_endpoints: List[str] = field(default_factory=list)
+
+class ResourceMode(Enum):
+    LOCAL = "local"
+    SHARED = "shared"
+    DOCKER = "docker"
+    DISABLED = "disabled"
     
 @dataclass
 class ValidationContext:
-    pass
-# from scripts.dev_launcher_service_config import  # Should be mocked in tests ResourceMode, ServicesConfiguration
+    config_path: Path
+    is_interactive: bool = True
+    is_ci_environment: bool = False
+    cli_overrides: Dict[str, str] = field(default_factory=dict)
+    env_overrides: Dict[str, str] = field(default_factory=dict)
+
+# Mock ServicesConfiguration for tests
+class ServicesConfiguration:
+    def __init__(self):
+        self.redis = None
+        self.clickhouse = None
 
 @pytest.fixture
 def temp_config_path(tmp_path: Path) -> Path:
@@ -54,15 +76,18 @@ def mock_validation_context(temp_config_path: Path) -> ValidationContext:
 @pytest.fixture
 def mock_services_config() -> ServicesConfiguration:
     """Create mock services configuration."""
+    # Mock: Component isolation for controlled unit testing
     config = Mock(spec=ServicesConfiguration)
     
     # Create mock redis service
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_redis = Mock()
     mock_redis.mode = ResourceMode.SHARED
     mock_redis.get_config.return_value = {"host": "redis.example.com", "port": 6379}
     config.redis = mock_redis
     
     # Create mock clickhouse service
+    # Mock: ClickHouse database isolation for fast testing without external database dependency
     mock_clickhouse = Mock()
     mock_clickhouse.mode = ResourceMode.LOCAL
     mock_clickhouse.get_config.return_value = {"host": "ch.example.com", "port": 8123, "secure": False}

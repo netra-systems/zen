@@ -14,7 +14,7 @@ COVERAGE TARGET: 100% for error recovery and performance scenarios
 All functions ≤8 lines per CLAUDE.md requirements.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -44,6 +44,7 @@ class TestWebSocketPerformanceUnderLoad:
 
     """Performance tests for WebSocket state recovery operations under load."""
     
+    @pytest.mark.asyncio
     async def test_websocket_performance_under_connection_load(self):
 
         """Test WebSocket performance under high connection load."""
@@ -112,6 +113,7 @@ class TestWebSocketPerformanceUnderLoad:
 
         assert manager.telemetry["connections_closed"] >= len(connections), "Disconnections should be tracked"
     
+    @pytest.mark.asyncio
     async def test_message_queue_performance_under_load(self):
 
         """Test message queue recovery performance with large queues."""
@@ -162,6 +164,7 @@ class TestWebSocketErrorScenarios:
 
     """Error scenario tests for WebSocket state recovery resilience."""
     
+    @pytest.mark.asyncio
     async def test_recovery_with_corrupted_state_data(self):
 
         """Test recovery behavior with corrupted state data."""
@@ -215,6 +218,7 @@ class TestWebSocketErrorScenarios:
         result = await manager.send_message_to_user(user_id, valid_message)
         # Result should be handled gracefully (True or False, not exception)
     
+    @pytest.mark.asyncio
     async def test_concurrent_race_condition_stability(self):
 
         """Test recovery behavior under concurrent connection race conditions."""
@@ -263,6 +267,7 @@ class TestWebSocketNetworkConditionRecovery:
 
     """Network condition simulation and recovery tests."""
     
+    @pytest.mark.asyncio
     async def test_recovery_under_intermittent_connectivity(self):
 
         """Test recovery behavior under intermittent network connectivity."""
@@ -315,6 +320,7 @@ class TestWebSocketNetworkConditionRecovery:
 
         assert stats["telemetry"]["errors_handled"] >= 0, "Network error handling should be tracked"
     
+    @pytest.mark.asyncio
     async def test_recovery_under_high_latency_conditions(self):
 
         """Test recovery behavior under high latency network conditions."""
@@ -366,6 +372,7 @@ class TestWebSocketCircuitBreakerRecovery:
 
     """Circuit breaker pattern tests for WebSocket error recovery."""
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_activation_and_recovery(self):
 
         """Test circuit breaker activation during error scenarios and recovery."""

@@ -21,7 +21,7 @@ import asyncio
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -41,6 +41,7 @@ class TestStateMixins:
         assert hasattr(mixin, 'operation_times')
         assert mixin.max_error_history == 50
     
+    @pytest.mark.asyncio
     async def test_state_tracking_operations(self):
         """Test state tracking during operations."""
         mixin = self._create_reliability_mixin()
@@ -60,6 +61,7 @@ class TestStateMixins:
         
         # Fill error history beyond limit
         for i in range(55):
+            # Mock: Component isolation for controlled unit testing
             mixin.error_history.append(Mock(timestamp=datetime.now(UTC)))
         
         mixin._record_successful_operation("test", 1.0)
@@ -85,6 +87,7 @@ class TestStateMixins:
 class TestLoggingMixins:
     """Test logging mixin functionality with proper formatting."""
     
+    @pytest.mark.asyncio
     async def test_structured_logging_format(self):
         """Test structured logging format in mixins."""
         mixin = self._create_reliability_mixin()
@@ -115,6 +118,7 @@ class TestLoggingMixins:
         
         with patch.object(logger, 'warning') as mock_log:
             error = ValueError("Test error")
+            # Mock: Generic component isolation for controlled unit testing
             error_record = Mock()
             error_record.agent_name = "TestAgent"
             error_record.operation = "test_op"
@@ -192,7 +196,9 @@ class TestCachingMixins:
         recent_time = datetime.now(UTC) - timedelta(seconds=30)
         
         mixin.error_history = [
+            # Mock: Component isolation for controlled unit testing
             Mock(timestamp=old_time),
+            # Mock: Component isolation for controlled unit testing
             Mock(timestamp=recent_time)
         ]
         
@@ -231,6 +237,7 @@ class TestCachingMixins:
         assert success_rate == 1.0  # All successful operations
         
         # Add error to history
+        # Mock: Generic component isolation for controlled unit testing
         mixin.error_history = [Mock()]
         success_rate_with_error = mixin._calculate_success_rate()
         assert success_rate_with_error < 1.0  # Mixed success/failure
@@ -245,6 +252,7 @@ class TestCachingMixins:
 class TestErrorHandlingMixins:
     """Test error handling and recovery mixins."""
     
+    @pytest.mark.asyncio
     async def test_error_recovery_strategies(self):
         """Test error recovery strategy registration and execution."""
         mixin = self._create_reliability_mixin()
@@ -261,6 +269,7 @@ class TestErrorHandlingMixins:
         assert result["recovered"] is True
         assert "Test error" in result["original_error"]
     
+    @pytest.mark.asyncio
     async def test_default_recovery_fallbacks(self):
         """Test default recovery strategy fallbacks."""
         mixin = self._create_reliability_mixin()
@@ -273,6 +282,7 @@ class TestErrorHandlingMixins:
         db_result = await mixin._default_db_recovery(ConnectionError("DB error"), {})
         assert db_result["fallback_used"] is True
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_integration(self):
         """Test circuit breaker integration with error mixins."""
         mixin = self._create_reliability_mixin()

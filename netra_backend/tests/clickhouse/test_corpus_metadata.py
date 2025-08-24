@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import CorpusCreate, CorpusUpdate
@@ -24,10 +24,12 @@ from netra_backend.app.services.corpus_service import (
 class TestMetadataTracking:
     """Test metadata tracking throughout corpus lifecycle"""
     
+    @pytest.mark.asyncio
     async def test_corpus_metadata_creation(self):
         """Test 16: Verify metadata is properly initialized"""
         service = CorpusService()
         
+        # Mock: Generic component isolation for controlled unit testing
         db = MagicMock()
         corpus_data = _create_metadata_test_corpus()
         
@@ -40,10 +42,12 @@ class TestMetadataTracking:
         assert metadata["version"] == 1
         assert "created_at" in metadata
 
+    @pytest.mark.asyncio
     async def test_corpus_metadata_update(self):
         """Test 17: Verify metadata is updated correctly"""
         service = CorpusService()
         
+        # Mock: Generic component isolation for controlled unit testing
         db = MagicMock()
         corpus = _create_mock_corpus_with_metadata()
         
@@ -60,17 +64,21 @@ class TestMetadataTracking:
 class TestErrorRecovery:
     """Test error recovery mechanisms"""
     
+    @pytest.mark.asyncio
     async def test_table_creation_failure_recovery(self):
         """Test 18: Verify recovery from table creation failure"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate table creation failure
             mock_instance.execute.side_effect = Exception("Cannot create table")
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             
             await service._create_clickhouse_table("corpus_id", "table_name", db)
@@ -80,17 +88,21 @@ class TestErrorRecovery:
                 {"status": CorpusStatus.FAILED.value}
             )
 
+    @pytest.mark.asyncio
     async def test_upload_failure_recovery(self):
         """Test 19: Verify recovery from upload failure"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate insert failure
             mock_instance.execute.side_effect = Exception("Insert failed")
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             corpus = _create_available_corpus()
             db.query().filter().first.return_value = corpus
@@ -104,17 +116,21 @@ class TestErrorRecovery:
             assert result["records_uploaded"] == 0
             assert "Insert failed" in str(result["validation_errors"])
 
+    @pytest.mark.asyncio
     async def test_deletion_failure_recovery(self):
         """Test 20: Verify recovery from deletion failure"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate drop table failure
             mock_instance.execute.side_effect = Exception("Cannot drop table")
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             corpus = _create_deletable_corpus()
             db.query().filter().first.return_value = corpus
@@ -137,12 +153,14 @@ def _create_metadata_test_corpus():
 
 def _create_mock_corpus_with_metadata():
     """Create mock corpus with metadata."""
+    # Mock: Generic component isolation for controlled unit testing
     corpus = MagicMock()
     corpus.metadata_ = json.dumps({"version": 1})
     return corpus
 
 def _create_available_corpus():
     """Create available corpus for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     corpus = MagicMock()
     corpus.status = "available"
     corpus.table_name = "test_table"
@@ -150,6 +168,7 @@ def _create_available_corpus():
 
 def _create_deletable_corpus():
     """Create corpus for deletion testing."""
+    # Mock: Generic component isolation for controlled unit testing
     corpus = MagicMock()
     corpus.status = "available"
     corpus.table_name = "test_table"

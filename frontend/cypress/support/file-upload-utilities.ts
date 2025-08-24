@@ -1,4 +1,4 @@
-import { Message, WebSocketMessage } from '@/types/chat';
+import { Message, WebSocketMessage } from '@/types/unified';
 
 export interface TestFile {
   name: string;

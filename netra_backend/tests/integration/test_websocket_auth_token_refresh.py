@@ -4,7 +4,7 @@ Components: AuthService → JWT Refresh → WebSocket → Session Continuity
 Critical: Seamless token refresh without disrupting active conversations
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -12,14 +12,14 @@ import sys
 import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import jwt
 import pytest
 from netra_backend.app.schemas import User
 
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 @pytest.mark.asyncio
@@ -46,6 +46,7 @@ class TestWebSocketAuthTokenRefresh:
     
     @pytest.fixture
 
+    @pytest.mark.asyncio
     async def test_user(self):
 
         """Create test user."""
@@ -64,6 +65,7 @@ class TestWebSocketAuthTokenRefresh:
 
         )
     
+    @pytest.mark.asyncio
     async def test_token_near_expiry_detection(self, auth_service):
 
         """Test detection of tokens near expiry."""
@@ -93,11 +95,13 @@ class TestWebSocketAuthTokenRefresh:
 
         assert needs_refresh is True
     
+    @pytest.mark.asyncio
     async def test_seamless_token_refresh_flow(self, auth_service, ws_manager, test_user):
 
         """Test seamless token refresh without disconnection."""
         # Establish WebSocket with initial token
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = Mock()
 
         mock_ws.client_state = "CONNECTED"
@@ -140,13 +144,16 @@ class TestWebSocketAuthTokenRefresh:
 
         assert connection.auth_token == "new_token_xyz"
     
+    @pytest.mark.asyncio
     async def test_message_continuity_during_refresh(self, ws_manager, test_user):
 
         """Test message flow continues during token refresh."""
         # Setup connection with message queue
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = Mock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.send_json = AsyncMock()
 
         mock_ws.client_state = "CONNECTED"
@@ -177,6 +184,7 @@ class TestWebSocketAuthTokenRefresh:
 
         assert calls[1][0][0]["content"] == "After refresh"
     
+    @pytest.mark.asyncio
     async def test_concurrent_refresh_handling(self, auth_service, ws_manager):
 
         """Test handling concurrent refresh requests."""
@@ -202,6 +210,7 @@ class TestWebSocketAuthTokenRefresh:
 
             users.append(user)
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = Mock()
 
             mock_ws.client_state = "CONNECTED"
@@ -238,15 +247,19 @@ class TestWebSocketAuthTokenRefresh:
 
             assert connection.auth_token == f"new_token_for_{user.id}"
     
+    @pytest.mark.asyncio
     async def test_refresh_failure_handling(self, ws_manager, test_user):
 
         """Test handling of token refresh failures."""
         # Establish connection
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = Mock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.close = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.send_json = AsyncMock()
 
         await ws_manager.connect(mock_ws, test_user.id)

@@ -14,7 +14,6 @@ from datetime import datetime
 import argparse
 
 # Import our modules
-sys.path.insert(0, str(Path(__file__).parent))
 from audit_config import AuditConfig, AuditLevel, get_default_config
 from duplicate_detector import DuplicateDetector, analyze_changed_files
 from claude_audit_analyzer import ClaudeAuditAnalyzer, AuditRequest, AuditResponse

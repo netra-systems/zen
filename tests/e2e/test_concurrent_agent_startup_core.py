@@ -506,6 +506,7 @@ class ConcurrentTestOrchestrator:
         successful_connections = 0
         for user in users:
             # For testing, just mock the websocket connection
+            # Mock: Generic component isolation for controlled unit testing
             user.websocket_client = MagicMock()
             user.startup_metrics['websocket_connection_time'] = 0.1
             successful_connections += 1

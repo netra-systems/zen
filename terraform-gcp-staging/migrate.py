@@ -14,7 +14,6 @@ from datetime import datetime
 from pathlib import Path
 
 # Add parent directory to path for imports
-sys.path.append(str(Path(__file__).parent.parent))
 
 def run_command(cmd, capture_output=True):
     """Execute a command and return output"""

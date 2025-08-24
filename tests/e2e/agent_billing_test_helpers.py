@@ -229,6 +229,7 @@ class AgentBillingTestUtils:
     @staticmethod
     def create_mock_llm_response(tokens_used: int) -> AsyncMock:
         """Create mock LLM response for deterministic testing."""
+        # Mock: Async component isolation for testing without real async operations
         mock_response = AsyncMock(return_value={
             "content": "Analysis complete",
             "tokens_used": tokens_used

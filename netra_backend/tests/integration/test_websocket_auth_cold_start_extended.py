@@ -36,7 +36,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -59,6 +59,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cold_start_valid_auth_memory_pressure(self, auth_service_config, mock_postgres, mock_redis):
         """Test 1.1 (Depth): Cold start under extreme memory pressure conditions."""
         # Simulate memory pressure by creating large objects
@@ -106,6 +107,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cold_start_valid_auth_clock_skew(self, auth_service_config, mock_postgres, mock_redis):
         """Test 1.2 (Depth): Cold start with significant clock skew between client and server."""
         # Create token with future timestamp (simulating clock skew)
@@ -137,6 +139,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cold_start_valid_auth_jwt_algorithm_confusion(self, auth_service_config):
         """Test 1.3 (Depth): Prevent JWT algorithm confusion attacks during cold start."""
         # Try to exploit algorithm confusion vulnerability
@@ -163,6 +166,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cold_start_valid_auth_connection_pooling(self, auth_service_config, mock_postgres, mock_redis):
         """Test 1.4 (Breadth): Cold start with connection pool exhaustion."""
         tokens = []
@@ -206,6 +210,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cold_start_valid_auth_dns_resolution_delay(self, auth_service_config, mock_postgres, mock_redis):
         """Test 1.5 (Breadth): Cold start with DNS resolution delays."""
         token = jwt.encode(
@@ -220,6 +225,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         )
         
         # Mock DNS resolution delay
+        # Mock: Component isolation for testing without external dependencies
         with patch('socket.getaddrinfo') as mock_dns:
             original_getaddrinfo = socket.getaddrinfo
             
@@ -247,6 +253,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cold_start_valid_auth_binary_protocol(self, auth_service_config, mock_postgres, mock_redis):
         """Test 1.6 (Breadth): Cold start with binary WebSocket frames."""
         token = jwt.encode(
@@ -282,6 +289,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_expired_token_replay_attack(self, auth_service_config):
         """Test 2.1 (Depth): Prevent replay attacks with expired tokens."""
         # Create an expired token
@@ -314,6 +322,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_expired_token_timing_attack(self, auth_service_config):
         """Test 2.2 (Depth): Verify constant-time validation to prevent timing attacks."""
         valid_but_expired = jwt.encode(
@@ -364,6 +373,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_expired_token_boundary_conditions(self, auth_service_config):
         """Test 2.3 (Depth): Test token expiration at exact boundary moments."""
         # Token that expires in exactly 1 second
@@ -399,6 +409,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_expired_token_malformed_exp_claim(self, auth_service_config):
         """Test 2.4 (Breadth): Handle malformed expiration claims gracefully."""
         # Various malformed exp claims
@@ -438,6 +449,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_expired_token_cache_poisoning(self, auth_service_config, mock_redis):
         """Test 2.5 (Breadth): Prevent cache poisoning with expired tokens."""
         user_id = "cache_poison_user"
@@ -484,6 +496,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_expired_token_error_message_leakage(self, auth_service_config):
         """Test 2.6 (Breadth): Verify no sensitive information in error messages."""
         expired_token = jwt.encode(
@@ -517,6 +530,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_token_refresh_race_condition(self, auth_service_config, mock_postgres, mock_redis):
         """Test 3.1 (Depth): Handle concurrent token refresh requests (race condition)."""
         initial_token = jwt.encode(
@@ -560,6 +574,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_token_refresh_rotation_tracking(self, auth_service_config, mock_postgres, mock_redis):
         """Test 3.2 (Depth): Track token rotation to prevent reuse of old tokens."""
         tokens = []
@@ -609,6 +624,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_token_refresh_invalid_refresh_token(self, auth_service_config, mock_postgres, mock_redis):
         """Test 3.3 (Depth): Reject refresh with invalid/expired refresh tokens."""
         access_token = jwt.encode(
@@ -649,6 +665,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_token_refresh_cross_tier_upgrade(self, auth_service_config, mock_postgres, mock_redis):
         """Test 3.4 (Breadth): Handle tier upgrades during token refresh."""
         # Start with free tier
@@ -668,6 +685,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         
         async with websockets.connect(ws_url, extra_headers=headers) as websocket:
             # Simulate tier upgrade in backend
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.clients.auth_client.auth_client.get_user_tier') as mock_tier:
                 mock_tier.return_value = "enterprise"
                 
@@ -690,6 +708,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_token_refresh_during_maintenance_mode(self, auth_service_config, mock_postgres, mock_redis):
         """Test 3.5 (Breadth): Token refresh behavior during maintenance mode."""
         token = jwt.encode(
@@ -708,6 +727,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         
         async with websockets.connect(ws_url, extra_headers=headers) as websocket:
             # Simulate maintenance mode
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.core.config.MAINTENANCE_MODE', True):
                 await websocket.send(json.dumps({
                     "type": "token_refresh",
@@ -722,6 +742,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_token_refresh_with_ip_change(self, auth_service_config, mock_postgres, mock_redis):
         """Test 3.6 (Breadth): Detect IP address changes during token refresh."""
         token = jwt.encode(
@@ -763,6 +784,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_auth_thundering_herd(self, auth_service_config, mock_postgres, mock_redis):
         """Test 4.1 (Depth): Handle thundering herd problem with 1000+ concurrent connections."""
         tokens = []
@@ -806,6 +828,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_auth_deadlock_prevention(self, auth_service_config, mock_postgres, mock_redis):
         """Test 4.2 (Depth): Prevent deadlocks with complex concurrent auth patterns."""
         # Create circular dependency scenario
@@ -866,6 +889,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_auth_resource_starvation(self, auth_service_config, mock_postgres, mock_redis):
         """Test 4.3 (Depth): Prevent resource starvation with mixed priority clients."""
         # Create tokens with different priority levels
@@ -931,6 +955,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_auth_connection_hijacking(self, auth_service_config, mock_postgres, mock_redis):
         """Test 4.4 (Breadth): Prevent connection hijacking during concurrent auth."""
         victim_token = jwt.encode(
@@ -994,6 +1019,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_auth_load_balancing(self, auth_service_config, mock_postgres, mock_redis):
         """Test 4.5 (Breadth): Verify load balancing across auth service instances."""
         # Simulate multiple auth service instances
@@ -1046,6 +1072,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_auth_circuit_breaker(self, auth_service_config, mock_postgres, mock_redis):
         """Test 4.6 (Breadth): Circuit breaker activation under auth service failures."""
         tokens = []
@@ -1065,6 +1092,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         ws_url = f"ws://localhost:8000/websocket"
         
         # Simulate auth service failures
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             failure_count = 0
             
@@ -1107,6 +1135,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_database_unavailable_cache_consistency(self, auth_service_config, mock_postgres, mock_redis):
         """Test 5.1 (Depth): Maintain cache consistency when database is unavailable."""
         token = jwt.encode(
@@ -1130,6 +1159,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             initial_data = json.loads(response)
         
         # Simulate database unavailability
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database connection failed")
             
@@ -1157,6 +1187,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_database_unavailable_split_brain(self, auth_service_config, mock_postgres, mock_redis):
         """Test 5.2 (Depth): Prevent split-brain scenarios during partial DB failures."""
         tokens = []
@@ -1176,6 +1207,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         ws_url = f"ws://localhost:8000/websocket"
         
         # Simulate partial database failure (read works, write fails)
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.execute') as mock_execute:
             async def partial_failure(query, *args, **kwargs):
                 if "SELECT" in query:
@@ -1215,6 +1247,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_database_unavailable_graceful_degradation(self, auth_service_config, mock_postgres, mock_redis):
         """Test 5.3 (Depth): Graceful feature degradation when database is down."""
         token = jwt.encode(
@@ -1232,6 +1265,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         headers = {"Authorization": f"Bearer {token}"}
         
         # Simulate database unavailability
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database unavailable")
             
@@ -1259,6 +1293,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_database_unavailable_recovery_sync(self, auth_service_config, mock_postgres, mock_redis):
         """Test 5.4 (Breadth): Synchronize state after database recovery."""
         token = jwt.encode(
@@ -1278,6 +1313,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         queued_operations = []
         
         # Phase 1: Database is down
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database down")
             
@@ -1312,6 +1348,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_database_unavailable_cache_expiry(self, auth_service_config, mock_postgres, mock_redis):
         """Test 5.5 (Breadth): Handle cache expiration during extended database outage."""
         token = jwt.encode(
@@ -1334,10 +1371,12 @@ class TestWebSocketAuthColdStartExtendedL3:
             await ws.recv()
         
         # Simulate extended database outage
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database down")
             
             # Simulate cache expiry
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             with patch('netra_backend.app.cache.redis_cache.get') as mock_cache_get:
                 mock_cache_get.return_value = None  # Cache miss
                 
@@ -1352,6 +1391,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_database_unavailable_failover_ordering(self, auth_service_config, mock_postgres, mock_redis):
         """Test 5.6 (Breadth): Correct failover ordering (primary -> replica -> cache)."""
         token = jwt.encode(
@@ -1371,8 +1411,11 @@ class TestWebSocketAuthColdStartExtendedL3:
         failover_sequence = []
         
         # Mock all data sources
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_primary_db') as mock_primary:
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.db.postgres.get_replica_db') as mock_replica:
+                # Mock: Redis caching isolation to prevent test interference and external dependencies
                 with patch('netra_backend.app.cache.redis_cache.get') as mock_cache:
                     
                     async def track_primary(*args, **kwargs):
@@ -1404,6 +1447,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rbac_privilege_escalation_attempts(self, auth_service_config, mock_postgres, mock_redis):
         """Test 6.1 (Depth): Detect and prevent privilege escalation attempts."""
         # Create token with basic user role
@@ -1457,6 +1501,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rbac_role_inheritance_delegation(self, auth_service_config, mock_postgres, mock_redis):
         """Test 6.2 (Depth): Complex role inheritance and delegation chains."""
         # Create token with inherited roles
@@ -1519,6 +1564,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rbac_dynamic_role_changes(self, auth_service_config, mock_postgres, mock_redis):
         """Test 6.3 (Depth): Handle dynamic role changes during active session."""
         user_id = "dynamic_role_user"
@@ -1551,6 +1597,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert data["type"] == "error"  # Should be denied
             
             # Simulate role upgrade in backend
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.clients.auth_client.auth_client.get_user_roles') as mock_roles:
                 mock_roles.return_value = ["user", "admin"]
                 
@@ -1576,6 +1623,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rbac_cross_tenant_access_prevention(self, auth_service_config, mock_postgres, mock_redis):
         """Test 6.4 (Breadth): Prevent cross-tenant data access."""
         # Create tokens for different tenants
@@ -1638,6 +1686,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rbac_role_specific_rate_limits(self, auth_service_config, mock_postgres, mock_redis):
         """Test 6.5 (Breadth): Different rate limits based on user roles."""
         # Create tokens with different roles
@@ -1700,6 +1749,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rbac_audit_logging_privileged_ops(self, auth_service_config, mock_postgres, mock_redis):
         """Test 6.6 (Breadth): Comprehensive audit logging for privileged operations."""
         admin_token = jwt.encode(
@@ -1720,6 +1770,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         audit_logs = []
         
         # Mock audit logging
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.audit.log_privileged_operation') as mock_audit:
             async def capture_audit(*args, **kwargs):
                 audit_logs.append(kwargs)
@@ -1753,6 +1804,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_fixation_attacks(self, auth_service_config, mock_postgres, mock_redis):
         """Test 7.1 (Depth): Prevent session fixation attacks."""
         # Attacker creates a session
@@ -1806,6 +1858,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_distributed_consistency(self, auth_service_config, mock_postgres, mock_redis):
         """Test 7.2 (Depth): Maintain session consistency across distributed nodes."""
         token = jwt.encode(
@@ -1860,6 +1913,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_timeout_renewal(self, auth_service_config, mock_postgres, mock_redis):
         """Test 7.3 (Depth): Session timeout and automatic renewal mechanisms."""
         token = jwt.encode(
@@ -1905,6 +1959,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_cross_device_management(self, auth_service_config, mock_postgres, mock_redis):
         """Test 7.4 (Breadth): Manage sessions across multiple devices."""
         user_id = "multi_device_user"
@@ -1973,6 +2028,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_migration_during_failover(self, auth_service_config, mock_postgres, mock_redis):
         """Test 7.5 (Breadth): Session migration during server failover."""
         token = jwt.encode(
@@ -2027,6 +2083,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_storage_limits(self, auth_service_config, mock_postgres, mock_redis):
         """Test 7.6 (Breadth): Handle session storage limits and cleanup."""
         token = jwt.encode(
@@ -2070,6 +2127,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rate_limit_distributed_accuracy(self, auth_service_config, mock_postgres, mock_redis):
         """Test 8.1 (Depth): Accurate rate limiting across distributed systems."""
         token = jwt.encode(
@@ -2121,6 +2179,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rate_limit_bypass_attempts(self, auth_service_config, mock_postgres, mock_redis):
         """Test 8.2 (Depth): Prevent rate limit bypass attempts."""
         base_token_data = {
@@ -2172,6 +2231,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rate_limit_sliding_vs_fixed_window(self, auth_service_config, mock_postgres, mock_redis):
         """Test 8.3 (Depth): Compare sliding window vs fixed window rate limiting."""
         token = jwt.encode(
@@ -2226,6 +2286,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rate_limit_tier_based(self, auth_service_config, mock_postgres, mock_redis):
         """Test 8.4 (Breadth): Different rate limits for different tiers."""
         tiers = {
@@ -2277,6 +2338,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rate_limit_geographic(self, auth_service_config, mock_postgres, mock_redis):
         """Test 8.5 (Breadth): Geographic-based rate limiting."""
         token = jwt.encode(
@@ -2330,6 +2392,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_rate_limit_recovery_backoff(self, auth_service_config, mock_postgres, mock_redis):
         """Test 8.6 (Breadth): Rate limit recovery with exponential backoff."""
         token = jwt.encode(
@@ -2388,6 +2451,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_mfa_totp_time_sync(self, auth_service_config, mock_postgres, mock_redis):
         """Test 9.1 (Depth): TOTP time synchronization tolerance."""
         import pyotp
@@ -2455,6 +2519,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_mfa_backup_code_exhaustion(self, auth_service_config, mock_postgres, mock_redis):
         """Test 9.2 (Depth): Handle backup code exhaustion scenarios."""
         backup_codes = ["BACKUP1", "BACKUP2", "BACKUP3"]
@@ -2515,6 +2580,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_mfa_bypass_detection(self, auth_service_config, mock_postgres, mock_redis):
         """Test 9.3 (Depth): Detect and prevent MFA bypass attempts."""
         token = jwt.encode(
@@ -2575,6 +2641,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_mfa_multiple_methods(self, auth_service_config, mock_postgres, mock_redis):
         """Test 9.4 (Breadth): Support multiple MFA methods simultaneously."""
         token = jwt.encode(
@@ -2622,6 +2689,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_mfa_device_registration(self, auth_service_config, mock_postgres, mock_redis):
         """Test 9.5 (Breadth): MFA device registration and management."""
         token = jwt.encode(
@@ -2684,6 +2752,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_mfa_recovery_procedures(self, auth_service_config, mock_postgres, mock_redis):
         """Test 9.6 (Breadth): MFA recovery procedures for locked out users."""
         token = jwt.encode(
@@ -2757,6 +2826,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cors_wildcard_exploitation(self, auth_service_config, mock_postgres, mock_redis):
         """Test 10.1 (Depth): Prevent wildcard origin exploitation."""
         token = jwt.encode(
@@ -2798,6 +2868,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cors_null_origin_handling(self, auth_service_config, mock_postgres, mock_redis):
         """Test 10.2 (Depth): Proper handling of null origin."""
         token = jwt.encode(
@@ -2844,6 +2915,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cors_preflight_validation(self, auth_service_config, mock_postgres, mock_redis):
         """Test 10.3 (Depth): Validate preflight request handling."""
         # Note: WebSocket doesn't use traditional CORS preflight,
@@ -2896,6 +2968,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cors_dynamic_origin_whitelisting(self, auth_service_config, mock_postgres, mock_redis):
         """Test 10.4 (Breadth): Dynamic origin whitelisting based on configuration."""
         token = jwt.encode(
@@ -2941,6 +3014,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cors_subdomain_validation(self, auth_service_config, mock_postgres, mock_redis):
         """Test 10.5 (Breadth): Validate subdomain handling in CORS."""
         token = jwt.encode(
@@ -2993,6 +3067,7 @@ class TestWebSocketAuthColdStartExtendedL3:
     
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cors_protocol_mismatch(self, auth_service_config, mock_postgres, mock_redis):
         """Test 10.6 (Breadth): Handle protocol mismatches in CORS."""
         token = jwt.encode(

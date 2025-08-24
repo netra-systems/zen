@@ -106,7 +106,7 @@ class ClickHouseQueryExecutor:
     async def create_clickhouse_query_executor(query: str, params: Optional[Dict[str, Any]]):
         """Create ClickHouse query executor function."""
         async def _execute_ch_query() -> List[Dict[str, Any]]:
-            from netra_backend.app.db.clickhouse import get_clickhouse_client
+            from netra_backend.app.database import get_clickhouse_client
             async with get_clickhouse_client() as ch_client:
                 return await ch_client.execute_query(query, params)
         return _execute_ch_query

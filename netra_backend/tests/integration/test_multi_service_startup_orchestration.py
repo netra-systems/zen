@@ -23,7 +23,7 @@ import tempfile
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest
@@ -82,6 +82,7 @@ class TestMultiServiceStartupOrchestration:
             }
         }
 
+    @pytest.mark.asyncio
     async def test_services_start_in_correct_dependency_order(self, orchestration_config):
         """
         Test that services start in correct dependency order.
@@ -107,6 +108,7 @@ class TestMultiServiceStartupOrchestration:
         all_healthy = await self._verify_all_services_healthy(orchestration_config)
         assert all_healthy, "Not all services reached healthy state"
 
+    @pytest.mark.asyncio
     async def test_backend_waits_for_auth_service_availability(self, orchestration_config):
         """Test backend service waits for auth service to be available."""
         # Start auth service first
@@ -121,6 +123,7 @@ class TestMultiServiceStartupOrchestration:
         backend_connected = await self._start_backend_with_auth_dependency(orchestration_config)
         assert backend_connected, "Backend failed to connect to auth service"
 
+    @pytest.mark.asyncio
     async def test_graceful_shutdown_on_dependency_failure(self, orchestration_config):
         """Test graceful shutdown when dependency service fails."""
         # Start all services
@@ -135,6 +138,7 @@ class TestMultiServiceStartupOrchestration:
         graceful_shutdown = await self._verify_graceful_dependent_shutdown(orchestration_config)
         assert graceful_shutdown, "Dependent services did not shutdown gracefully"
 
+    @pytest.mark.asyncio
     async def test_startup_retry_mechanism_on_transient_failures(self, orchestration_config):
         """Test startup retry mechanism handles transient failures."""
         # Configure transient failure simulation
@@ -152,6 +156,7 @@ class TestMultiServiceStartupOrchestration:
         final_state_healthy = await self._verify_final_state_healthy()
         assert final_state_healthy, "Final state not healthy after retries"
 
+    @pytest.mark.asyncio
     async def test_health_check_cascading_during_startup(self, orchestration_config):
         """Test health checks cascade properly during startup sequence."""
         health_cascade_config = {

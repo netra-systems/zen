@@ -7,7 +7,7 @@ Handles immutable table constraints through compensation strategies.
 from datetime import datetime
 from typing import Dict
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database.rollback_manager_core import (
     RollbackOperation,

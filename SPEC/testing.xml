@@ -7,6 +7,12 @@
     <last_updated>2025-08-22</last_updated>
     <owner>QA Architecture Team</owner>
     <status>Active</status>
+    <cross_references>
+      <ref>test_infrastructure_architecture.xml</ref>
+      <ref>environment_aware_testing.xml</ref>
+      <ref>coverage_requirements.xml</ref>
+      <ref>learnings/testing.xml</ref>
+    </cross_references>
     <changes>
       <change version="3.0" date="2025-08-11">Coverage standardization and report restructuring.</change>
       <change version="3.1" date="2025-08-11">Introduction of real LLM testing capabilities.</change>

@@ -13,17 +13,20 @@ from pathlib import Path
 import json
 import uuid
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
 class TestAPIErrorHandlingCritical:
     """Critical API error handling tests."""
+    @pytest.mark.asyncio
     async def test_bad_request_error(self):
         """Test 400 Bad Request error handling."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         # Test 400 Bad Request
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 400,
             "json": {"detail": "Invalid request data"}
@@ -32,11 +35,14 @@ class TestAPIErrorHandlingCritical:
         response = await mock_client.post("/api/auth/login", json={})
         assert response["status_code"] == 400
         assert "detail" in response["json"]
+    @pytest.mark.asyncio
     async def test_unauthorized_error(self):
         """Test 401 Unauthorized error handling."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         # Test 401 Unauthorized
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 401,
             "json": {"detail": "Not authenticated"}
@@ -44,11 +50,14 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.get("/api/threads")
         assert response["status_code"] == 401
+    @pytest.mark.asyncio
     async def test_forbidden_error(self):
         """Test 403 Forbidden error handling."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         # Test 403 Forbidden
+        # Mock: Async component isolation for testing without real async operations
         mock_client.delete = AsyncMock(return_value={
             "status_code": 403,
             "json": {"detail": "Not enough permissions"}
@@ -56,11 +65,14 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.delete("/api/admin/users/1")
         assert response["status_code"] == 403
+    @pytest.mark.asyncio
     async def test_not_found_error(self):
         """Test 404 Not Found error handling."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         # Test 404 Not Found
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 404,
             "json": {"detail": "Resource not found"}
@@ -68,11 +80,14 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.get("/api/threads/nonexistent")
         assert response["status_code"] == 404
+    @pytest.mark.asyncio
     async def test_internal_server_error(self):
         """Test 500 Internal Server Error handling."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         # Test 500 Internal Server Error
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 500,
             "json": {"detail": "Internal server error"}
@@ -80,10 +95,13 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.post("/api/agent/query", json={"query": "test"})
         assert response["status_code"] == 500
+    @pytest.mark.asyncio
     async def test_validation_error_detail(self):
         """Test validation error detail formatting."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 422,
             "json": {
@@ -100,10 +118,13 @@ class TestAPIErrorHandlingCritical:
         response = await mock_client.post("/api/auth/register", json={})
         assert response["status_code"] == 422
         assert "detail" in response["json"]
+    @pytest.mark.asyncio
     async def test_authentication_invalid_credentials(self):
         """Test authentication with invalid credentials."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 401,
             "json": {"detail": "Invalid email or password"}
@@ -115,11 +136,14 @@ class TestAPIErrorHandlingCritical:
         })
         assert response["status_code"] == 401
         assert response["json"]["detail"] == "Invalid email or password"
+    @pytest.mark.asyncio
     async def test_permission_insufficient_rights(self):
         """Test insufficient permission rights."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer user_token"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 403,
             "json": {"detail": "Insufficient permissions for admin operation"}
@@ -131,8 +155,10 @@ class TestAPIErrorHandlingCritical:
             headers=auth_headers
         )
         assert response["status_code"] == 403
+    @pytest.mark.asyncio
     async def test_resource_not_found_specific(self):
         """Test specific resource not found errors."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -143,6 +169,7 @@ class TestAPIErrorHandlingCritical:
         ]
         
         for endpoint in endpoints:
+            # Mock: Async component isolation for testing without real async operations
             mock_client.get = AsyncMock(return_value={
                 "status_code": 404,
                 "json": {"detail": f"Resource not found: {endpoint}"}
@@ -150,10 +177,13 @@ class TestAPIErrorHandlingCritical:
             
             response = await mock_client.get(endpoint, headers=auth_headers)
             assert response["status_code"] == 404
+    @pytest.mark.asyncio
     async def test_malformed_json_error(self):
         """Test malformed JSON request error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 400,
             "json": {"detail": "Invalid JSON format"}
@@ -162,10 +192,13 @@ class TestAPIErrorHandlingCritical:
         # Simulate malformed JSON by sending invalid data
         response = await mock_client.post("/api/threads", data="invalid json")
         assert response["status_code"] == 400
+    @pytest.mark.asyncio
     async def test_missing_required_headers(self):
         """Test missing required headers error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 401,
             "json": {"detail": "Authorization header required"}
@@ -174,11 +207,14 @@ class TestAPIErrorHandlingCritical:
         # Request without auth header
         response = await mock_client.get("/api/threads")
         assert response["status_code"] == 401
+    @pytest.mark.asyncio
     async def test_invalid_token_format(self):
         """Test invalid token format error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Invalid token_format"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 401,
             "json": {"detail": "Invalid token format"}
@@ -186,11 +222,14 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.get("/api/threads", headers=auth_headers)
         assert response["status_code"] == 401
+    @pytest.mark.asyncio
     async def test_expired_token_error(self):
         """Test expired token error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer expired_token"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 401,
             "json": {"detail": "Token has expired"}
@@ -199,23 +238,30 @@ class TestAPIErrorHandlingCritical:
         response = await mock_client.get("/api/threads", headers=auth_headers)
         assert response["status_code"] == 401
         assert response["json"]["detail"] == "Token has expired"
+    @pytest.mark.asyncio
     async def test_method_not_allowed(self):
         """Test method not allowed error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.patch = AsyncMock(return_value={
             "status_code": 405,
             "json": {"detail": "Method Not Allowed"}
         })
         
         # Try PATCH on endpoint that only accepts GET
+        # Mock: Component isolation for testing without external dependencies
         response = await mock_client.patch("/api/health/live")
         assert response["status_code"] == 405
+    @pytest.mark.asyncio
     async def test_content_type_validation(self):
         """Test content type validation error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 415,
             "json": {"detail": "Unsupported Media Type"}
@@ -228,11 +274,14 @@ class TestAPIErrorHandlingCritical:
             headers=auth_headers
         )
         assert response["status_code"] == 415
+    @pytest.mark.asyncio
     async def test_request_timeout_error(self):
         """Test request timeout error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 408,
             "json": {"detail": "Request Timeout"}
@@ -244,11 +293,14 @@ class TestAPIErrorHandlingCritical:
             headers=auth_headers
         )
         assert response["status_code"] == 408
+    @pytest.mark.asyncio
     async def test_payload_too_large(self):
         """Test payload too large error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 413,
             "json": {"detail": "Payload Too Large"}
@@ -261,10 +313,13 @@ class TestAPIErrorHandlingCritical:
             headers=auth_headers
         )
         assert response["status_code"] == 413
+    @pytest.mark.asyncio
     async def test_service_unavailable(self):
         """Test service unavailable error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 503,
             "json": {"detail": "Service Temporarily Unavailable"}
@@ -272,11 +327,14 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.get("/api/health/ready")
         assert response["status_code"] == 503
+    @pytest.mark.asyncio
     async def test_database_connection_error(self):
         """Test database connection error handling."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 503,
             "json": {"detail": "Database connection unavailable"}
@@ -284,13 +342,16 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.get("/api/threads", headers=auth_headers)
         assert response["status_code"] == 503
+    @pytest.mark.asyncio
     async def test_error_response_consistency(self):
         """Test error response format consistency."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         error_codes = [400, 401, 403, 404, 422, 500]
         
         for code in error_codes:
+            # Mock: Async component isolation for testing without real async operations
             mock_client.get = AsyncMock(return_value={
                 "status_code": code,
                 "json": {"detail": f"Error {code}"}
@@ -299,12 +360,15 @@ class TestAPIErrorHandlingCritical:
             response = await mock_client.get("/test/endpoint")
             assert response["status_code"] == code
             assert "detail" in response["json"]
+    @pytest.mark.asyncio
     async def test_cascading_error_prevention(self):
         """Test cascading error prevention."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         # First error
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 500,
             "json": {"detail": "Primary service error"}
@@ -317,6 +381,7 @@ class TestAPIErrorHandlingCritical:
         )
         
         # Second request should still work (no cascading failure)
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {"status": "ok"}

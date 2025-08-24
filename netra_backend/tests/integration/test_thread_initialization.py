@@ -5,7 +5,7 @@ Components: WebSocket → Thread Service → Database → Supervisor
 Critical: Thread context required for all agent interactions
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -15,7 +15,7 @@ import json
 import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -44,7 +44,11 @@ class TestFirstMessageThreadInit:
         
         async with async_session() as session:
 
-            yield session
+            try:
+                yield session
+            finally:
+                if hasattr(session, "close"):
+                    await session.close()
     
     @pytest.fixture
 
@@ -74,20 +78,26 @@ class TestFirstMessageThreadInit:
 
         }
     
+    @pytest.mark.asyncio
     async def test_new_thread_creation_first_message(self, db_session, thread_data):
 
         """Test thread creation when user sends first message."""
         from netra_backend.app.services.message_service import MessageService
         from netra_backend.app.services.thread_service import ThreadService
         
+        # Mock: Component isolation for controlled unit testing
         thread_service = Mock(spec=ThreadService)
 
+        # Mock: Async component isolation for testing without real async operations
         thread_service.create_thread = AsyncMock(return_value=thread_data)
 
+        # Mock: Async component isolation for testing without real async operations
         thread_service.get_thread = AsyncMock(return_value=None)
         
+        # Mock: Component isolation for controlled unit testing
         message_service = Mock(spec=MessageService)
 
+        # Mock: Generic component isolation for controlled unit testing
         message_service.add_message = AsyncMock()
         
         # User sends first message (no thread exists)
@@ -142,6 +152,7 @@ class TestFirstMessageThreadInit:
 
         message_service.add_message.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_thread_persistence_to_database(self, db_session):
 
         """Test thread data persists correctly to database."""
@@ -177,13 +188,16 @@ class TestFirstMessageThreadInit:
 
         assert result.title == "Cost optimization query"
     
+    @pytest.mark.asyncio
     async def test_thread_context_initialization(self, thread_data):
 
         """Test thread context properly initialized for agents."""
         from netra_backend.app.services.context_service import ContextService
         
+        # Mock: Component isolation for controlled unit testing
         context_service = Mock(spec=ContextService)
 
+        # Mock: Async component isolation for testing without real async operations
         context_service.initialize_context = AsyncMock(return_value={
 
             "thread_id": thread_data["id"],
@@ -216,10 +230,12 @@ class TestFirstMessageThreadInit:
         
         context_service.initialize_context.assert_called_once_with(thread_data)
     
+    @pytest.mark.asyncio
     async def test_concurrent_thread_creation_race_condition(self, db_session):
 
         """Test handling of concurrent thread creation attempts."""
         
+        # Mock: Component isolation for controlled unit testing
         thread_service = Mock(spec=ThreadService)
 
         creation_count = 0
@@ -260,10 +276,12 @@ class TestFirstMessageThreadInit:
 
         assert creation_count == 5
     
+    @pytest.mark.asyncio
     async def test_thread_title_generation_from_message(self):
 
         """Test automatic thread title generation from first message."""
         
+        # Mock: Component isolation for controlled unit testing
         thread_service = Mock(spec=ThreadService)
         
         def generate_title(message: str) -> str:
@@ -284,13 +302,16 @@ class TestFirstMessageThreadInit:
 
         assert thread_service.generate_title(long_msg) == "I need help optimizing my GPT-4 usage because cos..."
     
+    @pytest.mark.asyncio
     async def test_thread_metadata_includes_agent_routing(self, thread_data):
 
         """Test thread metadata includes agent routing information."""
         from netra_backend.app.services.agent_router import AgentRouter
         
+        # Mock: Agent service isolation for testing without LLM agent execution
         router = Mock(spec=AgentRouter)
 
+        # Mock: Async component isolation for testing without real async operations
         router.determine_agent = AsyncMock(return_value={
 
             "primary_agent": "cost_optimizer",
@@ -317,13 +338,16 @@ class TestFirstMessageThreadInit:
 
         assert thread_data["metadata"]["routing"]["confidence"] == 0.95
     
+    @pytest.mark.asyncio
     async def test_websocket_notification_on_thread_creation(self, thread_data):
 
         """Test WebSocket notification sent when thread created."""
-        from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+        from netra_backend.app.websocket_core.manager import WebSocketManager
         
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         ws_manager = Mock(spec=WebSocketManager)
 
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.send_message = AsyncMock()
         
         # Send thread creation notification

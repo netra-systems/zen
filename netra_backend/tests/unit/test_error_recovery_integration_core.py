@@ -3,11 +3,9 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -19,11 +17,17 @@ from netra_backend.app.core.error_recovery import OperationType
 class EnhancedErrorRecoverySystem:
     """Mock class for testing."""
     def __init__(self):
+        # Mock: Generic component isolation for controlled unit testing
         self.circuit_breaker_registry = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         self.degradation_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         self.memory_monitor = Mock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         self.websocket_manager = Mock()
+        # Mock: Database access isolation for fast, reliable unit testing
         self.database_registry = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         self.error_aggregation = Mock()
 
     def _determine_severity(self, error):
@@ -111,11 +115,17 @@ class TestErrorRecoveryIntegration:
     def test_get_recovery_metrics(self, recovery_system):
         """Test recovery metrics collection."""
         # Mock all metric sources
+        # Mock: Component isolation for controlled unit testing
         recovery_system.circuit_breaker_registry.get_all_metrics = Mock(return_value={})
+        # Mock: Component isolation for controlled unit testing
         recovery_system.degradation_manager.get_degradation_status = Mock(return_value={})
+        # Mock: Component isolation for controlled unit testing
         recovery_system.memory_monitor.get_memory_status = Mock(return_value={})
+        # Mock: WebSocket connection isolation for testing without network overhead
         recovery_system.websocket_manager.get_all_status = Mock(return_value={})
+        # Mock: Database access isolation for fast, reliable unit testing
         recovery_system.database_registry.get_global_status = Mock(return_value={})
+        # Mock: Component isolation for controlled unit testing
         recovery_system.error_aggregation.get_system_status = Mock(return_value={})
         
         # Test metrics collection

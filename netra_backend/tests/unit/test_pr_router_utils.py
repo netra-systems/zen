@@ -8,9 +8,7 @@ or removed as the functionality no longer exists in the current implementation.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from fastapi import HTTPException
@@ -50,6 +48,7 @@ class TestBuildPrRedirectUrl:
 class TestHandlePrRoutingError:
     """Test handle_pr_routing_error function."""
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.auth.pr_router.logger')
     def test_handle_pr_routing_error_basic(self, mock_logger):
         """Test handling basic PR routing error."""
@@ -61,6 +60,7 @@ class TestHandlePrRoutingError:
         assert "Invalid PR environment configuration: 123" in result.detail
         mock_logger.error.assert_called_once()
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.auth.pr_router.logger')
     def test_handle_pr_routing_error_auth_error(self, mock_logger):
         """Test handling authentication error."""

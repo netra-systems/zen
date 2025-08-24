@@ -23,7 +23,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -70,10 +70,15 @@ class TestFastStartupConnectionManager:
         # Mock database URL
         mock_db_url = "postgresql+asyncpg://test:test@localhost/test"
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.db.fast_startup_connection_manager.create_async_engine') as mock_engine:
+            # Mock: Generic component isolation for controlled unit testing
             mock_engine.return_value.begin = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_engine.return_value.begin.return_value.__aenter__ = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_engine.return_value.begin.return_value.__aexit__ = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_engine.return_value.begin.return_value.execute = AsyncMock()
             
             # Test successful initialization
@@ -86,8 +91,11 @@ class TestFastStartupConnectionManager:
     async def test_connection_pool_warming(self, connection_manager):
         """Test connection pool warming."""
         # Mock successful connection
+        # Mock: Generic component isolation for controlled unit testing
         mock_connection = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         connection_manager.connection_pool = Mock()
+        # Mock: Async component isolation for testing without real async operations
         connection_manager.connection_pool.begin = AsyncMock(return_value=mock_connection)
         
         await connection_manager._warm_connection_pool()
@@ -139,6 +147,7 @@ class TestClickHouseReliableManager:
     @pytest.mark.asyncio
     async def test_mock_fallback_initialization(self, clickhouse_manager):
         """Test fallback to mock mode when ClickHouse unavailable."""
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.db.clickhouse_reliable_manager.ClickHouseDatabase') as mock_ch:
             mock_ch.side_effect = ConnectionError("ClickHouse unavailable")
             
@@ -191,6 +200,7 @@ class TestGracefulDegradationManager:
     @pytest.mark.asyncio
     async def test_database_manager_registration(self, degradation_manager):
         """Test database manager registration."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
         mock_manager.is_available.return_value = True
         
@@ -213,6 +223,7 @@ class TestGracefulDegradationManager:
         )
         
         # Mock unavailable database
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
         mock_manager.is_available.return_value = False
         degradation_manager.register_database_manager("test_db", mock_manager)
@@ -232,8 +243,10 @@ class TestGracefulDegradationManager:
     async def test_service_level_determination(self, degradation_manager):
         """Test service level determination based on database availability."""
         # Register multiple databases
+        # Mock: Generic component isolation for controlled unit testing
         available_db = Mock()
         available_db.is_available.return_value = True
+        # Mock: Generic component isolation for controlled unit testing
         unavailable_db = Mock()
         unavailable_db.is_available.return_value = False
         
@@ -324,7 +337,9 @@ class TestOptimizedStartupChecker:
     @pytest.mark.asyncio
     async def test_fast_startup_checks_execution(self, startup_checker):
         """Test fast startup checks execution."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_app = Mock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_app.state.db_session_factory = AsyncMock()
         
         # Mock successful database checks
@@ -351,6 +366,7 @@ class TestOptimizedStartupChecker:
     @pytest.mark.asyncio
     async def test_critical_check_failure_blocks_startup(self, startup_checker):
         """Test that critical check failures block startup."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_app = Mock()
         
         with patch.object(startup_checker, '_quick_postgres_check') as mock_postgres:
@@ -368,6 +384,7 @@ class TestOptimizedStartupChecker:
     @pytest.mark.asyncio
     async def test_background_checks_scheduling(self, startup_checker):
         """Test background checks are properly scheduled."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_app = Mock()
         
         with patch.object(startup_checker, '_quick_postgres_check') as mock_postgres:
@@ -399,6 +416,7 @@ class TestComprehensiveHealthMonitor:
     @pytest.mark.asyncio
     async def test_database_manager_registration(self, health_monitor):
         """Test database manager registration for monitoring."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
         mock_manager.get_connection_info.return_value = {
             'total_connections': 10,
@@ -415,6 +433,7 @@ class TestComprehensiveHealthMonitor:
     @pytest.mark.asyncio
     async def test_health_check_execution(self, health_monitor):
         """Test health check execution and metrics collection."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
         mock_manager.get_connection_info.return_value = {
             'total_connections': 10,
@@ -434,6 +453,7 @@ class TestComprehensiveHealthMonitor:
     @pytest.mark.asyncio
     async def test_alert_generation_on_threshold_violation(self, health_monitor):
         """Test alert generation when thresholds are violated."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
         mock_manager.get_connection_info.return_value = {
             'total_connections': 10,
@@ -457,6 +477,7 @@ class TestComprehensiveHealthMonitor:
     
     def test_query_performance_tracking(self, health_monitor):
         """Test query performance tracking."""
+        # Mock: Database access isolation for fast, reliable unit testing
         health_monitor.register_database_manager("test_db", Mock())
         
         # Record some query times
@@ -471,6 +492,7 @@ class TestComprehensiveHealthMonitor:
     
     def test_error_tracking(self, health_monitor):
         """Test database error tracking."""
+        # Mock: Database access isolation for fast, reliable unit testing
         health_monitor.register_database_manager("test_db", Mock())
         
         # Record some errors
@@ -504,7 +526,9 @@ class TestIntegrationScenarios:
         health_monitor.register_database_manager("clickhouse", clickhouse_manager)
         
         # Test startup flow with mocked connections
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.db.fast_startup_connection_manager.create_async_engine'):
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.db.clickhouse_reliable_manager.ClickHouseDatabase') as mock_ch:
                 mock_ch.side_effect = ConnectionError("ClickHouse unavailable")
                 
@@ -571,6 +595,7 @@ class TestIntegrationScenarios:
         )
         
         # Simulate database unavailability
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
         mock_manager.is_available.return_value = False
         degradation_manager.register_database_manager("postgres", mock_manager)

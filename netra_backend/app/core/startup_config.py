@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Startup configuration for robust initialization system.
 
 This module defines configuration settings for the startup manager
@@ -61,9 +62,9 @@ class StartupConfig:
     HEALTH_CHECK_TIMEOUT: int = 5  # seconds
     
     # Graceful degradation settings
-    ALLOW_DEGRADED_MODE: bool = os.environ.get("ALLOW_DEGRADED_MODE", "true").lower() == "true"
-    USE_ROBUST_STARTUP: bool = os.environ.get("USE_ROBUST_STARTUP", "true").lower() == "true"
-    GRACEFUL_STARTUP_MODE: bool = os.environ.get("GRACEFUL_STARTUP_MODE", "true").lower() == "true"
+    ALLOW_DEGRADED_MODE: bool = get_env().get("ALLOW_DEGRADED_MODE", "true").lower() == "true"
+    USE_ROBUST_STARTUP: bool = get_env().get("USE_ROBUST_STARTUP", "true").lower() == "true"
+    GRACEFUL_STARTUP_MODE: bool = get_env().get("GRACEFUL_STARTUP_MODE", "true").lower() == "true"
     
     @classmethod
     def get_component_priority(cls, component_name: str) -> str:

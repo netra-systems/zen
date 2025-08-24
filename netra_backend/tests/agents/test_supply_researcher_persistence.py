@@ -9,7 +9,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from decimal import Decimal
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -70,6 +70,7 @@ class TestSupplyResearcherPersistence:
 
     def test_anomaly_detection_thresholds(self, mock_supply_service):
         """Test anomaly detection with various thresholds"""
+        # Mock: Generic component isolation for controlled unit testing
         service = SupplyResearchService(Mock())
         _setup_anomaly_detection_mock(service)
         anomalies = service.detect_anomalies(threshold=0.5)
@@ -208,6 +209,7 @@ class TestSupplyResearcherPersistence:
 
     def _setup_performance_monitoring(self):
         """Setup performance monitoring (≤8 lines)"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('time.perf_counter') as mock_timer:
             mock_timer.side_effect = [0.0, 0.1]  # 100ms execution
 
@@ -227,6 +229,7 @@ class TestSupplyResearcherPersistence:
     def _setup_backup_scenario(self, mock_db):
         """Setup backup test scenario (≤8 lines)"""
         mock_db.query.return_value.filter.return_value.all.return_value = [
+            # Mock: OpenAI API isolation for testing without external service dependencies
             Mock(provider="openai", model="gpt-4", 
                  pricing_input=Decimal("30")),
         ]

@@ -7,6 +7,9 @@ export * from './websocket-event-types';
 export * from './component-props';
 export * from './store-types';
 
+// Re-export ExecutionMetrics from canonical location (overrides layer-types version)
+export type { ExecutionMetrics, AgentTiming, ToolCall } from './unified/metrics.types';
+
 // Re-export key types for convenience
 export type {
   FastLayerData,

@@ -8,8 +8,8 @@ in the staging environment.
 import sys
 from pathlib import Path
 
-# Test framework import - using pytest fixtures instead
-
+import pytest
+import pytest
 import asyncio
 import os
 from typing import Optional
@@ -18,7 +18,7 @@ import asyncpg
 import psycopg2
 from psycopg2 import sql
 
-from netra_backend.tests.integration.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 class TestCloudSQLProxyConnectivity(StagingConfigTestBase):
     """Test Cloud SQL proxy connectivity in staging."""
@@ -163,6 +163,7 @@ class TestCloudSQLProxyConnectivity(StagingConfigTestBase):
                 except psycopg2.Error as e:
                     self.fail(f"Connection format '{conn_format['name']}' failed: {e}")
                     
+    @pytest.mark.asyncio
     async def test_async_connection_pool(self):
         """Test async connection pooling with Cloud SQL."""
         self.skip_if_not_staging()

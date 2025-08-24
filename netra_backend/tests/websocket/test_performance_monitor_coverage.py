@@ -7,16 +7,14 @@ Verifies 100% monitoring coverage despite individual check failures.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.websocket_core.performance_monitor_core import PerformanceMonitor
-from netra_backend.app.websocket_core.performance_monitor_types import PerformanceThresholds
+from netra_backend.app.websocket_core.utils import WebSocketConnectionMonitor as PerformanceMonitor
+from netra_backend.app.websocket_core.types import ConnectionMetrics as PerformanceThresholds
 
 class TestMonitoringCoverage:
     """Test monitoring coverage and partial failure scenarios."""
@@ -27,6 +25,7 @@ class TestMonitoringCoverage:
         thresholds = PerformanceThresholds()
         return PerformanceMonitor(thresholds)
     
+    @pytest.mark.asyncio
     async def test_all_checks_run_despite_individual_failures(self, monitor):
         """Test that all monitoring checks run even when some fail."""
         # Mock individual check methods to simulate failures
@@ -51,6 +50,7 @@ class TestMonitoringCoverage:
                             mock_tp.assert_called_once()
                             mock_cpu.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_coverage_metrics_track_failures(self, monitor):
         """Test that coverage metrics properly track check failures."""
         # Mock checks with mixed success/failure
@@ -75,6 +75,7 @@ class TestMonitoringCoverage:
                             assert coverage["successful_checks"] == 9  # 3 successful checks * 3 runs
                             assert coverage["failed_checks"] == 6   # 2 failed checks * 3 runs
     
+    @pytest.mark.asyncio
     async def test_monitoring_coverage_summary(self, monitor):
         """Test monitoring coverage summary calculation."""
         # Simulate some checks
@@ -89,6 +90,7 @@ class TestMonitoringCoverage:
         assert summary["coverage_percentage"] == 80.0
         assert "recent_failures" in summary
     
+    @pytest.mark.asyncio
     async def test_check_result_recording(self, monitor):
         """Test that check results are properly recorded."""
         # Record success and failure
@@ -109,6 +111,7 @@ class TestMonitoringCoverage:
         assert failure_result["check_name"] == "failed_check"
         assert "Test error" in failure_result["error"]
     
+    @pytest.mark.asyncio
     async def test_fifty_percent_failure_scenario(self, monitor):
         """Test 100% monitoring coverage with 50% check failures."""
         # Setup scenario with alternating failures
@@ -151,6 +154,7 @@ class TestMonitoringCoverage:
                             assert coverage["successful_checks"] == 2
                             assert coverage["failed_checks"] == 3
     
+    @pytest.mark.asyncio
     async def test_performance_summary_includes_coverage(self, monitor):
         """Test that performance summary includes monitoring coverage."""
         # Run some checks to populate coverage data
@@ -165,6 +169,7 @@ class TestMonitoringCoverage:
         assert "coverage_percentage" in coverage
         assert "recent_failures" in coverage
     
+    @pytest.mark.asyncio
     async def test_exception_handling_preserves_results(self, monitor):
         """Test that exceptions in check processing don't lose results."""
         results_captured = []
@@ -204,6 +209,7 @@ class TestMonitoringCoverage:
                                 assert len(exceptions) == 1
                                 assert len(successes) == 4
     
+    @pytest.mark.asyncio
     async def test_recent_failure_counting(self, monitor):
         """Test recent failure counting for coverage metrics."""
         # Add some old failures (outside 5-minute window)
@@ -231,6 +237,7 @@ class TestMonitoringCoverage:
         recent_count = monitor._count_recent_failures()
         assert recent_count == 1
     
+    @pytest.mark.asyncio
     async def test_reset_coverage_metrics(self, monitor):
         """Test that coverage metrics are properly reset."""
         # Populate some coverage data
@@ -256,6 +263,7 @@ class TestMonitoringReliabilityPatterns:
         """Create performance monitor for testing."""
         return PerformanceMonitor()
     
+    @pytest.mark.asyncio
     async def test_fail_fast_monitoring_pattern_compliance(self, monitor):
         """Test compliance with fail_fast_monitoring pattern from spec."""
         # Mock all checks to fail
@@ -281,6 +289,7 @@ class TestMonitoringReliabilityPatterns:
                             assert coverage["successful_checks"] == 0
                             assert coverage["total_checks"] == 5
     
+    @pytest.mark.asyncio
     async def test_independent_check_execution(self, monitor):
         """Test that monitoring checks are truly independent."""
         call_order = []

@@ -22,6 +22,7 @@ class TestAPIRequestValidationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_required_fields_validation(self):
         """Test validation of required fields"""
         async with httpx.AsyncClient() as client:
@@ -45,6 +46,7 @@ class TestAPIRequestValidationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_data_type_validation(self):
         """Test data type validation"""
         async with httpx.AsyncClient() as client:
@@ -68,6 +70,7 @@ class TestAPIRequestValidationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_string_length_validation(self):
         """Test string length constraints"""
         async with httpx.AsyncClient() as client:
@@ -91,6 +94,7 @@ class TestAPIRequestValidationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_enum_value_validation(self):
         """Test enum/choice field validation"""
         async with httpx.AsyncClient() as client:
@@ -113,6 +117,7 @@ class TestAPIRequestValidationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_injection_attack_prevention(self):
         """Test prevention of injection attacks"""
         async with httpx.AsyncClient() as client:

@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 L3 Test: Uses real Redis containers via Docker for WebSocket pub/sub validation.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -21,14 +21,14 @@ import subprocess
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import redis.asyncio as redis
 from netra_backend.app.schemas import User
 
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import (
 
@@ -109,6 +109,7 @@ class TestWebSocketRedisPubSubL3:
 
         _, redis_url = redis_container
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
@@ -153,6 +154,7 @@ class TestWebSocketRedisPubSubL3:
 
         ]
     
+    @pytest.mark.asyncio
     async def test_websocket_redis_connection_setup(self, websocket_manager, redis_client, test_users):
 
         """Test WebSocket connection establishment with Redis integration."""
@@ -191,6 +193,7 @@ class TestWebSocketRedisPubSubL3:
 
         await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_redis_pubsub_message_broadcasting(self, websocket_manager, redis_client, pubsub_client, test_users):
 
         """Test message broadcasting through Redis pub/sub."""
@@ -244,6 +247,7 @@ class TestWebSocketRedisPubSubL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_websocket_reconnection_redis_state(self, websocket_manager, redis_client, test_users):
 
         """Test WebSocket reconnection with Redis state recovery."""
@@ -292,6 +296,7 @@ class TestWebSocketRedisPubSubL3:
 
         await websocket_manager.disconnect_user(user.id, second_websocket)
     
+    @pytest.mark.asyncio
     async def test_concurrent_connections_performance(self, websocket_manager, redis_client):
 
         """Test performance with multiple concurrent WebSocket connections."""
@@ -344,6 +349,7 @@ class TestWebSocketRedisPubSubL3:
 
         assert setup_time < 10.0  # Should setup quickly
     
+    @pytest.mark.asyncio
     async def test_redis_channel_isolation(self, websocket_manager, redis_client, pubsub_client, test_users):
 
         """Test Redis channel management and isolation."""
@@ -389,6 +395,7 @@ class TestWebSocketRedisPubSubL3:
     
     @mock_justified("L3: Using real Redis container for integration validation")
 
+    @pytest.mark.asyncio
     async def test_redis_failover_recovery(self, redis_container, websocket_manager, test_users):
 
         """Test WebSocket resilience during Redis connection issues."""

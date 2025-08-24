@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 from netra_backend.app.logging_config import central_logger as logger
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.tests.clickhouse.clickhouse_test_fixtures import (
     build_workload_insert_query,
     check_table_insert_permission,
@@ -23,6 +23,7 @@ from netra_backend.tests.clickhouse.clickhouse_test_fixtures import (
 class TestWorkloadEventsTable:
     """Test workload_events table operations with real data"""
     
+    @pytest.mark.asyncio
     async def test_insert_workload_events(self, setup_workload_table):
         """Test inserting real workload events"""
         async with get_clickhouse_client() as client:
@@ -63,6 +64,7 @@ class TestWorkloadEventsTable:
         assert count >= 10, f"Expected at least 10 inserted events, found {count}"
         logger.info(f"Successfully inserted {count} test events")
 
+    @pytest.mark.asyncio
     async def test_query_with_array_syntax_fix(self, setup_workload_table):
         """Test querying with array syntax that needs fixing"""
         async with get_clickhouse_client() as client:
@@ -87,6 +89,7 @@ class TestWorkloadEventsTable:
                 if row.get('workload_id'):
                     logger.info(f"Event: {row['event_id']} workload: {row['workload_id']} type: {row['event_type']}")
 
+    @pytest.mark.asyncio
     async def test_complex_aggregation_queries(self, setup_workload_table):
         """Test complex aggregation queries with nested arrays"""
         async with get_clickhouse_client() as client:
@@ -112,6 +115,7 @@ class TestWorkloadEventsTable:
                           f"type: {row['event_type']}, "
                           f"category: {row['event_category']}")
 
+    @pytest.mark.asyncio
     async def test_time_series_analysis(self, setup_workload_table):
         """Test time-series analysis queries"""
         async with get_clickhouse_client() as client:

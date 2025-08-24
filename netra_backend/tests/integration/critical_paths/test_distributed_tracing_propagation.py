@@ -24,7 +24,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
@@ -390,6 +390,7 @@ class DistributedTracingValidator:
         else:
             return "poor"
     
+    @pytest.mark.asyncio
     async def test_correlation_accuracy(self, trace_count: int = 10) -> Dict[str, Any]:
         """Test accuracy of trace correlation across multiple concurrent traces."""
         correlation_results = {

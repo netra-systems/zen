@@ -127,7 +127,7 @@ class PaymentHandler(http.server.BaseHTTPRequestHandler):
             'amount': data.get('amount', 0)
         }
     
-    def _handle_webhook(self, data):
+    async def _handle_webhook(self, data):
         return {'received': True}
 
 with socketserver.TCPServer(('0.0.0.0', 8080), PaymentHandler) as httpd:
@@ -303,6 +303,7 @@ with socketserver.TCPServer(('0.0.0.0', 8080), PaymentHandler) as httpd:
         """Test webhook event processing for payment status updates."""
         webhook_events = []
         
+        @pytest.mark.asyncio
         async def test_webhook_handler(event_type, event_data):
             webhook_events.append({
                 "type": event_type,

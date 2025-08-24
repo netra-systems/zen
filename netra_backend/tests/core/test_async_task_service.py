@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -33,6 +33,7 @@ class TestAsyncTaskService:
         """Helper: Verify start implementation calls."""
         assert mock_start.call_count == expected_calls
 
+    @pytest.mark.asyncio
     async def test_start_background_tasks(self):
         """Test starting background tasks."""
         service = AsyncTaskService("task-service")
@@ -44,6 +45,7 @@ class TestAsyncTaskService:
             self._verify_background_running(service, True)
             self._verify_mock_start_calls(mock_start, 1)
 
+    @pytest.mark.asyncio
     async def test_start_background_tasks_idempotent(self):
         """Test that starting background tasks is idempotent."""
         service = AsyncTaskService("task-service")
@@ -64,6 +66,7 @@ class TestAsyncTaskService:
         mock_stop.assert_called_once()
         mock_cancel.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_stop_background_tasks(self):
         """Test stopping background tasks."""
         service = AsyncTaskService("task-service")

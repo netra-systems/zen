@@ -246,7 +246,9 @@ class MockAgentRegistry:
     
     def get_agent(self, name: str):
         """Get mock agent by name"""
+        # Mock: Generic component isolation for controlled unit testing
         agent = Mock()
+        # Mock: Agent service isolation for testing without LLM agent execution
         agent.execute = AsyncMock(return_value=TypedAgentResult(
             status=ExecutionStatus.SUCCESS,
             result=f"Mock result from {name}",

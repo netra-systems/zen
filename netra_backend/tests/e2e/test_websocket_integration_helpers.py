@@ -1,6 +1,6 @@
 """Utilities Tests - Split from test_websocket_integration.py"""
 
-from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -8,7 +8,7 @@ import sys
 import asyncio
 import json
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import pytest
@@ -23,13 +23,13 @@ from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 from netra_backend.app.websocket_core import (
     WebSocketManager as ConnectionManager,
 
-    get_connection_manager,
+    get_connection_monitor,
 
 )
-from netra_backend.app.websocket_core.message_handler_core import (
-
-    ModernReliableMessageHandler,
-
+from netra_backend.app.websocket_core.handlers import (
+    BaseMessageHandler,
+    UserMessageHandler,
+    HeartbeatHandler
 )
 
 # Removed TestSyntaxFix class as it was broken and had __init__ method that prevented pytest collection

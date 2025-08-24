@@ -30,7 +30,7 @@ class TestFirstTimeUserAdvanced:
     @pytest.fixture
     async def comprehensive_test_setup(self):
         """Setup comprehensive test environment"""
-        return await FirstTimeUserFixtures.create_comprehensive_test_env()
+        yield await FirstTimeUserFixtures.create_comprehensive_test_env()
 
     @pytest.fixture
     def api_integration_system(self):
@@ -48,6 +48,7 @@ class TestFirstTimeUserAdvanced:
         return FirstTimeUserFixtures.init_llm_optimization()
 
     @tdd_test("first_time_user_flow", expected_to_fail=True)
+    @pytest.mark.asyncio
     async def test_api_key_integration_critical(self, comprehensive_test_setup, api_integration_system):
         """
         TEST 4: API Key Integration
@@ -86,6 +87,7 @@ class TestFirstTimeUserAdvanced:
         return integration_result
 
     @tdd_test("first_time_user_flow", expected_to_fail=True)
+    @pytest.mark.asyncio
     async def test_collaboration_invitation_critical(self, comprehensive_test_setup, collaboration_system):
         """
         TEST 6: Collaboration Invitation
@@ -120,6 +122,7 @@ class TestFirstTimeUserAdvanced:
         return collaboration_result
 
     @tdd_test("first_time_user_flow", expected_to_fail=True)
+    @pytest.mark.asyncio
     async def test_data_security_privacy_critical(self, comprehensive_test_setup):
         """
         TEST 7: Data Security & Privacy
@@ -152,6 +155,7 @@ class TestFirstTimeUserAdvanced:
         return privacy_result
 
     @tdd_test("first_time_user_flow", expected_to_fail=True)
+    @pytest.mark.asyncio
     async def test_competitive_value_comparison_critical(self, comprehensive_test_setup, llm_optimization_system):
         """
         TEST 10: Competitive Value Comparison

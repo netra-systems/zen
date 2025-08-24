@@ -395,6 +395,7 @@ async def l3_delegation_manager(testcontainer_infrastructure):
 class TestSupervisorSubAgentDelegationL3:
     """L3 integration tests for supervisor to sub-agent delegation."""
     
+    @pytest.mark.asyncio
     async def test_basic_delegation_flow(self, l3_delegation_manager):
         """Test basic supervisor to sub-agent delegation flow."""
         # Create delegation task
@@ -419,6 +420,7 @@ class TestSupervisorSubAgentDelegationL3:
         assert l3_delegation_manager.delegation_metrics["successful_delegations"] == 1
         assert l3_delegation_manager.delegation_metrics["sub_agents_spawned"] == 1
     
+    @pytest.mark.asyncio
     async def test_multiple_concurrent_delegations(self, l3_delegation_manager):
         """Test multiple concurrent delegations."""
         # Create multiple tasks
@@ -454,6 +456,7 @@ class TestSupervisorSubAgentDelegationL3:
         assert l3_delegation_manager.delegation_metrics["successful_delegations"] == 3
         assert l3_delegation_manager.delegation_metrics["sub_agents_spawned"] == 3
     
+    @pytest.mark.asyncio
     async def test_delegation_state_persistence(self, l3_delegation_manager):
         """Test state persistence across delegation process."""
         # Create and execute delegation
@@ -478,6 +481,7 @@ class TestSupervisorSubAgentDelegationL3:
         assert checks["sub_agent_has_parent"] is True
         assert checks["task_id_consistent"] is True
     
+    @pytest.mark.asyncio
     async def test_sub_agent_lifecycle_management(self, l3_delegation_manager):
         """Test complete sub-agent lifecycle through delegation."""
         task = await l3_delegation_manager.create_delegation_task("optimization", "medium")
@@ -506,6 +510,7 @@ class TestSupervisorSubAgentDelegationL3:
         # Verify metrics
         assert l3_delegation_manager.delegation_metrics["sub_agents_spawned"] == initial_sub_agent_count + 1
     
+    @pytest.mark.asyncio
     async def test_delegation_error_handling(self, l3_delegation_manager):
         """Test delegation error handling and recovery."""
         # Create task that will cause controlled failure
@@ -544,6 +549,7 @@ class TestSupervisorSubAgentDelegationL3:
         assert recovery_result["success"] is True
         assert l3_delegation_manager.delegation_metrics["successful_delegations"] == 1
     
+    @pytest.mark.asyncio
     async def test_delegation_performance_metrics(self, l3_delegation_manager):
         """Test delegation performance metrics collection."""
         # Execute multiple delegations with different complexities

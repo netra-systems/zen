@@ -6,12 +6,10 @@ Tests security middleware functionality
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import Request
@@ -35,14 +33,17 @@ class TestSecurityMiddleware:
     @pytest.fixture
     def mock_request(self):
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.method = "POST"
         request.url.path = "/api/test"
         request.headers = {"content-length": "100", "user-agent": "test-agent"}
         request.client.host = "127.0.0.1"
+        # Mock: Async component isolation for testing without real async operations
         request.body = AsyncMock(return_value=b'{"test": "data"}')
         return request
 
+    @pytest.mark.asyncio
     async def test_request_size_validation(self, security_middleware, mock_request):
         """Test request size validation."""
         # Test oversized request
@@ -51,6 +52,7 @@ class TestSecurityMiddleware:
         with pytest.raises(Exception):  # Should raise HTTP 413
             await security_middleware._validate_request_size(mock_request)
 
+    @pytest.mark.asyncio
     async def test_rate_limiting(self, security_middleware, mock_request):
         """Test rate limiting functionality."""
         # Simulate multiple requests from same IP
@@ -61,15 +63,18 @@ class TestSecurityMiddleware:
                 with pytest.raises(Exception):  # Should raise HTTP 429
                     await security_middleware._check_rate_limits(mock_request)
 
+    @pytest.mark.asyncio
     async def test_input_validation(self, security_middleware, mock_request):
         """Test input validation for malicious content."""
         # Test SQL injection
+        # Mock: Async component isolation for testing without real async operations
         mock_request.body = AsyncMock(return_value=b'{"query": "SELECT * FROM users WHERE id = 1 OR 1=1"}')
         
         with pytest.raises(NetraSecurityException):
             await security_middleware._validate_request_body(mock_request)
         
         # Test XSS
+        # Mock: Async component isolation for testing without real async operations
         mock_request.body = AsyncMock(return_value=b'{"content": "<script>alert(\'xss\')</script>"}')
         
         with pytest.raises(NetraSecurityException):
@@ -105,6 +110,7 @@ class TestSecurityMiddleware:
         ip = security_middleware._get_client_ip(mock_request)
         assert ip == "127.0.0.1"
     
+    @pytest.mark.asyncio
     async def test_malicious_payload_detection(self, security_middleware, mock_request):
         """Test detection of various malicious payloads."""
         malicious_payloads = [
@@ -115,6 +121,7 @@ class TestSecurityMiddleware:
         ]
         
         for payload in malicious_payloads:
+            # Mock: Async component isolation for testing without real async operations
             mock_request.body = AsyncMock(return_value=payload)
             with pytest.raises(NetraSecurityException):
                 await security_middleware._validate_request_body(mock_request)
@@ -147,6 +154,7 @@ class TestSecurityMiddleware:
         for _ in range(200):
             security_middleware._check_rate_limits_sync(mock_request)
     
+    @pytest.mark.asyncio
     async def test_request_timeout_protection(self, security_middleware, mock_request):
         """Test protection against slow requests."""
         # Mock slow request body read

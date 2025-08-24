@@ -174,6 +174,7 @@ class MessagePipelineAuthValidator:
         """Authenticate user and get valid token."""
         # Mock user for testing
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = MagicMock()
 
         mock_user.id = self.user_id

@@ -12,7 +12,7 @@ Connection establishment -> Load testing -> Network interruption -> Reconnection
 Coverage: 100+ concurrent connections, network fault injection, message delivery guarantees, staging environment validation
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -28,7 +28,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import websockets
@@ -36,7 +36,7 @@ import websockets
 StagingTestSuite = AsyncMock
 
 get_staging_suite = AsyncMock
-# from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+# from netra_backend.app.websocket_core.manager import WebSocketManager
 
 WebSocketManager = AsyncMock
 # from app.services.redis.session_manager import RedisSessionManager
@@ -828,6 +828,7 @@ async def websocket_l4_suite():
 
 @pytest.mark.staging
 
+@pytest.mark.asyncio
 async def test_concurrent_websocket_connections_l4(websocket_l4_suite):
 
     """Test 100+ concurrent WebSocket connections in staging."""
@@ -859,6 +860,7 @@ async def test_concurrent_websocket_connections_l4(websocket_l4_suite):
 
 @pytest.mark.staging
 
+@pytest.mark.asyncio
 async def test_websocket_network_interruption_recovery_l4(websocket_l4_suite):
 
     """Test WebSocket recovery from network interruptions in staging."""
@@ -912,6 +914,7 @@ async def test_websocket_network_interruption_recovery_l4(websocket_l4_suite):
 
 @pytest.mark.staging
 
+@pytest.mark.asyncio
 async def test_websocket_message_delivery_guarantees_l4(websocket_l4_suite):
 
     """Test message delivery guarantees under various conditions."""
@@ -976,6 +979,7 @@ async def test_websocket_message_delivery_guarantees_l4(websocket_l4_suite):
 
 @pytest.mark.staging
 
+@pytest.mark.asyncio
 async def test_websocket_reconnection_success_rate_l4(websocket_l4_suite):
 
     """Test WebSocket reconnection success rate under load."""
@@ -1015,6 +1019,7 @@ async def test_websocket_reconnection_success_rate_l4(websocket_l4_suite):
 
 @pytest.mark.staging
 
+@pytest.mark.asyncio
 async def test_websocket_performance_under_stress_l4(websocket_l4_suite):
 
     """Test WebSocket performance under stress conditions."""

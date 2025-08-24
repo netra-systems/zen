@@ -24,6 +24,7 @@ from netra_backend.app.services.quality_gate_service import (
 class TestExamplePromptsModelSelection:
     """Test specific example prompts EP-005, EP-008, EP-009 with real LLM validation."""
     
+    @pytest.mark.asyncio
     async def test_ep_005_model_effectiveness_real_llm(self, model_selection_setup):
         """Test EP-005: Model effectiveness analysis using real LLM."""
         setup = model_selection_setup
@@ -31,6 +32,7 @@ class TestExamplePromptsModelSelection:
         results = await _execute_model_selection_workflow(setup, state)
         await _validate_ep_005_results(results, state, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_008_tool_migration_real_llm(self, model_selection_setup):
         """Test EP-008: Tool migration to GPT-5 using real LLM."""
         setup = model_selection_setup
@@ -38,6 +40,7 @@ class TestExamplePromptsModelSelection:
         results = await _execute_model_selection_workflow(setup, state)
         await _validate_ep_008_results(results, state, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_009_upgrade_rollback_real_llm(self, model_selection_setup):
         """Test EP-009: Upgrade rollback analysis using real LLM."""
         setup = model_selection_setup

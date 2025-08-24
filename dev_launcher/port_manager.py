@@ -111,7 +111,7 @@ class PortManager:
             start_port, end_port = self.reserved_ranges['dynamic']
         
         # Try preferred port first if specified
-        if preferred_port and self._is_port_available_with_retry(preferred_port):
+        if preferred_port and self._is_port_allocatable(preferred_port):
             self.allocated_ports[service_name] = preferred_port
             self.port_processes[preferred_port] = service_name
             logger.info(f"Allocated preferred port {preferred_port} to {service_name}")
@@ -119,13 +119,31 @@ class PortManager:
         
         # Search for available port in range
         for port in range(start_port, end_port + 1):
-            if self._is_port_available_with_retry(port):
+            if self._is_port_allocatable(port):
                 self.allocated_ports[service_name] = port
                 self.port_processes[port] = service_name
                 logger.info(f"Allocated port {port} to {service_name}")
                 return port
         
         return None
+    
+    def _is_port_allocatable(self, port: int) -> bool:
+        """
+        Check if a port is allocatable (available and not already allocated to another service).
+        
+        Args:
+            port: Port number to check
+            
+        Returns:
+            True if port can be allocated, False otherwise
+        """
+        # First check if port is already allocated to another service
+        if port in self.port_processes:
+            logger.debug(f"Port {port} already allocated to {self.port_processes[port]}")
+            return False
+        
+        # Then check if port is available on the system
+        return self._is_port_available_with_retry(port)
     
     def _is_port_available_with_retry(self, port: int, retries: int = 2) -> bool:
         """Check port availability with retry for race conditions."""

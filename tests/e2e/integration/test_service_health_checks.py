@@ -126,7 +126,7 @@ class DevHealthTestFixture:
         """Start dev environment and extract service ports."""
         config = LauncherConfig(
             dynamic_ports=True, no_browser=True,
-            no_secrets=True, non_interactive=True
+            non_interactive=True
         )
         
         self.launcher = DevLauncher(config)
@@ -162,13 +162,13 @@ async def test_health_test_fixture():
 
 
 @pytest.mark.asyncio
-async def test_all_services_have_health_endpoints(health_test_fixture):
+async def test_all_services_have_health_endpoints(test_health_test_fixture):
     """Test all services expose working health endpoints."""
-    success = await health_test_fixture.start_dev_environment()
+    success = await test_health_test_fixture.start_dev_environment()
     assert success, "Dev environment should start successfully"
     
     # Check health of all services
-    results = await _check_all_service_health(health_test_fixture)
+    results = await _check_all_service_health(test_health_test_fixture)
     
     # Verify all services are healthy
     for result in results:
@@ -177,15 +177,15 @@ async def test_all_services_have_health_endpoints(health_test_fixture):
 
 
 @pytest.mark.asyncio 
-async def test_health_checks_during_startup(health_test_fixture):
+async def test_health_checks_during_startup(test_health_test_fixture):
     """Test health endpoints become available during startup sequence."""
     # Start launcher but monitor health during startup
     startup_task = asyncio.create_task(
-        health_test_fixture.start_dev_environment()
+        test_health_test_fixture.start_dev_environment()
     )
     
     # Monitor health checks during startup
-    health_progression = await _monitor_startup_health(health_test_fixture)
+    health_progression = await _monitor_startup_health(test_health_test_fixture)
     
     await startup_task
     
@@ -194,12 +194,12 @@ async def test_health_checks_during_startup(health_test_fixture):
 
 
 @pytest.mark.asyncio
-async def test_health_check_response_times(health_test_fixture):
+async def test_health_check_response_times(test_health_test_fixture):
     """Test health endpoints respond within acceptable time limits."""
-    success = await health_test_fixture.start_dev_environment()
+    success = await test_health_test_fixture.start_dev_environment()
     assert success
     
-    results = await _check_all_service_health(health_test_fixture)
+    results = await _check_all_service_health(test_health_test_fixture)
     
     # Verify response times are reasonable
     for result in results:
@@ -208,12 +208,12 @@ async def test_health_check_response_times(health_test_fixture):
 
 
 @pytest.mark.asyncio
-async def test_health_check_content_validation(health_test_fixture):
+async def test_health_check_content_validation(test_health_test_fixture):
     """Test health endpoint responses contain expected data."""
-    success = await health_test_fixture.start_dev_environment()
+    success = await test_health_test_fixture.start_dev_environment()
     assert success
     
-    results = await _check_all_service_health(health_test_fixture)
+    results = await _check_all_service_health(test_health_test_fixture)
     
     # Verify response content
     for result in results:
@@ -222,15 +222,15 @@ async def test_health_check_content_validation(health_test_fixture):
 
 
 @pytest.mark.asyncio
-async def test_health_monitoring_reliability(health_test_fixture):
+async def test_health_monitoring_reliability(test_health_test_fixture):
     """Test health checks remain reliable over time."""
-    success = await health_test_fixture.start_dev_environment()
+    success = await test_health_test_fixture.start_dev_environment()
     assert success
     
     # Perform multiple health checks over time
     check_results = []
     for i in range(5):
-        results = await _check_all_service_health(health_test_fixture)
+        results = await _check_all_service_health(test_health_test_fixture)
         check_results.append(results)
         await asyncio.sleep(2)
     

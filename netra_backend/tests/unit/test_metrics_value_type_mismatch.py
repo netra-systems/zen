@@ -7,9 +7,7 @@ before being sent to ClickHouse.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -68,10 +66,13 @@ class TestMetricsValueTypeMismatch:
         
         assert "metrics.value[idx]" not in fixed_query
         assert "arrayElement(metrics.value, idx)" in fixed_query
+    @pytest.mark.asyncio
     async def test_query_interceptor_fixes_queries(self):
         """Test that the ClickHouseQueryInterceptor properly fixes queries"""
         # Mock client
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_client.execute_query = AsyncMock(return_value=[])
         
         # Create interceptor
@@ -121,9 +122,12 @@ class TestMetricsValueTypeMismatch:
         assert "metrics.value[idx + 1]" not in fixed_query
         assert "arrayElement(metrics.value, idx - 1)" in fixed_query
         assert "arrayElement(metrics.value, idx + 1)" in fixed_query
+    @pytest.mark.asyncio
     async def test_interceptor_statistics(self):
         """Test that interceptor tracks statistics correctly"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_client.execute_query = AsyncMock(return_value=[])
         
         interceptor = ClickHouseQueryInterceptor(mock_client)

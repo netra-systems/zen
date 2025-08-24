@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -702,6 +702,7 @@ async def quality_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_quality_metric_calculation(quality_manager):
     """Test individual quality metric calculations."""
     manager = quality_manager
@@ -731,6 +732,7 @@ async def test_quality_metric_calculation(quality_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_quality_gate_rule_evaluation(quality_manager):
     """Test quality gate rule evaluation."""
     manager = quality_manager
@@ -769,6 +771,7 @@ async def test_quality_gate_rule_evaluation(quality_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_complete_quality_assessment(quality_manager):
     """Test complete quality assessment flow."""
     manager = quality_manager
@@ -790,6 +793,7 @@ async def test_complete_quality_assessment(quality_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_quality_gate_pass_scenario(quality_manager):
     """Test scenario where output passes quality gates."""
     manager = quality_manager
@@ -822,6 +826,7 @@ async def test_quality_gate_pass_scenario(quality_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_quality_gate_fail_scenario(quality_manager):
     """Test scenario where output fails quality gates."""
     manager = quality_manager
@@ -861,6 +866,7 @@ async def test_quality_gate_fail_scenario(quality_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_quality_gate_bypass(quality_manager):
     """Test quality gate bypass functionality."""
     manager = quality_manager
@@ -893,6 +899,7 @@ async def test_quality_gate_bypass(quality_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_safety_metric_detection(quality_manager):
     """Test safety metric detection of harmful content."""
     manager = quality_manager
@@ -920,6 +927,7 @@ async def test_safety_metric_detection(quality_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_hallucination_detection(quality_manager):
     """Test hallucination detection in outputs."""
     manager = quality_manager
@@ -947,6 +955,7 @@ async def test_hallucination_detection(quality_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_quality_trends_tracking(quality_manager):
     """Test quality trends tracking over time."""
     manager = quality_manager
@@ -975,6 +984,7 @@ async def test_quality_trends_tracking(quality_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_recent_assessments_retrieval(quality_manager):
     """Test retrieval of recent assessments."""
     manager = quality_manager
@@ -1002,6 +1012,7 @@ async def test_recent_assessments_retrieval(quality_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_quality_assessments(quality_manager):
     """Test concurrent quality assessments."""
     manager = quality_manager
@@ -1025,6 +1036,7 @@ async def test_concurrent_quality_assessments(quality_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_quality_gate_performance(quality_manager):
     """Benchmark quality gate performance."""
     manager = quality_manager

@@ -19,7 +19,7 @@ from pathlib import Path
 
 import asyncio
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, Request, Response
@@ -38,6 +38,7 @@ logger = central_logger.get_logger(__name__)
 class TestRequestValidationMiddleware:
     """Test request validation middleware functionality."""
     
+    @pytest.mark.asyncio
     async def test_request_size_validation(self):
         """Test request size validation in middleware."""
         middleware = self._create_security_middleware()
@@ -47,6 +48,7 @@ class TestRequestValidationMiddleware:
             await middleware._validate_request_size(request)
         assert exc_info.value.status_code == 413
     
+    @pytest.mark.asyncio
     async def test_url_length_validation(self):
         """Test URL length validation in middleware."""
         middleware = self._create_security_middleware()
@@ -56,6 +58,7 @@ class TestRequestValidationMiddleware:
         with pytest.raises(NetraSecurityException):
             middleware._validate_url(request)
     
+    @pytest.mark.asyncio
     async def test_header_validation_success(self):
         """Test successful header validation."""
         middleware = self._create_security_middleware()
@@ -64,6 +67,7 @@ class TestRequestValidationMiddleware:
         # Should not raise exception for valid headers
         middleware._validate_headers(request)
     
+    @pytest.mark.asyncio
     async def test_malicious_input_detection(self):
         """Test malicious input detection in validation."""
         middleware = self._create_security_middleware()
@@ -81,10 +85,14 @@ class TestRequestValidationMiddleware:
     
     def _create_mock_request(self, content_length: int = 1000, url: str = "http://test.com") -> Mock:
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.headers = {}
+        # Mock: Component isolation for controlled unit testing
         request.headers.get = Mock(return_value=str(content_length))
+        # Mock: Generic component isolation for controlled unit testing
         request.url = Mock()
+        # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value=url)
         request.method = "GET"
         return request
@@ -92,9 +100,11 @@ class TestRequestValidationMiddleware:
 class TestResponseTransformationMiddleware:
     """Test response transformation middleware functionality."""
     
+    @pytest.mark.asyncio
     async def test_security_headers_addition(self):
         """Test automatic security headers addition."""
         middleware = self._create_security_middleware()
+        # Mock: Component isolation for controlled unit testing
         response = Mock(spec=Response)
         response.headers = {}
         
@@ -104,9 +114,11 @@ class TestResponseTransformationMiddleware:
         assert "X-Frame-Options" in response.headers
         assert response.headers["X-Security-Middleware"] == "enabled"
     
+    @pytest.mark.asyncio
     async def test_custom_header_injection(self):
         """Test custom header injection in responses."""
         middleware = self._create_security_middleware()
+        # Mock: Component isolation for controlled unit testing
         response = Mock(spec=Response)
         response.headers = {}
         
@@ -115,9 +127,11 @@ class TestResponseTransformationMiddleware:
         assert "X-Security-Middleware" in response.headers
         assert "X-Request-ID" in response.headers
     
+    @pytest.mark.asyncio
     async def test_content_type_header_override(self):
         """Test content type header override prevention."""
         middleware = self._create_security_middleware()
+        # Mock: Component isolation for controlled unit testing
         response = Mock(spec=Response)
         response.headers = {"Content-Type": "text/html"}
         
@@ -131,6 +145,7 @@ class TestResponseTransformationMiddleware:
 class TestRateLimitingMiddleware:
     """Test rate limiting middleware functionality."""
     
+    @pytest.mark.asyncio
     async def test_rate_limit_tracking(self):
         """Test rate limit tracking for IP addresses."""
         rate_limiter = RateLimitTracker()
@@ -145,6 +160,7 @@ class TestRateLimitingMiddleware:
         
         assert rate_limiter.is_rate_limited("192.168.1.1", 10)
     
+    @pytest.mark.asyncio
     async def test_different_ip_isolation(self):
         """Test rate limiting isolation between IPs."""
         rate_limiter = RateLimitTracker()
@@ -156,6 +172,7 @@ class TestRateLimitingMiddleware:
         # Second IP should not be affected
         assert not rate_limiter.is_rate_limited("192.168.1.2", 10)
     
+    @pytest.mark.asyncio
     async def test_rate_limit_window_expiry(self):
         """Test rate limit window expiry behavior."""
         rate_limiter = RateLimitTracker()
@@ -170,6 +187,7 @@ class TestRateLimitingMiddleware:
         # Should be allowed again
         assert not rate_limiter.is_rate_limited("192.168.1.1", 10, window=1)
     
+    @pytest.mark.asyncio
     async def test_sensitive_endpoint_rate_limits(self):
         """Test stricter rate limits for sensitive endpoints."""
         middleware = self._create_security_middleware()
@@ -190,15 +208,19 @@ class TestRateLimitingMiddleware:
     
     def _create_mock_request(self, path: str = "/test") -> Mock:
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
+        # Mock: Generic component isolation for controlled unit testing
         request.url = Mock()
         request.url.path = path
+        # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value=f"http://test.com{path}")
         return request
 
 class TestAuthenticationMiddleware:
     """Test authentication and authorization middleware."""
     
+    @pytest.mark.asyncio
     async def test_bearer_token_extraction(self):
         """Test bearer token extraction from headers."""
         middleware = self._create_security_middleware()
@@ -210,6 +232,7 @@ class TestAuthenticationMiddleware:
         # Since extraction is mocked to return None, verify the flow
         assert user_id is None  # Mock implementation
     
+    @pytest.mark.asyncio
     async def test_missing_authentication_handling(self):
         """Test handling of missing authentication."""
         middleware = self._create_security_middleware()
@@ -218,6 +241,7 @@ class TestAuthenticationMiddleware:
         user_id = await middleware._get_user_id(request)
         assert user_id is None
     
+    @pytest.mark.asyncio
     async def test_malformed_token_handling(self):
         """Test handling of malformed authentication tokens."""
         middleware = self._create_security_middleware()
@@ -228,6 +252,7 @@ class TestAuthenticationMiddleware:
         user_id = await middleware._get_user_id(request)
         assert user_id is None
     
+    @pytest.mark.asyncio
     async def test_auth_attempt_tracking(self):
         """Test authentication attempt tracking."""
         middleware = self._create_security_middleware()
@@ -245,14 +270,17 @@ class TestAuthenticationMiddleware:
     
     def _create_mock_request(self, headers: Dict = None) -> Mock:
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.headers = headers or {}
+        # Mock: Component isolation for controlled unit testing
         request.headers.get = Mock(side_effect=lambda k, d=None: headers.get(k, d) if headers else d)
         return request
 
 class TestErrorHandlingMiddleware:
     """Test error handling middleware chain functionality."""
     
+    @pytest.mark.asyncio
     async def test_security_exception_handling(self):
         """Test security exception handling in middleware chain."""
         middleware = self._create_security_middleware()
@@ -260,6 +288,7 @@ class TestErrorHandlingMiddleware:
         with pytest.raises(NetraSecurityException):
             middleware._handle_security_middleware_error(NetraSecurityException("Test security error"))
     
+    @pytest.mark.asyncio
     async def test_general_exception_handling(self):
         """Test general exception handling in middleware."""
         middleware = self._create_security_middleware()
@@ -268,6 +297,7 @@ class TestErrorHandlingMiddleware:
             middleware._handle_security_middleware_error(ValueError("General error"))
         assert exc_info.value.status_code == 500
     
+    @pytest.mark.asyncio
     async def test_exception_propagation_chain(self):
         """Test exception propagation through middleware chain."""
         middleware = self._create_security_middleware()
@@ -278,8 +308,10 @@ class TestErrorHandlingMiddleware:
         request = self._create_mock_request()
         
         with pytest.raises(ValueError):
+            # Mock: Component isolation for testing without external dependencies
             await middleware.dispatch(request, failing_call_next)
     
+    @pytest.mark.asyncio
     async def test_timeout_exception_handling(self):
         """Test timeout exception handling in middleware."""
         middleware = self._create_security_middleware()
@@ -289,6 +321,7 @@ class TestErrorHandlingMiddleware:
         with patch.object(asyncio, 'wait_for') as mock_wait:
             mock_wait.side_effect = asyncio.TimeoutError()
             with pytest.raises(asyncio.TimeoutError):
+                # Mock: Component isolation for controlled unit testing
                 await middleware.dispatch(request, lambda r: Mock(spec=Response))
     
     def _create_security_middleware(self) -> SecurityMiddleware:
@@ -297,11 +330,15 @@ class TestErrorHandlingMiddleware:
     
     def _create_mock_request(self, headers: Dict = None) -> Mock:
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.headers = headers or {}
         request.method = "GET"
+        # Mock: Generic component isolation for controlled unit testing
         request.url = Mock()
+        # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value="http://test.com")
         request.url.path = "/test"
+        # Mock: Async component isolation for testing without real async operations
         request.body = AsyncMock(return_value=b'')
         return request

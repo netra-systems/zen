@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """
 LLM Manager Test Helpers - Reusable functions for LLM testing
 Extracted from test_llm_manager_provider_switching.py for 25-line function compliance
@@ -51,31 +52,31 @@ def _should_enable_llm() -> bool:
 def _has_real_llm_marker() -> bool:
     """Check if real LLM is explicitly requested"""
     # Check pytest markers or environment flags
-    return os.getenv("USE_REAL_LLM", "false").lower() == "true"
+    return get_env().get("USE_REAL_LLM", "false").lower() == "true"
 
 def _has_api_keys() -> bool:
     """Check if any LLM API keys are available"""
     api_keys = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GOOGLE_API_KEY"]
-    return any(os.getenv(key) for key in api_keys)
+    return any(get_env().get(key) for key in api_keys)
 
 def _create_llm_configs() -> Dict[str, LLMConfig]:
     """Create LLM configurations with real or test keys"""
     configs = {}
     
     # OpenAI configuration
-    openai_key = os.getenv('OPENAI_API_KEY', 'test_openai_key')
+    openai_key = get_env().get('OPENAI_API_KEY', 'test_openai_key')
     configs['openai_gpt4'] = LLMConfig(
         provider='openai', model_name='gpt-4', api_key=openai_key
     )
     
     # Google configuration
-    google_key = os.getenv('GOOGLE_API_KEY', 'test_google_key')
+    google_key = get_env().get('GOOGLE_API_KEY', 'test_google_key')
     configs['google_gemini'] = LLMConfig(
         provider='google', model_name='gemini-pro', api_key=google_key
     )
     
     # Anthropic configuration
-    anthropic_key = os.getenv('ANTHROPIC_API_KEY', 'test_anthropic_key')
+    anthropic_key = get_env().get('ANTHROPIC_API_KEY', 'test_anthropic_key')
     configs['anthropic_claude'] = LLMConfig(
         provider='anthropic', model_name='claude-3-sonnet', api_key=anthropic_key
     )

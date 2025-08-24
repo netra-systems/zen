@@ -22,7 +22,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -90,6 +90,7 @@ class TestMigrationRollbackRecovery:
             "timeout_seconds": 30
         }
 
+    @pytest.mark.asyncio
     async def test_migration_failure_triggers_rollback(self, migration_config):
         """
         Test that migration failures trigger automatic rollback to previous state.
@@ -117,6 +118,7 @@ class TestMigrationRollbackRecovery:
         consistency_valid = await self._verify_database_consistency(migration_config)
         assert consistency_valid, "Database inconsistent after rollback"
 
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_constraint_violation(self, migration_config):
         """Test rollback when migration violates database constraints."""
         # Create table with constraints
@@ -130,6 +132,7 @@ class TestMigrationRollbackRecovery:
         schema_preserved = await self._verify_original_schema_intact(migration_config, constraint_tables)
         assert schema_preserved, "Original schema not preserved after constraint violation"
 
+    @pytest.mark.asyncio
     async def test_partial_migration_rollback_atomicity(self, migration_config):
         """Test that partial migrations are rolled back atomically."""
         # Setup multi-table migration scenario
@@ -143,6 +146,7 @@ class TestMigrationRollbackRecovery:
         no_partial_changes = await self._verify_no_partial_changes_remain(migration_config)
         assert no_partial_changes, "Partial migration changes were not rolled back"
 
+    @pytest.mark.asyncio
     async def test_concurrent_connection_handling_during_rollback(self, migration_config):
         """Test rollback behavior with concurrent database connections."""
         # Establish multiple connections

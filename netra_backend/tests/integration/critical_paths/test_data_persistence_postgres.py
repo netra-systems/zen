@@ -10,7 +10,7 @@ from pathlib import Path
 
 import asyncio
 import uuid
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import asyncpg
 import pytest
@@ -25,6 +25,7 @@ class TestDataPersistencePostgresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_data_insert_and_retrieval(self):
         """Test data insertion and retrieval"""
         pg_service = PostgresService()
@@ -57,6 +58,7 @@ class TestDataPersistencePostgresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_transaction_commit_rollback(self):
         """Test transaction commit and rollback"""
         pg_service = PostgresService()
@@ -86,6 +88,7 @@ class TestDataPersistencePostgresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_bulk_insert_performance(self):
         """Test bulk insert performance"""
         pg_service = PostgresService()
@@ -110,6 +113,7 @@ class TestDataPersistencePostgresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_data_update_consistency(self):
         """Test data update consistency"""
         pg_service = PostgresService()
@@ -141,6 +145,7 @@ class TestDataPersistencePostgresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_data_deletion_cascade(self):
         """Test cascading deletion"""
         pg_service = PostgresService()

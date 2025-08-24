@@ -4,7 +4,7 @@ Tests real LLM agents for model effectiveness and GPT-5 migration workflows.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -104,6 +104,7 @@ class TestModelEffectivenessAnalysis:
     
     @pytest.mark.real_llm
 
+    @pytest.mark.asyncio
     async def test_gpt4o_claude3_sonnet_effectiveness(self, model_selection_setup):
 
         """Test: 'I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?'"""
@@ -118,6 +119,7 @@ class TestModelEffectivenessAnalysis:
     
     @pytest.mark.real_llm
 
+    @pytest.mark.asyncio
     async def test_comparative_model_analysis(self, model_selection_setup):
 
         """Test comparative analysis between different models."""
@@ -274,6 +276,7 @@ class TestGPT5MigrationWorkflows:
 
     """Test GPT-5 migration and tool selection workflows."""
     
+    @pytest.mark.asyncio
     async def test_gpt5_tool_selection(self, model_selection_setup):
 
         """Test: '@Netra which of our Agent tools should switch to GPT-5? Which versions? What to set the verbosity to?'"""
@@ -286,6 +289,7 @@ class TestGPT5MigrationWorkflows:
 
         _validate_gpt5_tool_selection_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_gpt5_upgrade_analysis(self, model_selection_setup):
 
         """Test: '@Netra was the upgrade yesterday to GPT-5 worth it? Rollback anything where quality didn't improve much but cost was higher'"""

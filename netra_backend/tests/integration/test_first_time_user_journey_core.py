@@ -19,7 +19,7 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -36,7 +36,7 @@ class TestFirstTimeUserJourneyCore:
     @pytest.fixture
     async def first_time_user_setup(self):
         """Setup isolated test environment for first-time user testing"""
-        return await self._create_first_time_user_env()
+        yield await self._create_first_time_user_env()
 
     @pytest.fixture
     def payment_system(self):
@@ -69,30 +69,45 @@ class TestFirstTimeUserJourneyCore:
 
     def _init_payment_system(self):
         """Initialize mock payment system"""
+        # Mock: Generic component isolation for controlled unit testing
         payment_service = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         payment_service.create_customer = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         payment_service.process_payment = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         payment_service.setup_subscription = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         payment_service.verify_payment_method = AsyncMock()
         return payment_service
 
     def _init_email_system(self):
         """Initialize mock email system"""
+        # Mock: Generic component isolation for controlled unit testing
         email_service = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         email_service.send_verification = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         email_service.send_welcome = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         email_service.send_onboarding = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         email_service.verify_email_token = AsyncMock()
         return email_service
 
     def _init_llm_system(self):
         """Initialize mock LLM system"""
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.generate_response = AsyncMock()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.optimize_query = AsyncMock()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.route_model = AsyncMock()
         return llm_manager
 
+    @pytest.mark.asyncio
     async def test_complete_registration_to_first_login_flow(self, first_time_user_setup, email_system, payment_system):
         """
         Test complete user registration to first successful login.
@@ -152,6 +167,7 @@ class TestFirstTimeUserJourneyCore:
         
         return onboarding_data
 
+    @pytest.mark.asyncio
     async def test_first_agent_creation_to_success(self, first_time_user_setup, llm_system):
         """
         Test first agent creation and successful task execution.
@@ -204,6 +220,7 @@ class TestFirstTimeUserJourneyCore:
         
         return {"message": message, "response": agent_response, "task_completed": True}
 
+    @pytest.mark.asyncio
     async def test_trial_activation_to_first_optimization(self, first_time_user_setup, llm_system):
         """
         Test trial activation to first successful optimization.

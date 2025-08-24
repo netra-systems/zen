@@ -4,7 +4,7 @@ Components: AuthService → JWT Validation → WebSocket Middleware → Message 
 Critical: First user message must seamlessly authenticate and process
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -13,7 +13,7 @@ import asyncio
 import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import jwt
 import pytest
@@ -27,7 +27,7 @@ from netra_backend.app.services.agent_service_core import AgentService
 
 from netra_backend.app.services.user_auth_service import UserAuthService as AuthService
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 @pytest.mark.asyncio
@@ -38,6 +38,7 @@ class TestFirstMessageAuthenticationFlow:
     
     @pytest.fixture
 
+    @pytest.mark.asyncio
     async def test_user(self):
 
         """Create test user for authentication testing."""
@@ -62,14 +63,19 @@ class TestFirstMessageAuthenticationFlow:
 
         """Create mock WebSocket with auth headers."""
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.accept = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send_json = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.close = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         websocket.receive_json = AsyncMock(return_value={
 
             "type": "user_message",
@@ -100,6 +106,7 @@ class TestFirstMessageAuthenticationFlow:
 
         return WebSocketManager()
     
+    @pytest.mark.asyncio
     async def test_unauthenticated_to_authenticated_flow(
 
         self, auth_service, ws_manager, mock_websocket, test_user
@@ -114,6 +121,7 @@ class TestFirstMessageAuthenticationFlow:
 
         no_auth_ws.headers = {}
 
+        # Mock: Generic component isolation for controlled unit testing
         no_auth_ws.close = AsyncMock()
         
         with pytest.raises(ValueError, match="No authorization header"):
@@ -167,6 +175,7 @@ class TestFirstMessageAuthenticationFlow:
 
         assert connection.authenticated is True
     
+    @pytest.mark.asyncio
     async def test_jwt_validation_with_expiry(self, auth_service):
 
         """Test JWT validation including expiry checks."""
@@ -209,6 +218,7 @@ class TestFirstMessageAuthenticationFlow:
 
         assert decoded["user_id"] == "test_user"
     
+    @pytest.mark.asyncio
     async def test_websocket_auth_middleware_integration(
 
         self, ws_manager, mock_websocket, test_user
@@ -244,6 +254,7 @@ class TestFirstMessageAuthenticationFlow:
         
         # Test middleware rejection
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         no_auth_ws = Mock(spec=WebSocket)
 
         no_auth_ws.headers = {}
@@ -252,6 +263,7 @@ class TestFirstMessageAuthenticationFlow:
 
         assert authenticated_user is None
     
+    @pytest.mark.asyncio
     async def test_first_message_after_authentication(
 
         self, ws_manager, mock_websocket, test_user
@@ -267,8 +279,10 @@ class TestFirstMessageAuthenticationFlow:
         # Mock message handler
         # L2: Mocking message handler to test auth→message flow
 
+        # Mock: Component isolation for controlled unit testing
         message_handler = Mock(spec=MessageHandlerService)
 
+        # Mock: Generic component isolation for controlled unit testing
         message_handler.handle_user_message = AsyncMock()
         
         # Process first message
@@ -311,16 +325,19 @@ class TestFirstMessageAuthenticationFlow:
 
         )
     
+    @pytest.mark.asyncio
     async def test_auth_failure_scenarios(self, auth_service, ws_manager):
 
         """Test various authentication failure scenarios."""
         
         # Scenario 1: Invalid token format
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         invalid_ws = Mock(spec=WebSocket)
 
         invalid_ws.headers = {"Authorization": "InvalidFormat"}
 
+        # Mock: Generic component isolation for controlled unit testing
         invalid_ws.close = AsyncMock()
         
         with pytest.raises(ValueError, match="Invalid authorization format"):
@@ -329,14 +346,17 @@ class TestFirstMessageAuthenticationFlow:
         
         # Scenario 2: Malformed JWT
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         malformed_ws = Mock(spec=WebSocket)
 
         malformed_ws.headers = {"Authorization": "Bearer not.a.jwt"}
 
+        # Mock: Generic component isolation for controlled unit testing
         malformed_ws.close = AsyncMock()
         
         # L2: Mocking JWT decode to test malformed token handling
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('jwt.decode') as mock_decode:
 
             mock_decode.side_effect = jwt.InvalidTokenError("Invalid token")
@@ -356,6 +376,7 @@ class TestFirstMessageAuthenticationFlow:
 
             assert user is None
     
+    @pytest.mark.asyncio
     async def test_concurrent_auth_requests(self, ws_manager, test_user):
 
         """Test handling of concurrent authentication requests."""
@@ -366,8 +387,10 @@ class TestFirstMessageAuthenticationFlow:
 
         for i in range(5):
 
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             ws = Mock(spec=WebSocket)
 
+            # Mock: Generic component isolation for controlled unit testing
             ws.accept = AsyncMock()
 
             ws.headers = {"Authorization": f"Bearer token_{i}"}
@@ -396,6 +419,7 @@ class TestFirstMessageAuthenticationFlow:
 
             assert user_id in ws_manager.active_connections
     
+    @pytest.mark.asyncio
     async def test_auth_token_refresh_during_session(
 
         self, ws_manager, mock_websocket, test_user

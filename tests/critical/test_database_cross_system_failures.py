@@ -39,6 +39,7 @@ class TestDatabaseCrossSystemFailures:
     @pytest.fixture
     async def mock_postgres_session(self):
         """Mock PostgreSQL session that simulates database operations."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
         mock_data = {}
         
@@ -51,15 +52,22 @@ class TestDatabaseCrossSystemFailures:
                 # Simulate update operations
                 pass
             elif "SELECT" in str(query):
+                # Mock: Generic component isolation for controlled unit testing
                 result = MagicMock()
                 result.scalar.return_value = "test_value"
+                # Mock: Service component isolation for predictable testing behavior
                 result.fetchone.return_value = MagicMock(plan_tier="free", updated_at=time.time())
                 return result
+            # Mock: Generic component isolation for controlled unit testing
             return MagicMock()
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.execute = AsyncMock(side_effect=mock_execute)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.add = MagicMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.commit = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.rollback = AsyncMock()
         
         yield mock_session
@@ -68,10 +76,15 @@ class TestDatabaseCrossSystemFailures:
     async def redis_client(self):
         """Mock Redis client for testing database consistency patterns."""
         # Create mock Redis client for testing
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.hset = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.hget = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.flushdb = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.expire = AsyncMock()
         
         # Mock data store for simulating Redis behavior
@@ -96,6 +109,7 @@ class TestDatabaseCrossSystemFailures:
     @pytest.fixture
     async def mock_clickhouse_client(self):
         """Mock ClickHouse client for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         yield mock_client
     

@@ -3,10 +3,8 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import time
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -25,10 +23,14 @@ from netra_backend.app.core.exceptions_auth import NetraSecurityException
 @pytest.fixture
 def mock_redis_manager():
     """Mock Redis manager for testing."""
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis = Mock()
     redis.enabled = True
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.get = AsyncMock(return_value="active")
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.setex = AsyncMock()
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.delete = AsyncMock()
     return redis
 
@@ -83,6 +85,7 @@ class TestTimestampValidation:
 class TestCsrfTokenValidation:
     """Test CSRF token validation functions."""
 
+    @pytest.mark.asyncio
     async def test_store_csrf_token_redis_enabled(self, mock_redis_manager):
         """Test storing CSRF token when Redis is enabled."""
         await _store_csrf_token_in_redis("123", "csrf-token", mock_redis_manager)
@@ -91,6 +94,7 @@ class TestCsrfTokenValidation:
         call_args = mock_redis_manager.setex.call_args[0]
         assert "oauth_csrf:pr:123:csrf-token" in call_args[0]
 
+    @pytest.mark.asyncio
     async def test_validate_csrf_token_success(self, mock_redis_manager):
         """Test successful CSRF token validation."""
         state_data = {"pr_number": "123", "csrf_token": "valid-token"}
@@ -101,6 +105,7 @@ class TestCsrfTokenValidation:
         
         mock_redis_manager.delete.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_validate_csrf_token_invalid(self, mock_redis_manager):
         """Test CSRF token validation with invalid token."""
         state_data = {"pr_number": "123", "csrf_token": "invalid-token"}
@@ -109,16 +114,20 @@ class TestCsrfTokenValidation:
         with pytest.raises(NetraSecurityException, match="Invalid or expired CSRF token"):
             await _validate_and_consume_csrf_token(state_data, mock_redis_manager)
 
+    @pytest.mark.asyncio
     async def test_store_csrf_token_redis_disabled(self):
         """Test storing CSRF token when Redis is disabled."""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = Mock()
         mock_redis.enabled = False
         
         # Should not raise exception and not call Redis
         await _store_csrf_token_in_redis("123", "csrf-token", mock_redis)
 
+    @pytest.mark.asyncio
     async def test_validate_csrf_token_redis_disabled(self):
         """Test CSRF token validation when Redis is disabled."""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = Mock()
         mock_redis.enabled = False
         state_data = {"pr_number": "123", "csrf_token": "test-token"}

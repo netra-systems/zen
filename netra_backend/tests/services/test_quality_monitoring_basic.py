@@ -3,14 +3,13 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import sys
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
 # Mock ClickHouse before importing the service
+# Mock: ClickHouse external database isolation for unit testing performance
 sys.modules['netra_backend.app.db.clickhouse'] = MagicMock()
 sys.modules['netra_backend.app.db.clickhouse'].ClickHouseDatabase = MagicMock
 
@@ -31,6 +30,7 @@ from netra_backend.tests.helpers.quality_monitoring_helpers import (
 
 class TestQualityMonitoringServiceBasic:
     """Test basic functionality of QualityMonitoringService"""
+    @pytest.mark.asyncio
     async def test_service_initialization(self, quality_monitoring_service):
         """Test service initialization with dependencies"""
         assert_service_initialization(quality_monitoring_service)
@@ -76,6 +76,7 @@ class TestQualityThresholds:
 
 class TestServiceSubscription:
     """Test subscription management"""
+    @pytest.mark.asyncio
     async def test_subscribe_and_unsubscribe(self):
         """Test subscription lifecycle"""
         service = QualityMonitoringService()

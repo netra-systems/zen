@@ -62,6 +62,7 @@ class FileTestHelpers:
     @staticmethod
     def mock_write_failure():
         """Mock write failure for testing."""
+        # Mock: Component isolation for testing without external dependencies
         return patch('builtins.open', side_effect=IOError("Write failed"))
 
 class CryptoTestHelpers:

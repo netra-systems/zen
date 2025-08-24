@@ -18,7 +18,7 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 from netra_backend.app.schemas.UserPlan import PlanTier, ToolAllowance
 
@@ -29,27 +29,39 @@ class TestPlanEnforcementBilling:
     @pytest.fixture
     def mock_feature_enforcement_service(self):
         """Mock feature enforcement service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.check_feature_access = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.enforce_usage_limits = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.track_feature_usage = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_billing_cycle_service(self):
         """Mock billing cycle management service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.calculate_next_billing_date = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.handle_billing_date_changes = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.prorate_billing_adjustments = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_payment_retry_service(self):
         """Mock payment retry and dunning service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.initiate_payment_retry = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.execute_dunning_sequence = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.calculate_retry_schedule = AsyncMock()
         return service
     

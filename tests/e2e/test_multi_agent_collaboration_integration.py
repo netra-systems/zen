@@ -36,6 +36,7 @@ class TestMultiAgentCollaboration:
         """Setup multi-agent collaboration environment."""
         config = get_config()
         llm_manager = LLMManager(config)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = AsyncMock()
         
         supervisor = SupervisorAgent(llm_manager=llm_manager)

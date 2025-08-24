@@ -29,10 +29,10 @@ import asyncio
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from netra_backend.app.db.session import get_db_session as get_database_session
+from netra_backend.app.database import get_db_session as get_database_session
 from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
@@ -41,7 +41,7 @@ from netra_backend.app.schemas.core_models import Thread, User
 # Real imports - not mocked unless external API
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.user_service import UserService
-from netra_backend.app.websocket_core import ConnectionInfo
+from netra_backend.app.websocket_core.types import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)
 
@@ -107,7 +107,9 @@ class TestIntegrationRealComponents:
     """
     
     @pytest.mark.asyncio
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.services.external_api.make_request')
+    @pytest.mark.asyncio
     async def test_thread_service_integration(self, mock_api):
         """Integration test with real components, mocked external API only."""
         # Mock ONLY external API
@@ -125,10 +127,13 @@ class TestIntegrationRealComponents:
         assert thread.title == "Test Thread"
     
     @pytest.mark.asyncio
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.database.database_manager.get_session')
+    @pytest.mark.asyncio
     async def test_websocket_message_flow_integration(self, mock_db):
         """Test WebSocket message handling with real components."""
         # Mock database only
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
         mock_db.return_value = mock_session
         
@@ -161,7 +166,9 @@ class TestE2ERealBackend:
     
     @pytest.mark.asyncio
     @pytest.mark.integration
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.agents.external.openai_client.make_request')
+    @pytest.mark.asyncio
     async def test_complete_agent_workflow_e2e(self, mock_openai):
         """E2E test of complete agent workflow with real backend."""
         # Mock ONLY external LLM API
@@ -190,6 +197,7 @@ class TestE2ERealBackend:
     
     @pytest.mark.asyncio
     @pytest.mark.integration  
+    @pytest.mark.asyncio
     async def test_user_thread_creation_e2e(self):
         """E2E test of user creating thread with no external APIs."""
         # No mocking needed - pure internal functionality
@@ -221,7 +229,9 @@ class TestExternalAPIMocking:
     """
     
     @pytest.mark.asyncio
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.services.openai_service.OpenAIClient.chat_completion')
+    @pytest.mark.asyncio
     async def test_llm_response_handling(self, mock_openai):
         """Mock external LLM API, test real response handling."""
         # Realistic mock response
@@ -242,7 +252,9 @@ class TestExternalAPIMocking:
         assert result.confidence > 0.8
     
     @pytest.mark.asyncio
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.database.clickhouse.ClickHouseClient.execute')
+    @pytest.mark.asyncio
     async def test_analytics_query_with_mocked_db(self, mock_clickhouse):
         """Mock external ClickHouse, test real analytics logic."""
         # Realistic mock data
@@ -260,7 +272,9 @@ class TestExternalAPIMocking:
         assert report.avg_cost_per_request == 0.1036
     
     @pytest.mark.asyncio
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient.post')
+    @pytest.mark.asyncio
     async def test_webhook_delivery_with_error_handling(self, mock_http):
         """Test real error handling with mocked HTTP failures."""
         # Mock HTTP failure
@@ -311,11 +325,17 @@ class TestAntiPatternsWhatNotToDo:
         # This is an ANTI-PATTERN example - don't do this!
         
         # BAD: Mocking internal components (>30% of imports)
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.models.user.User'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.models.thread.Thread'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.user_service.UserService'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.thread_service.ThreadService'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.utils.validation.validate_email'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.utils.formatting.format_name'):
             
             # With everything mocked, this test tells us nothing
@@ -327,9 +347,13 @@ class TestAntiPatternsWhatNotToDo:
         # This is an ANTI-PATTERN example - don't do this!
         
         # BAD: Integration test with all components mocked
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.thread_service.ThreadService'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.models.user.User'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.models.thread.Thread'):
             
             # This isn't testing integration at all!
@@ -382,20 +406,24 @@ async def setup_test_data() -> Dict[str, Any]:
 @pytest.fixture
 async def real_user():
     """Fixture providing real User instance."""
-    return create_test_user(email="fixture@example.com")
+    yield create_test_user(email="fixture@example.com")
 
 @pytest.fixture
 async def real_thread_with_user():
     """Fixture providing real Thread with real User."""
     user = create_test_user()
     thread = create_test_thread(user.id)
-    return {"user": user, "thread": thread}
+    yield {"user": user, "thread": thread}
 
 @pytest.fixture
 async def database_session():
     """Fixture providing real database session for E2E tests."""
     async with get_database_session() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            if hasattr(session, "close"):
+                await session.close()
         # Cleanup happens automatically with async context manager
 
 # =============================================================================

@@ -10,7 +10,7 @@ import json
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -22,13 +22,13 @@ from netra_backend.app.schemas.websocket_models import (
 )
 
 from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
-from netra_backend.tests.integration.websocket_mocks import MockWebSocket
+from netra_backend.tests.integration.websocket_mocks import MockWebSocketConnection
 
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 
-    def __init__(self):
-        super().__init__()
+    def setup_method(self):
+        """Setup method for test class."""
         self.routing_decisions: List[Dict[str, Any]] = []
         self.agent_invocations: List[Dict[str, Any]] = []
 

@@ -92,6 +92,7 @@ class TestArtifactValidation:
         assert validator.validation_history == []
         assert validator.MAX_HISTORY_SIZE == 1000
     
+    @pytest.mark.asyncio
     async def test_valid_triage_artifact_validation(self, sample_triage_result, validation_context):
         """Test validation of valid triage artifact."""
         validator = ArtifactValidator()
@@ -105,6 +106,7 @@ class TestArtifactValidation:
         assert len(result.errors) == 0
         assert result.artifact_type == "triage_result"
     
+    @pytest.mark.asyncio
     async def test_invalid_triage_artifact_validation(self, validation_context):
         """Test validation of invalid triage artifact."""
         validator = ArtifactValidator()
@@ -123,6 +125,7 @@ class TestArtifactValidation:
         assert len(result.errors) >= 2  # Multiple validation failures
         assert any("unknown" in error for error in result.errors)
     
+    @pytest.mark.asyncio
     async def test_missing_triage_artifact_validation(self, validation_context):
         """Test validation when triage artifact is missing."""
         validator = ArtifactValidator()
@@ -132,6 +135,7 @@ class TestArtifactValidation:
         assert not result.is_valid
         assert any("triage_result is None" in error for error in result.errors)
     
+    @pytest.mark.asyncio
     async def test_valid_data_artifact_validation(self, sample_data_result, validation_context):
         """Test validation of valid data artifact."""
         validator = ArtifactValidator()
@@ -145,6 +149,7 @@ class TestArtifactValidation:
         assert len(result.errors) == 0
         assert result.artifact_type == "data_result"
     
+    @pytest.mark.asyncio
     async def test_invalid_data_artifact_validation(self, validation_context):
         """Test validation of invalid data artifact."""
         validator = ArtifactValidator()
@@ -178,6 +183,7 @@ class TestArtifactValidation:
         assert len(result.errors) >= 1
         assert any("query is required" in error for error in result.errors)
     
+    @pytest.mark.asyncio
     async def test_valid_optimization_artifact_validation(self, sample_optimization_result, validation_context):
         """Test validation of valid optimization artifact.""" 
         validator = ArtifactValidator()
@@ -191,6 +197,7 @@ class TestArtifactValidation:
         assert len(result.errors) == 0
         assert result.artifact_type == "optimizations_result"
     
+    @pytest.mark.asyncio
     async def test_invalid_optimization_artifact_validation(self, validation_context):
         """Test validation of invalid optimization artifact."""
         validator = ArtifactValidator()
@@ -224,6 +231,7 @@ class TestArtifactValidation:
         assert len(result.errors) >= 2
         assert any("optimization_type is required" in error for error in result.errors)
     
+    @pytest.mark.asyncio
     async def test_validation_history_storage(self, sample_triage_result, validation_context):
         """Test validation results are stored in history."""
         validator = ArtifactValidator()
@@ -240,6 +248,7 @@ class TestArtifactValidation:
         assert history[0].artifact_type == "triage_result"
         assert history[0].is_valid
     
+    @pytest.mark.asyncio
     async def test_validation_history_limit(self, validation_context):
         """Test validation history respects size limit."""
         validator = ArtifactValidator()
@@ -254,6 +263,7 @@ class TestArtifactValidation:
         history = validator.get_validation_history()
         assert len(history) == 3  # Should be limited to MAX_HISTORY_SIZE
     
+    @pytest.mark.asyncio
     async def test_pipeline_handoff_validation_triage_to_data(self, sample_triage_result):
         """Test pipeline handoff validation from triage to data agent."""
         validator = ArtifactValidator()
@@ -271,6 +281,7 @@ class TestArtifactValidation:
         assert len(history) == 1
         assert history[0].artifact_type == "triage_result"
     
+    @pytest.mark.asyncio
     async def test_pipeline_handoff_validation_failure(self):
         """Test pipeline handoff validation raises error for invalid artifacts."""
         validator = ArtifactValidator()
@@ -284,6 +295,7 @@ class TestArtifactValidation:
         assert "DataSubAgent" in str(exc_info.value)
         assert exc_info.value.artifact_type == "triage_result"
     
+    @pytest.mark.asyncio
     async def test_anomaly_detection_artifact_validation(self, validation_context):
         """Test validation of anomaly detection artifacts."""
         validator = ArtifactValidator()
@@ -301,12 +313,14 @@ class TestArtifactValidation:
         assert result.is_valid
         assert result.artifact_type == "data_result"
     
+    @pytest.mark.asyncio
     async def test_global_validator_instance(self):
         """Test global validator instance is available."""
         from netra_backend.app.agents.artifact_validator import artifact_validator
         assert isinstance(artifact_validator, ArtifactValidator)
         assert artifact_validator.validation_history == []
     
+    @pytest.mark.asyncio
     async def test_validation_context_creation(self):
         """Test validation context creates properly."""
         context = ValidationContext(
@@ -322,6 +336,7 @@ class TestArtifactValidation:
         assert context.user_request == "Test request"
         assert isinstance(context.validation_timestamp, datetime)
     
+    @pytest.mark.asyncio
     async def test_validation_warnings_and_errors_separation(self, validation_context):
         """Test validation properly separates warnings from errors."""
         validator = ArtifactValidator()

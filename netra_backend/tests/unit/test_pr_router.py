@@ -31,6 +31,4 @@ Coverage verified: All 22 functions from pr_router.py are tested.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 pass

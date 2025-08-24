@@ -15,15 +15,16 @@ from fastapi.testclient import TestClient
 
 # Add auth service to path
 auth_service_dir = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(auth_service_dir))
 from auth_service.main import app
 
 from auth_service.auth_core.models.auth_models import AuthProvider
+from test_framework.environment_markers import env, dev_and_staging, env_requires
 
 # Test client
 client = TestClient(app)
 
 
+@env("test", "dev")  # OAuth config tests can run with mocked configurations
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 

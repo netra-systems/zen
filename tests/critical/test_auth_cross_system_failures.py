@@ -49,8 +49,6 @@ os.environ["AUTH_SERVICE_URL"] = "http://127.0.0.1:8001"
 # Add project root to path for imports
 import sys
 from pathlib import Path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Import after setting environment and path
 try:
@@ -631,7 +629,9 @@ class TestAuthCrossSystemFailures:
         
         # Simulate service restart by clearing in-memory caches/state
         # This simulates what happens during a real service restart
+        # Mock: Component isolation for testing without external dependencies
         with patch('auth_service.auth_core.core.session_manager.SessionManager._sessions', {}):
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.auth_integration.auth._token_cache', {}):
                 # Wait for caches to clear
                 await asyncio.sleep(0.1)

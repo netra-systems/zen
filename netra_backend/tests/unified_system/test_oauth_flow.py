@@ -3,15 +3,14 @@ OAuth Flow End-to-End Tests
 Business Value: $25K MRR - Critical authentication path validation
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from pathlib import Path
 import sys
 
 import asyncio
 import json
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import httpx
 import pytest
@@ -44,6 +43,7 @@ try:
 
 except ImportError:
 
+    # Mock: Generic component isolation for controlled unit testing
     auth_client = Mock()
 
 try:
@@ -63,6 +63,7 @@ try:
 
 except ImportError:
 
+    # Mock: Generic component isolation for controlled unit testing
     get_current_user = Mock()
 
 @pytest.fixture
@@ -79,6 +80,7 @@ def mock_auth_client():
 
     """Mock auth client for OAuth testing"""
 
+    # Mock: Component isolation for testing without external dependencies
     with patch('app.clients.auth_client.auth_client') as mock:
 
         mock.get_oauth_config.return_value = {
@@ -91,6 +93,7 @@ def mock_auth_client():
 
         }
 
+        # Mock: Component isolation for controlled unit testing
         mock.detect_environment.return_value = Mock(value="development")
 
         yield mock
@@ -101,14 +104,19 @@ def mock_security_service():
 
     """Mock security service for authentication testing"""
 
+    # Mock: Security service isolation for auth testing without real token validation
     mock = Mock(spec=SecurityService)
 
+    # Mock: Authentication service isolation for testing without real auth flows
     mock.authenticate_user = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     mock.create_access_token = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     mock.create_refresh_token = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     mock.validate_token = AsyncMock()
 
     return mock
@@ -119,14 +127,19 @@ def mock_websocket_manager():
 
     """Mock WebSocket manager for connection testing"""
 
+    # Mock: WebSocket connection isolation for testing without network overhead
     with patch('app.websocket.connection_manager.WebSocketManager') as mock:
 
+        # Mock: Generic component isolation for controlled unit testing
         manager = Mock()
 
+        # Mock: Generic component isolation for controlled unit testing
         manager.connect = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         manager.disconnect = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         manager.authenticate_connection = AsyncMock(return_value=True)
 
         mock.return_value = manager
@@ -137,6 +150,7 @@ class TestOAuthCompleteFlow:
 
     """Test complete OAuth login sequence"""
     
+    @pytest.mark.asyncio
     async def test_complete_oauth_login_flow(self, test_client, mock_auth_client):
 
         """
@@ -148,6 +162,7 @@ class TestOAuthCompleteFlow:
         """
         # Step 1: User initiates OAuth login
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.auth_routes.login_flow.handle_login_request') as mock_login:
 
             mock_login.return_value = {
@@ -162,6 +177,7 @@ class TestOAuthCompleteFlow:
         
         # Step 2: Simulate OAuth callback with authorization code
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.auth_routes.callback_processor.handle_callback_request') as mock_callback:
 
             mock_callback.return_value = {
@@ -192,6 +208,7 @@ class TestOAuthCompleteFlow:
         
         # Step 3: Verify user session created
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.auth_integration.auth.get_current_user') as mock_user:
 
             mock_user.return_value = {
@@ -224,6 +241,7 @@ class TestTokenGenerationAndValidation:
 
     """Test JWT token lifecycle"""
     
+    @pytest.mark.asyncio
     async def test_token_generation_and_validation(self, mock_security_service):
 
         """
@@ -281,6 +299,7 @@ class TestTokenGenerationAndValidation:
 
         assert validation_result["user_id"] == "test_user"
         
+    @pytest.mark.asyncio
     async def test_token_expiration_handling(self, mock_security_service):
 
         """Test expired token handling"""
@@ -306,6 +325,7 @@ class TestWebSocketAuthentication:
 
     """Test WebSocket auth with JWT"""
     
+    @pytest.mark.asyncio
     async def test_websocket_authentication(self, mock_websocket_manager):
 
         """
@@ -341,6 +361,7 @@ class TestWebSocketAuthentication:
 
         assert auth_result["user_id"] == "test_user"
         
+    @pytest.mark.asyncio
     async def test_websocket_invalid_token_rejection(self, mock_websocket_manager):
 
         """Test WebSocket rejection of invalid tokens"""
@@ -372,6 +393,7 @@ class TestTokenRefreshFlow:
 
     """Test token refresh across services"""
     
+    @pytest.mark.asyncio
     async def test_token_refresh_across_services(self, test_client, mock_security_service):
 
         """
@@ -383,6 +405,7 @@ class TestTokenRefreshFlow:
         """
         # Mock refresh token validation and new token generation
 
+        # Mock: Security service isolation for auth testing without real token validation
         mock_security_service.validate_refresh_token = AsyncMock(return_value={
 
             "valid": True,
@@ -433,11 +456,13 @@ class TestOAuthErrorScenarios:
 
     """Test OAuth error handling scenarios"""
     
+    @pytest.mark.asyncio
     async def test_oauth_provider_error(self, test_client, mock_auth_client):
 
         """Test OAuth provider error handling"""
         # Mock OAuth provider error
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.auth_routes.login_flow.handle_login_request') as mock_login:
 
             mock_login.side_effect = Exception("OAuth provider unavailable")
@@ -447,10 +472,12 @@ class TestOAuthErrorScenarios:
 
             assert response.status_code in [500, 502, 503]
     
+    @pytest.mark.asyncio
     async def test_invalid_authorization_code(self, test_client):
 
         """Test invalid authorization code handling"""
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.auth_routes.callback_processor.handle_callback_request') as mock_callback:
 
             mock_callback.side_effect = Exception("Invalid authorization code")
@@ -464,6 +491,7 @@ class TestOAuthErrorScenarios:
 
             assert response.status_code in [400, 401, 500]
     
+    @pytest.mark.asyncio
     async def test_state_parameter_validation(self, test_client):
 
         """Test CSRF protection via state parameter"""
@@ -478,11 +506,13 @@ class TestCrossServiceTokenValidation:
 
     """Test token validation across different services"""
     
+    @pytest.mark.asyncio
     async def test_auth_service_token_validation(self, mock_auth_client):
 
         """Test token validation through auth service"""
         # Mock auth service token validation
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
 
             mock_validate.return_value = {
@@ -505,10 +535,12 @@ class TestCrossServiceTokenValidation:
 
             assert validation_result["user_id"] == "test_user"
     
+    @pytest.mark.asyncio
     async def test_backend_service_token_acceptance(self, test_client):
 
         """Test backend service accepts valid tokens from auth service"""
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.auth_integration.auth.get_current_user') as mock_user:
 
             mock_user.return_value = {
@@ -541,11 +573,13 @@ class TestDevLoginFlow:
 
     """Test development login functionality"""
     
+    @pytest.mark.asyncio
     async def test_dev_login_flow(self, test_client, mock_auth_client):
 
         """Test development mode login flow"""
         # Mock development environment
 
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_client.detect_environment.return_value = Mock(value="development")
         
         dev_request = DevLoginRequest(
@@ -556,6 +590,7 @@ class TestDevLoginFlow:
 
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.auth_routes.dev_login.handle_dev_login') as mock_dev_login:
 
             mock_dev_login.return_value = {
@@ -598,6 +633,7 @@ class TestOAuthIntegrationFlow:
 
     """Integration tests for complete OAuth flow"""
     
+    @pytest.mark.asyncio
     async def test_end_to_end_oauth_integration(self, test_client):
 
         """
@@ -618,6 +654,7 @@ class TestOAuthIntegrationFlow:
 
         with patch('httpx.AsyncClient') as mock_client:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_response = Mock()
 
             mock_response.status_code = 200

@@ -22,7 +22,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -63,6 +63,7 @@ class TestAdminOperations:
             "operations_success_rate": 1.0
         }
         
+        # Mock: Async component isolation for testing without real async operations
         infra["admin_manager"].execute_user_operations = AsyncMock(return_value=user_ops_results)
         return await infra["admin_manager"].execute_user_operations(scenario)
 
@@ -76,6 +77,7 @@ class TestAdminOperations:
             "monitoring_dashboard_updated": True
         }
         
+        # Mock: Async component isolation for testing without real async operations
         infra["admin_manager"].execute_monitoring = AsyncMock(return_value=monitoring_results)
         return await infra["admin_manager"].execute_monitoring(user_ops)
 
@@ -89,6 +91,7 @@ class TestAdminOperations:
             "financial_reconciliation_completed": True
         }
         
+        # Mock: Async component isolation for testing without real async operations
         infra["admin_manager"].execute_billing_operations = AsyncMock(return_value=billing_results)
         return await infra["admin_manager"].execute_billing_operations(monitoring)
 

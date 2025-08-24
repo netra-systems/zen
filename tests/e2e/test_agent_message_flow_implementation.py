@@ -40,12 +40,16 @@ class TestAgentMessageFlowImplementation:
 
     # """Mock database session."""
 
+    # Mock: Database session isolation for transaction testing without real database dependency
     # session = AsyncMock(spec=AsyncSession)
 
+    # Mock: Session isolation for controlled testing without external state
     # session.commit = AsyncMock()
 
+    # Mock: Session isolation for controlled testing without external state
     # session.rollback = AsyncMock()
 
+    # Mock: Session isolation for controlled testing without external state
     # session.close = AsyncMock()
 
     # return session
@@ -57,6 +61,7 @@ class TestAgentMessageFlowImplementation:
 
     # """Mock WebSocket connection."""
 
+    # Mock: Generic component isolation for controlled unit testing
     # websocket = AsyncMock()
 
     # websocket.headers = {
@@ -69,8 +74,10 @@ class TestAgentMessageFlowImplementation:
 
     # websocket.application_state = "CONNECTED"
 
+    # Mock: Generic component isolation for controlled unit testing
     # websocket.send_json = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     # websocket.close = AsyncMock()
 
     # return websocket
@@ -82,7 +89,8 @@ class TestAgentMessageFlowImplementation:
 
     # """Create SecureWebSocketManager with mocked dependencies."""
 
-    # with patch('app.routes.websocket_unified.get_websocket_cors_handler') as mock_cors:
+    # Mock: Component isolation for testing without external dependencies
+    # with patch('netra_backend.app.routes.websocket_unified.get_websocket_cors_handler') as mock_cors:
 
     # mock_cors.return_value.allowed_origins = []
 
@@ -100,8 +108,10 @@ class TestAgentMessageFlowImplementation:
 
     # """Mock supervisor agent."""
 
+    # Mock: Agent service isolation for testing without LLM agent execution
     # supervisor = AsyncMock(spec=SupervisorAgent)
 
+    # Mock: Async component isolation for testing without real async operations
     # supervisor.run = AsyncMock(return_value="Test response from supervisor")
 
     # return supervisor
@@ -113,10 +123,12 @@ class TestAgentMessageFlowImplementation:
 
     # """Mock agent service with supervisor."""
 
+    # Mock: Agent service isolation for testing without LLM agent execution
     # service = AsyncMock(spec=AgentService)
 
     # service.supervisor = mock_supervisor
 
+    # Mock: Generic component isolation for controlled unit testing
     # service.handle_websocket_message = AsyncMock()
 
     # return service
@@ -139,11 +151,14 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock agent service creation with LLMManager
 
-    # with patch('app.services.agent_service_factory._create_supervisor_agent') as mock_create, \n             patch('app.services.agent_service_core.AgentService') as mock_service_cls, \n             patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
+    # with patch('netra_backend.app.services.agent_service_factory._create_supervisor_agent') as mock_create, \n             patch('netra_backend.app.services.agent_service_core.AgentService') as mock_service_cls, \n             patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
 
-    # patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
+    # patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
     # # Setup LLMManager mock
 
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     # mock_llm = AsyncMock()
 
     # mock_llm_cls.return_value = mock_llm
@@ -151,8 +166,10 @@ class TestAgentMessageFlowImplementation:
 
     # mock_create.return_value = mock_supervisor
 
+    # Mock: Generic component isolation for controlled unit testing
     # mock_service = AsyncMock()
 
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     # mock_service.handle_websocket_message = AsyncMock()
 
     # mock_service_cls.return_value = mock_service
@@ -218,8 +235,10 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock LLMManager for connection handling
 
-    # with patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
+    # with patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
 
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     # mock_llm = AsyncMock()
 
     # mock_llm_cls.return_value = mock_llm
@@ -252,8 +271,10 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock LLMManager
 
-    # with patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
+    # with patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
 
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     # mock_llm = AsyncMock()
 
     # mock_llm_cls.return_value = mock_llm
@@ -304,19 +325,24 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock agent service to raise exception
 
-    # with patch('app.routes.websocket_unified._create_supervisor_agent') as mock_create, \
+    # Mock: Component isolation for testing without external dependencies
+    # with patch('netra_backend.app.routes.websocket_unified._create_supervisor_agent') as mock_create, \
 
-    # patch('app.services.agent_service_core.AgentService') as mock_service_cls, \
+    # Mock: Component isolation for testing without external dependencies
+    # patch('netra_backend.app.services.agent_service_core.AgentService') as mock_service_cls, \
 
-    # patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
+    # patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
             
     # # Setup LLMManager mock
 
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     # mock_llm = AsyncMock()
 
     # mock_llm_cls.return_value = mock_llm
             
 
+    # Mock: Generic component isolation for controlled unit testing
     # mock_service = AsyncMock()
 
     # mock_service.handle_websocket_message.side_effect = Exception("Agent processing failed")
@@ -390,10 +416,12 @@ class TestAgentMessageFlowImplementation:
         
     # # Create separate websockets for each user
 
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     # mock_websocket2 = AsyncMock()
 
     # mock_websocket2.application_state = "CONNECTED"
 
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     # mock_websocket2.send_json = AsyncMock()
         
     # # Add connections for both users
@@ -449,14 +477,18 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock the complete agent pipeline
 
-    # with patch('app.services.agent_service_factory._create_supervisor_agent') as mock_create, \
+    # Mock: Agent supervisor isolation for testing without spawning real agents
+    # with patch('netra_backend.app.services.agent_service_factory._create_supervisor_agent') as mock_create, \
 
-    # patch('app.services.agent_service_core.AgentService') as mock_service_cls, \
+    # Mock: Component isolation for testing without external dependencies
+    # patch('netra_backend.app.services.agent_service_core.AgentService') as mock_service_cls, \
 
-    # patch('app.llm.llm_manager.LLMManager') as mock_llm:
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
+    # patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm:
             
     # # Set up mocks
 
+    # Mock: Generic component isolation for controlled unit testing
     # mock_supervisor = AsyncMock()
 
     # mock_supervisor.run.return_value = "Agent response to hello"
@@ -464,6 +496,7 @@ class TestAgentMessageFlowImplementation:
     # mock_create.return_value = mock_supervisor
             
 
+    # Mock: Generic component isolation for controlled unit testing
     # mock_service = AsyncMock()
 
     # mock_service_cls.return_value = mock_service
@@ -508,8 +541,10 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock LLMManager
 
-    # with patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
+    # with patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
 
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     # mock_llm = AsyncMock()
 
     # mock_llm_cls.return_value = mock_llm
@@ -520,12 +555,15 @@ class TestAgentMessageFlowImplementation:
 
     # for i in range(max_connections + 2):
 
+    # Mock: Generic component isolation for controlled unit testing
     # ws = AsyncMock()
 
     # ws.application_state = "CONNECTED"
 
+    # Mock: Generic component isolation for controlled unit testing
     # ws.send_json = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     # ws.close = AsyncMock()
 
     # websockets.append(ws)

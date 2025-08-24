@@ -8,10 +8,8 @@ data access patterns work correctly without requiring a real database.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import time
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -27,12 +25,14 @@ pytest_plugins = ["netra_backend.tests.helpers.database_repository_fixtures"]
 class TestBaseRepository:
     """Test base repository functionality."""
 
+    @pytest.mark.asyncio
     async def test_repository_create(self, unit_of_work):
         """Test creating an entity."""
         async with unit_of_work as uow:
             thread = await create_test_thread(uow, "test_user", "Test Thread")
             assert_thread_created_correctly(thread, "test_user", "Test Thread")
 
+    @pytest.mark.asyncio
     async def test_repository_bulk_create(self, unit_of_work, mock_models):
         """Test bulk entity creation."""
         async with unit_of_work as uow:
@@ -46,6 +46,7 @@ class TestBaseRepository:
                 )
                 mock_threads.append(thread)
             
+            # Mock: Async component isolation for testing without real async operations
             uow.threads.bulk_create = AsyncMock(return_value=mock_threads)
             
             threads_data = [
@@ -61,6 +62,7 @@ class TestBaseRepository:
             assert len(threads) == 10
             assert all(t.id is not None for t in threads)
 
+    @pytest.mark.asyncio
     async def test_repository_get_by_id(self, unit_of_work, mock_models):
         """Test getting entity by ID."""
         async with unit_of_work as uow:
@@ -70,7 +72,9 @@ class TestBaseRepository:
                 title="Test Thread"
             )
             
+            # Mock: Async component isolation for testing without real async operations
             uow.threads.create = AsyncMock(return_value=mock_thread)
+            # Mock: Async component isolation for testing without real async operations
             uow.threads.get = AsyncMock(return_value=mock_thread)
             
             thread = await create_test_thread(uow, "test_user", "Test Thread")
@@ -80,6 +84,7 @@ class TestBaseRepository:
             assert retrieved.id == thread.id
             assert retrieved.title == thread.title
 
+    @pytest.mark.asyncio
     async def test_repository_get_many(self, unit_of_work, mock_models):
         """Test getting multiple entities."""
         async with unit_of_work as uow:
@@ -94,7 +99,9 @@ class TestBaseRepository:
                 mock_threads.append(thread)
                 thread_ids.append(thread.id)
             
+            # Mock: Async component isolation for testing without real async operations
             uow.threads.create = AsyncMock(side_effect=mock_threads)
+            # Mock: Async component isolation for testing without real async operations
             uow.threads.get_many = AsyncMock(return_value=mock_threads[:3])
             
             created_ids = []
@@ -106,6 +113,7 @@ class TestBaseRepository:
             assert len(threads) == 3
             assert all(t.id in thread_ids[:3] for t in threads)
 
+    @pytest.mark.asyncio
     async def test_repository_update(self, unit_of_work):
         """Test updating an entity."""
         async with unit_of_work as uow:
@@ -115,6 +123,7 @@ class TestBaseRepository:
             assert updated.title == "Updated Title"
             assert updated.updated_at > thread.created_at
 
+    @pytest.mark.asyncio
     async def test_repository_delete(self, unit_of_work):
         """Test deleting an entity."""
         async with unit_of_work as uow:
@@ -125,6 +134,7 @@ class TestBaseRepository:
             retrieved = await uow.threads.get(thread.id)
             assert retrieved is None
 
+    @pytest.mark.asyncio
     async def test_repository_soft_delete(self, unit_of_work):
         """Test soft delete functionality."""
         async with unit_of_work as uow:
@@ -138,6 +148,7 @@ class TestBaseRepository:
             assert retrieved is not None
             assert retrieved.deleted_at is not None
 
+    @pytest.mark.asyncio
     async def test_repository_pagination(self, unit_of_work):
         """Test pagination functionality."""
         async with unit_of_work as uow:

@@ -14,6 +14,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from urllib.parse import urlparse
 
+from test_framework.decorators import mock_justified
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.core.environment_constants import Environment
 
@@ -53,14 +54,18 @@ class TestDatabaseManagerURLConversion:
             result = DatabaseManager.get_base_database_url()
             assert result == expected_output
     
+    @mock_justified("L1 Unit Test: Mocking environment detection to test default URL fallback logic. Real environment configurations tested in L3 integration tests.", "L1")
     def test_get_base_database_url_default_fallback(self):
         """Test default URL when DATABASE_URL not set."""
         with patch.dict(os.environ, {}, clear=True):
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "development"
-                result = DatabaseManager.get_base_database_url()
-                # In test environment, we expect the test database URL
-                assert result == "postgresql://test:test@localhost:5432/netra_test"
+                # Mock unified config to return config without database_url
+                with patch("netra_backend.app.db.database_manager.get_unified_config") as mock_config:
+                    mock_config.return_value.database_url = None
+                    result = DatabaseManager.get_base_database_url()
+                    # In test environment, we expect the test database URL
+                    assert result == "postgresql://test:test@localhost:5432/netra_test"
     
     @pytest.mark.parametrize("base_url,expected_migration_url", [
         # Standard sync URL conversion
@@ -189,6 +194,8 @@ class TestDatabaseManagerEnvironmentDetection:
             result = DatabaseManager.is_cloud_sql_environment()
             assert result is False
     
+    @mock_justified("L1 Unit Test: Mocking environment detection to test environment-specific logic. Real environment testing in L3 integration tests.", "L1")
+    # Mock: Component isolation for testing without external dependencies
     @patch("netra_backend.app.db.database_manager.get_current_environment")
     def test_is_local_development_true(self, mock_get_env):
         """Test local development detection - positive case."""
@@ -196,6 +203,8 @@ class TestDatabaseManagerEnvironmentDetection:
         result = DatabaseManager.is_local_development()
         assert result is True
     
+    @mock_justified("L1 Unit Test: Mocking environment detection to test environment-specific logic. Real environment testing in L3 integration tests.", "L1")
+    # Mock: Component isolation for testing without external dependencies
     @patch("netra_backend.app.db.database_manager.get_current_environment") 
     def test_is_local_development_false(self, mock_get_env):
         """Test local development detection - negative case."""
@@ -211,6 +220,7 @@ class TestDatabaseManagerEnvironmentDetection:
     ])
     def test_is_remote_environment(self, environment, expected):
         """Test remote environment detection."""
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
             mock_env.return_value = environment
             result = DatabaseManager.is_remote_environment()
@@ -347,18 +357,24 @@ class TestDatabaseManagerErrorHandling:
         with patch.dict(os.environ, {"DATABASE_URL": ""}):
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "development"
-                result = DatabaseManager.get_base_database_url()
-                # In test environment, we expect the test database URL
-                assert result == "postgresql://test:test@localhost:5432/netra_test"
+                # Mock unified config to return config without database_url
+                with patch("netra_backend.app.db.database_manager.get_unified_config") as mock_config:
+                    mock_config.return_value.database_url = None
+                    result = DatabaseManager.get_base_database_url()
+                    # In test environment, we expect the test database URL
+                    assert result == "postgresql://test:test@localhost:5432/netra_test"
     
     def test_missing_database_url_handling(self):
         """Test handling when DATABASE_URL is not set."""
         with patch.dict(os.environ, {}, clear=True):
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "testing"
-                result = DatabaseManager.get_base_database_url()
-                # In test environment, we expect the test database URL
-                assert result == "postgresql://test:test@localhost:5432/netra_test"
+                # Mock unified config to return config without database_url
+                with patch("netra_backend.app.db.database_manager.get_unified_config") as mock_config:
+                    mock_config.return_value.database_url = None
+                    result = DatabaseManager.get_base_database_url()
+                    # In test environment, we expect the test database URL
+                    assert result == "postgresql://test:test@localhost:5432/netra_test"
     
     def test_driver_mismatch_validation(self):
         """Test validation catches driver mismatches."""
@@ -383,11 +399,17 @@ class TestDatabaseManagerErrorHandling:
     def test_default_environment_handling(self):
         """Test handling of unknown environment values."""
         with patch.dict(os.environ, {}, clear=True):
+            # Mock: Database access isolation for fast, reliable unit testing
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "unknown_environment"
-                result = DatabaseManager._get_default_database_url()
-                # Should default to development settings
-                assert result == "postgresql://postgres:password@localhost:5432/netra"
+                # Mock sys.modules to not contain pytest so we don't get test URL
+                # Mock: Component isolation for testing without external dependencies
+                with patch("sys.modules", {}):
+                    # Mock: Component isolation for testing without external dependencies
+                    with patch("sys.argv", ["python"]):
+                        result = DatabaseManager._get_default_database_url()
+                        # Should default to development settings
+                        assert result == "postgresql://postgres:password@localhost:5432/netra"
 
 
 class TestDatabaseManagerIntegration:
@@ -517,6 +539,7 @@ class TestDatabaseManagerEdgeCases:
     ])
     def test_default_database_url_by_environment(self, environment, expected_db):
         """Test default database URL generation for different environments."""
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
             mock_env.return_value = environment
             result = DatabaseManager._get_default_database_url()

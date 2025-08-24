@@ -7,19 +7,18 @@ Issue ID: websocket-manager-attribute-paradox
 Reference: SPEC/learnings.xml
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from pathlib import Path
 import sys
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.websocket_core import ConnectionInfo
+from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.types import ConnectionInfo
 
 class TestWebSocketConnectionParadoxPrevention:
 
@@ -39,14 +38,17 @@ class TestWebSocketConnectionParadoxPrevention:
 
         """Create mock WebSocket."""
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         ws = MagicMock(spec=WebSocket)
 
         ws.client_state = WebSocketState.CONNECTED
 
         ws.application_state = WebSocketState.CONNECTED
 
+        # Mock: Generic component isolation for controlled unit testing
         ws.send_json = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         ws.close = AsyncMock()
 
         return ws
@@ -66,6 +68,7 @@ class TestWebSocketConnectionParadoxPrevention:
 
         assert manager.connection_manager is manager._connection_manager
     
+    @pytest.mark.asyncio
     async def test_connection_persistence_across_operations(self, manager, mock_websocket):
 
         """Test that connections persist between creation and message handling.
@@ -120,6 +123,7 @@ class TestWebSocketConnectionParadoxPrevention:
 
         await manager.disconnect_user(user_id, mock_websocket)
     
+    @pytest.mark.asyncio
     async def test_job_id_validation_prevents_object_ids(self, manager, mock_websocket):
 
         """Test that connect_to_job validates job_id and prevents object IDs.
@@ -148,6 +152,7 @@ class TestWebSocketConnectionParadoxPrevention:
 
         assert "websocket" in invalid_job_id.lower() or "mock" in invalid_job_id.lower()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.ws_manager.logger') as mock_logger:
 
             conn_info2 = await manager.connect_to_job(mock_websocket, invalid_job_id)
@@ -171,6 +176,7 @@ class TestWebSocketConnectionParadoxPrevention:
 
         assert len(room_connections) >= 1
     
+    @pytest.mark.asyncio
     async def test_websocket_object_not_used_as_room_id(self, manager, mock_websocket):
 
         """Test that WebSocket objects are never used directly as room IDs.
@@ -184,6 +190,7 @@ class TestWebSocketConnectionParadoxPrevention:
         
         # connect_to_job should handle this gracefully
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.ws_manager.logger') as mock_logger:
             # This should trigger the validation logic
 
@@ -211,6 +218,7 @@ class TestWebSocketConnectionParadoxPrevention:
 
             assert "WebSocket" not in room_id
     
+    @pytest.mark.asyncio
     async def test_connection_lookup_consistency(self, manager, mock_websocket):
 
         """Test that connection lookups are consistent across different access patterns.
@@ -262,6 +270,7 @@ class TestWebSocketConnectionParadoxPrevention:
 
         await manager.disconnect_user(user_id, mock_websocket)
     
+    @pytest.mark.asyncio
     async def test_room_manager_receives_valid_identifiers(self, manager, mock_websocket):
 
         """Test that room manager always receives valid string identifiers.

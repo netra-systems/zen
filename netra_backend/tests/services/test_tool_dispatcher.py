@@ -1,9 +1,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -47,12 +45,15 @@ class ToolDispatcher:
         }
 class TestToolDispatcher:
     
+    @pytest.mark.asyncio
     async def test_tool_registration(self):
         """Test dynamic tool registration in dispatcher"""
         tool_dispatcher = ToolDispatcher({})
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_tool = MagicMock()
         mock_tool.name = "custom_analyzer"
+        # Mock: Async component isolation for testing without real async operations
         mock_tool.execute = AsyncMock(return_value={"result": "success"})
         
         tool_dispatcher.register_tool(mock_tool)
@@ -60,9 +61,12 @@ class TestToolDispatcher:
         assert "custom_analyzer" in tool_dispatcher.tools
         assert tool_dispatcher.tools["custom_analyzer"] == mock_tool
     
+    @pytest.mark.asyncio
     async def test_tool_execution_with_validation(self):
         """Test tool execution with parameter validation"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_log_fetcher = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_log_fetcher.execute = AsyncMock(return_value={
             "logs": ["log1", "log2"],
             "count": 2
@@ -79,13 +83,18 @@ class TestToolDispatcher:
         assert result["logs"] == ["log1", "log2"]
         mock_log_fetcher.execute.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_tool_chain_execution(self):
         """Test executing multiple tools in sequence"""
+        # Mock: Async component isolation for testing without real async operations
         mock_analyzer = AsyncMock(return_value={"patterns": ["pattern1"]})
+        # Mock: Async component isolation for testing without real async operations
         mock_optimizer = AsyncMock(return_value={"optimizations": ["opt1"]})
         
         tools = {
+            # Mock: Service component isolation for predictable testing behavior
             "pattern_analyzer": MagicMock(execute=mock_analyzer),
+            # Mock: Service component isolation for predictable testing behavior
             "optimizer": MagicMock(execute=mock_optimizer)
         }
         
@@ -100,9 +109,12 @@ class TestToolDispatcher:
         assert chain_result[0]["patterns"] == ["pattern1"]
         assert chain_result[1]["optimizations"] == ["opt1"]
     
+    @pytest.mark.asyncio
     async def test_tool_error_handling(self):
         """Test error handling when tool execution fails"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_failing_tool = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_failing_tool.execute = AsyncMock(
             side_effect=Exception("Tool execution failed")
         )
@@ -115,6 +127,7 @@ class TestToolDispatcher:
         
         assert "Tool execution failed" in str(exc_info.value)
     
+    @pytest.mark.asyncio
     async def test_unknown_tool_handling(self):
         """Test handling of unknown tool requests"""
         tool_dispatcher = ToolDispatcher({})
@@ -124,16 +137,23 @@ class TestToolDispatcher:
         
         assert "Unknown tool" in str(exc_info.value)
     
+    @pytest.mark.asyncio
     async def test_concurrent_tool_execution(self):
         """Test concurrent execution of multiple tools"""
         import asyncio
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_tool_1 = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_tool_2 = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_tool_3 = AsyncMock()
         
+        # Mock: Async component isolation for testing without real async operations
         mock_tool_1.execute = AsyncMock(return_value={"result": "tool1"})
+        # Mock: Async component isolation for testing without real async operations
         mock_tool_2.execute = AsyncMock(return_value={"result": "tool2"})
+        # Mock: Async component isolation for testing without real async operations
         mock_tool_3.execute = AsyncMock(return_value={"result": "tool3"})
         
         tools = {
@@ -157,9 +177,12 @@ class TestToolDispatcher:
         assert results[1]["result"] == "tool2"
         assert results[2]["result"] == "tool3"
     
+    @pytest.mark.asyncio
     async def test_tool_metadata_tracking(self):
         """Test tracking tool execution metadata"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_tool = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_tool.execute = AsyncMock(return_value={"data": "test_result"})
         
         tools = {"test_tool": mock_tool}

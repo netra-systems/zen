@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env, IsolatedEnvironment
 """Environment Detection Module
 
 Handles environment detection for configuration loading.
@@ -319,7 +320,7 @@ class ConfigEnvironment:
         Args:
             config: The configuration object to update
         """
-        server_port = os.environ.get("SERVER_PORT")
+        server_port = get_env().get("SERVER_PORT")
         if server_port and hasattr(config, 'ws_config'):
             old_url = config.ws_config.ws_url
             config.ws_config.ws_url = f"ws://localhost:{server_port}/ws"

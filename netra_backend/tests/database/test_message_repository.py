@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,8 +22,10 @@ from netra_backend.app.services.database.message_repository import MessageReposi
 class TestMessageRepositoryQueries:
     """test_message_repository_queries - Test message queries and pagination"""
     
+    @pytest.mark.asyncio
     async def test_message_pagination(self):
         """Test message pagination"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
         
@@ -51,8 +53,10 @@ class TestMessageRepositoryQueries:
             assert len(page2) == 20
             assert page2[0].id == "msg20"
     
+    @pytest.mark.asyncio
     async def test_complex_message_queries(self):
         """Test complex message queries"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
         

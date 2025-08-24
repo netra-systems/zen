@@ -11,8 +11,6 @@ Maximum 300 lines enforced - focuses on core JWT flows only
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 import uuid
@@ -108,6 +106,7 @@ class JWTTestHelper:
                 pass
         return None
     
+    @pytest.mark.asyncio
     async def test_websocket_connection(self, token: str, should_succeed: bool = True) -> bool:
         """Test WebSocket connection with token."""
         try:
@@ -194,6 +193,7 @@ class TestCrossServiceJWTValidation:
     """Test JWT validation across services."""
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_harness(self):
         """Setup test harness with all services."""
         harness = UnifiedTestHarness()
@@ -252,6 +252,7 @@ class TestSessionManagementUnified:
     """Test session consistency across services."""
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_harness(self):
         """Setup test harness with all services."""
         harness = UnifiedTestHarness()
@@ -311,6 +312,7 @@ class TestTokenExpirationHandling:
     """Test token expiry scenarios."""
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_harness(self):
         """Setup test harness with all services."""
         harness = UnifiedTestHarness()

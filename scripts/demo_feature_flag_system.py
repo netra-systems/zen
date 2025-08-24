@@ -14,8 +14,6 @@ import sys
 from pathlib import Path
 
 # Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
 
 from test_framework.decorators import feature_flag, requires_feature, tdd_test
 from test_framework.feature_flags import FeatureStatus, get_feature_flag_manager

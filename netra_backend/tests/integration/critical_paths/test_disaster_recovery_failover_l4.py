@@ -1148,6 +1148,7 @@ async def l4_disaster_recovery_test():
 class TestDisasterRecoveryFailoverL4:
     """L4 critical path tests for disaster recovery failover."""
     
+    @pytest.mark.asyncio
     async def test_complete_disaster_recovery_critical_path(self, l4_disaster_recovery_test):
         """Execute complete L4 disaster recovery critical path test."""
         test_metrics = await l4_disaster_recovery_test.run_complete_critical_path_test()

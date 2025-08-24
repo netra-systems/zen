@@ -7,12 +7,10 @@ Test classes: TestCheckToolPermission, TestGetUserToolAvailability, TestUpgradeP
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List, Set
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -101,6 +99,7 @@ def admin_context():
 class TestCheckToolPermission:
     """Test main tool permission checking"""
     
+    @pytest.mark.asyncio
     async def test_check_tool_permission_allowed(self, service):
         """Test tool permission check when access is allowed"""
         context = ToolExecutionContext(
@@ -128,6 +127,7 @@ class TestCheckToolPermission:
             assert "analytics" in result.required_permissions
             assert result.reason is not None
     
+    @pytest.mark.asyncio
     async def test_check_tool_permission_denied_insufficient_plan(self, service):
         """Test tool permission check with insufficient plan"""
         context = ToolExecutionContext(
@@ -154,6 +154,7 @@ class TestCheckToolPermission:
             assert "advanced_optimization" in result.required_permissions
             assert "insufficient" in result.reason.lower()
     
+    @pytest.mark.asyncio
     async def test_check_tool_permission_denied_missing_role(self, service):
         """Test tool permission check with missing role"""
         context = ToolExecutionContext(
@@ -171,6 +172,7 @@ class TestCheckToolPermission:
         assert result.allowed == False
         assert "admin" in result.required_permissions or "system_management" in result.required_permissions
     
+    @pytest.mark.asyncio
     async def test_check_tool_permission_with_business_requirements(self, service, admin_context):
         """Test tool permission check with business requirements"""
         with patch.object(service, '_get_user_plan') as mock_get_plan:
@@ -186,6 +188,7 @@ class TestCheckToolPermission:
             assert isinstance(result, PermissionCheckResult)
             # Result depends on implementation
     
+    @pytest.mark.asyncio
     async def test_check_tool_permission_with_rate_limiting(self, service_with_redis, sample_context):
         """Test tool permission check with rate limiting"""
         with patch.object(service_with_redis, '_get_user_plan') as mock_get_plan:
@@ -203,6 +206,7 @@ class TestCheckToolPermission:
 class TestGetUserToolAvailability:
     """Test user tool availability functionality"""
     
+    @pytest.mark.asyncio
     async def test_get_user_tool_availability(self, service):
         """Test getting user tool availability"""
         context = ToolExecutionContext(
@@ -231,6 +235,7 @@ class TestGetUserToolAvailability:
             assert isinstance(availability["available_tools"], list)
             assert isinstance(availability["restricted_tools"], list)
     
+    @pytest.mark.asyncio
     async def test_get_user_tool_availability_free_user(self, service):
         """Test tool availability for free tier user"""
         context = ToolExecutionContext(
@@ -256,6 +261,7 @@ class TestGetUserToolAvailability:
             assert len(availability["restricted_tools"]) > 0
             # Free users should have many restricted tools
     
+    @pytest.mark.asyncio
     async def test_get_user_tool_availability_enterprise(self, service):
         """Test tool availability for enterprise user"""
         context = ToolExecutionContext(

@@ -55,8 +55,11 @@ class AgentOrchestrationTester:
         self.orchestration_metrics = {}
         
         # Create mocked dependencies
+        # Mock: Session isolation for controlled testing without external state
         self.db_session = AsyncMock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         self.websocket_manager = AsyncMock()
+        # Mock: Tool execution isolation for predictable agent testing
         self.tool_dispatcher = AsyncMock()
     
     async def create_supervisor_agent(self, name: str) -> SupervisorAgent:

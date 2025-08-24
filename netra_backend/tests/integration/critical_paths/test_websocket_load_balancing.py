@@ -11,7 +11,7 @@ L2 Test: Real internal load balancing components with mocked external services.
 Performance target: <5ms routing decisions, 95% connection distribution accuracy.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -25,13 +25,13 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class LoadBalancingStrategy(Enum):
@@ -1071,6 +1071,7 @@ class TestWebSocketLoadBalancing:
 
         ]
     
+    @pytest.mark.asyncio
     async def test_basic_load_balancing_functionality(self, load_balancer, test_servers, test_users):
 
         """Test basic load balancing routing."""
@@ -1107,6 +1108,7 @@ class TestWebSocketLoadBalancing:
 
         assert stats["routing_success_rate"] == 100.0
     
+    @pytest.mark.asyncio
     async def test_least_connections_strategy(self, load_balancer, test_servers, test_users):
 
         """Test least connections load balancing strategy."""
@@ -1148,6 +1150,7 @@ class TestWebSocketLoadBalancing:
 
                 assert info["current_connections"] == server_connections[server_id]
     
+    @pytest.mark.asyncio
     async def test_round_robin_strategy(self, test_servers, test_users):
 
         """Test round robin load balancing strategy."""
@@ -1184,6 +1187,7 @@ class TestWebSocketLoadBalancing:
 
         assert len(unique_servers) > 1
     
+    @pytest.mark.asyncio
     async def test_geographic_strategy(self, test_users):
 
         """Test geographic load balancing strategy."""
@@ -1214,6 +1218,7 @@ class TestWebSocketLoadBalancing:
 
         assert unknown_result is not None  # Should fall back to available server
     
+    @pytest.mark.asyncio
     async def test_session_affinity(self, load_balancer, test_servers, test_users):
 
         """Test sticky session functionality."""
@@ -1250,6 +1255,7 @@ class TestWebSocketLoadBalancing:
 
         assert stats["session_affinity_hits"] == 1
     
+    @pytest.mark.asyncio
     async def test_server_failure_handling(self, load_balancer, test_servers, test_users):
 
         """Test handling of server failures."""
@@ -1283,6 +1289,7 @@ class TestWebSocketLoadBalancing:
 
         assert stats["healthy_servers"] == len(test_servers) - 1
     
+    @pytest.mark.asyncio
     async def test_capacity_enforcement(self, load_balancer, test_servers, test_users):
 
         """Test server capacity enforcement."""
@@ -1322,6 +1329,7 @@ class TestWebSocketLoadBalancing:
 
             assert server_connections[small_server.server_id] <= small_capacity
     
+    @pytest.mark.asyncio
     async def test_connection_disconnection(self, load_balancer, test_servers, test_users):
 
         """Test connection disconnection handling."""
@@ -1360,6 +1368,7 @@ class TestWebSocketLoadBalancing:
 
         assert session_id not in load_balancer.sessions
     
+    @pytest.mark.asyncio
     async def test_health_monitoring_integration(self, load_balancer, health_checker, test_servers):
 
         """Test health monitoring integration."""
@@ -1393,6 +1402,7 @@ class TestWebSocketLoadBalancing:
 
         assert health_stats["total_health_checks"] >= 0
     
+    @pytest.mark.asyncio
     async def test_load_distribution_analysis(self, load_balancer, test_servers, test_users):
 
         """Test load distribution quality analysis."""
@@ -1424,6 +1434,7 @@ class TestWebSocketLoadBalancing:
     
     @mock_justified("L2: Load balancing with real internal components")
 
+    @pytest.mark.asyncio
     async def test_websocket_integration_with_load_balancing(self, load_balancer, test_servers, test_users):
 
         """Test WebSocket integration with load balancing."""
@@ -1445,6 +1456,7 @@ class TestWebSocketLoadBalancing:
             
             # Simulate connection establishment
 
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_websocket = AsyncMock()
 
             connection_sessions.append({
@@ -1513,6 +1525,7 @@ class TestWebSocketLoadBalancing:
 
         assert final_stats["routing_success_rate"] > 90  # Should have high success rate
     
+    @pytest.mark.asyncio
     async def test_concurrent_routing_performance(self, load_balancer, test_servers, test_users):
 
         """Test concurrent routing performance."""
@@ -1567,6 +1580,7 @@ class TestWebSocketLoadBalancing:
 
         assert analysis["distribution_quality_score"] >= 60  # Reasonable distribution
     
+    @pytest.mark.asyncio
     async def test_load_balancing_strategies_comparison(self, test_servers, test_users):
 
         """Test comparison of different load balancing strategies."""

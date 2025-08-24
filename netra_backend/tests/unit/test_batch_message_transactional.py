@@ -7,12 +7,10 @@ websocket_reliability.xml to ensure zero message loss.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 from typing import List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -27,8 +25,9 @@ from netra_backend.app.websocket_core.types import (
     BatchingStrategy,
     MessageState,
     PendingMessage,
+    ConnectionInfo,
 )
-from netra_backend.app.websocket_core import ConnectionInfo, WebSocketManager as ConnectionManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 class TestTransactionalBatchProcessor:
     """Test transactional batch processing patterns."""
@@ -224,15 +223,19 @@ class TestMessageBatcherTransactional:
     def setup_method(self):
         """Setup test fixtures."""
         from unittest.mock import MagicMock
+        # Mock: Generic component isolation for controlled unit testing
         self.connection_manager = MagicMock()
         self.config = BatchConfig(max_batch_size=2, max_wait_time=0.1)
         self.batcher = MessageBatcher(self.config, self.connection_manager)
         
         # Mock connection info
+        # Mock: Generic component isolation for controlled unit testing
         self.mock_connection = MagicMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         self.mock_connection.websocket = AsyncMock()
         self.connection_manager.get_connection_by_id.return_value = self.mock_connection
         self.connection_manager.get_user_connections.return_value = [
+            # Mock: Component isolation for controlled unit testing
             Mock(connection_id="conn1")
         ]
     

@@ -4,11 +4,9 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from typing import AsyncGenerator
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -23,6 +21,7 @@ from netra_backend.app.services.streaming_service import (
 class TestStreamingService:
     """Test streaming service."""
     
+    @pytest.mark.asyncio
     async def test_streaming_service_initialization(self):
         """Test service initialization."""
         service = StreamingService(buffer_size=50, chunk_delay_ms=10)
@@ -30,6 +29,7 @@ class TestStreamingService:
         assert service.chunk_delay_ms == 10
         assert len(service.active_streams) == 0
     
+    @pytest.mark.asyncio
     async def test_text_stream_processor(self):
         """Test text stream processor."""
         processor = TextStreamProcessor(chunk_size=3)
@@ -45,6 +45,7 @@ class TestStreamingService:
         assert chunks[1] == "test message for "
         assert chunks[2] == "streaming"
     
+    @pytest.mark.asyncio
     async def test_stream_chunk_creation(self):
         """Test stream chunk creation."""
         chunk = StreamChunk(
@@ -71,6 +72,7 @@ class TestStreamingService:
         json_data = chunk.to_json()
         assert "data" in json_data
     
+    @pytest.mark.asyncio
     async def test_create_stream_success(self):
         """Test successful stream creation."""
         service = StreamingService(chunk_delay_ms=0)
@@ -94,6 +96,7 @@ class TestStreamingService:
         assert chunks[1].data == "chunk_0"
         assert chunks[-1].type == "stream_end"
     
+    @pytest.mark.asyncio
     async def test_create_stream_with_error(self):
         """Test stream creation with error."""
         service = StreamingService()
@@ -117,6 +120,7 @@ class TestStreamingService:
         assert chunks[2].type == "error"
         assert "Test error" in chunks[2].data["error"]
     
+    @pytest.mark.asyncio
     async def test_buffer_stream(self):
         """Test stream buffering."""
         service = StreamingService(buffer_size=2)
@@ -136,6 +140,7 @@ class TestStreamingService:
         assert len(buffers[1]) == 2
         assert len(buffers[2]) == 1
     
+    @pytest.mark.asyncio
     async def test_active_streams_tracking(self):
         """Test active streams tracking."""
         service = StreamingService(chunk_delay_ms=0)
@@ -158,6 +163,7 @@ class TestStreamingService:
         # After completion, no active streams
         assert len(service.get_active_streams()) == 0
     
+    @pytest.mark.asyncio
     async def test_terminate_stream(self):
         """Test stream termination."""
         service = StreamingService()
@@ -181,6 +187,7 @@ class TestStreamingService:
         result = await service.terminate_stream("non_existent")
         assert result is False
     
+    @pytest.mark.asyncio
     async def test_get_streaming_service_singleton(self):
         """Test singleton pattern."""
         service1 = get_streaming_service()

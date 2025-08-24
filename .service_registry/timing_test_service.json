@@ -1,0 +1,20 @@
+{
+  "service_name": "timing_test_service",
+  "status": "ready",
+  "endpoints": [
+    {
+      "name": "api",
+      "url": "http://localhost:18001",
+      "port": 18001,
+      "health_endpoint": null,
+      "ready_endpoint": null,
+      "protocol": "http"
+    }
+  ],
+  "registered_at": 1756034962.9486387,
+  "last_seen": 1756034962.949851,
+  "metadata": {},
+  "tags": [],
+  "dependencies": [],
+  "health_check_interval": 30.0
+}

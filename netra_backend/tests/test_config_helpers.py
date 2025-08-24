@@ -14,7 +14,7 @@ Each function ≤8 lines, file ≤300 lines.
 
 import os
 from typing import Any, Dict, Optional
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -26,7 +26,6 @@ except ImportError:
     # Fallback for when running from within netra_backend directory
     import sys
     from pathlib import Path
-    sys.path.append(str(Path(__file__).parent.parent))
     from app.config import get_config, reload_config
     from app.core.configuration.base import get_unified_config
 

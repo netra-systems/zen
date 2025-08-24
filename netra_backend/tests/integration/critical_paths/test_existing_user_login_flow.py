@@ -21,7 +21,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -45,6 +45,7 @@ class TestExistingUserLoginFlow:
     @pytest.fixture
     async def mock_existing_user(self):
         """Create mock existing user."""
+        # Mock: Service component isolation for predictable testing behavior
         user = MagicMock(spec=User)
         user.id = str(uuid.uuid4())
         user.email = "existing@example.com"
@@ -53,29 +54,41 @@ class TestExistingUserLoginFlow:
         user.email_verified = True
         user.last_login = datetime.utcnow() - timedelta(days=1)
         user.failed_login_attempts = 0
+        # Mock: Service component isolation for predictable testing behavior
         user.check_password = MagicMock(return_value=True)
-        return user
+        yield user
     
     @pytest.fixture
     async def mock_auth_service(self):
         """Create mock auth service."""
+        # Mock: Authentication service isolation for testing without real auth flows
         service = AsyncMock(spec=AuthService)
+        # Mock: Generic component isolation for controlled unit testing
         service.authenticate = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.generate_tokens = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         service.validate_token = AsyncMock(return_value=True)
+        # Mock: Generic component isolation for controlled unit testing
         service.refresh_tokens = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.revoke_token = AsyncMock()
-        return service
+        yield service
     
     @pytest.fixture
     async def mock_session_service(self):
         """Create mock session service."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         service = AsyncMock(spec=SessionService)
+        # Mock: Session isolation for controlled testing without external state
         service.create_session = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         service.get_session = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         service.update_session_activity = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         service.end_session = AsyncMock()
-        return service
+        yield service
     
     @pytest.fixture
     async def async_client(self):
@@ -86,6 +99,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_successful_login_with_valid_credentials(self, async_client, mock_existing_user, mock_auth_service):
         """Test 1: Successful login with valid credentials should return tokens."""
         login_data = {
@@ -101,8 +115,11 @@ class TestExistingUserLoginFlow:
             "expires_in": 3600
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.authenticate', return_value=mock_existing_user):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.auth_service.AuthService.generate_tokens', return_value=mock_tokens):
                     
                     response = await async_client.post("/api/auth/login", json=login_data)
@@ -118,6 +135,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_failed_login_with_invalid_password(self, async_client, mock_existing_user):
         """Test 2: Login with invalid password should fail and increment attempt counter."""
         mock_existing_user.check_password.return_value = False
@@ -127,6 +145,7 @@ class TestExistingUserLoginFlow:
             "password": "WrongPassword123!"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
             response = await async_client.post("/api/auth/login", json=login_data)
             
@@ -138,6 +157,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_account_lockout_after_failed_attempts(self, async_client, mock_existing_user):
         """Test 3: Account should be locked after multiple failed login attempts."""
         mock_existing_user.check_password.return_value = False
@@ -149,6 +169,7 @@ class TestExistingUserLoginFlow:
             "password": "AnyPassword123!"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
             response = await async_client.post("/api/auth/login", json=login_data)
             
@@ -160,8 +181,10 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_session_creation_on_successful_login(self, async_client, mock_existing_user, mock_session_service):
         """Test 4: Successful login should create a new session."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = MagicMock()
         mock_session.id = str(uuid.uuid4())
         mock_session.user_id = mock_existing_user.id
@@ -175,8 +198,11 @@ class TestExistingUserLoginFlow:
             "password": "ValidPassword123!"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.authenticate', return_value=mock_existing_user):
+                # Mock: Database session isolation for transaction testing without real database dependency
                 with patch('app.services.session_service.SessionService.create_session', return_value=mock_session) as mock_create:
                     
                     response = await async_client.post("/api/auth/login", json=login_data)
@@ -187,6 +213,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_token_refresh_flow(self, async_client, mock_auth_service):
         """Test 5: Token refresh should return new access token."""
         refresh_token = "valid_refresh_token_123"
@@ -201,7 +228,9 @@ class TestExistingUserLoginFlow:
         
         mock_auth_service.refresh_tokens.return_value = new_tokens
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.auth_service.AuthService.validate_refresh_token', return_value=True):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.refresh_tokens', return_value=new_tokens):
                 
                 response = await async_client.post(
@@ -218,12 +247,15 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_authenticated_request_with_valid_token(self, async_client, mock_existing_user):
         """Test 6: Authenticated requests with valid token should succeed."""
         access_token = "valid_access_token_123"
         
         # Mock token validation
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.auth_service.AuthService.validate_token', return_value=mock_existing_user.id):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.user_service.UserService.get_user', return_value=mock_existing_user):
                 
                 headers = {"Authorization": f"Bearer {access_token}"}
@@ -234,6 +266,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_logout_revokes_tokens_and_ends_session(self, async_client, mock_auth_service, mock_session_service):
         """Test 7: Logout should revoke tokens and end session."""
         access_token = "valid_access_token_123"
@@ -243,8 +276,11 @@ class TestExistingUserLoginFlow:
         mock_auth_service.revoke_token.return_value = True
         mock_session_service.end_session.return_value = True
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.auth_service.AuthService.validate_token', return_value=user_id):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.revoke_token', return_value=True) as mock_revoke:
+                # Mock: Session isolation for controlled testing without external state
                 with patch('app.services.session_service.SessionService.end_session', return_value=True) as mock_end:
                     
                     headers = {"Authorization": f"Bearer {access_token}"}
@@ -259,6 +295,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_concurrent_login_sessions_handling(self, async_client, mock_existing_user):
         """Test 8: System should handle multiple concurrent sessions for same user."""
         login_data = {
@@ -277,8 +314,11 @@ class TestExistingUserLoginFlow:
                 "expires_in": 3600
             }
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.auth_service.AuthService.authenticate', return_value=mock_existing_user):
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.services.auth_service.AuthService.generate_tokens', return_value=mock_tokens):
                         
                         response = await async_client.post("/api/auth/login", json=login_data)
@@ -293,6 +333,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_login_updates_last_login_timestamp(self, async_client, mock_existing_user):
         """Test 9: Successful login should update user's last login timestamp."""
         original_last_login = mock_existing_user.last_login
@@ -302,8 +343,11 @@ class TestExistingUserLoginFlow:
             "password": "ValidPassword123!"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.authenticate', return_value=mock_existing_user):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.user_service.UserService.update_last_login', return_value=True) as mock_update:
                     
                     response = await async_client.post("/api/auth/login", json=login_data)
@@ -314,6 +358,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_remember_me_extends_token_expiry(self, async_client, mock_existing_user):
         """Test 10: 'Remember me' option should extend token expiry time."""
         # Login without remember me
@@ -345,10 +390,13 @@ class TestExistingUserLoginFlow:
             "expires_in": 2592000  # 30 days
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.authenticate', return_value=mock_existing_user):
                 
                 # Test short expiry
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.auth_service.AuthService.generate_tokens', return_value=short_tokens):
                     response_short = await async_client.post("/api/auth/login", json=login_data_short)
                     
@@ -357,6 +405,7 @@ class TestExistingUserLoginFlow:
                         short_expiry = data_short.get("expires_in", 0)
                 
                 # Test long expiry
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.auth_service.AuthService.generate_tokens', return_value=long_tokens):
                     response_long = await async_client.post("/api/auth/login", json=login_data_long)
                     

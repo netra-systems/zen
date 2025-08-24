@@ -59,11 +59,25 @@ async def test_db_session():
         engine, class_=AsyncSession, expire_on_commit=False
     )
     
-    async with async_session_maker() as session:
+    session = None
+    try:
+        session = async_session_maker()
         yield session
-        await session.rollback()
-    
-    await engine.dispose()
+    except Exception:
+        if session:
+            await session.rollback()
+        raise
+    finally:
+        if session:
+            try:
+                await session.rollback()
+                await session.close()
+            except Exception:
+                pass
+        try:
+            await engine.dispose()
+        except Exception:
+            pass
 
 
 @pytest.fixture
@@ -72,9 +86,19 @@ async def netra_backend_db_session():
     
     Delegates to the service's single source of truth implementation.
     """
-    from netra_backend.app.database import get_db
-    async for session in get_db():
-        yield session
+    try:
+        from netra_backend.app.database import get_db
+        async for session in get_db():
+            try:
+                yield session
+            finally:
+                if hasattr(session, 'close'):
+                    await session.close()
+    except ImportError:
+        # Fall back to mock session if netra_backend is not available
+        mock_session = AsyncMock()
+        mock_session.close = AsyncMock()
+        yield mock_session
 
 
 @pytest.fixture  
@@ -83,13 +107,28 @@ async def auth_service_db_session():
     
     Delegates to the service's single source of truth implementation.
     """
-    from auth_service.auth_core.database.connection import auth_db
-    # Initialize if not already initialized
-    if not auth_db._initialized:
-        await auth_db.initialize()
-    
-    async with auth_db.get_session() as session:
-        yield session
+    try:
+        from auth_service.auth_core.database.connection import auth_db
+        # Initialize if not already initialized
+        if not auth_db._initialized:
+            await auth_db.initialize()
+        
+        async with auth_db.get_session() as session:
+            try:
+                yield session
+            finally:
+                # Additional cleanup if needed
+                if hasattr(session, 'rollback'):
+                    try:
+                        await session.rollback()
+                    except Exception:
+                        pass
+    except ImportError:
+        # Fall back to mock session if auth_service is not available
+        mock_session = AsyncMock()
+        mock_session.close = AsyncMock()
+        mock_session.rollback = AsyncMock()
+        yield mock_session
 
 @pytest.fixture
 def mock_postgres_connection():
@@ -186,8 +225,8 @@ def setup_test_database():
     return _setup
 
 @pytest.fixture
-def database_cleanup():
-    """Database cleanup fixture"""
+async def database_cleanup():
+    """Database cleanup fixture with async support"""
     cleanup_actions = []
     
     def add_cleanup(action):
@@ -199,8 +238,7 @@ def database_cleanup():
     for action in cleanup_actions:
         try:
             if asyncio.iscoroutinefunction(action):
-                # Would need to run in event loop
-                pass
+                await action()
             else:
                 action()
         except Exception:

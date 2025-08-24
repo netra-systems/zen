@@ -8,7 +8,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from tests.e2e.test_helpers import setup_test_path
+from test_framework import setup_test_path
 
 
 setup_test_path()
@@ -17,11 +17,18 @@ import asyncio
 
 import pytest
 
+from test_framework.environment_markers import env, env_requires, staging_only
 # Add project root to path
 from netra_backend.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest
 
 
 # Add project root to path
+@env("staging")
+@env_requires(
+    services=["backend", "websocket", "postgres", "redis", "load_balancer"],
+    features=["concurrent_user_support", "performance_metrics", "scaling"],
+    data=["concurrent_test_users", "performance_baselines"]
+)
 class TestConcurrentLoadCore:
     """Core concurrent user load tests"""
     

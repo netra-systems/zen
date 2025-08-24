@@ -35,6 +35,7 @@ class E2EEnvironmentValidator:
 @pytest.fixture
 async def mock_agent_service():
     """Mock agent service for E2E tests."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_service = AsyncMock()
     mock_service.process_message.return_value = {
         "response": "Test response",
@@ -45,8 +46,11 @@ async def mock_agent_service():
 @pytest.fixture
 def mock_websocket_manager():
     """Mock WebSocket manager for E2E tests."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_manager = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_manager.send_message = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_manager.broadcast = AsyncMock()
     return mock_manager
 
@@ -54,7 +58,9 @@ def mock_websocket_manager():
 def model_selection_setup():
     """Basic setup for model selection tests."""
     return {
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         "mock_llm_service": AsyncMock(),
+        # Mock: Database isolation for unit testing without external database connections
         "mock_database": AsyncMock(),
         "test_config": {"environment": "test"}
     }
@@ -76,12 +82,19 @@ async def concurrent_test_environment():
     from unittest.mock import AsyncMock
     
     # Create a mock environment with required methods
+    # Mock: Generic component isolation for controlled unit testing
     mock_env = AsyncMock()
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_env.redis_client = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_env.db_pool = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_env.initialize = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_env.cleanup = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_env.seed_user_data = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_env.cleanup_user_data = AsyncMock()
     
     # Initialize and return
@@ -96,6 +109,7 @@ def isolated_test_users():
     
     users = []
     for i in range(5):  # Create 5 test users
+        # Mock: Generic component isolation for controlled unit testing
         user = MagicMock()
         user.user_id = f"test_user_{i}"
         user.email = f"test{i}@example.com"

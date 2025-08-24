@@ -40,14 +40,19 @@ class TestFixer:
                     # Update the function body to use real components
                     j = i + 1
                     while j < len(lines) and (lines[j].startswith('    ') or lines[j].strip() == ''):
+                        # Mock: Generic component isolation for controlled unit testing
                         if 'Mock()' in lines[j]:
+                            # Mock: Generic component isolation for controlled unit testing
                             # Replace Mock() with real instantiation
+                            # Mock: LLM provider isolation to prevent external API usage and costs
                             if 'llm_manager = Mock()' in lines[j]:
                                 lines[j] = '        from netra_backend.app.llm.llm_manager import LLMManager\n'
                                 lines.insert(j + 1, '        llm_manager = LLMManager()\n')
+                            # Mock: Tool execution isolation for predictable agent testing
                             elif 'tool_dispatcher = Mock()' in lines[j]:
                                 lines[j] = '        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher\n'
                                 lines.insert(j + 1, '        tool_dispatcher = ToolDispatcher(llm_manager)\n')
+                            # Mock: WebSocket connection isolation for testing without network overhead
                             elif 'websocket_manager = Mock()' in lines[j]:
                                 lines[j] = '        from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager\n'
                                 lines.insert(j + 1, '        websocket_manager = UnifiedWebSocketManager()\n')

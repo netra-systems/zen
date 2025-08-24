@@ -108,6 +108,7 @@ class TokenRefreshTestClient:
             )
             
             # Mock WebSocket connection with token authentication
+            # Mock: Generic component isolation for controlled unit testing
             self.websocket = AsyncMock()
             self.websocket.token = self.current_token
             self.is_connected = True

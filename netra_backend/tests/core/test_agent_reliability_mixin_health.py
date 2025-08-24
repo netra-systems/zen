@@ -7,7 +7,7 @@ from pathlib import Path
 
 import time
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -29,11 +29,17 @@ class TestAgentReliabilityMixinMetrics:
     @pytest.fixture
     def mock_agent(self):
         """Create a mock agent with reliability mixin."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.execute_safely = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.circuit_breaker = Mock()
+            # Mock: Component isolation for controlled unit testing
             mock_reliability.circuit_breaker.get_status = Mock(return_value={"state": "closed"})
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.circuit_breaker.reset = Mock()
             mock_wrapper.return_value = mock_reliability
             
@@ -138,11 +144,17 @@ class TestAgentReliabilityMixinHealthStatus:
     @pytest.fixture
     def mock_agent(self):
         """Create a mock agent with reliability mixin."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.execute_safely = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.circuit_breaker = Mock()
+            # Mock: Component isolation for controlled unit testing
             mock_reliability.circuit_breaker.get_status = Mock(return_value={"state": "closed"})
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.circuit_breaker.reset = Mock()
             mock_wrapper.return_value = mock_reliability
             
@@ -213,11 +225,13 @@ class TestAgentReliabilityMixinHealthStatus:
         assert len(mock_agent.error_history) == 0
         mock_agent.reliability.circuit_breaker.reset.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_perform_health_check(self, mock_agent):
         """Test performing health check."""
         # Add some test data
         mock_agent.operation_times = [1.0, 2.0]
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.agent_reliability_mixin.logger') as mock_logger:
             health = await mock_agent.perform_health_check()
             

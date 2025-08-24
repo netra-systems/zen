@@ -17,77 +17,19 @@
 import React, { ReactElement } from 'react';
 import { render, RenderOptions, RenderResult, screen, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
+import { 
+  MockUser, 
+  MockThread, 
+  MockMessage, 
+  MockAuthStore, 
+  MockChatStore, 
+  MockThreadStore 
+} from '../utils/test-helpers';
 
 // ============================================================================
-// TYPE DEFINITIONS - Mock interfaces for testing
+// CONSOLIDATED MOCK TYPES - Now imported from test-helpers
+// All Mock type definitions removed - using single source of truth
 // ============================================================================
-
-export interface MockUser {
-  id: string;
-  email: string;
-  full_name?: string | null;
-  picture?: string | null;
-  is_active?: boolean;
-  is_superuser?: boolean;
-  access_token?: string;
-  token_type?: string;
-}
-
-export interface MockThread {
-  id: string;
-  title: string;
-  name?: string;
-  user_id?: string;
-  created_at: string;
-  updated_at: string;
-  message_count: number;
-  is_active?: boolean;
-  status?: 'active' | 'archived' | 'deleted';
-}
-
-export interface MockMessage {
-  id: string;
-  thread_id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  created_at: string;
-  updated_at?: string;
-  is_streaming?: boolean;
-}
-
-export interface MockAuthStore {
-  user: MockUser | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-  login: jest.Mock;
-  logout: jest.Mock;
-  refreshToken: jest.Mock;
-}
-
-export interface MockChatStore {
-  messages: MockMessage[];
-  isLoading: boolean;
-  isProcessing: boolean;
-  error: string | null;
-  sendMessage: jest.Mock;
-  clearMessages: jest.Mock;
-}
-
-export interface MockThreadStore {
-  threads: MockThread[];
-  currentThread: MockThread | null;
-  currentThreadId: string | null;
-  loading: boolean;
-  error: string | null;
-  setCurrentThread: jest.Mock;
-  deleteThread: jest.Mock;
-  createThread: jest.Mock;
-  setThreads: jest.Mock;
-  loadThreads: jest.Mock;
-  updateThread: jest.Mock;
-}
 
 // ============================================================================
 // BASIC MOCKING SETUP - Core mock initialization

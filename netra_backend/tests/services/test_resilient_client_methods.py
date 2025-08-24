@@ -3,9 +3,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -18,6 +16,7 @@ class TestResilientHTTPClientMethods:
     def client(self):
         """Create a ResilientHTTPClient for testing."""
         return ResilientHTTPClient(base_url="https://api.example.com")
+    @pytest.mark.asyncio
     async def test_get_method(self, client):
         """Test GET method."""
         with patch.object(client, '_request', return_value={"success": True}) as mock_request:
@@ -31,6 +30,7 @@ class TestResilientHTTPClientMethods:
         mock_request.assert_called_once_with(
             "GET", "/test", "test_api", params={"key": "value"}, headers={"Auth": "token"}
         )
+    @pytest.mark.asyncio
     async def test_post_method(self, client):
         """Test POST method."""
         with patch.object(client, '_request', return_value={"success": True}) as mock_request:
@@ -52,6 +52,7 @@ class TestResilientHTTPClientMethods:
             json_data={"json": "data"}, 
             headers={"Auth": "token"}
         )
+    @pytest.mark.asyncio
     async def test_put_method(self, client):
         """Test PUT method."""
         with patch.object(client, '_request', return_value={"success": True}) as mock_request:
@@ -72,6 +73,7 @@ class TestResilientHTTPClientMethods:
             json_data=None, 
             headers={"Auth": "token"}
         )
+    @pytest.mark.asyncio
     async def test_delete_method(self, client):
         """Test DELETE method."""
         with patch.object(client, '_request', return_value={"success": True}) as mock_request:

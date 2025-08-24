@@ -6,8 +6,6 @@ Tests performance aspects of tool registry
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import threading
 import time
 from typing import Any, Dict, List, Optional
@@ -24,6 +22,7 @@ class TestToolRegistryPerformance:
     @pytest.fixture
     def mock_db_session(self):
         """Mock database session"""
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     @pytest.fixture
@@ -31,6 +30,7 @@ class TestToolRegistryPerformance:
         """Create tool registry for performance testing"""
         return ToolRegistry(mock_db_session)
     
+    @pytest.mark.asyncio
     async def test_large_scale_tool_registration(self, tool_registry):
         """Test registration performance with large number of tools"""
         # Create many tools

@@ -28,7 +28,7 @@ import os
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -76,7 +76,9 @@ class TestSubAgentRegistryDiscovery:
     @mock_justified("LLM service external dependency for agent testing")
     def llm_manager_mock(self):
         """Mock LLM manager for registry testing."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_mock = Mock(spec=LLMManager)
+        # Mock: Async component isolation for testing without real async operations
         llm_mock.generate_response = AsyncMock(return_value={
             "content": "Agent discovery response",
             "usage": {"prompt_tokens": 40, "completion_tokens": 15}
@@ -87,7 +89,9 @@ class TestSubAgentRegistryDiscovery:
     @mock_justified("Tool dispatcher external dependency for capability mapping")
     def tool_dispatcher_mock(self):
         """Mock tool dispatcher for capability testing."""
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         dispatcher_mock = Mock(spec=ToolDispatcher)
+        # Mock: Async component isolation for testing without real async operations
         dispatcher_mock.dispatch = AsyncMock(return_value={"status": "success"})
         return dispatcher_mock
 
@@ -265,7 +269,7 @@ class TestSubAgentRegistryDiscovery:
         ]
         
         # Mock intelligent routing function
-        def route_request(request: str, registry: AgentRegistry) -> Dict[str, Any]:
+        async def route_request(request: str, registry: AgentRegistry) -> Dict[str, Any]:
             """Simulate intelligent request routing based on content analysis."""
             request_lower = request.lower()
             

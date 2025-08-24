@@ -155,9 +155,13 @@ class TestAuthFailoverScenarios:
             }
         
         async def verify_session(session_id: str) -> bool:
-            return session_id in sessions
+            try:
+                yield session
+            finally:
+                if hasattr(session, "close"):
+                    await session.close()
         
-        return {
+        yield {
             "add": add_session,
             "verify": verify_session,
             "sessions": sessions
@@ -165,6 +169,7 @@ class TestAuthFailoverScenarios:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(180)
+    @pytest.mark.asyncio
     async def test_primary_failure_automatic_failover(
         self, auth_cluster, session_tracker
     ):
@@ -230,6 +235,7 @@ class TestAuthFailoverScenarios:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_rolling_upgrade_zero_downtime(
         self, auth_cluster
     ):
@@ -294,6 +300,7 @@ class TestAuthFailoverScenarios:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_cascading_failure_recovery(
         self, auth_cluster
     ):
@@ -346,6 +353,7 @@ class TestAuthFailoverScenarios:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_split_brain_prevention(
         self, auth_cluster
     ):
@@ -388,6 +396,7 @@ class TestAuthFailoverScenarios:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_geographic_failover(
         self, auth_cluster
     ):
@@ -434,6 +443,7 @@ class TestAuthFailoverScenarios:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_failback_after_recovery(
         self, auth_cluster, session_tracker
     ):
@@ -493,6 +503,7 @@ class TestAuthFailoverScenarios:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(180)
+    @pytest.mark.asyncio
     async def test_load_based_failover(
         self, auth_cluster
     ):
@@ -541,6 +552,7 @@ class TestAuthFailoverScenarios:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_partial_failure_degraded_mode(
         self, auth_cluster
     ):

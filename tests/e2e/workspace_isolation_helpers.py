@@ -270,7 +270,7 @@ class WorkspaceSecurityTestUtils:
     async def simulate_malicious_cross_workspace_access(workspace_a_id: str, workspace_b_id: str) -> bool:
         """Simulate malicious attempt to access data across workspaces."""
         # This should ALWAYS fail in a properly isolated system
-        with patch('app.db.client.execute_query') as mock_query:
+        with patch('netra_backend.app.db.client.execute_query') as mock_query:
             mock_query.return_value = []  # Simulated empty result due to proper isolation
             return False  # Access denied as expected
     

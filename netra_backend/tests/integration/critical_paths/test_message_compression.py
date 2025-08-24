@@ -11,7 +11,7 @@ L2 Test: Real internal compression components with mocked external services.
 Performance target: >50% compression ratio, <10ms compression latency.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -26,14 +26,14 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from uuid import uuid4
 
 import lz4.frame
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class CompressionAlgorithm(Enum):
@@ -996,6 +996,7 @@ class TestMessageCompression:
 
         ]
     
+    @pytest.mark.asyncio
     async def test_basic_compression_functionality(self, message_compressor, test_messages):
 
         """Test basic message compression and decompression."""
@@ -1032,6 +1033,7 @@ class TestMessageCompression:
 
         assert stats.compression_time < 0.01  # Should be fast (<10ms)
     
+    @pytest.mark.asyncio
     async def test_compression_algorithm_comparison(self, message_compressor, test_messages):
 
         """Test comparison of different compression algorithms."""
@@ -1080,6 +1082,7 @@ class TestMessageCompression:
 
         ) * 1.5  # Allow some variance
     
+    @pytest.mark.asyncio
     async def test_compression_threshold_behavior(self, message_compressor, test_messages):
 
         """Test compression threshold behavior."""
@@ -1104,6 +1107,7 @@ class TestMessageCompression:
 
         assert large_compressed["algorithm"] != CompressionAlgorithm.NONE.value
     
+    @pytest.mark.asyncio
     async def test_compression_negotiation(self, compression_negotiator):
 
         """Test compression negotiation during handshake."""
@@ -1139,6 +1143,7 @@ class TestMessageCompression:
 
         assert stats["fallback_to_none"] == 1
     
+    @pytest.mark.asyncio
     async def test_compression_performance_analysis(self, performance_analyzer, test_messages):
 
         """Test compression performance analysis."""
@@ -1184,6 +1189,7 @@ class TestMessageCompression:
 
         assert len(full_analysis["recommendations"]) > 0
     
+    @pytest.mark.asyncio
     async def test_compression_with_already_compressed_data(self, message_compressor):
 
         """Test handling of already compressed data."""
@@ -1209,6 +1215,7 @@ class TestMessageCompression:
 
         assert "algorithm" in result
     
+    @pytest.mark.asyncio
     async def test_compression_error_handling(self, message_compressor):
 
         """Test compression error handling."""
@@ -1243,6 +1250,7 @@ class TestMessageCompression:
     
     @mock_justified("L2: Message compression with real internal components")
 
+    @pytest.mark.asyncio
     async def test_websocket_integration_with_compression(self, message_compressor, compression_negotiator, test_messages):
 
         """Test WebSocket integration with message compression."""
@@ -1302,6 +1310,7 @@ class TestMessageCompression:
 
         assert stats["overall_compression_ratio"] > 30
     
+    @pytest.mark.asyncio
     async def test_concurrent_compression_operations(self, message_compressor, test_messages):
 
         """Test concurrent compression operations."""
@@ -1380,6 +1389,7 @@ class TestMessageCompression:
 
                 assert decompressed == original
     
+    @pytest.mark.asyncio
     async def test_compression_performance_benchmarks(self, message_compressor, test_messages):
 
         """Test compression performance benchmarks."""

@@ -20,7 +20,9 @@ from dev_launcher.launcher import DevLauncher
 class TestDefaultLauncherConfig(unittest.TestCase):
     """Test suite for default launcher configuration."""
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.config.find_project_root')
+    # Mock: Component isolation for testing without external dependencies
     @patch('pathlib.Path.exists')
     def test_default_config_uses_dynamic_ports(self, mock_exists, mock_find_root):
         """Test that default configuration uses dynamic ports."""
@@ -48,10 +50,11 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         # Verify dynamic ports is enabled by default
         self.assertTrue(config.dynamic_ports)
         self.assertFalse(config.backend_reload)  # Should be disabled by default
-        self.assertTrue(config.frontend_reload)   # Frontend reload enabled
-        self.assertTrue(config.load_secrets)      # Secrets loading enabled by default
+        self.assertFalse(config.frontend_reload)  # Frontend reload disabled by default for performance
+        self.assertFalse(config.load_secrets)     # Local-only secrets by default (no GCP)
     
     @patch('dev_launcher.config.find_project_root')
+    # Mock: Component isolation for testing without external dependencies
     @patch('pathlib.Path.exists')
     def test_static_flag_disables_dynamic_ports(self, mock_exists, mock_find_root):
         """Test that --static flag properly disables dynamic ports."""
@@ -76,7 +79,9 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         # Verify static mode is enabled
         self.assertFalse(config.dynamic_ports)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.config.find_project_root')
+    # Mock: Component isolation for testing without external dependencies
     @patch('pathlib.Path.exists')
     def test_default_startup_mode_is_minimal(self, mock_exists, mock_find_root):
         """Test that default startup mode is minimal for clean output."""
@@ -104,7 +109,9 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         # Verify minimal mode is default
         self.assertEqual(config.startup_mode, "minimal")
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.config.find_project_root')
+    # Mock: Component isolation for testing without external dependencies
     @patch('pathlib.Path.exists')
     def test_parallel_startup_enabled_by_default(self, mock_exists, mock_find_root):
         """Test that parallel startup is enabled by default."""
@@ -129,8 +136,11 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         # Verify parallel startup is enabled
         self.assertTrue(config.parallel_startup)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.launcher.DevLauncher._setup_signal_handlers')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.launcher.setup_logging')
+    # Mock: Component isolation for testing without external dependencies
     @patch('pathlib.Path.exists')
     def test_launcher_initializes_with_improvements(self, mock_exists, mock_logging, mock_signals):
         """Test that launcher initializes with all improvements."""
@@ -150,6 +160,7 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         args.no_parallel = False
         args.project_id = None
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.config.find_project_root', return_value=Path(".")):
             config = LauncherConfig.from_args(args)
         
@@ -177,6 +188,7 @@ class TestPortAllocationImprovements(unittest.TestCase):
         """Test that find_available_port prefers the specified port."""
         from dev_launcher.utils import find_available_port, is_port_available
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.utils.is_port_available') as mock_available:
             # Mock that preferred port is available
             mock_available.side_effect = lambda p: p == 8000
@@ -191,6 +203,7 @@ class TestPortAllocationImprovements(unittest.TestCase):
         """Test that find_available_port tries ports in range."""
         from dev_launcher.utils import find_available_port
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.utils.is_port_available') as mock_available:
             # Mock that 8000-8002 are taken, 8003 is free
             mock_available.side_effect = lambda p: p == 8003
@@ -204,7 +217,9 @@ class TestPortAllocationImprovements(unittest.TestCase):
         """Test fallback to random port when range is exhausted."""
         from dev_launcher.utils import find_available_port
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.utils.is_port_available') as mock_available:
+            # Mock: Component isolation for testing without external dependencies
             with patch('dev_launcher.utils.get_free_port') as mock_free:
                 # Mock that all ports in range are taken
                 mock_available.return_value = False
@@ -220,14 +235,18 @@ class TestPortAllocationImprovements(unittest.TestCase):
 class TestGracefulShutdownImprovements(unittest.TestCase):
     """Test improved graceful shutdown functionality."""
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.launcher.DevLauncher._setup_signal_handlers')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.launcher.setup_logging')
+    # Mock: Component isolation for testing without external dependencies
     @patch('pathlib.Path.exists')
     def test_graceful_shutdown_avoids_duplicate_messages(self, mock_exists, mock_logging, mock_signals):
         """Test that graceful shutdown avoids duplicate cleanup messages."""
         mock_exists.return_value = True
         
         # Create launcher with mock config
+        # Mock: Generic component isolation for controlled unit testing
         config = MagicMock()
         config.project_root = Path(".")
         config.verbose = False
@@ -240,9 +259,11 @@ class TestGracefulShutdownImprovements(unittest.TestCase):
         launcher = DevLauncher(config)
         
         # Mock process manager with no processes
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager = MagicMock()
         launcher.process_manager.processes = {}
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.print') as mock_print:
             launcher._graceful_shutdown()
             
@@ -251,13 +272,17 @@ class TestGracefulShutdownImprovements(unittest.TestCase):
                                if 'shutdown' in str(call).lower()]
             self.assertEqual(len(shutdown_messages), 0)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.launcher.DevLauncher._setup_signal_handlers')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.launcher.setup_logging')
+    # Mock: Component isolation for testing without external dependencies
     @patch('pathlib.Path.exists')
     def test_ensure_cleanup_sets_shutting_down_flag(self, mock_exists, mock_logging, mock_signals):
         """Test that _ensure_cleanup properly sets shutting down flag."""
         mock_exists.return_value = True
         
+        # Mock: Generic component isolation for controlled unit testing
         config = MagicMock()
         config.project_root = Path(".")
         config.verbose = False

@@ -19,7 +19,7 @@ import asyncio
 import os
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -59,6 +59,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_health_check_before_startup_complete(self, async_client):
         """Test 1: Health check should indicate not ready before startup completes."""
         # Simulate early health check
@@ -75,6 +76,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_health_check_after_startup_complete(self, async_client):
         """Test 2: Health check should indicate ready after startup completes."""
         # Simulate completed startup
@@ -82,8 +84,11 @@ class TestBasicSystemColdStartup:
             mock_state.startup_complete = True
             
             # Mock database connections as healthy
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.core.health_checkers.HealthChecker.check_postgres', return_value={"healthy": True}):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.core.health_checkers.HealthChecker.check_clickhouse', return_value={"healthy": True}):
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.core.health_checkers.HealthChecker.check_redis', return_value={"healthy": True}):
                         
                         response = await async_client.get("/health")
@@ -95,6 +100,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_startup_initialization_order(self):
         """Test 3: Services should initialize in correct order."""
         initialization_order = []
@@ -117,9 +123,13 @@ class TestBasicSystemColdStartup:
             return True
         
         # Simulate startup sequence
+        # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.init_db', mock_postgres_init):
+            # Mock: ClickHouse database isolation for fast testing without external database dependency
             with patch('app.db.client_clickhouse.ClickHouseClient.initialize', mock_clickhouse_init):
+                # Mock: Redis external service isolation for fast, reliable tests without network dependency
                 with patch('app.cache.redis_manager.RedisManager.initialize', mock_redis_init):
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.cache.cache_manager.CacheManager.initialize', mock_cache_init):
                         
                         # Run initialization
@@ -136,6 +146,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_readiness_check_basic_dependencies(self, async_client):
         """Test 4: Readiness check should verify all basic dependencies."""
         # Mock health checker
@@ -159,6 +170,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_api_endpoints_available_after_startup(self, async_client):
         """Test 5: Basic API endpoints should be available after startup."""
         # Mock successful startup
@@ -176,6 +188,7 @@ class TestBasicSystemColdStartup:
             for endpoint, expected_status in endpoints_to_test:
                 # Mock dependencies as needed
                 if endpoint == "/health":
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.core.health_checkers.HealthChecker.check_health', 
                               return_value={"status": "healthy", "components": {}}):
                         response = await async_client.get(endpoint)
@@ -187,6 +200,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_configuration_loading_on_startup(self):
         """Test 6: Configuration should be properly loaded on startup."""
         # Get settings instance
@@ -208,9 +222,11 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_startup_failure_handling(self):
         """Test 7: System should handle startup failures gracefully."""
         # Simulate database connection failure
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.db.postgres.init_db', side_effect=Exception("Database connection failed")):
             
             # Startup should catch and log the error
@@ -224,6 +240,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_cold_start_performance(self, async_client):
         """Test 8: Cold start should complete within acceptable time."""
         start_time = time.perf_counter()
@@ -241,6 +258,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_startup_idempotency(self):
         """Test 9: Startup should be idempotent (safe to call multiple times)."""
         initialization_count = {"count": 0}
@@ -250,6 +268,7 @@ class TestBasicSystemColdStartup:
             return True
         
         # Mock initialization that tracks calls
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.cache.cache_manager.CacheManager.initialize', mock_init):
             # First initialization
             await mock_init()
@@ -264,11 +283,14 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_graceful_degradation_missing_optional_services(self, async_client):
         """Test 10: System should start even if optional services are unavailable."""
         # Mock optional service failures
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.notification_service.NotificationService.initialize', 
                   side_effect=Exception("Notification service unavailable")):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.analytics_service.AnalyticsService.initialize',
                       side_effect=Exception("Analytics service unavailable")):
                 
@@ -277,6 +299,7 @@ class TestBasicSystemColdStartup:
                     mock_state.startup_complete = True
                     
                     # Core services mocked as healthy
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.core.health_checkers.HealthChecker.check_health',
                               return_value={
                                   "status": "degraded",

@@ -6,10 +6,8 @@ Functions refactored to ≤8 lines each using helper functions
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import UTC, datetime
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -52,6 +50,7 @@ def service_with_redis(mock_redis):
 
 class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     """Test integration scenarios combining multiple features"""
+    @pytest.mark.asyncio
     async def test_developer_access_in_production(self, service):
         """Test developer tool access in production environment"""
         context = ToolExecutionContext(
@@ -68,6 +67,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
             result = await service.check_tool_permission(context)
         assert_permission_denied(result)
         assert_missing_permissions(result, ["developer_tools"])
+    @pytest.mark.asyncio
     async def test_free_user_enterprise_tool(self, service):
         """Test free user trying to access enterprise tool"""
         context = ToolExecutionContext(
@@ -84,6 +84,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         assert_permission_denied(result)
         assert_missing_permissions(result, ["advanced_optimization"])
         assert result.upgrade_path == "Enterprise"
+    @pytest.mark.asyncio
     async def test_pro_user_with_heavy_usage(self, service_with_redis):
         """Test pro user with heavy tool usage"""
         context = create_heavy_usage_context()

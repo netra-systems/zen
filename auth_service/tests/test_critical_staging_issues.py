@@ -16,12 +16,14 @@ from unittest.mock import patch, MagicMock, AsyncMock
 
 # Ensure absolute imports work
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+from test_framework.environment_markers import env, staging_only, env_requires
 
 
+@env("staging")  # Critical staging-specific issues need real staging environment
+@env_requires(services=["auth_service", "postgres"], features=["cloud_sql_configured"])
 class TestAuthDatabaseInitialization:
     """Test database initialization issues found in staging."""
     
@@ -93,9 +95,11 @@ class TestAuthDatabaseInitialization:
                         pytest.fail(f"Method not found error: {e}")
 
 
+@env("staging")  # Environment detection specifically for staging
 class TestEnvironmentModeDetection:
     """Test environment mode detection issues."""
     
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_staging_environment_detected_correctly(self):
         """Test that staging environment is detected when ENVIRONMENT=staging.
         
@@ -149,6 +153,7 @@ class TestEnvironmentModeDetection:
                 f"Should not show 'development mode' when ENVIRONMENT=staging"
 
 
+@env("staging")  # Service naming validation for staging deployment
 class TestServiceNaming:
     """Test service naming configuration issues."""
     
@@ -205,6 +210,7 @@ class TestServiceNaming:
                 f"Expected 'auth-service' in response, got: {response.json()}"
 
 
+@env("staging")  # Configuration validation for staging environment
 class TestSimilarConfigurationIssues:
     """Test similar configuration issues that might occur."""
     
@@ -218,7 +224,10 @@ class TestSimilarConfigurationIssues:
     
     def test_redis_configuration_in_staging(self):
         """Test Redis configuration in staging environment."""
-        with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
+        with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=False):
+            # Clear REDIS_URL to test default staging behavior
+            if 'REDIS_URL' in os.environ:
+                del os.environ['REDIS_URL']
             redis_url = AuthConfig.get_redis_url()
             # In staging, should not default to localhost
             assert "localhost" not in redis_url, \

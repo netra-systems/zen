@@ -296,6 +296,7 @@ class MultiTenantConfigIsolationL3Manager:
             logger.error(f"Failed to initialize tenant analytics isolation: {e}")
             raise
     
+    @pytest.mark.asyncio
     async def test_configuration_namespace_isolation(self, tenant_id_a: str, 
                                                    tenant_id_b: str) -> Dict[str, Any]:
         """Test configuration namespace isolation between tenants."""
@@ -399,6 +400,7 @@ class MultiTenantConfigIsolationL3Manager:
                 "error": str(e)
             }
     
+    @pytest.mark.asyncio
     async def test_data_residency_enforcement(self, tenant_id: str, 
                                             expected_region: str) -> Dict[str, Any]:
         """Test data residency enforcement for tenant."""
@@ -544,6 +546,7 @@ class MultiTenantConfigIsolationL3Manager:
         except Exception as e:
             return {"compliant": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_cache_namespace_separation(self, tenant_id_a: str, 
                                             tenant_id_b: str) -> Dict[str, Any]:
         """Test cache namespace separation between tenants."""
@@ -615,6 +618,7 @@ class MultiTenantConfigIsolationL3Manager:
                 "test_duration": time.time() - start_time
             }
     
+    @pytest.mark.asyncio
     async def test_configuration_hot_reload_per_tenant(self, tenant_id: str) -> Dict[str, Any]:
         """Test configuration hot reload for specific tenant without affecting others."""
         start_time = time.time()
@@ -699,6 +703,7 @@ class MultiTenantConfigIsolationL3Manager:
             logger.error(f"Failed to apply tenant config hot reload: {e}")
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_analytics_isolation_validation(self, tenant_id_a: str, 
                                                 tenant_id_b: str) -> Dict[str, Any]:
         """Test analytics data isolation between tenants."""
@@ -797,6 +802,7 @@ class MultiTenantConfigIsolationL3Manager:
         
         return False  # No cross-contamination
     
+    @pytest.mark.asyncio
     async def test_database_row_level_security(self, tenant_id_a: str, 
                                              tenant_id_b: str) -> Dict[str, Any]:
         """Test database row-level security between tenants."""
@@ -983,6 +989,7 @@ async def multi_tenant_isolation_l3():
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_configuration_namespace_complete_isolation(multi_tenant_isolation_l3):
     """Test complete configuration namespace isolation between tenants."""
     # Create two tenants in different regions
@@ -1004,6 +1011,7 @@ async def test_configuration_namespace_complete_isolation(multi_tenant_isolation
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_data_residency_gdpr_compliance(multi_tenant_isolation_l3):
     """Test data residency enforcement for GDPR compliance."""
     # Create tenants in different regions
@@ -1032,6 +1040,7 @@ async def test_data_residency_gdpr_compliance(multi_tenant_isolation_l3):
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_cache_namespace_separation_strict(multi_tenant_isolation_l3):
     """Test strict cache namespace separation between tenants."""
     # Create tenants with sensitive data
@@ -1053,6 +1062,7 @@ async def test_cache_namespace_separation_strict(multi_tenant_isolation_l3):
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_configuration_hot_reload_isolation(multi_tenant_isolation_l3):
     """Test configuration hot reload per tenant without affecting others."""
     # Create multiple tenants
@@ -1076,6 +1086,7 @@ async def test_configuration_hot_reload_isolation(multi_tenant_isolation_l3):
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_analytics_isolation_comprehensive(multi_tenant_isolation_l3):
     """Test comprehensive analytics data isolation between tenants."""
     # Create tenants with analytics requirements
@@ -1097,6 +1108,7 @@ async def test_analytics_isolation_comprehensive(multi_tenant_isolation_l3):
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_database_row_level_security_enforcement(multi_tenant_isolation_l3):
     """Test database row-level security enforcement between tenants."""
     # Create tenants with sensitive data requirements
@@ -1118,6 +1130,7 @@ async def test_database_row_level_security_enforcement(multi_tenant_isolation_l3
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_comprehensive_multi_tenant_isolation_metrics(multi_tenant_isolation_l3):
     """Test comprehensive multi-tenant isolation system metrics."""
     # Create multiple tenants and run all isolation tests

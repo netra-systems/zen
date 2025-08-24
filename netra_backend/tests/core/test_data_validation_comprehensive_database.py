@@ -7,7 +7,7 @@ from pathlib import Path
 
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from pydantic import BaseModel, Field, ValidationError
@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field, ValidationError
 from netra_backend.app.schemas.registry import WebSocketMessageType
 from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
 
-from netra_backend.app.websocket_core.validation import MessageValidator
+from netra_backend.app.websocket_core.utils import validate_message_structure as MessageValidator
 
 def test_schema_migration_field_renaming():
     """Test schema migration with field name changes."""

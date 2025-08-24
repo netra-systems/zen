@@ -16,6 +16,7 @@ import time
 import pytest
 from typing import Dict, Any
 
+from test_framework.environment_markers import env, env_requires, dev_and_staging
 from tests.e2e.config import TEST_USERS
 from tests.e2e.websocket_guarantees_helpers import (
     MessageOrderingCore, AtLeastOnceDeliveryCore, DuplicateDetectionCore, ReconnectionRecoveryCore, ConcurrentMessageCore,
@@ -27,6 +28,12 @@ from tests.e2e.websocket_guarantees_helpers import (
 )
 
 
+@env("dev", "staging")
+@env_requires(
+    services=["websocket_manager", "message_queue", "postgres", "redis"],
+    features=["message_ordering", "delivery_guarantees", "reconnection_recovery"],
+    data=["enterprise_test_users", "message_sequences"]
+)
 @pytest.mark.asyncio
 class TestMessageOrderingPreservation:
     @pytest.fixture

@@ -6,7 +6,7 @@ Handles content retrieval, statistics, and analytical queries
 import json
 from typing import Dict, List, Optional
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.corpus.base import (
     ClickHouseOperationError,

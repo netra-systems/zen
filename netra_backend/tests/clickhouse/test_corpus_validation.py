@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -49,10 +49,12 @@ class TestValidationAndSafety:
             for expected in expected_errors:
                 assert any(expected in error for error in result["errors"])
 
+    @pytest.mark.asyncio
     async def test_corpus_access_control(self):
         """Test 15: Verify corpus access control"""
         service = CorpusService()
         
+        # Mock: Generic component isolation for controlled unit testing
         db = MagicMock()
         
         # Test filtering by user_id
@@ -66,14 +68,18 @@ class TestValidationAndSafety:
 class TestCorpusCloning:
     """Test corpus cloning functionality"""
     
+    @pytest.mark.asyncio
     async def test_corpus_clone_workflow(self):
         """Test 11: Verify corpus cloning creates new corpus with data"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             
             # Mock source corpus
@@ -90,14 +96,18 @@ class TestCorpusCloning:
             assert result.name == "Cloned Corpus"
             assert result.description == "Clone of Original Corpus"
 
+    @pytest.mark.asyncio
     async def test_corpus_content_copy(self):
         """Test 12: Verify corpus content is copied correctly"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             
             await service._copy_corpus_content(
@@ -124,6 +134,7 @@ def _get_validation_test_cases():
 
 def _create_source_corpus():
     """Create source corpus for cloning."""
+    # Mock: Generic component isolation for controlled unit testing
     source = MagicMock()
     source.id = "source_id"
     source.name = "Original Corpus"

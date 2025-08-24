@@ -47,7 +47,9 @@ class TestRealisticLogIngestion:
         """Test streaming ingestion of logs"""
         logs = generate_realistic_logs(1000)
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.db.clickhouse.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             

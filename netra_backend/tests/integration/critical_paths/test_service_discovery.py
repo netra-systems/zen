@@ -20,7 +20,7 @@ import json
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -254,6 +254,7 @@ class ServiceDiscoveryManager:
                 "discovery_time": time.time() - discovery_start
             }
     
+    @pytest.mark.asyncio
     async def test_load_balanced_service_calls(self, service_name: str, call_count: int) -> Dict[str, Any]:
         """Test load-balanced service calls through discovery."""
         load_test_start = time.time()
@@ -326,6 +327,7 @@ class ServiceDiscoveryManager:
             "instance_id": instance["instance_id"]
         }
     
+    @pytest.mark.asyncio
     async def test_service_failover(self, service_name: str) -> Dict[str, Any]:
         """Test service failover when instances become unhealthy."""
         failover_start = time.time()
@@ -403,6 +405,7 @@ async def service_discovery_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_service_registration_and_discovery(service_discovery_manager):
     """Test service registration and discovery flow."""
     manager = service_discovery_manager
@@ -443,6 +446,7 @@ async def test_service_registration_and_discovery(service_discovery_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_load_balanced_service_calls(service_discovery_manager):
     """Test load-balanced service calls through discovery."""
     manager = service_discovery_manager
@@ -478,6 +482,7 @@ async def test_load_balanced_service_calls(service_discovery_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism  
+@pytest.mark.asyncio
 async def test_service_failover_mechanism(service_discovery_manager):
     """Test service failover when instances become unhealthy."""
     manager = service_discovery_manager
@@ -504,6 +509,7 @@ async def test_service_failover_mechanism(service_discovery_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_service_discovery_performance(service_discovery_manager):
     """Test service discovery performance under load."""
     manager = service_discovery_manager

@@ -366,7 +366,7 @@ class ConnectionManager:
 connection_manager = ConnectionManager()
 
 
-def get_connection_manager() -> ConnectionManager:
+def get_connection_monitor() -> ConnectionManager:
     """Get the global connection manager instance."""
     return connection_manager
 

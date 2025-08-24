@@ -33,8 +33,6 @@ from unittest.mock import patch
 import pytest
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Test configuration - Fast static analysis focused
 TEST_TIMEOUT = 15  # seconds - Static analysis should be fast
@@ -94,7 +92,7 @@ class MicroserviceIsolationValidator:
                     "requirements.txt", 
                     "auth_core/__init__.py"
                 ],
-                dockerfile_name="Dockerfile.auth"
+                dockerfile_name="deployment/docker/Dockerfile.auth"
             ),
             "main_backend": MicroserviceSpec(
                 name="main_backend",
@@ -116,7 +114,7 @@ class MicroserviceIsolationValidator:
                     "main.py",
                     "core/__init__.py"
                 ],
-                dockerfile_name="Dockerfile.backend"
+                dockerfile_name="deployment/docker/Dockerfile.backend"
             ),
             "frontend": MicroserviceSpec(
                 name="frontend",
@@ -142,7 +140,7 @@ class MicroserviceIsolationValidator:
                     "package.json",
                     "next.config.ts"
                 ],
-                dockerfile_name="Dockerfile.frontend"
+                dockerfile_name="deployment/docker/Dockerfile.frontend"
             )
         }
 

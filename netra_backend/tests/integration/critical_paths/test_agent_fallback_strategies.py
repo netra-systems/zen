@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -584,6 +584,7 @@ async def fallback_strategies_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_fallback_strategy_selection(fallback_strategies_manager):
     """Test basic fallback strategy selection."""
     manager = fallback_strategies_manager
@@ -601,6 +602,7 @@ async def test_basic_fallback_strategy_selection(fallback_strategies_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_fallback_execution_with_retry(fallback_strategies_manager):
     """Test fallback execution with retry strategy."""
     manager = fallback_strategies_manager
@@ -621,6 +623,7 @@ async def test_fallback_execution_with_retry(fallback_strategies_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_alternative_service_fallback(fallback_strategies_manager):
     """Test alternative service fallback strategy."""
     manager = fallback_strategies_manager
@@ -644,6 +647,7 @@ async def test_alternative_service_fallback(fallback_strategies_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_degraded_mode_operation(fallback_strategies_manager):
     """Test degraded mode fallback strategy."""
     manager = fallback_strategies_manager
@@ -667,6 +671,7 @@ async def test_degraded_mode_operation(fallback_strategies_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_cache_fallback_strategy(fallback_strategies_manager):
     """Test cache fallback strategy."""
     manager = fallback_strategies_manager
@@ -691,6 +696,7 @@ async def test_cache_fallback_strategy(fallback_strategies_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_authentication_error_handling(fallback_strategies_manager):
     """Test authentication error handling with manual override."""
     manager = fallback_strategies_manager
@@ -711,6 +717,7 @@ async def test_authentication_error_handling(fallback_strategies_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_strategy_priority_ordering(fallback_strategies_manager):
     """Test that higher priority strategies are selected first."""
     manager = fallback_strategies_manager
@@ -732,6 +739,7 @@ async def test_strategy_priority_ordering(fallback_strategies_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_strategy_execution_timeout(fallback_strategies_manager):
     """Test strategy execution timeout handling."""
     manager = fallback_strategies_manager
@@ -759,6 +767,7 @@ async def test_strategy_execution_timeout(fallback_strategies_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_recovery_monitoring(fallback_strategies_manager):
     """Test recovery monitoring and health metrics."""
     manager = fallback_strategies_manager
@@ -785,6 +794,7 @@ async def test_recovery_monitoring(fallback_strategies_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_fallback_execution(fallback_strategies_manager):
     """Test concurrent execution of multiple fallback strategies."""
     manager = fallback_strategies_manager
@@ -819,6 +829,7 @@ async def test_concurrent_fallback_execution(fallback_strategies_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_strategy_success_rate_tracking(fallback_strategies_manager):
     """Test tracking of strategy success rates."""
     manager = fallback_strategies_manager
@@ -842,6 +853,7 @@ async def test_strategy_success_rate_tracking(fallback_strategies_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_fallback_performance_benchmark(fallback_strategies_manager):
     """Benchmark fallback strategy performance."""
     manager = fallback_strategies_manager

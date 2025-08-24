@@ -65,12 +65,14 @@ class AuthDatabase:
             connect_args = {"check_same_thread": False}
         elif self.is_cloud_run or force_postgres_in_test:
             # Cloud Run with Cloud SQL OR test with PostgreSQL URL
-            database_url = AuthDatabaseManager.get_auth_database_url_async()
+            from auth_service.auth_core.config import AuthConfig
+            database_url = AuthConfig.get_database_url()
             pool_class = NullPool  # Serverless requires NullPool
             connect_args = self._get_cloud_sql_connect_args()
         else:
             # Local development with PostgreSQL
-            database_url = AuthDatabaseManager.get_auth_database_url_async()
+            from auth_service.auth_core.config import AuthConfig
+            database_url = AuthConfig.get_database_url()
             pool_class = AsyncAdaptedQueuePool
             connect_args = self._get_local_connect_args()
         
@@ -234,6 +236,41 @@ class AuthDatabase:
             "url_valid": AuthDatabaseManager.validate_auth_url() if self._initialized else None,
             "pool_type": "NullPool" if (self.is_cloud_run or self.is_test_mode) else "AsyncAdaptedQueuePool",
         }
+
+
+class DatabaseConnection:
+    """Compatibility class for test expectations - delegates to shared manager."""
+    
+    @staticmethod
+    def _normalize_url_for_asyncpg(url: str) -> str:
+        """Normalize URL for asyncpg compatibility.
+        
+        Args:
+            url: Database URL to normalize
+            
+        Returns:
+            URL normalized for asyncpg with SSL parameters handled
+        """
+        import re
+        
+        # Remove SSL parameters for Cloud SQL Unix socket connections
+        if "/cloudsql/" in url:
+            url = re.sub(r'[&?]sslmode=[^&]*', '', url)
+            url = re.sub(r'[&?]ssl=[^&]*', '', url)
+            url = re.sub(r'&&+', '&', url)
+            url = re.sub(r'[&?]$', '', url)
+        else:
+            # Convert sslmode to ssl for asyncpg
+            if "sslmode=require" in url:
+                url = url.replace("sslmode=require", "ssl=require")
+        
+        # Format for async driver
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://")
+        elif url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://")
+            
+        return url
 
 # Global database instance
 auth_db = AuthDatabase()

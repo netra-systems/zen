@@ -602,6 +602,7 @@ async def billing_l4_manager():
 
 @pytest.mark.l4
 
+@pytest.mark.asyncio
 async def test_billing_accuracy_under_concurrent_load(billing_l4_manager):
 
     """Test billing accuracy with concurrent users and real LLM calls."""
@@ -639,6 +640,7 @@ async def test_billing_accuracy_under_concurrent_load(billing_l4_manager):
 
 @pytest.mark.l4
 
+@pytest.mark.asyncio
 async def test_token_counting_accuracy_at_scale(billing_l4_manager):
 
     """Test token counting accuracy with high-volume real LLM requests."""
@@ -698,6 +700,7 @@ async def test_token_counting_accuracy_at_scale(billing_l4_manager):
 
 @pytest.mark.l4
 
+@pytest.mark.asyncio
 async def test_billing_consistency_across_services(billing_l4_manager):
 
     """Test billing consistency across multiple services and cache layers."""
@@ -775,6 +778,7 @@ async def test_billing_consistency_across_services(billing_l4_manager):
 
 @pytest.mark.l4  
 
+@pytest.mark.asyncio
 async def test_billing_performance_under_sustained_load(billing_l4_manager):
 
     """Test billing system performance under sustained load conditions."""

@@ -22,7 +22,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -66,6 +66,7 @@ class TestSystemMonitoring:
             "quality_gate_passed": True
         }
         
+        # Mock: Async component isolation for testing without real async operations
         infra["quality_monitor"].validate_thresholds = AsyncMock(return_value=validation_result)
         return await infra["quality_monitor"].validate_thresholds(measurement)
 
@@ -125,6 +126,7 @@ class TestSystemMonitoring:
             "system_status": "operational_with_warnings"
         }
         
+        # Mock: Async component isolation for testing without real async operations
         infra["health_aggregator"].aggregate_health = AsyncMock(return_value=aggregation_result)
         return await infra["health_aggregator"].aggregate_health(scenario)
 
@@ -138,6 +140,7 @@ class TestSystemMonitoring:
             "alert_resolution_time_minutes": 8
         }
         
+        # Mock: Async component isolation for testing without real async operations
         infra["health_aggregator"].manage_alerts = AsyncMock(return_value=alert_management)
         return await infra["health_aggregator"].manage_alerts(health_data)
 

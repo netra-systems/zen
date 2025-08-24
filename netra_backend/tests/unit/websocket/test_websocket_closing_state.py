@@ -6,11 +6,9 @@ Tests to prevent regression of the "Cannot call send once a close message has be
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from starlette.websockets import WebSocketState
@@ -18,7 +16,8 @@ from starlette.websockets import WebSocketState
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 from netra_backend.app.websocket_core.broadcast_core import BroadcastManager
 
-from netra_backend.app.websocket_core import ConnectionInfo, WebSocketManager as ConnectionManager
+from netra_backend.app.websocket_core.types import ConnectionInfo
+from netra_backend.app.websocket_core.manager import WebSocketManager as ConnectionManager
 
 class TestWebSocketClosingState:
     """Test WebSocket closing state handling."""
@@ -26,10 +25,13 @@ class TestWebSocketClosingState:
     @pytest.fixture
     def mock_websocket(self):
         """Create a mock WebSocket."""
+        # Mock: Generic component isolation for controlled unit testing
         ws = AsyncMock()
         ws.client_state = WebSocketState.CONNECTED
         ws.application_state = WebSocketState.CONNECTED
+        # Mock: Generic component isolation for controlled unit testing
         ws.send_json = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         ws.close = AsyncMock()
         return ws
     
@@ -123,6 +125,7 @@ class TestWebSocketClosingState:
         """Test error handling when send is called after close."""
         # Setup error scenario
         error_msg = 'Cannot call "send" once a close message has been sent'
+        # Mock: Async component isolation for testing without real async operations
         connection_info.websocket.send_json = AsyncMock(
             side_effect=RuntimeError(error_msg)
         )
@@ -141,6 +144,7 @@ class TestWebSocketClosingState:
         """Test that cleanup marks connections as closing."""
         # Setup connections
         user_id = "test_user"
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = AsyncMock()
         ws1.client_state = WebSocketState.DISCONNECTED
         ws1.application_state = WebSocketState.DISCONNECTED
@@ -149,6 +153,7 @@ class TestWebSocketClosingState:
         connections_to_remove = [(user_id, conn_info)]
         
         # Mock _disconnect_internal
+        # Mock: Generic component isolation for controlled unit testing
         connection_manager._disconnect_internal = AsyncMock()
         
         # Cleanup
@@ -203,14 +208,18 @@ class TestWebSocketClosingState:
         """Test that broadcasts skip connections marked as closing."""
         # Setup
         user_id = "test_user"
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = AsyncMock()
         ws1.client_state = WebSocketState.CONNECTED
         ws1.application_state = WebSocketState.CONNECTED
+        # Mock: Generic component isolation for controlled unit testing
         ws1.send_json = AsyncMock()
         
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = AsyncMock()
         ws2.client_state = WebSocketState.CONNECTED
         ws2.application_state = WebSocketState.CONNECTED
+        # Mock: Generic component isolation for controlled unit testing
         ws2.send_json = AsyncMock()
         
         conn1 = ConnectionInfo(websocket=ws1, user_id=user_id, connection_id="conn1")
@@ -236,6 +245,7 @@ class TestWebSocketStateTransitions:
     @pytest.mark.asyncio
     async def test_state_transition_connected_to_closing(self):
         """Test state transition from connected to closing."""
+        # Mock: Generic component isolation for controlled unit testing
         ws = AsyncMock()
         ws.client_state = WebSocketState.CONNECTED
         ws.application_state = WebSocketState.CONNECTED
@@ -259,7 +269,9 @@ class TestWebSocketStateTransitions:
     @pytest.mark.asyncio 
     async def test_close_websocket_safely_checks_states(self, connection_manager):
         """Test that _close_websocket_safely checks both states."""
+        # Mock: Generic component isolation for controlled unit testing
         ws = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         ws.close = AsyncMock()
         
         # Test various state combinations

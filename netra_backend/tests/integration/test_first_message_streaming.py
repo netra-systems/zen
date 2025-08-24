@@ -4,7 +4,7 @@ Components: StreamProcessor → WebSocket → UI Updates → Response Assembly
 Critical: Streaming responses provide immediate feedback for better UX
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -13,7 +13,7 @@ import asyncio
 import json
 from datetime import datetime, timezone
 from typing import Any, AsyncGenerator, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.schemas import LLMStreamChunk, User
@@ -21,7 +21,7 @@ from netra_backend.app.schemas import LLMStreamChunk, User
 from netra_backend.app.services.agent_service_core import AgentService
 
 from netra_backend.app.services.streaming_service import TextStreamProcessor
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 @pytest.mark.asyncio
@@ -56,10 +56,13 @@ class TestFirstMessageStreaming:
 
         """Create mock WebSocket for streaming."""
 
+        # Mock: Generic component isolation for controlled unit testing
         ws = Mock()
 
+        # Mock: Generic component isolation for controlled unit testing
         ws.send_json = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         ws.send_text = AsyncMock()
 
         ws.client_state = "CONNECTED"
@@ -68,6 +71,7 @@ class TestFirstMessageStreaming:
     
     @pytest.fixture
 
+    @pytest.mark.asyncio
     async def test_user(self):
 
         """Create test user for streaming."""
@@ -86,6 +90,7 @@ class TestFirstMessageStreaming:
 
         )
     
+    @pytest.mark.asyncio
     async def test_token_streaming_to_websocket(
 
         self, stream_processor, ws_manager, mock_websocket, test_user
@@ -147,6 +152,7 @@ class TestFirstMessageStreaming:
 
         assert mock_websocket.send_json.call_count == 8
     
+    @pytest.mark.asyncio
     async def test_progressive_ui_updates(
 
         self, ws_manager, mock_websocket, test_user
@@ -217,6 +223,7 @@ class TestFirstMessageStreaming:
 
         assert ui_updates[-1]["update_type"] == "complete"
     
+    @pytest.mark.asyncio
     async def test_response_assembly_from_stream(
 
         self, stream_processor
@@ -267,6 +274,7 @@ class TestFirstMessageStreaming:
 
         assert "35%" in complete_response
     
+    @pytest.mark.asyncio
     async def test_streaming_with_markdown_formatting(
 
         self, stream_processor, mock_websocket
@@ -335,6 +343,7 @@ Your AI costs can be reduced by **40%**
 
         assert "### Recommendations:" in complete_markdown
     
+    @pytest.mark.asyncio
     async def test_stream_error_handling(
 
         self, stream_processor, mock_websocket, test_user
@@ -397,6 +406,7 @@ Your AI costs can be reduced by **40%**
 
         assert "Starting analysis" in "".join(received_tokens)
     
+    @pytest.mark.asyncio
     async def test_streaming_performance_metrics(
 
         self, stream_processor
@@ -473,6 +483,7 @@ Your AI costs can be reduced by **40%**
 
         assert total_time < 1.0  # Reasonable total time
     
+    @pytest.mark.asyncio
     async def test_complete_response_confirmation(
 
         self, ws_manager, mock_websocket, test_user

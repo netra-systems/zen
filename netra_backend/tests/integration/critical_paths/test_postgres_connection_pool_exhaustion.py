@@ -142,6 +142,7 @@ class PostgresPoolExhaustionManager:
                     pass
             raise
     
+    @pytest.mark.asyncio
     async def test_pool_exhaustion_behavior(self) -> Dict[str, Any]:
         """Test behavior when pool is exhausted."""
         results = {
@@ -193,6 +194,7 @@ class PostgresPoolExhaustionManager:
         
         return results
     
+    @pytest.mark.asyncio
     async def test_connection_lifecycle(self) -> Dict[str, Any]:
         """Test complete connection lifecycle management."""
         results = {
@@ -237,6 +239,7 @@ class PostgresPoolExhaustionManager:
         
         return results
     
+    @pytest.mark.asyncio
     async def test_concurrent_connection_requests(self, concurrent_count: int = 10) -> Dict[str, Any]:
         """Test concurrent connection requests behavior."""
         results = {
@@ -332,6 +335,7 @@ async def pool_manager():
 class TestPostgresConnectionPoolExhaustionL3:
     """L3 integration tests for PostgreSQL connection pool exhaustion."""
     
+    @pytest.mark.asyncio
     async def test_connection_pool_exhaustion_and_recovery(self, pool_manager):
         """Test that connection pool handles exhaustion gracefully."""
         results = await pool_manager.test_pool_exhaustion_behavior()
@@ -340,6 +344,7 @@ class TestPostgresConnectionPoolExhaustionL3:
         assert results["timeout_occurred"] is True or results["error_details"] is not None
         assert results["recovery_successful"] is True
     
+    @pytest.mark.asyncio
     async def test_connection_lifecycle_management(self, pool_manager):
         """Test complete connection lifecycle from creation to release."""
         results = await pool_manager.test_connection_lifecycle()
@@ -349,6 +354,7 @@ class TestPostgresConnectionPoolExhaustionL3:
         assert results["connection_released"] is True
         assert results["pool_status_tracked"] is True
     
+    @pytest.mark.asyncio
     async def test_concurrent_connection_performance(self, pool_manager):
         """Test performance under concurrent connection requests."""
         results = await pool_manager.test_concurrent_connection_requests(15)
@@ -361,6 +367,7 @@ class TestPostgresConnectionPoolExhaustionL3:
         assert results["average_response_time"] < 2.0
         assert results["max_response_time"] < 5.0
     
+    @pytest.mark.asyncio
     async def test_pool_monitoring_and_metrics(self, pool_manager):
         """Test pool status monitoring and metrics collection."""
         # Create some connections to generate metrics
@@ -380,6 +387,7 @@ class TestPostgresConnectionPoolExhaustionL3:
         for session in sessions:
             await session.close()
     
+    @pytest.mark.asyncio
     async def test_pool_configuration_limits(self, pool_manager):
         """Test that pool respects configured limits."""
         initial_status = pool_manager.test_engine.pool.status()

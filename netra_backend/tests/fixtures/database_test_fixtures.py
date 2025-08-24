@@ -29,18 +29,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 @pytest.fixture
 def async_session_mock():
     """Create standard AsyncSession mock with basic methods."""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     _setup_basic_session_methods(session)
     return session
 
 def _setup_basic_session_methods(session: AsyncMock) -> None:
     """Setup core AsyncSession methods with defaults."""
+    # Mock: Session isolation for controlled testing without external state
     session.add = MagicMock()
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.close = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.refresh = AsyncMock(side_effect=_default_refresh)
+    # Mock: Session isolation for controlled testing without external state
     session.execute = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.scalar = AsyncMock()
 
 async def _default_refresh(entity: Any) -> None:
@@ -51,6 +59,7 @@ async def _default_refresh(entity: Any) -> None:
 @pytest.fixture
 def transaction_session_mock():
     """Create AsyncSession mock with transaction capabilities."""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     _setup_transaction_methods(session)
     return session
@@ -58,9 +67,13 @@ def transaction_session_mock():
 def _setup_transaction_methods(session: AsyncMock) -> None:
     """Setup transaction-specific session methods."""
     _setup_basic_session_methods(session)
+    # Mock: Session isolation for controlled testing without external state
     session.begin = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.flush = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.merge = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.expunge = MagicMock()
 
 # === Query Result Simulators ===
@@ -73,6 +86,7 @@ class QueryResultBuilder:
     
     def with_single_result(self, entity: Any) -> 'QueryResultBuilder':
         """Add single result to query response."""
+        # Mock: Generic component isolation for controlled unit testing
         result = Mock()
         result.scalars.return_value.first.return_value = entity
         result.scalar_one_or_none.return_value = entity
@@ -81,6 +95,7 @@ class QueryResultBuilder:
     
     def with_multiple_results(self, entities: List[Any]) -> 'QueryResultBuilder':
         """Add multiple results to query response."""
+        # Mock: Generic component isolation for controlled unit testing
         result = Mock()
         result.scalars.return_value.all.return_value = entities
         result.scalars.return_value.first.return_value = entities[0] if entities else None
@@ -89,6 +104,7 @@ class QueryResultBuilder:
     
     def with_empty_result(self) -> 'QueryResultBuilder':
         """Add empty result to query response."""
+        # Mock: Generic component isolation for controlled unit testing
         result = Mock()
         result.scalars.return_value.first.return_value = None
         result.scalars.return_value.all.return_value = []
@@ -109,6 +125,7 @@ def query_builder():
 
 def create_mock_user(**kwargs) -> Mock:
     """Create mock User model instance."""
+    # Mock: Component isolation for controlled unit testing
     return Mock(
         id=kwargs.get('id', f"user_{uuid.uuid4().hex[:8]}"),
         email=kwargs.get('email', 'test@example.com'),
@@ -119,6 +136,7 @@ def create_mock_user(**kwargs) -> Mock:
 
 def create_mock_thread(**kwargs) -> Mock:
     """Create mock Thread model instance."""
+    # Mock: Component isolation for controlled unit testing
     return Mock(
         id=kwargs.get('id', f"thread_{uuid.uuid4().hex[:8]}"),
         user_id=kwargs.get('user_id', 'test_user'),
@@ -129,6 +147,7 @@ def create_mock_thread(**kwargs) -> Mock:
 
 def create_mock_message(**kwargs) -> Mock:
     """Create mock Message model instance."""
+    # Mock: Component isolation for controlled unit testing
     return Mock(
         id=kwargs.get('id', f"msg_{uuid.uuid4().hex[:8]}"),
         thread_id=kwargs.get('thread_id', 'test_thread'),
@@ -209,6 +228,7 @@ class MockConnectionPool:
         if self.active_connections >= self.pool_size:
             raise Exception("Pool exhausted")
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         conn = AsyncMock(spec=AsyncSession)
         _setup_basic_session_methods(conn)
         self.active_connections += 1

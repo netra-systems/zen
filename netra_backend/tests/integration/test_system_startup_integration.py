@@ -19,7 +19,7 @@ import os
 import tempfile
 from pathlib import Path
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.startup_checks import StartupChecker, StartupCheckResult
@@ -36,7 +36,7 @@ class TestSystemStartupIntegration:
     def minimal_environment(self):
         """Create minimal environment for startup testing."""
         return {
-            "DATABASE_URL": "sqlite+aiosqlite:///test.db",
+            "DATABASE_URL": "sqlite+aioDATABASE_URL_PLACEHOLDER",
             "REDIS_URL": "redis://localhost:6379",
             "CLICKHOUSE_URL": "http://localhost:8123",
             "NETRA_API_KEY": "test-api-key",
@@ -49,6 +49,7 @@ class TestSystemStartupIntegration:
         app = create_app()
         return StartupChecker(app)
 
+    @pytest.mark.asyncio
     async def test_complete_startup_sequence_success(self, minimal_environment):
         """
         Test successful complete startup sequence with all components.
@@ -77,12 +78,15 @@ class TestSystemStartupIntegration:
         """Mock external services for startup testing."""
         return patch.multiple(
             'app.startup_checks.service_checks.ServiceChecker',
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             check_redis=AsyncMock(return_value=StartupCheckResult(
                 name="check_redis", success=True, message="Redis connected"
             )),
+            # Mock: ClickHouse external database isolation for unit testing performance
             check_clickhouse=AsyncMock(return_value=StartupCheckResult(
                 name="check_clickhouse", success=True, message="ClickHouse connected"
             )),
+            # Mock: Async component isolation for testing without real async operations
             check_llm_providers=AsyncMock(return_value=StartupCheckResult(
                 name="check_llm_providers", success=True, message="LLM providers available"
             ))
@@ -117,6 +121,7 @@ class TestSystemStartupIntegration:
         assert result["duration_ms"] > 0, "Startup duration not recorded"
         assert result["duration_ms"] < 30000, "Startup took too long (>30s)"
 
+    @pytest.mark.asyncio
     async def test_environment_variable_validation_failure(self):
         """
         Test startup failure when critical environment variables are missing.
@@ -136,6 +141,7 @@ class TestSystemStartupIntegration:
             
             assert "DATABASE_URL" in str(exc_info.value) or "environment" in str(exc_info.value).lower()
 
+    @pytest.mark.asyncio
     async def test_database_connection_failure_recovery(self, minimal_environment):
         """
         Test database connection failure and recovery scenarios.
@@ -168,17 +174,21 @@ class TestSystemStartupIntegration:
         """Mock non-database services for database testing."""
         return patch.multiple(
             'app.startup_checks.service_checks.ServiceChecker',
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             check_redis=AsyncMock(return_value=StartupCheckResult(
                 name="check_redis", success=True, message="Redis connected"
             )),
+            # Mock: ClickHouse external database isolation for unit testing performance
             check_clickhouse=AsyncMock(return_value=StartupCheckResult(
                 name="check_clickhouse", success=True, message="ClickHouse connected"  
             )),
+            # Mock: Async component isolation for testing without real async operations
             check_llm_providers=AsyncMock(return_value=StartupCheckResult(
                 name="check_llm_providers", success=True, message="LLM providers available"
             ))
         )
 
+    @pytest.mark.asyncio
     async def test_service_initialization_order(self, minimal_environment):
         """
         Test services are initialized in correct dependency order.
@@ -226,6 +236,7 @@ class TestSystemStartupIntegration:
                 assert db_index > env_index, "Database checks should run after environment checks"
                 break
 
+    @pytest.mark.asyncio
     async def test_health_check_endpoint_validation(self, minimal_environment):
         """
         Test health check endpoint responds correctly after startup.
@@ -272,6 +283,7 @@ class TestSystemStartupIntegration:
         assert isinstance(health_data["checks"], int)
         assert isinstance(health_data["duration_ms"], (int, float))
 
+    @pytest.mark.asyncio
     async def test_startup_failure_scenarios(self):
         """Test various startup failure scenarios and error handling."""
         # Test missing database URL scenario
@@ -290,6 +302,7 @@ class TestSystemStartupIntegration:
             except Exception as e:
                 assert "database" in str(e).lower(), f"Unexpected exception: {e}"
 
+    @pytest.mark.asyncio
     async def test_staging_environment_strict_validation(self, minimal_environment):
         """
         Test staging environment enforces strict validation.
@@ -306,7 +319,9 @@ class TestSystemStartupIntegration:
             checker = StartupChecker(app)
             
             # Mock one service to fail
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.startup_checks.service_checks.ServiceChecker.check_redis', 
+                      # Mock: Async component isolation for testing without real async operations
                       AsyncMock(return_value=StartupCheckResult(
                           name="check_redis", success=False, message="Redis unavailable", critical=True
                       ))):

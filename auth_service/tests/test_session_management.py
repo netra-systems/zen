@@ -16,8 +16,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from auth_service.auth_core.core.session_manager import SessionManager
 from auth_service.auth_core.database.connection import auth_db
 from auth_service.auth_core.database.models import AuthSession, AuthUser
+from test_framework.environment_markers import env
 
 
+@env("test", "dev")  # Session tests can use mocked Redis and database
 class TestSessionCreation:
     """Test session creation after login"""
     
@@ -25,6 +27,7 @@ class TestSessionCreation:
     def session_manager(self):
         """Create session manager with mocked Redis"""
         manager = SessionManager()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         manager.redis_client = MagicMock()
         manager.redis_client.ping.return_value = True
         return manager
@@ -60,6 +63,7 @@ class TestSessionValidation:
     def session_manager(self):
         """Setup session manager with mocked Redis"""
         manager = SessionManager()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         manager.redis_client = MagicMock()
         return manager
 
@@ -100,6 +104,7 @@ class TestSessionExpiry:
     def session_manager(self):
         """Setup session manager for expiry tests"""
         manager = SessionManager()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         manager.redis_client = MagicMock()
         manager.session_ttl = 24  # 24 hours
         return manager
@@ -140,6 +145,7 @@ class TestSessionRefresh:
     def session_manager(self):
         """Setup session manager for refresh tests"""
         manager = SessionManager()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         manager.redis_client = MagicMock()
         return manager
 
@@ -174,6 +180,7 @@ class TestMultiDeviceSessionManagement:
     def session_manager(self):
         """Setup session manager for multi-device tests"""
         manager = SessionManager()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         manager.redis_client = MagicMock()
         return manager
 
@@ -229,6 +236,7 @@ class TestSessionRevocation:
     def session_manager(self):
         """Setup session manager for revocation tests"""
         manager = SessionManager()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         manager.redis_client = MagicMock()
         return manager
 
@@ -311,6 +319,7 @@ class TestSessionSecurityAndHijackingPrevention:
     def session_manager(self):
         """Setup session manager for security tests"""
         manager = SessionManager()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         manager.redis_client = MagicMock()
         return manager
 

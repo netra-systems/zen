@@ -122,7 +122,6 @@ class StartupValidator:
         try:
             # Import and run auth service validation
             import sys
-            sys.path.insert(0, str(Path(__file__).parent.parent))
             from netra_backend.app.tests.startup.test_comprehensive_startup import (
                 AuthServiceValidator,
             )
@@ -149,7 +148,6 @@ class StartupValidator:
         try:
             # Import and run database validations
             import sys
-            sys.path.insert(0, str(Path(__file__).parent.parent))
             from netra_backend.app.tests.startup.test_comprehensive_startup import (
                 ClickHouseValidator,
                 RedisValidator,

@@ -6,14 +6,12 @@ Each function ≤8 lines, using helper functions for setup and assertions.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import json
 import tempfile
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -27,6 +25,7 @@ from netra_backend.tests.json_file_crypto_test_helpers import JsonTestHelpers
 class TestDatetimeUtilsTimezone:
     """test_datetime_utils_timezone - Test timezone conversions and DST handling"""
     
+    @pytest.mark.asyncio
     async def test_timezone_conversions(self):
         from netra_backend.app.utils.datetime_utils import DatetimeUtils
         utils = DatetimeUtils()
@@ -40,6 +39,7 @@ class TestDatetimeUtilsTimezone:
         
         self._assert_timezone_difference(utils, utc_time)
     
+    @pytest.mark.asyncio
     async def test_dst_handling(self):
         from netra_backend.app.utils.datetime_utils import DatetimeUtils
         utils = DatetimeUtils()
@@ -75,6 +75,7 @@ class TestDatetimeUtilsTimezone:
 class TestStringUtilsSanitization:
     """test_string_utils_sanitization - Test string sanitization and XSS prevention"""
     
+    @pytest.mark.asyncio
     async def test_xss_prevention(self):
         from netra_backend.app.utils.string_utils import StringUtils
         utils = StringUtils()
@@ -87,6 +88,7 @@ class TestStringUtilsSanitization:
         self._assert_sql_injection_prevention(utils)
         self._assert_path_traversal_prevention(utils)
     
+    @pytest.mark.asyncio
     async def test_input_validation(self):
         from netra_backend.app.utils.string_utils import StringUtils
         utils = StringUtils()
@@ -138,6 +140,7 @@ class TestStringUtilsSanitization:
 class TestJsonUtilsSerialization:
     """test_json_utils_serialization - Test custom serialization and circular reference handling"""
     
+    @pytest.mark.asyncio
     async def test_custom_serialization(self):
         from netra_backend.app.utils.json_utils import JsonUtils
         utils = JsonUtils()
@@ -151,6 +154,7 @@ class TestJsonUtilsSerialization:
         
         self._assert_custom_object_serialization(utils)
     
+    @pytest.mark.asyncio
     async def test_circular_reference_handling(self):
         from netra_backend.app.utils.json_utils import JsonUtils
         utils = JsonUtils()

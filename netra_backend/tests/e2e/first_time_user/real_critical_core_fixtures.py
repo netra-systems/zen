@@ -24,28 +24,28 @@ from netra_backend.tests.e2e.first_time_user.real_critical_auth_helpers import C
 @pytest.fixture
 async def critical_user_journey_environment():
     """Setup comprehensive environment for critical user journey testing"""
-    return await CriticalUserJourneyHelpers.create_real_user_context()
+    yield await CriticalUserJourneyHelpers.create_real_user_context()
 
 @pytest.fixture  
 async def real_optimization_service():
     """Real optimization service for testing actual analysis"""
-    return await CriticalUserJourneyHelpers.setup_real_optimization_service()
+    yield await CriticalUserJourneyHelpers.setup_real_optimization_service()
 
 @pytest.fixture
 async def concurrent_load_config():
     """Configuration for concurrent load testing"""
     from netra_backend.tests.e2e.first_time_user.real_critical_optimization_helpers import ConcurrentTestHelpers
-    return await ConcurrentTestHelpers.setup_concurrent_load_environment()
+    yield await ConcurrentTestHelpers.setup_concurrent_load_environment()
 
 @pytest.fixture
 async def real_auth_environment():
     """Real authentication environment for OAuth testing"""
-    return await CriticalUserJourneyHelpers.setup_real_auth_environment()
+    yield await CriticalUserJourneyHelpers.setup_real_auth_environment()
 
 @pytest.fixture
 async def websocket_connection_manager():
     """Real WebSocket connection manager for onboarding testing"""
-    return await CriticalUserJourneyHelpers.initialize_real_websocket_connection()
+    yield await CriticalUserJourneyHelpers.initialize_real_websocket_connection()
 
 # OAuth and Authentication Fixtures
 @pytest.fixture
@@ -57,7 +57,7 @@ async def oauth_flow_environment():
         "redirect_uri": "http://localhost:3000/auth/callback",
         "scopes": ["email", "profile"]
     }
-    return oauth_config
+    yield oauth_config
 
 @pytest.fixture
 def user_profile_data():
@@ -73,7 +73,7 @@ def user_profile_data():
 @pytest.fixture
 async def session_management_config():
     """Session management configuration for testing"""
-    return {
+    yield {
         "session_timeout": 3600,  # 1 hour
         "refresh_token_enabled": True,
         "secure_cookies": True,
@@ -95,7 +95,7 @@ async def provider_validation_environment():
         "rate_limit_check": True,
         "health_check_enabled": True
     }
-    return validation_config
+    yield validation_config
 
 @pytest.fixture
 def encrypted_storage_config():
@@ -117,7 +117,7 @@ async def websocket_test_environment():
         "message_queue_size": 1000,
         "compression_enabled": True
     }
-    return ws_config
+    yield ws_config
 
 @pytest.fixture
 def onboarding_state_config():
@@ -144,7 +144,7 @@ async def realtime_progress_tracker():
         "estimated_time_remaining": True,
         "step_validation": True
     }
-    return progress_config
+    yield progress_config
 
 # Optimization and Analysis Fixtures
 @pytest.fixture
@@ -181,7 +181,7 @@ async def optimization_analysis_config():
         "performance_impact_analysis": True,
         "implementation_guidance": True
     }
-    return analysis_config
+    yield analysis_config
 
 @pytest.fixture
 def cost_savings_calculator():
@@ -209,7 +209,7 @@ def performance_thresholds():
 @pytest.fixture
 async def load_testing_environment():
     """Load testing environment configuration"""
-    return {
+    yield {
         "concurrent_users": 10,
         "test_duration_seconds": 60,
         "ramp_up_time_seconds": 10,

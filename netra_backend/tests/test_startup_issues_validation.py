@@ -18,7 +18,7 @@ Business Value Justification (BVJ):
 import asyncio
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -142,8 +142,11 @@ class TestSchemaValidationService:
         )
         
         # Create a mock engine
+        # Mock: Service component isolation for predictable testing behavior
         mock_engine = MagicMock(spec=AsyncEngine)
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = AsyncMock()
         mock_result.scalar.return_value = 1
         mock_conn.execute.return_value = mock_result
@@ -164,8 +167,11 @@ class TestSchemaValidationService:
         )
         
         # Create mock engine
+        # Mock: Service component isolation for predictable testing behavior
         mock_engine = MagicMock(spec=AsyncEngine)
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = AsyncMock()
         mock_result.scalar.return_value = 1
         mock_conn.execute.return_value = mock_result
@@ -208,8 +214,11 @@ class TestStartupIntegration:
             'CLICKHOUSE_HOST': 'localhost'
         }):
             # Mock database connections
+            # Mock: Database access isolation for fast, reliable unit testing
             with patch('netra_backend.app.startup_checks.database_checks.AsyncEngine') as mock_engine:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_conn = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 mock_result = AsyncMock()
                 mock_result.scalar.return_value = 1
                 mock_conn.execute.return_value = mock_result

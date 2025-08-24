@@ -120,6 +120,7 @@ class OAuthE2ETestRunner:
     
     async def _process_oauth_callback(self) -> Dict[str, Any]:
         """Process OAuth callback with mocked external provider"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
             self._setup_google_oauth_mocks(mock_client)
             
@@ -133,13 +134,16 @@ class OAuthE2ETestRunner:
     
     def _setup_google_oauth_mocks(self, mock_client) -> None:
         """Mock external Google OAuth API calls only"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_instance = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_instance
         
+        # Mock: Generic component isolation for controlled unit testing
         token_response = AsyncMock()
         token_response.json.return_value = GoogleOAuthProvider.get_oauth_response()
         token_response.raise_for_status.return_value = None
         
+        # Mock: Generic component isolation for controlled unit testing
         user_response = AsyncMock()
         user_response.json.return_value = GoogleOAuthProvider.get_user_info()
         user_response.raise_for_status.return_value = None
@@ -300,7 +304,9 @@ class TestOAuthCompleteE2EFlow:
         runner = oauth_e2e_runner
         
         # Simulate OAuth provider failure
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             mock_instance.post.side_effect = Exception("OAuth provider timeout")

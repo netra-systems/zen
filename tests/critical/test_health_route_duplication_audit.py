@@ -22,7 +22,6 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from auth_service.main import app as auth_app
 from netra_backend.app.core.app_factory import create_app
@@ -189,7 +188,9 @@ class TestHealthRouteDuplicationAudit:
         auth_client = TestClient(auth_test_app)
         
         # Mock database connections
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.async_engine'):
+            # Mock: Component isolation for testing without external dependencies
             with patch('auth_service.auth_core.database.connection.auth_db'):
                 # Get health responses
                 backend_health = backend_client.get('/health')

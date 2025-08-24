@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy import JSON, Column, DateTime, Float, Integer, String
@@ -76,8 +76,10 @@ class MetricRepository:
 class TestUserRepositoryAuth:
     """test_user_repository_auth - Test user authentication and password hashing"""
     
+    @pytest.mark.asyncio
     async def test_password_hashing(self):
         """Test password hashing on user creation"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         
         # Create a mock repository that implements the expected interface
@@ -97,6 +99,7 @@ class TestUserRepositoryAuth:
         user_data = _create_user_data()
         
         # Mock argon2 hasher
+        # Mock: Password hashing isolation to avoid expensive crypto operations in tests
         with patch('argon2.PasswordHasher.hash') as mock_hash:
             mock_hash.return_value = 'hashed_password'
             
@@ -104,8 +107,10 @@ class TestUserRepositoryAuth:
             assert user.password_hash == "hashed_password"
             mock_hash.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_authentication_flow(self):
         """Test user authentication flow"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         
         # Create a mock repository that implements the expected interface
@@ -141,8 +146,10 @@ class TestUserRepositoryAuth:
 class TestOptimizationRepositoryStorage:
     """test_optimization_repository_storage - Test optimization storage and versioning"""
     
+    @pytest.mark.asyncio
     async def test_optimization_versioning(self):
         """Test optimization versioning system"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
         
@@ -166,8 +173,10 @@ class TestOptimizationRepositoryStorage:
         assert new_version.version == 2
         assert new_version.parent_id == "opt123"
     
+    @pytest.mark.asyncio
     async def test_optimization_history(self):
         """Test optimization version history"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
         
@@ -182,8 +191,10 @@ class TestOptimizationRepositoryStorage:
 class TestMetricRepositoryAggregation:
     """test_metric_repository_aggregation - Test metric aggregation and time-series queries"""
     
+    @pytest.mark.asyncio
     async def test_metric_aggregation(self):
         """Test metric aggregation functions"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()
         
@@ -206,8 +217,10 @@ class TestMetricRepositoryAggregation:
         )
         assert max_val == 70.0
     
+    @pytest.mark.asyncio
     async def test_time_series_queries(self):
         """Test time series data queries"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()
         

@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -657,6 +657,7 @@ async def context_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_context_window_creation(context_manager):
     """Test context window creation and basic operations."""
     manager = context_manager
@@ -672,6 +673,7 @@ async def test_context_window_creation(context_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_message_addition(context_manager):
     """Test adding messages to context window."""
     manager = context_manager
@@ -699,6 +701,7 @@ async def test_message_addition(context_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_context_compression_summarization(context_manager):
     """Test context compression using summarization strategy."""
     manager = context_manager
@@ -733,6 +736,7 @@ async def test_context_compression_summarization(context_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_context_compression_keywords(context_manager):
     """Test context compression using keyword extraction."""
     manager = context_manager
@@ -777,6 +781,7 @@ async def test_context_compression_keywords(context_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_sliding_window_compression(context_manager):
     """Test sliding window compression strategy."""
     manager = context_manager
@@ -811,6 +816,7 @@ async def test_sliding_window_compression(context_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_automatic_compression_on_capacity(context_manager):
     """Test automatic compression when context window reaches capacity."""
     manager = context_manager
@@ -851,6 +857,7 @@ async def test_automatic_compression_on_capacity(context_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_context_prompt_generation(context_manager):
     """Test generating context for LLM prompts."""
     manager = context_manager
@@ -879,6 +886,7 @@ async def test_context_prompt_generation(context_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_window_statistics(context_manager):
     """Test context window statistics generation."""
     manager = context_manager
@@ -911,6 +919,7 @@ async def test_window_statistics(context_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_window_persistence_and_recovery(context_manager):
     """Test context window persistence and recovery from cache."""
     manager = context_manager
@@ -937,6 +946,7 @@ async def test_window_persistence_and_recovery(context_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_context_operations(context_manager):
     """Test concurrent context window operations."""
     manager = context_manager
@@ -971,6 +981,7 @@ async def test_concurrent_context_operations(context_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_context_window_performance(context_manager):
     """Benchmark context window performance."""
     manager = context_manager

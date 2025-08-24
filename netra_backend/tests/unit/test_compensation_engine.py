@@ -10,12 +10,10 @@ preventing double billing or lost revenue scenarios.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -35,6 +33,7 @@ class TestCompensationEngine:
     @pytest.fixture
     def engine(self):
         """Create compensation engine with minimal dependencies."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.compensation_engine_core.central_logger'):
             engine = CompensationEngine()
             engine.handlers = []  # Clear default handlers for testing
@@ -43,8 +42,11 @@ class TestCompensationEngine:
     @pytest.fixture
     def mock_handler(self):
         """Create mock compensation handler."""
+        # Mock: Component isolation for controlled unit testing
         handler = Mock(spec=BaseCompensationHandler)
+        # Mock: Async component isolation for testing without real async operations
         handler.can_compensate = AsyncMock(return_value=True)
+        # Mock: Async component isolation for testing without real async operations
         handler.execute_compensation = AsyncMock(return_value=True)
         handler.get_priority.return_value = 1
         return handler
@@ -52,6 +54,7 @@ class TestCompensationEngine:
     @pytest.fixture
     def recovery_context(self):
         """Create mock recovery context."""
+        # Mock: Component isolation for controlled unit testing
         context = Mock(spec=RecoveryContext)
         context.operation_type = OperationType.DATABASE_WRITE
         context.operation_id = "test-op-123"
@@ -62,6 +65,7 @@ class TestCompensationEngine:
         """Create test compensation data."""
         return {"amount": 100.50, "user_id": "user123", "transaction_type": "billing"}
     
+    @pytest.mark.asyncio
     async def test_create_compensation_action_success(self, engine, mock_handler, recovery_context, compensation_data):
         """Test successful compensation action creation."""
         engine.register_handler(mock_handler)
@@ -72,6 +76,7 @@ class TestCompensationEngine:
         assert action.operation_id == "op123"
         assert action.compensation_data == compensation_data
     
+    @pytest.mark.asyncio
     async def test_create_compensation_action_no_handler(self, engine, recovery_context, compensation_data):
         """Test compensation action creation with no available handler."""
         action_id = await engine.create_compensation_action("op123", recovery_context, compensation_data)
@@ -79,6 +84,7 @@ class TestCompensationEngine:
         assert action_id not in engine.active_compensations
         mock_handler.can_compensate.assert_not_called()
     
+    @pytest.mark.asyncio
     async def test_execute_compensation_success(self, engine, mock_handler, recovery_context, compensation_data):
         """Test successful compensation execution."""
         action_id = await self._create_test_action(engine, mock_handler, recovery_context, compensation_data)
@@ -89,6 +95,7 @@ class TestCompensationEngine:
         action = engine.active_compensations[action_id]
         assert action.state == CompensationState.COMPLETED
     
+    @pytest.mark.asyncio
     async def test_execute_compensation_handler_failure(self, engine, mock_handler, recovery_context, compensation_data):
         """Test compensation execution with handler failure."""
         mock_handler.execute_compensation.return_value = False
@@ -100,6 +107,7 @@ class TestCompensationEngine:
         action = engine.active_compensations[action_id]
         assert action.state == CompensationState.FAILED
     
+    @pytest.mark.asyncio
     async def test_execute_compensation_handler_exception(self, engine, mock_handler, recovery_context, compensation_data):
         """Test compensation execution with handler exception."""
         mock_handler.execute_compensation.side_effect = Exception("Handler error")
@@ -112,6 +120,7 @@ class TestCompensationEngine:
         assert action.state == CompensationState.FAILED
         assert "Handler error" in action.error
     
+    @pytest.mark.asyncio
     async def test_execute_compensation_nonexistent_action(self, engine):
         """Test compensation execution for non-existent action."""
         fake_id = str(uuid.uuid4())
@@ -178,11 +187,16 @@ class TestCompensationEngine:
         priorities = [h.get_priority() for h in engine.handlers]
         assert priorities == [1, 2, 3]
     
+    @pytest.mark.asyncio
     async def test_find_compatible_handler_multiple_handlers(self, engine, recovery_context):
         """Test finding compatible handler with multiple available."""
+        # Mock: Component isolation for controlled unit testing
         handler1 = Mock(spec=BaseCompensationHandler)
+        # Mock: Async component isolation for testing without real async operations
         handler1.can_compensate = AsyncMock(return_value=False)
+        # Mock: Component isolation for controlled unit testing
         handler2 = Mock(spec=BaseCompensationHandler)  
+        # Mock: Async component isolation for testing without real async operations
         handler2.can_compensate = AsyncMock(return_value=True)
         
         engine.handlers = [handler1, handler2]
@@ -191,9 +205,12 @@ class TestCompensationEngine:
         
         assert handler == handler2
     
+    @pytest.mark.asyncio
     async def test_find_compatible_handler_none_available(self, engine, recovery_context):
         """Test finding compatible handler when none available."""
+        # Mock: Component isolation for controlled unit testing
         handler1 = Mock(spec=BaseCompensationHandler)
+        # Mock: Async component isolation for testing without real async operations
         handler1.can_compensate = AsyncMock(return_value=False)
         
         engine.handlers = [handler1]
@@ -254,11 +271,13 @@ class TestCompensationEngine:
             operation_id="test-op",
             action_type="test",
             compensation_data={},
+            # Mock: Generic component isolation for controlled unit testing
             handler=AsyncMock()
         )
     
     def _create_mock_handler_with_priority(self, priority):
         """Helper to create mock handler with specific priority."""
+        # Mock: Component isolation for controlled unit testing
         handler = Mock(spec=BaseCompensationHandler)
         handler.get_priority.return_value = priority
         return handler

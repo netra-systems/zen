@@ -10,7 +10,7 @@ L3 Test: Real cross-service session invalidation with PostgreSQL, Redis, ClickHo
 Tests complete logout propagation and audit trail persistence.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -22,7 +22,7 @@ import time
 import uuid
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -30,13 +30,13 @@ from sqlalchemy.orm import sessionmaker
 
 # JWT service replaced with auth_integration
 from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 JWTService = AsyncMock
 # Session manager replaced with mock
 
 SessionManager = AsyncMock
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.db.models_postgres import User, ResearchSession as Session
 from tests.e2e.websocket_resilience.websocket_recovery_fixtures import SecurityAuditLogger
@@ -280,6 +280,7 @@ class SessionInvalidationCascade:
 
             websocket = MockWebSocketForRedis(user_id)
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.ws_manager.verify_jwt_token') as mock_verify:
 
                 mock_verify.return_value = {
@@ -648,6 +649,7 @@ class TestSessionInvalidationCascadeL3:
 
         service = JWTService()
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -666,6 +668,7 @@ class TestSessionInvalidationCascadeL3:
 
         manager = SessionManager()
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -682,6 +685,7 @@ class TestSessionInvalidationCascadeL3:
 
         """Create WebSocket manager."""
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.ws_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
@@ -707,7 +711,9 @@ class TestSessionInvalidationCascadeL3:
         _, connection_url = clickhouse_container
         
         # Use AsyncMock for easier testing with call tracking
+        # Mock: Security service isolation for auth testing without real token validation
         logger = AsyncMock(spec=SecurityAuditLogger)
+        # Mock: Session isolation for controlled testing without external state
         logger.log_session_event = AsyncMock()
         logger.security_events = []
         logger.alert_triggers = []
@@ -732,6 +738,7 @@ class TestSessionInvalidationCascadeL3:
 
         await manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_complete_session_invalidation_cascade(self, cascade_manager):
 
         """Test complete session invalidation across all services."""
@@ -802,6 +809,7 @@ class TestSessionInvalidationCascadeL3:
 
         assert session_id not in cascade_manager.active_sessions
     
+    @pytest.mark.asyncio
     async def test_concurrent_session_invalidations(self, cascade_manager):
 
         """Test concurrent invalidation of multiple sessions."""
@@ -872,6 +880,7 @@ class TestSessionInvalidationCascadeL3:
 
         assert active_ws == 0
     
+    @pytest.mark.asyncio
     async def test_partial_invalidation_failure_handling(self, cascade_manager):
 
         """Test handling of partial invalidation failures."""
@@ -932,6 +941,7 @@ class TestSessionInvalidationCascadeL3:
 
         assert latest_event["successful_steps"] < latest_event["total_steps"]
     
+    @pytest.mark.asyncio
     async def test_session_invalidation_audit_trail(self, cascade_manager):
 
         """Test complete audit trail for session invalidation."""
@@ -984,6 +994,7 @@ class TestSessionInvalidationCascadeL3:
 
         assert stored_event["reason"] == "security_incident"
     
+    @pytest.mark.asyncio
     async def test_websocket_immediate_disconnection(self, cascade_manager):
 
         """Test immediate WebSocket disconnection during invalidation."""
@@ -1048,6 +1059,7 @@ class TestSessionInvalidationCascadeL3:
 
         assert success is False  # Should fail - no connection
     
+    @pytest.mark.asyncio
     async def test_invalidation_idempotency(self, cascade_manager):
 
         """Test that multiple invalidation calls are idempotent."""

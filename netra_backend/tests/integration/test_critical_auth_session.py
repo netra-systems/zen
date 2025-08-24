@@ -10,7 +10,7 @@ from pathlib import Path
 
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from starlette.websockets import WebSocketState
@@ -24,6 +24,7 @@ from netra_backend.tests.integration.test_fixtures_common import (
 class TestAuthSessionIntegration:
     """Authentication and session management integration tests"""
 
+    @pytest.mark.asyncio
     async def test_oauth_flow_with_token_refresh(self, test_database, mock_infrastructure):
         """Full OAuth/SSO flow with token refresh and session management"""
         test_user = await create_test_user_with_oauth(test_database)
@@ -31,6 +32,7 @@ class TestAuthSessionIntegration:
         await self._test_token_refresh_cycle(auth_tokens, test_user)
         await self._test_session_persistence(test_user, test_database)
 
+    @pytest.mark.asyncio
     async def test_websocket_session_state_preservation(self, test_database, mock_infrastructure):
         """Connection resilience with state preservation"""
         ws_manager = mock_infrastructure["ws_manager"]
@@ -39,6 +41,7 @@ class TestAuthSessionIntegration:
         await self._simulate_connection_failure(connection_state)
         recovered_state = await self._test_automatic_reconnection(ws_manager, test_user, connection_state)
 
+    @pytest.mark.asyncio
     async def test_permission_authorization_flow(self, test_database, mock_infrastructure):
         """Tool access control flow"""
         permission_system = await self._setup_permission_service()
@@ -55,6 +58,7 @@ class TestAuthSessionIntegration:
 
     async def _test_token_refresh_cycle(self, tokens, user):
         """Test automatic token refresh before expiration"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.refresh_token') as mock_refresh:
             mock_refresh.return_value = {"access_token": f"new_{tokens['access']}"}
             expired_token = tokens.copy()
@@ -83,8 +87,10 @@ class TestAuthSessionIntegration:
 
     async def _establish_websocket_with_state(self, ws_manager, user):
         """Establish WebSocket with active state"""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         mock_websocket.client_state = WebSocketState.CONNECTED
+        # Mock: Generic component isolation for controlled unit testing
         connection_info = Mock()
         connection_info.user_id = user.id
         connection_info.connection_id = str(uuid.uuid4())
@@ -104,6 +110,7 @@ class TestAuthSessionIntegration:
 
     async def _test_automatic_reconnection(self, ws_manager, user, original_state):
         """Test automatic reconnection with state recovery"""
+        # Mock: Generic component isolation for controlled unit testing
         new_websocket = Mock()
         new_websocket.client_state = WebSocketState.CONNECTED
         

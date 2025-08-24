@@ -3,10 +3,8 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -22,8 +20,12 @@ class TestSyntaxFix:
 
     @pytest.fixture
     def service(self):
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = AsyncMock(spec=RedisManager)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.get_list = AsyncMock(return_value=[])
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.add_to_list = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.store_metrics = AsyncMock()
         return QualityGateService(redis_manager=mock_redis)

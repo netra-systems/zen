@@ -6,8 +6,6 @@ Tests price change calculations, provider comparisons, and anomaly detection
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -23,6 +21,7 @@ from netra_backend.app.services.supply_research_service import SupplyResearchSer
 @pytest.fixture
 def mock_db_session():
     """Create a mock database session."""
+    # Mock: Generic component isolation for controlled unit testing
     return MagicMock()
 
 @pytest.fixture
@@ -33,6 +32,7 @@ def service(mock_db_session):
 @pytest.fixture
 def sample_openai_item() -> AISupplyItem:
     """Create OpenAI sample item for comparisons"""
+    # Mock: Service component isolation for predictable testing behavior
     item = MagicMock(spec=AISupplyItem)
     item.provider = "openai"
     item.model_name = "gpt-4"
@@ -45,6 +45,7 @@ def sample_openai_item() -> AISupplyItem:
 @pytest.fixture
 def sample_anthropic_item() -> AISupplyItem:
     """Create Anthropic sample item for comparisons"""
+    # Mock: Service component isolation for predictable testing behavior
     item = MagicMock(spec=AISupplyItem)
     item.provider = "anthropic"
     item.model_name = "claude-2"
@@ -144,6 +145,7 @@ class TestPriceChangeCalculations:
     
     def _create_price_log(self, old_value: str, new_value: str, item_id: str) -> SupplyUpdateLog:
         """Helper to create price change log"""
+        # Mock: Service component isolation for predictable testing behavior
         log = MagicMock(spec=SupplyUpdateLog)
         log.supply_item_id = item_id
         log.field_updated = "pricing_input"
@@ -154,6 +156,7 @@ class TestPriceChangeCalculations:
     
     def _create_test_item(self, provider: str, model: str) -> AISupplyItem:
         """Helper to create test supply item"""
+        # Mock: Service component isolation for predictable testing behavior
         item = MagicMock(spec=AISupplyItem)
         item.provider = provider
         item.model_name = model
@@ -189,6 +192,7 @@ class TestProviderComparison:
     
     def test_provider_comparison_no_pricing_data(self, service):
         """Test provider comparison when items lack pricing"""
+        # Mock: Service component isolation for predictable testing behavior
         item_no_pricing = MagicMock(spec=AISupplyItem)
         item_no_pricing.model_name = "test-model"
         item_no_pricing.pricing_input = None
@@ -260,6 +264,7 @@ class TestAnomalyDetection:
     
     def _create_stale_item(self) -> AISupplyItem:
         """Helper to create stale supply item"""
+        # Mock: Service component isolation for predictable testing behavior
         old_item = MagicMock(spec=AISupplyItem)
         old_item.provider = "openai"
         old_item.model_name = "gpt-3.5"
@@ -288,6 +293,7 @@ class TestCacheIntegration:
     
     def test_service_functionality_without_redis(self, mock_db_session):
         """Test that service works properly when Redis is unavailable"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_research_service.RedisManager', 
                    side_effect=Exception("Redis unavailable")):
             service = SupplyResearchService(mock_db_session)

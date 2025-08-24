@@ -32,7 +32,7 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -76,7 +76,9 @@ class TestAgentMessageProcessing:
     async def test_agent_service_processes_message(self, agent_service, sample_user_message):
         """Test agent service successfully processes user messages."""
         # Mock dependencies
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         with patch('app.services.agent_service.SupervisorAgent') as mock_supervisor:
+            # Mock: Async component isolation for testing without real async operations
             mock_supervisor.return_value.process_message = AsyncMock(
                 return_value={
                     "response": "I'll help you optimize your AI costs. Let me analyze your current setup.",
@@ -95,6 +97,7 @@ class TestAgentMessageProcessing:
     @pytest.mark.asyncio
     async def test_message_routing_to_supervisor(self, agent_service, sample_user_message):
         """Test messages are correctly routed to supervisor agent."""
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         with patch('app.agents.supervisor.supervisor_consolidated.SupervisorAgent.process_message') as mock_process:
             mock_process.return_value = {"response": "Supervisor processed"}
             
@@ -124,6 +127,7 @@ class TestAgentMessageProcessing:
         ]
         
         # Mock supervisor responses
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         with patch('app.agents.supervisor.supervisor_consolidated.SupervisorAgent.process_message') as mock_process:
             mock_process.return_value = {"response": "Processed"}
             
@@ -157,12 +161,14 @@ class TestSupervisorAgentOrchestration:
     async def test_supervisor_delegates_to_data_agent(self, supervisor_agent, optimization_request):
         """Test supervisor delegates data analysis to data sub-agent."""
         # Mock data sub-agent
+        # Mock: Agent service isolation for testing without LLM agent execution
         with patch('app.agents.data_sub_agent.agent.DataSubAgent.process_request') as mock_data_agent:
             mock_data_agent.return_value = {
                 "analysis": "Current costs: $5000/month, optimization potential: 35%"
             }
             
             # Mock LLM response that triggers data agent
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
                 mock_llm.return_value = MockLLMResponse(
                     content="I need to analyze your current usage data.",
@@ -186,6 +192,7 @@ class TestSupervisorAgentOrchestration:
         }
         
         # Mock triage sub-agent
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.agents.triage_sub_agent.agent.TriageSubAgent.process_request') as mock_triage:
             mock_triage.return_value = {
                 "prioritized_issues": ["performance", "cost", "quality"],
@@ -193,6 +200,7 @@ class TestSupervisorAgentOrchestration:
             }
             
             # Mock LLM response that triggers triage
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
                 mock_llm.return_value = MockLLMResponse(
                     content="This requires issue triage and prioritization.",
@@ -216,13 +224,16 @@ class TestSupervisorAgentOrchestration:
         }
         
         # Mock multiple sub-agents
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.agents.data_sub_agent.agent.DataSubAgent.process_request') as mock_data, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.agents.reporting_sub_agent.ReportingSubAgent.process_request') as mock_reporting:
             
             mock_data.return_value = {"cost_analysis": "Current: $5000, Potential: $3500"}
             mock_reporting.return_value = {"strategy_report": "Comprehensive optimization plan"}
             
             # Mock LLM responses
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
                 # Sequence of LLM calls
                 mock_llm.side_effect = [
@@ -253,6 +264,7 @@ class TestSubAgentExecution:
         }
         
         # Mock ClickHouse data
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.db.clickhouse.ClickHouseClient.query') as mock_query:
             mock_query.return_value = [
                 {"metric": "cost", "value": 5000, "date": "2025-01-01"},
@@ -281,6 +293,7 @@ class TestSubAgentExecution:
         }
         
         # Mock LLM for issue analysis
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
                 content=json.dumps({
@@ -314,6 +327,7 @@ class TestSubAgentExecution:
         }
         
         # Mock tool execution
+        # Mock: Tool execution isolation for predictable agent testing
         with patch('app.agents.tool_dispatcher.ToolDispatcher.execute_tool') as mock_execute:
             mock_execute.return_value = {
                 "current_cost": 2500,
@@ -344,6 +358,7 @@ class TestAgentResponseGeneration:
         }
         
         # Mock LLM response
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
                 content="""Based on your cost-sensitive requirements, I recommend:
@@ -382,6 +397,7 @@ class TestAgentResponseGeneration:
         }
         
         # Mock comprehensive response
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
                 content="""Here's your optimization plan:
@@ -422,6 +438,7 @@ class TestAgentResponseGeneration:
         responses = []
         
         # Mock consistent LLM responses
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
                 content="Well-formatted response with clear structure and recommendations."
@@ -454,6 +471,7 @@ class TestAgentErrorHandling:
         }
         
         # Mock LLM failure
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.side_effect = Exception("LLM service unavailable")
             
@@ -478,9 +496,11 @@ class TestAgentErrorHandling:
         }
         
         # Mock sub-agent failure
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.agents.data_sub_agent.agent.DataSubAgent.process_request') as mock_data:
             mock_data.side_effect = Exception("Data service unavailable")
             
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
                 mock_llm.return_value = MockLLMResponse(
                     content="I'll provide general optimization advice since data analysis is unavailable."
@@ -510,6 +530,7 @@ class TestAgentErrorHandling:
             await asyncio.sleep(10)  # Simulate slow response
             return MockLLMResponse("Delayed response")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.llm.llm_manager.LLMManager.generate_response', side_effect=slow_llm_response):
             # Process with timeout
             try:
@@ -539,6 +560,7 @@ class TestAgentPerformance:
         }
         
         # Mock fast LLM response
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse(
                 content="For simple tasks, use GPT-3.5-turbo or Claude-3-haiku."
@@ -567,6 +589,7 @@ class TestAgentPerformance:
         ]
         
         # Mock LLM responses
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('app.llm.llm_manager.LLMManager.generate_response') as mock_llm:
             mock_llm.return_value = MockLLMResponse("Response to request")
             

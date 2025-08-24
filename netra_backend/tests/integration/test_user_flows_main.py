@@ -18,7 +18,7 @@ The original comprehensive file was refactored into focused modules:
 - Additional modules for API management, provider integration, etc.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -26,24 +26,18 @@ import sys
 import asyncio
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.integration.integration.helpers.user_flow_helpers import (
-
+from netra_backend.tests.integration.helpers.user_flow_helpers import (
     MockAuthService,
-
     MockUsageService,
-
     MockWebSocketManager,
-
     generate_test_user_data,
-
     simulate_user_journey,
-
 )
 
 class TestCompleteUserJourney:
@@ -258,6 +252,7 @@ class TestCompleteUserJourney:
 
 @pytest.fixture
 
+@pytest.mark.asyncio
 async def test_user_data() -> Dict[str, Any]:
 
     """Fixture providing test user data"""

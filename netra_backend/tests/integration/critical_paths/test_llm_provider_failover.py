@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -505,6 +505,7 @@ async def failover_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_provider_registration_and_health(failover_manager):
     """Test provider registration and health checking."""
     manager = failover_manager
@@ -525,6 +526,7 @@ async def test_provider_registration_and_health(failover_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_request_execution(failover_manager):
     """Test basic LLM request execution."""
     manager = failover_manager
@@ -543,6 +545,7 @@ async def test_basic_request_execution(failover_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_provider_failover_on_circuit_breaker(failover_manager):
     """Test failover when circuit breaker opens."""
     manager = failover_manager
@@ -573,6 +576,7 @@ async def test_provider_failover_on_circuit_breaker(failover_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_provider_priority_ordering(failover_manager):
     """Test provider selection based on priority."""
     manager = failover_manager
@@ -586,6 +590,7 @@ async def test_provider_priority_ordering(failover_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_round_robin_strategy(failover_manager):
     """Test round-robin failover strategy."""
     manager = failover_manager
@@ -607,6 +612,7 @@ async def test_round_robin_strategy(failover_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_cost_optimized_strategy(failover_manager):
     """Test cost-optimized failover strategy."""
     manager = failover_manager
@@ -623,6 +629,7 @@ async def test_cost_optimized_strategy(failover_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_circuit_breaker_recovery(failover_manager):
     """Test circuit breaker recovery mechanism."""
     manager = failover_manager
@@ -653,6 +660,7 @@ async def test_circuit_breaker_recovery(failover_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_no_available_providers_error(failover_manager):
     """Test error when no providers are available."""
     manager = failover_manager
@@ -671,6 +679,7 @@ async def test_no_available_providers_error(failover_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_provider_statistics_tracking(failover_manager):
     """Test provider statistics tracking."""
     manager = failover_manager
@@ -693,6 +702,7 @@ async def test_provider_statistics_tracking(failover_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_requests_with_failover(failover_manager):
     """Test concurrent requests with failover handling."""
     manager = failover_manager
@@ -720,6 +730,7 @@ async def test_concurrent_requests_with_failover(failover_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_failover_performance_benchmarks(failover_manager):
     """Benchmark failover performance."""
     manager = failover_manager

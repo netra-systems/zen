@@ -14,7 +14,7 @@ import secrets
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -39,7 +39,7 @@ class TestTokenValidationChainCompleteL4:
     @pytest.fixture
     async def token_infrastructure(self):
         """Token infrastructure setup"""
-        return {
+        yield {
             'token_service': TokenService(),
             'auth_service': AuthService(),
             'redis_service': RedisService(),
@@ -55,6 +55,7 @@ class TestTokenValidationChainCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_jwt_token_complete_lifecycle(self, token_infrastructure):
         """Test complete JWT token lifecycle from creation to expiry"""
         user_id = "user_jwt_lifecycle"
@@ -94,6 +95,7 @@ class TestTokenValidationChainCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_refresh_token_rotation(self, token_infrastructure):
         """Test refresh token rotation mechanism"""
         user_id = "user_refresh_rotation"
@@ -124,6 +126,7 @@ class TestTokenValidationChainCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_token_tampering_detection(self, token_infrastructure):
         """Test detection of tampered tokens"""
         user_id = "user_tamper"
@@ -156,6 +159,7 @@ class TestTokenValidationChainCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_service_to_service_token_validation(self, token_infrastructure):
         """Test service-to-service authentication tokens"""
         service_id = "api_gateway"
@@ -199,6 +203,7 @@ class TestTokenValidationChainCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_token_revocation_propagation(self, token_infrastructure):
         """Test token revocation propagation across services"""
         user_id = "user_revoke"
@@ -236,6 +241,7 @@ class TestTokenValidationChainCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_token_validation_under_concurrent_load(self, token_infrastructure):
         """Test token validation under concurrent load"""
         user_id = "user_concurrent"
@@ -271,6 +277,7 @@ class TestTokenValidationChainCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_token_scope_enforcement(self, token_infrastructure):
         """Test token scope enforcement at validation"""
         user_id = "user_scopes"
@@ -324,6 +331,7 @@ class TestTokenValidationChainCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_token_validation_with_audience_claim(self, token_infrastructure):
         """Test token validation with audience claim verification"""
         user_id = "user_audience"
@@ -361,6 +369,7 @@ class TestTokenValidationChainCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_token_chain_validation(self, token_infrastructure):
         """Test validation of chained tokens (parent-child relationship)"""
         user_id = "user_chain"
@@ -401,6 +410,7 @@ class TestTokenValidationChainCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_token_validation_with_ip_binding(self, token_infrastructure):
         """Test token validation with IP address binding"""
         user_id = "user_ip_bound"
@@ -431,6 +441,7 @@ class TestTokenValidationChainCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_token_validation_cache_invalidation(self, token_infrastructure):
         """Test token validation cache invalidation on revocation"""
         user_id = "user_cache_invalidation"

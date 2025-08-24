@@ -11,7 +11,7 @@ L2 Test: Real internal health check components with mocked external monitoring.
 Performance target: <10s health check cycles, 99.5% uptime detection accuracy.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -22,13 +22,13 @@ import time
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class HealthStatus(Enum):
@@ -568,6 +568,7 @@ class TestWebSocketHealthCheck:
 
         """Create WebSocket manager with mocked external services."""
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis:
 
             mock_redis.enabled = False  # Use in-memory storage
@@ -616,12 +617,14 @@ class TestWebSocketHealthCheck:
 
         ]
     
+    @pytest.mark.asyncio
     async def test_basic_connection_health_check(self, websocket_manager, health_checker, test_users):
 
         """Test basic connection health checking."""
 
         user = test_users[0]
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Connect user
@@ -666,6 +669,7 @@ class TestWebSocketHealthCheck:
 
         await websocket_manager.disconnect_user(user.id, mock_websocket)
     
+    @pytest.mark.asyncio
     async def test_service_dependency_health_checks(self, health_checker):
 
         """Test health checks for service dependencies."""
@@ -724,12 +728,14 @@ class TestWebSocketHealthCheck:
 
         assert "error_rate" in auth_health
     
+    @pytest.mark.asyncio
     async def test_health_history_tracking(self, websocket_manager, health_checker, test_users):
 
         """Test health history tracking functionality."""
 
         user = test_users[0]
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Connect user
@@ -780,6 +786,7 @@ class TestWebSocketHealthCheck:
 
         await websocket_manager.disconnect_user(user.id, mock_websocket)
     
+    @pytest.mark.asyncio
     async def test_metric_collection_and_aggregation(self, metric_collector):
 
         """Test metric collection and aggregation."""
@@ -831,12 +838,14 @@ class TestWebSocketHealthCheck:
 
         assert "timestamp" in aggregated
     
+    @pytest.mark.asyncio
     async def test_unhealthy_connection_detection(self, websocket_manager, health_checker, test_users):
 
         """Test detection of unhealthy connections."""
 
         user = test_users[0]
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Connect user
@@ -867,6 +876,7 @@ class TestWebSocketHealthCheck:
 
         await websocket_manager.disconnect_user(user.id, mock_websocket)
     
+    @pytest.mark.asyncio
     async def test_concurrent_health_checks(self, websocket_manager, health_checker, test_users):
 
         """Test concurrent health checking for multiple connections."""
@@ -877,6 +887,7 @@ class TestWebSocketHealthCheck:
 
         for user in test_users:
 
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_websocket = AsyncMock()
 
             connection_info = await websocket_manager.connect_user(user.id, mock_websocket)
@@ -933,12 +944,14 @@ class TestWebSocketHealthCheck:
     
     @mock_justified("L2: WebSocket health checking with real internal components")
 
+    @pytest.mark.asyncio
     async def test_health_check_integration_flow(self, websocket_manager, health_checker, metric_collector, test_users):
 
         """Test complete health check integration flow."""
 
         user = test_users[0]
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Connect user
@@ -1008,6 +1021,7 @@ class TestWebSocketHealthCheck:
 
         await websocket_manager.disconnect_user(user.id, mock_websocket)
     
+    @pytest.mark.asyncio
     async def test_health_check_performance_benchmarks(self, health_checker, test_users):
 
         """Test health check performance benchmarks."""

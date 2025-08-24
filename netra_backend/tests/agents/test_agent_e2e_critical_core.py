@@ -10,7 +10,7 @@ from pathlib import Path
 
 import asyncio
 import uuid
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -36,8 +36,11 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         user_request = "Analyze my AI workload and provide optimization recommendations"
         
         # Mock state persistence methods as AsyncMock
+        # Mock: Generic component isolation for controlled unit testing
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+            # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
+                # Mock: Async component isolation for testing without real async operations
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     # Execute the full agent lifecycle (don't mock the run method)
                     result_state = await supervisor.run(user_request, supervisor.thread_id, supervisor.user_id, run_id)
@@ -94,12 +97,17 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         async def capture_message_to_thread(thread_id, msg):
             messages_sent.append((thread_id, msg))
             
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_message = AsyncMock(side_effect=capture_message)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_to_thread = AsyncMock(side_effect=capture_message_to_thread)
         
         # Mock state persistence
+        # Mock: Generic component isolation for controlled unit testing
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+            # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
+                # Mock: Async component isolation for testing without real async operations
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     # Test with streaming enabled
                     await supervisor.run("Test request", supervisor.thread_id, supervisor.user_id, run_id)
@@ -119,6 +127,7 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
         messages_sent.clear()
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
+                # Mock: Async component isolation for testing without real async operations
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     await supervisor.run("Test request", supervisor.thread_id, supervisor.user_id, run_id + "_no_stream")
         
@@ -169,8 +178,11 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
             agent.check_entry_conditions = mock_entry_conditions
         
         # Execute orchestration with proper state persistence mocking
+        # Mock: Generic component isolation for controlled unit testing
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+            # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
+                # Mock: Async component isolation for testing without real async operations
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     state = await supervisor.run("Optimize my GPU utilization", supervisor.thread_id, supervisor.user_id, run_id)
         

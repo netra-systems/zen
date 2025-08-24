@@ -15,7 +15,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -443,7 +443,7 @@ class TestCacheStateManagementL2:
                 total = hits + misses
                 return hits / total if total > 0 else 0.0
             
-            def get_optimization_suggestions(self) -> List[str]:
+            async def get_optimization_suggestions(self) -> List[str]:
                 suggestions = []
                 
                 # Find keys with low hit rate
@@ -525,7 +525,7 @@ class TestCacheStateManagementL2:
                 
                 return migrated
             
-            def get_session_node(self, session_key: str) -> str:
+            async def get_session_node(self, session_key: str) -> str:
                 return self.session_ownership.get(session_key, "unknown")
         
         migrator = SessionMigrator()
@@ -777,7 +777,7 @@ class TestCacheStateManagementL2:
                 return self._calculate_stats()
             
             def _calculate_stats(self):
-                def percentile(data, p):
+                async def percentile(data, p):
                     if not data:
                         return 0
                     sorted_data = sorted(data)

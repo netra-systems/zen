@@ -3,9 +3,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.auth_integration.auth import get_current_user, require_admin
@@ -16,6 +14,7 @@ from netra_backend.app.main import app
 @pytest.fixture
 def admin_client():
     """Create test client with admin authentication."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_admin_user = Mock()
     mock_admin_user.is_admin = True
     mock_admin_user.id = "admin_test_user"
@@ -30,6 +29,7 @@ def admin_client():
 @pytest.fixture
 def authenticated_client():
     """Create test client with basic authentication."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_user = Mock()
     mock_user.id = "test_user"
     mock_user.is_admin = False

@@ -12,7 +12,7 @@ import json
 import logging
 import os
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from cryptography.fernet import Fernet
@@ -28,19 +28,27 @@ class TestConfigValidator:
     
     @pytest.fixture
     def mock_config(self):
+        # Mock: Generic component isolation for controlled unit testing
         config = Mock()
         config.environment = "production"
         config.database_url = "postgresql://user:pass@localhost/db"
         config.jwt_secret_key = "a" * 32
         config.fernet_key = Fernet.generate_key()
+        # Mock: ClickHouse external database isolation for unit testing performance
         config.clickhouse_logging = Mock(enabled=True)
+        # Mock: ClickHouse external database isolation for unit testing performance
         config.clickhouse_native = Mock(host="localhost", password="pass")
+        # Mock: ClickHouse external database isolation for unit testing performance
         config.clickhouse_https = Mock(host="localhost", password="pass")
+        # Mock: Component isolation for controlled unit testing
         config.oauth_config = Mock(client_id="id", client_secret="secret")
         config.llm_configs = {
+            # Mock: OpenAI API isolation for testing without external service dependencies
             "default": Mock(api_key="key", model_name="model", provider="openai")
         }
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         config.redis = Mock(host="localhost", password="pass")
+        # Mock: Component isolation for controlled unit testing
         config.langfuse = Mock(secret_key="key", public_key="pub")
         return config
     
@@ -105,13 +113,16 @@ class TestErrorHandlers:
         assert response.error == True
         assert response.error_code == "TEST_ERROR"
         assert response.trace_id == "trace-123"
+    @pytest.mark.asyncio
     async def test_http_exception_handler(self):
         """Test HTTP exception handling."""
         from fastapi import HTTPException
 
         from netra_backend.app.core.error_handlers import http_exception_handler
         
+        # Mock: Generic component isolation for controlled unit testing
         request = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         request.state = Mock()
         request.state.request_id = "test-request-id"
         request.state.trace_id = "test-trace-id"
@@ -182,6 +193,7 @@ class TestLoggingManager:
 # Test 16: resource_manager_limits
 class TestResourceManager:
     """Test resource allocation - app/core/resource_manager.py"""
+    @pytest.mark.asyncio
     async def test_resource_tracking(self):
         """Test basic resource tracking."""
         from netra_backend.app.core.resource_manager import ResourceTracker
@@ -198,6 +210,7 @@ class TestResourceManager:
         result = tracker.unregister("connection_conn_1")
         assert result == True
         assert tracker.get_resource("connection_conn_1") is None
+    @pytest.mark.asyncio
     async def test_resource_limits(self):
         """Test resource limit enforcement with register/unregister."""
         from netra_backend.app.core.resource_manager import ResourceTracker
@@ -219,10 +232,12 @@ class TestResourceManager:
 # Test 17: schema_sync_database_migration
 class TestSchemaSync:
     """Test schema synchronization - app/core/schema_sync.py"""
+    @pytest.mark.asyncio
     async def test_schema_validation(self):
         """Test basic schema validation."""
         from netra_backend.app.core.schema_sync import validate_schema
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         mock_db.execute.return_value.fetchall.return_value = [
             ("users", "id", "integer"),
@@ -309,32 +324,43 @@ class TestStartupChecks:
     @pytest.fixture
     def mock_app(self):
         """Create mock FastAPI app for testing"""
+        # Mock: Generic component isolation for controlled unit testing
         app = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         app.state = Mock()
+        # Mock: Session isolation for controlled testing without external state
         app.state.db_session_factory = AsyncMock()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         app.state.redis_manager = AsyncMock()
         return app
+    @pytest.mark.asyncio
     async def test_database_check(self, mock_app):
         """Test database connectivity check."""
         from netra_backend.app.startup_checks.database_checks import DatabaseChecker
         
         # Mock database session
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
         mock_session.execute.return_value.scalar_one.return_value = 1
         
         # Create an async context manager mock
+        # Mock: Generic component isolation for controlled unit testing
         async_context_manager = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         async_context_manager.__aenter__ = AsyncMock(return_value=mock_session)
+        # Mock: Async component isolation for testing without real async operations
         async_context_manager.__aexit__ = AsyncMock(return_value=None)
         
         # Mock table existence check to return True for critical tables  
         with patch.object(DatabaseChecker, '_table_exists', return_value=True):
+            # Mock: Session management isolation for stateless unit testing
             mock_app.state.db_session_factory = Mock(return_value=async_context_manager)
             
             checker = DatabaseChecker(mock_app)
             result = await checker.check_database_connection()
             assert result.success == True
             assert result.name == "database_connection"
+    @pytest.mark.asyncio
     async def test_service_health_checks(self, mock_app):
         """Test external service health checks."""
         from netra_backend.app.startup_checks.service_checks import ServiceChecker
@@ -342,11 +368,16 @@ class TestStartupChecks:
         checker = ServiceChecker(mock_app)
         
         # Mock Redis check
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_app.state.redis_manager.connect = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_app.state.redis_manager.set = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_app.state.redis_manager.get = AsyncMock(return_value="test_value")
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_app.state.redis_manager.delete = AsyncMock()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('time.time', return_value=123456789):
             mock_app.state.redis_manager.get.return_value = "123456789"
             result = await checker.check_redis()
@@ -354,7 +385,9 @@ class TestStartupChecks:
             assert result.name == "redis_connection"
         
         # Mock ClickHouse check
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.db.clickhouse.get_clickhouse_client') as mock_ch:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client = AsyncMock()
             mock_client.ping.return_value = None
             mock_client.execute.return_value = [("workload_events",)]
@@ -363,11 +396,13 @@ class TestStartupChecks:
             result = await checker.check_clickhouse()
             assert result.success == True
             assert result.name == "clickhouse_connection"
+    @pytest.mark.asyncio
     async def test_graceful_degradation(self, mock_app):
         """Test graceful degradation when optional services fail."""
         from netra_backend.app.startup_checks import run_startup_checks
         
         # Mock database session for successful connection
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
         mock_session.execute.return_value.scalar_one.return_value = 1
         mock_app.state.db_session_factory.return_value.__aenter__.return_value = mock_session

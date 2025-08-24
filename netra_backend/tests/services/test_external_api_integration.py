@@ -3,8 +3,6 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -16,6 +14,7 @@ from netra_backend.app.services.external_api_client import (
 
 class TestIntegrationScenarios:
     """Integration test scenarios combining multiple components."""
+    @pytest.mark.asyncio
     async def test_full_request_flow_success(self):
         """Test complete request flow from client creation to response."""
         client = ResilientHTTPClient(base_url="https://api.test.com")
@@ -27,6 +26,7 @@ class TestIntegrationScenarios:
             assert result == expected_result
             mock_request.assert_called_once_with("GET", "/endpoint", "test_api", params=None, headers=None)
     
+    @pytest.mark.asyncio
     async def test_error_handling_chain(self):
         """Test error handling through the entire chain."""
         client = ResilientHTTPClient(base_url="https://api.test.com")

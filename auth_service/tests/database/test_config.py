@@ -13,6 +13,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from auth_service.auth_core.database.models import Base
+from test_framework.environment_markers import env
 
 logger = logging.getLogger(__name__)
 

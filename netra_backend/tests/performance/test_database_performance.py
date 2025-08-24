@@ -14,7 +14,7 @@ import asyncio
 import time
 import uuid
 from typing import Dict, List
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -26,16 +26,21 @@ from netra_backend.app.services.generation_service import (
 class TestDatabasePerformance:
     """Test database performance under load"""
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_clickhouse_bulk_insert_performance(self):
         """Test bulk insert performance"""
         large_corpus = self._generate_large_test_corpus(50000)
         table_name = 'perf_test_bulk_insert'
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+            # Mock: Generic component isolation for controlled unit testing
             mock_db = AsyncMock()
             mock_db_class.return_value = mock_db
             
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_interceptor = AsyncMock()
                 mock_interceptor_class.return_value = mock_interceptor
                 
@@ -57,15 +62,20 @@ class TestDatabasePerformance:
             
         return corpus
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_concurrent_database_operations(self):
         """Test concurrent database read/write operations"""
         table_names = [f'perf_test_{i}' for i in range(5)]
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+            # Mock: Generic component isolation for controlled unit testing
             mock_db = AsyncMock()
             mock_db_class.return_value = mock_db
             
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_interceptor = AsyncMock()
                 mock_interceptor_class.return_value = mock_interceptor
                 mock_interceptor.execute_query.return_value = [
@@ -85,6 +95,7 @@ class TestDatabasePerformance:
                 assert len(results) == 5
                 assert duration < 30  # Should handle concurrent ops efficiently
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_batch_processing_optimization(self):
         """Test optimized batch processing patterns"""
         batch_sizes = [100, 500, 1000, 5000]
@@ -93,11 +104,15 @@ class TestDatabasePerformance:
         for batch_size in batch_sizes:
             test_corpus = self._generate_large_test_corpus(batch_size)
             
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_db = AsyncMock()
                 mock_db_class.return_value = mock_db
                 
+                # Mock: ClickHouse external database isolation for unit testing performance
                 with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor_class:
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_interceptor = AsyncMock()
                     mock_interceptor_class.return_value = mock_interceptor
                     
@@ -113,17 +128,20 @@ class TestDatabasePerformance:
             size_ratio = batch_sizes[i] / batch_sizes[i-1]
             assert time_ratio < size_ratio * 1.3  # Allow 30% overhead
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_connection_pool_utilization(self):
         """Test database connection pool efficiency"""
         connection_count = 0
         
-        def mock_connection_factory(*args, **kwargs):
+        async def mock_connection_factory(*args, **kwargs):
             """Mock connection factory to track usage"""
             nonlocal connection_count
             connection_count += 1
+            # Mock: Generic component isolation for controlled unit testing
             mock_conn = AsyncMock()
             return mock_conn
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.ClickHouseDatabase', 
                    side_effect=mock_connection_factory):
             
@@ -139,6 +157,7 @@ class TestDatabasePerformance:
             # Should reuse connections efficiently
             assert connection_count <= 20  # Should not exceed reasonable limit
     @pytest.mark.performance  
+    @pytest.mark.asyncio
     async def test_query_optimization_patterns(self):
         """Test query optimization for large datasets"""
         # Test different query patterns
@@ -149,11 +168,15 @@ class TestDatabasePerformance:
         ]
         
         for scenario in query_scenarios:
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_db = AsyncMock()
                 mock_db_class.return_value = mock_db
                 
+                # Mock: ClickHouse external database isolation for unit testing performance
                 with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor_class:
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_interceptor = AsyncMock()
                     mock_interceptor_class.return_value = mock_interceptor
                     

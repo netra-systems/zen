@@ -8,8 +8,6 @@ message-specific data access patterns work correctly.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 
 import pytest
@@ -26,6 +24,7 @@ pytest_plugins = ["netra_backend.tests.helpers.database_repository_fixtures"]
 class TestMessageRepository:
     """Test message repository specific functionality."""
 
+    @pytest.mark.asyncio
     async def test_get_messages_by_thread(self, unit_of_work):
         """Test getting messages by thread ID."""
         async with unit_of_work as uow:
@@ -37,6 +36,7 @@ class TestMessageRepository:
             assert len(messages) == 5
             assert all(m.thread_id == thread.id for m in messages)
 
+    @pytest.mark.asyncio
     async def test_get_messages_with_pagination(self, unit_of_work):
         """Test paginated message retrieval."""
         async with unit_of_work as uow:
@@ -52,6 +52,7 @@ class TestMessageRepository:
             
             assert_pagination_result(page, 10, 50)
 
+    @pytest.mark.asyncio
     async def test_get_latest_messages(self, unit_of_work):
         """Test getting latest messages."""
         async with unit_of_work as uow:

@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Base Agent Core Module
 
 Main base agent class that composes functionality from focused modular components.
@@ -48,7 +49,7 @@ class BaseSubAgent(
         """Get subagent logging configuration setting."""
         import os
         # Skip heavy config loading during test collection
-        if os.environ.get('TEST_COLLECTION_MODE') == '1':
+        if get_env().get('TEST_COLLECTION_MODE') == '1':
             return False
         try:
             config = get_config()

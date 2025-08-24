@@ -11,7 +11,7 @@ import os
 import secrets
 import time
 from typing import Dict, Optional, Tuple
-import redis
+from auth_service.auth_core.redis_manager import auth_redis_manager
 
 logger = logging.getLogger(__name__)
 
@@ -19,9 +19,15 @@ logger = logging.getLogger(__name__)
 class OAuthSecurityManager:
     """Manages OAuth security validations and protections"""
     
-    def __init__(self, redis_client: Optional[redis.Redis] = None):
-        self.redis_client = redis_client
+    def __init__(self, redis_client: Optional[any] = None):
+        # Use unified Redis manager instead of passed client
+        self.redis_manager = auth_redis_manager
         self.hmac_secret = self._get_hmac_secret()
+        
+    @property
+    def redis_client(self):
+        """Get Redis client from unified manager."""
+        return self.redis_manager.get_client()
         
     def _get_hmac_secret(self) -> str:
         """Get HMAC secret for state signing"""
@@ -71,66 +77,11 @@ class OAuthSecurityManager:
         Returns:
             True if nonce is valid (not replayed), False if already used
         """
+        # Ensure Redis connection via unified manager
+        if not self.redis_manager.is_available():
+            self.redis_manager.connect()
+            
         redis_client = self.redis_client
-        
-        # If no Redis client, try to create one for testing
-        if not redis_client:
-            try:
-                import os
-                import redis
-                # Try to connect to Redis with various URLs for testing
-                redis_urls = [
-                    os.getenv("REDIS_URL"),
-                    os.getenv("TEST_REDIS_URL"),
-                    "redis://localhost:6379",
-                ]
-                
-                for url in redis_urls:
-                    if url:
-                        try:
-                            test_client = redis.from_url(url, decode_responses=True)
-                            test_client.ping()
-                            redis_client = test_client
-                            logger.info(f"Connected to Redis for nonce checking: {url}")
-                            break
-                        except Exception:
-                            continue
-                            
-                # Also try testcontainer Redis information if available
-                test_redis_host = os.getenv("TEST_REDIS_HOST", "localhost")
-                test_redis_port = os.getenv("TEST_REDIS_PORT")
-                
-                if test_redis_port:
-                    try:
-                        test_client = redis.Redis(
-                            host=test_redis_host, 
-                            port=int(test_redis_port), 
-                            decode_responses=True,
-                            socket_timeout=1.0
-                        )
-                        test_client.ping()
-                        redis_client = test_client
-                        self.redis_client = redis_client  # Cache for future use
-                        logger.info(f"Connected to test Redis: {test_redis_host}:{test_redis_port}")
-                    except Exception as e:
-                        logger.warning(f"Failed to connect to test Redis: {e}")
-                
-                # If still no Redis, try common test ports
-                if not redis_client:
-                    test_ports = [6379, 6380, 16379, 26379]
-                    for port in test_ports:
-                        try:
-                            test_client = redis.Redis(host='localhost', port=port, decode_responses=True, socket_timeout=0.5)
-                            test_client.ping()
-                            redis_client = test_client
-                            logger.info(f"Connected to Redis on port: {port}")
-                            break
-                        except Exception:
-                            continue
-                        
-            except Exception as e:
-                logger.warning(f"Could not establish Redis connection for nonce checking: {e}")
-        
         if not redis_client:
             logger.warning("Redis not available for nonce tracking")
             return True  # Allow if Redis not available
@@ -138,8 +89,7 @@ class OAuthSecurityManager:
         try:
             nonce_key = f"oauth_nonce:{nonce}"
             
-            # CRITICAL FIX: Use SET with NX (Not eXists) option for atomic check-and-set
-            # This prevents race conditions in concurrent OAuth flows
+            # Use atomic SET with NX to prevent race conditions
             result = redis_client.set(nonce_key, "used", ex=600, nx=True)
             
             if not result:
@@ -162,45 +112,11 @@ class OAuthSecurityManager:
         Returns:
             True if code is valid (first use), False if already used
         """
+        # Ensure Redis connection via unified manager
+        if not self.redis_manager.is_available():
+            self.redis_manager.connect()
+            
         redis_client = self.redis_client
-        
-        # If no Redis client, try to connect (same logic as nonce checking)
-        if not redis_client:
-            try:
-                import os
-                import redis
-                # Try to connect to Redis with various URLs for testing
-                redis_urls = [
-                    os.getenv("REDIS_URL"),
-                    os.getenv("TEST_REDIS_URL"),
-                    "redis://localhost:6379",
-                ]
-                
-                for url in redis_urls:
-                    if url:
-                        try:
-                            test_client = redis.from_url(url, decode_responses=True)
-                            test_client.ping()
-                            redis_client = test_client
-                            break
-                        except Exception:
-                            continue
-                            
-                # Also try common Redis test ports
-                if not redis_client:
-                    test_ports = [6379, 6380, 16379, 26379]
-                    for port in test_ports:
-                        try:
-                            test_client = redis.Redis(host='localhost', port=port, decode_responses=True)
-                            test_client.ping()
-                            redis_client = test_client
-                            break
-                        except Exception:
-                            continue
-                            
-            except Exception:
-                pass
-        
         if not redis_client:
             logger.warning("Redis not available for code tracking")
             return True  # Allow if Redis not available
@@ -208,8 +124,7 @@ class OAuthSecurityManager:
         try:
             code_key = f"oauth_code:{code}"
             
-            # CRITICAL FIX: Use atomic SET with NX for authorization code tracking
-            # This prevents race conditions in concurrent OAuth callback processing
+            # Use atomic SET with NX to prevent race conditions
             result = redis_client.set(code_key, "used", ex=600, nx=True)
             
             if not result:
@@ -396,7 +311,7 @@ class JWTSecurityValidator:
         # Ensure secret is strong enough for production environments
         env = os.getenv("ENVIRONMENT", "development").lower()
         if len(secret) < 32 and env in ["staging", "production"]:
-            raise ValueError("JWT_SECRET must be at least 32 characters in production")
+            raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production")
         
         return secret
     
@@ -479,8 +394,14 @@ class SessionFixationProtector:
 class OAuthStateCleanupManager:
     """Manages cleanup of expired OAuth states and tokens"""
     
-    def __init__(self, redis_client: Optional[redis.Redis] = None):
-        self.redis_client = redis_client
+    def __init__(self, redis_client: Optional[any] = None):
+        # Use unified Redis manager instead of passed client
+        self.redis_manager = auth_redis_manager
+        
+    @property
+    def redis_client(self):
+        """Get Redis client from unified manager."""
+        return self.redis_manager.get_client()
     
     def cleanup_expired_states(self) -> int:
         """

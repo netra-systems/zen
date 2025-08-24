@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Protocol, Set, Type, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -498,6 +498,7 @@ def dependency_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_dependency_registration(dependency_manager):
     """Test basic dependency registration."""
     manager = dependency_manager
@@ -515,6 +516,7 @@ async def test_basic_dependency_registration(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_simple_dependency_resolution(dependency_manager):
     """Test simple dependency resolution."""
     manager = dependency_manager
@@ -528,6 +530,7 @@ async def test_simple_dependency_resolution(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_dependency_chain_resolution(dependency_manager):
     """Test dependency chain resolution."""
     manager = dependency_manager
@@ -546,6 +549,7 @@ async def test_dependency_chain_resolution(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_singleton_scope_behavior(dependency_manager):
     """Test singleton scope behavior."""
     manager = dependency_manager
@@ -559,6 +563,7 @@ async def test_singleton_scope_behavior(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_scoped_dependency_behavior(dependency_manager):
     """Test scoped dependency behavior."""
     manager = dependency_manager
@@ -580,6 +585,7 @@ async def test_scoped_dependency_behavior(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_dependency_aliases(dependency_manager):
     """Test dependency aliases."""
     manager = dependency_manager
@@ -593,6 +599,7 @@ async def test_dependency_aliases(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_lazy_dependency_loading(dependency_manager):
     """Test lazy dependency loading."""
     manager = dependency_manager
@@ -609,6 +616,7 @@ async def test_lazy_dependency_loading(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_circular_dependency_detection(dependency_manager):
     """Test circular dependency detection."""
     manager = dependency_manager
@@ -639,6 +647,7 @@ async def test_circular_dependency_detection(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_dependency_graph_analysis(dependency_manager):
     """Test dependency graph analysis."""
     manager = dependency_manager
@@ -662,6 +671,7 @@ async def test_dependency_graph_analysis(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_bulk_dependency_resolution(dependency_manager):
     """Test bulk dependency resolution."""
     manager = dependency_manager
@@ -677,6 +687,7 @@ async def test_bulk_dependency_resolution(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_dependency_cleanup(dependency_manager):
     """Test dependency cleanup."""
     manager = dependency_manager
@@ -697,6 +708,7 @@ async def test_dependency_cleanup(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_dependency_error_handling(dependency_manager):
     """Test dependency error handling."""
     manager = dependency_manager
@@ -720,6 +732,7 @@ async def test_dependency_error_handling(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_dependency_resolution(dependency_manager):
     """Test concurrent dependency resolution."""
     manager = dependency_manager
@@ -738,6 +751,7 @@ async def test_concurrent_dependency_resolution(dependency_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_dependency_resolution_performance(dependency_manager):
     """Benchmark dependency resolution performance."""
     manager = dependency_manager

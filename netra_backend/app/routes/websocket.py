@@ -92,6 +92,21 @@ async def websocket_endpoint(websocket: WebSocket):
         message_router = get_message_router()
         connection_monitor = get_connection_monitor()
         
+        # Initialize MessageHandlerService and AgentMessageHandler
+        from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
+        from netra_backend.app.services.message_handlers import MessageHandlerService
+        
+        # Get dependencies from app state
+        supervisor = websocket.app.state.agent_supervisor
+        thread_service = websocket.app.state.thread_service
+        
+        # Create MessageHandlerService and AgentMessageHandler
+        message_handler_service = MessageHandlerService(supervisor, thread_service)
+        agent_handler = AgentMessageHandler(message_handler_service)
+        
+        # Register agent handler with message router
+        message_router.add_handler(agent_handler)
+        
         # Authenticate and establish secure connection
         async with secure_websocket_context(websocket) as (auth_info, security_manager):
             user_id = auth_info.user_id
@@ -151,6 +166,20 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         logger.error(f"WebSocket error: {e}", exc_info=True)
         if is_websocket_connected(websocket):
+            # Send error message before closing
+            try:
+                error_msg = create_server_message(
+                    MessageType.ERROR,
+                    {
+                        "error": "Internal server error",
+                        "message": "An unexpected error occurred. Please reconnect.",
+                        "code": "INTERNAL_ERROR"
+                    }
+                )
+                await safe_websocket_send(websocket, error_msg.model_dump())
+            except Exception:
+                pass  # Best effort to send error message
+            
             await safe_websocket_close(websocket, code=1011, reason="Internal error")
     
     finally:

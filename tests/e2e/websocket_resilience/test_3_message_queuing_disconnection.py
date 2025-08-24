@@ -213,6 +213,7 @@ class WebSocketQueueTestClient:
         """Connect to WebSocket and receive queued messages"""
         try:
             # Mock WebSocket connection for testing
+            # Mock: Generic component isolation for controlled unit testing
             self.websocket = AsyncMock()
             self.is_connected = True
             

@@ -30,7 +30,7 @@ class TestFirstTimeUserCore:
     @pytest.fixture
     async def comprehensive_test_setup(self):
         """Setup comprehensive test environment"""
-        return await FirstTimeUserFixtures.create_comprehensive_test_env()
+        yield await FirstTimeUserFixtures.create_comprehensive_test_env()
 
     @pytest.fixture
     def payment_integration_system(self):
@@ -48,6 +48,7 @@ class TestFirstTimeUserCore:
         return FirstTimeUserFixtures.init_api_integration()
 
     @tdd_test("first_time_user_flow", expected_to_fail=True)
+    @pytest.mark.asyncio
     async def test_real_time_value_demonstration_critical(self, comprehensive_test_setup, llm_optimization_system):
         """
         TEST 1: Real-Time Value Demonstration
@@ -83,6 +84,7 @@ class TestFirstTimeUserCore:
         return savings_data
 
     @tdd_test("first_time_user_flow", expected_to_fail=True)
+    @pytest.mark.asyncio
     async def test_payment_method_setup_billing_flow_critical(self, comprehensive_test_setup, payment_integration_system):
         """
         TEST 2: Payment Method Setup & Billing Flow
@@ -126,6 +128,7 @@ class TestFirstTimeUserCore:
         return billing_result
 
     @tdd_test("first_time_user_flow", expected_to_fail=True)
+    @pytest.mark.asyncio
     async def test_first_optimization_result_critical(self, comprehensive_test_setup, llm_optimization_system):
         """
         TEST 3: First Optimization Result

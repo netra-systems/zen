@@ -14,7 +14,7 @@ import asyncio
 import time
 import uuid
 from typing import Any, Dict, List
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import psutil
 import pytest
@@ -71,10 +71,12 @@ def resource_monitor():
 class TestLargeScaleGeneration:
     """Test large corpus generation (100k+ records)"""
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_large_corpus_generation_100k(self, large_corpus_params, resource_monitor):
         """Test generation of 100k+ records with performance monitoring"""
         resource_monitor.start_monitoring()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
             mock_pool.return_value = self._create_mock_results(100000)
             
@@ -106,6 +108,7 @@ class TestLargeScaleGeneration:
             results.append(result)
         return iter(results)
     @pytest.mark.performance  
+    @pytest.mark.asyncio
     async def test_memory_efficient_generation(self):
         """Test memory-efficient generation patterns"""
         memory_samples = []
@@ -122,6 +125,7 @@ class TestLargeScaleGeneration:
         
         perf_params = ContentGenParams(samples_per_type=100, max_cores=4)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.generate_content_for_worker') as mock_gen:
             mock_gen.side_effect = self._simulate_memory_efficient_generation
             
@@ -142,6 +146,7 @@ class TestLargeScaleGeneration:
             'data': (f'prompt_{workload_type}', f'response_{workload_type}')
         }
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_scalability_patterns(self, large_corpus_params):
         """Test generation scalability patterns"""
         scale_factors = [100, 500, 800, 1000]
@@ -153,6 +158,7 @@ class TestLargeScaleGeneration:
                 max_cores=4
             )
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
                 mock_pool.return_value = iter([
                     {'type': 'test', 'data': ('p', 'r')} 

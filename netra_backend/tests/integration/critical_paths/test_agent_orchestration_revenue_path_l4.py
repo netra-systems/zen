@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional, Tuple
 # from app.schemas.agent_models import AgentRequest, AgentResponse, AgentTask  # These classes don't exist, using generic dict structures
 # Available classes in agent_models: AgentResult, DeepAgentState, AgentMetadata, ToolResultData
 # from app.services.websocket_service import WebSocketService
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
@@ -94,6 +94,7 @@ class AgentOrchestrationRevenuePathL4Manager:
             configure_dedicated_test_environment()
             
             # Initialize core agent services
+            # Mock: Generic component isolation for controlled unit testing
             mock_supervisor = AsyncMock()
 
             self.agent_service = AgentService(mock_supervisor)
@@ -669,6 +670,7 @@ class AgentOrchestrationRevenuePathL4Manager:
             logger.error(f"Customer success metrics tracking failed: {e}")
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_concurrent_revenue_workflows(self, user_id: str, workflow_count: int = 10) -> Dict[str, Any]:
         """Test concurrent revenue workflows to validate system scalability."""
         start_time = time.time()
@@ -720,6 +722,7 @@ class AgentOrchestrationRevenuePathL4Manager:
                 "test_duration": time.time() - start_time
             }
     
+    @pytest.mark.asyncio
     async def test_failure_recovery_revenue_protection(self, user_id: str) -> Dict[str, Any]:
         """Test failure recovery mechanisms and revenue protection."""
         start_time = time.time()
@@ -892,6 +895,7 @@ async def agent_revenue_path_l4():
 @pytest.mark.l4
 @pytest.mark.critical
 @pytest.mark.real_llm
+@pytest.mark.asyncio
 async def test_complete_agent_revenue_workflow_high_value(agent_revenue_path_l4):
     """Test complete agent revenue workflow for high-value customer interaction."""
     # Create enterprise user for high-value testing
@@ -912,6 +916,7 @@ async def test_complete_agent_revenue_workflow_high_value(agent_revenue_path_l4)
 @pytest.mark.l4
 @pytest.mark.critical
 @pytest.mark.real_llm
+@pytest.mark.asyncio
 async def test_multi_agent_collaboration_revenue_chain(agent_revenue_path_l4):
     """Test multi-agent collaboration revenue generation chain."""
     user = await agent_revenue_path_l4.create_revenue_test_user(PlanTier.PRO)
@@ -938,6 +943,7 @@ async def test_multi_agent_collaboration_revenue_chain(agent_revenue_path_l4):
 @pytest.mark.l4
 @pytest.mark.critical
 @pytest.mark.real_llm
+@pytest.mark.asyncio
 async def test_concurrent_agent_orchestration_scalability(agent_revenue_path_l4):
     """Test concurrent agent orchestration scalability and revenue protection."""
     user = await agent_revenue_path_l4.create_revenue_test_user(PlanTier.ENTERPRISE)
@@ -953,6 +959,7 @@ async def test_concurrent_agent_orchestration_scalability(agent_revenue_path_l4)
 @pytest.mark.asyncio
 @pytest.mark.l4
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_failure_recovery_revenue_protection(agent_revenue_path_l4):
     """Test failure recovery mechanisms and revenue protection."""
     user = await agent_revenue_path_l4.create_revenue_test_user(PlanTier.PRO)
@@ -968,6 +975,7 @@ async def test_failure_recovery_revenue_protection(agent_revenue_path_l4):
 @pytest.mark.l4
 @pytest.mark.critical
 @pytest.mark.real_llm
+@pytest.mark.asyncio
 async def test_comprehensive_revenue_path_metrics(agent_revenue_path_l4):
     """Test comprehensive revenue path metrics across all tiers."""
     # Create users for each tier
@@ -997,6 +1005,7 @@ async def test_comprehensive_revenue_path_metrics(agent_revenue_path_l4):
 @pytest.mark.l4
 @pytest.mark.critical
 @pytest.mark.real_llm
+@pytest.mark.asyncio
 async def test_tier_based_revenue_optimization(agent_revenue_path_l4):
     """Test tier-based revenue optimization and value delivery."""
     # Test different tiers with appropriate value delivery

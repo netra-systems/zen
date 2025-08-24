@@ -8,7 +8,6 @@ import sys
 from pathlib import Path
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Additional module mappings for remaining errors
 ADDITIONAL_MAPPINGS = {
@@ -125,7 +124,7 @@ from netra_backend.app.core.error_handler import ErrorAggregator
     # Test helpers and fixtures
     "netra_backend/tests/integration/integration.py": """
 # Shim module for test backward compatibility
-from test_framework.base import BaseIntegrationTest
+from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.fixtures import *
 """,
     

@@ -26,6 +26,7 @@ from netra_backend.tests.e2e.first_time_user.helpers import FirstTimeUserTestHel
 class TestConversionFlowE2E:
     """Cost calculator and upgrade flow E2E tests"""
 
+    @pytest.mark.asyncio
     async def test_7_cost_calculator_to_purchase_decision_e2e(
         self, conversion_environment, cost_savings_calculator
     ):
@@ -46,6 +47,7 @@ class TestConversionFlowE2E:
         # Phase 3: Clear purchase path with confidence
         await self._present_confident_purchase_path(env, roi_result)
 
+    @pytest.mark.asyncio
     async def test_8_trial_limitations_and_upgrade_prompts_e2e(
         self, conversion_environment, permission_system
     ):

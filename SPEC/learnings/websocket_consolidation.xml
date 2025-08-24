@@ -86,7 +86,7 @@
         
         <step number="4">
             <action>Automate import updates</action>
-            <script>scripts/fix_websocket_imports.py</script>
+            <note>Use scripts/fix_all_import_issues.py for import corrections</note>
         </step>
         
         <step number="5">

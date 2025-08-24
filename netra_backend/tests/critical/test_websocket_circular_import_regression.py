@@ -13,7 +13,7 @@ REGRESSION HISTORY:
 - Date: 2025-08-18
 - Issue: Circular import between connection.py, connection_executor.py, and connection_manager.py
 - Impact: Module-level initialization of connection_manager caused import loops
-- Fix: Made connection_manager lazy-loaded with get_connection_manager_instance()
+- Fix: Made connection_manager lazy-loaded with get_connection_monitor_instance()
 """
 
 import sys
@@ -60,7 +60,7 @@ class TestCircularImportRegression:
     
     def test_websocket_modules_use_local_execution(self):
         """Verify WebSocket modules use local execution patterns."""
-        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.websocket_core.manager import WebSocketManager
         
         # Verify execution_engine is None or local implementation
         manager = WebSocketManager()
@@ -105,7 +105,7 @@ class TestCircularImportRegression:
         # Import in problematic order
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.websocket_core.manager import WebSocketManager
         
         # Verify classes are accessible
         assert WebSocketManager is not None
@@ -154,12 +154,14 @@ class TestCircularImportRegression:
     @pytest.mark.asyncio
     async def test_message_flow_without_circular_dependency(self):
         """Test message flow works after circular dependency fix."""
-        from unittest.mock import AsyncMock, Mock, patch
+        from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
         from netra_backend.app.services.agent_service_core import AgentService
         
         # Create mock supervisor
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(return_value="Test response")
         
         # Create agent service
@@ -172,6 +174,7 @@ class TestCircularImportRegression:
         }
         
         # Process message
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.ws_manager.manager'):
             await service.handle_websocket_message(
                 user_id="test_user",
@@ -205,7 +208,7 @@ class TestConnectionModuleCircularImportPrevention:
         # Import connection module
         # Note: The connection module was removed in unified WebSocket architecture
         # These components are now part of WebSocketManager
-        from netra_backend.app.websocket_core import WebSocketManager, get_websocket_manager
+        from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
         
         # Verify WebSocketManager can be imported without circular dependencies
         assert WebSocketManager is not None, \

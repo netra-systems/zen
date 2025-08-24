@@ -20,6 +20,7 @@ class TestToolDispatcherEdgeCases:
     async def test_dispatch_with_none_parameters(self):
         """Test dispatch with None parameters."""
         dispatcher = ToolDispatcher()
+        # Mock: Component isolation for testing without external dependencies
         result = await dispatcher.dispatch("create_corpus")
         self._verify_dispatch_handles_none_parameters(result)
     @pytest.mark.asyncio

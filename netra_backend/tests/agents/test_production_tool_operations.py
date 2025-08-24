@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -81,50 +81,64 @@ class TestProductionToolSpecificOperations:
     
     async def _execute_with_batch_service_mock(self, tool: ProductionTool) -> dict:
         """Execute with batch service mock."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data.synthetic_data_service') as mock_service:
+            # Mock: Async component isolation for testing without real async operations
             mock_service.generate_batch = AsyncMock(return_value=["data1", "data2"])
             return await tool._execute_synthetic_data_batch({"batch_size": 2})
     
     async def _execute_with_batch_service_failure(self, tool: ProductionTool) -> dict:
         """Execute with batch service failure."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data.synthetic_data_service') as mock_service:
+            # Mock: Async component isolation for testing without real async operations
             mock_service.generate_batch = AsyncMock(side_effect=Exception("Service error"))
             return await tool._execute_synthetic_data_batch({"batch_size": 2})
     
     async def _execute_with_corpus_service_mock(self, tool: ProductionTool) -> dict:
         """Execute with corpus service mock."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus.corpus_service') as mock_service:
             mock_corpus = self._create_mock_corpus()
+            # Mock: Async component isolation for testing without real async operations
             mock_service.create_corpus = AsyncMock(return_value=mock_corpus)
             return await tool._execute_create_corpus({"corpus_name": "test_corpus", "description": "Test description"})
     
     async def _execute_with_corpus_service_failure(self, tool: ProductionTool) -> dict:
         """Execute with corpus service failure."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus.corpus_service') as mock_service:
+            # Mock: Database isolation for unit testing without external database connections
             mock_service.create_corpus = AsyncMock(side_effect=Exception("Database error"))
             return await tool._execute_create_corpus({"corpus_name": "test"})
     
     async def _execute_with_search_service_mock(self, tool: ProductionTool) -> dict:
         """Execute with search service mock."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus.corpus_service') as mock_service:
             mock_results = {"results": ["doc1", "doc2"], "total": 2}
+            # Mock: Async component isolation for testing without real async operations
             mock_service.search_corpus_content = AsyncMock(return_value=mock_results)
             return await tool._execute_search_corpus({"corpus_id": "123", "query": "test", "limit": 10})
     
     async def _execute_with_validation_mock(self, tool: ProductionTool) -> dict:
         """Execute with validation mock."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data.validate_data') as mock_validate:
             mock_validate.return_value = {"valid": True, "errors": []}
             return await tool._execute_validate_synthetic_data({"data": ["item1", "item2"]})
     
     async def _execute_with_storage_mock(self, tool: ProductionTool) -> dict:
         """Execute with storage mock."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data.synthetic_data_service') as mock_service:
+            # Mock: Async component isolation for testing without real async operations
             mock_service.ingest_batch = AsyncMock(return_value={"stored": 10})
             return await tool._execute_store_synthetic_data({"data": ["item1", "item2"], "table_name": "test_table"})
     
     def _create_mock_corpus(self) -> Mock:
         """Create mock corpus object."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_corpus = Mock()
         mock_corpus.id = "corpus_123"
         mock_corpus.name = "test_corpus"

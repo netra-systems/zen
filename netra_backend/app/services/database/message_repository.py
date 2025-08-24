@@ -32,7 +32,13 @@ class MessageRepository(BaseRepository[Message]):
                     Thread.metadata_.op('->>')('user_id') == user_id
                 ).order_by(desc(Message.created_at))
             )
-            return list(result.scalars().all())
+            scalars = result.scalars()
+            if hasattr(scalars, '__await__'):
+                scalars = await scalars
+            scalars_result = scalars.all()
+            if hasattr(scalars_result, '__await__'):
+                scalars_result = await scalars_result
+            return list(scalars_result)
         except Exception as e:
             logger.error(f"Error finding messages for user {user_id}: {e}")
             return []
@@ -159,7 +165,13 @@ class MessageRepository(BaseRepository[Message]):
             query = select(Message).where(Message.thread_id == thread_id)
             query = query.order_by(Message.created_at).limit(limit).offset(offset)
             result = await db.execute(query)
-            return list(result.scalars().all())
+            scalars = result.scalars()
+            if hasattr(scalars, '__await__'):
+                scalars = await scalars
+            scalars_result = scalars.all()
+            if hasattr(scalars_result, '__await__'):
+                scalars_result = await scalars_result
+            return list(scalars_result)
         except Exception as e:
             logger.error(f"Error getting paginated messages for thread {thread_id}: {e}")
             return []
@@ -179,18 +191,31 @@ class MessageRepository(BaseRepository[Message]):
             # For now, return all messages since content is in JSON format
             # In a real implementation, we'd use JSON operators to search content
             result = await db.execute(stmt.order_by(Message.created_at))
-            messages = list(result.scalars().all())
+            scalars = result.scalars()
+            if hasattr(scalars, '__await__'):
+                scalars = await scalars
+            scalars_result = scalars.all()
+            if hasattr(scalars_result, '__await__'):
+                scalars_result = await scalars_result
+            messages = list(scalars_result)
             
             # Simple text search in content
             filtered = []
             for msg in messages:
-                if msg.content and isinstance(msg.content, list):
-                    for content_item in msg.content:
-                        if isinstance(content_item, dict) and 'text' in content_item:
-                            text_content = content_item.get('text', {}).get('value', '')
-                            if query.lower() in text_content.lower():
-                                filtered.append(msg)
-                                break
+                if msg.content:
+                    # Handle different content formats for flexibility
+                    if isinstance(msg.content, str):
+                        # Simple string content
+                        if query.lower() in msg.content.lower():
+                            filtered.append(msg)
+                    elif isinstance(msg.content, list):
+                        # OpenAI format: list of content objects
+                        for content_item in msg.content:
+                            if isinstance(content_item, dict) and 'text' in content_item:
+                                text_content = content_item.get('text', {}).get('value', '')
+                                if query.lower() in text_content.lower():
+                                    filtered.append(msg)
+                                    break
             
             return filtered
         except Exception as e:
@@ -217,7 +242,13 @@ class MessageRepository(BaseRepository[Message]):
             ).order_by(Message.created_at)
             
             result = await db.execute(query)
-            return list(result.scalars().all())
+            scalars = result.scalars()
+            if hasattr(scalars, '__await__'):
+                scalars = await scalars
+            scalars_result = scalars.all()
+            if hasattr(scalars_result, '__await__'):
+                scalars_result = await scalars_result
+            return list(scalars_result)
         except Exception as e:
             logger.error(f"Error getting messages by date range for thread {thread_id}: {e}")
             return []

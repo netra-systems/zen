@@ -6,8 +6,6 @@ Tests integrated security across all components
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 
@@ -32,6 +30,7 @@ class TestIntegratedSecurity:
         app.add_middleware(SecurityHeadersMiddleware, environment="development")
         
         @app.post("/api/test")
+        @pytest.mark.asyncio
         async def test_endpoint(data: dict):
             return {"status": "success", "data": data}
         
@@ -53,6 +52,7 @@ class TestIntegratedSecurity:
         with pytest.raises(Exception):
             client.post("/api/test", json={"query": "'; DROP TABLE users; --"})
 
+    @pytest.mark.asyncio
     async def test_performance_under_load(self, app_with_security):
         """Test security performance under load."""
         client = TestClient(app_with_security)

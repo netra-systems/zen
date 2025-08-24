@@ -615,7 +615,7 @@ async def test_l4_quota_enforcement_production_scale(l4_rate_limiting_manager):
 @pytest.mark.asyncio  
 async def test_l4_backpressure_under_production_load(l4_rate_limiting_manager):
     """Test backpressure application under production load conditions."""
-    from unittest.mock import patch
+    from unittest.mock import patch, AsyncMock, MagicMock
     
     with patch.object(l4_rate_limiting_manager.backpressure_service, 'get_system_metrics', 
                      return_value={

@@ -129,6 +129,7 @@ def initialized_test_db():
 @pytest.fixture
 def mock_auth_redis():
     """Auth-specific Redis mock for session management"""
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     with patch('auth_service.auth_core.core.session_manager.redis') as mock:
         mock.ping.return_value = True
         mock.get.return_value = None
@@ -164,6 +165,7 @@ def mock_auth_redis():
     """Mock Redis client for OAuth security testing"""
     from unittest.mock import Mock
     
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis_mock = Mock()
     
     # Set up default mock behaviors

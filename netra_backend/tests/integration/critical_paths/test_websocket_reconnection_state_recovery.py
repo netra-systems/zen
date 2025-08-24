@@ -11,7 +11,7 @@ L3 Test: Uses real Redis for state persistence and recovery validation.
 Recovery target: <5 second reconnection with full state restoration.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -22,11 +22,11 @@ import json
 import time
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 
 import redis.asyncio as redis
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified
@@ -159,6 +159,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         _, redis_url = redis_container
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
@@ -211,6 +212,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         ]
     
+    @pytest.mark.asyncio
     async def test_basic_state_persistence_and_recovery(self, websocket_manager, state_manager, test_users):
 
         """Test basic connection state persistence and recovery."""
@@ -275,6 +277,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         await state_manager.clear_state(user.id)
     
+    @pytest.mark.asyncio
     async def test_message_queue_recovery_after_reconnection(self, websocket_manager, redis_client, state_manager, test_users):
 
         """Test recovery of queued messages after reconnection."""
@@ -373,6 +376,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         await websocket_manager.disconnect_user(user.id, second_websocket)
     
+    @pytest.mark.asyncio
     async def test_subscription_state_recovery(self, websocket_manager, redis_client, state_manager, test_users):
 
         """Test recovery of subscription state after reconnection."""
@@ -465,6 +469,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         await redis_client.delete(subscription_key)
     
+    @pytest.mark.asyncio
     async def test_rapid_reconnection_handling(self, websocket_manager, state_manager, test_users):
 
         """Test handling of rapid reconnection attempts."""
@@ -527,6 +532,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
 
         await websocket_manager.disconnect_user(user.id, final_websocket)
     
+    @pytest.mark.asyncio
     async def test_concurrent_reconnection_state_isolation(self, websocket_manager, state_manager, test_users):
 
         """Test state isolation during concurrent reconnections."""
@@ -627,6 +633,7 @@ class TestWebSocketReconnectionStateRecoveryL3:
     
     @mock_justified("L3: State recovery testing with real Redis persistence")
 
+    @pytest.mark.asyncio
     async def test_state_recovery_performance(self, websocket_manager, state_manager, test_users):
 
         """Test performance of state recovery operations."""

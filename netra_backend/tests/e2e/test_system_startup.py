@@ -30,17 +30,21 @@ import os
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import psutil
 import pytest
 
-from dev_launcher.config import LauncherConfig
-# from scripts.dev_launcher_health_monitor import  # Should be mocked in tests HealthMonitor
-# from scripts.dev_launcher_launcher import  # Should be mocked in tests DevLauncher
-# from scripts.dev_launcher_service_discovery import  # Should be mocked in tests ServiceDiscovery
+# Environment-aware testing imports
+from test_framework.environment_markers import (
+    env, env_requires, dev_and_staging, all_envs, env_safe
+)
 
+from dev_launcher.config import LauncherConfig
+# Removed broken import statement
+# Removed broken import statement
+# Removed broken import statement
 class ServiceInfo:
     """Service information container."""
     
@@ -75,6 +79,8 @@ class TestSystemStartup:
             ServiceInfo("frontend", 3000, "/api/health")
         ]
     
+    @dev_and_staging  # E2E test requiring real services
+    @env_requires(services=["postgres", "redis"], features=["service_discovery"])
     @pytest.mark.asyncio
     async def test_dev_launcher_starts_all_services(self, launcher_config):
         """Test that dev launcher starts all required services."""
@@ -230,7 +236,9 @@ class TestSystemStartup:
         """Test services start in correct dependency order."""
         start_times = {}
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_startup.ServiceStartupCoordinator') as mock_coordinator:
+            # Mock: Async component isolation for testing without real async operations
             mock_coordinator.return_value.start_service = AsyncMock(
                 side_effect=lambda name: start_times.update({name: time.time()})
             )
@@ -306,13 +314,15 @@ class TestStartupRecovery:
         """Test system retries on transient startup failures."""
         retry_count = 0
         
-        def mock_start_service(service_name):
+        async def mock_start_service(service_name):
             nonlocal retry_count
             retry_count += 1
             if retry_count < 3:  # Fail first 2 attempts
                 raise Exception("Simulated startup failure")
+            # Mock: Generic component isolation for controlled unit testing
             return AsyncMock()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_service', 
                   side_effect=mock_start_service):
             
@@ -330,6 +340,7 @@ class TestStartupRecovery:
     @pytest.mark.asyncio  
     async def test_partial_startup_handling(self, launcher_config):
         """Test handling when only some services start successfully."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.backend_starter.BackendStarter.start') as mock_backend:
             mock_backend.side_effect = Exception("Backend startup failed")
             

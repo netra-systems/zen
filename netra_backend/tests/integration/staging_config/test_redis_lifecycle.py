@@ -8,6 +8,7 @@ in the staging environment.
 import sys
 from pathlib import Path
 
+import pytest
 # Test framework import - using pytest fixtures instead
 
 import asyncio
@@ -18,7 +19,7 @@ from typing import List, Optional
 import redis
 from redis.sentinel import Sentinel
 
-from netra_backend.tests.integration.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 class TestRedisLifecycle(StagingConfigTestBase):
     """Test Redis lifecycle in staging."""

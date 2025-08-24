@@ -7,8 +7,6 @@ from pathlib import Path
 
 # Setup paths
 current_dir = Path(__file__).parent
-project_root = current_dir.parent
-sys.path.insert(0, str(project_root))
 
 # Change to project root
 os.chdir(project_root)

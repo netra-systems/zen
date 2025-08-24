@@ -6,13 +6,11 @@ Each function ≤8 lines, using helper functions for setup and assertions.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import socket
 from datetime import datetime
 from decimal import Decimal
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -28,6 +26,7 @@ from netra_backend.tests.validation_formatting_test_helpers import (
 class TestFormattingUtilsDisplay:
     """test_formatting_utils_display - Test data formatting and localization"""
     
+    @pytest.mark.asyncio
     async def test_data_formatting(self):
         from netra_backend.app.utils.formatting_utils import FormattingUtils
         utils = FormattingUtils()
@@ -37,6 +36,7 @@ class TestFormattingUtilsDisplay:
         self._assert_percentage_formatting(utils)
         self._assert_file_size_formatting(utils)
     
+    @pytest.mark.asyncio
     async def test_localization(self):
         from netra_backend.app.utils.formatting_utils import FormattingUtils
         utils_us = FormattingUtils(locale="en_US")
@@ -89,6 +89,7 @@ class TestFormattingUtilsDisplay:
 class TestMathUtilsCalculations:
     """test_math_utils_calculations - Test mathematical operations and precision handling"""
     
+    @pytest.mark.asyncio
     async def test_mathematical_operations(self):
         from netra_backend.app.utils.math_utils import MathUtils
         utils = MathUtils()
@@ -98,6 +99,7 @@ class TestMathUtilsCalculations:
         self._assert_percentiles(utils, data)
         self._assert_moving_average(utils, data)
     
+    @pytest.mark.asyncio
     async def test_precision_handling(self):
         from netra_backend.app.utils.math_utils import MathUtils
         utils = MathUtils()
@@ -142,6 +144,7 @@ class TestMathUtilsCalculations:
 class TestNetworkUtilsRequests:
     """test_network_utils_requests - Test network utilities and retry logic"""
     
+    @pytest.mark.asyncio
     async def test_network_utilities(self):
         from netra_backend.app.utils.network_utils import NetworkUtils
         utils = NetworkUtils()
@@ -150,6 +153,7 @@ class TestNetworkUtilsRequests:
         self._assert_ip_validation(utils)
         await self._assert_port_checking(utils)
     
+    @pytest.mark.asyncio
     async def test_retry_logic(self):
         from netra_backend.app.utils.network_utils import NetworkUtils
         utils = NetworkUtils()
@@ -170,6 +174,7 @@ class TestNetworkUtilsRequests:
     
     async def _assert_port_checking(self, utils):
         """Assert port checking works."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('socket.socket') as mock_socket:
             mock_socket.return_value.connect_ex.return_value = 0
             assert await utils.is_port_open("localhost", 80) == True
@@ -180,6 +185,7 @@ class TestNetworkUtilsRequests:
     async def _assert_successful_request(self, utils):
         """Assert successful HTTP request."""
         mock_response = NetworkTestHelpers.mock_successful_response()
+        # Mock: Session isolation for controlled testing without external state
         with patch('aiohttp.ClientSession.get') as mock_get:
             mock_get.return_value.__aenter__.return_value = mock_response
             result = await utils.http_get_with_retry("https://api.example.com")
@@ -189,6 +195,7 @@ class TestNetworkUtilsRequests:
         """Assert retry logic on failure."""
         failing_get, get_call_count = NetworkTestHelpers.create_failing_request(3)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('aiohttp.ClientSession.get', side_effect=failing_get):
             result = await utils.http_get_with_retry(
                 "https://api.example.com", max_retries=3

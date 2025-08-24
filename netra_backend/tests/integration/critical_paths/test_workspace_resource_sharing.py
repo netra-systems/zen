@@ -50,7 +50,7 @@ async def team_with_multiple_roles():
     viewer_invitation = await manager.invite_user(team.team_id, admin_id, "viewer@test.com", TeamRole.VIEWER)
     await manager.accept_invitation(viewer_invitation["token"], viewer_id)
     
-    return {
+    yield {
         "manager": manager,
         "team": team,
         "members": {

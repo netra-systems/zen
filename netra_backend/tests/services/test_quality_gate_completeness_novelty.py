@@ -3,10 +3,8 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import re
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -30,6 +28,7 @@ class TestCompletenessCalculation:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
     async def test_completeness_report_type(self, quality_service):
         """Test completeness for report content type"""
         content = setup_completeness_report_content()
@@ -39,6 +38,7 @@ class TestCompletenessCalculation:
             ContentType.REPORT
         )
         assert score == 1.0  # Has all required elements
+    @pytest.mark.asyncio
     async def test_completeness_general_type(self, quality_service):
         """Test completeness for general content type"""
         content = setup_completeness_general_content()
@@ -55,6 +55,7 @@ class TestNoveltyCalculation:
     def _create_quality_service_with_mock(self, mock_redis):
         """Create quality service with specified Redis mock"""
         return QualityGateService(redis_manager=mock_redis)
+    @pytest.mark.asyncio
     async def test_novelty_redis_error_handling(self):
         """Test novelty calculation when Redis operations fail"""
         content = "Test content"
@@ -64,6 +65,7 @@ class TestNoveltyCalculation:
         
         score = await quality_service.metrics_calculator.specialized_calculator.calculate_novelty(content)
         assert score == 0.5  # Should return default on error
+    @pytest.mark.asyncio
     async def test_novelty_large_cache(self):
         """Test novelty with large cache list"""
         content = "Unique content"

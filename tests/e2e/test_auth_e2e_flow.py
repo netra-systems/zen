@@ -36,24 +36,32 @@ class UnifiedE2ETestHarness:
     
     async def setup_auth_service(self):
         """Setup mock authentication service"""
+        # Mock: Generic component isolation for controlled unit testing
         self.auth_service = MagicMock()
         self._setup_auth_methods()
     
     def _setup_auth_methods(self):
         """Configure auth service methods - single responsibility"""
+        # Mock: Generic component isolation for controlled unit testing
         self.auth_service.validate_token = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.auth_service.refresh_tokens = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.auth_service.logout = AsyncMock()
     
     async def setup_websocket_manager(self):
         """Setup WebSocket manager for testing"""
+        # Mock: WebSocket connection isolation for testing without network overhead
         self.websocket_manager = MagicMock()
         self._setup_websocket_methods()
     
     def _setup_websocket_methods(self):
         """Configure WebSocket manager methods"""
+        # Mock: WebSocket connection isolation for testing without network overhead
         self.websocket_manager.connect_user = AsyncMock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         self.websocket_manager.disconnect_user = AsyncMock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         self.websocket_manager.send_message = AsyncMock()
     
     def create_test_tokens(self) -> Dict[str, str]:
@@ -76,7 +84,9 @@ class TestAuthE2EFlow:
         """Setup test harness for each test"""
         self.harness = UnifiedE2ETestHarness()
         # Sync setup for compatibility
+        # Mock: Generic component isolation for controlled unit testing
         self.harness.auth_service = MagicMock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         self.harness.websocket_manager = MagicMock()
     
     async def test_complete_login_to_chat_ready(self):
@@ -93,6 +103,7 @@ class TestAuthE2EFlow:
         )
         
         # Phase 2: Mock authentication service
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth = AsyncMock(return_value=self.harness.test_user_id)
         
         # Phase 3: Simulate WebSocket authentication flow
@@ -132,6 +143,7 @@ class TestAuthE2EFlow:
         )
         
         # Mock auth service for token refresh
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service = AsyncMock()
         mock_auth_service.refresh_tokens.return_value = (
             new_tokens["access_token"],
@@ -161,9 +173,11 @@ class TestAuthE2EFlow:
         test_tokens = self.harness.create_test_tokens()
         
         # Mock successful logout
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service = AsyncMock()
         mock_auth_service.logout.return_value = True
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_cleanup = AsyncMock()
         
         # Simulate logout request
@@ -195,6 +209,7 @@ class TestAuthE2EFlow:
         tab2_token = f"tab2-{uuid.uuid4().hex[:8]}"
         
         # Mock authentication for both tabs
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth = AsyncMock(return_value=self.harness.test_user_id)
         
         # Simulate Tab 1 authentication
@@ -217,6 +232,7 @@ class TestAuthE2EFlow:
         invalid_token = "invalid-test-token"
         
         # Mock authentication failure
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth = AsyncMock(side_effect=ValueError("Invalid token"))
         
         # Test error recovery
@@ -237,6 +253,7 @@ class TestAuthE2EFlow:
         test_token = f"perf-{uuid.uuid4().hex[:8]}"
         
         # Mock fast authentication
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth = AsyncMock(return_value=self.harness.test_user_id)
         
         # Simulate authentication request
@@ -259,6 +276,7 @@ class TestAuthE2EFlow:
         ]
         
         # Mock concurrent authentication
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth = AsyncMock(return_value=self.harness.test_user_id)
         
         # Simulate concurrent authentication requests
@@ -285,6 +303,7 @@ class TestAuthE2EFlow:
         session_token = f"session-{uuid.uuid4().hex[:8]}"
         
         # Mock session persistence
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth = AsyncMock(return_value=self.harness.test_user_id)
         
         # First connection establishes session

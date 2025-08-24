@@ -14,7 +14,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -31,7 +31,9 @@ class TestAuthUserPersistenceRegression:
     async def test_websocket_auth_requires_database_user(self):
         """Test that WebSocket auth fails if user doesn't exist in database."""
         # Setup
+        # Mock: Generic component isolation for controlled unit testing
         websocket = AsyncMock()
+        # Mock: Security component isolation for controlled auth testing
         security_service = AsyncMock()
         
         # Create token with user ID that doesn't exist in DB
@@ -49,8 +51,11 @@ class TestAuthUserPersistenceRegression:
         
         # Test - should fail authentication
         with pytest.raises(ValueError, match="User not found"):
+            # Mock: Authentication service isolation for testing without real auth flows
             with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+                # Mock: Component isolation for testing without external dependencies
                 with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db'):
+                    # Mock: JWT token handling isolation to avoid real crypto dependencies
                     mock_auth_client.validate_token_jwt = AsyncMock(return_value=mock_auth_validation)
                     await authenticate_websocket_user(
                         websocket, "fake_token", security_service
@@ -145,10 +150,13 @@ class TestAuthUserPersistenceRegression:
     @pytest.mark.asyncio
     async def test_websocket_auth_succeeds_with_database_user(self):
         """Test that WebSocket auth succeeds when user exists in database."""
+        # Mock: Generic component isolation for controlled unit testing
         websocket = AsyncMock()
+        # Mock: Security component isolation for controlled auth testing
         security_service = AsyncMock()
         
         # Create mock user that exists in DB
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = MagicMock()
         mock_user.id = "dev-user-123"
         mock_user.email = "dev@example.com"
@@ -164,10 +172,14 @@ class TestAuthUserPersistenceRegression:
         security_service.get_user_by_id.return_value = mock_user  # User exists in DB
         
         # Test - should succeed
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__.return_value = mock_session
+                # Mock: JWT token handling isolation to avoid real crypto dependencies
                 mock_auth_client.validate_token_jwt = AsyncMock(return_value=mock_auth_validation)
                 
                 result = await authenticate_websocket_user(

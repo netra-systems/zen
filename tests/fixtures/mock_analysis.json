@@ -1,0 +1,915 @@
+{
+  "summary": {
+    "database": 1461,
+    "llm_services": 977,
+    "auth_services": 403,
+    "websocket": 523,
+    "redis": 269,
+    "http_client": 114,
+    "time_utilities": 20,
+    "file_system": 25,
+    "other": 1860
+  },
+  "top_100": [
+    {
+      "type": "patch",
+      "target": "netra_backend.app.db.database_initializer.psycopg2.connect",
+      "line": 152,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "tests\\e2e\\test_startup_integration.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.db.database_initializer.psycopg2.connect",
+      "line": 169,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "tests\\e2e\\test_startup_integration.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.services.openai_service.OpenAIClient.chat_completion",
+      "line": 228,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\examples\\test_real_functionality_examples.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.agents.supervisor.flow_logger.logger",
+      "line": 37,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_supervisor_flow_logger.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.agents.supervisor.flow_logger.logger",
+      "line": 47,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_supervisor_flow_logger.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.agents.supervisor.flow_logger.logger",
+      "line": 57,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_supervisor_flow_logger.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.agents.supervisor.flow_logger.logger",
+      "line": 67,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_supervisor_flow_logger.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.agents.supervisor.flow_logger.logger",
+      "line": 77,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_supervisor_flow_logger.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.agents.supervisor.flow_logger.logger",
+      "line": 86,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_supervisor_flow_logger.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.agents.supervisor.flow_logger.logger",
+      "line": 97,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_supervisor_flow_logger.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.agents.supervisor.flow_logger.logger",
+      "line": 104,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_supervisor_flow_logger.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.agents.supervisor.flow_logger.logger",
+      "line": 114,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_supervisor_flow_logger.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.agents.supervisor.flow_logger.logger",
+      "line": 124,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_supervisor_flow_logger.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.services.clickhouse_service.get_clickhouse_client",
+      "line": 102,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "netra_backend\\tests\\services\\test_clickhouse_service.py"
+    },
+    {
+      "type": "patch",
+      "target": "scripts.startup_diagnostics.check_database_connection",
+      "line": 75,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "netra_backend\\tests\\startup\\test_startup_diagnostics.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.startup.migration_tracker.get_sync_database_url",
+      "line": 152,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "netra_backend\\tests\\startup\\test_migration_tracker.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.core.fallback_coordinator.AgentFallbackStatus",
+      "line": 65,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\core\\test_fallback_coordinator_core.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.core.fallback_coordinator.LLMFallbackHandler",
+      "line": 63,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\core\\test_fallback_coordinator_core.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.database.clickhouse.ClickHouseClient.execute",
+      "line": 250,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "netra_backend\\tests\\examples\\test_real_functionality_examples.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.core.health.checks.llm_manager",
+      "line": 140,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\routes\\test_health_route_llm_issue.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.agents.external.openai_client.make_request",
+      "line": 166,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\examples\\test_real_functionality_examples.py"
+    },
+    {
+      "type": "patch",
+      "target": "netra_backend.app.db.postgres.get_pool_status",
+      "line": 155,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_metrics_collector_core.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.database.database_manager.get_session",
+      "line": 129,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "netra_backend\\tests\\examples\\test_real_functionality_examples.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.agents.supervisor.flow_logger.logger",
+      "line": 97,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\integration\\test_supervisor_observability.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.agents.supervisor.flow_logger.logger",
+      "line": 116,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\integration\\test_supervisor_observability.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.agents.supervisor.flow_logger.logger",
+      "line": 133,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\integration\\test_supervisor_observability.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.agents.supervisor.flow_logger.logger",
+      "line": 152,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\integration\\test_supervisor_observability.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.agents.supervisor.flow_logger.logger",
+      "line": 178,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\integration\\test_supervisor_observability.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.agents.supervisor.flow_logger.logger",
+      "line": 211,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\integration\\test_supervisor_observability.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.agents.supervisor.flow_logger.logger",
+      "line": 232,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\integration\\test_supervisor_observability.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.auth.token_manager.token_manager",
+      "line": 185,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_token_manager_operations.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.auth.token_manager.token_manager",
+      "line": 197,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_token_manager_operations.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.auth.token_manager.token_manager",
+      "line": 213,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_token_manager_operations.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.auth.token_manager.token_manager",
+      "line": 225,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_token_manager_operations.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.auth.token_manager.token_manager",
+      "line": 237,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_token_manager_operations.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.auth.token_manager.token_manager",
+      "line": 253,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_token_manager_operations.py"
+    },
+    {
+      "type": "patch",
+      "target": "langchain_openai.ChatOpenAI",
+      "line": 130,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\llm\\test_structured_generation.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.auth.pr_router.logger",
+      "line": 51,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_pr_router_utils.py"
+    },
+    {
+      "type": "patch",
+      "target": "app.auth.pr_router.logger",
+      "line": 62,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\unit\\test_pr_router_utils.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 8,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\conftest_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 9,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\conftest_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 10,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\conftest_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 21,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "netra_backend\\tests\\conftest_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 22,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "netra_backend\\tests\\conftest_helpers.py"
+    },
+    {
+      "type": "MagicMock",
+      "target": "",
+      "line": 39,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\conftest_helpers.py"
+    },
+    {
+      "type": "MagicMock",
+      "target": "",
+      "line": 58,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\conftest_helpers.py"
+    },
+    {
+      "type": "MagicMock",
+      "target": "",
+      "line": 125,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\conftest_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 38,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_classes.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 26,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 27,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 28,
+      "justified": false,
+      "category": "database",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 29,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 87,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 93,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 132,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 133,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 138,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 153,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 154,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 175,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 176,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 177,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 200,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 201,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 202,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 225,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 226,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\supervisor_test_helpers.py"
+    },
+    {
+      "type": "MagicMock",
+      "target": "",
+      "line": 73,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_agent_service_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 108,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_agent_service_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 132,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_agent_service_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 204,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_agent_service_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 220,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_agent_service_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 233,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_agent_service_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 252,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_agent_service_critical.py"
+    },
+    {
+      "type": "MagicMock",
+      "target": "",
+      "line": 78,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_agent_service_fixtures.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 79,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_agent_service_fixtures.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 80,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_agent_service_fixtures.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 26,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 57,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 89,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 118,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 148,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 173,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 198,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 222,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 255,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 285,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 318,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 340,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 370,
+      "justified": false,
+      "category": "llm_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 403,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 423,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_agent_generation_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 54,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_core_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 97,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_core_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 121,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_core_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 144,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_core_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 167,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_core_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 189,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_core_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 232,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_core_critical.py"
+    },
+    {
+      "type": "AsyncMock",
+      "target": "",
+      "line": 264,
+      "justified": false,
+      "category": "auth_services",
+      "priority": 1,
+      "file": "netra_backend\\tests\\test_api_core_critical.py"
+    }
+  ]
+}

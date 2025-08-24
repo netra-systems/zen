@@ -21,7 +21,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -59,6 +59,7 @@ class MultiAgentOrchestrationTestManager:
         
     async def _setup_agent_registry(self) -> None:
         """Setup real agent registry with mock tool dispatcher."""
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = AsyncMock()
         self.agent_registry = AgentRegistry(
             llm_manager=self._create_mock_llm_manager(),
@@ -68,7 +69,9 @@ class MultiAgentOrchestrationTestManager:
         
     def _create_mock_llm_manager(self) -> AsyncMock:
         """Create mock LLM manager for testing."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm = AsyncMock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm.generate_response = AsyncMock(return_value={
             "content": "Mock agent response",
             "metadata": {"cost": 0.001, "tokens": 50}
@@ -258,6 +261,7 @@ class MultiAgentOrchestrationTestManager:
             await self.state_manager.set(f"agent:{agent_id}", agent_state)
             raise
             
+    @pytest.mark.asyncio
     async def test_agent_failure_recovery(self, run_id: str, failing_agent_type: str) -> Dict[str, Any]:
         """Test agent failure and state recovery."""
         # Spawn agent that will fail
@@ -336,6 +340,7 @@ async def multi_agent_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_supervisor_spawns_multiple_sub_agents(multi_agent_manager):
     """Test supervisor agent spawns multiple sub-agents with shared state."""
     run_id = await multi_agent_manager.spawn_supervisor_agent(
@@ -356,6 +361,7 @@ async def test_supervisor_spawns_multiple_sub_agents(multi_agent_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration  
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_agents_share_state_through_redis(multi_agent_manager):
     """Test sub-agents share state through Redis."""
     run_id = await multi_agent_manager.spawn_supervisor_agent("Test shared state")
@@ -380,6 +386,7 @@ async def test_agents_share_state_through_redis(multi_agent_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_agent_handoff_with_context_preservation(multi_agent_manager):
     """Test agent handoff preserves context."""
     run_id = await multi_agent_manager.spawn_supervisor_agent("Test handoff")
@@ -406,6 +413,7 @@ async def test_agent_handoff_with_context_preservation(multi_agent_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_parallel_agent_execution_with_result_aggregation(multi_agent_manager):
     """Test parallel agent execution with result aggregation."""
     run_id = await multi_agent_manager.spawn_supervisor_agent("Test parallel execution")
@@ -430,6 +438,7 @@ async def test_parallel_agent_execution_with_result_aggregation(multi_agent_mana
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_agent_failure_recovery_with_state_preservation(multi_agent_manager):
     """Test agent failure recovery preserves state."""
     run_id = await multi_agent_manager.spawn_supervisor_agent("Test failure recovery")
@@ -455,6 +464,7 @@ async def test_agent_failure_recovery_with_state_preservation(multi_agent_manage
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_multi_agent_state_consistency_validation(multi_agent_manager):
     """Test state consistency across multi-agent orchestration."""
     run_id = await multi_agent_manager.spawn_supervisor_agent("Test consistency")
@@ -478,6 +488,7 @@ async def test_multi_agent_state_consistency_validation(multi_agent_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_complex_multi_agent_workflow_end_to_end(multi_agent_manager):
     """Test complete multi-agent workflow from spawn to completion."""
     # 1. Supervisor spawns agents

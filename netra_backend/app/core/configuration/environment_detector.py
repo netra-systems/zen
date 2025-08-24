@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Environment Detection and Configuration Consistency
 
 Provides unified environment detection and ensures configuration consistency
@@ -134,7 +135,7 @@ class EnvironmentDetector:
     
     def _detect_from_env_var(self) -> Optional[Environment]:
         """Detect environment from ENVIRONMENT variable."""
-        env_var = os.environ.get("ENVIRONMENT", "").lower()
+        env_var = get_env().get("ENVIRONMENT", "").lower()
         if not env_var:
             return None
         
@@ -174,7 +175,7 @@ class EnvironmentDetector:
     
     def _detect_from_database_url(self) -> Optional[Environment]:
         """Detect environment from database URL patterns."""
-        db_url = os.environ.get("DATABASE_URL", "").lower()
+        db_url = get_env().get("DATABASE_URL", "").lower()
         if not db_url:
             return None
         
@@ -192,7 +193,7 @@ class EnvironmentDetector:
     def _detect_from_service_context(self) -> Optional[Environment]:
         """Detect environment from service context (GCP, AWS, etc.)."""
         # Check for GCP metadata
-        gcp_project = os.environ.get("GOOGLE_CLOUD_PROJECT", "").lower()
+        gcp_project = get_env().get("GOOGLE_CLOUD_PROJECT", "").lower()
         if gcp_project:
             if "staging" in gcp_project:
                 return Environment.STAGING
@@ -200,7 +201,7 @@ class EnvironmentDetector:
                 return Environment.PRODUCTION
         
         # Check for Kubernetes context
-        k8s_namespace = os.environ.get("K8S_NAMESPACE", "").lower()
+        k8s_namespace = get_env().get("K8S_NAMESPACE", "").lower()
         if k8s_namespace:
             if "staging" in k8s_namespace:
                 return Environment.STAGING
@@ -223,23 +224,23 @@ class EnvironmentDetector:
         
         # Validate SSL requirements
         if env_config.ssl_required:
-            db_url = os.environ.get("DATABASE_URL", "")
+            db_url = get_env().get("DATABASE_URL", "")
             if db_url and "sslmode=" not in db_url and "ssl=" not in db_url:
                 issues.append(f"SSL required for {env_config.environment.value} but DATABASE_URL has no SSL config")
         
         # Validate service requirements
         if env_config.clickhouse_required:
-            clickhouse_url = os.environ.get("CLICKHOUSE_URL", "")
+            clickhouse_url = get_env().get("CLICKHOUSE_URL", "")
             if not clickhouse_url:
                 issues.append(f"ClickHouse required for {env_config.environment.value} but CLICKHOUSE_URL not set")
         
         if env_config.redis_enabled:
-            redis_url = os.environ.get("REDIS_URL", "")
+            redis_url = get_env().get("REDIS_URL", "")
             if not redis_url:
                 issues.append(f"Redis enabled for {env_config.environment.value} but REDIS_URL not set")
         
         # Validate debug mode consistency
-        debug_env = os.environ.get("DEBUG", "false").lower() == "true"
+        debug_env = get_env().get("DEBUG", "false").lower() == "true"
         if debug_env != env_config.debug_mode:
             issues.append(f"DEBUG environment variable ({debug_env}) inconsistent with environment ({env_config.debug_mode})")
         
@@ -265,11 +266,11 @@ class EnvironmentDetector:
                 "issues": issues
             },
             "environment_variables": {
-                "ENVIRONMENT": os.environ.get("ENVIRONMENT"),
-                "DATABASE_URL": self._mask_sensitive_url(os.environ.get("DATABASE_URL", "")),
-                "CLICKHOUSE_URL": self._mask_sensitive_url(os.environ.get("CLICKHOUSE_URL", "")),
-                "REDIS_URL": self._mask_sensitive_url(os.environ.get("REDIS_URL", "")),
-                "DEBUG": os.environ.get("DEBUG")
+                "ENVIRONMENT": get_env().get("ENVIRONMENT"),
+                "DATABASE_URL": self._mask_sensitive_url(get_env().get("DATABASE_URL", "")),
+                "CLICKHOUSE_URL": self._mask_sensitive_url(get_env().get("CLICKHOUSE_URL", "")),
+                "REDIS_URL": self._mask_sensitive_url(get_env().get("REDIS_URL", "")),
+                "DEBUG": get_env().get("DEBUG")
             }
         }
     

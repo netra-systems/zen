@@ -27,7 +27,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 import redis.asyncio as aioredis
@@ -240,6 +240,7 @@ class RedisCacheWarmingStartupL3Manager:
         source_types = ["postgres", "clickhouse", "config_service", "user_service"]
         
         for source_type in source_types:
+            # Mock: Database access isolation for fast, reliable unit testing
             self.database_sources[source_type] = DatabaseSourceMock(source_type)
         
         logger.info(f"Database sources initialized: {list(self.database_sources.keys())}")
@@ -481,6 +482,7 @@ class RedisCacheWarmingStartupL3Manager:
         
         return validation_results
     
+    @pytest.mark.asyncio
     async def test_incremental_cache_warming(self) -> Dict[str, Any]:
         """Test incremental cache warming strategy."""
         incremental_cycles = []
@@ -519,6 +521,7 @@ class RedisCacheWarmingStartupL3Manager:
             "avg_incremental_time": statistics.mean([c["cycle_time"] for c in incremental_cycles])
         }
     
+    @pytest.mark.asyncio
     async def test_cache_invalidation_handling(self) -> Dict[str, Any]:
         """Test cache warming with invalidation scenarios."""
         # Initial warming
@@ -552,6 +555,7 @@ class RedisCacheWarmingStartupL3Manager:
             "recovery_success": total_recovery_time < 10.0
         }
     
+    @pytest.mark.asyncio
     async def test_parallel_cache_warming_efficiency(self) -> Dict[str, Any]:
         """Test efficiency of parallel cache warming."""
         # Test sequential vs parallel warming
@@ -667,6 +671,7 @@ async def startup_warming_manager(isolated_redis_client):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_redis_cache_warming_on_startup_l3(startup_warming_manager):
     """L3: Test Redis cache warming completes on startup."""
     result = await startup_warming_manager.simulate_startup_cache_warming("cold_start")
@@ -690,6 +695,7 @@ async def test_redis_cache_warming_on_startup_l3(startup_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_critical_data_preloaded_startup(startup_warming_manager):
     """L3: Test critical data is correctly pre-loaded during startup."""
     result = await startup_warming_manager.simulate_startup_cache_warming("cold_start")
@@ -719,6 +725,7 @@ async def test_critical_data_preloaded_startup(startup_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cache_hit_rate_after_warming(startup_warming_manager):
     """L3: Test cache hit rate exceeds 80% after warming."""
     result = await startup_warming_manager.simulate_startup_cache_warming("cold_start")
@@ -755,6 +762,7 @@ async def test_cache_hit_rate_after_warming(startup_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_warming_time_under_30_seconds(startup_warming_manager):
     """L3: Test cache warming completes within 30 seconds."""
     scenarios = ["cold_start", "warm_restart", "deployment_update"]
@@ -782,6 +790,7 @@ async def test_warming_time_under_30_seconds(startup_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_parallel_warming_efficiency(startup_warming_manager):
     """L3: Test parallel warming of multiple caches."""
     result = await startup_warming_manager.test_parallel_cache_warming_efficiency()
@@ -802,6 +811,7 @@ async def test_parallel_warming_efficiency(startup_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_incremental_warming_strategy(startup_warming_manager):
     """L3: Test incremental cache warming strategy."""
     result = await startup_warming_manager.test_incremental_cache_warming()
@@ -827,6 +837,7 @@ async def test_incremental_warming_strategy(startup_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cache_invalidation_recovery(startup_warming_manager):
     """L3: Test cache warming handles invalidation scenarios."""
     result = await startup_warming_manager.test_cache_invalidation_handling()
@@ -850,6 +861,7 @@ async def test_cache_invalidation_recovery(startup_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_memory_usage_within_limits(startup_warming_manager):
     """L3: Test cache warming memory usage stays within limits."""
     await startup_warming_manager.simulate_startup_cache_warming("cold_start")
@@ -880,6 +892,7 @@ async def test_memory_usage_within_limits(startup_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_startup_warming_sla_compliance(startup_warming_manager):
     """L3: Test comprehensive startup cache warming SLA compliance."""
     # Execute multiple warming scenarios

@@ -19,7 +19,7 @@ import json
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, mock_open, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, mock_open, patch
 
 import pytest
 from fastapi import WebSocket, WebSocketDisconnect
@@ -36,15 +36,20 @@ from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollect
 class TestWebSocketConnectionResilience:
     """Business Value: Prevents $8K MRR loss from poor real-time experience"""
     
+    @pytest.mark.asyncio
     async def test_websocket_reconnection_after_network_failure(self):
         """Test WebSocket automatically reconnects after network failures"""
         # Arrange - Mock WebSocket manager
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client_state = WebSocketState.CONNECTED
         
         # Act - Simulate network failure and recovery
+        # Mock: Async component isolation for testing without real async operations
         mock_manager.connect = AsyncMock(return_value=True)
+        # Mock: Component isolation for controlled unit testing
         mock_manager.get_connection_count = Mock(return_value=1)
         
         await mock_manager.connect(mock_websocket, "test_user")
@@ -63,14 +68,18 @@ class TestWebSocketConnectionResilience:
 class TestAgentTaskDelegation:
     """Business Value: Core agent orchestration ensures proper AI workload distribution"""
     
+    @pytest.mark.asyncio
     async def test_supervisor_delegates_to_subagents_correctly(self):
         """Test supervisor properly delegates tasks to appropriate sub-agents"""
         # Arrange - Mock supervisor and result
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.agent_type = "data"
         mock_result.status = "completed"
         mock_result.confidence = 0.9
+        # Mock: Async component isolation for testing without real async operations
         mock_supervisor.process_message = AsyncMock(return_value=mock_result)
         
         test_message = {"type": "data_analysis", "content": "Analyze user behavior"}
@@ -88,13 +97,18 @@ class TestAgentTaskDelegation:
 class TestLLMFallbackChain:
     """Business Value: Prevents service disruption when primary LLM fails"""
     
+    @pytest.mark.asyncio
     async def test_llm_fallback_primary_to_secondary_to_tertiary(self):
         """Test LLM fallback chain: primary → secondary → tertiary model"""
         # Arrange - Mock LLM providers with fallback chain
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.open', mock_open(read_data=json.dumps({"content": "Tertiary response"}))):
             # Mock primary failure, secondary failure, tertiary success
+            # Mock: Async component isolation for testing without real async operations
             mock_primary = AsyncMock(side_effect=Exception("Primary API down"))
+            # Mock: Async component isolation for testing without real async operations
             mock_secondary = AsyncMock(side_effect=Exception("Secondary API down"))
+            # Mock: Async component isolation for testing without real async operations
             mock_tertiary = AsyncMock(return_value={"content": "Tertiary response"})
             
             # Act - Simulate fallback chain
@@ -115,6 +129,7 @@ class TestLLMFallbackChain:
 class TestMetricsAggregationAccuracy:
     """Business Value: Accurate billing metrics for 20% performance fee capture"""
     
+    @pytest.mark.asyncio
     async def test_billing_metrics_calculation_accuracy(self):
         """Test metrics aggregation produces accurate billing calculations"""
         # Arrange - Create test usage data for billing calculation
@@ -145,6 +160,7 @@ class TestMetricsAggregationAccuracy:
 class TestAuthTokenRefresh:
     """Business Value: Prevents customer session interruptions"""
     
+    @pytest.mark.asyncio
     async def test_auth_token_refresh_before_expiry(self):
         """Test authentication tokens refresh automatically before expiry"""
         # Arrange - Mock expiring token and refresh
@@ -154,7 +170,9 @@ class TestAuthTokenRefresh:
         }
         
         # Act - Mock token refresh mechanism
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('app.auth_integration.auth.auth_client') as mock_auth_client:
+            # Mock: Authentication service isolation for testing without real auth flows
             mock_auth_client.refresh_token = AsyncMock(
                 return_value={"token": "new_token", "exp": "future_date"}
             )
@@ -173,18 +191,25 @@ class TestAuthTokenRefresh:
 class TestDatabaseTransactionRollback:
     """Business Value: Data integrity prevents corrupt billing/audit records"""
     
+    @pytest.mark.asyncio
     async def test_database_transaction_rollback_on_failures(self):
         """Test database transactions rollback properly on failures"""
         # Arrange - Mock database session with transaction
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.add = Mock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.commit = AsyncMock(side_effect=Exception("DB Error"))
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.rollback = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.in_transaction = Mock(return_value=False)
         mock_session.new = set()
         
         # Act - Simulate transaction failure and rollback
         try:
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session.add(Mock())  # Add some data
             await mock_session.commit()  # This will fail
         except Exception:
@@ -200,6 +225,7 @@ class TestDatabaseTransactionRollback:
 class TestRateLimiterEnforcement:
     """Business Value: Prevents abuse and ensures fair resource allocation"""
     
+    @pytest.mark.asyncio
     async def test_websocket_rate_limiting_enforcement(self):
         """Test WebSocket rate limiter blocks excessive requests"""
         # Arrange - Mock rate limiter
@@ -225,6 +251,7 @@ class TestRateLimiterEnforcement:
 class TestCorpusDataValidation:
     """Business Value: Data quality ensures AI accuracy and customer satisfaction"""
     
+    @pytest.mark.asyncio
     async def test_corpus_crud_operations_data_integrity(self):
         """Test corpus CRUD operations maintain data integrity"""
         # Arrange - Mock corpus service
@@ -235,8 +262,11 @@ class TestCorpusDataValidation:
         }
         
         # Act - Mock CRUD operations
+        # Mock: Generic component isolation for controlled unit testing
         mock_service = Mock()
+        # Mock: Async component isolation for testing without real async operations
         mock_service.create_corpus = AsyncMock(return_value={"id": "test_id", **test_corpus})
+        # Mock: Async component isolation for testing without real async operations
         mock_service.get_corpus = AsyncMock(return_value={"id": "test_id", **test_corpus})
         
         created = await mock_service.create_corpus(test_corpus)
@@ -252,6 +282,7 @@ class TestCorpusDataValidation:
 class TestMultiAgentCoordination:
     """Business Value: Parallel agent execution increases processing throughput"""
     
+    @pytest.mark.asyncio
     async def test_parallel_agent_execution_coordination(self):
         """Test multiple agents execute in parallel without conflicts"""
         # Arrange - Mock agents with async processing
@@ -274,15 +305,19 @@ class TestMultiAgentCoordination:
 class TestErrorRecoveryPipeline:
     """Business Value: System resilience prevents cascade failures"""
     
+    @pytest.mark.asyncio
     async def test_error_handling_across_agent_pipeline(self):
         """Test error recovery mechanisms across the agent pipeline"""
         # Arrange - Mock pipeline with error recovery
+        # Mock: Generic component isolation for controlled unit testing
         mock_pipeline = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.status = "recovered"
         mock_result.error_handled = True
         
         # Act - Mock error recovery
+        # Mock: Async component isolation for testing without real async operations
         mock_pipeline.process_message_with_recovery = AsyncMock(return_value=mock_result)
         result = await mock_pipeline.process_message_with_recovery({
             "type": "test", "content": "test message"
@@ -297,6 +332,7 @@ class TestErrorRecoveryPipeline:
 class TestSystemHealthMonitoring:
     """Business Value: Proactive issue detection prevents downtime"""
     
+    @pytest.mark.asyncio
     async def test_health_check_accuracy_and_alerting(self):
         """Test system health monitoring accuracy"""
         # Arrange - Mock health checks
@@ -307,7 +343,9 @@ class TestSystemHealthMonitoring:
         }
         
         # Act - Mock health monitoring
+        # Mock: Generic component isolation for controlled unit testing
         mock_health_monitor = Mock()
+        # Mock: Async component isolation for testing without real async operations
         mock_health_monitor.run_health_checks = AsyncMock(return_value=health_checks)
         
         health_status = await mock_health_monitor.run_health_checks()
@@ -323,6 +361,7 @@ class TestSystemHealthMonitoring:
 class TestCostTrackingPrecision:
     """Business Value: Precise cost calculation for 20% performance fee"""
     
+    @pytest.mark.asyncio
     async def test_ai_cost_calculation_precision(self):
         """Test AI cost tracking maintains precision for billing"""
         # Arrange - Create cost tracking scenario
@@ -352,6 +391,7 @@ class TestCostTrackingPrecision:
 class TestAdditionalCriticalScenarios:
     """Business Value: Additional critical scenarios for comprehensive coverage"""
     
+    @pytest.mark.asyncio
     async def test_cache_invalidation_consistency(self):
         """Test cache invalidation maintains data consistency"""
         # Arrange - Mock cache operations
@@ -366,6 +406,7 @@ class TestAdditionalCriticalScenarios:
         assert cache_data["key1"] == "updated_value1"
         assert "key2" not in cache_data
     
+    @pytest.mark.asyncio
     async def test_websocket_message_ordering(self):
         """Test WebSocket message sequence preservation"""  
         # Arrange - Mock message queue
@@ -379,6 +420,7 @@ class TestAdditionalCriticalScenarios:
         # Assert - Order preserved
         assert received_messages == messages
     
+    @pytest.mark.asyncio
     async def test_concurrent_user_sessions(self):
         """Test system handles multiple users simultaneously"""
         # Arrange - Mock user sessions
@@ -394,6 +436,7 @@ class TestAdditionalCriticalScenarios:
         assert len(results) == 5
         assert all(r["status"] == "active" for r in results)
     
+    @pytest.mark.asyncio
     async def test_permission_boundaries_enforcement(self):
         """Test access control prevents unauthorized actions"""
         # Arrange - Mock permission system
@@ -404,6 +447,7 @@ class TestAdditionalCriticalScenarios:
         assert user_permissions["write"] is False
         assert user_permissions["admin"] is False
     
+    @pytest.mark.asyncio
     async def test_audit_trail_completeness(self):
         """Test audit logging completeness"""
         # Arrange - Mock audit operations
@@ -419,14 +463,17 @@ class TestAdditionalCriticalScenarios:
         assert len(audit_log) == 3
         assert all(entry["logged"] is True for entry in audit_log)
     
+    @pytest.mark.asyncio
     async def test_resource_cleanup_on_shutdown(self):
         """Test proper resource cleanup"""
         # Arrange - Mock resources
+        # Mock: Generic component isolation for controlled unit testing
         resources = {"db_conn": Mock(), "ws_conn": Mock(), "cache": Mock()}
         
         # Act - Cleanup resources
         cleanup_count = 0
         for resource in resources.values():
+            # Mock: Generic component isolation for controlled unit testing
             resource.close = Mock()
             resource.close()
             cleanup_count += 1

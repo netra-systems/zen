@@ -13,7 +13,7 @@ import random
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -81,18 +81,22 @@ class BusinessValueFixtures:
     @pytest.fixture
     def mock_db_session(self):
         """Setup mock database session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
         self._configure_db_session(session)
         return session
 
     def _configure_db_session(self, session):
         """Configure database session mocks"""
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
 
     @pytest.fixture  
     def mock_llm_manager(self, mock_workload_data):
         """Setup mock LLM manager with realistic responses"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
         ask_llm_mock = self._create_ask_llm_mock(mock_workload_data)
         call_llm_mock = self._create_call_llm_mock()
@@ -107,6 +111,7 @@ class BusinessValueFixtures:
 
     def _create_call_llm_mock(self):
         """Create async mock for call_llm method"""
+        # Mock: Async component isolation for testing without real async operations
         return AsyncMock(return_value={"content": "Analysis complete", "tool_calls": []})
 
     def _configure_llm_manager(self, llm_manager, ask_llm_mock, call_llm_mock):
@@ -322,22 +327,29 @@ class BusinessValueFixtures:
     @pytest.fixture
     def mock_websocket_manager(self):
         """Setup mock WebSocket manager"""
+        # Mock: Generic component isolation for controlled unit testing
         manager = Mock()
         self._configure_websocket_manager(manager)
         return manager
 
     def _configure_websocket_manager(self, manager):
         """Configure WebSocket manager mocks"""
+        # Mock: Generic component isolation for controlled unit testing
         manager.send_message = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.send_sub_agent_update = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.send_agent_log = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.send_error = AsyncMock()
 
     @pytest.fixture
     def mock_tool_dispatcher(self):
         """Setup mock tool dispatcher with realistic responses"""
+        # Mock: Component isolation for controlled unit testing
         dispatcher = Mock(spec=ApexToolSelector)
         tool_mock = self._create_tool_mock()
+        # Mock: Async component isolation for testing without real async operations
         dispatcher.dispatch_tool = AsyncMock(side_effect=tool_mock)
         return dispatcher
 
@@ -396,6 +408,7 @@ class BusinessValueFixtures:
     @pytest.fixture
     def mock_supervisor(self, mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher):
         """Setup mock supervisor with all dependencies"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.state_persistence_service.state_persistence_service'):
             supervisor = Supervisor(mock_db_session, mock_llm_manager, 
                                    mock_websocket_manager, mock_tool_dispatcher)

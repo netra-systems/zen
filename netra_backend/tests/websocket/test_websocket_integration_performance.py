@@ -6,13 +6,11 @@ Integration tests of all performance improvements working together.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.websocket_core.compression import WebSocketCompressor
@@ -57,6 +55,7 @@ class WebSocketIntegrationTestHelper:
     async def process_single_message(self, i: int, memory_manager, compressor, batcher, performance_monitor):
         """Process a single message through all components."""
         connection_id = f"conn_{i % 10}"
+        # Mock: Async component isolation for testing without real async operations
         memory_manager.register_connection(AsyncMock(connection_id=connection_id))
         
         message_data = self.create_test_message(i)
@@ -108,6 +107,7 @@ class WebSocketIntegrationTestVerifier:
 class TestWebSocketIntegratedPerformance:
     """Integration tests for WebSocket performance improvements."""
     
+    @pytest.mark.asyncio
     async def test_integrated_performance_improvements(self):
         """Integration test of all performance improvements working together."""
         helper = WebSocketIntegrationTestHelper()
@@ -146,6 +146,7 @@ class TestWebSocketIntegratedPerformance:
         finally:
             await helper.cleanup_services(memory_manager, performance_monitor, batcher)
     
+    @pytest.mark.asyncio
     async def test_integrated_stress_scenario(self):
         """Stress test with all components under high load."""
         helper = WebSocketIntegrationTestHelper()
@@ -194,6 +195,7 @@ class TestWebSocketIntegratedPerformance:
         finally:
             await helper.cleanup_services(memory_manager, performance_monitor, batcher)
     
+    @pytest.mark.asyncio
     async def test_integrated_component_interaction(self):
         """Test interaction between different performance components."""
         helper = WebSocketIntegrationTestHelper()

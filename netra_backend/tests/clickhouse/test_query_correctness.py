@@ -11,7 +11,7 @@ import sys
 import json
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -37,6 +37,7 @@ class TestCorpusQueries:
 
     """Test corpus-related queries for correctness"""
 
+    @pytest.mark.asyncio
     async def test_create_corpus_table_schema(self):
 
         """Test 1: Verify corpus table schema is valid SQL"""
@@ -61,6 +62,7 @@ class TestCorpusQueries:
 
         assert "ORDER BY (created_at, workload_type)" in schema
 
+    @pytest.mark.asyncio
     async def test_corpus_insert_query_structure(self):
 
         """Test 2: Verify INSERT query structure for corpus"""
@@ -71,8 +73,10 @@ class TestCorpusQueries:
         
         # Mock the client to capture the query
 
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
 
             mock_client.return_value.__aenter__.return_value = mock_instance
@@ -101,14 +105,17 @@ class TestCorpusQueries:
 
             assert "VALUES" in query
 
+    @pytest.mark.asyncio
     async def test_corpus_statistics_query(self):
 
         """Test 3: Verify corpus statistics query correctness"""
 
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
 
             mock_client.return_value.__aenter__.return_value = mock_instance
@@ -116,8 +123,10 @@ class TestCorpusQueries:
             # Mock database corpus
             from unittest.mock import MagicMock
 
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
 
+            # Mock: Generic component isolation for controlled unit testing
             corpus = MagicMock()
 
             corpus.id = "test_id"
@@ -160,22 +169,27 @@ class TestCorpusQueries:
 
             assert "GROUP BY workload_type" in dist_query
 
+    @pytest.mark.asyncio
     async def test_corpus_content_retrieval_query(self):
 
         """Test 4: Verify corpus content retrieval with filters"""
 
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
 
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Mock database corpus
 
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
 
+            # Mock: Generic component isolation for controlled unit testing
             corpus = MagicMock()
 
             corpus.status = "available"
@@ -206,14 +220,17 @@ class TestCorpusQueries:
 
             assert "LIMIT 50 OFFSET 100" in query
 
+    @pytest.mark.asyncio
     async def test_clone_corpus_copy_query(self):
 
         """Test 5: Verify corpus cloning query"""
 
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
 
             mock_client.return_value.__aenter__.return_value = mock_instance
@@ -224,6 +241,7 @@ class TestCorpusQueries:
             
             await service._copy_corpus_content(
 
+                # Mock: Generic component isolation for controlled unit testing
                 source_table, dest_table, "new_id", MagicMock()
 
             )
@@ -501,6 +519,7 @@ class TestGenerationServiceQueries:
 
     """Test generation service queries"""
 
+    @pytest.mark.asyncio
     async def test_get_corpus_from_clickhouse_query(self):
 
         """Test 14: Verify corpus loading query from generation service"""
@@ -510,8 +529,10 @@ class TestGenerationServiceQueries:
 
         )
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
 
             mock_db.return_value = mock_instance
@@ -538,11 +559,14 @@ class TestGenerationServiceQueries:
 
             }
 
+    @pytest.mark.asyncio
     async def test_save_corpus_to_clickhouse_batch_insert(self):
         """Test 15: Verify batch insert for corpus saving"""
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
 
             mock_db.return_value = mock_instance
@@ -575,13 +599,16 @@ class TestTableInitializationQueries:
 
     """Test table initialization queries"""
 
+    @pytest.mark.asyncio
     async def test_initialize_clickhouse_tables(self):
 
         """Test 16: Verify all tables are created on initialization"""
         from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.db.clickhouse_init.get_clickhouse_client') as mock_client:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
 
             mock_client.return_value.__aenter__.return_value = mock_instance
@@ -598,6 +625,7 @@ class TestTableInitializationQueries:
 
             ]
             
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.db.clickhouse_init.settings') as mock_settings:
 
                 mock_settings.environment = "production"
@@ -612,13 +640,16 @@ class TestTableInitializationQueries:
 
                 mock_instance.execute_query.assert_called_with("SHOW TABLES")
 
+    @pytest.mark.asyncio
     async def test_verify_workload_events_table(self):
 
         """Test 17: Verify workload_events table verification"""
         from netra_backend.app.db.clickhouse_init import verify_workload_events_table
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.db.clickhouse_init.get_clickhouse_client') as mock_client:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
 
             mock_client.return_value.__aenter__.return_value = mock_instance

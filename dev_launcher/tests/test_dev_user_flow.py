@@ -67,6 +67,7 @@ class TestDevUserCreation:
         # Mock the environment_validator.validate_all method that's actually called
         with patch.object(dev_launcher.environment_validator, 'validate_all') as mock_validate:
             # Mock a successful validation result with all required attributes
+            # Mock: Generic component isolation for controlled unit testing
             mock_result = Mock()
             mock_result.is_valid = True
             mock_result.errors = []
@@ -89,6 +90,7 @@ class TestDevUserCreation:
         assert dev_launcher.health_monitor.check_interval == 30
         
         # Test registering a service
+        # Mock: Component isolation for controlled unit testing
         mock_health_check = Mock(return_value=True)
         dev_launcher.health_monitor.register_service(
             "TestService",
@@ -240,6 +242,7 @@ class TestDevLauncherIntegration:
         """
         # Test environment checking by mocking environment_validator
         with patch.object(integration_launcher.environment_validator, 'validate_all') as mock_env:
+            # Mock: Generic component isolation for controlled unit testing
             mock_result = Mock()
             mock_result.is_valid = True
             mock_result.errors = []
@@ -263,11 +266,13 @@ class TestDevLauncherIntegration:
         integration_launcher._shutting_down = False
         
         # Mock having processes to shutdown
+        # Mock: Generic component isolation for controlled unit testing
         mock_process = Mock()
         integration_launcher.process_manager.processes = {"test": mock_process}
         
         # Test graceful shutdown by calling signal handler which sets _shutting_down
         with patch.object(integration_launcher, '_terminate_all_services'):
+            # Mock: Component isolation for testing without external dependencies
             with patch('sys.exit') as mock_exit:
                 # Call the signal handler which properly sets the shutdown flag
                 integration_launcher._signal_handler(2, None)  # SIGINT

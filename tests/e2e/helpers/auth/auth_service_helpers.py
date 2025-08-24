@@ -28,8 +28,6 @@ import httpx
 import pytest
 
 # Add project root to path for imports
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Test timeout configuration - MUST complete in <10 seconds
 TEST_TIMEOUT = 10  # seconds - Critical requirement for CI/CD
@@ -522,7 +520,7 @@ class AuthServiceIndependenceValidator:
         results = {"passed": False, "dockerfile_exists": False, "copies_full_service": False}
         
         try:
-            dockerfile_path = self.project_root / "Dockerfile.auth"
+            dockerfile_path = self.project_root / "deployment" / "docker" / "Dockerfile.auth"
             
             if dockerfile_path.exists():
                 results["dockerfile_exists"] = True
@@ -545,7 +543,7 @@ class AuthServiceIndependenceValidator:
                 results["passed"] = results["dockerfile_exists"] and results["copies_full_service"] and has_all_indicators
                 
             else:
-                results["error"] = "Dockerfile.auth not found"
+                results["error"] = "deployment/docker/Dockerfile.auth not found"
                 
         except Exception as e:
             results["error"] = str(e)

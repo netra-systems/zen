@@ -36,21 +36,31 @@ class AuthFlowE2ETester:
         
     async def _setup_auth_service_mock(self) -> None:
         """Setup auth service with real JWT logic."""
+        # Mock: Authentication service isolation for testing without real auth flows
         self.mock_services["auth"] = MagicMock()
+        # Mock: Authentication service isolation for testing without real auth flows
         self.mock_services["auth"].validate_token = AsyncMock(return_value=True)
+        # Mock: Authentication service isolation for testing without real auth flows
         self.mock_services["auth"].create_user = AsyncMock()
+        # Mock: Authentication service isolation for testing without real auth flows
         self.mock_services["auth"].authenticate = AsyncMock()
     
     async def _setup_websocket_manager_mock(self) -> None:
         """Setup WebSocket manager with real connection logic."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         self.mock_services["websocket"] = MagicMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         self.mock_services["websocket"].connect = AsyncMock(return_value=True)
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         self.mock_services["websocket"].send_message = AsyncMock()
         
     async def _setup_database_operations(self) -> None:
         """Setup database operations for user management."""
+        # Mock: Generic component isolation for controlled unit testing
         self.mock_services["db"] = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.mock_services["db"].create_user = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.mock_services["db"].get_user = AsyncMock()
 
     async def cleanup_services(self) -> None:

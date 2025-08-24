@@ -6,18 +6,16 @@ Common fixtures and mock classes used across all test modules
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import uuid
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
 from netra_backend.app.services.corpus_service import CorpusService
 
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from netra_backend.app.websocket_core import get_unified_manager
+from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
 ws_manager = get_unified_manager()
 
 # ==================== Mock Classes ====================
@@ -64,16 +62,23 @@ def corpus_service():
 
 @pytest.fixture
 def mock_db():
+    # Mock: Generic component isolation for controlled unit testing
     db = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     db.add = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     db.commit = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     db.refresh = MagicMock()
     return db
 
 @pytest.fixture
 def mock_clickhouse_client():
+    # Mock: Generic component isolation for controlled unit testing
     client = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     client.execute = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     client.query = AsyncMock(return_value=[])
     return client
 
@@ -101,8 +106,11 @@ def ingestion_service():
 
 @pytest.fixture
 def mock_clickhouse():
+    # Mock: Generic component isolation for controlled unit testing
     client = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.execute = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.query = AsyncMock()
     return client
 
@@ -112,8 +120,11 @@ def ws_service():
 
 @pytest.fixture
 def mock_websocket():
+    # Mock: Generic component isolation for controlled unit testing
     ws = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     ws.send_json = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     ws.receive_json = AsyncMock()
     return ws
 

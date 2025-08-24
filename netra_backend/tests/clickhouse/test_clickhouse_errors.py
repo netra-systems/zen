@@ -13,12 +13,13 @@ from netra_backend.app.logging_config import central_logger as logger
 
 from netra_backend.app.config import get_config
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 
 class TestClickHouseErrorHandling:
     """Test error handling and recovery"""
     
+    @pytest.mark.asyncio
     async def test_invalid_query_handling(self):
         """Test handling of invalid queries"""
         async with get_clickhouse_client() as client:
@@ -29,6 +30,7 @@ class TestClickHouseErrorHandling:
             error_msg = str(exc_info.value)
             logger.info(f"Expected error for non-existent table: {error_msg}")
 
+    @pytest.mark.asyncio
     async def test_connection_recovery(self):
         """Test connection recovery after disconnect"""
         config = self._get_test_config()

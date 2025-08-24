@@ -7,12 +7,10 @@ COMPLIANCE: 450-line max file, 25-line max functions
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import tracemalloc
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -27,9 +25,11 @@ from netra_backend.app.services.supply_research_scheduler import (
 class TestSupplyResearchSchedulerPerformance:
     """Test performance and resource management"""
     
+    @pytest.mark.asyncio
     async def test_memory_usage_under_load(self):
         """Test memory usage doesn't grow excessively under load."""
         scheduler = SupplyResearchScheduler()
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(return_value=True)
         
         # Start memory tracing
@@ -52,6 +52,7 @@ class TestSupplyResearchSchedulerPerformance:
         # Assert reasonable memory usage (< 100MB for this test)
         assert peak < 100 * 1024 * 1024  # 100MB
 
+    @pytest.mark.asyncio
     async def test_job_execution_performance_metrics(self):
         """Test job execution performance tracking."""
         scheduler = SupplyResearchScheduler()

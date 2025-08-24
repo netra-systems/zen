@@ -14,18 +14,21 @@ import json
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
 class TestAPIThreadsMessagesCritical:
     """Critical thread and message API endpoint tests."""
+    @pytest.mark.asyncio
     async def test_create_thread(self):
         """Test thread creation endpoint."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test create thread
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 201,
             "json": {
@@ -42,12 +45,15 @@ class TestAPIThreadsMessagesCritical:
         )
         assert response["status_code"] == 201
         assert response["json"]["title"] == "New Thread"
+    @pytest.mark.asyncio
     async def test_get_user_threads(self):
         """Test get user threads endpoint."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test get user threads
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -62,12 +68,15 @@ class TestAPIThreadsMessagesCritical:
         response = await mock_client.get("/api/threads", headers=auth_headers)
         assert response["status_code"] == 200
         assert len(response["json"]["threads"]) == 2
+    @pytest.mark.asyncio
     async def test_thread_creation_validation(self):
         """Test thread creation validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         thread_id = str(uuid.uuid4())
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 201,
             "json": {
@@ -84,8 +93,10 @@ class TestAPIThreadsMessagesCritical:
         )
         assert "id" in response["json"]
         assert "created_at" in response["json"]
+    @pytest.mark.asyncio
     async def test_send_message(self):
         """Test send message endpoint."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         thread_id = str(uuid.uuid4())
@@ -96,6 +107,7 @@ class TestAPIThreadsMessagesCritical:
             "thread_id": thread_id
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 201,
             "json": {
@@ -114,13 +126,16 @@ class TestAPIThreadsMessagesCritical:
         )
         assert response["status_code"] == 201
         assert response["json"]["content"] == message_data["content"]
+    @pytest.mark.asyncio
     async def test_get_thread_messages(self):
         """Test get thread messages endpoint."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         thread_id = str(uuid.uuid4())
         
         # Test get thread messages
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -138,12 +153,15 @@ class TestAPIThreadsMessagesCritical:
         )
         assert response["status_code"] == 200
         assert len(response["json"]["messages"]) == 2
+    @pytest.mark.asyncio
     async def test_message_role_validation(self):
         """Test message role validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         thread_id = str(uuid.uuid4())
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -163,8 +181,10 @@ class TestAPIThreadsMessagesCritical:
         messages = response["json"]["messages"]
         assert messages[0]["role"] == "user"
         assert messages[1]["role"] == "assistant"
+    @pytest.mark.asyncio
     async def test_message_content_validation(self):
         """Test message content validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         thread_id = str(uuid.uuid4())
@@ -174,6 +194,7 @@ class TestAPIThreadsMessagesCritical:
             "thread_id": thread_id
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 201,
             "json": {
@@ -192,11 +213,14 @@ class TestAPIThreadsMessagesCritical:
         )
         assert response["json"]["thread_id"] == thread_id
         assert response["json"]["role"] == "user"
+    @pytest.mark.asyncio
     async def test_thread_listing_pagination(self):
         """Test thread listing with pagination."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -213,13 +237,16 @@ class TestAPIThreadsMessagesCritical:
         response = await mock_client.get("/api/threads?page=1&per_page=5", headers=auth_headers)
         assert response["json"]["total"] == 5
         assert len(response["json"]["threads"]) == 5
+    @pytest.mark.asyncio
     async def test_message_timestamp_validation(self):
         """Test message timestamp validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         thread_id = str(uuid.uuid4())
         
         timestamp = datetime.now(timezone.utc).isoformat()
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 201,
             "json": {
@@ -238,12 +265,15 @@ class TestAPIThreadsMessagesCritical:
         )
         assert "created_at" in response["json"]
         assert response["json"]["created_at"] == timestamp
+    @pytest.mark.asyncio
     async def test_thread_id_validation(self):
         """Test thread ID validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         thread_id = str(uuid.uuid4())
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 201,
             "json": {
@@ -262,11 +292,14 @@ class TestAPIThreadsMessagesCritical:
         # Verify UUID format
         returned_id = response["json"]["id"]
         uuid.UUID(returned_id)  # This will raise ValueError if invalid UUID
+    @pytest.mark.asyncio
     async def test_empty_thread_list(self):
         """Test empty thread list response."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -279,12 +312,15 @@ class TestAPIThreadsMessagesCritical:
         assert response["status_code"] == 200
         assert len(response["json"]["threads"]) == 0
         assert response["json"]["total"] == 0
+    @pytest.mark.asyncio
     async def test_message_order_consistency(self):
         """Test message order consistency."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         thread_id = str(uuid.uuid4())
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -305,14 +341,17 @@ class TestAPIThreadsMessagesCritical:
         messages = response["json"]["messages"]
         assert len(messages) == 3
         assert messages[0]["role"] == "user"
+    @pytest.mark.asyncio
     async def test_thread_title_handling(self):
         """Test thread title handling."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         titles = ["Short", "A very long thread title that tests length limits", ""]
         
         for title in titles:
+            # Mock: Async component isolation for testing without real async operations
             mock_client.post = AsyncMock(return_value={
                 "status_code": 201,
                 "json": {
@@ -328,8 +367,10 @@ class TestAPIThreadsMessagesCritical:
                 headers=auth_headers
             )
             assert response["json"]["title"] == title
+    @pytest.mark.asyncio
     async def test_message_context_preservation(self):
         """Test message context preservation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         thread_id = str(uuid.uuid4())
@@ -341,6 +382,7 @@ class TestAPIThreadsMessagesCritical:
             "metadata": {"context": "important"}
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 201,
             "json": {

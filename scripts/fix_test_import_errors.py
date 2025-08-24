@@ -117,6 +117,7 @@ class TestImportFixer:
             ),
             ImportFix(
                 r"from netra_backend\.tests\.user_journey_data import.*",
+                # Mock: Generic component isolation for controlled unit testing
                 "# User journey data - creating mocks\nfrom unittest.mock import Mock\nUserTestData = Mock()\nUserJourneyScenarios = Mock()",
                 "Created mock user journey data"
             ),

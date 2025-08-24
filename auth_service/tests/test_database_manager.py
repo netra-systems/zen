@@ -14,8 +14,10 @@ import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
 from netra_backend.app.db.database_manager import DatabaseManager as AuthDatabaseManager
+from test_framework.environment_markers import env
 
 
+@env("test", "dev")  # Database manager tests can run locally with mocked connections
 class TestAuthDatabaseManager:
     """Test suite for auth service database manager."""
     
@@ -212,7 +214,9 @@ class TestAuthDatabaseManager:
     def test_pool_status_monitoring(self):
         """Test pool status retrieval for monitoring."""
         # Create a mock engine with pool
+        # Mock: Generic component isolation for controlled unit testing
         mock_engine = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_pool = MagicMock()
         mock_pool.size.return_value = 10
         mock_pool.checkedin.return_value = 8

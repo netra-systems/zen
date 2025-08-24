@@ -371,6 +371,7 @@ class MigrationRollbackSafetyManager:
             logger.error(f"Data preservation verification failed: {e}")
             return False
     
+    @pytest.mark.asyncio
     async def test_migration_rollback(self, migration_id: str) -> Dict[str, Any]:
         """Test rollback of a specific migration."""
         rollback_result = {
@@ -466,6 +467,7 @@ class MigrationRollbackSafetyManager:
             logger.error(f"Data restoration verification failed: {e}")
             return False
     
+    @pytest.mark.asyncio
     async def test_failed_migration_recovery(self) -> Dict[str, Any]:
         """Test recovery from a failed migration scenario."""
         recovery_result = {
@@ -558,6 +560,7 @@ async def migration_manager():
 class TestDatabaseMigrationRollbackSafetyL3:
     """L3 integration tests for database migration rollback safety."""
     
+    @pytest.mark.asyncio
     async def test_safe_migration_rollback_process(self, migration_manager):
         """Test complete migration and rollback process."""
         migration_id = f"test_migration_{uuid.uuid4().hex[:8]}"
@@ -573,6 +576,7 @@ class TestDatabaseMigrationRollbackSafetyL3:
         assert rollback_result["data_restored"] is True
         assert rollback_result["schema_restored"] is True
     
+    @pytest.mark.asyncio
     async def test_multiple_migration_types_rollback(self, migration_manager):
         """Test rollback safety across different migration types."""
         migration_types = ["add_column", "create_index", "modify_constraint", "data_migration"]
@@ -589,6 +593,7 @@ class TestDatabaseMigrationRollbackSafetyL3:
             assert rollback_result["rollback_successful"] is True, f"Failed to rollback {migration_type}"
             assert rollback_result["data_restored"] is True, f"Data not restored for {migration_type}"
     
+    @pytest.mark.asyncio
     async def test_failed_migration_recovery(self, migration_manager):
         """Test recovery from failed migration scenarios."""
         recovery_result = await migration_manager.test_failed_migration_recovery()
@@ -598,6 +603,7 @@ class TestDatabaseMigrationRollbackSafetyL3:
         assert recovery_result["data_integrity_maintained"] is True
         assert recovery_result["partial_changes_rolled_back"] is True
     
+    @pytest.mark.asyncio
     async def test_data_preservation_during_rollback(self, migration_manager):
         """Test that existing data is preserved during rollback operations."""
         migration_id = f"preservation_test_{uuid.uuid4().hex[:8]}"
@@ -628,6 +634,7 @@ class TestDatabaseMigrationRollbackSafetyL3:
             assert user_row[0] == "preservation_user"
             assert user_row[1] == "preserve@test.com"
     
+    @pytest.mark.asyncio
     async def test_rollback_safety_under_load(self, migration_manager):
         """Test rollback safety when database is under concurrent load."""
         migration_id = f"load_test_{uuid.uuid4().hex[:8]}"

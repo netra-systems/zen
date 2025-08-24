@@ -25,7 +25,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
@@ -215,6 +215,7 @@ class CustomMetricsValidator:
         
         return business_metrics
     
+    @pytest.mark.asyncio
     async def test_metric_registration_process(self, definitions: List[MetricDefinition]) -> Dict[str, Any]:
         """Test the complete metric registration process."""
         registration_results = {
@@ -277,6 +278,7 @@ class CustomMetricsValidator:
         
         return registration_results
     
+    @pytest.mark.asyncio
     async def test_dynamic_metric_collection(self, registered_definitions: List[MetricDefinition]) -> Dict[str, Any]:
         """Test dynamic collection of registered custom metrics."""
         collection_results = {
@@ -409,6 +411,7 @@ class CustomMetricsValidator:
             logger.error(f"Failed to collect custom metric {metric_instance.metric_name}: {e}")
             return False
     
+    @pytest.mark.asyncio
     async def test_metric_schema_validation(self) -> Dict[str, Any]:
         """Test comprehensive schema validation for custom metrics."""
         validation_results = {
@@ -496,6 +499,7 @@ class CustomMetricsValidator:
         
         return invalid_definitions
     
+    @pytest.mark.asyncio
     async def test_metric_lifecycle_management(self, definitions: List[MetricDefinition]) -> Dict[str, Any]:
         """Test complete lifecycle management of custom metrics."""
         lifecycle_results = {

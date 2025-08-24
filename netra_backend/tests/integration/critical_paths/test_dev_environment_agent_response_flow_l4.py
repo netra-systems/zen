@@ -305,6 +305,7 @@ class AgentResponseFlowTester:
             
         return None
     
+    @pytest.mark.asyncio
     async def test_message_processing(self, email: str, thread_id: str, test_case: Dict[str, Any]) -> Dict[str, Any]:
         """Test agent message processing and response generation."""
         result = {
@@ -441,6 +442,7 @@ class AgentResponseFlowTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_conversation_flow(self, email: str, scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Test multi-turn conversation flow."""
         result = {
@@ -508,6 +510,7 @@ class AgentResponseFlowTester:
         
         return result
     
+    @pytest.mark.asyncio
     async def test_agent_handoff(self, email: str) -> Dict[str, Any]:
         """Test agent handoff and escalation scenarios."""
         result = {
@@ -572,6 +575,7 @@ class AgentResponseFlowTester:
         
         return result
     
+    @pytest.mark.asyncio
     async def test_concurrent_responses(self, email: str) -> Dict[str, Any]:
         """Test handling of concurrent message processing."""
         result = {
@@ -892,6 +896,7 @@ class AgentResponseFlowTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.level_4
+@pytest.mark.asyncio
 async def test_dev_environment_agent_response_flow():
     """Test comprehensive agent response flow functionality."""
     async with AgentResponseFlowTester() as tester:

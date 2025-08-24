@@ -165,7 +165,6 @@ def remove_sys_path_manipulation(file_path: Path, dry_run: bool = False) -> List
             continue
         
         # Check for start of path manipulation block
-        if 'project_root' in line.lower() or 'PROJECT_ROOT' in line:
             # Look ahead to see if this is part of sys.path manipulation
             if i + 1 < len(lines) and 'sys.path' in lines[i + 1]:
                 in_path_block = True
@@ -177,7 +176,6 @@ def remove_sys_path_manipulation(file_path: Path, dry_run: bool = False) -> List
                 continue
         
         # Check for sys.path manipulations
-        if 'sys.path' in line and ('append' in line or 'insert' in line):
             removed_lines.append(line.rstrip())
             in_path_block = False
             
@@ -202,7 +200,6 @@ def remove_sys_path_manipulation(file_path: Path, dry_run: bool = False) -> List
         in_path_block = False
     
     if removed_lines:
-        changes.append(f"{file_path}: Removed sys.path manipulations:")
         for line in removed_lines:
             changes.append(f"  - {line}")
         
@@ -296,9 +293,9 @@ def main():
         print("\n4. Removing sys.path manipulations...")
         sys_path_changes = []
         for file_path in python_files:
-            if 'conftest.py' in str(file_path) or 'test_' in file_path.name or '__init__.py' in file_path.name:
-                changes = remove_sys_path_manipulation(file_path, args.dry_run)
-                sys_path_changes.extend(changes)
+            # Process ALL Python files for atomic remediation
+            changes = remove_sys_path_manipulation(file_path, args.dry_run)
+            sys_path_changes.extend(changes)
         
         all_changes.extend(sys_path_changes)
         print(f"   Removed {len(sys_path_changes)} sys.path manipulations")

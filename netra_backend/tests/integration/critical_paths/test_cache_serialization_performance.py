@@ -137,18 +137,27 @@ class CacheSerializationPerformanceL3Manager:
                 redis_urls[name] = url
                 
                 # Use mock Redis client to avoid event loop conflicts
-                from unittest.mock import AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
                 client = AsyncMock()
                 client.ping = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.get = AsyncMock(return_value=None)
+                # Mock: Generic component isolation for controlled unit testing
                 client.set = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 client.setex = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.delete = AsyncMock(return_value=0)
+                # Mock: Async component isolation for testing without real async operations
                 client.exists = AsyncMock(return_value=False)
+                # Mock: Async component isolation for testing without real async operations
                 client.info = AsyncMock(return_value={"role": config.get('role', 'master')})
                 # Support binary mode operations for serialization testing
+                # Mock: Generic component isolation for controlled unit testing
                 client.hset = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.hget = AsyncMock(return_value=None)
+                # Mock: Async component isolation for testing without real async operations
                 client.hgetall = AsyncMock(return_value={})
                 self.redis_clients[name] = client
                 
@@ -324,6 +333,7 @@ class CacheSerializationPerformanceL3Manager:
             logger.error(f"Deserialization failed for format {format_type}: {e}")
             raise
     
+    @pytest.mark.asyncio
     async def test_serialization_format_performance(self, format_type: str, data_type: str, operations: int) -> Dict[str, Any]:
         """Test serialization performance for specific format and data type."""
         client_name = f"{format_type.split('_')[0]}_cache"
@@ -391,6 +401,7 @@ class CacheSerializationPerformanceL3Manager:
         
         return results
     
+    @pytest.mark.asyncio
     async def test_concurrent_serialization_performance(self, format_type: str, concurrent_workers: int, operations_per_worker: int) -> Dict[str, Any]:
         """Test serialization performance under concurrent load."""
         
@@ -456,6 +467,7 @@ class CacheSerializationPerformanceL3Manager:
             "error_rate": (total_errors / (total_operations + total_errors) * 100) if (total_operations + total_errors) > 0 else 0
         }
     
+    @pytest.mark.asyncio
     async def test_large_data_serialization(self, format_type: str, data_sizes: List[str]) -> Dict[str, Any]:
         """Test serialization performance with large data sizes."""
         size_results = {}
@@ -637,6 +649,7 @@ async def serialization_performance_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_json_serialization_performance(serialization_performance_manager):
     """L3: Test JSON serialization performance."""
     result = await serialization_performance_manager.test_serialization_format_performance("json", "complex", 50)
@@ -654,6 +667,7 @@ async def test_json_serialization_performance(serialization_performance_manager)
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_concurrent_serialization_performance(serialization_performance_manager):
     """L3: Test serialization performance under concurrent load."""
     result = await serialization_performance_manager.test_concurrent_serialization_performance("json", 10, 20)
@@ -668,6 +682,7 @@ async def test_concurrent_serialization_performance(serialization_performance_ma
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_large_data_serialization_performance(serialization_performance_manager):
     """L3: Test serialization performance with large data sizes."""
     result = await serialization_performance_manager.test_large_data_serialization("json", ["medium", "large"])
@@ -684,6 +699,7 @@ async def test_large_data_serialization_performance(serialization_performance_ma
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_serialization_format_comparison(serialization_performance_manager):
     """L3: Test and compare different serialization formats."""
     result = await serialization_performance_manager.compare_serialization_formats(30)
@@ -708,6 +724,7 @@ async def test_serialization_format_comparison(serialization_performance_manager
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_serialization_performance_sla_compliance(serialization_performance_manager):
     """L3: Test comprehensive serialization performance SLA compliance."""
     # Execute comprehensive test suite

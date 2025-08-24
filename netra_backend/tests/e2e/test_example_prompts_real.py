@@ -41,6 +41,7 @@ from netra_backend.tests.e2e.example_prompts_validators import (
 class TestExamplePromptsComprehensive:
     """Test all 9 example prompts with real LLM calls and complete validation."""
     
+    @pytest.mark.asyncio
     async def test_ep_001_cost_quality_optimization(self, real_llm_prompt_setup):
         """Test EP-001: Cost reduction with quality preservation constraints."""
         setup = real_llm_prompt_setup
@@ -48,6 +49,7 @@ class TestExamplePromptsComprehensive:
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[0], state)
         validate_cost_optimization_result(result, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_002_latency_budget_constraint(self, real_llm_prompt_setup):
         """Test EP-002: Latency optimization with budget constraints."""
         setup = real_llm_prompt_setup
@@ -55,6 +57,7 @@ class TestExamplePromptsComprehensive:
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[1], state)
         validate_performance_optimization_result(result, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_003_capacity_planning_analysis(self, real_llm_prompt_setup):
         """Test EP-003: Capacity planning for usage increase."""
         setup = real_llm_prompt_setup
@@ -62,6 +65,7 @@ class TestExamplePromptsComprehensive:
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[2], state)
         validate_capacity_planning_result(result, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_004_function_optimization(self, real_llm_prompt_setup):
         """Test EP-004: Advanced function optimization methods."""
         setup = real_llm_prompt_setup
@@ -69,6 +73,7 @@ class TestExamplePromptsComprehensive:
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[3], state)
         validate_function_optimization_result(result, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_005_model_selection_evaluation(self, real_llm_prompt_setup):
         """Test EP-005: Model selection and effectiveness analysis."""
         setup = real_llm_prompt_setup
@@ -76,6 +81,7 @@ class TestExamplePromptsComprehensive:
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[4], state)
         validate_model_selection_result(result, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_006_kv_cache_audit(self, real_llm_prompt_setup):
         """Test EP-006: KV cache audit and optimization opportunities."""
         setup = real_llm_prompt_setup
@@ -83,6 +89,7 @@ class TestExamplePromptsComprehensive:
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[5], state)
         validate_kv_cache_audit_result(result, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_007_multi_constraint_optimization(self, real_llm_prompt_setup):
         """Test EP-007: Multi-constraint optimization with usage scaling."""
         setup = real_llm_prompt_setup
@@ -90,6 +97,7 @@ class TestExamplePromptsComprehensive:
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[6], state)
         validate_multi_constraint_result(result, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_008_tool_migration_analysis(self, real_llm_prompt_setup):
         """Test EP-008: Tool migration to new models analysis."""
         setup = real_llm_prompt_setup
@@ -97,6 +105,7 @@ class TestExamplePromptsComprehensive:
         result = await execute_full_prompt_workflow(setup, EXAMPLE_PROMPTS[7], state)
         validate_tool_migration_result(result, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_009_rollback_cost_analysis(self, real_llm_prompt_setup):
         """Test EP-009: Rollback analysis and cost-effectiveness evaluation."""
         setup = real_llm_prompt_setup

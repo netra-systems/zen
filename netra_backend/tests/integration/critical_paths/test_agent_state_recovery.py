@@ -27,7 +27,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import User
@@ -480,6 +480,7 @@ class TestAgentStateRecoveryL3:
         agent = RecoverableAgent("test_agent_1", recovery_manager)
         yield agent
         
+    @pytest.mark.asyncio
     async def test_agent_crash_and_recovery_under_30_seconds(self, recovery_manager, recoverable_agent):
         """Test agent recovery time is under 30 seconds."""
         # Establish agent state
@@ -509,6 +510,7 @@ class TestAgentStateRecoveryL3:
         assert len(recoverable_agent.task_progress) > 0
         assert task_id in recoverable_agent.task_progress
         
+    @pytest.mark.asyncio
     async def test_state_reconstruction_from_checkpoints(self, recovery_manager, recoverable_agent):
         """Test complete state reconstruction from checkpoints."""
         # Build comprehensive agent state
@@ -556,6 +558,7 @@ class TestAgentStateRecoveryL3:
         assert "learned_patterns" in recoverable_agent.memory_state
         assert recoverable_agent.memory_state["learned_patterns"] == ["pattern1", "pattern2"]
         
+    @pytest.mark.asyncio
     async def test_in_progress_task_resumption(self, recovery_manager, recoverable_agent):
         """Test resumption of in-progress tasks after recovery."""
         # Start task with partial progress
@@ -593,6 +596,7 @@ class TestAgentStateRecoveryL3:
         # Verify task completion
         assert recoverable_agent.task_progress[task_id]["status"] == "completed"
         
+    @pytest.mark.asyncio
     async def test_context_preservation_across_crashes(self, recovery_manager, recoverable_agent):
         """Test conversation context preservation across multiple crashes."""
         # Build conversation history
@@ -622,6 +626,7 @@ class TestAgentStateRecoveryL3:
             if i < len(conversation_data):
                 assert conversation_data[i] in str(context_entry)
                 
+    @pytest.mark.asyncio
     async def test_failure_detection_and_alerting(self, recovery_manager, recoverable_agent):
         """Test automatic failure detection and alerting mechanisms."""
         # Agent starts healthy
@@ -649,6 +654,7 @@ class TestAgentStateRecoveryL3:
         assert failure_detected == recoverable_agent.is_crashed
         
     @mock_justified("L3: State recovery testing with real persistence mechanisms")
+    @pytest.mark.asyncio
     async def test_recovery_performance_under_load(self, recovery_manager):
         """Test recovery performance with multiple agents under load."""
         # Create multiple agents

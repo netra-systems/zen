@@ -24,7 +24,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import User
@@ -338,6 +338,7 @@ class TestAgentToolAuthorizationL3:
         
         return agents
         
+    @pytest.mark.asyncio
     async def test_role_based_tool_permissions(self, authorization_service, test_agents):
         """Test role-based tool access permissions."""
         # Test basic agent permissions
@@ -387,6 +388,7 @@ class TestAgentToolAuthorizationL3:
         assert system_agent.tool_usage_count == 4
         assert system_agent.authorization_failures == 0
         
+    @pytest.mark.asyncio
     async def test_zero_unauthorized_access(self, authorization_service, test_agents):
         """Test that there is zero unauthorized tool access."""
         unauthorized_attempts = []
@@ -417,6 +419,7 @@ class TestAgentToolAuthorizationL3:
         failed_auth_count = len(authorization_service.failed_authorizations)
         assert failed_auth_count == len(test_cases)
         
+    @pytest.mark.asyncio
     async def test_tool_usage_tracking_and_audit(self, authorization_service, test_agents):
         """Test comprehensive tool usage tracking and audit trail."""
         # Perform various tool operations
@@ -443,6 +446,7 @@ class TestAgentToolAuthorizationL3:
             assert usage_stats["total_tool_calls"] > 0
             assert len(usage_stats["tool_usage"]) > 0
             
+    @pytest.mark.asyncio
     async def test_authorization_caching_performance(self, authorization_service, test_agents):
         """Test authorization caching for performance optimization."""
         agent = test_agents["admin"]
@@ -471,6 +475,7 @@ class TestAgentToolAuthorizationL3:
         cache_key = f"{agent.agent_id}:{tool_id}"
         assert cache_key in authorization_service.authorization_cache
         
+    @pytest.mark.asyncio
     async def test_cross_service_authorization_validation(self, authorization_service, test_agents):
         """Test authorization validation across service boundaries."""
         # Simulate cross-service authorization checks
@@ -509,6 +514,7 @@ class TestAgentToolAuthorizationL3:
         assert len(cross_service_logs) >= 5  # 5 successful operations
         
     @mock_justified("L3: Tool authorization testing with real security components")
+    @pytest.mark.asyncio
     async def test_authorization_under_concurrent_load(self, authorization_service, test_agents):
         """Test authorization system under concurrent load."""
         # Create concurrent authorization requests

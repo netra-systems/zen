@@ -18,7 +18,7 @@ from pathlib import Path
 
 import asyncio
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, Request, Response
@@ -37,6 +37,7 @@ logger = central_logger.get_logger(__name__)
 class TestMiddlewareOrdering:
     """Test middleware ordering and execution sequence."""
     
+    @pytest.mark.asyncio
     async def test_middleware_execution_order(self):
         """Test correct middleware execution order."""
         execution_order = []
@@ -46,6 +47,7 @@ class TestMiddlewareOrdering:
                 super().__init__(app)
                 self.name = name
             
+            # Mock: Component isolation for testing without external dependencies
             async def dispatch(self, request: Request, call_next):
                 execution_order.append(f"{self.name}_start")
                 response = await call_next(request)
@@ -58,15 +60,19 @@ class TestMiddlewareOrdering:
         
         async def mock_app(request):
             execution_order.append("app")
+            # Mock: Component isolation for controlled unit testing
             return Mock(spec=Response)
         
         # Test execution order
+        # Mock: Component isolation for controlled unit testing
         await middleware1.dispatch(Mock(spec=Request), 
+                                 # Mock: Component isolation for testing without external dependencies
                                  lambda r: middleware2.dispatch(r, mock_app))
         
         expected_order = ["first_start", "second_start", "app", "second_end", "first_end"]
         assert execution_order == expected_order
     
+    @pytest.mark.asyncio
     async def test_security_before_metrics(self):
         """Test security middleware executes before metrics."""
         security_middleware = self._create_security_middleware()
@@ -76,6 +82,7 @@ class TestMiddlewareOrdering:
         
         async def mock_call_next(request):
             execution_log.append("app")
+            # Mock: Component isolation for controlled unit testing
             return Mock(spec=Response, headers={})
         
         request = self._create_mock_request()
@@ -85,12 +92,14 @@ class TestMiddlewareOrdering:
             sec_mock.side_effect = lambda r: execution_log.append("security")
             
             try:
+                # Mock: Component isolation for testing without external dependencies
                 await security_middleware.dispatch(request, mock_call_next)
             except Exception:
                 pass  # Expected due to mocked dependencies
         
         assert "security" in execution_log
     
+    @pytest.mark.asyncio
     async def test_error_middleware_coordination(self):
         """Test error middleware coordination in chain."""
         middleware = self._create_security_middleware()
@@ -101,8 +110,10 @@ class TestMiddlewareOrdering:
         request = self._create_mock_request()
         
         with pytest.raises(ValueError):
+            # Mock: Component isolation for testing without external dependencies
             await middleware.dispatch(request, failing_call_next)
     
+    @pytest.mark.asyncio
     async def test_middleware_chain_interruption(self):
         """Test middleware chain interruption on errors."""
         middleware = self._create_security_middleware()
@@ -114,6 +125,7 @@ class TestMiddlewareOrdering:
             pytest.fail("This should not execute due to security validation")
         
         with pytest.raises(HTTPException):
+            # Mock: Component isolation for testing without external dependencies
             await middleware.dispatch(request, should_not_execute)
     
     def _create_security_middleware(self) -> SecurityMiddleware:
@@ -122,19 +134,25 @@ class TestMiddlewareOrdering:
     
     def _create_mock_request(self, content_length: int = 1000) -> Mock:
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.headers = {}
+        # Mock: Component isolation for controlled unit testing
         request.headers.get = Mock(return_value=str(content_length))
         request.method = "GET"
+        # Mock: Generic component isolation for controlled unit testing
         request.url = Mock()
+        # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value="http://test.com")
         request.url.path = "/test"
+        # Mock: Async component isolation for testing without real async operations
         request.body = AsyncMock(return_value=b'')
         return request
 
 class TestHookExecutionSequence:
     """Test hook execution sequence and coordination."""
     
+    @pytest.mark.asyncio
     async def test_pre_request_hooks(self):
         """Test pre-request hook execution."""
         middleware = self._create_security_middleware()
@@ -150,9 +168,11 @@ class TestHookExecutionSequence:
             url_mock.assert_called_once()
             header_mock.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_post_request_hooks(self):
         """Test post-request hook execution."""
         middleware = self._create_security_middleware()
+        # Mock: Component isolation for controlled unit testing
         response = Mock(spec=Response)
         response.headers = {}
         
@@ -169,6 +189,7 @@ class TestHookExecutionSequence:
             
             headers_mock.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_error_hooks_execution(self):
         """Test error hook execution in middleware."""
         middleware = self._create_security_middleware()
@@ -181,6 +202,7 @@ class TestHookExecutionSequence:
             
             log_mock.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_hook_dependency_chain(self):
         """Test hook dependency chain execution."""
         middleware = self._create_security_middleware()
@@ -203,12 +225,16 @@ class TestHookExecutionSequence:
     
     def _create_mock_request(self) -> Mock:
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.headers = {}
         request.method = "GET"
+        # Mock: Generic component isolation for controlled unit testing
         request.url = Mock()
+        # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value="http://test.com")
         request.url.path = "/test"
+        # Mock: Async component isolation for testing without real async operations
         request.body = AsyncMock(return_value=b'')
         return request
 
@@ -277,6 +303,7 @@ class TestMetricsMiddlewareIntegration:
         metrics_middleware = AgentMetricsMiddleware()
         
         @metrics_middleware.track_agent_operation()
+        @pytest.mark.asyncio
         async def test_operation():
             return "success"
         
@@ -301,9 +328,11 @@ class TestMetricsMiddlewareIntegration:
         metrics_middleware = AgentMetricsMiddleware()
         
         # Test different operation type detection patterns
+        # Mock: Component isolation for controlled unit testing
         execution_type = metrics_middleware._extract_operation_type(Mock(__name__="execute_task"))
         assert execution_type == "execution"
         
+        # Mock: Component isolation for controlled unit testing
         validation_type = metrics_middleware._extract_operation_type(Mock(__name__="validate_input"))
         assert validation_type == "validation"
     

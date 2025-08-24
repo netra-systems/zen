@@ -358,7 +358,6 @@ def main():
     
     # Add project root to Python path
     if str(root_path) not in sys.path:
-        sys.path.insert(0, str(root_path))
     
     # Initialize analyzer
     analyzer = ImportAnalyzer(root_path)

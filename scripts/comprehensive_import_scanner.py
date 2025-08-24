@@ -758,10 +758,8 @@ def main():
     
     # Initialize scanner
     project_root = Path(__file__).parent.parent
-    scanner = ComprehensiveImportScanner(root_path=project_root)
     
     # Add project root to sys.path
-    sys.path.insert(0, str(project_root))
     
     # Run comprehensive scan
     report = scanner.run_comprehensive_scan()

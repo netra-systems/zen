@@ -11,7 +11,7 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core import ConnectionInfo
+from netra_backend.app.websocket_core.types import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)
 

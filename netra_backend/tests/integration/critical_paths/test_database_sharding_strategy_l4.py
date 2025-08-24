@@ -27,7 +27,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import sqlalchemy as sa
@@ -415,6 +415,7 @@ class DatabaseShardingL4TestSuite:
             "success_rate": successful_insertions / total_insertions if total_insertions > 0 else 0
         }
     
+    @pytest.mark.asyncio
     async def test_cross_shard_query_performance_l4(self) -> Dict[str, Any]:
         """Test cross-shard query performance and correctness."""
         cross_shard_results = {
@@ -488,6 +489,7 @@ class DatabaseShardingL4TestSuite:
         
         return cross_shard_results
     
+    @pytest.mark.asyncio
     async def test_shard_rebalancing_l4(self) -> Dict[str, Any]:
         """Test shard rebalancing operations and efficiency."""
         rebalancing_results = {
@@ -662,6 +664,7 @@ async def database_sharding_l4_suite():
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_data_distribution_across_shards_l4(database_sharding_l4_suite):
     """Test data distribution across multiple database shards."""
     # Generate and distribute test data
@@ -690,6 +693,7 @@ async def test_data_distribution_across_shards_l4(database_sharding_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging  
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_cross_shard_query_operations_l4(database_sharding_l4_suite):
     """Test cross-shard query operations and performance."""
     # First ensure test data exists
@@ -712,6 +716,7 @@ async def test_cross_shard_query_operations_l4(database_sharding_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_shard_rebalancing_operations_l4(database_sharding_l4_suite):
     """Test shard rebalancing operations and data migration."""
     # Generate test data first
@@ -734,6 +739,7 @@ async def test_shard_rebalancing_operations_l4(database_sharding_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_shard_health_monitoring_l4(database_sharding_l4_suite):
     """Test shard health monitoring and failover capabilities."""
     # Test shard health monitoring
@@ -762,6 +768,7 @@ async def test_shard_health_monitoring_l4(database_sharding_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_sharding_performance_under_load_l4(database_sharding_l4_suite):
     """Test sharding performance under realistic load conditions."""
     performance_start = time.time()

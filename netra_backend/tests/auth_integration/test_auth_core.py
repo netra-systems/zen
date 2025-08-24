@@ -24,7 +24,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.auth_integration.auth import (
@@ -52,12 +52,14 @@ class TestAuthenticationCore:
     @pytest.fixture
     def mock_db_session(self):
         """Mock async database session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
         return session
 
     @pytest.fixture
     def mock_user(self):
         """Mock user object"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.id = "user_123"
         user.email = "test@example.com"
@@ -73,6 +75,7 @@ class TestAuthenticationCore:
     ):
         """Test successful user authentication and retrieval"""
         # Arrange - Mock auth client validation
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('app.auth_integration.auth.auth_client') as mock_auth:
             mock_auth.validate_token.return_value = {
                 "valid": True,
@@ -80,6 +83,7 @@ class TestAuthenticationCore:
             }
             
             # Mock database query result
+            # Mock: Generic component isolation for controlled unit testing
             mock_result = Mock()
             mock_result.scalar_one_or_none.return_value = mock_user
             mock_db_session.execute.return_value = mock_result
@@ -99,6 +103,7 @@ class TestAuthenticationCore:
     ):
         """Test authentication failure with invalid token"""
         # Arrange
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('app.auth_integration.auth.auth_client') as mock_auth:
             mock_auth.validate_token.return_value = {"valid": False}
             
@@ -117,6 +122,7 @@ class TestAuthenticationCore:
     ):
         """Test authentication failure when token lacks user_id"""
         # Arrange
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('app.auth_integration.auth.auth_client') as mock_auth:
             mock_auth.validate_token.return_value = {"valid": True}
             
@@ -135,6 +141,7 @@ class TestAuthenticationCore:
     ):
         """Test authentication failure when user not in database"""
         # Arrange
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('app.auth_integration.auth.auth_client') as mock_auth:
             mock_auth.validate_token.return_value = {
                 "valid": True,
@@ -142,6 +149,7 @@ class TestAuthenticationCore:
             }
             
             # Mock database query returning None
+            # Mock: Generic component isolation for controlled unit testing
             mock_result = Mock()
             mock_result.scalar_one_or_none.return_value = None
             mock_db_session.execute.return_value = mock_result
@@ -161,6 +169,7 @@ class TestAuthenticationCore:
     ):
         """Test handling of auth service communication errors"""
         # Arrange
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('app.auth_integration.auth.auth_client') as mock_auth:
             mock_auth.validate_token.side_effect = Exception("Auth service down")
             
@@ -198,9 +207,11 @@ class TestOptionalAuthentication:
             credentials="valid_token"
         )
         
+        # Mock: Component isolation for controlled unit testing
         mock_user = Mock(spec=User)
         mock_user.id = "user_123"
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.auth_integration.auth.get_current_user') as mock_get_user:
             mock_get_user.return_value = mock_user
             
@@ -222,6 +233,7 @@ class TestOptionalAuthentication:
             credentials="invalid_token"
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.auth_integration.auth.get_current_user') as mock_get_user:
             mock_get_user.side_effect = HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -253,6 +265,7 @@ class TestAuthenticationBoundaries:
                 credentials=token
             )
             
+            # Mock: Authentication service isolation for testing without real auth flows
             with patch('app.auth_integration.auth.auth_client') as mock_auth:
                 mock_auth.validate_token.return_value = {"valid": False}
                 
@@ -267,13 +280,16 @@ class TestAuthenticationBoundaries:
     ):
         """Test proper database session context management"""
         # Arrange
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('app.auth_integration.auth.auth_client') as mock_auth:
             mock_auth.validate_token.return_value = {
                 "valid": True,
                 "user_id": "user_123"
             }
             
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_result = Mock()
             mock_result.scalar_one_or_none.return_value = mock_user
             mock_session.execute.return_value = mock_result
@@ -303,12 +319,14 @@ class TestAuthenticationPerformance:
             credentials="concurrent_test_token"
         )
         
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('app.auth_integration.auth.auth_client') as mock_auth:
             mock_auth.validate_token.return_value = {
                 "valid": True,
                 "user_id": "user_123"
             }
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_result = Mock()
             mock_result.scalar_one_or_none.return_value = mock_user
             mock_db_session.execute.return_value = mock_result

@@ -24,8 +24,6 @@ COMPLIANCE:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import os
 from datetime import datetime
@@ -47,7 +45,7 @@ from netra_backend.app.auth_integration.auth import (
 )
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.database import get_db_session
 
 class RealAuthServiceTestFixture:
     """Manages real auth service connections for testing"""
@@ -96,17 +94,17 @@ async def ensure_auth_service():
 @pytest.fixture
 async def real_test_user():
     """Create real test user with token"""
-    return await real_auth_fixture.create_real_dev_user()
+    yield await real_auth_fixture.create_real_dev_user()
 
 @pytest.fixture
 async def real_token(real_test_user):
     """Extract token from real test user"""
-    return real_test_user["access_token"]
+    yield real_test_user["access_token"]
 
 @pytest.fixture
 async def real_credentials(real_token):
     """Create real HTTP credentials"""
-    return HTTPAuthorizationCredentials(
+    yield HTTPAuthorizationCredentials(
         scheme="Bearer",
         credentials=real_token
     )
@@ -121,6 +119,7 @@ async def db_session():
 class TestRealTokenValidation:
     """Real token validation tests (replaces mocked tests)"""
     
+    @pytest.mark.asyncio
     async def test_validate_real_token_success(self, real_token):
         """Test real token validation succeeds"""
         result = await real_auth_fixture.validate_real_token(real_token)
@@ -130,18 +129,21 @@ class TestRealTokenValidation:
         assert "user_id" in result
         assert "email" in result
     
+    @pytest.mark.asyncio
     async def test_validate_invalid_token_fails(self):
         """Test invalid token validation fails"""
         result = await real_auth_fixture.validate_real_token("invalid_token")
         
         assert result is None or result.get("valid") is False
     
+    @pytest.mark.asyncio
     async def test_validate_empty_token_fails(self):
         """Test empty token validation fails"""  
         result = await real_auth_fixture.validate_real_token("")
         
         assert result is None or result.get("valid") is False
     
+    @pytest.mark.asyncio
     async def test_validate_malformed_jwt_fails(self):
         """Test malformed JWT validation fails"""
         result = await real_auth_fixture.validate_real_token("not.a.jwt")
@@ -152,6 +154,7 @@ class TestRealTokenValidation:
 class TestRealUserRetrieval:
     """Real user retrieval tests (replaces mocked database tests)"""
     
+    @pytest.mark.asyncio
     async def test_get_current_user_real_flow(self, real_credentials, db_session):
         """Test complete real user retrieval flow"""
         user = await get_current_user(real_credentials, db_session)
@@ -162,6 +165,7 @@ class TestRealUserRetrieval:
         assert user.id is not None
         assert user.is_active is True
     
+    @pytest.mark.asyncio
     async def test_get_current_user_invalid_token_401(self, db_session):
         """Test user retrieval with invalid token raises 401"""
         invalid_credentials = HTTPAuthorizationCredentials(
@@ -175,6 +179,7 @@ class TestRealUserRetrieval:
         assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
         assert "Invalid or expired token" in str(exc_info.value.detail)
     
+    @pytest.mark.asyncio
     async def test_get_current_user_empty_token_401(self, db_session):
         """Test user retrieval with empty token raises 401"""
         empty_credentials = HTTPAuthorizationCredentials(
@@ -187,6 +192,7 @@ class TestRealUserRetrieval:
         
         assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
     
+    @pytest.mark.asyncio
     async def test_optional_user_with_valid_token(self, real_credentials, db_session):
         """Test optional user retrieval with valid token"""
         user = await get_current_user_optional(real_credentials, db_session)
@@ -195,12 +201,14 @@ class TestRealUserRetrieval:
         assert isinstance(user, User)
         assert user.email is not None
     
+    @pytest.mark.asyncio
     async def test_optional_user_with_no_credentials(self, db_session):
         """Test optional user retrieval with no credentials"""
         user = await get_current_user_optional(None, db_session)
         
         assert user is None
     
+    @pytest.mark.asyncio
     async def test_optional_user_with_invalid_token_returns_none(self, db_session):
         """Test optional auth returns None with invalid token"""
         invalid_credentials = HTTPAuthorizationCredentials(
@@ -216,6 +224,7 @@ class TestRealUserRetrieval:
 class TestRealPermissionValidation:
     """Real permission validation tests (no mocking)"""
     
+    @pytest.mark.asyncio
     async def test_admin_check_with_real_user(self, real_credentials, db_session):
         """Test admin permission check with real user"""
         user = await get_current_user(real_credentials, db_session)
@@ -234,6 +243,7 @@ class TestRealPermissionValidation:
             assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
             assert "Admin access required" in str(exc_info.value.detail)
     
+    @pytest.mark.asyncio
     async def test_developer_check_with_real_user(self, real_credentials, db_session):
         """Test developer permission check with real user"""
         user = await get_current_user(real_credentials, db_session)
@@ -249,6 +259,7 @@ class TestRealPermissionValidation:
             assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
             assert "Developer access required" in str(exc_info.value.detail)
     
+    @pytest.mark.asyncio
     async def test_specific_permission_check(self, real_credentials, db_session):
         """Test specific permission validation with real user"""
         user = await get_current_user(real_credentials, db_session)
@@ -269,6 +280,7 @@ class TestRealPermissionValidation:
 class TestRealDatabaseIntegration:
     """Real database integration validation"""
     
+    @pytest.mark.asyncio
     async def test_user_persists_in_real_database(self, real_test_user, db_session):
         """Test user created by auth service persists in main database"""
         user_id = real_test_user["user"]["id"]
@@ -284,6 +296,7 @@ class TestRealDatabaseIntegration:
         assert db_user.email == real_test_user["user"]["email"]
         assert db_user.is_active is True
     
+    @pytest.mark.asyncio
     async def test_user_auth_flow_database_consistency(self, real_credentials, db_session):
         """Test auth flow maintains database consistency"""
         # Get user through auth flow
@@ -301,6 +314,7 @@ class TestRealDatabaseIntegration:
         assert db_user.email == auth_user.email
         assert db_user.is_active == auth_user.is_active
     
+    @pytest.mark.asyncio
     async def test_multiple_auth_calls_same_user(self, real_credentials, db_session):
         """Test multiple auth calls return consistent user"""
         user1 = await get_current_user(real_credentials, db_session)
@@ -314,6 +328,7 @@ class TestRealDatabaseIntegration:
 class TestRealServiceCommunication:
     """Test real service-to-service communication"""
     
+    @pytest.mark.asyncio
     async def test_auth_client_direct_validation(self, real_token):
         """Test direct auth client token validation"""
         client = AuthServiceClient()
@@ -328,6 +343,7 @@ class TestRealServiceCommunication:
         finally:
             await client.close()
     
+    @pytest.mark.asyncio
     async def test_auth_service_health_check(self):
         """Test auth service health endpoint"""
         async with httpx.AsyncClient() as client:
@@ -337,6 +353,7 @@ class TestRealServiceCommunication:
             health_data = response.json()
             assert health_data.get("status") == "healthy"
     
+    @pytest.mark.asyncio
     async def test_auth_service_config_endpoint(self):
         """Test auth service configuration endpoint"""
         async with httpx.AsyncClient() as client:

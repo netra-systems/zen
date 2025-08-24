@@ -14,7 +14,7 @@ import time
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -30,7 +30,7 @@ class TestDatabaseTransactionIntegrityL4:
     @pytest.fixture
     async def db_infrastructure(self):
         """Database infrastructure setup"""
-        return {
+        yield {
             'db_service': DatabaseService(),
             'tx_manager': TransactionManager(),
             'user_service': UserService(),
@@ -41,6 +41,7 @@ class TestDatabaseTransactionIntegrityL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_concurrent_balance_transfers(self, db_infrastructure):
         """Test concurrent balance transfers maintain consistency"""
         
@@ -112,6 +113,7 @@ class TestDatabaseTransactionIntegrityL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_read_write_isolation_levels(self, db_infrastructure):
         """Test different isolation levels prevent dirty reads"""
         
@@ -175,6 +177,7 @@ class TestDatabaseTransactionIntegrityL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_deadlock_detection_and_recovery(self, db_infrastructure):
         """Test database deadlock detection and automatic recovery"""
         
@@ -227,6 +230,7 @@ class TestDatabaseTransactionIntegrityL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_transaction_savepoints_and_nested_rollback(self, db_infrastructure):
         """Test savepoints and nested transaction rollback"""
         
@@ -272,6 +276,7 @@ class TestDatabaseTransactionIntegrityL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_bulk_insert_atomicity(self, db_infrastructure):
         """Test atomicity of bulk insert operations"""
         
@@ -317,6 +322,7 @@ class TestDatabaseTransactionIntegrityL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_phantom_read_prevention(self, db_infrastructure):
         """Test prevention of phantom reads in concurrent transactions"""
         
@@ -365,6 +371,7 @@ class TestDatabaseTransactionIntegrityL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_connection_pool_exhaustion(self, db_infrastructure):
         """Test behavior when connection pool is exhausted"""
         
@@ -403,6 +410,7 @@ class TestDatabaseTransactionIntegrityL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_cascade_delete_integrity(self, db_infrastructure):
         """Test cascade delete maintains referential integrity"""
         
@@ -452,6 +460,7 @@ class TestDatabaseTransactionIntegrityL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_transaction_timeout_and_cleanup(self, db_infrastructure):
         """Test transaction timeout and proper cleanup"""
         
@@ -492,6 +501,7 @@ class TestDatabaseTransactionIntegrityL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_write_ahead_logging_durability(self, db_infrastructure):
         """Test write-ahead logging ensures durability"""
         

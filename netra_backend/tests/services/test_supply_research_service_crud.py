@@ -6,8 +6,6 @@ Tests supply item creation, updates, and update log operations
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any, Dict, List
@@ -22,6 +20,7 @@ from netra_backend.app.services.supply_research_service import SupplyResearchSer
 @pytest.fixture
 def mock_db_session():
     """Create a mock database session."""
+    # Mock: Generic component isolation for controlled unit testing
     return MagicMock()
 
 @pytest.fixture
@@ -32,6 +31,7 @@ def service(mock_db_session):
 @pytest.fixture
 def sample_supply_item() -> AISupplyItem:
     """Create compact sample AISupplyItem fixture"""
+    # Mock: Service component isolation for predictable testing behavior
     item = MagicMock(spec=AISupplyItem)
     item.id = "supply-item-1"
     item.provider = "openai"
@@ -45,6 +45,7 @@ def sample_supply_item() -> AISupplyItem:
 @pytest.fixture
 def sample_update_log() -> SupplyUpdateLog:
     """Create compact sample SupplyUpdateLog fixture"""
+    # Mock: Service component isolation for predictable testing behavior
     log = MagicMock(spec=SupplyUpdateLog)
     log.id = "log-1"
     log.supply_item_id = "supply-item-1"
@@ -70,8 +71,11 @@ class TestSupplyItemCreate:
         with patch.object(service.db, 'query') as mock_query:
             mock_query.return_value.filter.return_value.first.return_value = None
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.AISupplyItem') as mock_item_class:
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.supply_research_service.SupplyUpdateLog'):
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_item = MagicMock()
                     mock_item.id = "new-item-id"
                     mock_item_class.return_value = mock_item
@@ -96,8 +100,11 @@ class TestSupplyItemCreate:
         with patch.object(service.db, 'query') as mock_query:
             mock_query.return_value.filter.return_value.first.return_value = None
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.AISupplyItem') as mock_item_class:
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.supply_research_service.SupplyUpdateLog'):
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_item = MagicMock()
                     mock_item_class.return_value = mock_item
                     
@@ -145,6 +152,7 @@ class TestSupplyItemUpdate:
         with patch.object(service.db, 'query') as mock_query:
             mock_query.return_value.filter.return_value.first.return_value = sample_supply_item
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.SupplyUpdateLog'):
                 result = service.create_or_update_supply_item("openai", "gpt-4", data)
         
@@ -158,6 +166,7 @@ class TestSupplyItemUpdate:
         with patch.object(service.db, 'query') as mock_query:
             mock_query.return_value.filter.return_value.first.return_value = item
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.SupplyUpdateLog'):
                 result = service.create_or_update_supply_item("openai", "gpt-4", data, "session-1")
         
@@ -220,6 +229,7 @@ class TestUpdateLogOperations:
     
     def test_get_update_logs_with_custom_limit(self, service):
         """Test retrieving logs with custom result limit"""
+        # Mock: Service component isolation for predictable testing behavior
         logs = [MagicMock(spec=SupplyUpdateLog) for _ in range(10)]
         
         with patch.object(service.db, 'query') as mock_query:
@@ -252,7 +262,9 @@ class TestTransactionHandling:
         with patch.object(service.db, 'query') as mock_query:
             mock_query.return_value.filter.return_value.first.return_value = None
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.AISupplyItem'):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.supply_research_service.SupplyUpdateLog'):
                     service.create_or_update_supply_item("openai", "test-model", data)
     

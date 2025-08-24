@@ -8,7 +8,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -36,6 +36,7 @@ class TestAsyncResourceManager:
     
     def test_register_resource_without_callback(self, resource_manager):
         """Test registering resource without cleanup callback"""
+        # Mock: Generic component isolation for controlled unit testing
         resource = Mock()
         resource_manager.register_resource(resource)
         assert resource in resource_manager._resources
@@ -43,7 +44,9 @@ class TestAsyncResourceManager:
     
     def test_register_resource_with_callback(self, resource_manager):
         """Test registering resource with cleanup callback"""
+        # Mock: Generic component isolation for controlled unit testing
         resource = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         callback = AsyncMock()
         resource_manager.register_resource(resource, callback)
         assert resource in resource_manager._resources
@@ -52,10 +55,12 @@ class TestAsyncResourceManager:
     def test_register_resource_during_shutdown(self, resource_manager):
         """Test that resources cannot be registered during shutdown"""
         resource_manager._shutting_down = True
+        # Mock: Generic component isolation for controlled unit testing
         resource = Mock()
         resource_manager.register_resource(resource)
         assert resource not in resource_manager._resources
     
+    @pytest.mark.asyncio
     async def test_cleanup_all(self, resource_manager):
         """Test cleanup of all resources"""
         callback1, callback2, resource1, resource2 = create_mock_resources()
@@ -64,9 +69,12 @@ class TestAsyncResourceManager:
         assert_callbacks_called(callback1, callback2)
         assert_resource_manager_state(resource_manager)
     
+    @pytest.mark.asyncio
     async def test_cleanup_all_idempotent(self, resource_manager):
         """Test that cleanup_all is idempotent"""
+        # Mock: Generic component isolation for controlled unit testing
         callback = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         resource = Mock()
         resource_manager.register_resource(resource, callback)
         await resource_manager.cleanup_all()
@@ -74,11 +82,15 @@ class TestAsyncResourceManager:
         await resource_manager.cleanup_all()
         callback.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_cleanup_handles_exceptions(self, resource_manager):
         """Test that cleanup handles exceptions gracefully"""
         failing_callback = create_failing_callback()
+        # Mock: Generic component isolation for controlled unit testing
         success_callback = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         resource_manager.register_resource(Mock(), failing_callback)
+        # Mock: Generic component isolation for controlled unit testing
         resource_manager.register_resource(Mock(), success_callback)
         await resource_manager.cleanup_all()
         failing_callback.assert_called_once()

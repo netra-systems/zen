@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """
 Base class for staging configuration integration tests.
 
@@ -28,14 +29,14 @@ class StagingConfigTestBase(unittest.TestCase):
     def setUpClass(cls):
         """Set up class-level resources."""
         # Staging-specific configuration from environment
-        cls.project_id = os.getenv('GCP_PROJECT_ID', 'netra-ai-staging')
-        cls.region = os.getenv('GCP_REGION', 'us-central1')
+        cls.project_id = get_env().get('GCP_PROJECT_ID', 'netra-ai-staging')
+        cls.region = get_env().get('GCP_REGION', 'us-central1')
         
         # Use actual staging URLs from environment
-        cls.staging_url = os.getenv('STAGING_URL', 'https://app.staging.netrasystems.ai')
-        cls.staging_api_url = os.getenv('STAGING_API_URL', 'https://api.staging.netrasystems.ai')
-        cls.staging_auth_url = os.getenv('STAGING_AUTH_URL', 'https://auth.staging.netrasystems.ai')
-        cls.staging_frontend_url = os.getenv('STAGING_FRONTEND_URL', 'https://app.staging.netrasystems.ai')
+        cls.staging_url = get_env().get('STAGING_URL', 'https://app.staging.netrasystems.ai')
+        cls.staging_api_url = get_env().get('STAGING_API_URL', 'https://api.staging.netrasystems.ai')
+        cls.staging_auth_url = get_env().get('STAGING_AUTH_URL', 'https://auth.staging.netrasystems.ai')
+        cls.staging_frontend_url = get_env().get('STAGING_FRONTEND_URL', 'https://app.staging.netrasystems.ai')
         
         # Initialize GCP clients if available
         try:
@@ -158,7 +159,7 @@ class StagingConfigTestBase(unittest.TestCase):
     def skip_if_not_staging(self):
         """Skip test if not running against staging environment."""
         # Check staging environment from test settings
-        if os.getenv('ENVIRONMENT') != 'staging':
+        if get_env().get('ENVIRONMENT') != 'staging':
             self.skipTest("Test requires staging environment")
         # Also skip if GCP clients are not available
         if not self.secret_client and not self.sql_client:
@@ -167,7 +168,7 @@ class StagingConfigTestBase(unittest.TestCase):
     def require_gcp_credentials(self):
         """Ensure GCP credentials are available."""
         # Check GCP credentials from environment for staging tests
-        if not os.getenv('GOOGLE_APPLICATION_CREDENTIALS'):
+        if not get_env().get('GOOGLE_APPLICATION_CREDENTIALS'):
             self.skipTest("GOOGLE_APPLICATION_CREDENTIALS not set")
         # Also check if clients are available
         if not self.secret_client and not self.sql_client:

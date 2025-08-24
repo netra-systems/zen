@@ -23,7 +23,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -131,6 +131,7 @@ class TestAgentResponsePipelinePerformance:
         test_users = []
         for i in range(20):
             user_id = str(uuid.uuid4())
+            # Mock: Generic component isolation for controlled unit testing
             user_websocket = Mock()
             user_websocket.state = "connected"
             
@@ -148,7 +149,9 @@ class TestAgentResponsePipelinePerformance:
                     return True
                 return send_json
 
+            # Mock: Async component isolation for testing without real async operations
             user_websocket.send_text = AsyncMock(side_effect=await make_send_text())
+            # Mock: Async component isolation for testing without real async operations
             user_websocket.send_json = AsyncMock(side_effect=await make_send_json())
             user_websocket._messages = user_messages
             

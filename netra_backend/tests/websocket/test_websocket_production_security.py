@@ -12,8 +12,6 @@ Tests production-specific security measures including:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import re
 from unittest.mock import MagicMock, patch
 
@@ -31,6 +29,7 @@ class TestProductionCORSSecurity:
     
     def test_production_environment_detection(self):
         """Test that production environment is correctly detected and configured."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('os.getenv', return_value='production'):
             origins = get_environment_origins()
             
@@ -41,6 +40,7 @@ class TestProductionCORSSecurity:
     
     def test_staging_environment_hybrid_config(self):
         """Test that staging environment allows both staging and dev origins."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('os.getenv', return_value='staging'):
             origins = get_environment_origins()
             
@@ -53,6 +53,7 @@ class TestProductionCORSSecurity:
         """Test that custom origins from environment variables are included."""
         custom_origins = "https://custom1.com,https://custom2.com"
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('os.getenv') as mock_getenv:
             mock_getenv.side_effect = lambda key, default=None: {
                 'ENVIRONMENT': 'production',
@@ -67,7 +68,9 @@ class TestProductionCORSSecurity:
     def test_origin_deduplication(self):
         """Test that duplicate origins are removed while preserving order."""
         # Create scenario with duplicates
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.websocket_cors.PRODUCTION_ORIGINS', ['https://netrasystems.ai', 'https://app.netrasystems.ai']):
+            # Mock: Component isolation for testing without external dependencies
             with patch('os.getenv') as mock_getenv:
                 mock_getenv.side_effect = lambda key, default=None: {
                     'ENVIRONMENT': 'production',

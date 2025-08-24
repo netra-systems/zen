@@ -35,7 +35,6 @@ from auth_service.auth_core.models.auth_models import AuthProvider
 
 # Add auth service to path
 auth_service_dir = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(auth_service_dir))
 from auth_service.main import app
 
 # Test client
@@ -143,6 +142,7 @@ class TestOAuthErrorHandling:
                 # Should redirect to error page or login page
                 assert any(page in location for page in ["error", "login", "denied"])
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient')
     def test_oauth_token_exchange_failure(self, mock_client, oauth_state, oauth_code):
         """
@@ -153,6 +153,7 @@ class TestOAuthErrorHandling:
         - Tests provider service failure scenarios
         - Ensures graceful OAuth failure recovery
         """
+        # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
         
@@ -194,6 +195,7 @@ class TestOAuthErrorHandling:
         
         for scenario in failure_scenarios:
             # Mock failed token exchange
+            # Mock: Generic component isolation for controlled unit testing
             token_response = Mock()
             token_response.status_code = scenario["status_code"]
             token_response.json.return_value = scenario["response"]
@@ -205,6 +207,7 @@ class TestOAuthErrorHandling:
             
             assert response.status_code in scenario["expected_status"]
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient')
     def test_oauth_user_info_failure(self, mock_client, oauth_state, oauth_code):
         """
@@ -215,10 +218,12 @@ class TestOAuthErrorHandling:
         - Tests provider user info service failures
         - Ensures graceful handling of incomplete user data
         """
+        # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
         
         # Mock successful token exchange
+        # Mock: Generic component isolation for controlled unit testing
         token_response = Mock()
         token_response.status_code = 200
         token_response.json.return_value = MOCK_GOOGLE_TOKENS
@@ -260,6 +265,7 @@ class TestOAuthErrorHandling:
         
         for failure in user_info_failures:
             # Mock failed user info fetch
+            # Mock: Generic component isolation for controlled unit testing
             user_response = Mock()
             user_response.status_code = failure["status_code"]
             user_response.json.return_value = failure["response"]
@@ -272,6 +278,7 @@ class TestOAuthErrorHandling:
             # Should handle user info failures gracefully
             assert response.status_code in [401, 400, 422, 500, 502]
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient')
     def test_oauth_network_timeout_handling(self, mock_client, oauth_state, oauth_code):
         """
@@ -282,6 +289,7 @@ class TestOAuthErrorHandling:
         - Tests provider service availability issues
         - Ensures graceful handling of network failures
         """
+        # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
         
@@ -320,6 +328,7 @@ class TestOAuthErrorHandling:
                 mock_async_client.get.side_effect = None
             else:
                 # Mock successful token exchange, failed user info
+                # Mock: Generic component isolation for controlled unit testing
                 token_response = Mock()
                 token_response.status_code = 200
                 token_response.json.return_value = MOCK_GOOGLE_TOKENS
@@ -385,6 +394,7 @@ class TestOAuthErrorHandling:
                 assert "/etc/passwd" not in response_text
                 assert "database" not in response_text
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient')
     def test_oauth_rate_limiting_behavior(self, mock_client, oauth_state, oauth_code):
         """
@@ -395,15 +405,18 @@ class TestOAuthErrorHandling:
         - Tests high-frequency OAuth request handling
         - Ensures OAuth service stability under load
         """
+        # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
         
         # Mock responses
+        # Mock: Generic component isolation for controlled unit testing
         token_response = Mock()
         token_response.status_code = 200
         token_response.json.return_value = MOCK_GOOGLE_TOKENS
         mock_async_client.post.return_value = token_response
         
+        # Mock: Generic component isolation for controlled unit testing
         user_response = Mock()
         user_response.status_code = 200
         user_response.json.return_value = MOCK_USER_INFO

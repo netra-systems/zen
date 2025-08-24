@@ -288,6 +288,7 @@ class ClickHousePartitionManager:
         
         return analysis_result
     
+    @pytest.mark.asyncio
     async def test_partition_pruning_performance(self) -> Dict[str, Any]:
         """Test query performance with partition pruning."""
         performance_result = {
@@ -373,6 +374,7 @@ class ClickHousePartitionManager:
         
         return performance_result
     
+    @pytest.mark.asyncio
     async def test_partition_maintenance_operations(self) -> Dict[str, Any]:
         """Test partition maintenance operations like dropping old partitions."""
         maintenance_result = {
@@ -457,6 +459,7 @@ class ClickHousePartitionManager:
         
         return maintenance_result
     
+    @pytest.mark.asyncio
     async def test_partition_query_optimization(self) -> Dict[str, Any]:
         """Test query optimization across partitions."""
         optimization_result = {
@@ -549,6 +552,7 @@ async def partition_manager():
 class TestDatabasePartitionManagementL3:
     """L3 integration tests for ClickHouse partition management."""
     
+    @pytest.mark.asyncio
     async def test_partition_creation_and_population(self, partition_manager):
         """Test partition creation and data population across time periods."""
         population_result = await partition_manager.populate_test_data_across_partitions(4)
@@ -558,6 +562,7 @@ class TestDatabasePartitionManagementL3:
         assert population_result["total_records_inserted"] > 1000
         assert len(population_result["partitions_created"]) == 4
     
+    @pytest.mark.asyncio
     async def test_partition_structure_analysis(self, partition_manager):
         """Test analysis of partition structure and metadata."""
         # First populate data
@@ -576,6 +581,7 @@ class TestDatabasePartitionManagementL3:
             assert table_info["total_rows"] > 0
             assert table_info["total_size_bytes"] > 0
     
+    @pytest.mark.asyncio
     async def test_partition_pruning_performance(self, partition_manager):
         """Test query performance with partition pruning."""
         # Populate data across partitions
@@ -593,6 +599,7 @@ class TestDatabasePartitionManagementL3:
             if "error" not in metrics:
                 assert metrics["execution_time_seconds"] < 10.0  # Reasonable execution time
     
+    @pytest.mark.asyncio
     async def test_partition_maintenance_operations(self, partition_manager):
         """Test partition maintenance and cleanup operations."""
         # Populate data to create partitions
@@ -607,6 +614,7 @@ class TestDatabasePartitionManagementL3:
         # Should identify old partitions for cleanup
         assert maintenance_result["old_partitions_identified"] >= 0
     
+    @pytest.mark.asyncio
     async def test_partition_query_optimization(self, partition_manager):
         """Test query optimization benefits across partitions."""
         # Populate data for optimization testing

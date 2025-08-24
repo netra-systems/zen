@@ -11,7 +11,7 @@ L2 Test: Real internal message ordering components with mocked external services
 Performance target: <50ms ordering latency, 99.9% ordering accuracy.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -23,13 +23,13 @@ from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 @dataclass
@@ -431,6 +431,7 @@ class TestMessageOrderingGuarantees:
 
         """Create WebSocket manager with mocked external services."""
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.ws_manager.redis_manager') as mock_redis:
 
             mock_redis.enabled = False  # Use in-memory storage
@@ -497,6 +498,7 @@ class TestMessageOrderingGuarantees:
 
         }
     
+    @pytest.mark.asyncio
     async def test_basic_sequence_assignment(self, sequence_manager, test_users):
 
         """Test basic sequence number assignment."""
@@ -535,6 +537,7 @@ class TestMessageOrderingGuarantees:
 
         assert stats["out_of_order_messages"] == 0
     
+    @pytest.mark.asyncio
     async def test_in_order_message_processing(self, sequence_manager, test_users):
 
         """Test processing of in-order messages."""
@@ -585,6 +588,7 @@ class TestMessageOrderingGuarantees:
 
         assert buffer_status["delivered_count"] == 10
     
+    @pytest.mark.asyncio
     async def test_out_of_order_message_handling(self, sequence_manager, test_users):
 
         """Test handling of out-of-order messages."""
@@ -633,6 +637,7 @@ class TestMessageOrderingGuarantees:
 
         assert stats["reordered_messages"] == 4  # Messages 1, 2, 3, 4 were reordered
     
+    @pytest.mark.asyncio
     async def test_gap_handling_with_timeouts(self, sequence_manager, test_users):
 
         """Test handling of message gaps with timeout forcing."""
@@ -703,6 +708,7 @@ class TestMessageOrderingGuarantees:
 
         assert forced_messages[1].sequence_number == 4
     
+    @pytest.mark.asyncio
     async def test_order_enforcer_delivery(self, order_enforcer, test_users):
 
         """Test order enforcer delivery mechanism."""
@@ -771,6 +777,7 @@ class TestMessageOrderingGuarantees:
 
         assert delivered_sequences == list(range(15))
     
+    @pytest.mark.asyncio
     async def test_concurrent_user_ordering(self, sequence_manager, order_enforcer, test_users):
 
         """Test message ordering for multiple concurrent users."""
@@ -844,12 +851,14 @@ class TestMessageOrderingGuarantees:
     
     @mock_justified("L2: Message ordering with real internal components")
 
+    @pytest.mark.asyncio
     async def test_websocket_integration_with_ordering(self, ws_manager, sequence_manager, order_enforcer, test_users):
 
         """Test WebSocket integration with message ordering."""
 
         user = test_users[0]
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Connect user
@@ -919,6 +928,7 @@ class TestMessageOrderingGuarantees:
 
         await ws_manager.disconnect_user(user.id, mock_websocket)
     
+    @pytest.mark.asyncio
     async def test_ordering_performance_benchmarks(self, sequence_manager, order_enforcer, test_users):
 
         """Test message ordering performance benchmarks."""

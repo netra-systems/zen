@@ -10,7 +10,7 @@ Critical Path: Service discovery -> Health checks -> Database readiness -> Agent
 Coverage: Microservice startup orchestration, dependency resolution, graceful degradation
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -20,7 +20,7 @@ import json
 import logging
 import time
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest
@@ -31,7 +31,7 @@ from netra_backend.app.core.database_connection_manager import DatabaseConnectio
 
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 logger = logging.getLogger(__name__)
 
@@ -255,6 +255,7 @@ async def test_dependency_resolution_chain(system_manager):
     
     # Simulate database failure
 
+    # Mock: Component isolation for testing without external dependencies
     with patch('app.services.database.connection_manager.ConnectionManager.initialize', 
 
                side_effect=Exception("Database unavailable")):

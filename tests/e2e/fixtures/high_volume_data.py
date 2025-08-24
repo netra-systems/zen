@@ -147,26 +147,25 @@ class MockAuthenticator:
 async def test_user_token():
     """Create test user and return auth token."""
     if E2E_TEST_CONFIG["test_mode"] == "real":
-        # Use real authentication service
-        try:
-            async with httpx.AsyncClient(follow_redirects=True) as client:
-                response = await client.post(
-                    f"{E2E_TEST_CONFIG['auth_service_url']}/auth/test-user",
-                    json={"email": f"throughput-test-{uuid.uuid4().hex[:8]}@example.com"},
-                    timeout=10.0
-                )
-                if response.status_code == 200:
-                    token_data = response.json()
-                    return {
-                        "user_id": token_data["user_id"],
-                        "token": token_data["token"],
-                        "email": token_data["email"]
-                    }
-        except Exception as e:
-            logger.warning(f"Real auth failed, using mock: {e}")
+        # Use real authentication service - fail if not available
+        async with httpx.AsyncClient(follow_redirects=True) as client:
+            response = await client.post(
+                f"{E2E_TEST_CONFIG['auth_service_url']}/auth/test-user",
+                json={"email": f"throughput-test-{uuid.uuid4().hex[:8]}@example.com"},
+                timeout=10.0
+            )
+            if response.status_code != 200:
+                raise RuntimeError(f"Authentication service returned {response.status_code}")
+            
+            token_data = response.json()
+            return {
+                "user_id": token_data["user_id"],
+                "token": token_data["token"],
+                "email": token_data["email"]
+            }
     
-    # Fallback to mock authentication
-    return MockAuthenticator.create_test_user()
+    # No fallback - authentication service must be available
+    raise RuntimeError("Authentication service not configured for E2E tests")
 
 
 @pytest.fixture

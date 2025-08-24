@@ -514,6 +514,7 @@ async def progress_tracking_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_basic_progress_tracking_l3(progress_tracking_manager):
     """Test basic job progress tracking with real Redis storage."""
     # Enqueue a long-running analysis job
@@ -556,6 +557,7 @@ async def test_basic_progress_tracking_l3(progress_tracking_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_iterative_progress_tracking_l3(progress_tracking_manager):
     """Test progress tracking for iterative optimization jobs."""
     # Enqueue optimization job
@@ -602,6 +604,7 @@ async def test_iterative_progress_tracking_l3(progress_tracking_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_batch_processing_progress_l3(progress_tracking_manager):
     """Test progress tracking for batch processing jobs."""
     # Enqueue data processing job with specific batch count
@@ -648,6 +651,7 @@ async def test_batch_processing_progress_l3(progress_tracking_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_concurrent_progress_tracking_l3(progress_tracking_manager):
     """Test progress tracking for multiple concurrent jobs."""
     # Enqueue multiple different long-running jobs
@@ -703,6 +707,7 @@ async def test_concurrent_progress_tracking_l3(progress_tracking_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_progress_broadcast_functionality_l3(progress_tracking_manager):
     """Test WebSocket progress broadcasting functionality."""
     # Set up progress callback to monitor broadcasts
@@ -760,6 +765,7 @@ async def test_progress_broadcast_functionality_l3(progress_tracking_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_progress_persistence_and_recovery_l3(progress_tracking_manager):
     """Test progress persistence in Redis and recovery capabilities."""
     # Start a job and track initial progress
@@ -806,6 +812,7 @@ async def test_progress_persistence_and_recovery_l3(progress_tracking_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_progress_tracking_under_load_l3(progress_tracking_manager):
     """Test progress tracking performance under high load."""
     # Create multiple concurrent jobs for load testing

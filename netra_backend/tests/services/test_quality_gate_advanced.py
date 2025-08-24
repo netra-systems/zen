@@ -6,10 +6,8 @@ Tests caching, batch processing, statistics, and system behavior
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import hashlib
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -51,6 +49,7 @@ from netra_backend.tests.helpers.quality_gate_helpers import (
 
 class TestQualityGateAdvanced:
     """Test suite for advanced QualityGateService features"""
+    @pytest.mark.asyncio
     async def test_caching_mechanism(self, quality_service):
         """Test that validation results are cached properly"""
         content = "Test content for caching validation"
@@ -110,6 +109,7 @@ class TestQualityGateAdvanced:
         
         adjustments = quality_service.validator.generate_prompt_adjustments(poor_metrics)
         assert_prompt_adjustments_structure(adjustments)
+    @pytest.mark.asyncio
     async def test_store_metrics_in_memory_and_redis(self, quality_service):
         """Test metrics storage in both memory and Redis"""
         metrics = create_test_quality_metrics()
@@ -119,6 +119,7 @@ class TestQualityGateAdvanced:
         assert ContentType.OPTIMIZATION in quality_service.metrics_history
         stored_metric = quality_service.metrics_history[ContentType.OPTIMIZATION][0]
         assert_metrics_storage_structure(stored_metric)
+    @pytest.mark.asyncio
     async def test_get_quality_stats(self, quality_service):
         """Test quality statistics retrieval"""
         metrics_generator = add_multiple_test_metrics(quality_service)
@@ -127,12 +128,14 @@ class TestQualityGateAdvanced:
         
         stats = await quality_service.get_quality_stats(ContentType.OPTIMIZATION)
         assert_quality_stats_structure(stats, 'optimization')
+    @pytest.mark.asyncio
     async def test_validate_batch_processing(self, quality_service):
         """Test batch validation of multiple contents"""
         contents = get_batch_validation_contents()
         results = await quality_service.validate_batch(contents)
         
         assert_batch_validation_results(results, 3)
+    @pytest.mark.asyncio
     async def test_validate_batch_with_context(self, quality_service):
         """Test batch validation with shared context"""
         contents = get_brief_optimization_contents()
@@ -140,6 +143,7 @@ class TestQualityGateAdvanced:
         
         results = await quality_service.validate_batch(contents, context)
         assert_batch_validation_results(results, 2)
+    @pytest.mark.asyncio
     async def test_memory_metrics_limit(self, quality_service):
         """Test that metrics history respects memory limits"""
         metrics_generator = create_memory_overflow_metrics()
@@ -157,11 +161,13 @@ class TestQualityGateAdvanced:
         assert core_calc.generic_pattern.search(test_texts['generic']) != None
         assert core_calc.vague_pattern.search(test_texts['vague']) != None
         assert core_calc.circular_pattern.search(test_texts['circular']) != None
+    @pytest.mark.asyncio
     async def test_redis_manager_error_handling(self, quality_service):
         """Test handling of Redis manager errors"""
         setup_redis_error_mocks(quality_service)
         metrics = create_test_quality_metrics()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.quality_gate.quality_gate_core.logger') as mock_logger:
             await quality_service._store_metrics(metrics, ContentType.GENERAL)
             mock_logger.warning.assert_called()
@@ -170,6 +176,7 @@ class TestQualityGateAdvanced:
         """Test that domain-specific terms are properly recognized"""
         content = setup_domain_content_for_recognition()
         assert_domain_terms_count(content, quality_service)
+    @pytest.mark.asyncio
     async def test_content_type_specific_thresholds(self, quality_service):
         """Test that different content types have appropriate thresholds"""
         borderline_metrics = create_borderline_metrics()

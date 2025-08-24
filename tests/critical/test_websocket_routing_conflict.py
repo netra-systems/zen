@@ -176,10 +176,14 @@ class TestWebSocketRoutingConflict:
         validator = WebSocketValidator(use_emoji=False)
         
         # Mock the actual app's WebSocket behavior
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
             # Simulate connection failure scenario
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws.send = AsyncMock()
+            # Mock: Async component isolation for testing without real async operations
             mock_ws.recv = AsyncMock(side_effect=asyncio.TimeoutError)
             mock_connect.return_value.__aenter__.return_value = mock_ws
             
@@ -429,9 +433,13 @@ class TestExistingTestCoverageGaps:
     async def test_existing_tests_mock_websocket_connections(self):
         """Most existing tests mock WebSocket connections instead of testing real ones."""
         # Example of how existing tests work (they mock everything)
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.accept = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.receive_json = AsyncMock(return_value={"type": "test"})
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
         
         # This passes but doesn't test real WebSocket behavior

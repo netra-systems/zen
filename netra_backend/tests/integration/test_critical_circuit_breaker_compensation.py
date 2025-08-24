@@ -10,7 +10,7 @@ from pathlib import Path
 
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -23,6 +23,7 @@ from netra_backend.tests.integration.test_fixtures_common import (
 class TestCircuitBreakerCompensationIntegration:
     """Circuit breaker and compensation integration tests"""
 
+    @pytest.mark.asyncio
     async def test_circuit_breaker_cascade_with_degradation(self, test_database, mock_infrastructure):
         """Service degradation patterns when dependencies fail"""
         service_chain = await self._create_service_dependency_chain()
@@ -31,6 +32,7 @@ class TestCircuitBreakerCompensationIntegration:
         degraded_responses = await self._verify_graceful_degradation(service_chain)
         await self._test_circuit_recovery_sequence(circuit_breakers, service_chain)
 
+    @pytest.mark.asyncio
     async def test_rate_limiting_with_backpressure_handling(self, test_database, mock_infrastructure):
         """System behavior under load with queuing"""
         rate_limiter = await self._setup_adaptive_rate_limiter()
@@ -38,6 +40,7 @@ class TestCircuitBreakerCompensationIntegration:
         queue_behavior = await self._test_backpressure_queuing(rate_limiter, load_scenario)
         await self._verify_graceful_load_shedding(rate_limiter, queue_behavior)
 
+    @pytest.mark.asyncio
     async def test_compensation_engine_error_flow(self, test_database, mock_infrastructure):
         """Error compensation and retry logic"""
         compensation_engine = await self._setup_compensation_engine()

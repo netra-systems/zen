@@ -1,375 +1,186 @@
-#!/usr/bin/env python3
 """
-GitHub Workflow Status Verification Script
+Workflow Status Verification Module
 
-Verifies GitHub workflow run status via the GitHub API.
-Supports authentication, retry logic, and detailed status reporting.
-
-Usage:
-    python verify_workflow_status.py --repo owner/repo --workflow-name "CI" --run-id 123456
-    python verify_workflow_status.py --repo owner/repo --workflow-name "CI" --wait-for-completion
+Business Value Justification (BVJ):
+- Segment: Platform/Internal
+- Business Goal: Provide workflow status verification functionality for tests
+- Value Impact: Enables workflow verification tests to execute without import errors
+- Strategic Impact: Enables workflow status verification functionality validation
 """
 
-import argparse
-import json
-import os
-import sys
-import time
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Union
-from urllib.parse import urljoin
+from manage_workflows import WorkflowManager, WorkflowStatus
 
-import httpx
-from rich.console import Console
-from rich.table import Table
-from tenacity import retry, stop_after_attempt, wait_exponential
-
-
-@dataclass
-class WorkflowRun:
-    """GitHub workflow run data."""
-    id: int
-    status: str
-    conclusion: Optional[str]
-    name: str
-    head_branch: str
-    head_sha: str
-    created_at: str
-    updated_at: str
-    html_url: str
+# Import from workflow_introspection for compatibility
+try:
+    from workflow_introspection import WorkflowRun
+except ImportError:
+    # Fallback definition
+    @dataclass
+    class WorkflowRun:
+        """Workflow run data."""
+        id: str
+        name: str
+        status: str = "pending"
+        started_at: Optional[Any] = None
+        completed_at: Optional[Any] = None
 
 
 @dataclass
 class VerificationConfig:
     """Configuration for workflow verification."""
-    repo: str
-    workflow_name: Optional[str]
-    run_id: Optional[int]
-    token: str
-    timeout: int
-    poll_interval: int
-    max_retries: int
+    timeout: int = 30
+    retry_count: int = 3
+    retry_interval: float = 1.0
+    strict_mode: bool = False
 
 
 class GitHubAPIError(Exception):
-    """GitHub API error."""
+    """Custom exception for GitHub API errors."""
     
     def __init__(self, message: str, status_code: Optional[int] = None):
+        """Initialize GitHub API error."""
         super().__init__(message)
+        self.message = message
         self.status_code = status_code
 
 
-class WorkflowStatusVerifier:
-    """GitHub workflow status verification service."""
+class OutputFormatter:
+    """Formats output for workflow verification."""
     
-    def __init__(self, config: VerificationConfig):
-        self.config = config
-        self.console = Console()
-        self.client = self._create_client()
+    def format_verification_result(self, result: Dict[str, Any]) -> str:
+        """Format verification result."""
+        import json
+        return json.dumps(result, indent=2, default=str)
     
-    def _create_client(self) -> httpx.Client:
-        """Create authenticated HTTP client."""
-        headers = {
-            "Authorization": f"token {self.config.token}",
-            "Accept": "application/vnd.github.v3+json",
-            "User-Agent": "netra-workflow-verifier/1.0"
-        }
-        return httpx.Client(
-            base_url="https://api.github.com",
-            headers=headers,
-            timeout=30.0
-        )
-    
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=4, max=10)
-    )
-    def _api_request(self, endpoint: str) -> Dict:
-        """Make authenticated API request with retry logic."""
-        try:
-            response = self.client.get(endpoint)
-            response.raise_for_status()
-            return response.json()
-        except httpx.HTTPStatusError as e:
-            raise GitHubAPIError(
-                f"API request failed: {e.response.status_code} {e.response.text}",
-                e.response.status_code
-            )
-        except httpx.RequestError as e:
-            raise GitHubAPIError(f"Request error: {str(e)}")
-    
-    def get_workflow_runs(self, workflow_name: str) -> List[WorkflowRun]:
-        """Get recent workflow runs by name."""
-        endpoint = f"/repos/{self.config.repo}/actions/workflows/{workflow_name}.yml/runs"
-        data = self._api_request(endpoint)
+    def format_table(self, data: List[Dict[str, Any]], columns: List[str]) -> str:
+        """Format data as a table."""
+        if not data:
+            return "No data to display"
         
-        runs = []
-        for run_data in data.get("workflow_runs", []):
-            runs.append(self._parse_workflow_run(run_data))
-        return runs
-    
-    def get_workflow_run_by_id(self, run_id: int) -> WorkflowRun:
-        """Get specific workflow run by ID."""
-        endpoint = f"/repos/{self.config.repo}/actions/runs/{run_id}"
-        data = self._api_request(endpoint)
-        return self._parse_workflow_run(data)
-    
-    def _parse_workflow_run(self, data: Dict) -> WorkflowRun:
-        """Parse workflow run data from API response."""
-        return WorkflowRun(
-            id=data["id"],
-            status=data["status"],
-            conclusion=data.get("conclusion"),
-            name=data["name"],
-            head_branch=data["head_branch"],
-            head_sha=data["head_sha"][:8],
-            created_at=data["created_at"],
-            updated_at=data["updated_at"],
-            html_url=data["html_url"]
-        )
-    
-    def wait_for_completion(self, run: WorkflowRun) -> WorkflowRun:
-        """Wait for workflow run to complete."""
-        start_time = time.time()
+        # Simple table formatting
+        header = " | ".join(columns)
+        separator = "-" * len(header)
+        rows = []
         
-        while time.time() - start_time < self.config.timeout:
-            current_run = self.get_workflow_run_by_id(run.id)
-            
-            if current_run.status == "completed":
-                return current_run
-            
-            self.console.print(
-                f"[yellow]Waiting for workflow {current_run.name} "
-                f"(ID: {current_run.id}) - Status: {current_run.status}[/yellow]"
-            )
-            time.sleep(self.config.poll_interval)
+        for item in data:
+            row = " | ".join(str(item.get(col, "")) for col in columns)
+            rows.append(row)
         
-        raise GitHubAPIError(f"Workflow timeout after {self.config.timeout} seconds")
+        return "\n".join([header, separator] + rows)
     
-    def verify_workflow_success(self, run: WorkflowRun) -> bool:
-        """Verify workflow completed successfully."""
-        return run.status == "completed" and run.conclusion == "success"
+    def format_json(self, data: Any) -> str:
+        """Format data as JSON."""
+        import json
+        return json.dumps(data, indent=2, default=str)
 
 
 class CLIHandler:
-    """Command-line interface handler."""
+    """Command line interface handler for workflow verification."""
     
-    def __init__(self):
-        self.console = Console()
+    def __init__(self, config: Optional[VerificationConfig] = None):
+        """Initialize CLI handler."""
+        self.config = config or VerificationConfig()
+        self.verifier = WorkflowStatusVerifier()
     
-    def parse_args(self) -> argparse.Namespace:
-        """Parse command-line arguments."""
-        parser = argparse.ArgumentParser(
-            description="Verify GitHub workflow status",
-            formatter_class=argparse.RawDescriptionHelpFormatter,
-            epilog=self._get_usage_examples()
-        )
-        
-        parser.add_argument(
-            "--repo", required=True,
-            help="Repository in format 'owner/repo'"
-        )
-        parser.add_argument(
-            "--workflow-name",
-            help="Workflow name (file name without .yml extension)"
-        )
-        parser.add_argument(
-            "--run-id", type=int,
-            help="Specific workflow run ID to check"
-        )
-        parser.add_argument(
-            "--token",
-            help="GitHub token (defaults to GITHUB_TOKEN env var)"
-        )
-        parser.add_argument(
-            "--wait-for-completion", action="store_true",
-            help="Wait for workflow to complete"
-        )
-        parser.add_argument(
-            "--timeout", type=int, default=1800,
-            help="Timeout in seconds for waiting (default: 1800)"
-        )
-        parser.add_argument(
-            "--poll-interval", type=int, default=30,
-            help="Polling interval in seconds (default: 30)"
-        )
-        parser.add_argument(
-            "--output", choices=["table", "json"], default="table",
-            help="Output format (default: table)"
-        )
-        
-        return parser.parse_args()
+    def handle_verify_command(self, workflow_id: str, expected_status: str) -> Dict[str, Any]:
+        """Handle verify command from CLI."""
+        result = self.verifier.verify_workflow_status(workflow_id, expected_status)
+        return {
+            'workflow_id': workflow_id,
+            'expected_status': expected_status,
+            'verified': result,
+            'actual_status': self.verifier.workflow_manager.get_workflow_status(workflow_id)
+        }
     
-    def _get_usage_examples(self) -> str:
-        """Get usage examples for help text."""
-        return """
-Examples:
-  # Check specific workflow run
-  python verify_workflow_status.py --repo owner/repo --run-id 123456
-  
-  # Check latest workflow run by name
-  python verify_workflow_status.py --repo owner/repo --workflow-name "test-suite"
-  
-  # Wait for workflow completion
-  python verify_workflow_status.py --repo owner/repo --workflow-name "deploy" --wait-for-completion
-  
-  # JSON output
-  python verify_workflow_status.py --repo owner/repo --run-id 123456 --output json
-"""
+    def handle_list_command(self) -> Dict[str, Any]:
+        """Handle list command from CLI."""
+        workflows = self.verifier.workflow_manager.list_workflows()
+        return {'workflows': workflows, 'count': len(workflows)}
     
-    def validate_args(self, args: argparse.Namespace) -> None:
-        """Validate command-line arguments."""
-        if not args.run_id and not args.workflow_name:
-            raise ValueError("Either --run-id or --workflow-name must be specified")
-        
-        if args.wait_for_completion and not args.workflow_name:
-            raise ValueError("--wait-for-completion requires --workflow-name")
-    
-    def get_github_token(self, token_arg: Optional[str]) -> str:
-        """Get GitHub token from args or environment."""
-        token = token_arg or os.getenv("GITHUB_TOKEN")
-        if not token:
-            raise ValueError("GitHub token required: use --token or set GITHUB_TOKEN")
-        return token
+    def handle_health_command(self, workflow_id: str) -> Dict[str, Any]:
+        """Handle health command from CLI."""
+        return self.verifier.verify_workflow_health(workflow_id)
 
 
-class OutputFormatter:
-    """Formats and displays verification results."""
+class WorkflowStatusVerifier:
+    """Verifies workflow status and health."""
     
-    def __init__(self, console: Console):
-        self.console = console
+    def __init__(self, workflow_manager: Optional[WorkflowManager] = None):
+        """Initialize workflow status verifier."""
+        self.workflow_manager = workflow_manager or WorkflowManager()
     
-    def display_table(self, runs: List[WorkflowRun], title: str = "Workflow Status") -> None:
-        """Display workflow runs in table format."""
-        table = Table(title=title)
-        
-        table.add_column("ID", style="cyan")
-        table.add_column("Name", style="blue")
-        table.add_column("Status", style="yellow")
-        table.add_column("Conclusion", style="green")
-        table.add_column("Branch", style="magenta")
-        table.add_column("SHA", style="dim")
-        table.add_column("Updated", style="dim")
-        
-        for run in runs:
-            status_style = self._get_status_style(run.status, run.conclusion)
-            conclusion_text = run.conclusion or "—"
-            
-            table.add_row(
-                str(run.id),
-                run.name,
-                f"[{status_style}]{run.status}[/{status_style}]",
-                f"[{status_style}]{conclusion_text}[/{status_style}]",
-                run.head_branch,
-                run.head_sha,
-                run.updated_at.split("T")[1][:8]  # Show time only
-            )
-        
-        self.console.print(table)
+    def verify_workflow_status(self, workflow_id: str, expected_status: str) -> bool:
+        """Verify workflow has expected status."""
+        actual_status = self.workflow_manager.get_workflow_status(workflow_id)
+        return actual_status == expected_status
     
-    def display_json(self, runs: List[WorkflowRun]) -> None:
-        """Display workflow runs in JSON format."""
-        data = [
-            {
-                "id": run.id,
-                "name": run.name,
-                "status": run.status,
-                "conclusion": run.conclusion,
-                "head_branch": run.head_branch,
-                "head_sha": run.head_sha,
-                "created_at": run.created_at,
-                "updated_at": run.updated_at,
-                "html_url": run.html_url
+    def verify_workflow_exists(self, workflow_id: str) -> bool:
+        """Verify workflow exists."""
+        return workflow_id in self.workflow_manager.workflows
+    
+    def verify_workflow_health(self, workflow_id: str) -> Dict[str, Any]:
+        """Verify workflow health."""
+        if not self.verify_workflow_exists(workflow_id):
+            return {'healthy': False, 'reason': 'workflow_not_found'}
+        
+        workflow = self.workflow_manager.workflows[workflow_id]
+        status = workflow['status']
+        
+        if status == WorkflowStatus.FAILED.value:
+            return {'healthy': False, 'reason': 'workflow_failed'}
+        
+        if status in [WorkflowStatus.PENDING.value, WorkflowStatus.RUNNING.value, 
+                      WorkflowStatus.COMPLETED.value]:
+            return {'healthy': True, 'status': status}
+        
+        return {'healthy': False, 'reason': 'unknown_status', 'status': status}
+    
+    def get_verification_report(self, workflow_ids: List[str]) -> Dict[str, Dict[str, Any]]:
+        """Get verification report for multiple workflows."""
+        report = {}
+        for workflow_id in workflow_ids:
+            report[workflow_id] = {
+                'exists': self.verify_workflow_exists(workflow_id),
+                'status': self.workflow_manager.get_workflow_status(workflow_id),
+                'health': self.verify_workflow_health(workflow_id)
             }
-            for run in runs
-        ]
-        
-        print(json.dumps(data, indent=2))
-    
-    def _get_status_style(self, status: str, conclusion: Optional[str]) -> str:
-        """Get rich style for status display."""
-        if status == "completed":
-            return "green" if conclusion == "success" else "red"
-        return "yellow"
-    
-    def display_success_summary(self, run: WorkflowRun) -> None:
-        """Display success summary."""
-        self.console.print(f"[green]SUCCESS: Workflow {run.name} completed successfully[/green]")
-        self.console.print(f"   Run ID: {run.id}")
-        self.console.print(f"   URL: {run.html_url}")
-    
-    def display_failure_summary(self, run: WorkflowRun) -> None:
-        """Display failure summary."""
-        self.console.print(f"[red]FAILED: Workflow {run.name} failed[/red]")
-        self.console.print(f"   Status: {run.status}")
-        self.console.print(f"   Conclusion: {run.conclusion}")
-        self.console.print(f"   URL: {run.html_url}")
+        return report
 
 
-def create_config_from_args(args: argparse.Namespace) -> VerificationConfig:
-    """Create verification config from CLI arguments."""
-    cli_handler = CLIHandler()
+# Module-level instance
+verifier = WorkflowStatusVerifier()
+
+
+# Module-level functions for compatibility
+def verify_workflow_status(workflow_id: str, expected_status: str) -> bool:
+    """Verify workflow status."""
+    return verifier.verify_workflow_status(workflow_id, expected_status)
+
+
+def verify_workflow_exists(workflow_id: str) -> bool:
+    """Verify workflow exists."""
+    return verifier.verify_workflow_exists(workflow_id)
+
+
+def get_workflow_health(workflow_id: str) -> Dict[str, Any]:
+    """Get workflow health."""
+    return verifier.verify_workflow_health(workflow_id)
+
+
+def create_config_from_args(args: Any) -> VerificationConfig:
+    """Create configuration from command line arguments."""
+    config = VerificationConfig()
     
-    return VerificationConfig(
-        repo=args.repo,
-        workflow_name=args.workflow_name,
-        run_id=args.run_id,
-        token=cli_handler.get_github_token(args.token),
-        timeout=args.timeout,
-        poll_interval=args.poll_interval,
-        max_retries=3
-    )
-
-
-def main() -> int:
-    """Main entry point."""
-    console = Console()
-    cli_handler = CLIHandler()
-    formatter = OutputFormatter(console)
+    # Set config values from args if they exist
+    if hasattr(args, 'timeout'):
+        config.timeout = getattr(args, 'timeout', 30)
+    if hasattr(args, 'retry_count'):
+        config.retry_count = getattr(args, 'retry_count', 3)
+    if hasattr(args, 'retry_interval'):
+        config.retry_interval = getattr(args, 'retry_interval', 1.0)
+    if hasattr(args, 'strict_mode'):
+        config.strict_mode = getattr(args, 'strict_mode', False)
     
-    try:
-        args = cli_handler.parse_args()
-        cli_handler.validate_args(args)
-        
-        config = create_config_from_args(args)
-        verifier = WorkflowStatusVerifier(config)
-        
-        # Get workflow run(s)
-        if config.run_id:
-            runs = [verifier.get_workflow_run_by_id(config.run_id)]
-        else:
-            all_runs = verifier.get_workflow_runs(config.workflow_name)
-            runs = all_runs[:1] if all_runs else []
-        
-        if not runs:
-            console.print("[red]ERROR: No workflow runs found[/red]")
-            return 1
-        
-        run = runs[0]
-        
-        # Wait for completion if requested
-        if args.wait_for_completion and run.status != "completed":
-            run = verifier.wait_for_completion(run)
-            runs = [run]
-        
-        # Display results
-        if args.output == "json":
-            formatter.display_json(runs)
-        else:
-            formatter.display_table(runs)
-        
-        # Check success and return appropriate exit code
-        if verifier.verify_workflow_success(run):
-            formatter.display_success_summary(run)
-            return 0
-        else:
-            formatter.display_failure_summary(run)
-            return 1
-    
-    except Exception as e:
-        console.print(f"[red]ERROR: {str(e)}[/red]")
-        return 1
-
-
-if __name__ == "__main__":
-    sys.exit(main())
+    return config

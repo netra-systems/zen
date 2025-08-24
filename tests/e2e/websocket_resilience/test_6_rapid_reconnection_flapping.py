@@ -154,6 +154,7 @@ class RapidReconnectionClient:
             connection_id = f"{self.connection_id}_{time.time()}"
             
             # Mock connection for testing
+            # Mock: Generic component isolation for controlled unit testing
             self.websocket = AsyncMock()
             self.is_connected = True
             

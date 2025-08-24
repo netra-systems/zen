@@ -172,8 +172,11 @@ class TestExecutionContextHashableRegression:
             )
             
             # Mock dependencies
+            # Mock: Generic component isolation for controlled unit testing
             mock_service = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_discovery = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_monitor = Mock()
             
             manager = MCPContextManager(mock_service, mock_discovery, mock_monitor)

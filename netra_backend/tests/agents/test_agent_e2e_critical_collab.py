@@ -11,7 +11,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -131,8 +131,10 @@ class TestAgentE2ECriticalCollaboration(AgentE2ETestBase):
             return await self._track_concurrent_execution(concurrent_executions, execution_lock, s, "OptimizationsCore")
         
         if len(sub_agents) > 1:
+            # Mock: Async component isolation for testing without real async operations
             sub_agents[1].execute = AsyncMock(side_effect=data_execute)
         if len(sub_agents) > 2:
+            # Mock: Async component isolation for testing without real async operations
             sub_agents[2].execute = AsyncMock(side_effect=opt_execute)
 
     async def _execute_parallel_agents(self, agents, state, run_id, stream):

@@ -23,7 +23,7 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import aiohttp
 import pytest
@@ -512,6 +512,7 @@ class ApiCacheManager:
                 "cache_status": "ERROR"
             }
     
+    @pytest.mark.asyncio
     async def test_cache_hit_ratio(self, path: str, request_count: int, 
                                  query_params: Optional[Dict[str, str]] = None,
                                  headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
@@ -542,6 +543,7 @@ class ApiCacheManager:
             "results": results
         }
     
+    @pytest.mark.asyncio
     async def test_cache_performance_improvement(self, path: str, iterations: int) -> Dict[str, Any]:
         """Test performance improvement from caching."""
         # Clear cache first
@@ -662,6 +664,7 @@ async def api_cache_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_time_based_caching(api_cache_manager):
     """Test time-based caching with TTL."""
     path = "/api/v1/users/123"
@@ -684,6 +687,7 @@ async def test_time_based_caching(api_cache_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_user_based_caching(api_cache_manager):
     """Test user-based caching with different users."""
     path = "/api/v1/threads"
@@ -712,6 +716,7 @@ async def test_user_based_caching(api_cache_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_content_based_caching(api_cache_manager):
     """Test content-based caching with different parameters."""
     path = "/api/v1/agents/config"
@@ -736,6 +741,7 @@ async def test_content_based_caching(api_cache_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_no_cache_strategy(api_cache_manager):
     """Test endpoints configured for no caching."""
     path = "/api/v1/websocket/status"
@@ -757,6 +763,7 @@ async def test_no_cache_strategy(api_cache_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_cache_performance_improvement(api_cache_manager):
     """Test performance improvement from caching."""
     path = "/api/v1/metrics"
@@ -776,6 +783,7 @@ async def test_cache_performance_improvement(api_cache_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_cache_invalidation(api_cache_manager):
     """Test cache invalidation on triggers."""
     path = "/api/v1/users/456"
@@ -798,6 +806,7 @@ async def test_cache_invalidation(api_cache_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_cache_ttl_expiration(api_cache_manager):
     """Test cache TTL expiration."""
     # Use metrics endpoint with 60-second TTL
@@ -823,6 +832,7 @@ async def test_cache_ttl_expiration(api_cache_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_concurrent_cache_requests(api_cache_manager):
     """Test concurrent requests to cached endpoints."""
     path = "/api/v1/static/config.json"
@@ -851,6 +861,7 @@ async def test_concurrent_cache_requests(api_cache_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_cache_size_limits(api_cache_manager):
     """Test cache size management."""
     # Get initial cache size
@@ -879,6 +890,7 @@ async def test_cache_size_limits(api_cache_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_cache_metrics_accuracy(api_cache_manager):
     """Test accuracy of cache metrics collection."""
     # Generate test traffic with known patterns
@@ -910,6 +922,7 @@ async def test_cache_metrics_accuracy(api_cache_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_cache_strategy_effectiveness(api_cache_manager):
     """Test effectiveness of different caching strategies."""
     # Test different strategies

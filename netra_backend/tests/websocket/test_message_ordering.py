@@ -6,8 +6,6 @@ Tests message sequencing, protocol version handling, and binary data transmissio
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import hashlib
 import json
@@ -15,7 +13,7 @@ import random
 import struct
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import websockets
@@ -109,6 +107,7 @@ def _verify_per_client_ordering(clients: List[OrderedWebSocket]):
     for client in clients:
         for i, msg in enumerate(client.received_messages):
             assert msg['sequence'] == i, f"Client {client.client_id} has out-of-order messages"
+@pytest.mark.asyncio
 async def test_message_ordering_under_load():
     """Test that messages maintain order even under heavy load"""
     NUM_CLIENTS, MESSAGES_PER_CLIENT = 50, 100
@@ -124,6 +123,7 @@ async def test_message_ordering_under_load():
     out_of_order_count = 0 if router_task.cancelled() else await router_task
     _verify_message_results(clients, NUM_CLIENTS, MESSAGES_PER_CLIENT, out_of_order_count)
     _verify_per_client_ordering(clients)
+@pytest.mark.asyncio
 async def test_binary_data_transmission():
     """Test transmission of binary data through WebSocket"""
     
@@ -136,8 +136,11 @@ async def test_binary_data_transmission():
         ("Mixed text/binary", lambda: b'TEXT:' + bytes([0, 1, 2, 3, 255]) + b':END', 14),
     ]
     
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws.send = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws.recv = AsyncMock()
     
     for description, data_generator, expected_size in test_cases:
@@ -180,6 +183,7 @@ async def test_binary_data_transmission():
     # Verify reconstruction
     reconstructed = b''.join(chunks_sent)
     assert reconstructed == large_data, "Chunked transmission should preserve data"
+@pytest.mark.asyncio
 async def test_protocol_version_mismatch():
     """Test handling of protocol version mismatches"""
     
@@ -191,6 +195,7 @@ async def test_protocol_version_mismatch():
     ]
     
     for name, version, should_succeed in protocol_versions:
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = AsyncMock()
         mock_ws.protocol_version = version
         
@@ -221,7 +226,9 @@ async def test_protocol_version_mismatch():
     
     # Test subprotocol negotiation
     subprotocols = ['chat', 'notifications', 'metrics']
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     mock_ws.subprotocol = AsyncMock(return_value='chat')
     
     selected = await mock_ws.subprotocol()

@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Model cascading for CLQT optimization in NACIS.
 
 Date Created: 2025-01-22
@@ -29,9 +30,9 @@ class ModelCascade:
         """Initialize model tier configurations."""
         # Use NACIS-specific env vars if available, fallback to defaults
         self.model_tiers = {
-            ModelTier.TIER1: os.getenv("NACIS_TIER1_MODEL", "triage_llm"),
-            ModelTier.TIER2: os.getenv("NACIS_TIER2_MODEL", "default_llm"),
-            ModelTier.TIER3: os.getenv("NACIS_TIER3_MODEL", "quality_llm"),
+            ModelTier.TIER1: get_env().get("NACIS_TIER1_MODEL", "triage_llm"),
+            ModelTier.TIER2: get_env().get("NACIS_TIER2_MODEL", "default_llm"),
+            ModelTier.TIER3: get_env().get("NACIS_TIER3_MODEL", "quality_llm"),
         }
     
     def _init_task_mappings(self) -> None:

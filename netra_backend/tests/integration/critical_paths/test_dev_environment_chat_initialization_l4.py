@@ -226,6 +226,7 @@ class ChatInitializationTester:
             self.log_event(email, "WS_CONNECT_ERROR", str(e))
             return False
     
+    @pytest.mark.asyncio
     async def test_basic_thread_creation(self, email: str, thread_case: Dict[str, Any]) -> Dict[str, Any]:
         """Test basic thread creation functionality."""
         result = {
@@ -315,6 +316,7 @@ class ChatInitializationTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_context_loading(self, email: str, thread_id: str, context_requirements: List[str]) -> Dict[str, Any]:
         """Test context loading for a thread."""
         result = {
@@ -393,6 +395,7 @@ class ChatInitializationTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_agent_assignment(self, email: str, thread_id: str, expected_agent_type: str) -> Dict[str, Any]:
         """Test agent assignment to thread."""
         result = {
@@ -451,6 +454,7 @@ class ChatInitializationTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_thread_state_persistence(self, email: str, thread_id: str) -> Dict[str, Any]:
         """Test thread state persistence across reconnections."""
         result = {
@@ -519,6 +523,7 @@ class ChatInitializationTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_concurrent_thread_creation(self, email: str) -> Dict[str, Any]:
         """Test concurrent thread creation for a single user."""
         result = {
@@ -571,6 +576,7 @@ class ChatInitializationTester:
             
         return result
     
+    @pytest.mark.asyncio
     async def test_thread_cleanup(self, email: str) -> Dict[str, Any]:
         """Test thread cleanup and archival."""
         result = {
@@ -754,6 +760,7 @@ class ChatInitializationTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.level_4
+@pytest.mark.asyncio
 async def test_dev_environment_chat_initialization():
     """Test comprehensive chat thread initialization functionality."""
     async with ChatInitializationTester() as tester:

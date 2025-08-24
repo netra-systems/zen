@@ -23,7 +23,7 @@ import os
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import aiohttp
 import jwt
@@ -79,6 +79,7 @@ class TestStagingAuthServiceSync:
         await manager.stop()
 
     @mock_justified("Auth service HTTP calls are external service not available in test environment")
+    @pytest.mark.asyncio
     async def test_auth_service_backend_synchronization(self, auth_manager, test_user_data):
         """Test authentication synchronization between auth service and backend."""
         # Create user token
@@ -99,6 +100,7 @@ class TestStagingAuthServiceSync:
         }
         
         with patch.object(auth_manager, '_session') as mock_session:
+            # Mock: Generic component isolation for controlled unit testing
             mock_response = AsyncMock()
             mock_response.status = 200
             mock_response.json.return_value = auth_service_response
@@ -113,6 +115,7 @@ class TestStagingAuthServiceSync:
             assert auth_context.token_type == AuthTokenType.USER_ACCESS
 
     @mock_justified("Redis cache is external service not available in test environment")
+    @pytest.mark.asyncio
     async def test_session_persistence_across_service_restarts(self, auth_manager, test_user_data):
         """Test session persistence when auth service restarts."""
         # Create user session
@@ -133,6 +136,7 @@ class TestStagingAuthServiceSync:
         assert auth_context2.authenticated is True
         assert auth_context2.user_id == test_user_data["user_id"]
 
+    @pytest.mark.asyncio
     async def test_auth_metrics_collection_staging(self, auth_manager, test_user_data):
         """Test authentication metrics collection in staging environment."""
         # Perform several auth operations

@@ -13,13 +13,11 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -196,7 +194,9 @@ class AgentActivationTestHelper:
 def mock_agent_registry():
     """Fixture providing mock agent registry with test agents."""
     # Create mock dependencies for registry
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock_llm_manager = Mock()
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     mock_tool_dispatcher = Mock()
     
     registry = AgentRegistry(mock_llm_manager, mock_tool_dispatcher)
@@ -209,6 +209,7 @@ def mock_agent_registry():
     registry.register("analysis", analysis_agent)
     registry.register("debug", debug_agent) 
     registry.register("optimization", optimization_agent)
+    # Mock: Generic component isolation for controlled unit testing
     registry.register("triage", Mock())  # Simple mock for triage
     
     return registry, analysis_agent, debug_agent, optimization_agent
@@ -224,17 +225,23 @@ async def supervisor_with_registry(mock_agent_registry):
     registry, analysis_agent, debug_agent, optimization_agent = mock_agent_registry
     
     # Create LLM manager mock for routing decisions
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager = Mock()
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.ask_llm = AsyncMock()
     
     # Create tool dispatcher mock
+    # Mock: Tool execution isolation for predictable agent testing
     tool_dispatcher = Mock()
     
     # Create WebSocket manager mock  
+    # Mock: WebSocket connection isolation for testing without network overhead
     websocket_manager = Mock()
+    # Mock: WebSocket connection isolation for testing without network overhead
     websocket_manager.send_message = AsyncMock()
     
     # Create database session mock
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_db_session = AsyncMock()
     
     supervisor = SupervisorAgent(
@@ -247,12 +254,13 @@ async def supervisor_with_registry(mock_agent_registry):
     # Replace registry with our mock
     supervisor.registry = registry
     
-    return supervisor, registry, analysis_agent, debug_agent, optimization_agent, llm_manager
+    yield supervisor, registry, analysis_agent, debug_agent, optimization_agent, llm_manager
 
 @pytest.mark.asyncio
 class TestAgentActivation:
     """Test agent activation and routing."""
     
+    @pytest.mark.asyncio
     async def test_supervisor_agent_routing(self, supervisor_with_registry, activation_helper):
         """Test supervisor routing decisions.
         
@@ -338,6 +346,7 @@ class TestAgentActivation:
         
         logger.info("✅ Supervisor routing test completed successfully")
     
+    @pytest.mark.asyncio
     async def test_sub_agent_spawning(self, supervisor_with_registry, activation_helper):
         """Test sub-agent creation and execution.
         
@@ -412,6 +421,7 @@ class TestAgentActivation:
         
         logger.info(f"✅ Sub-agent spawning test: {len(agents_to_spawn)} agents in {total_spawn_time:.2f}s")
     
+    @pytest.mark.asyncio
     async def test_agent_response_aggregation(self, supervisor_with_registry, activation_helper):
         """Test response aggregation from multiple agents.
         
@@ -496,6 +506,7 @@ class TestAgentActivation:
         
         logger.info(f"✅ Response aggregation test: {len(agent_responses)} responses aggregated")
     
+    @pytest.mark.asyncio
     async def test_agent_error_handling(self, supervisor_with_registry, activation_helper):
         """Test agent failure scenarios.
         
@@ -591,6 +602,7 @@ class TestAgentActivation:
         
         logger.info(f"✅ Error handling test: {len(error_activations)} errors handled gracefully")
     
+    @pytest.mark.asyncio
     async def test_agent_performance_benchmarks(self, supervisor_with_registry, activation_helper):
         """Test agent performance benchmarks and timing constraints."""
         supervisor, registry, analysis_agent, debug_agent, optimization_agent, llm_manager = supervisor_with_registry

@@ -4,10 +4,11 @@ Standalone microservice for authentication
 """
 import os
 import sys
+import signal
+import asyncio
 from pathlib import Path
 
 # Add parent directory to Python path for auth_service imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import logging
 from contextlib import asynccontextmanager
@@ -33,13 +34,41 @@ else:
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.routes.auth_routes import router as auth_router
+from shared.logging import get_logger, configure_service_logging
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Configure unified logging for auth service
+configure_service_logging({
+    'service_name': 'auth-service',
+    'enable_file_logging': True
+})
+logger = get_logger(__name__)
+
+# Global shutdown event for graceful shutdown
+shutdown_event = asyncio.Event()
+
+# Graceful shutdown handlers
+def signal_handler(signum: int, frame):
+    """Handle shutdown signals gracefully"""
+    signal_name = signal.Signals(signum).name
+    logger.info(f"Received {signal_name} signal, initiating graceful shutdown...")
+    shutdown_event.set()
+
+def setup_signal_handlers():
+    """Setup signal handlers for graceful shutdown"""
+    # Handle SIGTERM (Cloud Run shutdown signal)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
+    # Handle SIGINT (Ctrl+C)
+    signal.signal(signal.SIGINT, signal_handler)
+    
+    # On Windows, also handle SIGBREAK
+    if hasattr(signal, 'SIGBREAK'):
+        signal.signal(signal.SIGBREAK, signal_handler)
+    
+    logger.info("Signal handlers configured for graceful shutdown")
+
+# Setup signal handlers early
+setup_signal_handlers()
 
 # Simplified Health Interface for Auth Service
 class AuthServiceHealthInterface:
@@ -69,7 +98,7 @@ health_interface = AuthServiceHealthInterface("auth-service", "1.0.0")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Manage application lifecycle with optimized startup"""
+    """Manage application lifecycle with optimized startup and graceful shutdown"""
     logger.info("Starting Auth Service...")
     
     # Log configuration
@@ -114,18 +143,61 @@ async def lifespan(app: FastAPI):
     elif initialization_errors and env == "production":
         raise RuntimeError(f"Critical database failures: {initialization_errors}")
     
+    logger.info("Auth Service startup completed")
+    
     yield
     
-    # Cleanup
+    # Graceful shutdown
     logger.info("Shutting down Auth Service...")
     
-    # Close database connection safely
+    # Wait for shutdown signal with timeout to prevent hanging
     try:
-        await auth_db.close()
-    except Exception as e:
-        logger.warning(f"Error closing database: {e}")
+        # Set a timeout for graceful shutdown (Cloud Run gives 10 seconds by default)
+        shutdown_timeout = float(os.getenv("SHUTDOWN_TIMEOUT_SECONDS", "8"))
+        logger.info(f"Waiting up to {shutdown_timeout} seconds for graceful shutdown...")
+        
+        await asyncio.wait_for(shutdown_event.wait(), timeout=shutdown_timeout)
+        logger.info("Shutdown signal received, proceeding with cleanup")
+    except asyncio.TimeoutError:
+        logger.warning("Shutdown timeout exceeded, forcing cleanup")
     
-    logger.info("Database connection closed")
+    # Close connections gracefully
+    tasks = []
+    
+    # Close database connection safely
+    async def close_database():
+        try:
+            await auth_db.close()
+            logger.info("Database connection closed successfully")
+        except Exception as e:
+            logger.warning(f"Error closing database: {e}")
+    
+    tasks.append(close_database())
+    
+    # Close Redis connections if enabled
+    async def close_redis():
+        try:
+            if hasattr(auth_service.session_manager, 'close_redis'):
+                await auth_service.session_manager.close_redis()
+                logger.info("Redis connections closed successfully")
+        except Exception as e:
+            logger.warning(f"Error closing Redis connections: {e}")
+    
+    tasks.append(close_redis())
+    
+    # Execute all cleanup tasks concurrently with timeout
+    if tasks:
+        try:
+            await asyncio.wait_for(
+                asyncio.gather(*tasks, return_exceptions=True),
+                timeout=5.0  # 5 second timeout for cleanup
+            )
+        except asyncio.TimeoutError:
+            logger.warning("Cleanup timeout exceeded, some connections may not have closed gracefully")
+        except Exception as e:
+            logger.error(f"Error during cleanup: {e}")
+    
+    logger.info("Auth Service shutdown completed")
 
 # Create FastAPI app
 app = FastAPI(

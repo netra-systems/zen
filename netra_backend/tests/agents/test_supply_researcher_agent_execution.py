@@ -8,7 +8,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -27,27 +27,38 @@ class TestSupplyResearcherAgentExecution:
     @pytest.fixture
     def mock_db(self):
         """Create mock database session"""
+        # Mock: Generic component isolation for controlled unit testing
         db = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         db.query = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         db.add = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         db.commit = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         db.rollback = AsyncMock()
         return db
     
     @pytest.fixture
     def mock_llm_manager(self):
         """Create mock LLM manager"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm = Mock(spec=LLMManager)
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm.ask_llm = AsyncMock(return_value="Mock LLM response")
         return llm
     
     @pytest.fixture
     def mock_supply_service(self, mock_db):
         """Create mock supply research service"""
+        # Mock: Component isolation for controlled unit testing
         service = Mock(spec=SupplyResearchService)
         service.db = mock_db
+        # Mock: Component isolation for controlled unit testing
         service.get_supply_items = Mock(return_value=[])
+        # Mock: Generic component isolation for controlled unit testing
         service.create_or_update_supply_item = Mock()
+        # Mock: Component isolation for controlled unit testing
         service.validate_supply_data = Mock(return_value=(True, []))
         return service
     
@@ -130,9 +141,13 @@ class TestSupplyResearcherAgentExecution:
     @pytest.mark.asyncio
     async def test_redis_cache_integration(self, agent):
         """Test Redis caching for research results"""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.redis_manager.RedisManager') as mock_redis:
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis_instance = Mock()
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis_instance.set = AsyncMock()
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis_instance.get = AsyncMock(return_value=None)
             mock_redis.return_value = mock_redis_instance
             

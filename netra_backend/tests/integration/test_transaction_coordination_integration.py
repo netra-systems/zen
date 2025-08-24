@@ -122,6 +122,7 @@ def transaction_metrics():
 class TestDistributedTransactionPatterns:
     """Test distributed transaction pattern implementations."""
 
+    @pytest.mark.asyncio
     async def test_two_phase_commit_protocol(self, transaction_metrics):
         """Test two-phase commit (2PC) protocol implementation."""
         transaction_id = str(uuid.uuid4())
@@ -178,6 +179,7 @@ class TestDistributedTransactionPatterns:
         assert all_committed, "2PC commit phase failed"
         assert coordination_duration < 2.0, "2PC coordination too slow"
 
+    @pytest.mark.asyncio
     async def test_saga_pattern_implementation(self, transaction_metrics):
         """Test saga pattern for long-running transactions."""
         saga_id = str(uuid.uuid4())
@@ -239,6 +241,7 @@ class TestDistributedTransactionPatterns:
         assert len(compensated_steps) == 2, "Insufficient compensation actions"
         assert total_saga_duration < 3.0, "Saga execution too slow"
 
+    @pytest.mark.asyncio
     async def test_transaction_isolation_levels(self, transaction_metrics):
         """Test transaction isolation levels and conflict resolution."""
         # Simulate concurrent transactions with different isolation levels
@@ -288,6 +291,7 @@ class TestDistributedTransactionPatterns:
 class TestDeadlockDetectionResolution:
     """Test deadlock detection and resolution mechanisms."""
 
+    @pytest.mark.asyncio
     async def test_deadlock_detection_algorithm(self, transaction_metrics):
         """Test deadlock detection using wait-for graph analysis."""
         # Simulate transactions waiting for resources
@@ -351,6 +355,7 @@ class TestDeadlockDetectionResolution:
         assert deadlock_detected, "Failed to detect deadlock cycle"
         assert detection_time < 0.5, "Deadlock detection too slow"
 
+    @pytest.mark.asyncio
     async def test_deadlock_prevention_strategies(self, transaction_metrics):
         """Test deadlock prevention using resource ordering."""
         # Define resources with consistent ordering
@@ -402,6 +407,7 @@ class TestDeadlockDetectionResolution:
         assert all(result["deadlock_prevented"] for result in acquisition_results), "Deadlock prevention failed"
         assert total_prevention_time < 1.0, "Deadlock prevention too slow"
 
+    @pytest.mark.asyncio
     async def test_timeout_based_deadlock_resolution(self, transaction_metrics):
         """Test timeout-based deadlock resolution."""
         timeout_threshold = 1.0  # 1 second timeout
@@ -444,6 +450,7 @@ class TestDeadlockDetectionResolution:
 class TestCrossServiceTransactionIntegrity:
     """Test transaction integrity across multiple services."""
 
+    @pytest.mark.asyncio
     async def test_cross_service_data_consistency(self, transaction_metrics):
         """Test data consistency across multiple services in a transaction."""
         transaction_id = str(uuid.uuid4())
@@ -525,6 +532,7 @@ class TestCrossServiceTransactionIntegrity:
         assert transaction_duration < 1.0, "Cross-service transaction too slow"
 
     @mock_justified("External payment gateway not available in test environment")
+    @pytest.mark.asyncio
     async def test_distributed_transaction_rollback(self, transaction_metrics):
         """Test distributed transaction rollback across services."""
         transaction_id = str(uuid.uuid4())

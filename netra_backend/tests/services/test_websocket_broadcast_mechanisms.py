@@ -6,8 +6,6 @@ Tests for broadcast mechanisms and subscription management.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from typing import Any, Dict, List
 
@@ -81,6 +79,7 @@ class TestBroadcastMechanisms:
         assert broadcast_manager.should_receive_broadcast('user4', alert_low) == True
         assert broadcast_manager.should_receive_broadcast('user4', update_high) == True
 
+    @pytest.mark.asyncio
     async def test_broadcast_message_delivery(self, broadcast_manager):
         """Test broadcast message delivery."""
         # Subscribe users
@@ -108,6 +107,7 @@ class TestBroadcastMechanisms:
         assert stats['successful_deliveries'] == 2
         assert stats['failed_deliveries'] == 0
 
+    @pytest.mark.asyncio
     async def test_targeted_broadcast(self, broadcast_manager):
         """Test targeted broadcast to specific users."""
         # Subscribe multiple users
@@ -127,6 +127,7 @@ class TestBroadcastMechanisms:
         history_entry = broadcast_manager.broadcast_history[0]
         assert history_entry['target_users'] == target_users
 
+    @pytest.mark.asyncio
     async def test_broadcast_delivery_failure_handling(self, broadcast_manager):
         """Test handling of broadcast delivery failures."""
         # Subscribe users
@@ -156,6 +157,7 @@ class TestBroadcastMechanisms:
         assert stats['successful_deliveries'] == 1
         assert stats['failed_deliveries'] == 1
 
+    @pytest.mark.asyncio
     async def test_high_volume_broadcasting(self, broadcast_manager):
         """Test broadcasting under high volume conditions."""
         # Subscribe many users

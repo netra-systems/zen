@@ -29,7 +29,7 @@ import {
   waitMs,
   measureTime,
   cleanupTest
-} from '../utils';
+} from '../utils/index';
 
 // ============================================================================
 // MOCK SETUP - Service and store mocking

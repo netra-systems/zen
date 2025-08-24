@@ -26,6 +26,7 @@ from netra_backend.app.services.generation_service import run_content_generation
 class TestConcurrentProcessing:
     """Test concurrent generation requests and resource sharing"""
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_concurrent_generation_requests(self):
         """Test multiple concurrent generation jobs"""
         perf_params = ContentGenParams(
@@ -37,6 +38,7 @@ class TestConcurrentProcessing:
         concurrent_jobs = 5
         job_ids = [str(uuid.uuid4()) for _ in range(concurrent_jobs)]
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
             mock_pool.return_value = iter([
                 {'type': 'test', 'data': ('p', 'r')} for _ in range(100)
@@ -57,6 +59,7 @@ class TestConcurrentProcessing:
             assert duration < 300  # Under 5 minutes for 5 concurrent jobs
             assert mock_pool.call_count == concurrent_jobs
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_resource_contention_handling(self):
         """Test handling of resource contention"""
         perf_params = ContentGenParams(
@@ -64,8 +67,11 @@ class TestConcurrentProcessing:
             max_cores=4
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('multiprocessing.cpu_count', return_value=4):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.generation_service.Pool') as mock_pool_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_pool = MagicMock()
                 mock_pool_class.return_value.__enter__.return_value = mock_pool
                 mock_pool.imap_unordered.return_value = iter([
@@ -82,6 +88,7 @@ class TestConcurrentProcessing:
                     initializer=mock_pool_class.call_args[1]['initializer']
                 )
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_thread_pool_efficiency(self):
         """Test thread pool utilization efficiency"""
         thread_pool_size = 10
@@ -109,11 +116,12 @@ class TestConcurrentProcessing:
         assert len(results) == task_count
         assert throughput > 100  # Should process >100 tasks/second
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_load_balancing_efficiency(self):
         """Test load balancing across multiple workers"""
         worker_loads = []
         
-        def mock_worker_with_load_tracking(task):
+        async def mock_worker_with_load_tracking(task):
             """Mock worker that tracks load distribution"""
             worker_id = id(task)  # Simulate worker ID
             worker_loads.append(worker_id)
@@ -124,8 +132,10 @@ class TestConcurrentProcessing:
             max_cores=8
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.generate_content_for_worker', 
                    side_effect=mock_worker_with_load_tracking):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
                 mock_pool.side_effect = lambda tasks, num_proc: [
                     mock_worker_with_load_tracking(task) for task in tasks
@@ -138,6 +148,7 @@ class TestConcurrentProcessing:
         unique_workers = len(set(worker_loads))
         assert unique_workers >= min(8, len(worker_loads))
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_queue_management_under_load(self):
         """Test queue management under high load"""
         queue_sizes = []

@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Environment Constants Module
 
 Single source of truth for all environment-related constants and utilities.
@@ -138,11 +139,11 @@ class EnvironmentDetector:
         """
         # BOOTSTRAP ONLY: Direct env access required for initial config loading
         # Check for testing environment first (highest priority)
-        if bool(os.environ.get(EnvironmentVariables.TESTING)) or bool(os.environ.get(EnvironmentVariables.PYTEST_CURRENT_TEST)):
+        if bool(get_env().get(EnvironmentVariables.TESTING)) or bool(get_env().get(EnvironmentVariables.PYTEST_CURRENT_TEST)):
             return Environment.TESTING.value
         
         # Check explicit environment variable second
-        env_var = os.environ.get(EnvironmentVariables.ENVIRONMENT, "").strip().lower()
+        env_var = get_env().get(EnvironmentVariables.ENVIRONMENT, "").strip().lower()
         if Environment.is_valid(env_var):
             return env_var
             
@@ -165,13 +166,13 @@ class EnvironmentDetector:
         """
         # BOOTSTRAP ONLY: Direct env access for testing detection
         # If ENVIRONMENT is explicitly set to something other than testing, respect that
-        explicit_env = os.environ.get(EnvironmentVariables.ENVIRONMENT, "").lower()
+        explicit_env = get_env().get(EnvironmentVariables.ENVIRONMENT, "").lower()
         if explicit_env and explicit_env != Environment.TESTING.value:
             return False
             
         return (
-            bool(os.environ.get(EnvironmentVariables.TESTING)) or 
-            bool(os.environ.get(EnvironmentVariables.PYTEST_CURRENT_TEST))
+            bool(get_env().get(EnvironmentVariables.TESTING)) or 
+            bool(get_env().get(EnvironmentVariables.PYTEST_CURRENT_TEST))
         )
     
     @staticmethod
@@ -206,7 +207,7 @@ class EnvironmentDetector:
         NOTE: Bootstrap method requiring direct environment access.
         """
         # BOOTSTRAP ONLY: Direct env access for cloud platform detection
-        return bool(os.environ.get(EnvironmentVariables.K_SERVICE))
+        return bool(get_env().get(EnvironmentVariables.K_SERVICE))
     
     @staticmethod
     def get_cloud_run_environment() -> str:
@@ -215,14 +216,14 @@ class EnvironmentDetector:
         NOTE: Bootstrap method requiring direct environment access.
         """
         # BOOTSTRAP ONLY: Direct env access for cloud environment detection
-        service_name = os.environ.get(EnvironmentVariables.K_SERVICE, "")
+        service_name = get_env().get(EnvironmentVariables.K_SERVICE, "")
         if "prod" in service_name.lower():
             return Environment.PRODUCTION.value
         elif "staging" in service_name.lower():
             return Environment.STAGING.value
         
         # Check for PR-based staging
-        if os.environ.get(EnvironmentVariables.PR_NUMBER):
+        if get_env().get(EnvironmentVariables.PR_NUMBER):
             return Environment.STAGING.value
             
         return Environment.DEVELOPMENT.value
@@ -234,7 +235,7 @@ class EnvironmentDetector:
         NOTE: Bootstrap method requiring direct environment access.
         """
         # BOOTSTRAP ONLY: Direct env access for App Engine detection
-        return bool(os.environ.get(EnvironmentVariables.GAE_ENV))
+        return bool(get_env().get(EnvironmentVariables.GAE_ENV))
     
     @staticmethod
     def get_app_engine_environment() -> str:
@@ -243,9 +244,9 @@ class EnvironmentDetector:
         NOTE: Bootstrap method requiring direct environment access.
         """
         # BOOTSTRAP ONLY: Direct env access for App Engine environment detection
-        gae_env = os.environ.get(EnvironmentVariables.GAE_ENV, "")
-        gae_app = os.environ.get(EnvironmentVariables.GAE_APPLICATION, "")
-        gae_version = os.environ.get(EnvironmentVariables.GAE_VERSION, "")
+        gae_env = get_env().get(EnvironmentVariables.GAE_ENV, "")
+        gae_app = get_env().get(EnvironmentVariables.GAE_APPLICATION, "")
+        gae_version = get_env().get(EnvironmentVariables.GAE_VERSION, "")
         
         if "staging" in gae_app.lower() or "staging" in gae_version.lower():
             return Environment.STAGING.value
@@ -262,8 +263,8 @@ class EnvironmentDetector:
         """
         # BOOTSTRAP ONLY: Direct env access for AWS detection
         return (
-            bool(os.environ.get(EnvironmentVariables.AWS_EXECUTION_ENV)) or 
-            bool(os.environ.get(EnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME))
+            bool(get_env().get(EnvironmentVariables.AWS_EXECUTION_ENV)) or 
+            bool(get_env().get(EnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME))
         )
     
     @staticmethod
@@ -274,12 +275,12 @@ class EnvironmentDetector:
         """
         # BOOTSTRAP ONLY: Direct env access for AWS environment detection
         # Check for explicit AWS environment tag
-        aws_env = os.environ.get(EnvironmentVariables.AWS_ENVIRONMENT, "").lower()
+        aws_env = get_env().get(EnvironmentVariables.AWS_ENVIRONMENT, "").lower()
         if Environment.is_valid(aws_env):
             return aws_env
         
         # Check Lambda function name for hints
-        function_name = os.environ.get(EnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME, "")
+        function_name = get_env().get(EnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME, "")
         if "prod" in function_name.lower():
             return Environment.PRODUCTION.value
         elif "staging" in function_name.lower():
@@ -294,7 +295,7 @@ class EnvironmentDetector:
         NOTE: Bootstrap method requiring direct environment access.
         """
         # BOOTSTRAP ONLY: Direct env access for Kubernetes detection
-        return bool(os.environ.get(EnvironmentVariables.KUBERNETES_SERVICE_HOST))
+        return bool(get_env().get(EnvironmentVariables.KUBERNETES_SERVICE_HOST))
     
     # APPLICATION-FRIENDLY METHODS (Unified Config Aware)
     
@@ -505,7 +506,7 @@ def get_current_project_id() -> str:
     
     # BOOTSTRAP ONLY: Direct env access for project ID detection
     # Check for explicit override first
-    explicit_project_id = os.environ.get(EnvironmentVariables.GOOGLE_CLOUD_PROJECT)
+    explicit_project_id = get_env().get(EnvironmentVariables.GOOGLE_CLOUD_PROJECT)
     if explicit_project_id:
         return explicit_project_id
     

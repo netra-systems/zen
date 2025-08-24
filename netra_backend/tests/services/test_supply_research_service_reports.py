@@ -6,8 +6,6 @@ Tests comprehensive market report generation with all sections
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import UTC, datetime
 from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
@@ -25,6 +23,7 @@ def service(db_session):
 class TestMarketReportGeneration:
     """Test comprehensive market report generation"""
     
+    @pytest.mark.asyncio
     async def test_generate_complete_market_report(self, service):
         """Test full market report generation with all sections"""
         report_deps = self._create_report_dependencies()
@@ -37,6 +36,7 @@ class TestMarketReportGeneration:
         
         self._verify_report_structure(report)
     
+    @pytest.mark.asyncio
     async def test_generate_report_with_long_query_truncation(self, service):
         """Test report generation with query truncation"""
         long_session = self._create_long_query_session()
@@ -48,6 +48,7 @@ class TestMarketReportGeneration:
         assert len(recent_research[0]["query"]) <= 103  # 100 + "..."
         assert recent_research[0]["query"].endswith("...")
     
+    @pytest.mark.asyncio
     async def test_generate_report_empty_data(self, service):
         """Test report generation with no data"""
         with self._patch_empty_dependencies(service):
@@ -55,6 +56,7 @@ class TestMarketReportGeneration:
         
         self._verify_empty_report_structure(report)
     
+    @pytest.mark.asyncio
     async def test_generate_report_with_anomalies(self, service):
         """Test report generation including anomalies section"""
         anomalies = self._create_sample_anomalies()
@@ -65,6 +67,7 @@ class TestMarketReportGeneration:
         assert "anomalies" in report["sections"]
         assert len(report["sections"]["anomalies"]) == 2
     
+    @pytest.mark.asyncio
     async def test_generate_report_statistics_section(self, service):
         """Test that statistics section is properly populated"""
         with self._patch_statistics_dependencies(service):
@@ -91,6 +94,7 @@ class TestMarketReportGeneration:
     
     def _create_research_session(self) -> ResearchSession:
         """Helper to create research session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         research_session = MagicMock(spec=ResearchSession)
         research_session.id = "session-1"
         research_session.query = "Research pricing updates"
@@ -101,6 +105,7 @@ class TestMarketReportGeneration:
     def _create_long_query_session(self) -> ResearchSession:
         """Helper to create session with long query"""
         long_query = "A" * 150  # Query longer than 100 characters
+        # Mock: Database session isolation for transaction testing without real database dependency
         research_session = MagicMock(spec=ResearchSession)
         research_session.id = "session-1"
         research_session.query = long_query
@@ -133,6 +138,7 @@ class TestMarketReportGeneration:
             calculate_price_changes=lambda: deps["price_changes"],
             detect_anomalies=lambda: deps["anomalies"],
             get_research_sessions=lambda **kwargs: [deps["research_session"]],
+            # Mock: Generic component isolation for controlled unit testing
             get_supply_items=lambda **kwargs: [MagicMock()]
         )
     
@@ -172,6 +178,7 @@ class TestMarketReportGeneration:
     def _patch_statistics_dependencies(self, service):
         """Helper to patch dependencies for statistics testing"""
         def mock_query_count():
+            # Mock: Generic component isolation for controlled unit testing
             mock_q = MagicMock()
             mock_q.filter.return_value.count.return_value = 25  # Available models
             mock_q.count.return_value = 50  # Total models
@@ -258,11 +265,13 @@ class TestReportSectionsIndividually:
     
     def _create_recent_sessions(self) -> List[ResearchSession]:
         """Helper to create recent research sessions"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session1 = MagicMock(spec=ResearchSession)
         session1.id = "session-1"
         session1.query = "Research OpenAI pricing"
         session1.status = "completed"
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         session2 = MagicMock(spec=ResearchSession)
         session2.id = "session-2"
         session2.query = "Research Claude pricing"

@@ -105,6 +105,7 @@ class MemoryPressureEvictionL3Manager:
             logger.error(f"Failed to setup Redis for memory pressure testing: {e}")
             return False
     
+    @pytest.mark.asyncio
     async def test_memory_pressure_simulation(self, data_size_mb: int) -> Dict[str, Any]:
         """Simulate memory pressure by filling cache beyond limit."""
         client = self.redis_client
@@ -200,6 +201,7 @@ class MemoryPressureEvictionL3Manager:
         
         return memory_stats
     
+    @pytest.mark.asyncio
     async def test_lru_eviction_accuracy(self) -> Dict[str, Any]:
         """Test LRU eviction policy accuracy."""
         client = self.redis_client
@@ -273,6 +275,7 @@ class MemoryPressureEvictionL3Manager:
             "pressure_keys_written": len(pressure_keys)
         }
     
+    @pytest.mark.asyncio
     async def test_cache_efficiency_under_pressure(self) -> Dict[str, Any]:
         """Test cache efficiency maintenance under memory pressure."""
         client = self.redis_client
@@ -345,6 +348,7 @@ class MemoryPressureEvictionL3Manager:
             "original_keys_surviving": pressure_hits
         }
     
+    @pytest.mark.asyncio
     async def test_memory_recovery_patterns(self) -> Dict[str, Any]:
         """Test memory recovery patterns after pressure relief."""
         client = self.redis_client
@@ -411,6 +415,7 @@ class MemoryPressureEvictionL3Manager:
         
         return recovery_stats
     
+    @pytest.mark.asyncio
     async def test_concurrent_eviction_performance(self) -> Dict[str, Any]:
         """Test eviction performance under concurrent operations."""
         client = self.redis_client
@@ -536,6 +541,7 @@ async def memory_pressure_manager(isolated_redis_client):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_memory_pressure_eviction_simulation(memory_pressure_manager):
     """L3: Test memory pressure simulation and eviction behavior with real Redis."""
     result = await memory_pressure_manager.test_memory_pressure_simulation(10)  # 10MB of data
@@ -552,6 +558,7 @@ async def test_memory_pressure_eviction_simulation(memory_pressure_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_lru_eviction_policy_accuracy(memory_pressure_manager):
     """L3: Test LRU eviction policy accuracy with real Redis memory limits."""
     result = await memory_pressure_manager.test_lru_eviction_accuracy()
@@ -566,6 +573,7 @@ async def test_lru_eviction_policy_accuracy(memory_pressure_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cache_efficiency_under_memory_pressure(memory_pressure_manager):
     """L3: Test cache efficiency maintenance under memory pressure."""
     result = await memory_pressure_manager.test_cache_efficiency_under_pressure()
@@ -580,6 +588,7 @@ async def test_cache_efficiency_under_memory_pressure(memory_pressure_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_memory_recovery_after_pressure_relief(memory_pressure_manager):
     """L3: Test memory recovery patterns after pressure relief."""
     result = await memory_pressure_manager.test_memory_recovery_patterns()
@@ -596,6 +605,7 @@ async def test_memory_recovery_after_pressure_relief(memory_pressure_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_concurrent_eviction_performance(memory_pressure_manager):
     """L3: Test eviction performance under concurrent memory pressure."""
     result = await memory_pressure_manager.test_concurrent_eviction_performance()
@@ -610,6 +620,7 @@ async def test_concurrent_eviction_performance(memory_pressure_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_memory_pressure_sla_compliance(memory_pressure_manager):
     """L3: Test comprehensive memory pressure and eviction SLA compliance."""
     # Execute comprehensive test suite

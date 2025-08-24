@@ -6,13 +6,14 @@ Modular design enables targeted validation of specific service aspects.
 """
 
 import asyncio
-import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel, Field
+
+from netra_backend.app.core.unified_logging import get_logger
 
 
 class ValidationSeverity(str, Enum):
@@ -89,7 +90,7 @@ class BaseValidator(ABC):
     def __init__(self, name: str, config: Optional[Dict[str, Any]] = None):
         self.name = name
         self.config = config or {}
-        self.logger = logging.getLogger(f"validator.{name}")
+        self.logger = get_logger(f"validator.{name}")
     
     @abstractmethod
     async def validate(self, context: Dict[str, Any]) -> List[ValidationResult]:
@@ -158,7 +159,7 @@ class CrossServiceValidatorFramework:
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or {}
         self.registry = ValidatorRegistry()
-        self.logger = logging.getLogger("cross_service_validator")
+        self.logger = get_logger("cross_service_validator")
     
     async def run_validation(
         self,

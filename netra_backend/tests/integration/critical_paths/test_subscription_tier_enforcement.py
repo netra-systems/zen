@@ -154,6 +154,7 @@ class SubscriptionTierEnforcementL3Manager:
             logger.error(f"Failed to create test user {user_id}: {e}")
             raise
     
+    @pytest.mark.asyncio
     async def test_free_tier_monthly_limit_enforcement(self, user_id: str) -> Dict[str, Any]:
         """Test free tier monthly request limit (100 requests/month)."""
         start_time = time.time()
@@ -237,6 +238,7 @@ class SubscriptionTierEnforcementL3Manager:
                 "test_duration": time.time() - start_time
             }
     
+    @pytest.mark.asyncio
     async def test_mid_tier_concurrent_limit_enforcement(self, user_id: str) -> Dict[str, Any]:
         """Test mid tier concurrent request limit (20 concurrent)."""
         start_time = time.time()
@@ -312,6 +314,7 @@ class SubscriptionTierEnforcementL3Manager:
         except Exception as e:
             return {"allowed": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_enterprise_unlimited_access(self, user_id: str) -> Dict[str, Any]:
         """Test enterprise tier unlimited access."""
         start_time = time.time()
@@ -356,6 +359,7 @@ class SubscriptionTierEnforcementL3Manager:
                 "test_duration": time.time() - start_time
             }
     
+    @pytest.mark.asyncio
     async def test_tier_downgrade_enforcement(self, user_id: str, 
                                             from_tier: PlanTier, to_tier: PlanTier) -> Dict[str, Any]:
         """Test tier downgrade enforcement and immediate limit application."""
@@ -424,6 +428,7 @@ class SubscriptionTierEnforcementL3Manager:
                 "test_duration": time.time() - start_time
             }
     
+    @pytest.mark.asyncio
     async def test_cross_service_tier_validation(self, user_id: str, tier: PlanTier) -> Dict[str, Any]:
         """Test tier validation across multiple services."""
         start_time = time.time()
@@ -487,6 +492,7 @@ class SubscriptionTierEnforcementL3Manager:
                 "error": str(e)
             }
     
+    @pytest.mark.asyncio
     async def test_billing_event_generation(self, user_id: str, tier: PlanTier) -> Dict[str, Any]:
         """Test billing event generation accuracy."""
         start_time = time.time()
@@ -617,6 +623,7 @@ async def tier_enforcement_l3():
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_free_tier_monthly_limit_enforcement(tier_enforcement_l3):
     """Test free tier monthly request limit enforcement."""
     # Create free tier user
@@ -634,6 +641,7 @@ async def test_free_tier_monthly_limit_enforcement(tier_enforcement_l3):
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_mid_tier_concurrent_limit_enforcement(tier_enforcement_l3):
     """Test mid tier concurrent request limit enforcement."""
     # Create mid tier user (using PRO as mid tier)
@@ -650,6 +658,7 @@ async def test_mid_tier_concurrent_limit_enforcement(tier_enforcement_l3):
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_enterprise_unlimited_access_verification(tier_enforcement_l3):
     """Test enterprise tier unlimited access."""
     # Create enterprise tier user
@@ -665,6 +674,7 @@ async def test_enterprise_unlimited_access_verification(tier_enforcement_l3):
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_tier_downgrade_immediate_enforcement(tier_enforcement_l3):
     """Test immediate enforcement after tier downgrade."""
     # Create enterprise user
@@ -682,6 +692,7 @@ async def test_tier_downgrade_immediate_enforcement(tier_enforcement_l3):
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_cross_service_tier_validation_consistency(tier_enforcement_l3):
     """Test tier validation consistency across all services."""
     # Test each tier across services
@@ -701,6 +712,7 @@ async def test_cross_service_tier_validation_consistency(tier_enforcement_l3):
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_billing_event_generation_accuracy(tier_enforcement_l3):
     """Test billing event generation accuracy for all tiers."""
     billing_results = {}
@@ -720,6 +732,7 @@ async def test_billing_event_generation_accuracy(tier_enforcement_l3):
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_comprehensive_tier_enforcement_metrics(tier_enforcement_l3):
     """Test comprehensive tier enforcement system metrics."""
     # Create users for each tier and run multiple tests

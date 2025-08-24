@@ -32,7 +32,7 @@ from testcontainers.clickhouse import ClickHouseContainer
 from testcontainers.postgres import PostgresContainer
 
 # import asyncio_clickhouse  # Module not available
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.logging_config import central_logger
@@ -176,6 +176,7 @@ class CrossDatabaseConsistencyManager:
             ORDER BY sync_timestamp
         """)
     
+    @pytest.mark.asyncio
     async def test_atomic_cross_database_operation(self, user_id: str, event_data: Dict[str, Any]) -> Dict[str, Any]:
         """Test atomic operation across both databases."""
         operation_result = {
@@ -273,6 +274,7 @@ class CrossDatabaseConsistencyManager:
         
         return operation_result
     
+    @pytest.mark.asyncio
     async def test_eventual_consistency_sync(self, batch_size: int = 100) -> Dict[str, Any]:
         """Test eventual consistency synchronization between databases."""
         sync_result = {
@@ -394,6 +396,7 @@ class CrossDatabaseConsistencyManager:
         
         return sync_result
     
+    @pytest.mark.asyncio
     async def test_rollback_consistency(self) -> Dict[str, Any]:
         """Test rollback scenarios for consistency maintenance."""
         rollback_result = {
@@ -513,6 +516,7 @@ async def cross_db_manager():
 class TestCrossDatabaseTransactionConsistencyL3:
     """L3 integration tests for cross-database transaction consistency."""
     
+    @pytest.mark.asyncio
     async def test_atomic_cross_database_operations(self, cross_db_manager):
         """Test atomic operations that span PostgreSQL and ClickHouse."""
         user_id = "atomic_test_user"
@@ -529,6 +533,7 @@ class TestCrossDatabaseTransactionConsistencyL3:
         if result["rollback_required"]:
             assert result["consistency_maintained"] is False
     
+    @pytest.mark.asyncio
     async def test_eventual_consistency_synchronization(self, cross_db_manager):
         """Test eventual consistency synchronization between databases."""
         result = await cross_db_manager.test_eventual_consistency_sync(50)
@@ -542,6 +547,7 @@ class TestCrossDatabaseTransactionConsistencyL3:
         assert result["sync_metrics"]["records_per_second"] > 100  # Minimum sync performance
         assert result["sync_metrics"]["sync_duration_seconds"] < 5  # Max sync time
     
+    @pytest.mark.asyncio
     async def test_rollback_consistency_scenarios(self, cross_db_manager):
         """Test various rollback scenarios maintain data integrity."""
         result = await cross_db_manager.test_rollback_consistency()
@@ -550,6 +556,7 @@ class TestCrossDatabaseTransactionConsistencyL3:
         assert result["successful_rollbacks"] == result["rollback_scenarios_tested"]
         assert result["data_integrity_maintained"] is True
     
+    @pytest.mark.asyncio
     async def test_concurrent_cross_database_operations(self, cross_db_manager):
         """Test concurrent operations across both databases."""
         concurrent_operations = 10
@@ -573,6 +580,7 @@ class TestCrossDatabaseTransactionConsistencyL3:
         success_rate = successful_operations / concurrent_operations
         assert success_rate >= 0.8  # At least 80% success rate
     
+    @pytest.mark.asyncio
     async def test_data_consistency_verification(self, cross_db_manager):
         """Test comprehensive data consistency verification."""
         # Create test data

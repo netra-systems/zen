@@ -195,10 +195,12 @@ class IngestionEvent(BaseModel):
 
 class DataSample(BaseModel):
     """Sample of ingested data"""
+    model_config = ConfigDict(populate_by_name=True)
+    
     job_id: str
     sample_size: int
     data: List[Dict[str, Any]]
-    schema: Dict[str, str]  # Field name to type mapping
+    data_schema: Dict[str, str] = Field(alias="schema")  # Field name to type mapping
     statistics: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -217,12 +219,14 @@ class IngestionError(BaseModel):
 
 class DataCatalog(BaseModel):
     """Data catalog entry"""
+    model_config = ConfigDict(populate_by_name=True)
+    
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     description: Optional[str] = None
     source: DataSource
     format: DataFormat
-    schema: Dict[str, Any]
+    data_schema: Dict[str, Any] = Field(alias="schema")
     sample_data: Optional[List[Dict[str, Any]]] = None
     row_count: Optional[int] = None
     size_bytes: Optional[int] = None

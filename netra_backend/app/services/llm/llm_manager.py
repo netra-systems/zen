@@ -7,8 +7,11 @@ import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import datetime
+from decimal import Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+
+from netra_backend.app.services.cost_calculator import BudgetManager, create_budget_manager
 
 logger = logging.getLogger(__name__)
 
@@ -54,11 +57,13 @@ class LLMManager:
     Handles request lifecycle, model switching, and performance monitoring.
     """
     
-    def __init__(self):
+    def __init__(self, daily_budget: Optional[Decimal] = None):
         self.active_requests: Dict[str, LLMRequest] = {}
         self.model_metrics: Dict[str, ModelMetrics] = {}
         self.default_model = "gpt-3.5-turbo"
         self.initialized = False
+        self.budget_manager: BudgetManager = create_budget_manager(daily_budget)
+        self.cost_limit_enforced = True  # Flag to enable/disable cost enforcement
     
     async def initialize(self) -> bool:
         """Initialize the LLM manager service."""
@@ -143,6 +148,29 @@ class LLMManager:
             # Update status
             request.status = RequestStatus.PROCESSING
             
+            # Estimate token usage for cost checking
+            # More aggressive estimation for expensive models
+            token_multiplier = 3 if "gpt-4" in request.model else 2
+            estimated_tokens = len(request.prompt.split()) * token_multiplier
+            
+            # CRITICAL: Enforce cost limits before processing
+            if self.cost_limit_enforced:
+                # Block if tokens exceed reasonable limit (e.g., 5000 tokens for single request)
+                max_tokens_per_request = 5000
+                if estimated_tokens > max_tokens_per_request:
+                    request.status = RequestStatus.FAILED
+                    request.error = f"Cost limit exceeded - request with {estimated_tokens} estimated tokens blocked to prevent unbounded API costs (max: {max_tokens_per_request})"
+                    request.completed_at = datetime.utcnow()
+                    logger.warning(f"Request {request_id} blocked due to cost limit enforcement")
+                    return request
+                
+                if not self._check_cost_limit(request.model, estimated_tokens):
+                    request.status = RequestStatus.FAILED
+                    request.error = "Cost limit exceeded - daily budget exhausted"
+                    request.completed_at = datetime.utcnow()
+                    logger.warning(f"Request {request_id} blocked due to budget exhaustion")
+                    return request
+            
             # Simulate LLM processing
             await asyncio.sleep(0.1)  # Simulate processing time
             
@@ -153,6 +181,10 @@ class LLMManager:
                 "output_tokens": len(response.split()),
                 "total_tokens": len(request.prompt.split()) + len(response.split())
             }
+            
+            # Record actual usage after successful processing
+            if self.cost_limit_enforced:
+                self._record_usage(request.model, token_usage["total_tokens"])
             
             # Update request
             request.status = RequestStatus.COMPLETED
@@ -246,6 +278,58 @@ class LLMManager:
         logger.error(f"Model {model} not available")
         return False
     
+    def _check_cost_limit(self, model: str, estimated_tokens: int) -> bool:
+        """
+        Check if processing request would exceed cost limits.
+        
+        Args:
+            model: Model to use
+            estimated_tokens: Estimated token count
+            
+        Returns:
+            True if within limits, False if would exceed
+        """
+        from netra_backend.app.schemas.llm_config_types import LLMProvider
+        from netra_backend.app.services.cost_calculator import TokenUsage
+        
+        # Map model to provider (simplified)
+        provider = LLMProvider.OPENAI if "gpt" in model else LLMProvider.ANTHROPIC
+        
+        # Create token usage estimate
+        usage = TokenUsage(
+            input_tokens=estimated_tokens // 2,
+            output_tokens=estimated_tokens // 2,
+            total_tokens=estimated_tokens
+        )
+        
+        # Check if this would exceed budget
+        return self.budget_manager.check_budget_impact(usage, provider, model)
+    
+    def _record_usage(self, model: str, actual_tokens: int) -> None:
+        """
+        Record actual usage after processing.
+        
+        Args:
+            model: Model used
+            actual_tokens: Actual token count
+        """
+        from netra_backend.app.schemas.llm_config_types import LLMProvider
+        from netra_backend.app.services.cost_calculator import TokenUsage
+        
+        # Map model to provider
+        provider = LLMProvider.OPENAI if "gpt" in model else LLMProvider.ANTHROPIC
+        
+        # Create token usage
+        usage = TokenUsage(
+            input_tokens=actual_tokens // 2,
+            output_tokens=actual_tokens // 2,
+            total_tokens=actual_tokens
+        )
+        
+        # Record the usage
+        cost = self.budget_manager.record_usage(usage, provider, model)
+        logger.debug(f"Recorded usage for {model}: {actual_tokens} tokens, cost: ${cost:.4f}")
+    
     async def health_check(self) -> Dict[str, Any]:
         """Perform health check of LLM manager."""
         active_count = len([r for r in self.active_requests.values() 
@@ -256,7 +340,10 @@ class LLMManager:
             "default_model": self.default_model,
             "active_requests": active_count,
             "total_requests": len(self.active_requests),
-            "available_models": list(self.model_metrics.keys())
+            "available_models": list(self.model_metrics.keys()),
+            "cost_limit_enforced": self.cost_limit_enforced,
+            "remaining_budget": float(self.budget_manager.get_remaining_budget()),
+            "daily_budget": float(self.budget_manager.daily_budget)
         }
     
     async def cleanup_completed_requests(self, max_age_hours: int = 24) -> int:

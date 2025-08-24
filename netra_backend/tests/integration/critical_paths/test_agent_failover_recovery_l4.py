@@ -278,6 +278,7 @@ class AgentFailoverTester:
         except:
             return False
             
+    @pytest.mark.asyncio
     async def test_failure_detection(self) -> Tuple[bool, float]:
         """Test failure detection mechanisms."""
         print("\n[DETECTION] Testing failure detection...")
@@ -320,6 +321,7 @@ class AgentFailoverTester:
             
         return detected, detection_time
         
+    @pytest.mark.asyncio
     async def test_automatic_failover(self) -> Tuple[bool, float]:
         """Test automatic failover to backup agents."""
         print("\n[FAILOVER] Testing automatic failover...")
@@ -373,6 +375,7 @@ class AgentFailoverTester:
         
         return success, failover_time
         
+    @pytest.mark.asyncio
     async def test_state_recovery(self) -> Tuple[bool, float]:
         """Test state persistence and recovery."""
         print("\n[STATE] Testing state recovery...")
@@ -431,6 +434,7 @@ class AgentFailoverTester:
             
         return False, time.time() - recovery_start
         
+    @pytest.mark.asyncio
     async def test_circuit_breaker(self) -> bool:
         """Test circuit breaker activation."""
         print("\n[CIRCUIT] Testing circuit breaker...")
@@ -473,6 +477,7 @@ class AgentFailoverTester:
                 
         return test_agent.circuit_breaker_open
         
+    @pytest.mark.asyncio
     async def test_graceful_degradation(self) -> bool:
         """Test graceful degradation strategies."""
         print("\n[DEGRADATION] Testing graceful degradation...")
@@ -519,6 +524,7 @@ class AgentFailoverTester:
         
         return progression_correct
         
+    @pytest.mark.asyncio
     async def test_data_consistency(self) -> bool:
         """Test data consistency after recovery."""
         print("\n[CONSISTENCY] Testing data consistency...")
@@ -557,6 +563,7 @@ class AgentFailoverTester:
             
         return len(inconsistencies) == 0
         
+    @pytest.mark.asyncio
     async def test_recovery_metrics(self) -> bool:
         """Verify recovery time objectives."""
         print("\n[METRICS] Verifying recovery metrics...")
@@ -606,6 +613,7 @@ class AgentFailoverTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_agent_failover_recovery():
     """Test complete agent failover and recovery system."""
     async with AgentFailoverTester() as tester:

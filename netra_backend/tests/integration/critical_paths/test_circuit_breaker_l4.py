@@ -26,7 +26,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -398,6 +398,7 @@ class CircuitBreakerL4TestSuite:
             "circuit_breaker_triggered": cb_state == CircuitBreakerState.OPEN
         }
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_state_transitions(self, service_name: str) -> Dict[str, Any]:
         """Test circuit breaker state transitions through complete lifecycle."""
         state_transitions = []
@@ -463,6 +464,7 @@ class CircuitBreakerL4TestSuite:
                 "state_transitions": state_transitions
             }
     
+    @pytest.mark.asyncio
     async def test_cascade_failure_prevention(self, failure_scenario: str) -> Dict[str, Any]:
         """Test prevention of cascading failures across services."""
         cascade_start_time = time.time()
@@ -670,6 +672,7 @@ class CircuitBreakerL4TestSuite:
                 "error": str(e)
             }
     
+    @pytest.mark.asyncio
     async def test_recovery_monitoring(self, service_name: str) -> Dict[str, Any]:
         """Test recovery monitoring and automatic recovery process."""
         recovery_start_time = time.time()
@@ -793,6 +796,7 @@ async def circuit_breaker_l4_suite():
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_circuit_breaker_activation_on_service_failure_l4(circuit_breaker_l4_suite):
     """Test circuit breaker activation when service fails in staging."""
     # Test circuit breaker state transitions for backend service
@@ -815,6 +819,7 @@ async def test_circuit_breaker_activation_on_service_failure_l4(circuit_breaker_
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_cascade_failure_prevention_auth_service_l4(circuit_breaker_l4_suite):
     """Test cascade failure prevention when auth service fails in staging."""
     # Test auth service failure cascade prevention
@@ -840,6 +845,7 @@ async def test_cascade_failure_prevention_auth_service_l4(circuit_breaker_l4_sui
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_cascade_failure_prevention_backend_service_l4(circuit_breaker_l4_suite):
     """Test cascade failure prevention when backend service fails in staging."""
     # Test backend service failure cascade prevention
@@ -860,6 +866,7 @@ async def test_cascade_failure_prevention_backend_service_l4(circuit_breaker_l4_
 
 @pytest.mark.asyncio
 @pytest.mark.staging  
+@pytest.mark.asyncio
 async def test_multiple_service_failure_cascade_prevention_l4(circuit_breaker_l4_suite):
     """Test cascade prevention when multiple services fail simultaneously in staging."""
     # Test multiple service failure scenario
@@ -884,6 +891,7 @@ async def test_multiple_service_failure_cascade_prevention_l4(circuit_breaker_l4
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_circuit_breaker_recovery_monitoring_l4(circuit_breaker_l4_suite):
     """Test circuit breaker recovery monitoring and automatic recovery in staging."""
     # Test recovery for WebSocket service
@@ -902,6 +910,7 @@ async def test_circuit_breaker_recovery_monitoring_l4(circuit_breaker_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_circuit_breaker_half_open_state_behavior_l4(circuit_breaker_l4_suite):
     """Test circuit breaker half-open state behavior in staging."""
     service_name = "frontend"
@@ -948,6 +957,7 @@ async def test_circuit_breaker_half_open_state_behavior_l4(circuit_breaker_l4_su
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_service_health_monitoring_accuracy_l4(circuit_breaker_l4_suite):
     """Test accuracy of service health monitoring in staging."""
     # Monitor all services for a period
@@ -984,6 +994,7 @@ async def test_service_health_monitoring_accuracy_l4(circuit_breaker_l4_suite):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_circuit_breaker_performance_under_load_l4(circuit_breaker_l4_suite):
     """Test circuit breaker performance under high load in staging."""
     # Monitor system performance during concurrent service monitoring

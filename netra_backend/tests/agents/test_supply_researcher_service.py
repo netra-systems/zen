@@ -9,7 +9,7 @@ from pathlib import Path
 
 from datetime import UTC, datetime
 from decimal import Decimal
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -21,16 +21,22 @@ class TestSupplyResearchService:
     @pytest.fixture
     def mock_db(self):
         """Create mock database session"""
+        # Mock: Generic component isolation for controlled unit testing
         db = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         db.query = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         db.add = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         db.commit = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         db.rollback = Mock()
         return db
     
     def test_service_get_supply_items(self, mock_db):
         """Test getting supply items with filters"""
         mock_items = [
+            # Mock: OpenAI API isolation for testing without external service dependencies
             Mock(provider="openai", model_name="GPT-4", pricing_input=30)
         ]
         mock_db.query().filter().order_by().all.return_value = mock_items
@@ -62,6 +68,7 @@ class TestSupplyResearchService:
     def test_service_calculate_price_changes(self, mock_db):
         """Test calculating price changes over time"""
         mock_logs = [
+            # Mock: Component isolation for controlled unit testing
             Mock(
                 field_updated="pricing_input",
                 old_value='"30"',
@@ -70,6 +77,7 @@ class TestSupplyResearchService:
                 updated_at=datetime.now(UTC)
             )
         ]
+        # Mock: OpenAI API isolation for testing without external service dependencies
         mock_item = Mock(provider="openai", model_name="GPT-4")
         
         mock_db.query().filter().all.return_value = mock_logs
@@ -84,6 +92,7 @@ class TestSupplyResearchService:
     def test_service_provider_comparison(self, mock_db):
         """Test comparing pricing across providers"""
         mock_items = [
+            # Mock: Component isolation for controlled unit testing
             Mock(
                 provider="openai",
                 model_name="GPT-4",
@@ -126,6 +135,7 @@ class TestSupplyResearchService:
     
     def test_service_validate_supply_data(self):
         """Test validating supply data before storage"""
+        # Mock: Generic component isolation for controlled unit testing
         service = SupplyResearchService(Mock())
         
         # Valid data
@@ -153,6 +163,7 @@ class TestSupplyResearchService:
     
     def test_invalid_data_validation(self):
         """Test handling invalid supply data"""
+        # Mock: Generic component isolation for controlled unit testing
         service = SupplyResearchService(Mock())
         
         invalid_data = {

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import json
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -43,8 +43,11 @@ class TestSupplyResearcherInfrastructure:
 
     def _setup_redis_cache(self, agent):
         """Setup Redis cache with fallback data (≤8 lines)"""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.redis_manager.RedisManager') as mock_redis_class:
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis = Mock()
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis.get = AsyncMock(return_value=json.dumps(_get_cached_fallback_data()))
             mock_redis_class.return_value = mock_redis
             agent.redis_manager = mock_redis
@@ -87,9 +90,13 @@ class TestSupplyResearcherInfrastructure:
 
     def _setup_metrics_collection(self):
         """Setup metrics collection mocks (≤8 lines)"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.agents.supply_researcher_sub_agent.metrics') as mock_metrics:
+            # Mock: Generic component isolation for controlled unit testing
             mock_metrics.counter = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_metrics.histogram = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_metrics.gauge = Mock()
 
     async def _execute_performance_test(self, agent, state):
@@ -196,6 +203,7 @@ class TestSupplyResearcherInfrastructure:
         return {
             "connections": ["conn1", "conn2", "conn3"],
             "files": ["temp1.txt", "temp2.txt"],
+            # Mock: Generic component isolation for controlled unit testing
             "memory_objects": [Mock(), Mock(), Mock()]
         }
 

@@ -11,7 +11,7 @@ from pathlib import Path
 import asyncio
 import time
 import uuid
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -59,6 +59,7 @@ async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
     """Test handling multiple concurrent requests"""
     db_session, llm_manager, ws_manager, mock_persistence = _setup_concurrent_infrastructure()
     
+    # Mock: Agent supervisor isolation for testing without spawning real agents
     with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         supervisors = create_multiple_supervisors(db_session, llm_manager, ws_manager, mock_persistence, 5)
         results = await _run_concurrent_requests(supervisors)
@@ -152,6 +153,7 @@ async def test_end_to_end_optimization_flow():
     db_session, llm_manager, ws_manager = _setup_end_to_end_infrastructure()
     mock_persistence = _setup_end_to_end_persistence()
     
+    # Mock: Agent supervisor isolation for testing without spawning real agents
     with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         supervisor = create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
         state = await _run_end_to_end_flow(supervisor)

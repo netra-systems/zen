@@ -7,10 +7,8 @@ COMPLIANCE: 450-line max file, 25-line max functions
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -40,6 +38,7 @@ def mock_service_config() -> ServiceConfig:
 class TestHealthChecks:
     """Test health check execution."""
     
+    @pytest.mark.asyncio
     async def test_check_service_health_success(self, health_monitor: StagedHealthMonitor,
                                                mock_service_config: ServiceConfig) -> None:
         """Test successful health check."""
@@ -54,6 +53,7 @@ class TestHealthChecks:
             assert result.success is True
             assert result.stage == HealthStage.INITIALIZATION
 
+    @pytest.mark.asyncio
     async def test_check_service_health_failure(self, health_monitor: StagedHealthMonitor) -> None:
         """Test health check with failing function."""
         failing_config = ServiceConfig(
@@ -68,9 +68,10 @@ class TestHealthChecks:
             result = mock_process.call_args[0][1]
             assert result.success is False
 
+    @pytest.mark.asyncio
     async def test_check_service_health_exception(self, health_monitor: StagedHealthMonitor) -> None:
         """Test health check with exception."""
-        def raise_exception():
+        async def raise_exception():
             raise Exception("Health check failed")
         
         exception_config = ServiceConfig(
@@ -86,6 +87,7 @@ class TestHealthChecks:
             assert result.success is False
             assert "Health check failed" in result.error_message
 
+    @pytest.mark.asyncio
     async def test_check_service_health_no_function(self, health_monitor: StagedHealthMonitor) -> None:
         """Test health check when no function is available."""
         no_check_config = ServiceConfig(name="no_check_service")
@@ -97,6 +99,7 @@ class TestHealthChecks:
 class TestCheckResultProcessing:
     """Test health check result processing."""
     
+    @pytest.mark.asyncio
     async def test_process_check_result_success(self, health_monitor: StagedHealthMonitor,
                                                mock_service_config: ServiceConfig) -> None:
         """Test processing successful check result."""
@@ -109,6 +112,7 @@ class TestCheckResultProcessing:
         assert state.failure_count == 0
         assert len(state.check_history) == 1
 
+    @pytest.mark.asyncio
     async def test_process_check_result_failure(self, health_monitor: StagedHealthMonitor,
                                                mock_service_config: ServiceConfig) -> None:
         """Test processing failed check result."""
@@ -122,6 +126,7 @@ class TestCheckResultProcessing:
             assert state.failure_count == 1
             mock_handle.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_handle_failure_within_threshold(self, health_monitor: StagedHealthMonitor,
                                                   mock_service_config: ServiceConfig) -> None:
         """Test failure handling within threshold."""
@@ -131,6 +136,7 @@ class TestCheckResultProcessing:
         # Should log warning but not error
         await health_monitor._handle_failure("test_service", result)
 
+    @pytest.mark.asyncio
     async def test_handle_failure_exceeds_threshold(self, health_monitor: StagedHealthMonitor,
                                                    mock_service_config: ServiceConfig) -> None:
         """Test failure handling when exceeding threshold."""
@@ -147,6 +153,7 @@ class TestCheckResultProcessing:
 class TestStageProgression:
     """Test service stage progression."""
     
+    @pytest.mark.asyncio
     async def test_update_service_stage_progression(self, health_monitor: StagedHealthMonitor,
                                                    mock_service_config: ServiceConfig) -> None:
         """Test service stage progression over time."""

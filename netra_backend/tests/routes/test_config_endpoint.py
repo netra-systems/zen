@@ -1,8 +1,6 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -45,6 +43,7 @@ class TestConfigEndpoint:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.config._build_public_config', return_value=expected_config):
             response = client.get("/api/config/public")
             
@@ -68,6 +67,7 @@ class TestConfigEndpoint:
         }
         
         # Mock the User object that would be returned from require_admin
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = MagicMock()
         mock_user.id = "test-user-id"
         mock_user.email = "admin@test.com"

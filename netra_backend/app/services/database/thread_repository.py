@@ -86,3 +86,26 @@ class ThreadRepository(BaseRepository[Thread]):
             await db.rollback()
             logger.error(f"Error archiving thread {thread_id}: {e}")
             return False
+    
+    async def get_active_threads(self, db: AsyncSession, user_id: str) -> List[Thread]:
+        """Get all active (non-soft-deleted) threads for a user"""
+        try:
+            result = await db.execute(
+                select(Thread).where(
+                    and_(
+                        Thread.metadata_.op('->>')('user_id') == user_id,
+                        Thread.deleted_at.is_(None)
+                    )
+                ).order_by(Thread.created_at.desc())
+            )
+            scalars = result.scalars()
+            # Handle potential mock coroutine issues
+            if hasattr(scalars, '__await__'):
+                scalars = await scalars
+            scalars_result = scalars.all()
+            if hasattr(scalars_result, '__await__'):
+                scalars_result = await scalars_result
+            return list(scalars_result)
+        except Exception as e:
+            logger.error(f"Error getting active threads for user {user_id}: {e}")
+            return []

@@ -118,7 +118,6 @@ class StartupIsolationValidator:
         """Create test script for import validation."""
         return f"""
 import os
-sys.path.insert(0, "{entry_point_path.parent}")
 os.chdir("{entry_point_path.parent}")
 
 try:

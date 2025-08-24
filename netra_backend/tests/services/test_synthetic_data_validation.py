@@ -6,8 +6,6 @@ Tests to validate that the implementation matches the specification
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import os
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, List
@@ -213,7 +211,7 @@ class TestImplementationConsistency:
 
     def test_websocket_manager_exists(self):
         """Verify WebSocket manager exists for real-time updates"""
-        from netra_backend.app.websocket_core import get_unified_manager
+        from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
         manager = get_unified_manager()
         
         assert manager != None
@@ -238,7 +236,7 @@ class TestImplementationConsistency:
 
     def test_clickhouse_integration_configured(self):
         """Verify ClickHouse integration is configured"""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         
         assert get_clickhouse_client != None
 

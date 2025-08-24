@@ -210,7 +210,8 @@ class TestCostTrackingAccuracyE2E:
                                              frontend_validator) -> Dict[str, Any]:
         """Execute complete cost tracking flow."""
         # Mock LLM for deterministic costs
-        with patch('app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
             mock_llm.return_value = self._create_mock_llm_response(operation["expected_tokens"])
             
             # Execute through all layers
@@ -232,7 +233,8 @@ class TestCostTrackingAccuracyE2E:
     async def _execute_cost_calculation_flow(self, session: Dict, operation: Dict,
                                            test_core, cost_validator, billing_validator) -> Dict:
         """Execute cost calculation and billing flow."""
-        with patch('app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
             mock_llm.return_value = self._create_mock_llm_response(operation["expected_tokens"])
             
             cost_result = await cost_validator.validate_operation_cost_calculation(operation)
@@ -244,13 +246,15 @@ class TestCostTrackingAccuracyE2E:
     
     async def _execute_timed_cost_tracking(self, session: Dict, operation: Dict, test_core) -> Dict:
         """Execute cost tracking with timing measurement."""
-        with patch('app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
             mock_llm.return_value = self._create_mock_llm_response(operation["expected_tokens"])
             
             return await test_core.execute_operation_with_cost_tracking(session, operation)
     
     def _create_mock_llm_response(self, expected_tokens: int) -> AsyncMock:
         """Create mock LLM response for deterministic testing."""
+        # Mock: Async component isolation for testing without real async operations
         return AsyncMock(return_value={
             "content": "Operation completed successfully",
             "tokens_used": expected_tokens,

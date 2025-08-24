@@ -29,6 +29,7 @@ class AuthTestUtils:
     
     def __init__(self, db_session: AsyncSession = None, redis_client=None):
         self.db_session = db_session
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         self.redis_client = redis_client or AsyncMock()
         self.created_users = []
         self.created_sessions = []

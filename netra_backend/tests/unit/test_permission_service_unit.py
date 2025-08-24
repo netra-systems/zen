@@ -15,8 +15,6 @@ Critical for protecting revenue through proper tier enforcement.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, Mock, patch
 
@@ -34,11 +32,13 @@ from netra_backend.app.services.permission_service import (
 @pytest.fixture
 def mock_db_session():
     """Mock database session."""
+    # Mock: Generic component isolation for controlled unit testing
     return Mock()
 
 @pytest.fixture
 def free_tier_user():
     """Free tier user fixture."""
+    # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "test_user_1"
     user.email = "user@example.com"
@@ -52,6 +52,7 @@ def free_tier_user():
 @pytest.fixture
 def pro_tier_user():
     """Pro tier user fixture."""
+    # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "test_user_2"
     user.email = "pro@example.com"
@@ -65,6 +66,7 @@ def pro_tier_user():
 @pytest.fixture
 def developer_user():
     """Developer user fixture."""
+    # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "dev_user_1"
     user.email = "dev@netrasystems.ai"
@@ -78,6 +80,7 @@ def developer_user():
 @pytest.fixture
 def admin_user():
     """Admin user fixture."""
+    # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "admin_user_1"
     user.email = "admin@netrasystems.ai"
@@ -91,6 +94,7 @@ def admin_user():
 @pytest.fixture
 def super_admin_user():
     """Super admin user fixture."""
+    # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "super_admin_1"
     user.email = "super@netrasystems.ai"
@@ -129,6 +133,7 @@ def assert_user_is_developer_or_higher(user, expected):
 
 def create_user_with_custom_permissions(additional=None, revoked=None):
     """Create user with custom permissions."""
+    # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.role = "standard_user"
     user.permissions = {"additional": additional or [], "revoked": revoked or []}
@@ -217,6 +222,7 @@ class TestRoleHierarchyAndLevels:
 
     def test_admin_or_higher_detection(self):
         """Admin or higher detection works correctly."""
+        # Mock: Component isolation for controlled unit testing
         admin_user = Mock(spec=User)
         admin_user.role = "admin"
         admin_user.is_superuser = False
@@ -256,6 +262,7 @@ class TestDeveloperAutoDetection:
 
     def test_netra_domain_enables_developer_status(self):
         """Netra domain email enables developer status."""
+        # Mock: Component isolation for controlled unit testing
         netra_user = Mock(spec=User)
         netra_user.email = "test@netrasystems.ai"
         result = PermissionService.detect_developer_status(netra_user)
@@ -327,6 +334,7 @@ class TestCustomPermissions:
 
     def test_grant_permission_creates_structure(self, mock_db_session):
         """Grant permission creates proper permissions structure."""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.permissions = None
         PermissionService.grant_permission(mock_db_session, user, "test_perm")
@@ -350,6 +358,7 @@ class TestCustomPermissions:
 
     def test_revoke_permission_creates_structure(self, mock_db_session):
         """Revoke permission creates proper revoked structure."""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.permissions = None
         PermissionService.revoke_permission(mock_db_session, user, "test_perm")
@@ -446,6 +455,7 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_empty_permissions_dict_handling(self):
         """Empty permissions dict is handled correctly."""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "standard_user"
         user.permissions = {}
@@ -457,6 +467,7 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_none_permissions_handling(self):
         """None permissions is handled correctly."""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "standard_user"
         user.permissions = None
@@ -468,6 +479,7 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_unknown_role_gets_empty_permissions(self):
         """Unknown role gets empty permissions."""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.role = "unknown_role"
         user.permissions = {}
@@ -479,6 +491,7 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_case_insensitive_netra_domain_detection(self):
         """Netra domain detection is case insensitive."""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@NETRASYSTEMS.AI"
         result = PermissionService._check_netra_domain(user)
@@ -486,6 +499,7 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_none_email_handling_in_domain_check(self):
         """None email is handled in domain check."""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = None
         result = PermissionService._check_netra_domain(user)

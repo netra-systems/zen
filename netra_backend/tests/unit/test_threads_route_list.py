@@ -3,9 +3,7 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -26,11 +24,13 @@ from netra_backend.tests.helpers.thread_test_helpers import (
 @pytest.fixture
 def mock_db():
     """Mock database session"""
+    # Mock: Generic component isolation for controlled unit testing
     return AsyncMock(commit=AsyncMock())
 
 @pytest.fixture
 def mock_user():
     """Mock authenticated user"""
+    # Mock: Generic component isolation for controlled unit testing
     user = Mock()
     user.id = "test_user_123"
     user.email = "test@example.com"
@@ -38,6 +38,7 @@ def mock_user():
 
 class TestListThreads:
     """Test cases for GET / endpoint"""
+    @pytest.mark.asyncio
     async def test_list_threads_success(self, mock_db, mock_user):
         """Test successful thread listing with pagination"""
         mock_thread = create_mock_thread()
@@ -51,6 +52,7 @@ class TestListThreads:
         assert len(result) == 1
         assert_thread_response(result[0], "thread_abc123", 5)
         assert_repo_calls(thread_repo, message_repo, mock_db, "test_user_123", "thread_abc123")
+    @pytest.mark.asyncio
     async def test_list_threads_with_pagination(self, mock_db, mock_user):
         """Test thread listing with offset and limit"""
         threads = create_multiple_threads(30)
@@ -64,6 +66,7 @@ class TestListThreads:
         assert len(result) == 5
         assert result[0].id == "thread_10"
         assert result[4].id == "thread_14"
+    @pytest.mark.asyncio
     async def test_list_threads_empty_metadata(self, mock_db, mock_user):
         """Test thread listing when metadata == None"""
         thread = create_empty_metadata_thread()
@@ -77,12 +80,16 @@ class TestListThreads:
         assert len(result) == 1
         assert result[0].title == None
         assert result[0].updated_at == None
+    @pytest.mark.asyncio
     async def test_list_threads_exception(self, mock_db, mock_user):
         """Test error handling in list_threads"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             thread_repo = MockThreadRepo.return_value
+            # Mock: Database isolation for unit testing without external database connections
             thread_repo.find_by_user = AsyncMock(side_effect=Exception("Database error"))
             
             with pytest.raises(HTTPException) as exc_info:

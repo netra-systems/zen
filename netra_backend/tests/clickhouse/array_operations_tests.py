@@ -56,7 +56,9 @@ class TestClickHouseArrayOperations:
     async def test_query_interceptor_fixes_queries(self):
         """Test the query interceptor automatically fixes queries"""
         # Create mock client
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_client.execute_query = AsyncMock(return_value=[{"result": "success"}])
         
         # Wrap with interceptor

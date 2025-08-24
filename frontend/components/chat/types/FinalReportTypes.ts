@@ -1,22 +1,9 @@
 // Types for FinalReport components
-export interface AgentTiming {
-  agent_name: string;
-  duration: number;
-  start_time: string;
-  end_time: string;
-}
+// Note: ExecutionMetrics, AgentTiming, and ToolCall are now imported from unified/metrics.types.ts
+import type { ExecutionMetrics, AgentTiming, ToolCall } from '@/types/unified/metrics.types';
 
-export interface ToolCall {
-  tool_name: string;
-  count: number;
-  avg_duration: number;
-}
-
-export interface ExecutionMetrics {
-  total_duration: number;
-  agent_timings: AgentTiming[];
-  tool_calls: ToolCall[];
-}
+// Re-export for backward compatibility
+export type { ExecutionMetrics, AgentTiming, ToolCall };
 
 export interface FinalReportData {
   data_result?: Record<string, unknown>;

@@ -87,6 +87,7 @@ class TestWorkflowSystemIntegration:
             poll_interval=5,
             max_retries=3
         )
+        # Mock: Component isolation for testing without external dependencies
         with patch('verify_workflow_status.httpx.Client'):
             return WorkflowStatusVerifier(config)
     
@@ -112,6 +113,7 @@ class TestWorkflowSystemIntegration:
         # Mock verification for enabled workflows
         mock_runs = []
         for workflow in enabled_workflows:
+            # Mock: Component isolation for controlled unit testing
             workflow_verifier._api_request = Mock(return_value={
                 "workflow_runs": [{
                     "id": hash(workflow) % 10000,
@@ -144,7 +146,9 @@ class TestWorkflowSystemIntegration:
         assert not workflow_manager.get_workflow_status()["ci"]["enabled"]
         
         # Mock introspection showing workflow is inactive
+        # Mock: Component isolation for testing without external dependencies
         with patch('workflow_introspection.subprocess.run') as mock_run:
+            # Mock: Component isolation for controlled unit testing
             mock_run.return_value = Mock(
                 stdout="CI\tdisabled\t123456\n"
             )
@@ -158,7 +162,9 @@ class TestWorkflowSystemIntegration:
         assert workflow_manager.get_workflow_status()["ci"]["enabled"]
         
         # Mock introspection showing workflow is now active
+        # Mock: Component isolation for testing without external dependencies
         with patch('workflow_introspection.subprocess.run') as mock_run:
+            # Mock: Component isolation for controlled unit testing
             mock_run.return_value = Mock(
                 stdout="CI\tactive\t123456\n"
             )
@@ -172,6 +178,7 @@ class TestWorkflowSystemIntegration:
         run_id = 999999
         
         # Mock verification showing run in progress
+        # Mock: Component isolation for controlled unit testing
         workflow_verifier._api_request = Mock(return_value={
             "id": run_id,
             "status": "in_progress",
@@ -189,6 +196,7 @@ class TestWorkflowSystemIntegration:
         assert not workflow_verifier.verify_workflow_success(run)
         
         # Mock introspection with detailed job information
+        # Mock: Component isolation for controlled unit testing
         workflow_introspector._run_gh_command = Mock(return_value={
             "databaseId": run_id,
             "name": "Complex Pipeline",
@@ -246,6 +254,7 @@ class TestWorkflowConfigurationSync:
             max_retries=3
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('verify_workflow_status.httpx.Client'):
             verifier = WorkflowStatusVerifier(config)
         
@@ -263,6 +272,7 @@ class TestWorkflowConfigurationSync:
         verifier = integrated_system["verifier"]
         
         # Apply minimal preset
+        # Mock: Component isolation for testing without external dependencies
         with patch('manage_workflows.WorkflowPresets.get_presets') as mock_presets:
             mock_presets.return_value = {
                 "minimal": {
@@ -283,6 +293,7 @@ class TestWorkflowConfigurationSync:
                 }
             }
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('manage_workflows.WorkflowPresets.validate_preset', return_value=True):
                 manager.apply_preset("minimal")
         
@@ -291,6 +302,7 @@ class TestWorkflowConfigurationSync:
         assert all(not info["enabled"] for info in status.values())
         
         # Mock verification should return no active runs
+        # Mock: Component isolation for controlled unit testing
         verifier._api_request = Mock(return_value={"workflow_runs": []})
         
         for workflow in ["ci", "tests", "deploy", "staging"]:
@@ -338,6 +350,7 @@ class TestWorkflowMonitoring:
             max_retries=5
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('verify_workflow_status.httpx.Client'):
             verifier = WorkflowStatusVerifier(config)
         
@@ -374,6 +387,7 @@ class TestWorkflowMonitoring:
         
         for i, (status, conclusion, jobs) in enumerate(states):
             # Mock verification state
+            # Mock: Component isolation for controlled unit testing
             verifier._api_request = Mock(return_value={
                 "id": run_id,
                 "status": status,
@@ -390,6 +404,7 @@ class TestWorkflowMonitoring:
             assert run.status == status
             
             # Mock introspection state
+            # Mock: Component isolation for controlled unit testing
             introspector._run_gh_command = Mock(return_value={
                 "databaseId": run_id,
                 "name": "Long Pipeline",
@@ -435,6 +450,7 @@ class TestWorkflowMonitoring:
         ]
         
         # Mock recent runs
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(return_value=[
             {
                 "databaseId": run["id"],
@@ -485,6 +501,7 @@ class TestWorkflowErrorRecovery:
             max_retries=3
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('verify_workflow_status.httpx.Client'):
             verifier = WorkflowStatusVerifier(config)
         
@@ -504,7 +521,9 @@ class TestWorkflowErrorRecovery:
         # Test verifier handling API error
         verifier.client.get.side_effect = httpx.HTTPStatusError(
             "Rate limited",
+            # Mock: Generic component isolation for controlled unit testing
             request=Mock(),
+            # Mock: Component isolation for controlled unit testing
             response=Mock(status_code=429, text="API rate limit exceeded")
         )
         
@@ -512,6 +531,7 @@ class TestWorkflowErrorRecovery:
             verifier.get_workflow_runs("ci")
         
         # Test introspector handling subprocess error
+        # Mock: Component isolation for testing without external dependencies
         with patch('workflow_introspection.subprocess.run') as mock_run:
             mock_run.side_effect = subprocess.CalledProcessError(
                 1, ["gh"], stderr="Authentication failed"
@@ -558,6 +578,7 @@ class TestWorkflowErrorRecovery:
         )
         
         # Mock to always return in_progress
+        # Mock: Component isolation for controlled unit testing
         verifier.get_workflow_run_by_id = Mock(return_value=run)
         verifier.config.timeout = 0.1  # Very short timeout
         
@@ -602,10 +623,12 @@ class TestWorkflowPerformanceOptimization:
             max_retries=3
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('verify_workflow_status.httpx.Client') as mock_client:
             verifier = WorkflowStatusVerifier(config)
             
             # Mock API response
+            # Mock: Generic component isolation for controlled unit testing
             mock_response = Mock()
             mock_response.json.return_value = {
                 "workflow_runs": [{
@@ -638,11 +661,13 @@ class TestWorkflowPerformanceOptimization:
         # Mock multiple workflow runs
         run_ids = [1001, 1002, 1003, 1004, 1005]
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('workflow_introspection.subprocess.run') as mock_run:
             # Simulate parallel fetching
             start_time = datetime.now()
             
             for run_id in run_ids:
+                # Mock: Component isolation for controlled unit testing
                 mock_run.return_value = Mock(
                     stdout=json.dumps({
                         "databaseId": run_id,

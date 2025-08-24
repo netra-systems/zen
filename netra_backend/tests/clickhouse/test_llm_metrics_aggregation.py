@@ -86,6 +86,7 @@ class TestLLMMetricsAggregation:
         is_valid, error = validate_clickhouse_query(query)
         assert is_valid, f"LLM optimization query failed: {error}"
 
+    @pytest.mark.asyncio
     async def test_llm_usage_patterns(self):
         """Test LLM usage pattern analysis"""
         query = """

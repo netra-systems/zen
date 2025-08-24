@@ -9,7 +9,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 
@@ -36,7 +36,14 @@ class TestAsyncConnectionPool:
             min_size=1
         )
         await pool.initialize()
-        return pool
+        yield pool
+        # Proper cleanup
+        try:
+            if not pool._closed:
+                await pool.close()
+        except Exception:
+            pass
+    @pytest.mark.asyncio
     async def test_acquire_and_release_connection(self, connection_pool):
         """Test acquiring and releasing connections"""
         async with connection_pool.acquire() as conn:
@@ -44,6 +51,7 @@ class TestAsyncConnectionPool:
             assert hasattr(conn, 'id')
             assert conn.id > 0
         assert not connection_pool._closed
+    @pytest.mark.asyncio
     async def test_multiple_concurrent_connections(self, connection_pool):
         """Test multiple concurrent connections"""
         connections = []
@@ -56,6 +64,7 @@ class TestAsyncConnectionPool:
         async with pool.acquire() as conn:
             connections.append(conn)
             await asyncio.sleep(0.01)
+    @pytest.mark.asyncio
     async def test_connection_pool_limit(self, connection_pool):
         """Test connection pool respects max size"""
         acquired_connections = []
@@ -70,6 +79,7 @@ class TestAsyncConnectionPool:
         async with pool.acquire() as conn:
             acquired_connections.append(conn)
             await asyncio.sleep(0.1)
+    @pytest.mark.asyncio
     async def test_pool_close(self, connection_pool):
         """Test closing the connection pool"""
         async with connection_pool.acquire() as conn:
@@ -77,12 +87,14 @@ class TestAsyncConnectionPool:
         await connection_pool.close()
         assert connection_pool._closed == True
         assert hasattr(original_conn, 'closed') or True
+    @pytest.mark.asyncio
     async def test_acquire_from_closed_pool(self, connection_pool):
         """Test acquiring from closed pool raises error"""
         await connection_pool.close()
         with pytest.raises(ServiceError, match="Connection pool is closed"):
             async with connection_pool.acquire():
                 pass
+    @pytest.mark.asyncio
     async def test_acquire_timeout_when_no_connections(self):
         """Test acquire timeout when pool is empty"""
         create_connection = create_slow_connection_factory()
@@ -96,6 +108,7 @@ class TestAsyncConnectionPool:
             async with asyncio.timeout(0.1):
                 async with pool.acquire() as conn:
                     pass
+    @pytest.mark.asyncio
     async def test_connection_pool_queue_full(self):
         """Test handling when connection pool queue is full"""
         connections_closed = []
@@ -125,6 +138,7 @@ class TestAsyncConnectionPool:
                 await pool._available_connections.put(f"extra_conn_{i}")
             except asyncio.QueueFull:
                 break
+    @pytest.mark.asyncio
     async def test_close_pool_with_timeout_on_empty(self):
         """Test closing pool when getting connection times out"""
         pool = AsyncConnectionPool(

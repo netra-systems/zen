@@ -386,8 +386,6 @@ def scan_e2e_tests():
 
 def verify_fixes():
     """Verify that the fixes work by trying to import the modules"""
-    project_root = Path(__file__).parent.parent
-    sys.path.insert(0, str(project_root))
     
     print("\nVerifying Fixes...")
     print("="*60)

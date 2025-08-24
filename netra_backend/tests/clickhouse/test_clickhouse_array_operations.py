@@ -60,6 +60,7 @@ class TestClickHouseArrayOperations:
         assert is_valid
         assert error == ""
 
+    @pytest.mark.asyncio
     async def test_query_interceptor_fixes_queries(self):
         """Test the query interceptor automatically fixes queries"""
         # Create interceptor with mock client

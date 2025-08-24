@@ -69,15 +69,30 @@ def setup_test_path():
     Returns:
         Path: The project root path
     """
-    # Navigate from test_framework/ -> project_root/
+    # Navigate from test_framework/__init__.py -> project_root/
     current_file = Path(__file__).resolve()
-    project_root = current_file.parent  # Go up one level from test_framework to project root
+    project_root = current_file.parent.parent  # Go up from test_framework to project root
     
     # Add project root to sys.path (for main imports)
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
     
     return project_root
+
+
+def get_project_root():
+    """Get the project root path without modifying sys.path.
+    
+    Simple utility for tests that only need the project root path
+    without the sys.path setup side effect.
+    
+    Returns:
+        Path: The project root path
+    """
+    # Navigate from test_framework/ -> project_root/
+    current_file = Path(__file__).resolve()
+    return current_file.parent.parent  # Go up two levels from test_framework/__init__.py to project root
+
 
 __all__ = [
     # Core runner classes
@@ -117,6 +132,7 @@ __all__ = [
     'requires_feature',
     'tdd_test',
     'setup_test_path',
+    'get_project_root',
     
     # Consolidated test infrastructure
     'WebSocketTestHelpers',

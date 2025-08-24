@@ -28,7 +28,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -379,6 +379,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
             logger.error(f"Failed to initialize workspace billing: {e}")
             return {}
     
+    @pytest.mark.asyncio
     async def test_cross_tenant_workspace_access_prevention(self, source_tenant_id: str, 
                                                           target_tenant_id: str,
                                                           user_id: str, workspace_id: str) -> Dict[str, Any]:
@@ -663,6 +664,7 @@ class MultiTenantWorkspaceIsolationL4Manager:
                 "staging_verified": False
             }
     
+    @pytest.mark.asyncio
     async def test_concurrent_multi_tenant_operations(self, tenant_ids: List[str]) -> Dict[str, Any]:
         """Test concurrent operations across multiple tenants to validate isolation."""
         start_time = time.time()

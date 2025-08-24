@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning_document>
+    <metadata>
+        <title>DatabaseConfig Migration to Unified Configuration</title>
+        <category>configuration</category>
+        <subcategory>migration</subcategory>
+        <severity>critical</severity>
+        <date>2025-08-24</date>
+        <environment>staging</environment>
+        <affected_services>netra-backend</affected_services>
+    </metadata>
+
+    <problem_statement>
+        <description>
+            Staging deployment failed with "RuntimeError: Database engine creation failed: name 'DatabaseConfig' is not defined"
+            during startup in postgres_core.py and postgres_events.py.
+        </description>
+        <error_details>
+            <error_message>NameError: name 'DatabaseConfig' is not defined</error_message>
+            <location>netra_backend/app/db/postgres_events.py</location>
+            <context>Database engine initialization during startup</context>
+        </error_details>
+    </problem_statement>
+
+    <root_cause_analysis>
+        <five_whys>
+            <why number="1">
+                <question>Why did the database engine creation fail?</question>
+                <answer>The code was trying to reference DatabaseConfig class, but it wasn't imported or defined.</answer>
+            </why>
+            <why number="2">
+                <question>Why is DatabaseConfig not defined?</question>
+                <answer>The codebase underwent a migration from legacy DatabaseConfig class to unified configuration system (get_unified_config()), but some references were not updated.</answer>
+            </why>
+            <why number="3">
+                <question>Why wasn't this caught in testing?</question>
+                <answer>The migration was incomplete - some files were updated but not all. The error occurs specifically in the database initialization path during staging deployment.</answer>
+            </why>
+            <why number="4">
+                <question>Why did this work locally but fail in staging?</question>
+                <answer>Environment-specific differences in module loading order and configuration initialization. Staging uses different configuration loading mechanisms than local development.</answer>
+            </why>
+            <why number="5">
+                <question>Why wasn't the import/configuration validated?</question>
+                <answer>The migration from DatabaseConfig to unified configuration was done piecemeal without comprehensive system-wide validation.</answer>
+            </why>
+        </five_whys>
+        <primary_cause>Incomplete migration from legacy DatabaseConfig class-based configuration to the new unified configuration system.</primary_cause>
+    </root_cause_analysis>
+
+    <solution>
+        <changes_made>
+            <change>
+                <file>netra_backend/app/db/postgres_events.py</file>
+                <description>Replaced all DatabaseConfig.* references with get_unified_config() calls</description>
+                <replacements>
+                    <replacement>
+                        <old>from netra_backend.app.db.postgres_config import DatabaseConfig</old>
+                        <new>from netra_backend.app.config import get_unified_config</new>
+                    </replacement>
+                    <replacement>
+                        <old>DatabaseConfig.STATEMENT_TIMEOUT</old>
+                        <new>config.db_statement_timeout</new>
+                    </replacement>
+                    <replacement>
+                        <old>DatabaseConfig.POOL_SIZE</old>
+                        <new>config.db_pool_size</new>
+                    </replacement>
+                    <replacement>
+                        <old>DatabaseConfig.MAX_OVERFLOW</old>
+                        <new>config.db_max_overflow</new>
+                    </replacement>
+                </replacements>
+            </change>
+            <change>
+                <file>netra_backend/tests/integration/red_team/tier2_major_failures/test_error_response_consistency.py</file>
+                <description>Fixed incorrect import of ErrorMiddleware (doesn't exist) to ErrorRecoveryMiddleware</description>
+            </change>
+        </changes_made>
+    </solution>
+
+    <testing>
+        <test_created>netra_backend/tests/unit/test_postgres_events_config_migration.py</test_created>
+        <test_categories>
+            <category>Import validation tests</category>
+            <category>Configuration reference detection tests</category>
+            <category>Edge case tests for config migration</category>
+            <category>Environment variable handling tests</category>
+        </test_categories>
+    </testing>
+
+    <prevention_measures>
+        <measure>
+            <name>Automated Migration Validation</name>
+            <description>Use tools to detect legacy class references during configuration system migrations</description>
+        </measure>
+        <measure>
+            <name>Comprehensive Testing</name>
+            <description>Ensure staging deployment paths are tested in CI/CD</description>
+        </measure>
+        <measure>
+            <name>Import Validation</name>
+            <description>Add pre-commit hooks to detect deprecated configuration pattern usage</description>
+        </measure>
+        <measure>
+            <name>Environment Parity</name>
+            <description>Ensure local development closely mirrors staging/production configuration loading</description>
+        </measure>
+        <measure>
+            <name>Complete Atomic Migrations</name>
+            <description>When migrating configuration systems, ensure ALL references are updated in a single atomic operation</description>
+        </measure>
+    </prevention_measures>
+
+    <migration_guide>
+        <mapping>
+            <old_pattern>DatabaseConfig.POOL_SIZE</old_pattern>
+            <new_pattern>get_unified_config().db_pool_size</new_pattern>
+        </mapping>
+        <mapping>
+            <old_pattern>DatabaseConfig.MAX_OVERFLOW</old_pattern>
+            <new_pattern>get_unified_config().db_max_overflow</new_pattern>
+        </mapping>
+        <mapping>
+            <old_pattern>DatabaseConfig.POOL_TIMEOUT</old_pattern>
+            <new_pattern>get_unified_config().db_pool_timeout</new_pattern>
+        </mapping>
+        <mapping>
+            <old_pattern>DatabaseConfig.POOL_RECYCLE</old_pattern>
+            <new_pattern>get_unified_config().db_pool_recycle</new_pattern>
+        </mapping>
+        <mapping>
+            <old_pattern>DatabaseConfig.POOL_PRE_PING</old_pattern>
+            <new_pattern>get_unified_config().db_pool_pre_ping</new_pattern>
+        </mapping>
+        <mapping>
+            <old_pattern>DatabaseConfig.ECHO</old_pattern>
+            <new_pattern>get_unified_config().db_echo</new_pattern>
+        </mapping>
+        <mapping>
+            <old_pattern>DatabaseConfig.ECHO_POOL</old_pattern>
+            <new_pattern>get_unified_config().db_echo_pool</new_pattern>
+        </mapping>
+        <mapping>
+            <old_pattern>DatabaseConfig.STATEMENT_TIMEOUT</old_pattern>
+            <new_pattern>get_unified_config().db_statement_timeout</new_pattern>
+        </mapping>
+    </migration_guide>
+
+    <lessons_learned>
+        <lesson>Configuration migrations must be atomic and comprehensive - partial migrations lead to deployment failures</lesson>
+        <lesson>Staging environment reveals issues that local development may not catch due to different initialization paths</lesson>
+        <lesson>Five Whys analysis is effective for drilling down to root causes of deployment issues</lesson>
+        <lesson>Creating failing tests first helps verify the fix actually addresses the issue</lesson>
+        <lesson>Always verify fixes in the actual deployment environment, not just in tests</lesson>
+    </lessons_learned>
+
+    <verification_status>
+        <tests_passing>true</tests_passing>
+        <staging_deployment>successful</staging_deployment>
+        <database_config_errors>resolved</database_config_errors>
+        <remaining_issues>Database authentication in staging (separate issue)</remaining_issues>
+    </verification_status>
+</learning_document>

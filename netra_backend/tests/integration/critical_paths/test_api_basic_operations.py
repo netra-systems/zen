@@ -24,6 +24,7 @@ from test_framework.test_patterns import L3IntegrationTest
 class TestAPIBasicOperations(L3IntegrationTest):
     """Test API basic operations from multiple angles."""
     
+    @pytest.mark.asyncio
     async def test_api_health_check(self):
         """Test API health check endpoint."""
         async with aiohttp.ClientSession() as session:
@@ -36,6 +37,7 @@ class TestAPIBasicOperations(L3IntegrationTest):
                 assert "timestamp" in data
                 assert "services" in data
                 
+    @pytest.mark.asyncio
     async def test_api_version_endpoint(self):
         """Test API version information endpoint."""
         async with aiohttp.ClientSession() as session:
@@ -47,6 +49,7 @@ class TestAPIBasicOperations(L3IntegrationTest):
                 assert "build_number" in data
                 assert "git_commit" in data
                 
+    @pytest.mark.asyncio
     async def test_api_cors_headers(self):
         """Test CORS headers on API responses."""
         async with aiohttp.ClientSession() as session:
@@ -61,6 +64,7 @@ class TestAPIBasicOperations(L3IntegrationTest):
                 assert "Access-Control-Allow-Methods" in resp.headers
                 assert "Access-Control-Allow-Headers" in resp.headers
                 
+    @pytest.mark.asyncio
     async def test_api_content_type_negotiation(self):
         """Test content type negotiation."""
         user_data = await self.create_test_user("api1@test.com")
@@ -80,6 +84,7 @@ class TestAPIBasicOperations(L3IntegrationTest):
                 assert resp.status == 200
                 assert "application/json" in resp.headers["Content-Type"]
                 
+    @pytest.mark.asyncio
     async def test_api_pagination_parameters(self):
         """Test API pagination with different parameters."""
         user_data = await self.create_test_user("api2@test.com")
@@ -123,6 +128,7 @@ class TestAPIBasicOperations(L3IntegrationTest):
                     expected_count = min(params["limit"], max(0, data["total"] - params["offset"]))
                     assert len(data["threads"]) == expected_count
                     
+    @pytest.mark.asyncio
     async def test_api_sorting_parameters(self):
         """Test API sorting with different fields."""
         user_data = await self.create_test_user("api3@test.com")
@@ -170,6 +176,7 @@ class TestAPIBasicOperations(L3IntegrationTest):
                 dates = [t["created_at"] for t in data["threads"]]
                 assert dates == sorted(dates, reverse=True)
                 
+    @pytest.mark.asyncio
     async def test_api_filtering_operations(self):
         """Test API filtering with different operators."""
         user_data = await self.create_test_user("api4@test.com")
@@ -214,6 +221,7 @@ class TestAPIBasicOperations(L3IntegrationTest):
                 for thread in data["threads"]:
                     assert 5 <= thread["priority"] <= 8
                     
+    @pytest.mark.asyncio
     async def test_api_field_selection(self):
         """Test API field selection/projection."""
         user_data = await self.create_test_user("api5@test.com")
@@ -249,6 +257,7 @@ class TestAPIBasicOperations(L3IntegrationTest):
                 assert "description" not in data
                 assert "metadata" not in data
                 
+    @pytest.mark.asyncio
     async def test_api_batch_operations(self):
         """Test API batch operations."""
         user_data = await self.create_test_user("api6@test.com")
@@ -279,6 +288,7 @@ class TestAPIBasicOperations(L3IntegrationTest):
                     assert result["status"] == "success"
                     assert "id" in result["data"]
                     
+    @pytest.mark.asyncio
     async def test_api_error_response_format(self):
         """Test standardized error response format."""
         async with aiohttp.ClientSession() as session:

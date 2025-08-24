@@ -116,7 +116,7 @@ def _check_clickhouse_disabled_status() -> Optional[HealthCheckResult]:
 
 async def _execute_clickhouse_query() -> None:
     """Execute test query on ClickHouse database."""
-    from netra_backend.app.db.clickhouse import get_clickhouse_client
+    from netra_backend.app.database import get_clickhouse_client
     async with get_clickhouse_client() as client:
         await client.execute("SELECT 1")
 
@@ -164,12 +164,12 @@ async def check_websocket_health() -> HealthCheckResult:
         return _create_websocket_health_result(stats, health_score, response_time)
     except Exception as e:
         response_time = (time.time() - start_time) * 1000
-        return _create_failed_result("websocket", str(e), response_time)
+        return _handle_service_failure("websocket", str(e), response_time)
 
 async def _get_websocket_stats_and_score() -> tuple[Dict[str, Any], float]:
     """Get WebSocket connection stats and calculate health score."""
-    from netra_backend.app.websocket_core_manager import get_connection_manager
-    conn_manager = get_connection_manager()
+    from netra_backend.app.websocket_core.utils import get_connection_monitor
+    conn_manager = get_connection_monitor()
     stats = await conn_manager.get_stats()
     health_score = _calculate_websocket_health_score(stats)
     return stats, health_score

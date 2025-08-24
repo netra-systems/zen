@@ -48,22 +48,27 @@ const nextConfig: NextConfig = {
     return [];
   },
   async rewrites() {
-    // Proxy API routes to backend service
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
-      },
-      {
-        source: '/health/:path*', 
-        destination: `${backendUrl}/health/:path*`,
-      },
-      {
-        source: '/openapi.json',
-        destination: `${backendUrl}/openapi.json`,
-      },
-    ];
+    // Only use proxy rewrites in development
+    // In production, the frontend should call backend services directly using their public URLs
+    if (process.env.NODE_ENV === 'development') {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      return [
+        {
+          source: '/api/:path*',
+          destination: `${backendUrl}/api/:path*`,
+        },
+        {
+          source: '/health/:path*', 
+          destination: `${backendUrl}/health/:path*`,
+        },
+        {
+          source: '/openapi.json',
+          destination: `${backendUrl}/openapi.json`,
+        },
+      ];
+    }
+    // No rewrites in production - frontend calls services directly
+    return [];
   },
   outputFileTracingIncludes: {
     '/api': ['./node_modules/**/*.js'],

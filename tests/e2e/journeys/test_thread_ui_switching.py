@@ -126,6 +126,7 @@ class ThreadOperationExecutor:
     async def create_thread_with_ui_update(self, thread_title: str = None) -> Dict[str, Any]:
         """Create thread and update UI state."""
         thread_id = f"thread_{self.user_id}_{int(time.time())}_{len(self.created_threads)}"
+        # Mock: Generic component isolation for controlled unit testing
         mock_thread = MagicMock()
         mock_thread.id = thread_id
         mock_thread.created_at = datetime.now(timezone.utc)
@@ -181,6 +182,7 @@ class ThreadOperationExecutor:
     async def add_message_with_ui_update(self, thread_id: str, content: str, role: str = "user") -> Dict[str, Any]:
         """Add message to thread and update UI."""
         # Mock message creation
+        # Mock: Generic component isolation for controlled unit testing
         mock_message = MagicMock()
         mock_message.id = f"msg_{int(time.time())}"
         mock_message.created_at = datetime.now(timezone.utc)

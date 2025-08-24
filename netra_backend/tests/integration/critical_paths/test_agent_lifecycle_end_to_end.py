@@ -103,6 +103,7 @@ class AgentLifecycleTester:
             print(f"[ERROR] Authentication error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_agent_initialization(self) -> bool:
         """Test agent initialization and registration."""
         print("\n[INIT] STEP 2: Initializing agent...")
@@ -149,6 +150,7 @@ class AgentLifecycleTester:
             print(f"[ERROR] Agent initialization error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_agent_registration(self) -> bool:
         """Test agent registration with the system."""
         print("\n[REGISTER] STEP 3: Registering agent with system...")
@@ -185,6 +187,7 @@ class AgentLifecycleTester:
             print(f"[ERROR] Registration error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_context_creation(self) -> bool:
         """Test agent context creation and management."""
         print("\n[CONTEXT] STEP 4: Creating agent context...")
@@ -232,6 +235,7 @@ class AgentLifecycleTester:
             print(f"[ERROR] Context creation error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_task_delegation(self) -> bool:
         """Test task delegation to agent."""
         print("\n[DELEGATE] STEP 5: Delegating task to agent...")
@@ -277,6 +281,7 @@ class AgentLifecycleTester:
             print(f"[ERROR] Task delegation error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_agent_websocket_communication(self) -> bool:
         """Test agent communication via WebSocket."""
         print("\n[WS] STEP 6: Testing agent WebSocket communication...")
@@ -340,6 +345,7 @@ class AgentLifecycleTester:
             print(f"[ERROR] WebSocket error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_sub_agent_creation(self) -> bool:
         """Test sub-agent creation by supervisor."""
         print("\n[SUB-AGENT] STEP 7: Creating sub-agent...")
@@ -382,6 +388,7 @@ class AgentLifecycleTester:
             print(f"[ERROR] Sub-agent creation error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_error_recovery(self) -> bool:
         """Test agent error handling and recovery."""
         print("\n[RECOVERY] STEP 8: Testing error recovery...")
@@ -435,6 +442,7 @@ class AgentLifecycleTester:
             print(f"[ERROR] Recovery test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_context_persistence(self) -> bool:
         """Test agent context persistence and retrieval."""
         print("\n[PERSIST] STEP 9: Testing context persistence...")
@@ -486,6 +494,7 @@ class AgentLifecycleTester:
             print(f"[ERROR] Context persistence error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_graceful_termination(self) -> bool:
         """Test agent graceful termination."""
         print("\n[TERMINATE] STEP 10: Testing graceful termination...")
@@ -557,6 +566,7 @@ class AgentLifecycleTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_agent_lifecycle_end_to_end():
     """Test the complete agent lifecycle flow."""
     async with AgentLifecycleTester() as tester:

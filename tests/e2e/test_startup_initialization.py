@@ -36,8 +36,6 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.config import LauncherConfig
@@ -721,6 +719,7 @@ async def test_jwt_secret_mismatch_between_services(test_env):
 @pytest.mark.asyncio
 async def test_secrets_manager_api_timeout(test_env):
     """Test 18: Handle secrets loading timeouts"""
+    # Mock: Component isolation for testing without external dependencies
     with patch("netra_backend.app.core.configuration.secrets.GoogleSecretManager") as mock_gsm:
         # Make secret loading hang
         async def slow_load():

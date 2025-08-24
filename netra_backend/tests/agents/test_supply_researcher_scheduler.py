@@ -8,7 +8,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.services.background_task_manager import BackgroundTaskManager
@@ -30,6 +30,7 @@ class TestSupplyResearchScheduler:
     def test_scheduler_initialization(self):
         """Test scheduler initializes with default schedules"""
         background_manager = BackgroundTaskManager()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
         
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
@@ -70,6 +71,7 @@ class TestSupplyResearchScheduler:
     async def test_scheduler_execute_research(self):
         """Test executing scheduled research task"""
         background_manager = BackgroundTaskManager()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
@@ -80,9 +82,13 @@ class TestSupplyResearchScheduler:
             providers=["openai"]
         )
         
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('app.services.supply_research.research_executor.Database') as mock_db_manager:
+            # Mock: Generic component isolation for controlled unit testing
             mock_db = Mock()
+            # Mock: Component isolation for controlled unit testing
             mock_db_manager.return_value.get_db.return_value.__enter__ = Mock(return_value=mock_db)
+            # Mock: Component isolation for controlled unit testing
             mock_db_manager.return_value.get_db.return_value.__exit__ = Mock(return_value=None)
             
             with patch.object(SupplyResearcherAgent, 'process_scheduled_research', new_callable=AsyncMock) as mock_process:
@@ -96,6 +102,7 @@ class TestSupplyResearchScheduler:
     def test_scheduler_add_remove_schedules(self):
         """Test adding and removing schedules"""
         background_manager = BackgroundTaskManager()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
@@ -117,6 +124,7 @@ class TestSupplyResearchScheduler:
     def test_scheduler_enable_disable(self):
         """Test enabling and disabling schedules"""
         background_manager = BackgroundTaskManager()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
@@ -132,6 +140,7 @@ class TestSupplyResearchScheduler:
     def test_scheduler_get_status(self):
         """Test getting status of all schedules"""
         background_manager = BackgroundTaskManager()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
@@ -146,12 +155,17 @@ class TestSupplyResearchScheduler:
     async def test_scheduler_agent_integration(self):
         """Test scheduler integration with agent"""
         background_manager = BackgroundTaskManager()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('app.db.postgres.Database') as mock_db_manager:
+            # Mock: Generic component isolation for controlled unit testing
             mock_db = Mock()
+            # Mock: Component isolation for controlled unit testing
             mock_db_manager.return_value.get_db.return_value.__enter__ = Mock(return_value=mock_db)
+            # Mock: Component isolation for controlled unit testing
             mock_db_manager.return_value.get_db.return_value.__exit__ = Mock(return_value=None)
             
             # Mock agent execution

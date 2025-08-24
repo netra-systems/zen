@@ -5,9 +5,8 @@
 Handles secure loading, rotation, and management of secrets.
 Supports GCP Secret Manager integration and local development.
 
-**CONFIGURATION MANAGER**: This module is part of the configuration system
-and requires direct os.environ access for secure secret loading.
-Application code should use the unified configuration system instead.
+**UPDATED**: This module now uses IsolatedEnvironment for unified environment management.
+Follows SPEC/unified_environment_management.xml for consistent environment access.
 
 Business Value: Prevents security breaches that could affect Enterprise customers.
 Ensures compliance with security requirements for revenue-critical operations.
@@ -16,10 +15,10 @@ Each function ≤8 lines, file ≤300 lines.
 """
 
 import json
-import os
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
+from dev_launcher.isolated_environment import get_env
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.Config import AppConfig
@@ -35,6 +34,7 @@ class SecretManager:
     def __init__(self):
         """Initialize secure secret manager."""
         self._logger = logger
+        self._env = get_env()  # Use IsolatedEnvironment for all env access
         self._environment = self._get_environment()
         self._secret_mappings = self._load_secret_mappings()
         self._secret_cache = {}
@@ -45,10 +45,10 @@ class SecretManager:
     def _get_environment(self) -> str:
         """Get current environment for secret management.
         
-        CONFIG MANAGER: Direct env access required for secure environment detection.
+        Uses IsolatedEnvironment for secure environment detection.
         """
-        # CONFIG BOOTSTRAP: Direct env access for secure environment detection
-        return os.environ.get("ENVIRONMENT", "development").lower()
+        # Use IsolatedEnvironment for secure environment detection
+        return self._env.get("ENVIRONMENT", "development").lower()
     
     def _load_secret_mappings(self) -> Dict[str, dict]:
         """Load secret to configuration field mappings."""
@@ -61,14 +61,34 @@ class SecretManager:
     
     def _get_llm_secret_mappings(self) -> Dict[str, dict]:
         """Get LLM-related secret mappings."""
-        return {"GEMINI_API_KEY": self._get_gemini_api_key_mapping()}
+        return {
+            "GEMINI_API_KEY": self._get_gemini_api_key_mapping(),
+            "ANTHROPIC_API_KEY": self._get_anthropic_api_key_mapping(),
+            "OPENAI_API_KEY": self._get_openai_api_key_mapping()
+        }
     
     def _get_gemini_api_key_mapping(self) -> Dict[str, Any]:
         """Get Gemini API key mapping configuration."""
         return {
             "target_models": ["llm_configs.default", "llm_configs.triage", 
                             "llm_configs.data", "llm_configs.optimizations_core"],
-            "target_field": "api_key", "required": True, "rotation_enabled": True
+            "target_field": "gemini_api_key", "required": False, "rotation_enabled": True
+        }
+    
+    def _get_anthropic_api_key_mapping(self) -> Dict[str, Any]:
+        """Get Anthropic API key mapping configuration."""
+        return {
+            "target_field": "anthropic_api_key",
+            "required": False,
+            "rotation_enabled": True
+        }
+    
+    def _get_openai_api_key_mapping(self) -> Dict[str, Any]:
+        """Get OpenAI API key mapping configuration."""
+        return {
+            "target_field": "openai_api_key",
+            "required": False,
+            "rotation_enabled": True
         }
     
     def _get_oauth_secret_mappings(self) -> Dict[str, dict]:
@@ -178,20 +198,67 @@ class SecretManager:
         if self._is_cache_valid():
             return
         self._secret_cache = {}
+        self._load_dotenv_if_development()
         self._load_from_environment_variables()
         self._load_from_gcp_secret_manager()
         self._load_from_local_files()
         self._cache_timestamp = datetime.now()
     
+    def _load_dotenv_if_development(self) -> None:
+        """Load .env files in development mode.
+        
+        CONFIG MANAGER: Direct env loading for development secrets.
+        """
+        if self._environment not in ["development", "testing"]:
+            return
+            
+        try:
+            from pathlib import Path
+            from dotenv import load_dotenv
+            
+            # Find project root
+            current_file = Path(__file__)
+            project_root = current_file.parent.parent.parent.parent
+            
+            # Load .env file if it exists
+            env_path = project_root / ".env"
+            if env_path.exists():
+                load_dotenv(env_path, override=False)
+                self._logger.debug(f"Loaded .env file from {env_path}")
+            
+            # Load .env.dev if it exists (higher priority)
+            env_dev_path = project_root / ".env.dev"
+            if env_dev_path.exists():
+                load_dotenv(env_dev_path, override=True)
+                self._logger.debug(f"Loaded .env.dev file from {env_dev_path}")
+            
+            # Load .env.test if in testing environment (higher priority than .env.dev)
+            if self._environment == "testing":
+                env_test_path = project_root / "netra_backend" / ".env.test"
+                if env_test_path.exists():
+                    load_dotenv(env_test_path, override=True)
+                    self._logger.debug(f"Loaded .env.test file from {env_test_path}")
+            
+            # Load .env.local if it exists (highest priority)
+            env_local_path = project_root / ".env.local"
+            if env_local_path.exists():
+                load_dotenv(env_local_path, override=True)
+                self._logger.debug(f"Loaded .env.local file from {env_local_path}")
+        except ImportError:
+            # dotenv not available, skip
+            pass
+        except Exception as e:
+            self._logger.debug(f"Could not load .env files: {e}")
+    
     def _load_from_environment_variables(self) -> None:
         """Load secrets from environment variables.
         
-        CONFIG MANAGER: Direct env access required for secure secret loading.
+        Uses IsolatedEnvironment for secure secret loading.
         """
-        # CONFIG BOOTSTRAP: Direct env access for secure secret loading
+        # Use IsolatedEnvironment for secure secret loading
         env_mapping = self._get_environment_variable_mapping()
         for secret_name, env_var in env_mapping.items():
-            value = os.environ.get(env_var)
+            value = self._env.get(env_var)
             if value:
                 self._secret_cache[secret_name] = value
                 self._logger.debug(f"Loaded {secret_name} from environment")
@@ -290,17 +357,19 @@ class SecretManager:
             "FERNET_KEY": "FERNET_KEY",
             "SERVICE_SECRET": "SERVICE_SECRET",
             "CLICKHOUSE_DEFAULT_PASSWORD": "CLICKHOUSE_DEFAULT_PASSWORD",
-            "REDIS_PASSWORD": "REDIS_PASSWORD"
+            "REDIS_PASSWORD": "REDIS_PASSWORD",
+            "ANTHROPIC_API_KEY": "ANTHROPIC_API_KEY",
+            "OPENAI_API_KEY": "OPENAI_API_KEY"
         }
     
     def _is_gcp_available(self) -> bool:
         """Check if GCP Secret Manager is available.
         
-        CONFIG MANAGER: Direct env access required for GCP availability check.
+        Uses IsolatedEnvironment for GCP availability check.
         """
-        # CONFIG BOOTSTRAP: Direct env access for GCP availability detection
+        # Use IsolatedEnvironment for GCP availability detection
         return (self._environment in ["staging", "production"] and 
-                os.environ.get("GCP_PROJECT_ID") is not None)
+                self._env.get("GCP_PROJECT_ID") is not None)
     
     def _fetch_gcp_secrets(self) -> Dict[str, str]:
         """Fetch secrets from GCP Secret Manager."""
@@ -316,12 +385,12 @@ class SecretManager:
     def _get_gcp_project_id(self) -> str:
         """Get GCP project ID for secret access.
         
-        CONFIG MANAGER: Direct env access required for GCP project ID.
+        Uses IsolatedEnvironment for GCP project ID.
         """
-        # CONFIG BOOTSTRAP: Direct env access for GCP project ID
+        # Use IsolatedEnvironment for GCP project ID
         staging_project = "701982941522"
         production_project = "304612253870"
-        return os.environ.get("GCP_PROJECT_ID", 
+        return self._env.get("GCP_PROJECT_ID", 
                              staging_project if self._environment == "staging" else production_project)
     
     def _retrieve_gcp_secrets(self, client, project_id: str) -> Dict[str, str]:
@@ -348,8 +417,9 @@ class SecretManager:
         # .secrets file is only for ACT/GitHub Actions testing, not for dev mode
         # Real development should use .env.local or environment variables
         secret_files = [".env.local", "secrets.json"]
+        from pathlib import Path
         for file_path in secret_files:
-            if os.path.exists(file_path):
+            if Path(file_path).exists():
                 secrets.update(self._parse_secret_file(file_path))
         return secrets
     
@@ -357,7 +427,8 @@ class SecretManager:
         """Parse individual secret file."""
         secrets = {}
         try:
-            if file_path.endswith('.json'):
+            from pathlib import Path
+            if Path(file_path).suffix == '.json':
                 secrets = self._parse_json_secret_file(file_path)
             else:
                 secrets = self._parse_env_secret_file(file_path)

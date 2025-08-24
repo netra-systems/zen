@@ -104,27 +104,21 @@ class DatabaseConsistencyTester:
             self.websocket_client = RealWebSocketClient("ws://localhost:8000/ws")
             await self.websocket_client.connect({"Authorization": f"Bearer {test_token}"})
         except Exception as e:
-            # If WebSocket connection fails, continue without it
-            # This allows tests to run even if services aren't available
-            self.websocket_client = None
+            # WebSocket connection must succeed for E2E tests
+            raise RuntimeError(f"WebSocket service unavailable for E2E tests: {e}")
     
     async def _verify_services_health(self) -> None:
         """Verify all services are healthy before testing."""
-        try:
-            health_checks = [
-                self.services_manager.check_service_health("auth"),
-                self.services_manager.check_service_health("backend")
-            ]
-            results = await asyncio.gather(*health_checks, return_exceptions=True)
-            # Log any health check failures but don't fail the test setup
-            # Tests should handle service unavailability gracefully
-            for i, result in enumerate(results):
-                if isinstance(result, Exception):
-                    service_name = ["auth", "backend"][i]
-                    print(f"Warning: {service_name} service health check failed: {result}")
-        except Exception as e:
-            # If health checks fail entirely, continue anyway
-            print(f"Warning: Service health checks failed: {e}")
+        health_checks = [
+            self.services_manager.check_service_health("auth"),
+            self.services_manager.check_service_health("backend")
+        ]
+        results = await asyncio.gather(*health_checks, return_exceptions=True)
+        # All services must be healthy for E2E tests
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                service_name = ["auth", "backend"][i]
+                raise RuntimeError(f"{service_name} service unavailable for E2E tests: {result}")
     
     def create_test_transaction(self, user_id: str) -> CrossServiceTransaction:
         """Create a test transaction with generated data."""
@@ -273,7 +267,7 @@ class DatabaseConsistencyTester:
             if backend_user is not None:
                 print(f"Backend user found: {backend_user}")
         except Exception as e:
-            print(f"Backend service unavailable: {e}")
+            raise RuntimeError(f"Backend service unavailable for E2E tests: {e}")
     
     async def _verify_workspace_consistency(self, transaction: CrossServiceTransaction) -> None:
         """Verify workspace data consistency."""

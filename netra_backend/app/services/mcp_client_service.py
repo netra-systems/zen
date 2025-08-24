@@ -7,7 +7,7 @@ Implements IMCPClientService interface with modular architecture compliance.
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.exceptions_service import ServiceError
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.database import get_db_session
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import MCPServerStatus
 from netra_backend.app.schemas.mcp_client import MCPServerConfig

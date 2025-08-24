@@ -13,7 +13,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
@@ -41,7 +41,7 @@ async def real_llm_workflow_setup(real_agent_setup):
         'user_id': 'test-user-001',
         'run_id': f'real-llm-run-{int(time.time())}'
     })
-    return setup
+    yield setup
 
 def _create_performance_tracker():
     """Create performance tracking utilities."""
@@ -56,6 +56,7 @@ def _create_performance_tracker():
 class TestRealLLMWorkflow:
     """Test complete agent workflow with real LLM calls."""
     
+    @pytest.mark.asyncio
     async def test_complete_optimization_workflow_real_llm(self, real_llm_workflow_setup):
         """Test complete optimization workflow with real LLM and quality gates."""
         setup = real_llm_workflow_setup
@@ -164,6 +165,7 @@ class TestRealLLMWorkflow:
 class TestRealLLMConcurrentWorkflow:
     """Test concurrent real LLM workflows for performance and stability."""
     
+    @pytest.mark.asyncio
     async def test_concurrent_real_llm_workflows(self, real_llm_workflow_setup):
         """Test multiple concurrent workflows with real LLM calls."""
         setup = real_llm_workflow_setup
@@ -219,6 +221,7 @@ class TestRealLLMConcurrentWorkflow:
 class TestRealLLMErrorHandling:
     """Test error handling and recovery in real LLM workflows."""
     
+    @pytest.mark.asyncio
     async def test_real_llm_timeout_handling(self, real_llm_workflow_setup):
         """Test how workflow handles real LLM timeout scenarios."""
         setup = real_llm_workflow_setup
@@ -255,6 +258,7 @@ class TestRealLLMErrorHandling:
 class TestRealLLMQualityGates:
     """Test quality gate validation with real LLM responses."""
     
+    @pytest.mark.asyncio
     async def test_quality_gate_validation_real_responses(self, real_llm_workflow_setup):
         """Test quality gates with actual LLM response content."""
         setup = real_llm_workflow_setup

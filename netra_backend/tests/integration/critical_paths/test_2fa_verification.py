@@ -38,7 +38,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pyotp
 import pytest
@@ -672,6 +672,7 @@ class TwoFactorAuthTestManager:
             logger.error(f"Service initialization failed: {e}")
             raise
 
+    @pytest.mark.asyncio
     async def test_complete_totp_setup_and_verification(self, user_id: str) -> Dict[str, Any]:
         """Test complete TOTP setup and verification flow."""
         totp_flow_start = time.time()
@@ -720,6 +721,7 @@ class TwoFactorAuthTestManager:
                 "totp_flow_time": time.time() - totp_flow_start
             }
 
+    @pytest.mark.asyncio
     async def test_sms_fallback_flow(self, user_id: str, phone_number: str) -> Dict[str, Any]:
         """Test SMS fallback verification flow."""
         sms_flow_start = time.time()
@@ -777,6 +779,7 @@ class TwoFactorAuthTestManager:
         match = re.search(r'\b(\d{6})\b', message)
         return match.group(1) if match else "000000"
 
+    @pytest.mark.asyncio
     async def test_2fa_rate_limiting(self, user_id: str) -> Dict[str, Any]:
         """Test 2FA rate limiting functionality."""
         rate_limit_start = time.time()
@@ -820,6 +823,7 @@ class TwoFactorAuthTestManager:
                 "rate_limit_time": time.time() - rate_limit_start
             }
 
+    @pytest.mark.asyncio
     async def test_session_enhancement_flow(self, user_id: str) -> Dict[str, Any]:
         """Test session enhancement after 2FA completion."""
         enhancement_start = time.time()
@@ -862,6 +866,7 @@ class TwoFactorAuthTestManager:
                 "enhancement_time": time.time() - enhancement_start
             }
 
+    @pytest.mark.asyncio
     async def test_cross_method_verification(self, user_id: str, phone_number: str) -> Dict[str, Any]:
         """Test verification across different 2FA methods."""
         cross_method_start = time.time()
@@ -937,6 +942,7 @@ async def tfa_verification_manager(isolated_redis_client):
 
 @pytest.mark.asyncio
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_complete_totp_setup_and_verification_flow(tfa_verification_manager):
     """
     Test complete TOTP setup and verification flow.

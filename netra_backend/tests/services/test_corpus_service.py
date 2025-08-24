@@ -3,11 +3,9 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import datetime
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import Corpus, CorpusCreate
@@ -17,6 +15,7 @@ from netra_backend.app.services.corpus_service import CorpusStatus
 class TestCorpusService:
     """Test corpus service basic functionality."""
 
+    @pytest.mark.asyncio
     async def test_corpus_status_enum(self):
         """Test corpus status enumeration."""
         assert CorpusStatus.CREATING.value == "creating"
@@ -25,6 +24,7 @@ class TestCorpusService:
         assert CorpusStatus.UPDATING.value == "updating"
         assert CorpusStatus.DELETING.value == "deleting"
 
+    @pytest.mark.asyncio
     async def test_corpus_schema(self):
         """Test corpus Pydantic schema."""
         corpus_data = {
@@ -44,6 +44,7 @@ class TestCorpusService:
         assert corpus.status == "available"
         assert corpus.created_by_id == "user123"
 
+    @pytest.mark.asyncio
     async def test_corpus_create_schema(self):
         """Test corpus creation schema."""
         create_data = {
@@ -55,6 +56,7 @@ class TestCorpusService:
         assert corpus_create.name == "New Corpus"
         assert corpus_create.description == "Creating a new corpus"
 
+    @pytest.mark.asyncio
     async def test_corpus_service_import(self):
         """Test that corpus service can be imported."""
         from netra_backend.app.services.corpus_service import CorpusStatus

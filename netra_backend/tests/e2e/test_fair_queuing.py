@@ -24,6 +24,7 @@ from netra_backend.tests.e2e.concurrent_load_helpers import (
 class TestFairQueuing:
     """Test fair queuing mechanism"""
     
+    @pytest.mark.asyncio
     async def test_fair_queuing_mechanism(self):
         """Validate fair queuing of requests under load"""
         tester = ConcurrentUserLoadTest()
@@ -33,6 +34,7 @@ class TestFairQueuing:
         assert results['starvation_prevented'], "Some users were starved of resources"
         assert results['fair_queuing'], "Queuing mechanism is not fair"
     
+    @pytest.mark.asyncio
     async def test_fair_queuing(self, tester) -> dict:
         """Test fair queuing mechanism under load"""
         tasks = []

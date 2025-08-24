@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -75,6 +75,7 @@ class TestServiceRegistry:
         assert service1.is_initialized
         assert service2.is_initialized
 
+    @pytest.mark.asyncio
     async def test_initialize_all(self):
         """Test initializing all services."""
         registry = ServiceRegistry()
@@ -91,6 +92,7 @@ class TestServiceRegistry:
         assert not service1.is_initialized
         assert not service2.is_initialized
 
+    @pytest.mark.asyncio
     async def test_shutdown_all(self):
         """Test shutting down all services."""
         registry = ServiceRegistry()
@@ -109,6 +111,7 @@ class TestServiceRegistry:
         assert health_results["service1"].service_name == "service1"
         assert health_results["service2"].service_name == "service2"
 
+    @pytest.mark.asyncio
     async def test_health_check_all(self):
         """Test health check for all services."""
         registry = ServiceRegistry()
@@ -127,6 +130,7 @@ class TestServiceRegistry:
         assert health_results[service_name].status == "unhealthy"
         assert error_text in health_results[service_name].metrics.get("error", "")
 
+    @pytest.mark.asyncio
     async def test_health_check_all_with_exception(self):
         """Test health check when service raises exception."""
         registry = ServiceRegistry()

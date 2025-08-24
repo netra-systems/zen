@@ -83,25 +83,39 @@ def sample_data():
 @pytest.fixture
 def mock_redis_client():
     """Common Redis client mock for all tests"""
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     mock.connect = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.disconnect = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.get = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.set = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.delete = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.exists = AsyncMock(return_value=False)
+    # Mock: Async component isolation for testing without real async operations
     mock.ping = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     mock.aclose = AsyncMock(return_value=None)
     return mock
 
 @pytest.fixture
 def mock_redis_manager():
     """Common Redis manager mock"""
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
     mock.enabled = True
+    # Mock: Async component isolation for testing without real async operations
     mock.get = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.set = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     mock.delete = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.exists = AsyncMock(return_value=False)
     return mock
 
@@ -112,23 +126,40 @@ def mock_redis_manager():
 @pytest.fixture
 def mock_websocket_manager():
     """Unified WebSocket manager mock for all services"""
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
     mock.active_connections = {}
+    # Mock: Async component isolation for testing without real async operations
     mock.connect = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.disconnect = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_message = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.broadcast = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.shutdown = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_upgrade_prompt = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_tier_limits_warning = AsyncMock(return_value=None)
+    # Mock: Security service isolation for auth testing without real token validation
     mock.send_security_confirmation = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_dashboard_update = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_onboarding_update = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_optimization_results = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_optimization_result = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_dashboard_ready = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_team_upgrade_offer = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_purchase_confirmation = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_sharing_ready = AsyncMock(return_value=None)
     return mock
 
@@ -139,17 +170,24 @@ def mock_websocket_manager():
 @pytest.fixture
 def mock_clickhouse_client():
     """Common ClickHouse client mock"""
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     mock.execute = AsyncMock(return_value=[])
+    # Mock: Async component isolation for testing without real async operations
     mock.insert = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     mock.close = AsyncMock(return_value=None)
     return mock
 
 @pytest.fixture
 def mock_llm_manager():
     """Common LLM manager mock"""
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock.get_llm = MagicMock(return_value=MagicMock())
+    # Mock: Async component isolation for testing without real async operations
     mock.generate_response = AsyncMock(return_value={
         "content": "Test response",
         "model": "test-model", 
@@ -161,38 +199,48 @@ def mock_llm_manager():
 @pytest.fixture
 def mock_background_task_manager():
     """Common background task manager mock"""
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     mock.shutdown = AsyncMock(return_value=None)
     return mock
 
 @pytest.fixture
 def mock_key_manager():
     """Common key manager mock"""
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
+    # Mock: Service component isolation for predictable testing behavior
     mock.load_from_settings = MagicMock(return_value=mock)
     return mock
 
 @pytest.fixture
 def mock_security_service():
     """Common security service mock"""
+    # Mock: Generic component isolation for controlled unit testing
     return MagicMock()
 
 @pytest.fixture
 def mock_tool_dispatcher():
     """Common tool dispatcher mock"""
+    # Mock: Generic component isolation for controlled unit testing
     return MagicMock()
 
 @pytest.fixture
 def mock_agent_supervisor():
     """Common agent supervisor mock"""
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     mock.shutdown = AsyncMock(return_value=None)
     return mock
 
 @pytest.fixture
 def mock_agent_service():
     """Common agent service mock"""
+    # Mock: Generic component isolation for controlled unit testing
     mock = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     mock.process_message = AsyncMock(return_value={
         "response": "Test response", 
         "metadata": {"test": True}
@@ -206,12 +254,19 @@ def mock_agent_service():
 @pytest.fixture
 def mock_auth_redis():
     """Auth-specific Redis mock for session management"""
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     mock.ping = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     mock.get = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.set = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     mock.setex = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     mock.delete = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     mock.exists = AsyncMock(return_value=False)
     return mock
 
@@ -232,12 +287,19 @@ def test_user_data():
 @pytest.fixture
 def mock_database_factory():
     """Mock database session factory for tests"""
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.commit = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.rollback = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.close = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.add = MagicMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.execute = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.get = AsyncMock()
     mock_session.id = "mock_session_id"
     
@@ -338,16 +400,25 @@ def e2e_logger():
 # ASYNC UTILITIES
 # =============================================================================
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def event_loop():
-    """Shared event loop for session-scoped async fixtures"""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
+    """Create a new event loop for each test function to prevent async issues"""
+    # Always create a new event loop for each test to prevent contamination
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
+    asyncio.set_event_loop(loop)
     yield loop
-    if not loop.is_closed():
-        loop.close()
+    # Proper cleanup: cancel all tasks and close the loop
+    try:
+        # Cancel any remaining tasks
+        pending_tasks = [task for task in asyncio.all_tasks(loop) if not task.done()]
+        if pending_tasks:
+            loop.run_until_complete(asyncio.gather(*pending_tasks, return_exceptions=True))
+    except Exception:
+        pass
+    finally:
+        if not loop.is_closed():
+            loop.close()
 
 # =============================================================================
 # TEST DATA FACTORIES
@@ -358,6 +429,7 @@ def isolated_test_users():
     """Create isolated test users for concurrent testing"""
     users = []
     for i in range(5):
+        # Mock: Generic component isolation for controlled unit testing
         user = MagicMock()
         user.user_id = f"test_user_{i}"
         user.email = f"test{i}@example.com"

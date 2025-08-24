@@ -8,7 +8,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from decimal import Decimal
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.services.background_task_manager import BackgroundTaskManager
@@ -32,6 +32,7 @@ class TestSupplyResearcherIntegration:
     @pytest.mark.asyncio
     async def test_agent_database_integration(self):
         """Test agent integration with database models"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = Mock()
         # Create mock supply item
         existing_item = AISupplyItem(
@@ -45,6 +46,7 @@ class TestSupplyResearcherIntegration:
         mock_db.query().filter().first.return_value = existing_item
         
         service = SupplyResearchService(mock_db)
+        # Mock: Generic component isolation for controlled unit testing
         agent = SupplyResearcherAgent(Mock(), mock_db, service)
         
         # Test update existing item
@@ -58,17 +60,22 @@ class TestSupplyResearcherIntegration:
     
     def _setup_test_infrastructure(self):
         """Setup mock infrastructure for e2e test"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = Mock()
         mock_user = User(id="admin_123", email="admin@test.com", role="admin", is_superuser=True)
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws_manager = AsyncMock()
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_ws_manager.send_agent_update = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws_manager.send_message = AsyncMock()
         
         return mock_db, mock_user, mock_ws_manager
 
     def _create_test_agent(self, mock_db, mock_ws_manager):
         """Create agent with mocked dependencies"""
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
         supply_service = SupplyResearchService(mock_db)
         agent = SupplyResearcherAgent(llm_manager, mock_db, supply_service)
@@ -102,7 +109,9 @@ class TestSupplyResearcherIntegration:
     def _setup_database_mocks(self, mock_db):
         """Setup database mock expectations"""
         mock_db.query().filter().first.return_value = None  # No existing GPT-5
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.add = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.commit = AsyncMock()
 
     def _verify_research_results(self, state):
@@ -157,7 +166,9 @@ class TestSupplyResearcherIntegration:
         # For now, using mocks to simulate the flow
         
         # Setup components
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = Mock()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
         background_manager = BackgroundTaskManager()
         
@@ -174,11 +185,16 @@ class TestSupplyResearcherIntegration:
         scheduler.add_schedule(custom_schedule)
         
         # Mock database and API calls
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('app.db.postgres.Database') as mock_db_class:
+            # Mock: Component isolation for controlled unit testing
             mock_db_class.return_value.get_db.return_value.__enter__ = Mock(return_value=mock_db)
+            # Mock: Component isolation for controlled unit testing
             mock_db_class.return_value.get_db.return_value.__exit__ = Mock(return_value=None)
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_service.SupplyResearchService') as MockService:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_service = Mock()
                 mock_service.calculate_price_changes.return_value = {"all_changes": []}
                 MockService.return_value = mock_service

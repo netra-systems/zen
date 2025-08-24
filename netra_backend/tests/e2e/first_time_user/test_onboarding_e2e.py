@@ -26,6 +26,7 @@ from netra_backend.tests.e2e.first_time_user.helpers import FirstTimeUserTestHel
 class TestOnboardingE2E:
     """Onboarding and demo E2E tests for first-time user conversion"""
 
+    @pytest.mark.asyncio
     async def test_1_first_time_user_complete_onboarding_to_value_e2e(
         self, conversion_environment, cost_savings_calculator
     ):
@@ -49,6 +50,7 @@ class TestOnboardingE2E:
         # Phase 4: First optimization preview
         await self._show_first_optimization_preview(env, value_result)
 
+    @pytest.mark.asyncio
     async def test_2_free_user_demo_to_paid_conversion_e2e(
         self, conversion_environment, cost_savings_calculator
     ):
@@ -69,6 +71,7 @@ class TestOnboardingE2E:
         # Phase 3: Upgrade path with urgency
         await self._present_upgrade_with_urgency(env, savings_result)
 
+    @pytest.mark.asyncio
     async def test_5_welcome_screen_to_workspace_setup_e2e(
         self, conversion_environment
     ):

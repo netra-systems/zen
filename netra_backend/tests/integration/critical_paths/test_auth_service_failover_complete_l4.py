@@ -13,7 +13,7 @@ import random
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -51,10 +51,11 @@ class TestAuthServiceFailoverCompleteL4:
         # Create health monitor with reference to infrastructure
         infrastructure['health_monitor'] = HealthMonitor(health_provider=infrastructure)
         
-        return infrastructure
+        yield infrastructure
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_primary_auth_failure_detection(self, ha_infrastructure):
         """Test detection of primary auth service failure"""
         
@@ -98,6 +99,7 @@ class TestAuthServiceFailoverCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_seamless_auth_during_failover(self, ha_infrastructure):
         """Test authentication continues during failover"""
         
@@ -173,6 +175,7 @@ class TestAuthServiceFailoverCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_session_state_replication(self, ha_infrastructure):
         """Test session state replication across auth instances"""
         user_id = "user_replication"
@@ -216,6 +219,7 @@ class TestAuthServiceFailoverCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_split_brain_prevention(self, ha_infrastructure):
         """Test prevention of split-brain scenario"""
         
@@ -254,6 +258,7 @@ class TestAuthServiceFailoverCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_cascading_failure_recovery(self, ha_infrastructure):
         """Test recovery from cascading failures"""
         
@@ -307,6 +312,7 @@ class TestAuthServiceFailoverCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_service_autoscaling(self, ha_infrastructure):
         """Test auth service autoscaling under load"""
         
@@ -374,6 +380,7 @@ class TestAuthServiceFailoverCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_circuit_breaker_activation(self, ha_infrastructure):
         """Test circuit breaker activation during auth service issues"""
         
@@ -452,6 +459,7 @@ class TestAuthServiceFailoverCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_graceful_degradation(self, ha_infrastructure):
         """Test graceful degradation when auth services are partially available"""
         
@@ -498,6 +506,7 @@ class TestAuthServiceFailoverCompleteL4:
         
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_state_reconciliation(self, ha_infrastructure):
         """Test state reconciliation after network partition heal"""
         

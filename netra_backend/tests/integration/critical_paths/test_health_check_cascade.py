@@ -20,7 +20,7 @@ import json
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -124,6 +124,7 @@ class HealthCheckCascadeManager:
             "cascade_time": time.time() - failure_start
         }
     
+    @pytest.mark.asyncio
     async def test_dependency_health_propagation(self, services: List[str]) -> Dict[str, Any]:
         """Test health status propagation through dependencies."""
         propagation_start = time.time()
@@ -160,6 +161,7 @@ class HealthCheckCascadeManager:
             "cascade_detected": len(affected_services) > 0
         }
     
+    @pytest.mark.asyncio
     async def test_health_check_alerting(self, critical_services: List[str]) -> Dict[str, Any]:
         """Test alerting integration with health checks."""
         alerting_start = time.time()
@@ -228,6 +230,7 @@ async def health_cascade_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_service_health_check_registration(health_cascade_manager):
     """Test service health check registration and basic functionality."""
     manager = health_cascade_manager
@@ -248,6 +251,7 @@ async def test_service_health_check_registration(health_cascade_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_dependency_cascade_failure_detection(health_cascade_manager):
     """Test cascade failure detection through dependencies."""
     manager = health_cascade_manager
@@ -277,6 +281,7 @@ async def test_dependency_cascade_failure_detection(health_cascade_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_health_check_alerting_integration(health_cascade_manager):
     """Test integration between health checks and alerting system."""
     manager = health_cascade_manager
@@ -305,6 +310,7 @@ async def test_health_check_alerting_integration(health_cascade_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_health_check_recovery_detection(health_cascade_manager):
     """Test health check recovery detection and cascade restoration."""
     manager = health_cascade_manager

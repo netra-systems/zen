@@ -8,8 +8,6 @@ while ensuring each module is ≤300 lines and each function is ≤8 lines.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import sys
 from pathlib import Path
 

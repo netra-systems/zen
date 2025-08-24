@@ -106,6 +106,7 @@ class TestMultiTenantIsolationL3:
         await manager.cleanup()
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_tenants(self, tenant_manager):
         """Create test tenants."""
         tenant_a_id = str(uuid.uuid4())
