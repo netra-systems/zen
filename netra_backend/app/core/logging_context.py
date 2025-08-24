@@ -15,6 +15,7 @@ except ImportError:
                 os.environ[key] = value
         return FallbackEnv()
     _has_isolated_env = False
+
 """Logging context management and correlation IDs for the unified logging system.
 
 This module handles:

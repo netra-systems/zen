@@ -12,6 +12,17 @@ except ImportError:
             def set(self, key, value, source="production"):
                 os.environ[key] = value
         return FallbackEnv()
+except ImportError:
+    # Production fallback if isolated_environment module unavailable
+    import os
+    def get_env():
+        """Fallback environment accessor for production."""
+        class FallbackEnv:
+            def get(self, key, default=None):
+                return os.environ.get(key, default)
+            def set(self, key, value, source="production"):
+                os.environ[key] = value
+        return FallbackEnv()
 """PostgreSQL core connection and engine setup module.
 
 Handles database engine creation, connection management, and initialization.

@@ -1,6 +1,5 @@
 # Environment access: Development vs Production
 try:
-    # Use backend-specific isolated environment
     from netra_backend.app.core.isolated_environment import get_env
     _has_isolated_env = True
 except ImportError:

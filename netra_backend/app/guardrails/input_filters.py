@@ -12,6 +12,17 @@ except ImportError:
             def set(self, key, value, source="production"):
                 os.environ[key] = value
         return FallbackEnv()
+except ImportError:
+    # Production fallback if isolated_environment module unavailable
+    import os
+    def get_env():
+        """Fallback environment accessor for production."""
+        class FallbackEnv:
+            def get(self, key, default=None):
+                return os.environ.get(key, default)
+            def set(self, key, value, source="production"):
+                os.environ[key] = value
+        return FallbackEnv()
 """Input filtering and validation for NACIS security.
 
 Date Created: 2025-01-22

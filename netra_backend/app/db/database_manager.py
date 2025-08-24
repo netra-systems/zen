@@ -1,8 +1,7 @@
 # Conditional import of environment management
 try:
-    # Use backend-specific isolated environment
-try:
     from netra_backend.app.core.isolated_environment import get_env
+    _env_available = True
 except ImportError:
     # Production fallback if isolated_environment module unavailable
     import os
@@ -14,18 +13,6 @@ except ImportError:
             def set(self, key, value, source="production"):
                 os.environ[key] = value
         return FallbackEnv()
-    _env_available = True
-except ImportError:
-    # Fallback for production environments where dev_launcher might not be available
-    import os
-    def get_env():
-        """Fallback environment manager for production."""
-        class ProductionEnv:
-            def get(self, key: str, default=None):
-                return os.environ.get(key, default)
-            def set(self, key: str, value: str, source: str = "production"):
-                os.environ[key] = value
-        return ProductionEnv()
     _env_available = False
 """Unified Database Manager - Handles Sync and Async Connections
 
