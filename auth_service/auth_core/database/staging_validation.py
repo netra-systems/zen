@@ -275,11 +275,19 @@ class StagingDatabaseValidator:
         }
         
         try:
-            from shared.database.core_database_manager import CoreDatabaseManager
+            import re
             
             # Test SSL parameter conversion
-            is_cloud_sql = CoreDatabaseManager.is_cloud_sql_connection(url)
-            converted = CoreDatabaseManager.convert_ssl_params_for_asyncpg(url)
+            is_cloud_sql = "/cloudsql/" in url
+            
+            # Convert SSL params for asyncpg
+            if is_cloud_sql:
+                converted = re.sub(r'[&?]sslmode=[^&]*', '', url)
+                converted = re.sub(r'[&?]ssl=[^&]*', '', converted)
+                converted = re.sub(r'&&+', '&', converted)
+                converted = re.sub(r'[&?]$', '', converted)
+            else:
+                converted = url.replace("sslmode=require", "ssl=require") if "sslmode=require" in url else url
             
             if is_cloud_sql:
                 # Cloud SQL should have no SSL parameters after conversion

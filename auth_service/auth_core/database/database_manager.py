@@ -16,8 +16,6 @@ from urllib.parse import urlparse, urlunparse
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.pool import NullPool, AsyncAdaptedQueuePool
 
-from shared.database.core_database_manager import CoreDatabaseManager
-
 logger = logging.getLogger(__name__)
 
 
@@ -30,8 +28,13 @@ class AuthDatabaseManager:
         if not url:
             return url
         
-        # Use shared core database manager for URL conversion
-        return CoreDatabaseManager.format_url_for_async_driver(url)
+        # Convert to async driver format for auth service
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://")
+        elif url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://")
+        
+        return url
     
     @classmethod
     def create_async_engine(

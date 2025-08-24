@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
-from shared.database.unified_redis_manager import auth_redis_manager
+from auth_service.auth_core.redis_manager import auth_redis_manager
 from auth_service.auth_core.config import AuthConfig
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ class SessionManager:
     """Single Source of Truth for session management"""
     
     def __init__(self):
-        # Use unified Redis manager for all Redis operations
+        # Use auth service Redis manager for all Redis operations
         self.redis_manager = auth_redis_manager
         self.session_ttl = AuthConfig.get_session_ttl_hours()
         

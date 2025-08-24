@@ -251,13 +251,26 @@ class DatabaseConnection:
         Returns:
             URL normalized for asyncpg with SSL parameters handled
         """
-        from shared.database.core_database_manager import CoreDatabaseManager
+        import re
         
-        # Resolve SSL parameter conflicts first
-        resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(url, "asyncpg")
+        # Remove SSL parameters for Cloud SQL Unix socket connections
+        if "/cloudsql/" in url:
+            url = re.sub(r'[&?]sslmode=[^&]*', '', url)
+            url = re.sub(r'[&?]ssl=[^&]*', '', url)
+            url = re.sub(r'&&+', '&', url)
+            url = re.sub(r'[&?]$', '', url)
+        else:
+            # Convert sslmode to ssl for asyncpg
+            if "sslmode=require" in url:
+                url = url.replace("sslmode=require", "ssl=require")
         
         # Format for async driver
-        return CoreDatabaseManager.format_url_for_async_driver(resolved_url)
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://")
+        elif url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://")
+            
+        return url
 
 # Global database instance
 auth_db = AuthDatabase()

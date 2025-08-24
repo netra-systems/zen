@@ -11,7 +11,7 @@ import os
 import secrets
 import time
 from typing import Dict, Optional, Tuple
-from shared.database.unified_redis_manager import auth_redis_manager
+from auth_service.auth_core.redis_manager import auth_redis_manager
 
 logger = logging.getLogger(__name__)
 

@@ -219,8 +219,15 @@ class PreDeploymentValidator:
             
             # Test SSL parameter conversion
             try:
-                from shared.database.core_database_manager import CoreDatabaseManager
-                converted_url = CoreDatabaseManager.convert_ssl_params_for_asyncpg(database_url)
+                import re
+                # Convert SSL params for asyncpg
+                if is_cloud_sql:
+                    converted_url = re.sub(r'[&?]sslmode=[^&]*', '', database_url)
+                    converted_url = re.sub(r'[&?]ssl=[^&]*', '', converted_url)
+                    converted_url = re.sub(r'&&+', '&', converted_url)
+                    converted_url = re.sub(r'[&?]$', '', converted_url)
+                else:
+                    converted_url = database_url.replace("sslmode=require", "ssl=require") if "sslmode=require" in database_url else database_url
                 ssl_config["details"]["conversion_successful"] = True
                 
                 # Check conversion results
