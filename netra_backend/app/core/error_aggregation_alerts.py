@@ -8,13 +8,13 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.error_aggregation_utils import (
+from netra_backend.app.core.error_aggregation_utils import (
     AlertRule,
-    AlertSeverity,
     ErrorAlert,
     ErrorPattern,
     ErrorTrend,
 )
+from netra_backend.app.core.resilience.monitor import AlertSeverity
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
