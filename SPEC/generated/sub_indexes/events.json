@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-08-24T09:35:31.325646",
+    "generated_at": "2025-08-24T12:45:21.222129",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 26
   },
@@ -55,8 +55,8 @@
       "locations": [
         "netra_backend/app/db/postgres_events.py:88",
         "netra_backend/app/db/postgres_events.py:144",
-        "netra_backend/app/websocket_core/types.py:32",
-        "auth_service/auth_core/database/connection_events.py:157",
+        "netra_backend/app/websocket_core/types.py:41",
+        "auth_service/auth_core/database/connection_events.py:152",
         "scripts/scan_string_literals.py:138"
       ]
     },
@@ -78,7 +78,7 @@
       "value": "disconnect",
       "category": "events",
       "locations": [
-        "netra_backend/app/websocket_core/types.py:33",
+        "netra_backend/app/websocket_core/types.py:42",
         "scripts/scan_string_literals.py:138"
       ]
     },
@@ -93,6 +93,7 @@
       "value": "error",
       "category": "events",
       "locations": [
+        "netra_backend/app/agents/actions_agent_monitoring.py:45",
         "netra_backend/app/agents/actions_goals_plan_builder.py:124",
         "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:159",
         "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:229",
@@ -101,8 +102,7 @@
         "netra_backend/app/agents/admin_tool_dispatcher/execution_pattern_helpers.py:45",
         "netra_backend/app/agents/admin_tool_dispatcher/modern_execution_helpers.py:48",
         "netra_backend/app/agents/admin_tool_dispatcher/modern_execution_helpers.py:48",
-        "netra_backend/app/agents/admin_tool_dispatcher/operation_helpers.py:76",
-        "netra_backend/app/agents/admin_tool_dispatcher/tool_handler_helpers.py:207"
+        "netra_backend/app/agents/admin_tool_dispatcher/operation_helpers.py:76"
       ]
     },
     "filtered_by_event": {
@@ -138,6 +138,7 @@
       "value": "message",
       "category": "events",
       "locations": [
+        "netra_backend/app/agents/actions_agent_monitoring.py:53",
         "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:167",
         "netra_backend/app/agents/actions_to_meet_goals_sub_agent.py:340",
         "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py:208",
@@ -146,8 +147,7 @@
         "netra_backend/app/agents/agent_communication.py:81",
         "netra_backend/app/agents/agent_lifecycle.py:149",
         "netra_backend/app/agents/agent_lifecycle.py:164",
-        "netra_backend/app/agents/base/interface.py:133",
-        "netra_backend/app/agents/chat_orchestrator/pipeline_executor.py:92"
+        "netra_backend/app/agents/base/interface.py:133"
       ]
     },
     "newest_event": {
@@ -188,7 +188,7 @@
         "netra_backend/app/routes/mcp/websocket_handler.py:141",
         "netra_backend/app/routes/utils/websocket_helpers.py:206",
         "netra_backend/app/routes/utils/websocket_helpers.py:277",
-        "netra_backend/app/routes/websocket.py:449",
+        "netra_backend/app/routes/websocket.py:529",
         "netra_backend/app/schemas/core_enums.py:62",
         "netra_backend/app/schemas/core_enums.py:162",
         "netra_backend/app/services/external_api_client.py:172"
@@ -203,11 +203,11 @@
         "netra_backend/app/routes/utils/websocket_helpers.py:198",
         "netra_backend/app/routes/utils/websocket_helpers.py:310",
         "netra_backend/app/routes/websocket.py:249",
-        "netra_backend/app/routes/websocket.py:452",
+        "netra_backend/app/routes/websocket.py:532",
         "netra_backend/app/schemas/core_enums.py:63",
         "netra_backend/app/schemas/core_enums.py:163",
         "netra_backend/app/websocket_core/manager.py:353",
-        "netra_backend/app/websocket_core/types.py:37"
+        "netra_backend/app/websocket_core/types.py:46"
       ]
     },
     "subscribe": {

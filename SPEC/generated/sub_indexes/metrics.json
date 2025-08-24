@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-08-24T09:35:31.718301",
+    "generated_at": "2025-08-24T12:45:21.685305",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 164
+    "total_literals": 163
   },
   "literals": {
     "(timestamp) as time_bucket, count() as event_count": {
@@ -998,13 +998,6 @@
         "netra_backend/app/websocket_core/auth.py:67"
       ]
     },
-    "restart_count": {
-      "value": "restart_count",
-      "category": "metrics",
-      "locations": [
-        "scripts/dev_launcher_processes.py:161"
-      ]
-    },
     "results_count": {
       "value": "results_count",
       "category": "metrics",
@@ -1187,14 +1180,14 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/db/connection_pool_manager.py:273",
-        "netra_backend/app/db/database_manager.py:212",
+        "netra_backend/app/db/database_manager.py:230",
         "netra_backend/app/db/postgres_async.py:74",
         "netra_backend/app/db/postgres_cloud.py:102",
-        "netra_backend/app/db/postgres_core.py:230",
-        "netra_backend/app/db/postgres_core.py:459",
+        "netra_backend/app/db/postgres_core.py:231",
+        "netra_backend/app/db/postgres_core.py:460",
         "netra_backend/app/services/database/connection_manager.py:127",
-        "auth_service/auth_core/database/connection.py:155",
-        "auth_service/auth_core/database/connection.py:167"
+        "auth_service/auth_core/database/connection.py:165",
+        "auth_service/auth_core/database/connection.py:177"
       ]
     },
     "test_count": {

@@ -120,7 +120,6 @@
     "remaining_count",
     "request_count",
     "requests_count",
-    "restart_count",
     "results_count",
     "retry_count",
     "rotation_enabled_count",
