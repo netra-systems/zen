@@ -26,8 +26,8 @@ except ImportError:
     # Fallback for when running from within netra_backend directory
     import sys
     from pathlib import Path
-    from app.config import get_config, reload_config
-    from app.core.configuration.base import get_unified_config
+    from netra_backend.app.config import get_config, reload_config
+    from netra_backend.app.core.configuration.base import get_unified_config
 
 
 def get_test_config():
@@ -127,7 +127,7 @@ def assert_config_uses_unified_system():
     try:
         from netra_backend.app.schemas.Config import AppConfig
     except ImportError:
-        from app.schemas.Config import AppConfig
+        from netra_backend.app.schemas.Config import AppConfig
     assert isinstance(config, AppConfig), "Config not from unified system"
 
 

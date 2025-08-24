@@ -48,7 +48,7 @@ class TestAdminRoute:
         from netra_backend.app.routes.admin import get_all_users, update_user_role
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.user_service.get_all_users') as mock_get:
+        with patch('netra_backend.app.services.user_service.get_all_users') as mock_get:
             mock_get.return_value = [
                 {"id": "1", "email": "user1@test.com"},
                 {"id": "2", "email": "user2@test.com"}
@@ -66,7 +66,7 @@ class TestAdminRoute:
         
         # Test with mock authorization (if endpoint exists)  
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.auth_integration.get_current_user') as mock_verify:
+        with patch('netra_backend.app.auth_integration.get_current_user') as mock_verify:
             mock_verify.return_value = TEST_USER_DATA["admin"]
             
             response = basic_test_client.get(
@@ -84,7 +84,7 @@ class TestAdminRoute:
         }
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.user_service.update_user_role') as mock_update:
+        with patch('netra_backend.app.services.user_service.update_user_role') as mock_update:
             mock_update.return_value = {"success": True, "user_id": "user123"}
             
             response = basic_test_client.put(
@@ -109,7 +109,7 @@ class TestAdminRoute:
         }
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.user_service.bulk_update_users') as mock_bulk:
+        with patch('netra_backend.app.services.user_service.bulk_update_users') as mock_bulk:
             mock_bulk.return_value = {
                 "processed": 3,
                 "failed": 0,
@@ -165,7 +165,7 @@ class TestAdminRoute:
         from netra_backend.app.routes.admin import get_audit_logs
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.services.audit_service.get_recent_logs') as mock_logs:
+        with patch('netra_backend.app.services.audit_service.get_recent_logs') as mock_logs:
             mock_logs.return_value = [
                 {
                     "id": "log1",

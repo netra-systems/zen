@@ -368,6 +368,161 @@ def create_full_mock_app() -> MockRouteRegistry:
     
     return registry
 
+# Test data and validators
+
+TEST_USER_DATA = {
+    "user_id": "test_user_123",
+    "email": "test@example.com",
+    "username": "testuser",
+    "first_name": "Test",
+    "last_name": "User",
+    "role": "user",
+    "is_active": True,
+    "created_at": "2024-01-01T00:00:00Z",
+    "permissions": ["user:read", "user:update"]
+}
+
+TEST_DOCUMENT_DATA = {
+    "document_id": "test_doc_123",
+    "title": "Test Document",
+    "content": "This is test document content for corpus testing.",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z",
+    "author": "test_user_123",
+    "tags": ["test", "document", "corpus"],
+    "status": "published",
+    "word_count": 10,
+    "version": 1,
+    "metadata": {
+        "source": "test_suite",
+        "category": "test_data",
+        "language": "en"
+    }
+}
+
+
+class MockServiceFactory:
+    """Factory for creating mock services for testing."""
+    
+    def __init__(self):
+        self.services = {}
+        self.mocks = {}
+    
+    def create_mock_service(self, service_name: str, methods: List[str] = None):
+        """Create a mock service with specified methods."""
+        mock_service = Mock()
+        
+        # Add common async methods if not specified
+        if methods is None:
+            methods = ['initialize', 'cleanup', 'get_status', 'health_check']
+        
+        for method_name in methods:
+            # Create async mock methods
+            async_mock = AsyncMock()
+            setattr(mock_service, method_name, async_mock)
+        
+        self.services[service_name] = mock_service
+        return mock_service
+    
+    def get_service(self, service_name: str):
+        """Get a mock service by name."""
+        if service_name not in self.services:
+            return self.create_mock_service(service_name)
+        return self.services[service_name]
+    
+    def create_agent_service(self):
+        """Create a mock agent service."""
+        return self.create_mock_service('agent', [
+            'create_agent', 'delete_agent', 'get_agent', 'list_agents',
+            'update_agent', 'start_agent', 'stop_agent', 'get_agent_status'
+        ])
+    
+    def create_websocket_service(self):
+        """Create a mock websocket service."""
+        return self.create_mock_service('websocket', [
+            'connect', 'disconnect', 'send_message', 'broadcast',
+            'get_connections', 'handle_message'
+        ])
+    
+    def create_database_service(self):
+        """Create a mock database service."""
+        return self.create_mock_service('database', [
+            'connect', 'disconnect', 'execute_query', 'fetch_one',
+            'fetch_all', 'execute_transaction'
+        ])
+
+
+class CommonResponseValidators:
+    """Common response validation utilities."""
+    
+    @staticmethod
+    def validate_success_response(response: MockResponse, expected_keys: List[str] = None):
+        """Validate a successful response."""
+        assert response.status_code == 200
+        content = response.json()
+        
+        if expected_keys:
+            for key in expected_keys:
+                assert key in content, f"Expected key '{key}' not found in response"
+    
+    @staticmethod
+    def validate_error_response(response: MockResponse, expected_status: int = 400):
+        """Validate an error response."""
+        assert response.status_code == expected_status
+        content = response.json()
+        assert "error" in content or "message" in content
+    
+    @staticmethod
+    def validate_auth_response(response: MockResponse):
+        """Validate an authentication response."""
+        assert response.status_code == 200
+        content = response.json()
+        assert "token" in content
+        assert "user_id" in content
+    
+    @staticmethod
+    def validate_user_data(data: Dict[str, Any]):
+        """Validate user data structure."""
+        required_fields = ["user_id", "email", "username"]
+        for field in required_fields:
+            assert field in data, f"Required field '{field}' missing from user data"
+
+
+def basic_test_client():
+    """Create a basic test client for route testing."""
+    return create_mock_api_client("http://localhost:8000")
+
+
+def agent_test_client():
+    """Create an agent-specific test client for route testing."""
+    client = create_mock_api_client("http://localhost:8000")
+    
+    # Set up common agent responses
+    client.set_mock_response("GET", "/agents", MockResponse(200, {
+        "agents": [],
+        "total": 0,
+        "page": 1,
+        "page_size": 10
+    }))
+    
+    client.set_mock_response("POST", "/agents", MockResponse(201, {
+        "agent_id": "test_agent_123",
+        "name": "Test Agent",
+        "status": "created",
+        "created_at": datetime.utcnow().isoformat()
+    }))
+    
+    client.set_mock_response("GET", "/agents/test_agent_123", MockResponse(200, {
+        "agent_id": "test_agent_123",
+        "name": "Test Agent",
+        "status": "running",
+        "created_at": datetime.utcnow().isoformat(),
+        "last_activity": datetime.utcnow().isoformat()
+    }))
+    
+    return client
+
+
 # Test data generators
 
 def generate_test_requests(count: int = 10) -> List[MockRequest]:

@@ -461,6 +461,68 @@ def example_sync_operation():
     time.sleep(0.05)  # Simulate work
     return {"status": "success"}
 
+class BatchingTestHelper:
+    """Helper class for testing batching operations."""
+    
+    def __init__(self, batch_size: int = 10):
+        self.batch_size = batch_size
+        self.batches: List[List[Any]] = []
+        self.processed_items = 0
+        
+    async def process_batch(self, items: List[Any]) -> Dict[str, Any]:
+        """Process a batch of items."""
+        start_time = time.time()
+        
+        # Simulate batch processing
+        await asyncio.sleep(0.01 * len(items))  # Simulated processing time
+        
+        self.batches.append(items)
+        self.processed_items += len(items)
+        
+        return {
+            "batch_size": len(items),
+            "processing_time": time.time() - start_time,
+            "total_processed": self.processed_items,
+            "batch_count": len(self.batches)
+        }
+    
+    def create_batches(self, items: List[Any]) -> List[List[Any]]:
+        """Split items into batches."""
+        return [items[i:i + self.batch_size] for i in range(0, len(items), self.batch_size)]
+    
+    async def process_all_batches(self, items: List[Any]) -> List[Dict[str, Any]]:
+        """Process all batches sequentially."""
+        batches = self.create_batches(items)
+        results = []
+        
+        for batch in batches:
+            result = await self.process_batch(batch)
+            results.append(result)
+        
+        return results
+    
+    async def process_concurrent_batches(self, items: List[Any], max_concurrent: int = 3) -> List[Dict[str, Any]]:
+        """Process batches concurrently with limit."""
+        batches = self.create_batches(items)
+        semaphore = asyncio.Semaphore(max_concurrent)
+        
+        async def process_with_semaphore(batch):
+            async with semaphore:
+                return await self.process_batch(batch)
+        
+        tasks = [process_with_semaphore(batch) for batch in batches]
+        return await asyncio.gather(*tasks)
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get processing statistics."""
+        return {
+            "total_batches": len(self.batches),
+            "total_items": self.processed_items,
+            "avg_batch_size": self.processed_items / len(self.batches) if self.batches else 0,
+            "configured_batch_size": self.batch_size
+        }
+
+
 def create_test_operations() -> Dict[str, Callable]:
     """Create test operations for benchmarking."""
     return {

@@ -11,15 +11,15 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from netra_backend.tests.test_performance_batching import (
+from netra_backend.tests.performance.test_performance_batching import (
     TestBatchProcessor,
     TestMessageBatcher,
 )
-from netra_backend.tests.test_performance_cache import (
+from netra_backend.tests.performance.test_performance_cache import (
     TestMemoryCache,
     TestQueryOptimizer,
 )
-from netra_backend.tests.test_performance_monitoring import (
+from netra_backend.tests.performance.test_performance_monitoring import (
     TestDatabaseIndexOptimization,
     TestPerformanceMonitoring,
     TestPerformanceOptimizationIntegration,

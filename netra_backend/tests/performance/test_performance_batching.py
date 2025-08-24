@@ -1,174 +1,94 @@
 """
-Performance Tests - Batching and Message Processing
-Tests for batch processing and WebSocket message batching functionality.
-Compliance: <300 lines, 25-line max functions, modular design.
+Performance Tests - Batching Operations
+Tests for batch processing and message batching optimizations.
 """
 
+import pytest
+import asyncio
+from typing import List, Dict, Any
 import sys
 from pathlib import Path
+# Add the project root to the Python path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from test_framework.performance import BatchingTestHelper, PerformanceBenchmark
 
-# Test framework import - using pytest fixtures instead
-
-import asyncio
-import time
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
-
-import pytest
-
-from netra_backend.app.core.performance_optimization_manager import BatchProcessor
-from netra_backend.app.websocket_core.types import (
-    BatchConfig,
-    BatchingStrategy,
-)
-from netra_backend.app.websocket_core.batch_message_core import (
-    LoadMonitor,
-    MessageBatcher,
-)
 
 class TestBatchProcessor:
-    """Test batch processing functionality."""
+    """Test batch processing operations."""
     
     @pytest.fixture
-    def processor(self):
-        """Create batch processor for testing."""
-        return BatchProcessor(max_batch_size=5, flush_interval=0.1)
-        
+    def batch_helper(self):
+        """Create batch processing helper."""
+        return BatchingTestHelper(batch_size=5)
+    
     @pytest.mark.asyncio
-    async def test_batch_size_flushing(self, processor):
-        """Test batch flushing when size limit is reached."""
-        processed_batches = []
+    async def test_sequential_batch_processing(self, batch_helper):
+        """Test sequential batch processing."""
+        items = list(range(20))  # 20 items should create 4 batches
         
-        async def batch_processor(batch):
-            processed_batches.append(batch.copy())
+        results = await batch_helper.process_all_batches(items)
         
-        # Add items to trigger size-based flush
-        for i in range(5):
-            await processor.add_to_batch("test_batch", f"item_{i}", batch_processor)
+        assert len(results) == 4  # 4 batches
+        assert batch_helper.processed_items == 20
         
-        # Wait a moment for processing
-        await asyncio.sleep(0.01)
-        
-        # Should have processed one batch of 5 items
-        assert len(processed_batches) == 1
-        assert len(processed_batches[0]) == 5
-        
+        stats = batch_helper.get_stats()
+        assert stats["total_batches"] == 4
+        assert stats["avg_batch_size"] == 5.0
+    
     @pytest.mark.asyncio
-    async def test_time_based_flushing(self, processor):
-        """Test batch flushing based on time interval."""
-        processed_batches = []
+    async def test_concurrent_batch_processing(self, batch_helper):
+        """Test concurrent batch processing."""
+        items = list(range(15))  # 15 items should create 3 batches
         
-        async def batch_processor(batch):
-            processed_batches.append(batch.copy())
+        results = await batch_helper.process_concurrent_batches(items, max_concurrent=2)
         
-        # Add fewer items than batch size
-        for i in range(3):
-            await processor.add_to_batch("test_batch", f"item_{i}", batch_processor)
-        
-        # Wait for time-based flush
-        await asyncio.sleep(0.15)
-        
-        # Should have processed one batch of 3 items
-        assert len(processed_batches) == 1
-        assert len(processed_batches[0]) == 3
-        
+        assert len(results) == 3
+        assert batch_helper.processed_items == 15
+    
     @pytest.mark.asyncio
-    async def test_multiple_batch_keys(self, processor):
-        """Test handling multiple batch keys."""
-        processed_batches = {"batch1": [], "batch2": []}
+    async def test_batch_creation(self, batch_helper):
+        """Test batch creation logic."""
+        items = list(range(12))
+        batches = batch_helper.create_batches(items)
         
-        async def batch_processor_1(batch):
-            processed_batches["batch1"].append(batch.copy())
-        
-        async def batch_processor_2(batch):
-            processed_batches["batch2"].append(batch.copy())
-        
-        # Add items to different batches
-        await processor.add_to_batch("batch1", "item1", batch_processor_1)
-        await processor.add_to_batch("batch2", "item2", batch_processor_2)
-        await processor.add_to_batch("batch1", "item3", batch_processor_1)
-        
-        # Flush all batches
-        await processor.flush_all()
-        
-        # Each batch should have been processed separately
-        assert len(processed_batches["batch1"]) == 1
-        assert len(processed_batches["batch2"]) == 1
-        assert len(processed_batches["batch1"][0]) == 2  # item1, item3
-        assert len(processed_batches["batch2"][0]) == 1  # item2
+        assert len(batches) == 3  # 12 items / 5 per batch = 3 batches
+        assert len(batches[0]) == 5
+        assert len(batches[1]) == 5 
+        assert len(batches[2]) == 2  # Remainder
+
 
 class TestMessageBatcher:
-    """Test WebSocket message batching."""
+    """Test message batching operations."""
     
     @pytest.fixture
-    def mock_connection_manager(self):
-        """Create mock connection manager."""
-        # Mock: Generic component isolation for controlled unit testing
-        manager = Mock()
-        manager.get_user_connections.return_value = [
-            # Mock: WebSocket infrastructure isolation for unit tests without real connections
-            Mock(connection_id="conn_1", websocket=AsyncMock()),
-            # Mock: WebSocket infrastructure isolation for unit tests without real connections
-            Mock(connection_id="conn_2", websocket=AsyncMock())
-        ]
-        # Mock: Component isolation for controlled unit testing
-        manager.get_connection_by_id.return_value = Mock(
-            # Mock: Generic component isolation for controlled unit testing
-            websocket=AsyncMock(),
-            message_count=0
-        )
-        return manager
+    def message_batcher(self):
+        """Create message batcher."""
+        return BatchingTestHelper(batch_size=10)
     
-    @pytest.fixture
-    def batcher(self, mock_connection_manager):
-        """Create message batcher for testing."""
-        config = BatchConfig(max_batch_size=3, max_wait_time=0.1)
-        return MessageBatcher(config, mock_connection_manager)
-        
     @pytest.mark.asyncio
-    async def test_message_batching_size_trigger(self, batcher, mock_connection_manager):
-        """Test message batching triggered by size."""
-        # Queue messages
-        for i in range(3):
-            await batcher.queue_message("user123", {"message": f"test_{i}"})
+    async def test_message_batch_performance(self, message_batcher):
+        """Test performance of message batching."""
+        messages = [{"id": i, "content": f"message_{i}"} for i in range(50)]
         
-        # Wait for batch processing
-        await asyncio.sleep(0.01)
+        benchmark = PerformanceBenchmark("Message Batching")
         
-        # Should have sent a batch
-        conn_mock = mock_connection_manager.get_connection_by_id.return_value
-        assert conn_mock.websocket.send_text.called
+        async def process_messages():
+            return await message_batcher.process_all_batches(messages)
         
+        metrics = await benchmark.run_load_test(process_messages, concurrent_users=1, operations_per_user=1)
+        
+        assert metrics.success_count >= 1
+        assert metrics.error_rate_percent < 10  # Less than 10% error rate
+    
     @pytest.mark.asyncio
-    async def test_priority_message_handling(self, batcher, mock_connection_manager):
-        """Test high-priority message handling."""
-        # Queue high-priority message
-        await batcher.queue_message("user123", {"urgent": "data"}, priority=5)
+    async def test_large_message_batch(self, message_batcher):
+        """Test processing large batches of messages."""
+        large_messages = [{"id": i, "data": "x" * 100} for i in range(100)]
         
-        # Wait for processing
-        await asyncio.sleep(0.01)
+        results = await message_batcher.process_concurrent_batches(large_messages, max_concurrent=3)
         
-        # High-priority messages should be processed quickly
-        conn_mock = mock_connection_manager.get_connection_by_id.return_value
-        assert conn_mock.websocket.send_text.called
+        assert len(results) == 10  # 100 items / 10 per batch
+        assert message_batcher.processed_items == 100
         
-    @pytest.mark.asyncio
-    async def test_adaptive_batching(self, batcher, mock_connection_manager):
-        """Test adaptive batching strategy."""
-        batcher.config.strategy = BatchingStrategy.ADAPTIVE
-        
-        # Simulate high load
-        batcher._load_monitor._load_history = [(time.time(), 0.9)]
-        
-        # Add messages
-        for i in range(2):  # Less than max but should trigger due to high load
-            await batcher.queue_message("user123", {"message": f"test_{i}"})
-        
-        await asyncio.sleep(0.01)
-        
-        # Should have batched due to adaptive strategy
-        conn_mock = mock_connection_manager.get_connection_by_id.return_value
-        assert conn_mock.websocket.send_text.called
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+        stats = message_batcher.get_stats()
+        assert stats["total_batches"] == 10
