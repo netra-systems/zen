@@ -187,7 +187,7 @@ if error_rate > threshold:
 
     <service_configuration>
         <service name="Backend">
-            <dockerfile>Dockerfile.backend</dockerfile>
+            <dockerfile>deployment/docker/Dockerfile.backend</dockerfile>
             <port>8000</port>
             <health_check>/health/ready</health_check>
             <environment_vars>
@@ -205,7 +205,7 @@ if error_rate > threshold:
         </service>
 
         <service name="Auth">
-            <dockerfile>Dockerfile.auth</dockerfile>
+            <dockerfile>deployment/docker/Dockerfile.auth</dockerfile>
             <port>8080</port>
             <health_check>/health/ready</health_check>
             <domain>auth.staging.netrasystems.ai</domain>
@@ -224,7 +224,7 @@ if error_rate > threshold:
         </service>
 
         <service name="Frontend">
-            <dockerfile>Dockerfile.frontend</dockerfile>
+            <dockerfile>deployment/docker/Dockerfile.frontend</dockerfile>
             <port>3000</port>
             <health_check>/</health_check>
             <domain>staging.netrasystems.ai</domain>

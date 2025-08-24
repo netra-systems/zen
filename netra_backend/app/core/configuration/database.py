@@ -144,18 +144,27 @@ class DatabaseConfigManager:
         return url
     
     def _normalize_postgres_url(self, url: str) -> str:
-        """Normalize PostgreSQL URL using shared CoreDatabaseManager.
+        """Normalize PostgreSQL URL format.
         
-        Uses the canonical URL normalization from CoreDatabaseManager.
+        Converts postgres:// to postgresql:// and adds async driver.
         """
-        normalized = CoreDatabaseManager.normalize_postgres_url(url)
+        if not url:
+            return url
+            
+        # Convert postgres:// to postgresql://
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://")
+        
+        # Strip any existing async driver prefixes first
+        url = url.replace("postgresql+asyncpg://", "postgresql://")
+        url = url.replace("postgres+asyncpg://", "postgresql://")
         
         # Add async driver for application use
-        if normalized.startswith("postgresql://"):
-            normalized = normalized.replace("postgresql://", "postgresql+asyncpg://")
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://")
             self._logger.debug(f"Added asyncpg driver for application use")
         
-        return normalized
+        return url
     
     def _get_default_postgres_url(self) -> str:
         """Get default PostgreSQL URL for environment."""
@@ -173,8 +182,8 @@ class DatabaseConfigManager:
         if not any(parsed.scheme.startswith(scheme) for scheme in ["postgresql", "postgres"]):
             return  # Skip validation for non-PostgreSQL URLs
         
-        # Use CoreDatabaseManager to detect Cloud SQL connections
-        if CoreDatabaseManager.is_cloud_sql_connection(url):
+        # Detect Cloud SQL connections
+        if "/cloudsql/" in url:
             # Only log this message once globally to prevent log spam
             log_key = "cloudsql_socket_detected"
             if log_key not in _GLOBAL_LOGGED_MESSAGES:

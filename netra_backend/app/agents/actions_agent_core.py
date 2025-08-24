@@ -22,7 +22,6 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger as logger
 
 from .actions_agent_execution import ActionsAgentExecutionManager
-from .actions_agent_legacy import ActionsAgentLegacyCompat
 from .actions_agent_llm import ActionsAgentLLMHandler
 from .actions_agent_monitoring import ActionsAgentMonitoringService
 
@@ -50,7 +49,6 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
         self.execution_manager = ActionsAgentExecutionManager()
         self.monitoring_service = ActionsAgentMonitoringService()
         self.llm_handler = ActionsAgentLLMHandler(self.llm_manager)
-        self.legacy_compat = ActionsAgentLegacyCompat()
 
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions."""
