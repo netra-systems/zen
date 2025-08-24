@@ -1,20 +1,4 @@
-# Import IsolatedEnvironment directly and provide fallback
-try:
-    from netra_backend.app.core.isolated_environment import IsolatedEnvironment, get_env
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    
-    class IsolatedEnvironment:
-        """Fallback IsolatedEnvironment for production."""
-        def get(self, key, default=None):
-            return os.environ.get(key, default)
-        def set(self, key, value, source="production"):
-            os.environ[key] = value
-    
-    def get_env():
-        """Fallback environment accessor for production."""
-        return IsolatedEnvironment()
+from netra_backend.app.core.isolated_environment import IsolatedEnvironment, get_env
 
 # Always export IsolatedEnvironment for imports
 __all__ = ['IsolatedEnvironment', 'get_env', 'EnvironmentDetector']

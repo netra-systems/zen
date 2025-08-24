@@ -1,28 +1,4 @@
-# Use backend-specific isolated environment
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
+from netra_backend.app.core.isolated_environment import get_env
 """Unified Secret Management Module
 
 Provides a unified interface for all secret management operations.
@@ -217,8 +193,8 @@ class UnifiedSecretManager:
             self._logger.error("Cannot set secrets in production")
             return False
             
-        # CONFIG BOOTSTRAP: Direct env access for secret setting (dev/test only)
-        os.environ[key] = value
+        # CONFIG BOOTSTRAP: Use get_env for secret setting (dev/test only)
+        get_env().set(key, value, "unified_secrets")
         self._cache[key] = value
         return True
     
