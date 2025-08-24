@@ -45,7 +45,6 @@ class TestSupplyResearcherSecurity:
         assert_malicious_input_safe(parsed)
 
     @pytest.mark.asyncio
-
     async def test_rate_limiting_backoff(self, agent):
         """Test exponential backoff on rate limit errors"""
         state = _create_rate_limit_test_state()
@@ -228,7 +227,6 @@ class TestSupplyResearcherSecurity:
         assert "whoami" not in str(parsed).lower()
 
     @pytest.mark.asyncio
-
     async def test_input_length_validation(self, agent):
         """Test validation of input length limits"""
         long_input = _create_extremely_long_input()

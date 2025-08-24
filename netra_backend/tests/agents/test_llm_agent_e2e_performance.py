@@ -20,7 +20,7 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -58,7 +58,6 @@ from netra_backend.tests.agents.helpers.performance_test_helpers import (
 )
 
 @pytest.mark.asyncio
-
 async def test_performance_metrics(supervisor_agent):
     """Test performance metric collection"""
     start_time = time.time()
@@ -77,7 +76,6 @@ async def test_performance_metrics(supervisor_agent):
     assert execution_time < 2.0, f"Execution took {execution_time}s, expected < 2s"
 
 @pytest.mark.asyncio
-
 async def test_error_recovery(supervisor_agent):
     """Test error handling and recovery mechanisms"""
     # Simulate error in execution pipeline
@@ -98,7 +96,6 @@ async def test_error_recovery(supervisor_agent):
         assert "Pipeline error" in str(e)
 
 @pytest.mark.asyncio
-
 async def test_concurrent_request_handling_optimized():
     """Test handling multiple concurrent requests with optimized setup"""
     # Create optimized mock infrastructure
@@ -114,7 +111,6 @@ async def test_concurrent_request_handling_optimized():
     _verify_concurrent_results(results)
 
 @pytest.mark.asyncio
-
 async def test_end_to_end_optimization_flow_optimized():
     """Test complete end-to-end optimization flow with optimized structure"""
     # Create infrastructure with optimized setup
@@ -128,7 +124,6 @@ async def test_end_to_end_optimization_flow_optimized():
     _verify_e2e_completion(state, supervisor)
 
 @pytest.mark.asyncio
-
 async def test_complex_multi_step_flow():
     """Test complex multi-step optimization flow"""
     # Create infrastructure
@@ -149,7 +144,6 @@ async def test_complex_multi_step_flow():
     _verify_optimization_flow(state, supervisor)
 
 @pytest.mark.asyncio
-
 async def test_flow_interruption_and_recovery():
     """Test flow interruption and recovery scenarios"""
     db_session, llm_manager, ws_manager = create_mock_infrastructure()
@@ -164,7 +158,6 @@ async def test_flow_interruption_and_recovery():
     _verify_recovery_state(recovered_state)
 
 @pytest.mark.asyncio
-
 async def test_flow_performance_benchmarks():
     """Test flow performance under various conditions"""
     performance_metrics = []
@@ -177,7 +170,6 @@ async def test_flow_performance_benchmarks():
     _verify_performance_metrics(performance_metrics)
 
 @pytest.mark.asyncio
-
 async def test_high_load_scenarios():
     """Test system behavior under high load"""
     # Create high load scenario

@@ -25,7 +25,6 @@ class TestSupplyResearcherInfrastructure:
     """Infrastructure and operational tests"""
 
     @pytest.mark.asyncio
-
     async def test_error_recovery_fallback(self, agent):
         """Test error recovery with fallback to cached data"""
         state = _create_error_recovery_state()
@@ -72,7 +71,6 @@ class TestSupplyResearcherInfrastructure:
             assert agent.redis_manager.get.called
 
     @pytest.mark.asyncio
-
     async def test_performance_metrics_collection(self, agent):
         """Test collection of performance metrics"""
         state = _create_performance_test_state()
@@ -152,7 +150,6 @@ class TestSupplyResearcherInfrastructure:
         assert circuit_breaker["failure_count"] > circuit_breaker["failure_threshold"]
 
     @pytest.mark.asyncio
-
     async def test_health_check_endpoints(self, agent):
         """Test health check and readiness endpoints"""
         health_status = await _check_agent_health(agent)
@@ -229,7 +226,6 @@ class TestSupplyResearcherInfrastructure:
         assert len(resources["memory_objects"]) == 0
 
     @pytest.mark.asyncio
-
     async def test_graceful_shutdown_handling(self, agent):
         """Test graceful shutdown procedures"""
         shutdown_tasks = _create_shutdown_tasks()

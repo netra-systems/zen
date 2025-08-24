@@ -14,7 +14,7 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -34,7 +34,6 @@ from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
 )
 
 @pytest.mark.asyncio
-
 async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     """Test tool dispatcher integration with LLM agents"""
     # Test successful tool execution
@@ -51,7 +50,6 @@ async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     assert "Tool error" in str(exc_info.value)
 
 @pytest.mark.asyncio
-
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -93,7 +91,6 @@ async def test_tool_execution_with_llm():
     assert tool_results[1]["tool"] == "optimize_batch_size"
 
 @pytest.mark.asyncio
-
 async def test_real_llm_interaction():
     """Test real LLM interaction with proper error handling"""
     # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -101,6 +98,7 @@ async def test_real_llm_interaction():
     
     # Simulate real LLM call with retry logic
     call_count = 0
+    
     async def mock_llm_call(*args, **kwargs):
         nonlocal call_count
         call_count += 1
@@ -126,7 +124,6 @@ async def test_real_llm_interaction():
     assert call_count == 2
 
 @pytest.mark.asyncio
-
 async def test_tool_call_integration_complex():
     """Test complex tool call integration scenarios"""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -169,7 +166,6 @@ async def test_tool_call_integration_complex():
     assert execution_log[1] == "Completed data_fetcher"
 
 @pytest.mark.asyncio
-
 async def test_llm_tool_chain_execution():
     """Test LLM-driven tool chain execution"""
     # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -192,6 +188,7 @@ async def test_llm_tool_chain_execution():
     ]
     
     call_count = 0
+    
     async def mock_sequential_llm(*args, **kwargs):
         nonlocal call_count
         result = responses[min(call_count, len(responses) - 1)]

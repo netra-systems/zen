@@ -10,7 +10,7 @@ from pathlib import Path
 import asyncio
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List, Set
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 import pytest
 

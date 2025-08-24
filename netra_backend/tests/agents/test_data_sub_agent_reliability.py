@@ -58,7 +58,6 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert "Database unavailable" in str(exc_info.value)
 
     @pytest.mark.asyncio
-
     async def test_retry_on_failure(self):
         """Test retry mechanism on processing failure"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -82,7 +81,6 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert mock_process.call_count == 3
 
     @pytest.mark.asyncio
-
     async def test_max_retries_exceeded(self):
         """Test behavior when max retries exceeded"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -102,7 +100,6 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert mock_process.call_count == 2
 
     @pytest.mark.asyncio
-
     async def test_graceful_degradation(self):
         """Test graceful degradation on partial failure"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -156,7 +153,6 @@ class TestCaching:
         mock_process.assert_not_called()
 
     @pytest.mark.asyncio
-
     async def test_cache_expiration(self):
         """Test cache expiration with real TTL"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits

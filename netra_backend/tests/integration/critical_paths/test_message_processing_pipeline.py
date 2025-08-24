@@ -22,7 +22,7 @@ import time
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -81,7 +81,7 @@ class MessagePipelineTestManager:
 
         }
         
-    async def initialize_pipeline(self):
+async def initialize_pipeline(self):
 
         """Initialize the message processing pipeline with real components."""
 
@@ -114,7 +114,7 @@ class MessagePipelineTestManager:
 
             raise
     
-    async def simulate_websocket_message(self, user_id: str, message_content: str, 
+async def simulate_websocket_message(self, user_id: str, message_content: str, 
 
                                        message_type: str = "chat") -> Dict[str, Any]:
 
@@ -239,7 +239,7 @@ class MessagePipelineTestManager:
 
             }
     
-    async def authenticate_message(self, user_id: str) -> Dict[str, Any]:
+async def authenticate_message(self, user_id: str) -> Dict[str, Any]:
 
         """Authenticate the message sender."""
 
@@ -280,7 +280,7 @@ class MessagePipelineTestManager:
 
             }
     
-    async def route_message(self, message: WebSocketMessage) -> Dict[str, Any]:
+async def route_message(self, message: WebSocketMessage) -> Dict[str, Any]:
 
         """Route message to appropriate handler based on content and type."""
 
@@ -325,7 +325,7 @@ class MessagePipelineTestManager:
 
             }
     
-    async def process_with_agent(self, message: WebSocketMessage, agent_type: str) -> Dict[str, Any]:
+async def process_with_agent(self, message: WebSocketMessage, agent_type: str) -> Dict[str, Any]:
 
         """Process message with the designated agent."""
 
@@ -394,7 +394,7 @@ class MessagePipelineTestManager:
 
             }
     
-    async def deliver_response(self, original_message: WebSocketMessage, 
+async def deliver_response(self, original_message: WebSocketMessage, 
 
                              processing_result: Dict[str, Any]) -> Dict[str, Any]:
 
@@ -453,7 +453,7 @@ class MessagePipelineTestManager:
 
             }
     
-    async def simulate_websocket_delivery(self, response_data: Dict[str, Any]) -> bool:
+async def simulate_websocket_delivery(self, response_data: Dict[str, Any]) -> bool:
 
         """Simulate WebSocket response delivery."""
 
@@ -480,7 +480,7 @@ class MessagePipelineTestManager:
 
             return False
     
-    def update_average_processing_time(self, new_time: float):
+def update_average_processing_time(self, new_time: float):
 
         """Update running average of processing times."""
 
@@ -501,7 +501,7 @@ class MessagePipelineTestManager:
 
             )
     
-    async def get_pipeline_health(self) -> Dict[str, Any]:
+async def get_pipeline_health(self) -> Dict[str, Any]:
 
         """Get comprehensive pipeline health metrics."""
 
@@ -535,7 +535,7 @@ class MessagePipelineTestManager:
 
         }
     
-    async def cleanup(self):
+async def cleanup(self):
 
         """Clean up pipeline resources."""
 
@@ -568,7 +568,6 @@ async def pipeline_manager():
     await manager.cleanup()
 
 @pytest.mark.asyncio
-
 async def test_complete_message_processing_flow(pipeline_manager):
 
     """Test complete message processing from WebSocket to agent response."""
@@ -614,7 +613,6 @@ async def test_complete_message_processing_flow(pipeline_manager):
     assert health["success_rate"] > 0
 
 @pytest.mark.asyncio
-
 async def test_message_authentication_and_routing(pipeline_manager):
 
     """Test message authentication and routing logic."""
@@ -658,7 +656,6 @@ async def test_message_authentication_and_routing(pipeline_manager):
         assert processed_msg["content"] == message_content
 
 @pytest.mark.asyncio
-
 async def test_pipeline_error_handling_and_recovery(pipeline_manager):
 
     """Test pipeline error handling and recovery mechanisms."""
@@ -704,7 +701,6 @@ async def test_pipeline_error_handling_and_recovery(pipeline_manager):
     assert health["error_count"] >= 2
 
 @pytest.mark.asyncio
-
 async def test_concurrent_message_processing(pipeline_manager):
 
     """Test pipeline handling of concurrent messages."""
@@ -750,7 +746,6 @@ async def test_concurrent_message_processing(pipeline_manager):
     assert health["success_rate"] > 90
 
 @pytest.mark.asyncio
-
 async def test_message_processing_performance_benchmarks(pipeline_manager):
 
     """Test message processing performance meets requirements."""
@@ -790,7 +785,6 @@ async def test_message_processing_performance_benchmarks(pipeline_manager):
     assert health["pipeline_status"] == "healthy"
 
 @pytest.mark.asyncio
-
 async def test_message_state_consistency_validation(pipeline_manager):
 
     """Test message state consistency throughout the pipeline."""

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import json
 from typing import List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from pydantic import BaseModel, Field

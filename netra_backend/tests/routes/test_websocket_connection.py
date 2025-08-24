@@ -3,7 +3,7 @@ from pathlib import Path
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from fastapi import WebSocket
@@ -204,7 +204,6 @@ class TestWebSocketConnection:
                 # Mock user count query
                 # Mock: Component isolation for testing without external dependencies
                 with patch('netra_backend.app.routes.utils.websocket_helpers.select') as mock_select, \
-                     # Mock: Component isolation for testing without external dependencies
                      patch('netra_backend.app.routes.utils.websocket_helpers.func') as mock_func:
                     
                     # Mock: Generic component isolation for controlled unit testing

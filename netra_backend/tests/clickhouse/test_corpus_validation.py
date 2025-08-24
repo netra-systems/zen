@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 

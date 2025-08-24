@@ -12,7 +12,7 @@ import asyncio
 import json
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import clickhouse_driver
 import psycopg2
@@ -32,7 +32,6 @@ class TestCriticalDatabaseIntegration:
     @pytest.mark.integration
 
     @pytest.mark.asyncio
-
     async def test_concurrent_transaction_isolation_postgres(self):
 
         """Test concurrent transaction isolation with real PostgreSQL"""
@@ -68,8 +67,7 @@ class TestCriticalDatabaseIntegration:
     
     @pytest.mark.integration
 
-    @pytest.mark.asyncio  
-
+    @pytest.mark.asyncio
     async def test_clickhouse_data_consistency_under_load(self):
 
         """Test ClickHouse data consistency under concurrent write load"""
@@ -138,7 +136,6 @@ class TestAgentOrchestrationIntegration:
     @pytest.mark.integration
 
     @pytest.mark.asyncio
-
     async def test_supervisor_subagent_deadlock_detection(self):
 
         """Test deadlock detection in supervisor-subagent communication"""
@@ -164,7 +161,6 @@ class TestAgentOrchestrationIntegration:
     @pytest.mark.integration
 
     @pytest.mark.asyncio
-
     async def test_agent_retry_with_exponential_backoff(self):
 
         """Test agent retry mechanism with proper exponential backoff"""
@@ -233,7 +229,6 @@ class TestWebSocketIntegration:
     @pytest.mark.integration  
 
     @pytest.mark.asyncio
-
     async def test_websocket_reconnection_with_message_replay(self):
 
         """Test WebSocket reconnection preserves message order"""
@@ -426,7 +421,6 @@ class TestDataConsistencyIntegration:
     @pytest.mark.integration
 
     @pytest.mark.asyncio
-
     async def test_distributed_transaction_rollback(self):
 
         """Test distributed transaction rollback across services"""
@@ -526,7 +520,6 @@ class TestPerformanceIntegration:
     @pytest.mark.integration
 
     @pytest.mark.asyncio
-
     async def test_connection_pool_exhaustion_recovery(self):
 
         """Test connection pool exhaustion and recovery"""
@@ -732,7 +725,6 @@ class TestErrorHandlingIntegration:
     @pytest.mark.integration
 
     @pytest.mark.asyncio
-
     async def test_cascade_failure_circuit_breaker(self):
 
         """Test circuit breaker prevents cascade failures"""

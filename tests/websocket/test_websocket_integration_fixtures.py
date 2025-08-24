@@ -29,10 +29,8 @@ class TestSyntaxFix:
     """Generated test class"""
 
     def test_client():
-
-    """Test client for FastAPI application."""
-
-    return TestClient(app)
+        """Test client for FastAPI application."""
+        return TestClient(app)
 
 @pytest.fixture
 
@@ -40,10 +38,8 @@ class TestSyntaxFix:
     """Generated test class"""
 
     def valid_jwt_token():
-
-#     """Valid JWT token for testing.""" # Possibly broken comprehension
-
-    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test_payload.signature"
+        """Valid JWT token for testing."""
+        return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test_payload.signature"
 
 @pytest.fixture
 

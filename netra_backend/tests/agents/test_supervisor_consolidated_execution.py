@@ -21,7 +21,6 @@ class TestSupervisorAgentExecution:
     """Test execution methods."""
     
     @pytest.mark.asyncio
-    
     async def test_execute_method(self):
         """Test execute method (BaseSubAgent compatibility)."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -57,7 +56,6 @@ class TestSupervisorAgentExecution:
         )
     
     @pytest.mark.asyncio
-    
     async def test_execute_method_with_defaults(self):
         """Test execute method with default values."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -109,7 +107,6 @@ class TestSupervisorAgentExecution:
         assert context["run_id"] == "run-789"
     
     @pytest.mark.asyncio
-    
     async def test_run_method_with_execution_lock(self):
         """Test run method uses execution lock."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -152,7 +149,6 @@ class TestSupervisorAgentExecution:
         assert isinstance(result, DeepAgentState)
     
     @pytest.mark.asyncio
-    
     async def test_execute_with_context(self):
         """Test _execute_with_context method."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -187,7 +183,6 @@ class TestSupervisorAgentExecution:
         supervisor.pipeline_executor.finalize_state.assert_called_once_with(state, context)
     
     @pytest.mark.asyncio
-    
     async def test_execute_with_state_merge(self):
         """Test execute method properly merges state results."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -221,7 +216,6 @@ class TestSupervisorAgentExecution:
             mock_merge.assert_called_once_with(updated_state)
     
     @pytest.mark.asyncio
-    
     async def test_run_method_component_interaction(self):
         """Test run method properly coordinates all components."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -266,7 +260,6 @@ class TestSupervisorAgentHooks:
     """Test hook execution."""
     
     @pytest.mark.asyncio
-    
     async def test_run_hooks_success(self):
         """Test successful hook execution."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -300,7 +293,6 @@ class TestSupervisorAgentHooks:
         handler2.assert_called_once_with(state, extra_param="value")
     
     @pytest.mark.asyncio
-    
     async def test_run_hooks_with_handler_failure(self):
         """Test hook execution with handler failure."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -331,7 +323,6 @@ class TestSupervisorAgentHooks:
         handler1.assert_called_once()
     
     @pytest.mark.asyncio
-    
     async def test_run_hooks_error_event_reraises(self):
         """Test hook execution for error event re-raises exceptions."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -357,7 +348,6 @@ class TestSupervisorAgentHooks:
             await supervisor._run_hooks("on_error", state)
     
     @pytest.mark.asyncio
-    
     async def test_run_hooks_nonexistent_event(self):
         """Test hook execution for non-existent event."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits

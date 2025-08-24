@@ -12,7 +12,7 @@ import time
 import tracemalloc
 from datetime import UTC, datetime, timezone
 from typing import Any, Dict, List, Tuple
-from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, call, patch
 
 import pytest
 from fastapi import WebSocket

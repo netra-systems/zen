@@ -62,7 +62,7 @@ class ImportTestReport:
         else:
             self.failed_imports += 1
     
-    def get_summary(self) -> str:
+def get_summary(self) -> str:
         return f"""
 Import Test Summary
 ===================
@@ -73,7 +73,7 @@ Success Rate: {(self.successful_imports/self.total_modules*100 if self.total_mod
 Total Time: {self.total_time:.2f}s
 """
 
-    def get_failures_report(self) -> str:
+def get_failures_report(self) -> str:
         if not any(not r.success for r in self.results):
             return "No import failures detected!"
         
@@ -100,7 +100,7 @@ Total Time: {self.total_time:.2f}s
         
         return report
     
-    def save_json_report(self, filepath: str):
+def save_json_report(self, filepath: str):
         """Save detailed JSON report"""
         report_data = {
             'summary': {
@@ -128,7 +128,7 @@ class ImportTester:
         self._tested_modules: Set[str] = set()
         self._import_stack: List[str] = []
         
-    def test_module(self, module_path: str) -> ImportResult:
+def test_module(self, module_path: str) -> ImportResult:
         """Test importing a single module"""
         if module_path in self._tested_modules:
             return ImportResult(module_path, True, import_time=0.0)
@@ -230,7 +230,7 @@ class ImportTester:
         
         return result
     
-    def _extract_missing_dependencies(self, error_message: str) -> List[str]:
+def _extract_missing_dependencies(self, error_message: str) -> List[str]:
         """Extract missing module names from error message"""
         missing = []
         if "No module named" in error_message:
@@ -240,7 +240,7 @@ class ImportTester:
                 missing.append(parts[1])
         return missing
     
-    def test_package(self, package_path: str, recursive: bool = True) -> ImportTestReport:
+def test_package(self, package_path: str, recursive: bool = True) -> ImportTestReport:
         """Test all modules in a package"""
         self.report.start_time = datetime.now()
         package_dir = self.root_path / package_path.replace('.', '/')
@@ -266,7 +266,7 @@ class ImportTester:
         
         return self.report
     
-    def _discover_modules(self, package_name: str, package_dir: Path, recursive: bool) -> List[str]:
+def _discover_modules(self, package_name: str, package_dir: Path, recursive: bool) -> List[str]:
         """Discover all Python modules in a package"""
         modules = []
         
@@ -291,7 +291,7 @@ class ImportTester:
         
         return sorted(modules)
     
-    def test_critical_imports(self) -> ImportTestReport:
+def test_critical_imports(self) -> ImportTestReport:
         """Test critical application imports"""
         critical_modules = [
             # Core modules
@@ -344,7 +344,7 @@ class ImportTester:
         
         return self.report
     
-    def generate_import_graph(self) -> Dict[str, List[str]]:
+def generate_import_graph(self) -> Dict[str, List[str]]:
         """Generate import dependency graph"""
         import_graph = {}
         
@@ -364,7 +364,7 @@ class ImportTester:
         
         return import_graph
     
-    def run_fast_fail_test(self) -> bool:
+def run_fast_fail_test(self) -> bool:
         """Run fast-fail import test - stops on first error"""
         print("\nRunning Fast-Fail Import Test...")
         print("="*60)

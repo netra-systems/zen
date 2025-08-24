@@ -87,7 +87,10 @@ class TestCriticalPathIntegration:
         # Mock: Generic component isolation for controlled unit testing
         coordinator.emergency_manager = Mock()
         # Register the agent with the coordinator before using it
-        coordinator.register_agent("CriticalPathAgent")
+        # Mock the return value of register_agent
+        mock_handler = Mock()
+        mock_handler.execute_with_fallback = AsyncMock(return_value={"success": True})
+        coordinator.register_agent = Mock(return_value=mock_handler)
         agent = MockReliableAgent("CriticalPathAgent")
         agent.reliability = mock_patches["mock_reliability"]
         return coordinator, agent, self._setup_http_client_mocks()

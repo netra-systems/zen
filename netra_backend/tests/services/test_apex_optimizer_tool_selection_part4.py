@@ -13,7 +13,7 @@ import tracemalloc
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, call, patch
 
 import pytest
 from netra_backend.app.schemas import AppConfig, RequestModel

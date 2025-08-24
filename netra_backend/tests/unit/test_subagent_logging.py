@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 

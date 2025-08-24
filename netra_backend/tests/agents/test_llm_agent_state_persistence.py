@@ -14,7 +14,7 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -34,7 +34,6 @@ from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
 )
 
 @pytest.mark.asyncio
-
 async def test_state_persistence(supervisor_agent):
     """Test agent state persistence and recovery"""
     # Create a proper mock that matches the expected interface
@@ -70,7 +69,6 @@ async def test_state_persistence(supervisor_agent):
     assert isinstance(result, DeepAgentState)
 
 @pytest.mark.asyncio
-
 async def test_error_recovery(supervisor_agent):
     """Test error handling and recovery mechanisms"""
     # Simulate error in execution pipeline
@@ -91,7 +89,6 @@ async def test_error_recovery(supervisor_agent):
         assert "Pipeline error" in str(e)
 
 @pytest.mark.asyncio
-
 async def test_state_recovery_from_interruption():
     """Test state recovery from interrupted execution"""
     # Mock: Generic component isolation for controlled unit testing
@@ -117,7 +114,6 @@ async def test_state_recovery_from_interruption():
     assert recovered_state.triage_result["category"] == "optimization"
 
 @pytest.mark.asyncio
-
 async def test_persistence_failure_handling():
     """Test handling of persistence failures"""
     # Mock: Generic component isolation for controlled unit testing
@@ -134,7 +130,6 @@ async def test_persistence_failure_handling():
     assert "Database connection failed" in str(exc_info.value)
 
 @pytest.mark.asyncio
-
 async def test_state_serialization_consistency():
     """Test state serialization and deserialization consistency"""
     original_state = DeepAgentState(
@@ -162,7 +157,6 @@ async def test_state_serialization_consistency():
     assert deserialized_data["triage_result"]["category"] == "optimization"
 
 @pytest.mark.asyncio
-
 async def test_concurrent_state_operations():
     """Test concurrent state save/load operations"""
     # Mock: Generic component isolation for controlled unit testing
@@ -200,7 +194,6 @@ async def test_concurrent_state_operations():
         assert not isinstance(result, Exception)
 
 @pytest.mark.asyncio
-
 async def test_state_version_compatibility():
     """Test backward compatibility of state versions"""
     # Mock old version state data

@@ -25,7 +25,6 @@ from netra_backend.tests.agents.test_fixtures import (
 from netra_backend.tests.agents.test_helpers import setup_mock_llm_with_retry
 
 @pytest.mark.asyncio
-
 async def test_supervisor_initialization(supervisor_agent):
     """Test supervisor agent proper initialization"""
     assert supervisor_agent is not None
@@ -55,7 +54,6 @@ def _verify_supervisor_state(state, user_request, supervisor_agent):
     assert state.user_id == supervisor_agent.user_id
 
 @pytest.mark.asyncio
-
 async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
     """Test LLM triage agent processes user requests correctly"""
     user_request = _create_user_request()
@@ -92,7 +90,6 @@ async def _test_invalid_json_handling(mock_llm_manager):
         pass
 
 @pytest.mark.asyncio
-
 async def test_llm_response_parsing(mock_llm_manager):
     """Test LLM response parsing and error handling"""
     _setup_valid_json_response(mock_llm_manager)
@@ -138,7 +135,6 @@ def _verify_state_structure(state):
     assert "recommendations" in state.optimizations_result
 
 @pytest.mark.asyncio
-
 async def test_agent_state_transitions(supervisor_agent):
     """Test agent state transitions through pipeline"""
     state = _create_test_state(supervisor_agent)
@@ -170,7 +166,6 @@ def _verify_streaming_messages(mock_websocket_manager, messages_sent):
     assert mock_websocket_manager.send_message.called or len(messages_sent) >= 0
 
 @pytest.mark.asyncio
-
 async def test_websocket_message_streaming(supervisor_agent, mock_websocket_manager):
     """Test WebSocket message streaming during execution"""
     messages_sent = _setup_message_capture(mock_websocket_manager)
@@ -195,7 +190,6 @@ async def _test_tool_error_handling(mock_tool_dispatcher):
     assert "Tool error" in str(exc_info.value)
 
 @pytest.mark.asyncio
-
 async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     """Test tool dispatcher integration with LLM agents"""
     await _test_successful_tool_execution(mock_tool_dispatcher)
@@ -240,7 +234,6 @@ def _verify_persistence_result(result):
     assert isinstance(result, DeepAgentState)
 
 @pytest.mark.asyncio
-
 async def test_state_persistence(supervisor_agent):
     """Test agent state persistence and recovery"""
     _setup_persistence_mocks(supervisor_agent)
@@ -268,7 +261,6 @@ async def _test_error_handling(supervisor_agent):
         assert "Pipeline error" in str(e)
 
 @pytest.mark.asyncio
-
 async def test_error_recovery(supervisor_agent):
     """Test error handling and recovery mechanisms"""
     _setup_pipeline_error(supervisor_agent)
@@ -282,7 +274,6 @@ def _verify_expected_agents(agent_names):
             f"Missing expected agent: {expected}"
 
 @pytest.mark.asyncio
-
 async def test_multi_agent_coordination(supervisor_agent):
     """Test coordination between multiple sub-agents"""
     agent_names = list(supervisor_agent.agents.keys())

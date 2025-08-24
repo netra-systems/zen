@@ -103,10 +103,15 @@ class AuthDatabaseManager:
         logger.debug(f"Converting database URL for async: {database_url[:20]}...")
         
         # CRITICAL FIX: Resolve SSL parameter conflicts first (staging deployment issue)
-        resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(database_url, "asyncpg")
-        
-        # Use shared core database manager for URL conversion
-        converted_url = CoreDatabaseManager.format_url_for_async_driver(resolved_url)
+        try:
+            from shared.database.core_database_manager import CoreDatabaseManager
+            resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(database_url, "asyncpg")
+            # Use shared core database manager for URL conversion
+            converted_url = CoreDatabaseManager.format_url_for_async_driver(resolved_url)
+        except ImportError:
+            # Fallback for when CoreDatabaseManager is not available
+            logger.warning("CoreDatabaseManager not available, using fallback URL conversion")
+            converted_url = AuthDatabaseManager.convert_database_url(database_url)
         
         logger.debug(f"Converted async database URL: {converted_url[:20]}...")
         return converted_url
@@ -130,6 +135,7 @@ class AuthDatabaseManager:
         
         try:
             # Use shared core database manager for validation
+            from shared.database.core_database_manager import CoreDatabaseManager
             is_valid = CoreDatabaseManager.validate_database_url(url)
             
             if is_valid:
@@ -152,9 +158,16 @@ class AuthDatabaseManager:
         """
         # Check if DATABASE_URL contains Cloud SQL Unix socket path
         database_url = os.getenv("DATABASE_URL", "")
-        if CoreDatabaseManager.is_cloud_sql_connection(database_url):
-            logger.debug("Detected Cloud SQL environment from DATABASE_URL")
-            return True
+        try:
+            from shared.database.core_database_manager import CoreDatabaseManager
+            if CoreDatabaseManager.is_cloud_sql_connection(database_url):
+                logger.debug("Detected Cloud SQL environment from DATABASE_URL")
+                return True
+        except ImportError:
+            # Fallback check
+            if "/cloudsql/" in database_url:
+                logger.debug("Detected Cloud SQL environment from DATABASE_URL (fallback)")
+                return True
         
         # Check if running in Cloud Run (K_SERVICE is set by Cloud Run)
         k_service = os.getenv("K_SERVICE")
@@ -194,24 +207,46 @@ class AuthDatabaseManager:
         Returns:
             Default database URL for the current environment
         """
-        environment = CoreDatabaseManager.get_environment_type()
-        return CoreDatabaseManager.get_default_url_for_environment(environment)
+        try:
+            from shared.database.core_database_manager import CoreDatabaseManager
+            environment = CoreDatabaseManager.get_environment_type()
+            return CoreDatabaseManager.get_default_url_for_environment(environment)
+        except ImportError:
+            # Fallback default URL
+            return "postgresql://postgres:password@localhost:5432/netra_auth"
     
     @staticmethod
     def _normalize_postgres_url(url: str) -> str:
         """Normalize PostgreSQL URL using shared CoreDatabaseManager."""
-        return CoreDatabaseManager.normalize_postgres_url(url)
+        try:
+            from shared.database.core_database_manager import CoreDatabaseManager
+            return CoreDatabaseManager.normalize_postgres_url(url)
+        except ImportError:
+            # Fallback normalization
+            if url.startswith("postgres://"):
+                return url.replace("postgres://", "postgresql://")
+            return url
     
     @staticmethod
     def _convert_sslmode_to_ssl(url: str) -> str:
         """Convert sslmode parameter using shared CoreDatabaseManager."""
-        return CoreDatabaseManager.convert_ssl_params_for_asyncpg(url)
+        try:
+            from shared.database.core_database_manager import CoreDatabaseManager
+            return CoreDatabaseManager.convert_ssl_params_for_asyncpg(url)
+        except ImportError:
+            # Fallback SSL parameter conversion
+            return url.replace("sslmode=", "ssl=")
     
     @staticmethod
     def _normalize_database_url(url: str) -> str:
         """Normalize database URL using shared CoreDatabaseManager."""
-        resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(url, "asyncpg")
-        return CoreDatabaseManager.format_url_for_async_driver(resolved_url)
+        try:
+            from shared.database.core_database_manager import CoreDatabaseManager
+            resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(url, "asyncpg")
+            return CoreDatabaseManager.format_url_for_async_driver(resolved_url)
+        except ImportError:
+            # Fallback normalization
+            return AuthDatabaseManager.convert_database_url(url)
     
     @staticmethod
     def get_connection_url() -> str:

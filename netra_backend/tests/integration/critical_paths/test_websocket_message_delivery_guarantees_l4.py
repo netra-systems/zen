@@ -15,7 +15,7 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Set
 
 # from app.services.websocket_service import WebSocketService
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 import websockets

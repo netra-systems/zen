@@ -396,7 +396,7 @@ class DatabaseFailoverTester:
                         passed = check.get("passed", False)
                         
                         consistency_checks.append((check_name, passed))
-                        status = "✓" if passed else "✗"
+                        status = "[PASS]" if passed else "[FAIL]"
                         print(f"[{status}] {check_name}: {check.get('message', '')}")
                         
             # Perform manual consistency checks
@@ -415,10 +415,10 @@ class DatabaseFailoverTester:
                         
                         if primary_count == replica_count:
                             consistency_checks.append((f"{table}_count", True))
-                            print(f"[✓] {table}: {primary_count} rows match")
+                            print(f"[PASS] {table}: {primary_count} rows match")
                         else:
                             consistency_checks.append((f"{table}_count", False))
-                            print(f"[✗] {table}: Primary={primary_count}, Replica={replica_count}")
+                            print(f"[FAIL] {table}: Primary={primary_count}, Replica={replica_count}")
                             
                     except Exception as e:
                         print(f"[WARNING] Could not check {table}: {e}")
@@ -703,7 +703,7 @@ async def test_database_failover_recovery_flow():
         print("="*60)
         
         for test_name, passed in results.items():
-            status = "✓ PASS" if passed else "✗ FAIL"
+            status = "PASS" if passed else "FAIL"
             print(f"  {test_name:30} : {status}")
             
         print("="*60)
@@ -721,10 +721,10 @@ async def test_database_failover_recovery_flow():
         print(f"\nOverall: {passed_tests}/{total_tests} tests passed")
         
         if passed_tests == total_tests:
-            print("\n✓ SUCCESS: Database failover and recovery fully validated!")
+            print("\n[SUCCESS] Database failover and recovery fully validated!")
         else:
             failed = [name for name, passed in results.items() if not passed]
-            print(f"\n✗ WARNING: Failed tests: {', '.join(failed)}")
+            print(f"\n[WARNING] Failed tests: {', '.join(failed)}")
             
         # Assert critical tests passed
         critical_tests = [

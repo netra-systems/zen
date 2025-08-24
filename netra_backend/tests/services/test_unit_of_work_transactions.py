@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession

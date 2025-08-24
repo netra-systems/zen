@@ -187,7 +187,7 @@ class SecretManager:
         try:
             return self._attempt_secret_fetch(client, secret_name, is_staging)
         except Exception as e:
-            self._logger.debug(f"✗ Failed to fetch {secret_name}: {str(e)[:100]}")
+            self._logger.debug(f"[FAIL] Failed to fetch {secret_name}: {str(e)[:100]}")
             return None
     
     def _attempt_secret_fetch(self, client: secretmanager.SecretManagerServiceClient, 
@@ -203,7 +203,7 @@ class SecretManager:
         from netra_backend.app.core.secret_manager_helpers import track_secret_result
         if secret_value:
             secrets[secret_name] = secret_value
-            self._logger.debug(f"✓ Successfully loaded: {secret_name}")
+            self._logger.debug(f"[PASS] Successfully loaded: {secret_name}")
         track_secret_result(secret_name, secret_value, successful_secrets, failed_secrets)
     
     def _log_fetch_summary(self, successful_secrets: List[str], failed_secrets: List[str]) -> None:

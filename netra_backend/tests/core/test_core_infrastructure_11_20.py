@@ -12,7 +12,7 @@ import json
 import logging
 import os
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 import pytest
 from cryptography.fernet import Fernet

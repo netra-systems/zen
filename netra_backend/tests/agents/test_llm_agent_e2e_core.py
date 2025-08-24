@@ -20,7 +20,7 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -41,7 +41,6 @@ from netra_backend.tests.agents.test_fixtures import (
 )
 
 @pytest.mark.asyncio
-
 async def test_supervisor_initialization(supervisor_agent):
     """Test supervisor agent proper initialization"""
     assert supervisor_agent is not None
@@ -50,7 +49,6 @@ async def test_supervisor_initialization(supervisor_agent):
     assert len(supervisor_agent.agents) > 0
 
 @pytest.mark.asyncio
-
 async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
     """Test LLM triage agent processes user requests correctly"""
     user_request = "Optimize my GPU utilization for LLM inference"
@@ -71,7 +69,6 @@ async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
     assert state.user_id == supervisor_agent.user_id
 
 @pytest.mark.asyncio
-
 async def test_llm_response_parsing(mock_llm_manager):
     """Test LLM response parsing and error handling"""
     # Test valid JSON response
@@ -98,7 +95,6 @@ async def test_llm_response_parsing(mock_llm_manager):
         pass  # Expected
 
 @pytest.mark.asyncio
-
 async def test_agent_state_creation():
     """Test basic agent state creation and structure"""
     state = DeepAgentState(
@@ -115,7 +111,6 @@ async def test_agent_state_creation():
     assert state.optimizations_result is None
 
 @pytest.mark.asyncio
-
 async def test_basic_llm_call():
     """Test basic LLM call functionality"""
     # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -131,7 +126,6 @@ async def test_basic_llm_call():
     assert result["tool_calls"] == []
 
 @pytest.mark.asyncio
-
 async def test_structured_llm_call():
     """Test structured LLM call functionality"""
     # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -152,7 +146,6 @@ async def test_structured_llm_call():
     assert result["requires_analysis"] is True
 
 @pytest.mark.asyncio
-
 async def test_agent_registry():
     """Test agent registry functionality"""
     # Mock: Database session isolation for transaction testing without real database dependency
@@ -179,7 +172,6 @@ async def test_agent_registry():
         assert any("triage" in name.lower() for name in agent_names)
 
 @pytest.mark.asyncio
-
 async def test_basic_error_handling():
     """Test basic error handling in supervisor"""
     # Mock: Database session isolation for transaction testing without real database dependency
@@ -217,7 +209,6 @@ async def test_basic_error_handling():
             assert isinstance(e, Exception)
 
 @pytest.mark.asyncio
-
 async def test_mock_infrastructure_creation():
     """Test mock infrastructure creation helpers"""
     from netra_backend.tests.agents.fixtures.llm_agent_fixtures import create_mock_infrastructure
@@ -271,7 +262,6 @@ def _setup_basic_persistence_mock():
     return mock_persistence
 
 @pytest.mark.asyncio
-
 async def test_basic_agent_lifecycle():
     """Test basic agent lifecycle"""
     # Create basic state
@@ -283,7 +273,6 @@ async def test_basic_agent_lifecycle():
     assert state.triage_result["category"] == "test"
 
 @pytest.mark.asyncio
-
 async def test_basic_mock_setup():
     """Test basic mock setup functionality"""
     llm_manager = _setup_basic_llm_mock()
@@ -298,7 +287,6 @@ async def test_basic_mock_setup():
     assert save_result == (True, "test_id")
 
 @pytest.mark.asyncio
-
 async def test_uuid_generation():
     """Test UUID generation for IDs"""
     thread_id = str(uuid.uuid4())

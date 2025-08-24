@@ -11,7 +11,7 @@ from pathlib import Path
 
 import asyncio
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 

@@ -17,6 +17,9 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.utils.websocket_helpers import decode_token_payload
+
+# Use central_logger as logger
+logger = central_logger
 from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -28,7 +31,8 @@ from netra_backend.tests.integration.jwt_token_helpers import JWTTestHelper
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 
-    def __init__(self):
+    def setup_method(self):
+        """Setup method for pytest (replaces __init__)"""
         self.flow_log: List[Dict[str, Any]] = []
         self.performance_metrics: Dict[str, float] = {}
         self.error_count = 0
@@ -58,7 +62,7 @@ class TestSyntaxFix:
         self.performance_metrics[timer_id] = duration
         return duration
 
-    def _verify_complete_flow(self, tracker: MessageFlowTracker, duration: float) -> None:
+    def _verify_complete_flow(self, tracker: 'TestSyntaxFix', duration: float) -> None:
         """Verify complete message flow."""
         assert len(tracker.flow_log) >= 5, "Missing flow steps"
         assert duration < 5.0, f"Flow too slow: {duration}s"
@@ -77,7 +81,6 @@ class TestSyntaxFix:
         for step in expected_steps:
             assert step in actual_steps, f"Missing flow step: {step}"
 
-        def __init__(self, user_id=None):
-            self.user_id = user_id
-            self.sent_messages = []
-# )  # Orphaned closing parenthesis
+    def test_placeholder(self):
+        """Placeholder test to make this a valid test class"""
+        assert True

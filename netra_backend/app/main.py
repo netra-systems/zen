@@ -1,4 +1,3 @@
-from dev_launcher.isolated_environment import get_env
 """
 Main FastAPI application module.
 Entry point for the Netra AI Optimization Platform.
@@ -16,6 +15,22 @@ import logging
 import os
 import sys
 from pathlib import Path
+
+# Conditional import of environment management
+try:
+    from dev_launcher.isolated_environment import get_env
+    _env_available = True
+except ImportError:
+    # Fallback for production environments where dev_launcher might not be available
+    def get_env():
+        """Fallback environment manager for production."""
+        class ProductionEnv:
+            def get(self, key: str, default=None):
+                return os.environ.get(key, default)
+            def set(self, key: str, value: str, source: str = "production"):
+                os.environ[key] = value
+        return ProductionEnv()
+    _env_available = False
 
 # Add the project root to the Python path
 
@@ -58,6 +73,8 @@ def _load_all_env_files(root_path: Path) -> None:
 
 def _setup_environment_files() -> None:
     """Load environment files ONLY if not already loaded by dev launcher."""
+    env_manager = get_env()
+    
     # Check if dev launcher already loaded environment variables
     # by looking for specific environment variables that dev launcher sets
     dev_launcher_indicators = [
@@ -67,14 +84,14 @@ def _setup_environment_files() -> None:
     
     # If any dev launcher indicator is present, skip loading
     for indicator in dev_launcher_indicators:
-        if get_env().get(indicator):
+        if env_manager.get(indicator):
             print(f"Dev launcher detected via {indicator} - skipping .env loading")
             return
     
     # Check if critical environment variables are already set
     # This handles cases where env vars are set directly without dev launcher
     critical_vars = ['LLM_MODE', 'DATABASE_URL', 'GEMINI_API_KEY']
-    vars_already_set = sum(1 for var in critical_vars if get_env().get(var))
+    vars_already_set = sum(1 for var in critical_vars if env_manager.get(var))
     
     # If most critical vars are already set, assume external loading
     if vars_already_set >= len(critical_vars) // 2:

@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 from contextlib import asynccontextmanager
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from fastapi import Depends, FastAPI
@@ -96,7 +96,6 @@ class TestDatabaseConnectionPooling:
         # Mock the underlying _get_async_db function that get_db_dependency uses
         # Mock: Component isolation for testing without external dependencies
         with patch('app.dependencies._get_async_db', mock_get_async_db), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.dependencies.logger') as mock_logger:
             with TestClient(app) as client:
                 response = client.get("/test")

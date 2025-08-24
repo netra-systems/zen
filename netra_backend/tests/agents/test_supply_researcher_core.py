@@ -31,7 +31,6 @@ class TestSupplyResearcherCore:
     """Core agent functionality tests"""
 
     @pytest.mark.asyncio
-
     async def test_llm_prompt_template_usage(self, agent, mock_llm_manager):
         """Test that agent uses LLM prompt templates correctly"""
         request = "What are the latest prices for Claude-3 Opus?"
@@ -56,7 +55,6 @@ class TestSupplyResearcherCore:
         assert "claude" in parsed["model_name"].lower()
 
     @pytest.mark.asyncio
-
     async def test_websocket_event_streaming(self, agent):
         """Test WebSocket event streaming during research"""
         state = _create_websocket_test_state()
@@ -102,7 +100,6 @@ class TestSupplyResearcherCore:
         return statuses
 
     @pytest.mark.asyncio
-
     async def test_state_persistence_redis(self, agent):
         """Test agent state persistence in Redis"""
         _setup_redis_mock()
@@ -149,7 +146,6 @@ class TestSupplyResearcherCore:
         assert hasattr(agent, 'redis_manager')
 
     @pytest.mark.asyncio
-
     async def test_multi_provider_parallel_research(self, agent):
         """Test parallel research execution for multiple providers"""
         providers = ["openai", "anthropic", "google"]

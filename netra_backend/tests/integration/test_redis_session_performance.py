@@ -76,7 +76,6 @@ class TestRedisSessionPerformance:
         return MockWebSocketManagerWithRedis(session_manager)
 
     @pytest.mark.asyncio
-
     async def test_state_synchronization_real_time(self, websocket_manager, session_manager, redis_connection):
 
         """BVJ: Validates real-time state synchronization across connections."""
@@ -144,7 +143,6 @@ class TestRedisSessionPerformance:
         logger.info(f"Real-time sync validated: {avg_sync_time:.2f}s avg, {max_sync_time:.2f}s max")
 
     @pytest.mark.asyncio
-
     async def test_concurrent_state_sync_load_testing(self, websocket_manager, session_manager):
 
         """BVJ: Validates state sync performance under concurrent load."""
@@ -238,7 +236,6 @@ class TestRedisSessionPerformance:
         logger.info(f"Concurrent load test validated: {throughput:.1f} updates/sec, {overall_avg_time:.2f}s avg time")
 
     @pytest.mark.asyncio
-
     async def test_state_conflict_resolution(self, websocket_manager, session_manager, redis_connection):
 
         """BVJ: Validates state conflict resolution when concurrent updates occur."""

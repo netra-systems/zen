@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional, Tuple
 # from app.schemas.agent_models import AgentRequest, AgentResponse, AgentTask  # These classes don't exist, using generic dict structures
 # Available classes in agent_models: AgentResult, DeepAgentState, AgentMetadata, ToolResultData
 # from app.services.websocket_service import WebSocketService
-from unittest.mock import AsyncMock, MagicMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 

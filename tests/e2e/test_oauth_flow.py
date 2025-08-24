@@ -105,7 +105,6 @@ class TestOAuthFlow:
         # Step 1: Mock GitHub Enterprise OAuth
         # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient.post') as mock_post, \
-             # Mock: Component isolation for testing without external dependencies
              patch('httpx.AsyncClient.get') as mock_get:
             
             self._setup_github_mocks(mock_post, mock_get, mock_oauth_responses)

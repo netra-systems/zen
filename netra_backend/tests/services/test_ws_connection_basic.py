@@ -11,7 +11,7 @@ import asyncio
 import time
 from datetime import UTC, datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, call, patch
 
 import pytest
 from fastapi import WebSocket

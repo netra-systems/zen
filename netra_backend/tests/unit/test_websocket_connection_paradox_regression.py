@@ -11,7 +11,7 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 from pathlib import Path
 import sys
 
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from fastapi import WebSocket

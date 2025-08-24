@@ -11,7 +11,7 @@ from pathlib import Path
 
 import json
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from netra_backend.app.schemas import CorpusCreate

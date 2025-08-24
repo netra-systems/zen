@@ -75,7 +75,6 @@ class TestResilientHTTPClientCircuit:
         mock_circuit = self._setup_open_circuit_mock()
         
         with patch.object(client, '_get_circuit', return_value=mock_circuit), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.services.external_api_client.logger') as mock_logger:
             result = await client._request("GET", "/test", "test_api")
             self._verify_circuit_open_result(result, mock_logger)

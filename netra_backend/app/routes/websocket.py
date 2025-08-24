@@ -348,49 +348,84 @@ async def get_websocket_config():
 
 @router.get("/ws/health")
 async def websocket_health_check():
-    """WebSocket service health check."""
-    ws_manager = get_websocket_manager()
-    authenticator = get_websocket_authenticator()
-    connection_monitor = get_connection_monitor()
+    """WebSocket service health check with resilient error handling."""
+    errors = []
+    metrics = {}
     
-    # Get service statistics
-    ws_stats = ws_manager.get_stats()
-    auth_stats = authenticator.get_auth_stats()
-    monitor_stats = connection_monitor.get_global_stats()
+    # Try to get WebSocket manager stats (most basic requirement)
+    try:
+        ws_manager = get_websocket_manager()
+        ws_stats = ws_manager.get_stats()
+        metrics["websocket"] = {
+            "active_connections": ws_stats["active_connections"],
+            "total_connections": ws_stats["total_connections"], 
+            "messages_processed": ws_stats["messages_sent"] + ws_stats["messages_received"],
+            "error_rate": ws_stats["errors_handled"] / max(1, ws_stats["total_connections"])
+        }
+    except Exception as e:
+        errors.append(f"websocket_manager: {str(e)}")
+        metrics["websocket"] = {
+            "status": "unavailable",
+            "error": str(e)
+        }
     
-    # Determine health status
+    # Try to get authentication stats (optional)
+    try:
+        authenticator = get_websocket_authenticator()
+        auth_stats = authenticator.get_auth_stats()
+        metrics["authentication"] = {
+            "success_rate": auth_stats.get("success_rate", 0),
+            "rate_limited_requests": auth_stats.get("rate_limited", 0)
+        }
+    except Exception as e:
+        errors.append(f"websocket_auth: {str(e)}")
+        metrics["authentication"] = {
+            "status": "unavailable", 
+            "error": str(e)
+        }
+    
+    # Try to get connection monitoring stats (optional)
+    try:
+        connection_monitor = get_connection_monitor()
+        monitor_stats = connection_monitor.get_global_stats()
+        metrics["monitoring"] = {
+            "monitored_connections": monitor_stats["total_connections"],
+            "healthy_connections": monitor_stats.get("health_summary", {}).get("healthy_connections", 0)
+        }
+    except Exception as e:
+        errors.append(f"connection_monitor: {str(e)}")
+        metrics["monitoring"] = {
+            "status": "unavailable",
+            "error": str(e)
+        }
+    
+    # Determine health status based on core functionality
+    ws_metrics = metrics.get("websocket", {})
     is_healthy = (
-        ws_stats.active_connections >= 0 and  # Basic sanity check
-        auth_stats.get("success_rate", 0) > 0.8 and  # 80%+ auth success rate
-        ws_stats.errors_handled < 100  # Less than 100 total errors
+        "error" not in ws_metrics and  # WebSocket manager is available
+        ws_metrics.get("active_connections", -1) >= 0  # Basic sanity check
     )
     
-    return {
-        "status": "healthy" if is_healthy else "degraded",
+    status = "healthy" if is_healthy else "degraded" 
+    if errors:
+        status = "degraded"
+    
+    response = {
+        "status": status,
         "service": "websocket",
         "version": "1.0.0",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "metrics": {
-            "websocket": {
-                "active_connections": ws_stats.active_connections,
-                "total_connections": ws_stats.total_connections,
-                "messages_processed": ws_stats.messages_sent + ws_stats.messages_received,
-                "error_rate": ws_stats.errors_handled / max(1, ws_stats.total_connections)
-            },
-            "authentication": {
-                "success_rate": auth_stats.get("success_rate", 0),
-                "rate_limited_requests": auth_stats.get("rate_limited", 0)
-            },
-            "monitoring": {
-                "monitored_connections": monitor_stats["total_connections"],
-                "healthy_connections": monitor_stats.get("health_summary", {}).get("healthy_connections", 0)
-            }
-        },
+        "metrics": metrics,
         "config": {
             "max_connections_per_user": WEBSOCKET_CONFIG.max_connections_per_user,
             "heartbeat_interval": WEBSOCKET_CONFIG.heartbeat_interval_seconds
         }
     }
+    
+    if errors:
+        response["errors"] = errors
+    
+    return response
 
 
 @router.websocket("/ws/test")

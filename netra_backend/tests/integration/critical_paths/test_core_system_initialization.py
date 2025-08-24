@@ -47,7 +47,7 @@ class SystemInitializationManager:
 
         self.startup_times = {}
         
-    async def start_service(self, service_name: str, service_class, **kwargs) -> bool:
+async def start_service(self, service_name: str, service_class, **kwargs) -> bool:
 
         """Start a service and track initialization time."""
 
@@ -103,7 +103,7 @@ class SystemInitializationManager:
 
             return False
     
-    async def check_service_health(self, service_name: str) -> Dict:
+async def check_service_health(self, service_name: str) -> Dict:
 
         """Check individual service health status."""
 
@@ -135,7 +135,7 @@ class SystemInitializationManager:
 
             return {"status": "unhealthy", "details": str(e)}
     
-    async def get_system_health(self) -> Dict:
+async def get_system_health(self) -> Dict:
 
         """Get comprehensive system health status."""
 
@@ -190,7 +190,6 @@ async def system_manager():
                 pass
 
 @pytest.mark.asyncio
-
 async def test_microservice_startup_orchestration(system_manager):
 
     """Test that all microservices start in correct dependency order."""
@@ -243,7 +242,6 @@ async def test_microservice_startup_orchestration(system_manager):
     assert system_health["overall_status"] == "healthy"
 
 @pytest.mark.asyncio
-
 async def test_dependency_resolution_chain(system_manager):
 
     """Test that services properly handle dependency failures."""
@@ -280,7 +278,6 @@ async def test_dependency_resolution_chain(system_manager):
     assert system_health["services"]["database"]["status"] == "unhealthy"
 
 @pytest.mark.asyncio
-
 async def test_health_check_endpoints_integration(system_manager):
 
     """Test health check endpoints provide accurate service status."""
@@ -324,8 +321,7 @@ async def test_health_check_endpoints_integration(system_manager):
 
         assert health_status["startup_times"][service_name] > 0
 
-@pytest.mark.asyncio 
-
+@pytest.mark.asyncio
 async def test_graceful_shutdown_sequence(system_manager):
 
     """Test that services shut down gracefully in reverse dependency order."""
@@ -382,7 +378,6 @@ async def test_graceful_shutdown_sequence(system_manager):
     assert len(system_manager.services) == 0
 
 @pytest.mark.asyncio
-
 async def test_startup_performance_benchmarks(system_manager):
 
     """Test that system startup meets performance requirements."""

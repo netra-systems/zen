@@ -107,7 +107,6 @@ class TestHealthCheckersCore:
         # Mock the engine to be None to trigger the engine initialization path
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres_core.async_engine', None), \
-             # Mock: Component isolation for testing without external dependencies
              patch('netra_backend.app.db.postgres.initialize_postgres') as mock_init:
             mock_init.return_value = None  # Ensure engine remains None after init
             result = await check_postgres_health()

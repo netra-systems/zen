@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import json
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from netra_backend.app.schemas import CorpusCreate, CorpusUpdate

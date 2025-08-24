@@ -14,7 +14,7 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 import websockets
@@ -307,7 +307,6 @@ class TestWebSocketReconnection:
         return ReconnectingClient
     
     @pytest.mark.asyncio
-
     async def test_basic_websocket_connection(self, websocket_server, websocket_client):
 
         """Test basic WebSocket connection and message exchange."""
@@ -336,7 +335,6 @@ class TestWebSocketReconnection:
         await client.disconnect()
     
     @pytest.mark.asyncio
-
     async def test_automatic_reconnection(self, websocket_server, websocket_client):
 
         """Test automatic reconnection after connection loss."""
@@ -372,7 +370,6 @@ class TestWebSocketReconnection:
         await client.disconnect()
     
     @pytest.mark.asyncio
-
     async def test_connection_state_recovery(self, websocket_server):
 
         """Test that connection state is properly recovered after reconnection."""
@@ -414,7 +411,6 @@ class TestWebSocketReconnection:
         assert new_time > initial_time
     
     @pytest.mark.asyncio
-
     async def test_exponential_backoff_reconnection(self):
 
         """Test exponential backoff during reconnection attempts."""
@@ -459,7 +455,6 @@ class TestWebSocketReconnection:
             assert second_delay > first_delay * 1.5
     
     @pytest.mark.asyncio
-
     async def test_concurrent_connections(self, websocket_server):
 
         """Test handling multiple concurrent WebSocket connections."""
@@ -499,7 +494,6 @@ class TestWebSocketReconnection:
             mock_ws.ping.assert_called_once()
     
     @pytest.mark.asyncio
-
     async def test_message_buffering_during_reconnection(self, websocket_server, websocket_client):
 
         """Test that messages are buffered during reconnection."""

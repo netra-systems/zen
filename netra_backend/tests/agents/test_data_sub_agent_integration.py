@@ -42,7 +42,6 @@ class TestIntegration(SharedTestIntegration):
         mock_ws.send.assert_called()
 
     @pytest.mark.asyncio
-
     async def test_integration_with_database(self):
         """Test integration with database persistence"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -73,7 +72,6 @@ class TestIntegration(SharedTestIntegration):
         assert result["status"] == "processed"
 
     @pytest.mark.asyncio
-
     async def test_integration_with_supervisor(self):
         """Test integration with supervisor agent"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits
@@ -116,7 +114,6 @@ class TestPerformance:
         assert duration < 5.0  # Should complete within 5 seconds
 
     @pytest.mark.asyncio
-
     async def test_memory_efficiency(self):
         """Test memory efficiency with large datasets"""
         # Mock: LLM service isolation for fast testing without API calls or rate limits

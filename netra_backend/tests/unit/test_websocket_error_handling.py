@@ -13,7 +13,7 @@ pytestmark = pytest.mark.skip(reason="Private function imports not available - t
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from fastapi import WebSocket, WebSocketDisconnect

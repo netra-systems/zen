@@ -839,7 +839,6 @@ class TestSLACompliance:
         self.sla_tester = SLAComplianceTester()
     
     @pytest.mark.asyncio
-
     async def test_p95_response_time(self):
 
         """Test P95 response time meets SLA requirements."""
@@ -848,7 +847,6 @@ class TestSLACompliance:
         await self.test_api_response_time_sla()
     
     @pytest.mark.asyncio
-
     async def test_api_response_time_sla(self):
 
         """Test API response time meets P95 < 200ms SLA."""
@@ -882,7 +880,6 @@ class TestSLACompliance:
         print(f"API Performance: P95={metrics.p95_response_time:.1f}ms, Success={metrics.success_rate:.1f}%")
     
     @pytest.mark.asyncio
-
     async def test_websocket_latency_sla(self):
 
         """Test WebSocket latency meets < 50ms SLA."""
@@ -914,7 +911,6 @@ class TestSLACompliance:
             pytest.skip("WebSocket connection failed - service may not be running")
     
     @pytest.mark.asyncio
-
     async def test_concurrent_users_sla(self):
 
         """Test concurrent user handling meets 100+ users SLA."""
@@ -948,7 +944,6 @@ class TestSLACompliance:
         print(f"Concurrent Users: Max successful={max_successful}, Results={results}")
     
     @pytest.mark.asyncio
-
     async def test_memory_usage_sla(self):
 
         """Test memory usage stays within acceptable bounds."""

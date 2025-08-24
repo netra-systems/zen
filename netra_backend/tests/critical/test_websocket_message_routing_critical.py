@@ -12,7 +12,7 @@ import asyncio
 import json
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, call, patch
 
 import pytest
 from fastapi import WebSocket

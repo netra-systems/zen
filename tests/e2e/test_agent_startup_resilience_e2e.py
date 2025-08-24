@@ -44,7 +44,7 @@ class AgentRateLimitTester:
         self.rate_limit_responses: List[Dict[str, Any]] = []
         
 
-    async def send_rapid_messages(self, user_token: str, count: int = 10) -> List[Dict[str, Any]]:
+async def send_rapid_messages(self, user_token: str, count: int = 10) -> List[Dict[str, Any]]:
 
         """Send rapid succession of messages to test rate limiting."""
 
@@ -77,7 +77,7 @@ class AgentRateLimitTester:
         return responses
     
 
-    async def _mock_rapid_messages(self, user_token: str, count: int) -> List[Dict[str, Any]]:
+async def _mock_rapid_messages(self, user_token: str, count: int) -> List[Dict[str, Any]]:
 
         """Mock rapid message sending for testing."""
 
@@ -109,7 +109,7 @@ class AgentRateLimitTester:
         return responses
     
 
-    def _create_rapid_message(self, index: int) -> Dict[str, Any]:
+def _create_rapid_message(self, index: int) -> Dict[str, Any]:
 
         """Create message for rapid fire testing."""
 
@@ -124,7 +124,7 @@ class AgentRateLimitTester:
         }
     
 
-    def _process_rate_limit_response(self, response: Dict[str, Any], index: int) -> Dict[str, Any]:
+def _process_rate_limit_response(self, response: Dict[str, Any], index: int) -> Dict[str, Any]:
 
         """Process response for rate limit analysis."""
 
@@ -167,7 +167,7 @@ class DatabaseFailureSimulator:
         self.failure_active = False
         
 
-    async def simulate_database_failure(self) -> None:
+async def simulate_database_failure(self) -> None:
 
         """Simulate complete database connectivity failure."""
 
@@ -178,7 +178,7 @@ class DatabaseFailureSimulator:
         self.failure_active = True
         
 
-    async def restore_database_connectivity(self) -> None:
+async def restore_database_connectivity(self) -> None:
 
         """Restore database connectivity after failure simulation."""
 
@@ -187,7 +187,7 @@ class DatabaseFailureSimulator:
         self.failure_active = False
     
 
-    def _store_original_connections(self) -> None:
+def _store_original_connections(self) -> None:
 
         """Store original database connections for restoration."""
 
@@ -202,7 +202,7 @@ class DatabaseFailureSimulator:
         }
     
 
-    async def _disable_database_connections(self) -> None:
+async def _disable_database_connections(self) -> None:
 
         """Disable all database connections to simulate failure."""
 
@@ -219,7 +219,7 @@ class DatabaseFailureSimulator:
             self.db_manager.redis_client = None
         
 
-    async def _restore_database_connections(self) -> None:
+async def _restore_database_connections(self) -> None:
 
         """Restore original database connections."""
 
@@ -237,7 +237,6 @@ class DatabaseFailureSimulator:
 
 
 @pytest.mark.asyncio
-
 async def test_agent_startup_with_rate_limiting():
 
     """Test 7: Validate agent startup and behavior under rate limiting conditions.
@@ -322,7 +321,6 @@ async def _assert_rate_limiting_success_criteria(responses: List[Dict[str, Any]]
 
 
 @pytest.mark.asyncio
-
 async def test_agent_startup_database_connectivity_failure_recovery():
 
     """Test 8: Validate agent graceful degradation and recovery from database failures.

@@ -57,11 +57,8 @@ class TestAutoRenameThread:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository', return_value=thread_repo), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.MessageRepository', return_value=message_repo), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.LLMManager', return_value=llm_manager), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.ws_manager', mock_ws):
             
             result = await auto_rename_thread("thread_abc123", mock_db, mock_user)
@@ -75,7 +72,7 @@ class TestAutoRenameThread:
     # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.utils.thread_helpers.time.time')
     @pytest.mark.asyncio
-    async def test_auto_rename_llm_failure_fallback(self, mock_time, mock_db, mock_user):
+async def test_auto_rename_llm_failure_fallback(self, mock_time, mock_db, mock_user):
         """Test auto-rename with LLM failure, using fallback"""
         create_thread_update_scenario(mock_time)
         mock_thread = create_mock_thread()
@@ -85,11 +82,9 @@ class TestAutoRenameThread:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository', return_value=thread_repo), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.MessageRepository', return_value=message_repo), \
              # Mock: LLM service isolation for fast testing without API calls or rate limits
              patch('app.routes.utils.thread_helpers.LLMManager') as MockLLMManager, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.ws_manager') as mock_ws, \
              # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.logger') as mock_logger:
@@ -106,7 +101,7 @@ class TestAutoRenameThread:
         assert mock_thread.metadata_["title"] == "Chat 1234567900"
         mock_logger.warning.assert_called_once()
     @pytest.mark.asyncio
-    async def test_auto_rename_no_user_message(self, mock_db, mock_user):
+async def test_auto_rename_no_user_message(self, mock_db, mock_user):
         """Test auto-rename when no user message exists"""
         mock_thread = create_mock_thread()
         # Mock: Component isolation for controlled unit testing
@@ -121,7 +116,7 @@ class TestAutoRenameThread:
             
         assert_http_exception(exc_info, 400, "No user message found to generate title from")
     @pytest.mark.asyncio
-    async def test_auto_rename_thread_not_found(self, mock_db, mock_user):
+async def test_auto_rename_thread_not_found(self, mock_db, mock_user):
         """Test auto-rename for non-existent thread"""
         # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
@@ -134,7 +129,7 @@ class TestAutoRenameThread:
             
             assert_http_exception(exc_info, 404, "Thread not found")
     @pytest.mark.asyncio
-    async def test_auto_rename_access_denied(self, mock_db, mock_user):
+async def test_auto_rename_access_denied(self, mock_db, mock_user):
         """Test auto-rename for thread owned by another user"""
         mock_thread = create_access_denied_thread()
         
@@ -151,7 +146,7 @@ class TestAutoRenameThread:
     # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.utils.thread_helpers.time.time')
     @pytest.mark.asyncio
-    async def test_auto_rename_empty_metadata(self, mock_time, mock_db, mock_user):
+async def test_auto_rename_empty_metadata(self, mock_time, mock_db, mock_user):
         """Test auto-rename when thread has no metadata"""
         create_thread_update_scenario(mock_time)
         mock_thread = setup_thread_with_special_metadata()
@@ -159,11 +154,9 @@ class TestAutoRenameThread:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.MessageRepository') as MockMessageRepo, \
              # Mock: LLM service isolation for fast testing without API calls or rate limits
              patch('app.routes.utils.thread_helpers.LLMManager') as MockLLMManager, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.ws_manager') as mock_ws:
             
             thread_repo = MockThreadRepo.return_value
@@ -191,7 +184,7 @@ class TestAutoRenameThread:
         assert mock_thread.metadata_["auto_renamed"] == True
         assert mock_thread.metadata_["updated_at"] == 1234567900
     @pytest.mark.asyncio
-    async def test_auto_rename_title_cleanup(self, mock_db, mock_user):
+async def test_auto_rename_title_cleanup(self, mock_db, mock_user):
         """Test that generated title is cleaned up properly"""
         mock_thread = create_mock_thread()
         mock_message = create_mock_message()
@@ -199,11 +192,9 @@ class TestAutoRenameThread:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.MessageRepository') as MockMessageRepo, \
              # Mock: LLM service isolation for fast testing without API calls or rate limits
              patch('app.routes.utils.thread_helpers.LLMManager') as MockLLMManager, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.ws_manager') as mock_ws:
             
             thread_repo = MockThreadRepo.return_value
@@ -226,11 +217,10 @@ class TestAutoRenameThread:
         assert result.title == expected_title
         assert len(result.title) == 50
     @pytest.mark.asyncio
-    async def test_auto_rename_exception(self, mock_db, mock_user):
+async def test_auto_rename_exception(self, mock_db, mock_user):
         """Test general exception in auto_rename_thread"""
         # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             thread_repo = MockThreadRepo.return_value

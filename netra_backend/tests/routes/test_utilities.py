@@ -8,7 +8,7 @@ from pathlib import Path
 
 from contextlib import asynccontextmanager
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock
 
 import pytest
 from fastapi.testclient import TestClient

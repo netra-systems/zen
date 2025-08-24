@@ -290,6 +290,11 @@ class MockLLMManager:
         }
 
 
+# Aliases for backward compatibility
+MockLLM = MockLLMClient  # Alias for tests expecting MockLLM
+MockStructuredLLM = MockLLMClient  # Alias for tests expecting MockStructuredLLM
+
+
 # Convenience functions and fixtures
 
 def create_mock_llm_client(provider: MockLLMProvider = MockLLMProvider.MOCK_LOCAL,

@@ -176,7 +176,6 @@ class TestErrorHandlingAndRecovery:
     """Test comprehensive error handling and recovery"""
     
     @pytest.mark.asyncio
-    
     async def test_llm_timeout_handling(self, triage_agent, complex_state):
         """Test LLM timeout handling"""
         triage_agent.llm_manager.ask_llm.side_effect = AsyncTestHelpers.create_timeout_llm
@@ -194,7 +193,6 @@ class TestErrorHandlingAndRecovery:
             assert "timeout" in state.triage_result.metadata.error_details.lower()
     
     @pytest.mark.asyncio
-    
     async def test_llm_rate_limit_handling(self, triage_agent, complex_state):
         """Test LLM rate limit error handling"""
         triage_agent.llm_manager.ask_llm.side_effect = AsyncTestHelpers.create_rate_limit_error
@@ -212,7 +210,6 @@ class TestErrorHandlingAndRecovery:
             assert "rate limit" in state.triage_result.metadata.error_details.lower()
     
     @pytest.mark.asyncio
-    
     async def test_redis_connection_failures(self):
         """Test Redis connection failure handling"""
         agent = self._create_agent_with_failing_redis()

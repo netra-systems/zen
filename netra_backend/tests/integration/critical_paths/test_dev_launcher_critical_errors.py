@@ -18,7 +18,7 @@ These tests should initially FAIL (demonstrating the bugs exist) and will PASS a
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 from typing import Dict, Any
 from contextlib import asynccontextmanager
 

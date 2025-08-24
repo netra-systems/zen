@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from netra_backend.app.schemas import User
@@ -913,7 +913,6 @@ class TestWebSocketHeartbeatZombieL3:
     """L3 integration tests for WebSocket heartbeat monitoring and zombie detection."""
     
     @pytest.mark.asyncio
-
     async def test_basic_heartbeat_monitoring_setup(self, heartbeat_manager, test_users):
 
         """Test basic heartbeat monitoring system setup and operation."""
@@ -957,7 +956,6 @@ class TestWebSocketHeartbeatZombieL3:
         assert not heartbeat_manager.monitoring_active
     
     @pytest.mark.asyncio
-
     async def test_zombie_detection_under_60_seconds(self, heartbeat_manager, test_users):
 
         """Test zombie detection meets <60 seconds requirement."""
@@ -1022,7 +1020,6 @@ class TestWebSocketHeartbeatZombieL3:
         assert health_state.state in [ConnectionState.ZOMBIE, ConnectionState.CLEANUP_PENDING]
     
     @pytest.mark.asyncio
-
     async def test_heartbeat_interval_accuracy(self, heartbeat_manager, test_users):
 
         """Test heartbeat interval timing accuracy."""
@@ -1069,7 +1066,6 @@ class TestWebSocketHeartbeatZombieL3:
             f"Expected ~{expected_interval_count} heartbeats, got {actual_interval_count}"
     
     @pytest.mark.asyncio
-
     async def test_connection_pruning_and_cleanup(self, heartbeat_manager, test_users):
 
         """Test connection pruning and resource cleanup mechanisms."""
@@ -1142,7 +1138,6 @@ class TestWebSocketHeartbeatZombieL3:
                 f"Zombie connection {connection_id} should be closed"
     
     @pytest.mark.asyncio
-
     async def test_client_reconnection_handling(self, heartbeat_manager, test_users):
 
         """Test client reconnection scenarios and old connection cleanup."""
@@ -1198,7 +1193,6 @@ class TestWebSocketHeartbeatZombieL3:
         assert new_health_state.state == ConnectionState.ACTIVE, "New connection should be active"
     
     @pytest.mark.asyncio
-
     async def test_resource_reclamation_efficiency(self, heartbeat_manager, test_users):
 
         """Test resource reclamation efficiency and memory cleanup."""
@@ -1281,7 +1275,6 @@ class TestWebSocketHeartbeatZombieL3:
         assert active_websockets < connection_count, "Should have cleaned up some WebSocket connections"
     
     @pytest.mark.asyncio
-
     async def test_heartbeat_response_time_monitoring(self, heartbeat_manager, test_users):
 
         """Test heartbeat response time monitoring and metrics accuracy."""
@@ -1336,7 +1329,6 @@ class TestWebSocketHeartbeatZombieL3:
     @mock_justified("L3: WebSocket heartbeat and zombie detection testing with controlled connection simulation")
 
     @pytest.mark.asyncio
-
     async def test_comprehensive_zombie_detection_reliability(self, heartbeat_manager, test_users):
 
         """Test comprehensive zombie detection reliability and accuracy."""

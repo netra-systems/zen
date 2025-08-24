@@ -20,7 +20,7 @@ from pathlib import Path
 import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 import pytest
 from fastapi import HTTPException, Request, Response, status

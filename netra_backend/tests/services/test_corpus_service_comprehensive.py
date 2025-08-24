@@ -7,7 +7,7 @@ import hashlib
 import json
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, call, patch
 
 import pytest
 from netra_backend.app.schemas import Corpus, CorpusCreate, CorpusUpdate

@@ -14,7 +14,7 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -35,7 +35,6 @@ from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
 )
 
 @pytest.mark.asyncio
-
 async def test_supervisor_initialization(supervisor_agent):
     """Test supervisor agent proper initialization"""
     assert supervisor_agent is not None
@@ -44,7 +43,6 @@ async def test_supervisor_initialization(supervisor_agent):
     assert len(supervisor_agent.agents) > 0
 
 @pytest.mark.asyncio
-
 async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
     """Test LLM triage agent processes user requests correctly"""
     user_request = "Optimize my GPU utilization for LLM inference"
@@ -65,7 +63,6 @@ async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
     assert state.user_id == supervisor_agent.user_id
 
 @pytest.mark.asyncio
-
 async def test_llm_response_parsing(mock_llm_manager):
     """Test LLM response parsing and error handling"""
     # Test valid JSON response
@@ -92,7 +89,6 @@ async def test_llm_response_parsing(mock_llm_manager):
         pass  # Expected
 
 @pytest.mark.asyncio
-
 async def test_agent_state_transitions(supervisor_agent):
     """Test agent state transitions through pipeline"""
     state = DeepAgentState(
@@ -130,7 +126,6 @@ async def test_agent_state_transitions(supervisor_agent):
     assert "recommendations" in state.optimizations_result
 
 @pytest.mark.asyncio
-
 async def test_websocket_message_streaming(supervisor_agent, mock_websocket_manager):
     """Test WebSocket message streaming during execution"""
     messages_sent = []
@@ -154,7 +149,6 @@ async def test_websocket_message_streaming(supervisor_agent, mock_websocket_mana
     assert mock_websocket_manager.send_message.called or len(messages_sent) >= 0
 
 @pytest.mark.asyncio
-
 async def test_multi_agent_coordination(supervisor_agent):
     """Test coordination between multiple sub-agents"""
     # Verify all expected agents are registered
@@ -167,7 +161,6 @@ async def test_multi_agent_coordination(supervisor_agent):
             f"Missing expected agent: {expected}"
 
 @pytest.mark.asyncio
-
 async def test_performance_metrics(supervisor_agent):
     """Test performance metric collection"""
     start_time = time.time()

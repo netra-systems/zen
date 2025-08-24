@@ -83,6 +83,43 @@ class WebSocketValidator:
         
         logger.info(f"Discovered {len(self.endpoints)} WebSocket endpoints")
     
+    def update_backend_port(self, new_port: int) -> None:
+        """
+        Update backend port for WebSocket endpoints after backend service starts.
+        
+        This fixes the issue where backend gets allocated a different port due to conflicts,
+        but WebSocket validator still uses the original environment port.
+        """
+        old_backend_port = int(get_env().get("BACKEND_PORT", "8000"))
+        
+        if old_backend_port == new_port:
+            logger.debug(f"Backend port unchanged at {new_port}")
+            return
+            
+        logger.info(f"Updating WebSocket validator backend port from {old_backend_port} to {new_port}")
+        
+        # Update main WebSocket endpoint
+        if "main_ws" in self.endpoints:
+            old_url = self.endpoints["main_ws"].url
+            self.endpoints["main_ws"].port = new_port
+            self.endpoints["main_ws"].url = f"ws://localhost:{new_port}/ws"
+            logger.info(f"Updated main_ws: {old_url} -> {self.endpoints['main_ws'].url}")
+        
+        # Update MCP WebSocket endpoint
+        if "mcp_ws" in self.endpoints:
+            old_url = self.endpoints["mcp_ws"].url
+            self.endpoints["mcp_ws"].port = new_port
+            self.endpoints["mcp_ws"].url = f"ws://localhost:{new_port}/api/mcp/ws"
+            logger.info(f"Updated mcp_ws: {old_url} -> {self.endpoints['mcp_ws'].url}")
+        
+        # Reset validation status for updated endpoints
+        for endpoint in self.endpoints.values():
+            if endpoint.port == new_port:
+                endpoint.status = WebSocketStatus.UNKNOWN
+                endpoint.failure_count = 0
+                endpoint.last_error = None
+                endpoint.last_check = None
+    
     def _add_endpoint(self, name: str, host: str, port: int, path: str = "/ws", required: bool = True) -> None:
         """Add WebSocket endpoint for validation."""
         url = f"ws://{host}:{port}{path}"

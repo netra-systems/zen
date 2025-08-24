@@ -72,7 +72,6 @@ class TestErrorHandlerDecorator:
         return successful_function
 
     @pytest.mark.asyncio
-
     async def test_decorator_successful_execution(self):
         """Test decorator with successful function execution."""
         successful_function = await self._create_successful_function()
@@ -93,7 +92,6 @@ class TestErrorHandlerDecorator:
         return retryable_function, call_count
 
     @pytest.mark.asyncio
-
     async def test_decorator_with_retries(self):
         """Test decorator with retryable errors."""
         retryable_function, call_count = await self._create_retryable_function()
@@ -109,7 +107,6 @@ class TestErrorHandlerDecorator:
         return non_retryable_function
 
     @pytest.mark.asyncio
-
     async def test_decorator_with_non_retryable_error(self):
         """Test decorator with non-retryable error."""
         non_retryable_function = await self._create_non_retryable_function()
@@ -125,7 +122,6 @@ class TestErrorHandlerDecorator:
         return max_retries_function
 
     @pytest.mark.asyncio
-
     async def test_decorator_max_retries_exceeded(self):
         """Test decorator when max retries is exceeded."""
         max_retries_function = await self._create_max_retries_exceeded_function()
@@ -148,7 +144,6 @@ class TestErrorHandlerDecorator:
         return custom_handler_function, custom_handler
 
     @pytest.mark.asyncio
-
     async def test_decorator_with_custom_handler(self):
         """Test decorator with custom error handler."""
         custom_function, custom_handler = await self._create_function_with_custom_handler()
@@ -184,7 +179,6 @@ class TestErrorHandlerDecorator:
         return context_function
 
     @pytest.mark.asyncio
-
     async def test_decorator_context_propagation(self):
         """Test decorator context propagation."""
         context_function = await self._create_function_with_context_propagation()
@@ -193,7 +187,6 @@ class TestErrorHandlerDecorator:
             await context_function()
 
     @pytest.mark.asyncio
-
     async def test_decorator_preserves_function_metadata(self):
         """Test decorator preserves original function metadata."""
         @handle_agent_error(agent_name="TestAgent", operation_name="metadata_op")
@@ -225,7 +218,6 @@ class TestErrorHandlerDecorator:
         return delayed_retry_function, call_times
 
     @pytest.mark.asyncio
-
     async def test_decorator_retry_delay(self):
         """Test decorator retry delay functionality."""
         delayed_function, call_times = await self._create_function_with_retry_delay()

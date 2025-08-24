@@ -16,7 +16,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import psutil
 import pytest
@@ -50,7 +50,6 @@ class TestPerformanceScalabilityL2:
     """L2 tests for performance and scalability (Tests 76-85)."""
     
     @pytest.mark.asyncio
-
     async def test_76_concurrent_user_load(self):
 
         """Test 76: Concurrent User Load
@@ -200,7 +199,6 @@ class TestPerformanceScalabilityL2:
         assert metrics["memory_increase_mb"] < 100  # Reasonable memory usage
     
     @pytest.mark.asyncio
-
     async def test_77_message_throughput(self):
 
         """Test 77: Message Throughput
@@ -361,7 +359,6 @@ class TestPerformanceScalabilityL2:
         assert metrics["dropped"] < 10  # Minimal drops
     
     @pytest.mark.asyncio
-
     async def test_78_database_query_optimization(self):
 
         """Test 78: Database Query Optimization
@@ -505,7 +502,6 @@ class TestPerformanceScalabilityL2:
         assert result["optimized_cost"] < result["original_cost"]
     
     @pytest.mark.asyncio
-
     async def test_79_memory_leak_detection(self):
 
         """Test 79: Memory Leak Detection
@@ -671,7 +667,6 @@ class TestPerformanceScalabilityL2:
         assert result["object_growth"] > 0
     
     @pytest.mark.asyncio
-
     async def test_80_cpu_utilization_patterns(self):
 
         """Test 80: CPU Utilization Patterns
@@ -851,7 +846,6 @@ class TestPerformanceScalabilityL2:
         assert pattern_io["avg_cpu"] < pattern["avg_cpu"]  # Less CPU than compute
     
     @pytest.mark.asyncio
-
     async def test_81_network_latency_compensation(self):
 
         """Test 81: Network Latency Compensation
@@ -1015,7 +1009,6 @@ class TestPerformanceScalabilityL2:
         assert result["strategy"] in ["prefetch", "cache"]
     
     @pytest.mark.asyncio
-
     async def test_82_batch_processing_performance(self):
 
         """Test 82: Batch Processing Performance
@@ -1178,7 +1171,6 @@ class TestPerformanceScalabilityL2:
         assert len(result["results"]) == 1000
     
     @pytest.mark.asyncio
-
     async def test_83_startup_time_optimization(self):
 
         """Test 83: Startup Time Optimization
@@ -1371,7 +1363,6 @@ class TestPerformanceScalabilityL2:
         assert optimized["parallel_phases"] > 0
     
     @pytest.mark.asyncio
-
     async def test_84_resource_pool_sizing(self):
 
         """Test 84: Resource Pool Sizing
@@ -1575,7 +1566,6 @@ class TestPerformanceScalabilityL2:
         assert utilization["metrics"]["timeouts"] == 0  # No timeouts with proper sizing
     
     @pytest.mark.asyncio
-
     async def test_85_garbage_collection_impact(self):
 
         """Test 85: Garbage Collection Impact

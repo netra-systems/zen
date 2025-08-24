@@ -189,7 +189,7 @@ class TestStartupCheckIntegration:
         
         This test will fail if any startup check module has the wrong import.
         """
-        from unittest.mock import AsyncMock, MagicMock, MagicMock
+        from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
         from netra_backend.app.startup_checks.checker import StartupChecker
         

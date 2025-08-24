@@ -14,7 +14,7 @@ import json
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -40,7 +40,6 @@ from netra_backend.tests.agents.fixtures.llm_agent_fixtures import (
 )
 
 @pytest.mark.asyncio
-
 async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
                                           mock_websocket_manager, mock_tool_dispatcher):
     """Test handling multiple concurrent requests"""
@@ -73,7 +72,6 @@ def verify_optimization_flow(state, supervisor):
     assert supervisor.engine.execute_pipeline.called
 
 @pytest.mark.asyncio
-
 async def test_end_to_end_optimization_flow():
     """Test complete end-to-end optimization flow"""
     # Create infrastructure and setup responses
@@ -90,7 +88,6 @@ async def test_end_to_end_optimization_flow():
     _verify_e2e_flow_completion(state, supervisor)
 
 @pytest.mark.asyncio
-
 async def test_complex_multi_step_flow():
     """Test complex multi-step optimization flow"""
     # Create infrastructure
@@ -121,7 +118,6 @@ async def test_complex_multi_step_flow():
     verify_optimization_flow(state, supervisor)
 
 @pytest.mark.asyncio
-
 async def test_flow_interruption_and_recovery():
     """Test flow interruption and recovery scenarios"""
     db_session, llm_manager, ws_manager = create_mock_infrastructure()
@@ -149,7 +145,6 @@ async def test_flow_interruption_and_recovery():
     assert recovered_state.triage_result["step"] == "analysis"
 
 @pytest.mark.asyncio
-
 async def test_flow_performance_benchmarks():
     """Test flow performance under various conditions"""
     performance_metrics = []
@@ -237,6 +232,7 @@ def _setup_e2e_llm_responses(llm_manager):
     ]
     
     response_index = 0
+    
     async def mock_structured_llm(*args, **kwargs):
         nonlocal response_index
         result = responses[response_index]

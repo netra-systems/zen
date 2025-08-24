@@ -21,7 +21,7 @@ import os
 import time
 from datetime import datetime
 from typing import Any, AsyncGenerator, Dict
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from fastapi.testclient import TestClient

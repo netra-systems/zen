@@ -85,7 +85,6 @@ class TestGetThreadMessages:
         """Test general exception in get_thread_messages"""
         # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             thread_repo = MockThreadRepo.return_value
