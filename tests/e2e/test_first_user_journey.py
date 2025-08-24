@@ -137,8 +137,8 @@ class TestFirstUserJourney:
         user_id = str(uuid.uuid4())
         
         # Mock: Authentication service isolation for testing without real auth flows
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client') as mock_auth_client, \
-             # Mock: Component isolation for testing without external dependencies
              patch('netra_backend.app.db.repositories.user_repository') as mock_backend_repo:
             
             mock_auth_client.create_user.return_value = {"id": user_id, **user_data}

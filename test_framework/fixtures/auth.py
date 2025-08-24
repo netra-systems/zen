@@ -275,6 +275,148 @@ def create_mock_saml_provider() -> MockSAMLProvider:
     """Create a mock SAML provider."""
     return MockSAMLProvider()
 
+
+class EnterpriseTokenManager:
+    """Enterprise token management for SSO/SAML testing."""
+    
+    def __init__(self):
+        self.tokens: Dict[str, Dict[str, Any]] = {}
+        self.sessions: Dict[str, Dict[str, Any]] = {}
+    
+    async def create_enterprise_session(self, saml_assertion: Dict[str, Any]) -> str:
+        """Create enterprise session from SAML assertion."""
+        session_id = f"enterprise_session_{uuid.uuid4().hex[:16]}"
+        self.sessions[session_id] = {
+            "assertion": saml_assertion,
+            "created_at": time.time(),
+            "expires_at": time.time() + 28800,  # 8 hours
+            "user_id": saml_assertion.get("subject"),
+            "attributes": saml_assertion.get("attributes", {})
+        }
+        return session_id
+    
+    async def validate_enterprise_token(self, token: str) -> bool:
+        """Validate enterprise token."""
+        token_data = self.tokens.get(token)
+        if not token_data:
+            return False
+        return token_data["expires_at"] > time.time()
+
+
+class MockIdPErrorGenerator:
+    """Generate mock IdP errors for testing."""
+    
+    @staticmethod
+    async def create_invalid_assertion() -> Dict[str, Any]:
+        """Create SAML assertion with invalid issuer."""
+        return {
+            "id": str(uuid.uuid4()),
+            "issuer": "https://invalid-issuer.malicious.com",  # Invalid issuer
+            "subject": "test@example.com",
+            "issued_at": datetime.now(timezone.utc).isoformat(),
+            "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
+            "attributes": {"role": "user"}
+        }
+    
+    @staticmethod
+    async def create_expired_assertion() -> Dict[str, Any]:
+        """Create expired SAML assertion."""
+        return {
+            "id": str(uuid.uuid4()),
+            "issuer": "https://enterprise-idp.example.com",
+            "subject": "test@example.com",
+            "issued_at": (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat(),
+            "expires_at": (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat(),  # Already expired
+            "attributes": {"role": "user"}
+        }
+    
+    @staticmethod
+    async def create_malformed_assertion() -> Dict[str, Any]:
+        """Create malformed SAML assertion."""
+        return {
+            "id": str(uuid.uuid4()),
+            "issuer": "https://enterprise-idp.example.com",
+            "subject": "test@example.com",
+            # Missing required fields like issued_at, expires_at
+            "attributes": {"role": "user"}
+        }
+
+
+class SAMLAssertionValidator:
+    """SAML assertion validator for testing."""
+    
+    def __init__(self):
+        self.trusted_issuers = [
+            "https://enterprise-idp.example.com",
+            "https://trusted-saml.company.com"
+        ]
+    
+    async def validate_assertion(self, assertion: Dict[str, Any]) -> bool:
+        """Validate SAML assertion."""
+        # Check issuer
+        if assertion.get("issuer") not in self.trusted_issuers:
+            raise ValueError("Invalid issuer")
+        
+        # Check expiration
+        expires_at = assertion.get("expires_at")
+        if expires_at:
+            try:
+                expiry_time = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+                if expiry_time < datetime.now(timezone.utc):
+                    raise ValueError("Assertion expired")
+            except ValueError as e:
+                if "Assertion expired" in str(e):
+                    raise
+                raise ValueError("Invalid expiration format")
+        
+        # Check required fields
+        required_fields = ["id", "issuer", "subject"]
+        for field in required_fields:
+            if field not in assertion or not assertion[field]:
+                raise ValueError(f"Missing required field: {field}")
+        
+        return True
+    
+    async def extract_user_info(self, assertion: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract user information from SAML assertion."""
+        await self.validate_assertion(assertion)  # Validate first
+        
+        return {
+            "user_id": assertion["subject"],
+            "email": assertion["subject"],  # Assume subject is email
+            "attributes": assertion.get("attributes", {}),
+            "issuer": assertion["issuer"]
+        }
+
+
+class SSOTestComponents:
+    """Comprehensive SSO test components."""
+    
+    def __init__(self):
+        self.token_manager = EnterpriseTokenManager()
+        self.saml_validator = SAMLAssertionValidator()
+        self.error_generator = MockIdPErrorGenerator()
+    
+    async def create_test_scenario(self, scenario_type: str) -> Dict[str, Any]:
+        """Create test scenario data."""
+        if scenario_type == "invalid_issuer":
+            return await self.error_generator.create_invalid_assertion()
+        elif scenario_type == "expired_assertion":
+            return await self.error_generator.create_expired_assertion()
+        elif scenario_type == "malformed_assertion":
+            return await self.error_generator.create_malformed_assertion()
+        else:
+            # Valid scenario
+            return {
+                "id": str(uuid.uuid4()),
+                "issuer": "https://enterprise-idp.example.com",
+                "subject": "test@example.com",
+                "issued_at": datetime.now(timezone.utc).isoformat(),
+                "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
+                "attributes": {"role": "user", "department": "engineering"}
+            }
+
+
 def create_test_user_token(user_id: str = "test_user", 
                           permissions: List[str] = None) -> MockAuthToken:
     """Create a test user token."""
@@ -306,6 +448,83 @@ def mock_auth_middleware():
         return await call_next(request)
     
     return middleware
+
+class SSOTestComponents:
+    """Comprehensive SSO testing components for SAML and OAuth integration tests."""
+    
+    def __init__(self):
+        self.oauth_provider = MockOAuthProvider()
+        self.saml_provider = MockSAMLProvider()
+        self.auth_service = MockAuthService()
+        self.jwt_manager = MockJWTManager()
+        self._setup_test_data()
+    
+    def _setup_test_data(self):
+        """Initialize test data."""
+        # Create test users
+        self.auth_service.create_user("sso_user", "sso@example.com", ["user"])
+        self.auth_service.create_user("enterprise_sso", "enterprise@example.com", ["enterprise", "user"])
+        
+    def create_saml_assertion(self, email: str = "test@example.com", 
+                             attributes: Dict[str, Any] = None) -> str:
+        """Create a SAML assertion for testing."""
+        return self.saml_provider.create_mock_assertion(email, attributes)
+    
+    def create_oauth_code(self, user_info: Dict[str, Any] = None) -> str:
+        """Create an OAuth authorization code for testing."""
+        user_info = user_info or {"email": "oauth@example.com", "name": "OAuth User"}
+        return self.oauth_provider.create_mock_auth_code(user_info)
+    
+    async def authenticate_with_saml(self, assertion: str) -> Optional[Dict[str, Any]]:
+        """Mock SAML authentication flow."""
+        assertion_data = self.saml_provider.validate_assertion(assertion)
+        if assertion_data:
+            # Create JWT token for successful SAML auth
+            token = self.jwt_manager.generate_token(
+                assertion_data["subject"], 
+                ["user", "saml"]
+            )
+            return {
+                "token": token,
+                "user_email": assertion_data["subject"],
+                "auth_method": "saml"
+            }
+        return None
+    
+    async def authenticate_with_oauth(self, code: str, redirect_uri: str = "http://localhost:3000/callback") -> Optional[Dict[str, Any]]:
+        """Mock OAuth authentication flow."""
+        token_data = await self.oauth_provider.exchange_code_for_token(code, redirect_uri)
+        if token_data:
+            user_info = token_data.get("user_info", {})
+            token = self.jwt_manager.generate_token(
+                user_info.get("email", "unknown"), 
+                ["user", "oauth"]
+            )
+            return {
+                "token": token,
+                "user_info": user_info,
+                "auth_method": "oauth"
+            }
+        return None
+    
+    def setup_enterprise_saml(self, domain: str = "enterprise.com") -> Dict[str, Any]:
+        """Setup enterprise SAML configuration."""
+        return {
+            "issuer": f"https://idp.{domain}",
+            "sso_url": f"https://idp.{domain}/sso",
+            "certificate": "mock_enterprise_cert",
+            "domain": domain
+        }
+    
+    def create_test_scenarios(self) -> Dict[str, Any]:
+        """Create comprehensive test scenarios."""
+        return {
+            "valid_saml": self.create_saml_assertion("valid@enterprise.com"),
+            "expired_saml": self.create_saml_assertion("expired@enterprise.com", {"expired": True}),
+            "valid_oauth_code": self.create_oauth_code({"email": "oauth@example.com"}),
+            "invalid_oauth_code": "invalid_code_12345"
+        }
+
 
 def create_auth_test_data() -> Dict[str, Any]:
     """Create comprehensive auth test data."""
