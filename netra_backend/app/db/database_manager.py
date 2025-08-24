@@ -129,9 +129,9 @@ class DatabaseManager:
         """
         base_url = DatabaseManager.get_base_database_url()
         
-        # Check for driver-specific elements using shared utilities
+        # Check for driver-specific elements
         has_async_driver = "asyncpg" in base_url
-        has_mixed_ssl = CoreDatabaseManager.has_mixed_ssl_params(base_url)
+        has_mixed_ssl = DatabaseManager._has_mixed_ssl_params(base_url)
         
         return not (has_async_driver or has_mixed_ssl)
     
@@ -152,7 +152,7 @@ class DatabaseManager:
             return False
         
         # Should use sslmode (not ssl) unless Cloud SQL
-        if not CoreDatabaseManager.is_cloud_sql_connection(target_url) and "ssl=" in target_url:
+        if not DatabaseManager._is_cloud_sql_connection(target_url) and "ssl=" in target_url:
             return False
         
         return target_url.startswith("postgresql://")
@@ -174,7 +174,7 @@ class DatabaseManager:
             return False
         
         # Should use ssl (not sslmode) unless Cloud SQL
-        if not CoreDatabaseManager.is_cloud_sql_connection(target_url) and "sslmode=" in target_url:
+        if not DatabaseManager._is_cloud_sql_connection(target_url) and "sslmode=" in target_url:
             return False
         
         return True
@@ -310,7 +310,7 @@ class DatabaseManager:
                 # Fallback for bootstrap
                 database_url = get_env().get("DATABASE_URL", "")
         
-        return CoreDatabaseManager.is_cloud_sql_connection(database_url)
+        return DatabaseManager._is_cloud_sql_connection(database_url)
     
     @staticmethod
     def is_local_development() -> bool:
@@ -514,19 +514,57 @@ class DatabaseManager:
     
     @staticmethod
     def _normalize_postgres_url(url: str) -> str:
-        """Normalize URL - delegates to CoreDatabaseManager."""
-        return CoreDatabaseManager.normalize_postgres_url(url)
+        """Normalize PostgreSQL URL format."""
+        if not url:
+            return url
+        # Convert postgres:// to postgresql://
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://")
+        # Strip async driver prefixes
+        url = url.replace("postgresql+asyncpg://", "postgresql://")
+        url = url.replace("postgres+asyncpg://", "postgresql://")
+        return url
+    
+    @staticmethod
+    def _is_cloud_sql_connection(url: str) -> bool:
+        """Check if URL is a Cloud SQL Unix socket connection."""
+        return "/cloudsql/" in url if url else False
+    
+    @staticmethod
+    def _has_mixed_ssl_params(url: str) -> bool:
+        """Check if URL has both ssl= and sslmode= parameters."""
+        if not url:
+            return False
+        return "ssl=" in url and "sslmode=" in url
     
     @staticmethod
     def _convert_sslmode_to_ssl(url: str) -> str:
-        """Convert SSL params - delegates to CoreDatabaseManager."""
-        return CoreDatabaseManager.convert_ssl_params_for_asyncpg(url)
+        """Convert SSL parameters for asyncpg compatibility."""
+        if not url:
+            return url
+        # For Cloud SQL, remove all SSL parameters
+        if DatabaseManager._is_cloud_sql_connection(url):
+            import re
+            url = re.sub(r'[&?]sslmode=[^&]*', '', url)
+            url = re.sub(r'[&?]ssl=[^&]*', '', url)
+            url = re.sub(r'&&+', '&', url)
+            url = re.sub(r'[&?]$', '', url)
+        else:
+            # Convert sslmode to ssl for asyncpg
+            if "sslmode=require" in url:
+                url = url.replace("sslmode=require", "ssl=require")
+        return url
     
     @staticmethod
     def _get_default_auth_url() -> str:
-        """Get default auth URL - delegates to CoreDatabaseManager."""
+        """Get default database URL for current environment."""
         current_env = get_current_environment()
-        return CoreDatabaseManager.get_default_url_for_environment(current_env)
+        if current_env == "production":
+            return "postgresql://netra:password@/netra_auth?host=/cloudsql/netra-production:us-central1:netra-db"
+        elif current_env == "staging":
+            return "postgresql://netra:password@/netra_auth?host=/cloudsql/netra-staging:us-central1:netra-db"
+        else:
+            return "postgresql://netra:password@localhost:5432/netra_auth"
 
 
     @staticmethod
