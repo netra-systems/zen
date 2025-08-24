@@ -79,32 +79,40 @@ except ImportError:
         return False
 
 def main():
-    """Fix all Python files in netra_backend directory."""
-    backend_dir = Path("netra_backend")
+    """Fix all Python files in netra_backend and auth_service directories."""
+    directories = [Path("netra_backend"), Path("auth_service")]
     
-    if not backend_dir.exists():
-        print("Error: netra_backend directory not found")
-        return
+    total_fixed_count = 0
+    total_scanned_count = 0
     
-    print("Fixing dev_launcher import issues in netra_backend...")
+    for directory in directories:
+        if not directory.exists():
+            print(f"Warning: {directory} directory not found, skipping")
+            continue
     
-    fixed_count = 0
-    total_count = 0
-    
-    # Find all Python files
-    for py_file in backend_dir.rglob("*.py"):
-        total_count += 1
+        print(f"Fixing dev_launcher import issues in {directory}...")
         
-        if fix_file(py_file):
-            fixed_count += 1
-            print(f"FIXED: {py_file}")
+        fixed_count = 0
+        scanned_count = 0
+        
+        # Find all Python files
+        for py_file in directory.rglob("*.py"):
+            scanned_count += 1
+            
+            if fix_file(py_file):
+                fixed_count += 1
+                print(f"FIXED: {py_file}")
+        
+        print(f"   {directory}: Files scanned: {scanned_count}, Files fixed: {fixed_count}")
+        total_fixed_count += fixed_count
+        total_scanned_count += scanned_count
     
-    print(f"\nSummary:")
-    print(f"   Files scanned: {total_count}")
-    print(f"   Files fixed: {fixed_count}")
-    print(f"   Files unchanged: {total_count - fixed_count}")
+    print(f"\nOverall Summary:")
+    print(f"   Total files scanned: {total_scanned_count}")
+    print(f"   Total files fixed: {total_fixed_count}")
+    print(f"   Files unchanged: {total_scanned_count - total_fixed_count}")
     
-    if fixed_count > 0:
+    if total_fixed_count > 0:
         print(f"\nAll import issues fixed! Ready for deployment.")
     else:
         print(f"\nNo import issues found.")
