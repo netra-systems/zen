@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <title>Logging Architecture Specification</title>
+        <version>1.0.0</version>
+        <created>2024-01-24</created>
+        <description>
+            Defines the logging architecture for all Netra services.
+            CRITICAL: netra_backend uses its own advanced Loguru-based unified logger.
+            All other services use the simplified shared logger.
+        </description>
+    </metadata>
+
+    <critical_rules>
+        <rule id="LR001" severity="CRITICAL">
+            <title>Service-Specific Logger Usage</title>
+            <requirement>
+                1. netra_backend MUST use netra_backend.app.core.unified_logging.UnifiedLogger
+                2. auth_service MUST use shared.logging.unified_logger_factory
+                3. dev_launcher MUST use shared.logging.unified_logger_factory
+                4. test_framework MUST use shared.logging.unified_logger_factory
+                5. frontend uses its own Next.js logging (console/winston)
+            </requirement>
+            <rationale>
+                netra_backend requires advanced features (Loguru, performance tracking, context management)
+                that are not needed by other services. The shared logger provides simplified,
+                consistent logging for auxiliary services.
+            </rationale>
+        </rule>
+
+        <rule id="LR002" severity="CRITICAL">
+            <title>Import Patterns</title>
+            <netra_backend>
+                <!-- ONLY valid import for netra_backend -->
+                from netra_backend.app.core.unified_logging import central_logger, get_logger
+                # OR
+                from netra_backend.app.core.unified_logging import UnifiedLogger
+            </netra_backend>
+            <other_services>
+                <!-- Valid import for auth_service, dev_launcher, tests -->
+                from shared.logging.unified_logger_factory import get_logger
+            </other_services>
+        </rule>
+
+        <rule id="LR003" severity="HIGH">
+            <title>No Cross-Service Logger Usage</title>
+            <requirement>
+                NEVER import netra_backend's logger in other services
+                NEVER import shared logger in netra_backend
+            </requirement>
+        </rule>
+    </critical_rules>
+
+    <netra_backend_logger>
+        <features>
+            <feature>Loguru-based advanced logging</feature>
+            <feature>Performance tracking (log_performance, log_api_call)</feature>
+            <feature>Execution time decorator (@log_execution_time)</feature>
+            <feature>Context management (request_id, user_id, trace_id)</feature>
+            <feature>Sensitive data filtering</feature>
+            <feature>JSON logging support</feature>
+            <feature>Async shutdown</feature>
+            <feature>Dynamic configuration from unified_config_manager</feature>
+        </features>
+        <location>netra_backend/app/core/unified_logging.py</location>
+        <dependencies>
+            <dependency>loguru</dependency>
+            <dependency>netra_backend.app.core.logging_context</dependency>
+            <dependency>netra_backend.app.core.logging_formatters</dependency>
+        </dependencies>
+    </netra_backend_logger>
+
+    <shared_logger>
+        <features>
+            <feature>Standard Python logging</feature>
+            <feature>Consistent format across services</feature>
+            <feature>Environment-based configuration</feature>
+            <feature>Service name inference</feature>
+            <feature>File and console handlers</feature>
+        </features>
+        <location>shared/logging/unified_logger_factory.py</location>
+        <used_by>
+            <service>auth_service</service>
+            <service>dev_launcher</service>
+            <service>test_framework</service>
+            <service>scripts (deployment, utilities)</service>
+        </used_by>
+    </shared_logger>
+
+    <deployment_configuration>
+        <docker_requirements>
+            <!-- All Dockerfiles must copy both logging systems -->
+            <requirement>COPY netra_backend/ ./netra_backend/ (includes unified_logging)</requirement>
+            <requirement>COPY shared/ ./shared/ (includes shared logger for other services)</requirement>
+        </docker_requirements>
+        
+        <environment_variables>
+            <variable name="LOG_LEVEL" default="INFO" />
+            <variable name="SERVICE_NAME" required="false" />
+            <variable name="ENABLE_FILE_LOGGING" default="false" />
+        </environment_variables>
+    </deployment_configuration>
+
+    <migration_notes>
+        <note priority="HIGH">
+            DO NOT migrate netra_backend to shared logger - it needs advanced features
+        </note>
+        <note priority="MEDIUM">
+            auth_service has been migrated to shared logger
+        </note>
+        <note priority="LOW">
+            dev_launcher should use shared logger for consistency
+        </note>
+    </migration_notes>
+</specification>
