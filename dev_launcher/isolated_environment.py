@@ -73,10 +73,21 @@ class IsolatedEnvironment:
     - Source tracking for debugging
     - Backwards compatibility with existing code
     - Subprocess environment management
+    - Pytest integration compatibility
     """
     
     _instance: Optional['IsolatedEnvironment'] = None
     _lock = threading.RLock()
+    
+    # Variables that must always remain in os.environ for external tool compatibility
+    PRESERVE_IN_OS_ENVIRON = {
+        "PYTEST_CURRENT_TEST",
+        "PYTEST_VERSION", 
+        "_PYTEST_RAISE",
+        "PYTEST_PLUGINS",
+        "PYTEST_TIMEOUT",
+        # Add other tool-specific variables as needed
+    }
     
     def __new__(cls) -> 'IsolatedEnvironment':
         """Ensure singleton behavior with thread safety."""
@@ -160,6 +171,14 @@ class IsolatedEnvironment:
             # Copy current os.environ to isolated vars
             self._isolated_vars = dict(os.environ)
             
+            # Ensure preserved variables remain in os.environ
+            # This is critical for tools like pytest that manage their own variables
+            for key in self.PRESERVE_IN_OS_ENVIRON:
+                if key in self._isolated_vars and key not in os.environ:
+                    # Variable is in isolated vars but not in os.environ, restore it
+                    os.environ[key] = self._isolated_vars[key]
+                    logger.debug(f"Preserved {key} in os.environ during isolation")
+            
             logger.info("Environment isolation enabled")
     
     def disable_isolation(self, restore_original: bool = False) -> None:
@@ -214,8 +233,15 @@ class IsolatedEnvironment:
             
             # Set in appropriate location
             if self._isolation_enabled:
+                # Always set in isolated vars
                 self._isolated_vars[key] = value
-                logger.debug(f"Set isolated var: {key}={value[:50]}... (source: {source})")
+                
+                # Also preserve in os.environ if it's a tool-specific variable
+                if key in self.PRESERVE_IN_OS_ENVIRON:
+                    os.environ[key] = value
+                    logger.debug(f"Set isolated var + preserved in os.environ: {key}={value[:50]}... (source: {source})")
+                else:
+                    logger.debug(f"Set isolated var: {key}={value[:50]}... (source: {source})")
             else:
                 os.environ[key] = value
                 logger.debug(f"Set os.environ: {key}={value[:50]}... (source: {source})")
@@ -268,6 +294,10 @@ class IsolatedEnvironment:
             if self._isolation_enabled:
                 if key in self._isolated_vars:
                     del self._isolated_vars[key]
+                    
+                # Also delete from os.environ if it was preserved there
+                if key in self.PRESERVE_IN_OS_ENVIRON and key in os.environ:
+                    del os.environ[key]
             else:
                 if key in os.environ:
                     del os.environ[key]

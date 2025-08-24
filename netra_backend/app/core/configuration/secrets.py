@@ -158,10 +158,13 @@ class SecretManager:
     
     def _get_clickhouse_password_mapping(self) -> Dict[str, Any]:
         """Get ClickHouse password mapping."""
+        # ClickHouse password is only required in production environments
+        # For development, ClickHouse containers may not require authentication
+        is_required = self._environment in ["production", "staging"]
         return {
             "target_models": ["clickhouse_native", "clickhouse_https"],
             "target_field": "password",
-            "required": True,
+            "required": is_required,
             "rotation_enabled": True
         }
     

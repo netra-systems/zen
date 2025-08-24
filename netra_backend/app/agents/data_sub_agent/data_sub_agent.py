@@ -94,15 +94,19 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             # Prepare final result
             execution_time = (time.time() - start_time) * 1000
             
+            # Flatten all result data to comply with TypedAgentResult constraints
+            result_data = {
+                "analysis_type": analysis_request.get("type"),
+                "execution_time_ms": execution_time,
+                "data_points_analyzed": analysis_result.get("data_points", 0)
+            }
+            
+            # Add flattened insights directly to result
+            result_data.update(insights)
+            
             return TypedAgentResult(
                 success=True,
-                agent_name="DataSubAgent",
-                result={
-                    "analysis_type": analysis_request.get("type"),
-                    "insights": insights,
-                    "execution_time_ms": execution_time,
-                    "data_points_analyzed": analysis_result.get("data_points", 0)
-                },
+                result=result_data,
                 execution_time_ms=execution_time
             )
             
@@ -147,13 +151,27 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     
     async def _generate_insights(self, analysis_result: Dict[str, Any]) -> Dict[str, Any]:
         """Generate actionable insights from analysis results."""
+        # Flatten complex structures to comply with TypedAgentResult constraints
         insights = {
             "summary": analysis_result.get("summary", "Analysis completed"),
-            "key_findings": analysis_result.get("findings", []),
-            "recommendations": analysis_result.get("recommendations", []),
-            "cost_savings_potential": analysis_result.get("cost_savings", {}),
-            "performance_metrics": analysis_result.get("metrics", {})
+            "key_findings": ", ".join(analysis_result.get("findings", [])),
+            "recommendations": ", ".join(analysis_result.get("recommendations", [])),
         }
+        
+        # Flatten cost savings data
+        cost_savings = analysis_result.get("cost_savings", {})
+        if cost_savings:
+            insights["cost_savings_percentage"] = cost_savings.get("percentage", 0.0)
+            insights["cost_savings_amount_cents"] = cost_savings.get("amount_cents", 0.0)
+        
+        # Flatten performance metrics
+        metrics = analysis_result.get("metrics", {})
+        if metrics:
+            # Extract latency metrics
+            if "latency" in metrics:
+                latency_data = metrics["latency"]
+                insights["avg_latency_ms"] = latency_data.get("avg_latency_ms", 0.0)
+                insights["p95_latency_ms"] = latency_data.get("p95_latency_ms", 0.0)
         
         # Add LLM-generated insights if available
         if self.llm_manager and analysis_result.get("raw_data"):
@@ -193,7 +211,6 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         
         return TypedAgentResult(
             success=False,
-            agent_name="DataSubAgent",
             result={
                 "error": error_message,
                 "execution_time_ms": execution_time

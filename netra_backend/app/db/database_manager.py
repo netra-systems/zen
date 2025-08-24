@@ -70,22 +70,35 @@ class DatabaseManager:
             return DatabaseManager._get_default_database_url()
         
         # Normalize URL by removing driver-specific prefixes
-        normalized = raw_url
-        if raw_url.startswith("postgresql+"):
-            normalized = "postgresql://" + raw_url[len("postgresql+"):].split("://", 1)[-1]
+        normalized = DatabaseManager._normalize_postgres_url(raw_url)
         
-        # Handle SSL parameters - remove them for Cloud SQL connections
+        # Handle SSL parameters and add schema search_path
+        from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+        parsed = urlparse(normalized)
+        query_params = parse_qs(parsed.query)
+        
+        # Handle Cloud SQL connections
         if "/cloudsql/" in normalized or "@/cloudsql/" in normalized:
-            # For Cloud SQL, remove SSL parameters
-            from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-            parsed = urlparse(normalized)
-            query_params = parse_qs(parsed.query)
             # Remove SSL-related parameters for Cloud SQL
             ssl_params = ['sslmode', 'sslcert', 'sslkey', 'sslrootcert', 'ssl']
             for param in ssl_params:
                 query_params.pop(param, None)
-            new_query = urlencode(query_params, doseq=True)
-            normalized = urlunparse(parsed._replace(query=new_query))
+        
+        # Add search_path option if not already present
+        if 'options' not in query_params and normalized.startswith("postgresql://"):
+            current_env = get_current_environment()
+            if current_env == "development":
+                # Use netra_dev schema for development
+                query_params['options'] = ['-c search_path=netra_dev,public']
+            elif current_env in ["testing", "test"]:
+                # Use netra_test schema for testing
+                query_params['options'] = ['-c search_path=netra_test,public']
+            else:
+                # Use public schema for staging/production
+                query_params['options'] = ['-c search_path=public']
+        
+        new_query = urlencode(query_params, doseq=True)
+        normalized = urlunparse(parsed._replace(query=new_query))
         
         return normalized
     
@@ -96,13 +109,53 @@ class DatabaseManager:
         Returns:
             Database URL compatible with synchronous drivers
         """
-        base_url = DatabaseManager.get_base_database_url()
-        # For sync driver, ensure postgresql:// prefix
-        if base_url.startswith("sqlite"):
-            return base_url
-        if not base_url.startswith("postgresql://"):
-            base_url = "postgresql://" + base_url.split("://", 1)[-1]
-        return base_url
+        # Get raw URL without search_path additions that get_base_database_url() adds
+        import sys
+        from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
+        
+        is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
+        
+        raw_url = ""
+        
+        if is_pytest:
+            # In pytest mode, directly check environment to handle dynamic test env changes
+            raw_url = get_env().get("DATABASE_URL", "")
+        else:
+            # Get from unified configuration - single source of truth for non-test environments
+            try:
+                config = get_unified_config()
+                raw_url = config.database_url or ""
+            except Exception:
+                # Fallback for bootstrap or when config not available
+                raw_url = get_env().get("DATABASE_URL", "")
+        
+        if not raw_url:
+            return "sqlite:///:memory:"
+        
+        # For sqlite, return as-is
+        if raw_url.startswith("sqlite"):
+            return raw_url
+        
+        # Parse the URL for conversion
+        parsed = urlparse(raw_url)
+        
+        # Convert async driver to sync and handle SSL conversion
+        scheme = parsed.scheme
+        if scheme in ["postgresql+asyncpg", "postgres+asyncpg"]:
+            scheme = "postgresql"
+        elif scheme == "postgres":
+            scheme = "postgresql"
+        
+        # Handle SSL parameter conversion for sync drivers
+        query_params = parse_qs(parsed.query)
+        if 'ssl' in query_params and 'sslmode' not in query_params:
+            # Convert ssl=require to sslmode=require for sync drivers
+            query_params['sslmode'] = query_params.pop('ssl')
+        
+        new_query = urlencode(query_params, doseq=True)
+        normalized = urlunparse(parsed._replace(scheme=scheme, query=new_query))
+        
+        return normalized
     
     @staticmethod
     def get_application_url_async() -> str:
@@ -438,7 +491,7 @@ class DatabaseManager:
         """Get default database URL for current environment.
         
         Returns:
-            Default PostgreSQL URL based on environment
+            Default PostgreSQL URL based on environment with schema search_path
         """
         current_env = get_current_environment()
         
@@ -448,15 +501,15 @@ class DatabaseManager:
         
         if is_pytest:
             # When running in pytest, tests expect this specific URL format regardless of current_env
-            return "postgresql://test:test@localhost:5432/netra_test"
+            return "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
         elif current_env in ["testing", "test"]:
-            return "postgresql://test:test@localhost:5432/netra_test"
+            return "postgresql://test:test@localhost:5432/netra_test?options=-c%20search_path%3Dnetra_test,public"
         elif current_env == "development":
-            return "postgresql://postgres:password@localhost:5432/netra"
+            return "postgresql://postgres:password@localhost:5432/netra?options=-c%20search_path%3Dnetra_dev,public"
         else:
             # Staging/production should always have DATABASE_URL set
             logger.warning(f"No DATABASE_URL found for {current_env} environment")
-            return "postgresql://postgres:password@localhost:5432/netra"
+            return "postgresql://postgres:password@localhost:5432/netra?options=-c%20search_path%3Dpublic"
     
     # AUTH SERVICE COMPATIBILITY METHODS
     # These methods provide auth service compatibility while using CoreDatabaseManager

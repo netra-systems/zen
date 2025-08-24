@@ -81,7 +81,8 @@ class BaseExecutionEngine:
     async def _execute_with_reliability(self, agent: 'BaseExecutionInterface',
                                       context: ExecutionContext) -> ExecutionResult:
         """Execute with reliability manager (circuit breaker, retry)."""
-        execute_func = lambda: self._execute_direct(agent, context)
+        async def execute_func():
+            return await self._execute_direct(agent, context)
         return await self.reliability_manager.execute_with_reliability(context, execute_func)
     
     async def _execute_direct(self, agent: 'BaseExecutionInterface',

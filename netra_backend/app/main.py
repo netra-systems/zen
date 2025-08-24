@@ -12,7 +12,6 @@ Entry point for the Netra AI Optimization Platform.
 See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 """
 import logging
-import sys
 from pathlib import Path
 
 from netra_backend.app.core.isolated_environment import get_env
