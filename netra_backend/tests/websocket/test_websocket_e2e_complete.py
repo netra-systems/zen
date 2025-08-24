@@ -31,13 +31,13 @@ from netra_backend.app.core.network_constants import (
     ServicePorts,
     URLConstants,
 )
-from netra_backend.app.routes.websocket import connection_manager
+from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.schemas.websocket_models import (
     AgentUpdatePayload,
     UserMessagePayload,
 )
 
-from netra_backend.tests.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.integration.jwt_token_helpers import JWTTestHelper
 
 class WebSocketE2EClient:
     """E2E WebSocket test client with auth and message handling."""
@@ -352,8 +352,10 @@ class TestConcurrentConnections:
                 assert client.connected
                 
             # Connection manager enforces limits (max 5 per user)
-            stats = connection_manager.get_connection_stats()
-            assert stats["total_connections"] <= 5
+            ws_manager = get_websocket_manager()
+            stats = ws_manager.get_stats()
+            total_connections = stats.total_connections if hasattr(stats, 'total_connections') else len(getattr(stats, 'connections', {}))
+            assert total_connections <= 5
             
         finally:
             for client in clients:
@@ -418,7 +420,7 @@ class TestManualDatabaseSessions:
             assert mock_db.called
             
     # Mock: Component isolation for testing without external dependencies
-    @patch('netra_backend.app.routes.websocket_enhanced.get_async_db')
+    @patch('netra_backend.app.db.postgres_session.get_async_db')
     @pytest.mark.asyncio
     async def test_auth_validation_manual_session(self, mock_db):
         """Test auth validation uses manual database session."""

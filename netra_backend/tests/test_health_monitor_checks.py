@@ -61,13 +61,12 @@ class TestBackendHealthChecks:
         """Test successful database health check."""
         # Arrange
         expected_result = HealthCheckResult(
+            component_name="database_postgres",
+            success=True,
+            health_score=1.0,
+            response_time_ms=50.0,
             status="healthy",
-            response_time=0.05,
-            details={
-                "component_name": "database_postgres",
-                "success": True,
-                "health_score": 1.0
-            }
+            response_time=0.05  # Legacy field for compatibility
         )
         mock_database_checker.check_health.return_value = expected_result
 
@@ -76,21 +75,22 @@ class TestBackendHealthChecks:
 
         # Assert
         assert result.status == "healthy"
-        assert result.details["success"] is True
-        assert result.details["health_score"] == 1.0
+        assert result.success is True
+        assert result.component_name == "database_postgres"
+        assert result.health_score == 1.0
         assert result.response_time == 0.05
 
     async def test_database_health_check_failure(self, mock_database_checker):
         """Test database health check failure with Five Whys analysis."""
         # Arrange - simulate database connection failure
         failure_result = HealthCheckResult(
+            component_name="database_postgres",
+            success=False,
+            health_score=0.0,
+            response_time_ms=5000.0,
             status="unhealthy",
-            response_time=5.0,
+            error_message="Connection timeout",
             details={
-                "component_name": "database_postgres",
-                "success": False,
-                "health_score": 0.0,
-                "error_message": "Connection timeout",
                 "five_whys_analysis": {
                     "why_1": "Database connection timed out after 5s",
                     "why_2": "Database server is overloaded or unreachable",
@@ -108,15 +108,19 @@ class TestBackendHealthChecks:
 
         # Assert
         assert result.status == "unhealthy"
-        assert result.details["success"] is False
+        assert result.success is False
         assert "five_whys_analysis" in result.details
         assert "root_cause" in result.details["five_whys_analysis"]
 
     async def test_redis_connectivity_check(self):
         """Test Redis connectivity health check."""
-        with patch('netra_backend.app.core.health_checkers.check_redis_health') as mock_redis:
+        with patch('netra_backend.app.core.health.checks.check_redis_health') as mock_redis:
             # Arrange
             mock_redis.return_value = HealthCheckResult(
+                component_name="redis",
+                success=True,
+                health_score=1.0,
+                response_time_ms=20.0,
                 status="healthy",
                 response_time=0.02,
                 details={"success": True, "health_score": 1.0}
@@ -133,9 +137,13 @@ class TestBackendHealthChecks:
 
     async def test_clickhouse_health_check(self):
         """Test ClickHouse database health check."""
-        with patch('netra_backend.app.core.health_checkers.check_clickhouse_health') as mock_ch:
+        with patch('netra_backend.app.core.health.checks.check_clickhouse_health') as mock_ch:
             # Arrange
             mock_ch.return_value = HealthCheckResult(
+                component_name="clickhouse",
+                success=True,
+                health_score=0.9,
+                response_time_ms=100.0,
                 status="healthy",
                 response_time=0.1,
                 details={"success": True, "health_score": 0.9}
@@ -149,6 +157,58 @@ class TestBackendHealthChecks:
             # Assert
             assert result.status == "healthy"
             assert result.details["health_score"] == 0.9
+
+    async def test_clickhouse_real_authentication_failure(self):
+        """
+        Test ClickHouse authentication failure - FAILING TEST
+        
+        This test exposes the real ClickHouse authentication bug discovered in dev launcher.
+        Error from dev launcher: 'default: Authentication failed: password is incorrect'
+        
+        This test will FAIL until the ClickHouse authentication configuration is fixed.
+        """
+        from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+        
+        # Use real environment to test actual ClickHouse connection
+        env = IsolatedEnvironment()
+        
+        # Get the actual ClickHouse configuration from environment
+        clickhouse_host = env.get('CLICKHOUSE_HOST', 'localhost')
+        clickhouse_port = env.get('CLICKHOUSE_HTTP_PORT', '8123')  
+        clickhouse_user = env.get('CLICKHOUSE_USER', 'default')
+        clickhouse_password = env.get('CLICKHOUSE_PASSWORD', 'netra_dev_password')
+        
+        # Create actual ClickHouse health checker (no mocks - real connection test)
+        checker = UnifiedDatabaseHealthChecker("clickhouse")
+        
+        # Act - attempt real ClickHouse connection
+        result = await checker.check_health()
+        
+        # Verify the health check properly detected the authentication failure
+        assert result.status == "unhealthy", f"Expected 'unhealthy' status but got: {result.status}"
+        assert result.details.get("success") is False, f"Expected success=False but got: {result.details}"
+        
+        # Extract the error details from the health check result
+        error_details = result.details.get("error_message", "").lower()
+        
+        # Assert that we're detecting the specific ClickHouse authentication error
+        auth_error_found = (
+            "authentication failed" in error_details or 
+            "password is incorrect" in error_details or
+            "code: 194" in error_details
+        )
+        
+        assert auth_error_found, f"Expected ClickHouse authentication error but got: {result.details}"
+        
+        # This test will FAIL until the ClickHouse authentication is properly configured
+        pytest.fail(
+            f"ClickHouse authentication failure detected (EXPECTED FAILURE):\n"
+            f"Status: {result.status}\n"
+            f"Error: {error_details}\n"
+            f"Config: user={clickhouse_user}, host={clickhouse_host}:{clickhouse_port}\n"
+            f"This test exposes the real authentication bug found in dev launcher.\n"
+            f"Fix requires: correct ClickHouse password configuration for 'default' user."
+        )
 
     async def test_websocket_health_check(self):
         """Test WebSocket endpoint health check."""
@@ -211,7 +271,13 @@ class TestBackendHealthChecks:
         
         # Test normal operation
         base_checker.check_health.return_value = HealthCheckResult(
-            status="healthy", response_time=0.1, details={"success": True}
+            component_name="test_component",
+            success=True,
+            health_score=1.0,
+            response_time_ms=100.0,
+            status="healthy", 
+            response_time=0.1, 
+            details={"success": True}
         )
         
         result = await cb_checker.check_health()
@@ -229,7 +295,13 @@ class TestBackendHealthChecks:
         
         # Simulate failures
         base_checker.check_health.return_value = HealthCheckResult(
-            status="unhealthy", response_time=5.0, details={"success": False}
+            component_name="test_component",
+            success=False,
+            health_score=0.0,
+            response_time_ms=5000.0,
+            status="unhealthy", 
+            response_time=5.0, 
+            details={"success": False}
         )
         
         # First failure
@@ -418,10 +490,19 @@ class TestHealthCheckReliabilityImprovement:
         # Verify timeout is properly set
         assert checker.timeout == 1.0
         
-        # Test timeout configuration
-        with patch.dict(os.environ, {'HEALTH_CHECK_TIMEOUT': '2.5'}):
+        # Test timeout configuration using IsolatedEnvironment system
+        from dev_launcher.isolated_environment import get_env
+        env = get_env()
+        
+        # Set environment variable through IsolatedEnvironment
+        env.set('HEALTH_CHECK_TIMEOUT', '2.5', 'test_health_check_timeout_handling')
+        
+        try:
             checker_with_env = UnifiedDatabaseHealthChecker()
             assert checker_with_env.timeout == 2.5
+        finally:
+            # Clean up the environment variable
+            env.delete('HEALTH_CHECK_TIMEOUT')
 
     def test_health_check_retry_logic(self):
         """Test retry logic for transient failures."""

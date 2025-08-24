@@ -48,7 +48,7 @@ from netra_backend.app.routes.utils.websocket_helpers import (
     accept_websocket_connection,
 )
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.tests.conftest import create_test_user, get_test_token
+from netra_backend.tests.helpers.model_setup_helpers import create_test_user, get_test_token
 
 class WebSocketTestClient:
     """Test client for WebSocket connections."""
