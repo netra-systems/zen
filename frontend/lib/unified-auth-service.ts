@@ -4,7 +4,7 @@
  */
 
 import { authService as authServiceClient } from '@/lib/auth-service-config';
-import { authService } from '@/auth/service';
+import { authService } from '@/auth';
 import { authInterceptor } from '@/lib/auth-interceptor';
 import { logger } from '@/lib/logger';
 
@@ -251,5 +251,5 @@ export const unifiedAuthService = new UnifiedAuthService();
 export { authInterceptor } from '@/lib/auth-interceptor';
 
 // Export individual services for direct access if needed
-export { authService } from '@/auth/service';
+export { authService } from '@/auth';
 export { authService as authServiceClient } from '@/lib/auth-service-config';

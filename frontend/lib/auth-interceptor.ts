@@ -4,7 +4,7 @@
  */
 
 import { authService as authServiceClient } from '@/lib/auth-service-config';
-import { authService } from '@/auth/service';
+import { authService } from '@/auth';
 import { logger } from '@/lib/logger';
 
 export interface RequestConfig extends RequestInit {
