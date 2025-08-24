@@ -7,7 +7,6 @@ import sys
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 
 # Import and run the compliance checker
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from scripts.compliance.analyzer import Analyzer
 from scripts.compliance.collector import ViolationCollector
 from scripts.compliance.reporter import ComplianceReporter

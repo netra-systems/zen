@@ -227,4 +227,77 @@
             </takeaway>
         </key_takeaways>
     </learning>
+
+    <learning>
+        <title>Shared Folder Anti-Pattern: Creating Cross-Service Dependencies (2025-08-24)</title>
+        
+        <problem>
+            <description>
+                A shared folder was created with modules like shared/health, shared/resilience, shared/serialization,
+                and shared/database that were imported by multiple services, violating microservice independence.
+            </description>
+            <impact>
+                - Created tight coupling between services through shared code
+                - Services could not evolve independently
+                - Breaking changes in shared modules affected all services
+                - Violated the principle that services should communicate via APIs, not shared code
+            </impact>
+            <example>
+                INCORRECT pattern:
+                - /shared/health/unified_health_checker.py imported by both auth_service and netra_backend
+                - /shared/database/core_database_manager.py used across all services
+                - auth_service/health_check.py importing from shared.health
+            </example>
+        </problem>
+
+        <root_cause>
+            <analysis>
+                Attempted to eliminate "duplication" by creating shared modules, but this violated
+                microservice boundaries. Each service should maintain its own implementations of
+                infrastructure code like health checks, database managers, and retry logic.
+            </analysis>
+        </root_cause>
+
+        <solution>
+            <correct_approach>
+                1. Each service maintains its own health check implementation
+                2. Each service has its own database manager
+                3. Each service implements its own retry/resilience logic
+                4. Only truly cross-cutting concerns like logging schemas can be shared
+                5. Services communicate via well-defined APIs, not shared code
+            </correct_approach>
+
+            <acceptable_shared>
+                <!-- What CAN be in shared folder -->
+                - JSON schemas for API contracts
+                - Logging configuration (read-only)
+                - Type definitions for cross-service communication
+            </acceptable_shared>
+
+            <not_acceptable_shared>
+                <!-- What CANNOT be in shared folder -->
+                - Database managers or connection logic
+                - Health check implementations
+                - Retry/resilience handlers
+                - Business logic of any kind
+                - Service-specific utilities
+            </not_acceptable_shared>
+        </solution>
+
+        <prevention>
+            <rule>Before creating anything in /shared, verify it's in the acceptable list</rule>
+            <rule>Each service should be deployable without any code from other services</rule>
+            <rule>Run compliance checks regularly to detect violations</rule>
+            <rule>Review SPEC/acceptable_duplicates.xml before consolidating "duplicate" code</rule>
+        </prevention>
+
+        <key_takeaways>
+            <takeaway priority="CRITICAL">
+                Shared folders should ONLY contain schemas and contracts, not implementation code
+            </takeaway>
+            <takeaway priority="CRITICAL">
+                Infrastructure code (health, database, retry) must be owned by each service independently
+            </takeaway>
+        </key_takeaways>
+    </learning>
 </specification>

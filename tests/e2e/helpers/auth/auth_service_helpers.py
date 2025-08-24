@@ -28,8 +28,6 @@ import httpx
 import pytest
 
 # Add project root to path for imports
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Test timeout configuration - MUST complete in <10 seconds
 TEST_TIMEOUT = 10  # seconds - Critical requirement for CI/CD

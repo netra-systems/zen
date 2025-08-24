@@ -20,7 +20,6 @@ from pathlib import Path
 from unittest.mock import patch, Mock, MagicMock
 
 # Setup test path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 

@@ -1,0 +1,109 @@
+{
+  "timestamp": "20250824_093218",
+  "environment": "test",
+  "categories": {
+    "database": {
+      "success": false,
+      "duration": 4.943151473999023,
+      "output": "============================= test session starts =============================\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.5.3, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=session, asyncio_default_test_loop_scope=function\ncollected 0 items / 1 error\n\n=================================== ERRORS ====================================\n_______ ERROR collecting tests/agents/test_agent_e2e_critical_collab.py _______\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\agents\\test_agent_e2e_critical_collab.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\nC:\\Users\\antho\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\agents\\test_agent_e2e_critical_collab.py:19: in <module>\n    from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase\ntests\\agents\\test_agent_e2e_critical_setup.py:22: in <module>\n    from netra_backend.app.agents.supervisor_consolidated import (\napp\\agents\\supervisor_consolidated.py:24: in <module>\n    from netra_backend.app.agents.base.executor import BaseExecutionEngine\napp\\agents\\base\\executor.py:30: in <module>\n    from netra_backend.app.agents.base.reliability import ReliabilityManager\napp\\agents\\base\\reliability.py:21: in <module>\n    from netra_backend.app.agents.base.circuit_breaker import (\napp\\agents\\base\\circuit_breaker.py:16: in <module>\n    from netra_backend.app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker\napp\\core\\circuit_breaker.py:36: in <module>\n    from netra_backend.app.core.resilience import (\napp\\core\\resilience\\__init__.py:85: in <module>\n    from netra_backend.app.core.resilience.unified_retry_handler import (\napp\\core\\resilience\\unified_retry_handler.py:38: in <module>\n    from netra_backend.app.core.configuration.environment import IsolatedEnvironment\nE   ImportError: cannot import name 'IsolatedEnvironment' from 'netra_backend.app.core.configuration.environment' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\core\\configuration\\environment.py)\n============================== warnings summary ===============================\napp\\schemas\\Config.py:361\n  C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\schemas\\Config.py:361: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/\n    @validator('service_secret')\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nERROR tests/agents/test_agent_e2e_critical_collab.py\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\n========================= 1 warning, 1 error in 0.81s =========================\n",
+      "errors": ""
+    },
+    "integration": {
+      "success": false,
+      "duration": 4.797924518585205,
+      "output": "============================= test session starts =============================\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.5.3, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=session, asyncio_default_test_loop_scope=function\ncollected 0 items / 1 error\n\n=================================== ERRORS ====================================\n_______ ERROR collecting tests/agents/test_agent_e2e_critical_collab.py _______\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\agents\\test_agent_e2e_critical_collab.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\nC:\\Users\\antho\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\agents\\test_agent_e2e_critical_collab.py:19: in <module>\n    from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase\ntests\\agents\\test_agent_e2e_critical_setup.py:19: in <module>\n    from netra_backend.app.agents.base_agent import BaseSubAgent\napp\\agents\\base_agent.py:19: in <module>\n    from netra_backend.app.llm.llm_manager import LLMManager\napp\\llm\\llm_manager.py:10: in <module>\n    from netra_backend.app.llm.llm_core_operations import LLMCoreOperations\napp\\llm\\llm_core_operations.py:9: in <module>\n    from netra_backend.app.llm.llm_operations import LLMOperations as LLMCoreOperations\napp\\llm\\llm_operations.py:11: in <module>\n    from netra_backend.app.llm.llm_response_processing import (\napp\\llm\\llm_response_processing.py:15: in <module>\n    from netra_backend.app.services.llm_cache_service import llm_cache_service\napp\\services\\llm_cache_service.py:13: in <module>\n    from netra_backend.app.services.llm_cache_core import LLMCacheCore\napp\\services\\llm_cache_core.py:13: in <module>\n    from netra_backend.app.redis_manager import redis_manager\napp\\redis_manager.py:352: in <module>\n    from shared.database.unified_redis_manager import backend_redis_manager\nE   ModuleNotFoundError: No module named 'shared.database.unified_redis_manager'\n============================== warnings summary ===============================\napp\\schemas\\Config.py:361\n  C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\schemas\\Config.py:361: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/\n    @validator('service_secret')\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nERROR tests/agents/test_agent_e2e_critical_collab.py\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\n========================= 1 warning, 1 error in 0.72s =========================\n",
+      "errors": ""
+    }
+  },
+  "overall_success": false,
+  "total_duration": 9.741075992584229,
+  "execution_plan": null,
+  "category_statistics": {
+    "total_categories": 9,
+    "by_priority": {
+      "CRITICAL": 1,
+      "HIGH": 2,
+      "MEDIUM": 3,
+      "LOW": 3,
+      "OPTIONAL": 0
+    },
+    "by_type": {
+      "functional": 3,
+      "technical": 2,
+      "quality": 1,
+      "integration": 1,
+      "performance": 1,
+      "security": 0,
+      "e2e": 1
+    },
+    "parallel_safe": 7,
+    "requires_real_services": 1,
+    "requires_real_llm": 0,
+    "memory_intensive": 2,
+    "cpu_intensive": 1,
+    "database_dependent": 1,
+    "average_estimated_duration": "0:10:40",
+    "categories_with_history": 0,
+    "average_success_rate": 0.0
+  },
+  "progress_tracking": {
+    "run_id": "run_1756053128",
+    "start_time": "2025-08-24T09:32:08.777098",
+    "end_time": "2025-08-24T09:32:18.518174",
+    "status": "failed",
+    "categories": {
+      "integration": {
+        "name": "integration",
+        "status": "failed",
+        "start_time": "2025-08-24T09:32:13.720250",
+        "end_time": "2025-08-24T09:32:18.518174",
+        "duration": 0.0,
+        "total_tests": 0,
+        "passed_tests": 0,
+        "failed_tests": 0,
+        "skipped_tests": 0,
+        "error_tests": 0,
+        "progress_percentage": 100.0,
+        "estimated_remaining": 0.0,
+        "output_log": [],
+        "error_messages": [],
+        "warnings": [],
+        "peak_memory_mb": 0.0,
+        "cpu_usage_percent": 0.0,
+        "retry_count": 0,
+        "max_retries": 0,
+        "phase": 1,
+        "parallel_group": null,
+        "worker_id": null,
+        "tags": [],
+        "success_rate": 0.0,
+        "execution_time": 4.797924
+      }
+    },
+    "total_categories": 1,
+    "completed_categories": 1,
+    "current_phase": 1,
+    "total_phases": 0,
+    "total_tests": 0,
+    "passed_tests": 0,
+    "failed_tests": 0,
+    "skipped_tests": 0,
+    "error_tests": 0,
+    "overall_progress": 100.0,
+    "estimated_total_duration": 0.0,
+    "estimated_remaining": 0.0,
+    "test_level": "category",
+    "service_filter": null,
+    "parallel_workers": 4,
+    "fail_fast_enabled": true,
+    "real_llm_enabled": false,
+    "environment": "test",
+    "peak_memory_mb": 0.0,
+    "average_cpu_percent": 0.0,
+    "execution_duration": 9.741076,
+    "success_rate": 0.0,
+    "completion_percentage": 100.0,
+    "resumable": true,
+    "checkpoint_data": {}
+  }
+}

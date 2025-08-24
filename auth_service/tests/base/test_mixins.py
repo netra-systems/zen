@@ -96,6 +96,7 @@ class RedisTestMixin:
     
     def create_mock_redis(self) -> AsyncMock:
         """Create mock Redis client"""
+        # Mock: Redis external service isolation for fast, deterministic test execution
         mock_redis = AsyncMock()
         
         # Setup common Redis methods
@@ -149,9 +150,13 @@ class AuthTestMixin:
     def setup_auth_mocks(self) -> Dict[str, MagicMock]:
         """Setup common auth-related mocks"""
         mocks = {
+            # Mock: Cryptographic operations isolation for security testing speed
             "password_hasher": MagicMock(),
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             "jwt_handler": MagicMock(),
+            # Mock: OAuth external provider isolation for network-independent testing
             "oauth_client": AsyncMock(),
+            # Mock: Session management isolation for stateless unit testing
             "session_manager": AsyncMock(),
         }
         

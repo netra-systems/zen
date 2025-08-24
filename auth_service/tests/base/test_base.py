@@ -43,6 +43,7 @@ class AsyncTestBase:
     
     def create_mock(self, name: str, spec=None, **kwargs) -> MagicMock:
         """Create and store mock object"""
+        # Mock: Generic test object isolation based on spec type for controlled testing
         mock_obj = AsyncMock(spec=spec, **kwargs) if asyncio.iscoroutinefunction(spec) else MagicMock(spec=spec, **kwargs)
         self.mock_objects[name] = mock_obj
         return mock_obj

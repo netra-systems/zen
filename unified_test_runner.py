@@ -169,6 +169,9 @@ class UnifiedTestRunner:
     
     def _configure_environment(self, args: argparse.Namespace):
         """Configure test environment based on arguments."""
+        # Load test environment secrets first to prevent validation errors
+        self._load_test_environment_secrets()
+        
         if args.env == "dev" or args.real_services:
             configure_dev_environment()
             # Enable real services for frontend tests
@@ -192,6 +195,37 @@ class UnifiedTestRunner:
         
         if args.no_coverage:
             os.environ["COVERAGE_ENABLED"] = "false"
+    
+    def _load_test_environment_secrets(self):
+        """Load test environment secrets to prevent validation errors during testing."""
+        # Set essential test environment variables
+        test_env_vars = {
+            'ENVIRONMENT': 'testing',
+            'TESTING': '1',
+            'GOOGLE_CLIENT_ID': 'test-google-client-id-for-integration-testing',
+            'GOOGLE_CLIENT_SECRET': 'test-google-client-secret-for-integration-testing',
+            'JWT_SECRET_KEY': 'test-jwt-secret-key-for-integration-testing-must-be-32-chars-minimum',
+            'SERVICE_SECRET': 'test-service-secret-for-cross-service-auth-32-chars-minimum-length',
+            'FERNET_KEY': 'iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=',
+            'CLICKHOUSE_DEFAULT_PASSWORD': 'test-clickhouse-password-for-integration-testing'
+        }
+        
+        # Only set if not already present (don't override existing values)
+        for key, value in test_env_vars.items():
+            if key not in os.environ:
+                os.environ[key] = value
+        
+        # Try to load .env.test file if it exists
+        test_env_file = self.project_root / ".env.test"
+        if test_env_file.exists():
+            try:
+                from dotenv import load_dotenv
+                load_dotenv(test_env_file, override=False)
+            except ImportError:
+                # dotenv not available, use manual loading
+                pass
+            except Exception as e:
+                print(f"Warning: Could not load .env.test file: {e}")
     
     def _determine_categories_to_run(self, args: argparse.Namespace) -> List[str]:
         """Determine which categories to run based on arguments."""

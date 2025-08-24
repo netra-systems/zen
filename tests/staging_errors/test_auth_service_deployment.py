@@ -6,7 +6,6 @@ import sys
 from unittest.mock import patch, MagicMock
 
 # Add the auth_service to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 
 def test_auth_service_missing_jwt_secret():

@@ -27,7 +27,6 @@ from fastapi.testclient import TestClient
 import redis.asyncio as redis
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from auth_service.main import app as auth_app
 from netra_backend.app.core.app_factory import create_app

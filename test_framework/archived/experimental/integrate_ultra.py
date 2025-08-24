@@ -144,7 +144,6 @@ def patch_test_runner():
     
     # Add integration to test framework
     test_framework_path = Path(__file__).parent
-    sys.path.insert(0, str(test_framework_path))
     
     print("✅ Ultra Test Optimization patched successfully")
     print("   Use --optimization ultra to enable 100x performance mode")

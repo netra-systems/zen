@@ -49,8 +49,6 @@ os.environ["AUTH_SERVICE_URL"] = "http://127.0.0.1:8001"
 # Add project root to path for imports
 import sys
 from pathlib import Path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Import after setting environment and path
 try:

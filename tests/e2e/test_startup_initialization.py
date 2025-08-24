@@ -36,8 +36,6 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.config import LauncherConfig

@@ -6,7 +6,6 @@ import sys
 from unittest.mock import patch, MagicMock
 
 # Add the netra_backend to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 
 def test_logging_filter_circular_dependency():

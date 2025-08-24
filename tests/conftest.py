@@ -3,44 +3,33 @@ import os
 import sys
 from typing import Optional
 from unittest.mock import AsyncMock, MagicMock
+from pathlib import Path
 
 import pytest
 
+# Add project root for imports
+
+# Import isolated environment for proper test isolation
+from dev_launcher.isolated_environment import get_env
+from test_framework.environment_isolation import (
+    get_test_env_manager,
+    isolated_test_session,
+    isolated_test_env,
+    ensure_test_isolation,
+)
+
 # =============================================================================
 # COMMON ENVIRONMENT SETUP FOR ALL TESTS
-# Consolidated from multiple conftest files to eliminate duplication
+# Uses IsolatedEnvironment to prevent global pollution
 # =============================================================================
 
-# Set base testing environment variables
-# CRITICAL: Only set test environment if we're actually running tests
-# This prevents the dev launcher from being affected when modules are imported
-if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
-    os.environ["TESTING"] = "1"
-    os.environ["NETRA_ENV"] = "testing"
-    os.environ["ENVIRONMENT"] = "testing"
-    os.environ["LOG_LEVEL"] = "ERROR"
-    
-    # Network and service configuration
-    os.environ["REDIS_HOST"] = "localhost"
-    os.environ["CLICKHOUSE_HOST"] = "localhost"
-    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-    
-    # Authentication secrets required for tests
-    os.environ["JWT_SECRET_KEY"] = (
-        "test-jwt-secret-key-for-testing-only-do-not-use-in-production"
-    )
-    os.environ["SERVICE_SECRET"] = (
-        "test-service-secret-for-cross-service-auth-32-chars-minimum-length"
-    )
-    os.environ["FERNET_KEY"] = "cYpHdJm0e-zt3SWz-9h0gC_kh0Z7c3H6mRQPbPLFdao="
-    os.environ["ENCRYPTION_KEY"] = "test-encryption-key-32-chars-long"
-    
-    # Disable heavy services for faster testing
-    os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
-    os.environ["CLICKHOUSE_ENABLED"] = "false"
-    os.environ["TEST_DISABLE_REDIS"] = "true"
+# Set up isolated test environment if we're running tests
+if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
+    # Ensure test isolation is enabled
+    ensure_test_isolation()
 
-# Add parent directory to path
+# Re-export test environment fixtures for convenience
+__all__ = ['isolated_test_session', 'isolated_test_env']
 
 # Only import if available to avoid failures
 try:
@@ -89,12 +78,13 @@ pytest_plugins = ["pytest_asyncio"]
 # =============================================================================
 
 # Environment configuration for performance tests
+# Use isolated environment for safe access
 E2E_TEST_CONFIG = {
-    "websocket_url": os.getenv("E2E_WEBSOCKET_URL", "ws://localhost:8765"),
-    "backend_url": os.getenv("E2E_BACKEND_URL", "http://localhost:8000"),
-    "auth_service_url": os.getenv("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
-    "skip_real_services": os.getenv("SKIP_REAL_SERVICES", "true").lower() == "true",
-    "test_mode": os.getenv("HIGH_VOLUME_TEST_MODE", "mock")
+    "websocket_url": get_env().get("E2E_WEBSOCKET_URL", "ws://localhost:8765"),
+    "backend_url": get_env().get("E2E_BACKEND_URL", "http://localhost:8000"),
+    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
+    "skip_real_services": get_env().get("SKIP_REAL_SERVICES", "true").lower() == "true",
+    "test_mode": get_env().get("HIGH_VOLUME_TEST_MODE", "mock")
 }
 
 
@@ -117,6 +107,7 @@ async def high_volume_server():
         await server.stop()
     except ImportError:
         # Mock server if performance_base not available
+        # Mock: Performance test server isolation when performance_base module unavailable
         yield MagicMock()
 
 
@@ -149,6 +140,7 @@ async def throughput_client(test_user_token, high_volume_server):
             logging.getLogger(__name__).warning(f"Client cleanup error: {e}")
     except ImportError:
         # Mock client if performance_base not available
+        # Mock: Performance test client isolation when performance_base module unavailable
         yield AsyncMock()
 
 
@@ -160,6 +152,7 @@ async def throughput_client(test_user_token, high_volume_server):
 @pytest.fixture
 def mock_redis_client():
     """Common Redis client mock for all tests"""
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock = MagicMock()
     mock.connect = AsyncMock(return_value=None)
     mock.disconnect = AsyncMock(return_value=None)
@@ -175,6 +168,7 @@ def mock_redis_client():
 @pytest.fixture
 def mock_redis_manager():
     """Common Redis manager mock"""
+    # Mock: Redis cache isolation to prevent test interference and external dependencies
     mock = MagicMock()
     mock.enabled = True
     mock.get = AsyncMock(return_value=None)
@@ -184,11 +178,27 @@ def mock_redis_manager():
     return mock
 
 
+@pytest.fixture
+def mock_clickhouse_client():
+    """Common ClickHouse client mock"""
+    # Mock: ClickHouse database isolation for fast testing without external database dependency
+    mock = MagicMock()
+    mock.connect = AsyncMock(return_value=None)
+    mock.disconnect = AsyncMock(return_value=None)
+    mock.execute = AsyncMock(return_value=None)
+    mock.fetch = AsyncMock(return_value=[])
+    mock.insert_data = AsyncMock(return_value=None)
+    mock.command = AsyncMock(return_value=None)
+    mock.ping = AsyncMock(return_value=True)
+    return mock
+
+
 # =============================================================================\n# COMMON TEST DATA FIXTURES\n# Shared test data used across multiple services\n# =============================================================================\n\n@pytest.fixture\ndef common_test_user():\n    \"\"\"Common test user data for all services\"\"\"\n    return {\n        \"id\": \"test-user-123\",\n        \"email\": \"test@example.com\",\n        \"name\": \"Test User\",\n        \"is_active\": True,\n        \"is_superuser\": False\n    }\n\n\n@pytest.fixture\ndef sample_data():\n    \"\"\"Basic sample data for tests\"\"\"\n    return {\"test\": \"data\", \"status\": \"active\"}\n\n\n# =============================================================================\n# COMMON SERVICE MOCKS\n# Basic service mocks that are reused across tests\n# ============================================================================="
 
 
 @pytest.fixture
 def mock_llm_manager():
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock = MagicMock()
     mock.get_llm = MagicMock(return_value=MagicMock())
     return mock
@@ -196,6 +206,7 @@ def mock_llm_manager():
 
 @pytest.fixture
 def mock_websocket_manager():
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock = MagicMock()
     mock.active_connections = {}
     mock.connect = AsyncMock(return_value=None)
@@ -208,6 +219,7 @@ def mock_websocket_manager():
 
 @pytest.fixture
 def mock_background_task_manager():
+    # Mock: Background task isolation to prevent real tasks during testing
     mock = MagicMock()
     mock.shutdown = AsyncMock(return_value=None)
     return mock
@@ -215,6 +227,7 @@ def mock_background_task_manager():
 
 @pytest.fixture
 def mock_key_manager():
+    # Mock: Cryptographic key isolation for security testing without real keys
     mock = MagicMock()
     mock.load_from_settings = MagicMock(return_value=mock)
     return mock
@@ -222,16 +235,19 @@ def mock_key_manager():
 
 @pytest.fixture
 def mock_security_service():
+    # Mock: Security service isolation for auth testing without real token validation
     return MagicMock()
 
 
 @pytest.fixture
 def mock_tool_dispatcher():
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     return MagicMock()
 
 
 @pytest.fixture
 def mock_agent_supervisor():
+    # Mock: Agent supervisor isolation for testing without spawning real agents
     mock = MagicMock()
     mock.shutdown = AsyncMock(return_value=None)
     return mock
@@ -239,6 +255,7 @@ def mock_agent_supervisor():
 
 @pytest.fixture
 def mock_agent_service():
+    # Mock: Agent service isolation for testing without LLM agent execution
     return MagicMock()
 
 
@@ -439,14 +456,14 @@ e2e_logger = logging.getLogger("e2e_conftest")
 
 # E2E Test Environment Configuration
 E2E_CONFIG = {
-    "auth_service_url": os.getenv("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
-    "backend_url": os.getenv("E2E_BACKEND_URL", "http://localhost:8000"),
-    "websocket_url": os.getenv("E2E_WEBSOCKET_URL", "ws://localhost:8000/ws"),
-    "redis_url": os.getenv("E2E_REDIS_URL", "redis://localhost:6379"),
-    "postgres_url": os.getenv("E2E_POSTGRES_URL", "postgresql://postgres:netra@localhost:5432/netra_test"),
-    "clickhouse_url": os.getenv("E2E_CLICKHOUSE_URL", "clickhouse://localhost:8123/netra_test"),
-    "test_timeout": int(os.getenv("E2E_TEST_TIMEOUT", "300")),  # 5 minutes
-    "performance_mode": os.getenv("E2E_PERFORMANCE_MODE", "true").lower() == "true"
+    "auth_service_url": get_env().get("E2E_AUTH_SERVICE_URL", "http://localhost:8001"),
+    "backend_url": get_env().get("E2E_BACKEND_URL", "http://localhost:8000"),
+    "websocket_url": get_env().get("E2E_WEBSOCKET_URL", "ws://localhost:8000/ws"),
+    "redis_url": get_env().get("E2E_REDIS_URL", "redis://localhost:6379"),
+    "postgres_url": get_env().get("E2E_POSTGRES_URL", "postgresql://postgres:netra@localhost:5432/netra_test"),
+    "clickhouse_url": get_env().get("E2E_CLICKHOUSE_URL", "clickhouse://localhost:8123/netra_test"),
+    "test_timeout": int(get_env().get("E2E_TEST_TIMEOUT", "300")),  # 5 minutes
+    "performance_mode": get_env().get("E2E_PERFORMANCE_MODE", "true").lower() == "true"
 }
 
 
@@ -512,7 +529,7 @@ class E2EEnvironmentValidator:
         
         var_status = {}
         for var in required_vars:
-            var_status[var] = os.getenv(var) is not None
+            var_status[var] = get_env().get(var) is not None
             
         return var_status
 
@@ -523,7 +540,7 @@ async def validate_e2e_environment():
     e2e_logger.info("Validating E2E test environment...")
     
     # Skip E2E tests if not explicitly enabled
-    if not os.getenv("RUN_E2E_TESTS", "false").lower() == "true":
+    if not get_env().get("RUN_E2E_TESTS", "false").lower() == "true":
         pytest.skip("E2E tests disabled (set RUN_E2E_TESTS=true to enable)")
     
     validator = E2EEnvironmentValidator()
@@ -611,12 +628,13 @@ def e2e_logger():
 @pytest.fixture(autouse=True)
 def setup_e2e_test_environment():
     """Auto-setup E2E test environment variables."""
-    os.environ["TESTING"] = "1"
-    os.environ["NETRA_ENV"] = "e2e_testing" 
-    os.environ["USE_REAL_SERVICES"] = "true"
-    os.environ["AUTH_FAST_TEST_MODE"] = "true"
+    env = get_env()
+    env.set("TESTING", "1", source="e2e_test_setup")
+    env.set("NETRA_ENV", "e2e_testing", source="e2e_test_setup")
+    env.set("USE_REAL_SERVICES", "true", source="e2e_test_setup")
+    env.set("AUTH_FAST_TEST_MODE", "true", source="e2e_test_setup")
     
     # Set longer timeouts for E2E tests
-    os.environ["HTTP_TIMEOUT"] = "30"
-    os.environ["WEBSOCKET_TIMEOUT"] = "30"
-    os.environ["LLM_TIMEOUT"] = "60"
+    env.set("HTTP_TIMEOUT", "30", source="e2e_test_setup")
+    env.set("WEBSOCKET_TIMEOUT", "30", source="e2e_test_setup")
+    env.set("LLM_TIMEOUT", "60", source="e2e_test_setup")

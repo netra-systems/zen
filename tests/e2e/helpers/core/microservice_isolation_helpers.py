@@ -33,8 +33,6 @@ from unittest.mock import patch
 import pytest
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 # Test configuration - Fast static analysis focused
 TEST_TIMEOUT = 15  # seconds - Static analysis should be fast

@@ -13,8 +13,6 @@ import time
 from pathlib import Path
 from typing import Any, Dict
 
-project_root = Path(__file__).parent.parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 from tests.e2e.helpers.resilience.error_propagation.error_generators import (
     RealErrorPropagationTester,

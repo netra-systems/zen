@@ -251,7 +251,6 @@ class ImportTester:
         # Add package directory to sys.path if not present
         package_parent = str(package_dir.parent)
         if package_parent not in sys.path:
-            sys.path.insert(0, package_parent)
         
         modules_to_test = self._discover_modules(package_path, package_dir, recursive)
         
@@ -408,8 +407,6 @@ def main():
     args = parser.parse_args()
     
     # Set up paths
-    project_root = Path(__file__).parent.parent
-    sys.path.insert(0, str(project_root))
     
     tester = ImportTester(root_path=project_root, verbose=args.verbose)
     
