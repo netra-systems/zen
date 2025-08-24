@@ -45,8 +45,6 @@ import httpx
 import pytest
 
 # Define project root - go up 4 levels from tests/e2e/integration/
-project_root = Path(__file__).parent.parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 from dev_launcher import DevLauncher, LauncherConfig
 from dev_launcher.service_discovery import ServiceDiscovery

@@ -564,36 +564,15 @@ class DatabaseConnector:
             return False
     
     async def _test_redis_connection(self, connection: DatabaseConnection) -> bool:
-        """Test Redis connection."""
+        """Test Redis connection using unified Redis manager."""
         try:
-            # Try modern redis library first (4.3+) which works with Python 3.12
-            try:
-                import redis.asyncio as redis_async
-                
-                redis = redis_async.from_url(
-                    connection.url,
-                    socket_connect_timeout=self.retry_config.timeout,
-                    socket_timeout=self.retry_config.timeout
-                )
-                
-                # Test with ping
-                await redis.ping()
-                await redis.aclose()
+            from shared.database.unified_redis_manager import launcher_redis_manager
+            
+            # Use unified manager for Redis testing
+            if await launcher_redis_manager.connect_async():
+                await launcher_redis_manager.disconnect_async()
                 return True
-                
-            except ImportError:
-                # Fall back to aioredis for older setups
-                import aioredis
-                
-                redis = aioredis.from_url(
-                    connection.url,
-                    socket_timeout=self.retry_config.timeout
-                )
-                
-                # Test with ping
-                await redis.ping()
-                await redis.aclose()
-                return True
+            return False
             
         except ImportError:
             # No Redis libraries available, skip validation

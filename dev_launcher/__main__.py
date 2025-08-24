@@ -34,7 +34,6 @@ if sys.platform in ("win32", "darwin"):
         sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 # Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dev_launcher import DevLauncher, LauncherConfig
 

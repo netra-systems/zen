@@ -6,7 +6,7 @@ import asyncio
 import atexit
 import hashlib
 import json
-import logging
+from shared.logging import get_logger, configure_service_logging
 import signal
 import sys
 import threading
@@ -44,7 +44,12 @@ from dev_launcher.utils import check_emoji_support, print_with_emoji
 from dev_launcher.websocket_validator import WebSocketValidator
 from dev_launcher.windows_process_manager import WindowsProcessManager
 
-logger = logging.getLogger(__name__)
+# Configure unified logging for dev launcher
+configure_service_logging({
+    'service_name': 'dev-launcher',
+    'level': 'DEBUG'  # More verbose for development
+})
+logger = get_logger(__name__)
 
 
 class DevLauncher:
