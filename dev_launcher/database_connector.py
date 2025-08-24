@@ -563,15 +563,15 @@ class DatabaseConnector:
             return False
     
     async def _test_redis_connection(self, connection: DatabaseConnection) -> bool:
-        """Test Redis connection using unified Redis manager."""
+        """Test Redis connection directly."""
         try:
-            from shared.database.unified_redis_manager import launcher_redis_manager
+            import redis.asyncio as redis
             
-            # Use unified manager for Redis testing
-            if await launcher_redis_manager.connect_async():
-                await launcher_redis_manager.disconnect_async()
-                return True
-            return False
+            # Test Redis connection directly
+            client = redis.from_url(connection.url, socket_connect_timeout=5)
+            await client.ping()
+            await client.close()
+            return True
             
         except ImportError:
             # No Redis libraries available, skip validation
