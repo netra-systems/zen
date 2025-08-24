@@ -12,27 +12,10 @@ Entry point for the Netra AI Optimization Platform.
 See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 """
 import logging
-import os
 import sys
 from pathlib import Path
 
-# Conditional import of environment management
-try:
-    # Use backend-specific isolated environment
-    from netra_backend.app.core.isolated_environment import get_env
-    _env_available = True
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
-    _env_available = False
+from netra_backend.app.core.isolated_environment import get_env
 
 # Add the project root to the Python path
 

@@ -1,28 +1,4 @@
-# Use backend-specific isolated environment
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
+from netra_backend.app.core.isolated_environment import get_env
 """Integration module for startup fixes
 
 This module provides integration points for all the critical startup fixes
@@ -71,11 +47,11 @@ class StartupFixesIntegration:
         clickhouse_default_password = get_env().get("CLICKHOUSE_DEFAULT_PASSWORD")
         
         if clickhouse_default_password and not clickhouse_password:
-            os.environ["CLICKHOUSE_PASSWORD"] = clickhouse_default_password
+            get_env().set("CLICKHOUSE_PASSWORD", clickhouse_default_password, "startup_fixes")
             fixes["clickhouse_password_mapping"] = f"Mapped CLICKHOUSE_DEFAULT_PASSWORD to CLICKHOUSE_PASSWORD"
             logger.info("Applied ClickHouse password environment variable mapping fix")
         elif clickhouse_password and not clickhouse_default_password:
-            os.environ["CLICKHOUSE_DEFAULT_PASSWORD"] = clickhouse_password
+            get_env().set("CLICKHOUSE_DEFAULT_PASSWORD", clickhouse_password, "startup_fixes")
             fixes["clickhouse_default_password_mapping"] = f"Mapped CLICKHOUSE_PASSWORD to CLICKHOUSE_DEFAULT_PASSWORD"
             logger.info("Applied reverse ClickHouse password environment variable mapping fix")
         
@@ -83,7 +59,7 @@ class StartupFixesIntegration:
         redis_mode = get_env().get("REDIS_MODE")
         if not redis_mode:
             # Set default Redis mode that supports fallback
-            os.environ["REDIS_MODE"] = "shared"  # Will fallback to local if remote fails
+            get_env().set("REDIS_MODE", "shared", "startup_fixes")  # Will fallback to local if remote fails
             fixes["redis_mode_default"] = "Set default REDIS_MODE with fallback capability"
             logger.info("Applied Redis mode default with fallback capability")
         
