@@ -71,12 +71,16 @@ def setup_test_path():
     """
     # Navigate from test_framework/__init__.py -> project_root/
     current_file = Path(__file__).resolve()
+    project_root = current_file.parent.parent  # Go up from test_framework to project root
     
     # Add project root to sys.path (for main imports)
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
     
     return project_root
 
 
+def get_project_root():
     """Get the project root path without modifying sys.path.
     
     Simple utility for tests that only need the project root path

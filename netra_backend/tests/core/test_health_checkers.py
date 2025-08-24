@@ -298,11 +298,9 @@ class TestSystemResourcesChecker:
         mock_disk.free = 1 * (1024**3)  # 1GB
         
         # Mock: Component isolation for testing without external dependencies
-        with patch("app.core.health_checkers.psutil.cpu_percent", return_value=98.0), \
-             # Mock: Component isolation for testing without external dependencies
-             patch("app.core.health_checkers.psutil.virtual_memory", return_value=mock_memory), \
-             # Mock: Component isolation for testing without external dependencies
-             patch("app.core.health_checkers.psutil.disk_usage", return_value=mock_disk):
+        with patch("app.core.health_checkers.psutil.cpu_percent", return_value=98.0) as mock_cpu, \
+             patch("app.core.health_checkers.psutil.virtual_memory", return_value=mock_memory) as mock_vm, \
+             patch("app.core.health_checkers.psutil.disk_usage", return_value=mock_disk) as mock_disk_usage:
             
             result = check_system_resources()
         
@@ -330,11 +328,9 @@ class TestSystemResourcesChecker:
         mock_disk.free = 50 * (1024**3)
         
         # Mock: Component isolation for testing without external dependencies
-        with patch("app.core.health_checkers.psutil.cpu_percent", return_value=50.0), \
-             # Mock: Component isolation for testing without external dependencies
-             patch("app.core.health_checkers.psutil.virtual_memory", return_value=mock_memory), \
-             # Mock: Component isolation for testing without external dependencies
-             patch("app.core.health_checkers.psutil.disk_usage", return_value=mock_disk):
+        with patch("app.core.health_checkers.psutil.cpu_percent", return_value=50.0) as mock_cpu, \
+             patch("app.core.health_checkers.psutil.virtual_memory", return_value=mock_memory) as mock_vm, \
+             patch("app.core.health_checkers.psutil.disk_usage", return_value=mock_disk) as mock_disk_usage:
             
             result = check_system_resources()
         
