@@ -20,6 +20,7 @@ from pathlib import Path
 import asyncio
 import json
 import logging
+import os
 import subprocess
 import time
 from dataclasses import dataclass, field
@@ -321,7 +322,7 @@ class TestStagingWorkerStartup:
             metrics = await validator.validate_worker_config(worker_id=2)
             
             # Check for Cloud SQL validation
-            if "/cloudsql/" in os.getenv("DATABASE_URL", ""):
+            if "/cloudsql/" in get_env().get("DATABASE_URL", ""):
                 assert metrics.startup_phase in ["dependency_check", "worker_init", "config_validation"]
                 
     @pytest.mark.asyncio
