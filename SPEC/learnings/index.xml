@@ -45,6 +45,14 @@
             <critical-takeaway>Test runner uses netra_backend/tests/, dev launcher uses netra_backend.app.main:app.</critical-takeaway>
         </category>
         
+        <category name="Microservice Environment Independence" path="SPEC/learnings/microservice_environment_independence.xml" keywords="Environment, IsolatedEnvironment, dev_launcher, Service Independence, Cross-Service">
+            <critical-takeaway>NEVER import environment management from dev_launcher - each service MUST have its own isolated_environment.</critical-takeaway>
+            <critical-takeaway>Service-local implementations of shared patterns are acceptable and required for independence.</critical-takeaway>
+            <critical-takeaway>Always provide production fallback patterns when development modules may not be available.</critical-takeaway>
+            <critical-takeaway>netra_backend MUST use netra_backend.app.core.isolated_environment, NOT dev_launcher.isolated_environment.</critical-takeaway>
+            <critical-takeaway>Remove all service discovery imports from dev_launcher in production services.</critical-takeaway>
+        </category>
+        
         <category name="AI-Native Path Management" path="SPEC/learnings/ai_native_path_management.xml" keywords="AI-Native, Path Migration, Refactoring, Service Creation, Batch Operations, Import Management">
             <critical-takeaway>ALWAYS use batch operations for path migrations - never migrate file-by-file to avoid inconsistencies.</critical-takeaway>
             <critical-takeaway>Path migrations must be atomic - all changes in single commit with tests passing before and after.</critical-takeaway>

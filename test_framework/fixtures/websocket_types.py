@@ -498,3 +498,80 @@ def get_websocket_test_data() -> Dict[str, Any]:
             {"type": "rate_limit", "expected_recovery": True}
         ]
     }
+
+
+class BidirectionalTypeTest:
+    """Test class for bidirectional WebSocket type validation."""
+    
+    def __init__(self):
+        self.test_cases = []
+        self.validation_results = []
+    
+    def add_test_case(self, name: str, input_data: Any, expected_output: Any):
+        """Add a test case for type validation."""
+        self.test_cases.append({
+            "name": name,
+            "input": input_data,
+            "expected": expected_output
+        })
+    
+    def validate_message_type(self, message: MockWebSocketMessage) -> bool:
+        """Validate message type consistency."""
+        try:
+            # Check if message type is valid
+            if not isinstance(message.type, (str, MockMessageType)):
+                return False
+            
+            # Check if data is serializable
+            json.dumps(message.data)
+            
+            # Check if message can be reconstructed
+            reconstructed = MockWebSocketMessage.from_dict(message.to_dict())
+            return reconstructed.type == message.type and reconstructed.data == message.data
+            
+        except Exception:
+            return False
+    
+    def run_bidirectional_test(self) -> Dict[str, Any]:
+        """Run bidirectional type validation tests."""
+        results = {
+            "passed": 0,
+            "failed": 0,
+            "total": len(self.test_cases),
+            "details": []
+        }
+        
+        for test_case in self.test_cases:
+            try:
+                # Create message from input
+                message = MockWebSocketMessage(
+                    type=test_case["input"].get("type", MockMessageType.USER_INPUT),
+                    data=test_case["input"].get("data", {})
+                )
+                
+                # Validate bidirectional conversion
+                is_valid = self.validate_message_type(message)
+                
+                if is_valid:
+                    results["passed"] += 1
+                    results["details"].append({
+                        "name": test_case["name"],
+                        "status": "passed"
+                    })
+                else:
+                    results["failed"] += 1
+                    results["details"].append({
+                        "name": test_case["name"],
+                        "status": "failed",
+                        "error": "Type validation failed"
+                    })
+                    
+            except Exception as e:
+                results["failed"] += 1
+                results["details"].append({
+                    "name": test_case["name"],
+                    "status": "failed",
+                    "error": str(e)
+                })
+        
+        return results
