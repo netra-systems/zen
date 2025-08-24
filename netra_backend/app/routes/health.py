@@ -526,3 +526,5 @@ def _calculate_availability(health_status: Dict[str, Any]) -> float:
     successful_checks = _count_successful_checks(checks)
     return (successful_checks / len(checks)) * 100.0
 
+
+

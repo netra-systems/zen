@@ -538,8 +538,12 @@ def _build_supervisor_agent(app: FastAPI):
 def _setup_agent_state(app: FastAPI, supervisor) -> None:
     """Setup agent state in app."""
     from netra_backend.app.services.agent_service import AgentService
+    from netra_backend.app.services.thread_service import ThreadService
+    from netra_backend.app.services.corpus_service import CorpusService
     app.state.agent_supervisor = supervisor
     app.state.agent_service = AgentService(supervisor)
+    app.state.thread_service = ThreadService()
+    app.state.corpus_service = CorpusService()
 
 
 async def initialize_websocket_components(logger: logging.Logger) -> None:

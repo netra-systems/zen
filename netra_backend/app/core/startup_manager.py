@@ -538,6 +538,16 @@ class StartupManager:
                 max_retries=1
             )
             
+            # Register agent_supervisor as HIGH priority - required for WebSocket agent communication
+            self.register_component(
+                name="agent_supervisor",
+                init_func=lambda: self._initialize_agent_supervisor(app),
+                priority=ComponentPriority.HIGH,
+                dependencies=["database", "websocket"],
+                timeout_seconds=30.0,
+                max_retries=2
+            )
+            
             # Initialize logging first (synchronous, required for other components)
             start_time, logger = initialize_logging()
             logger.info("Starting robust system initialization...")
@@ -693,6 +703,22 @@ class StartupManager:
         
         logger = central_logger.get_logger(__name__)
         await start_monitoring(app, logger)
+
+    async def _initialize_agent_supervisor(self, app) -> None:
+        """Initialize agent supervisor for WebSocket agent communication"""
+        from netra_backend.app.startup_module import _create_agent_supervisor
+        from netra_backend.app.logging_config import central_logger
+        
+        logger = central_logger.get_logger(__name__)
+        
+        # Create agent supervisor and set up agent services
+        _create_agent_supervisor(app)
+        
+        # Verify agent supervisor was created
+        if not hasattr(app.state, 'agent_supervisor') or app.state.agent_supervisor is None:
+            raise RuntimeError("Failed to create agent supervisor - app.state.agent_supervisor is None")
+        
+        logger.info("Agent supervisor initialization completed successfully")
 
 
 # Global instance

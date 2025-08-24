@@ -425,6 +425,17 @@ class DevelopmentConfig(AppConfig):
     jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Generated with Fernet.generate_key()
     
+    # Compatibility aliases for uppercase attribute access
+    @property
+    def SECRET_KEY(self) -> str:
+        """Compatibility alias for secret_key."""
+        return self.secret_key
+    
+    @property 
+    def API_BASE_URL(self) -> str:
+        """Compatibility alias for api_base_url."""
+        return self.api_base_url
+    
     # OAuth configuration for development - populated by SecretReference system
     oauth_config: OAuthConfig = OAuthConfig(
         client_id="",  # Populated by SecretReference: google-client-id

@@ -124,9 +124,10 @@ OptionalUserDep = Annotated[Optional[User], Depends(get_current_user_optional)]
 # Permission-based dependencies
 async def require_admin(user: User = Depends(get_current_user)) -> User:
     """Require admin permissions"""
-    # Check both is_superuser and role for admin permissions
+    # Check both is_superuser, role, and legacy is_admin for admin permissions
     is_admin = (hasattr(user, 'is_superuser') and user.is_superuser) or \
-               (hasattr(user, 'role') and user.role in ['admin', 'super_admin'])
+               (hasattr(user, 'role') and user.role in ['admin', 'super_admin']) or \
+               (hasattr(user, 'is_admin') and user.is_admin)
     if not is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

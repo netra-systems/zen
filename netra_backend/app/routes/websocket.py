@@ -96,16 +96,19 @@ async def websocket_endpoint(websocket: WebSocket):
         from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
         from netra_backend.app.services.message_handlers import MessageHandlerService
         
-        # Get dependencies from app state
-        supervisor = websocket.app.state.agent_supervisor
-        thread_service = websocket.app.state.thread_service
+        # Get dependencies from app state (check if they exist first)
+        supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
+        thread_service = getattr(websocket.app.state, 'thread_service', None)
         
-        # Create MessageHandlerService and AgentMessageHandler
-        message_handler_service = MessageHandlerService(supervisor, thread_service)
-        agent_handler = AgentMessageHandler(message_handler_service)
-        
-        # Register agent handler with message router
-        message_router.add_handler(agent_handler)
+        # Create MessageHandlerService and AgentMessageHandler if dependencies exist
+        if supervisor is not None and thread_service is not None:
+            message_handler_service = MessageHandlerService(supervisor, thread_service)
+            agent_handler = AgentMessageHandler(message_handler_service)
+            
+            # Register agent handler with message router
+            message_router.add_handler(agent_handler)
+        else:
+            logger.warning("WebSocket dependencies not available - running in test mode without agent handlers")
         
         # Authenticate and establish secure connection
         async with secure_websocket_context(websocket) as (auth_info, security_manager):

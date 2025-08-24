@@ -139,22 +139,38 @@ async def _execute_session_transaction(session: AsyncSession):
 @asynccontextmanager
 async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency to get async database session with resilient transaction handling."""
-    session_factory = _setup_session_for_transaction()
-    async with session_factory as session:
+    from netra_backend.app.db.postgres_core import async_session_factory
+    
+    if async_session_factory is None:
+        logger.error("async_session_factory is not initialized.")
+        raise RuntimeError("Database not configured")
+        
+    async with async_session_factory() as session:
         try:
-            async for result in _execute_session_transaction(session):
-                yield result
+            _validate_async_session(session)
+            yield session
+            await session.commit()
+            
             # Mark connection as healthy on successful completion
             try:
                 from netra_backend.app.db.postgres_resilience import postgres_resilience
                 postgres_resilience.set_connection_health(True)
             except ImportError:
                 pass  # Resilience module not available
-        except (OperationalError, DatabaseError, DisconnectionError) as e:
-            logger.warning(f"PostgreSQL session failed with database error: {e}")
-            raise
+                
         except Exception as e:
-            logger.error(f"PostgreSQL session failed with unexpected error: {e}")
+            await session.rollback()
+            
+            # Track connection health for resilience manager
+            if isinstance(e, (OperationalError, DatabaseError, DisconnectionError)):
+                try:
+                    from netra_backend.app.db.postgres_resilience import postgres_resilience
+                    postgres_resilience.set_connection_health(False)
+                    logger.warning(f"PostgreSQL connection marked unhealthy due to: {e}")
+                except ImportError:
+                    pass  # Resilience module not available
+            
+            logger.error(f"Async DB session error: {e}")
             raise
 
 

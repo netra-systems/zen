@@ -21,7 +21,13 @@ class CriticalCallbackFailure(Exception):
     
     def __str__(self) -> str:
         """String representation of the error."""
-        msg = f"Critical callback '{self.callback_name}' failed"
+        if "multiple_callbacks_" in self.callback_name:
+            # Handle multiple callback failures
+            conn_id = self.callback_name.replace("multiple_callbacks_", "")
+            msg = f"Critical callback failures for {conn_id}"
+        else:
+            msg = f"Critical callback '{self.callback_name}' failed"
+        
         if self.original_error:
             msg += f": {self.original_error}"
         return msg

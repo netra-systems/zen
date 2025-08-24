@@ -4,7 +4,7 @@ Unified response schemas for Enterprise SLA monitoring and compliance.
 Ensures consistent health data across all Netra services.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -73,7 +73,7 @@ class HealthResponseBuilder:
             "status": status,
             "service": self.service_name,
             "version": self.version,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
             "environment": self.environment
         }
     

@@ -84,10 +84,11 @@ def _import_auth_routers() -> dict:
 
 def _import_core_routers() -> dict:
     """Import core functionality routers"""
+    from netra_backend.app.routes.api_v1_compatibility import router as api_v1_router
     from netra_backend.app.routes.llm_cache import router as llm_cache_router
     from netra_backend.app.routes.mcp import router as mcp_router
     from netra_backend.app.routes.threads_route import router as threads_router
-    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router}
+    return {"api_v1_router": api_v1_router, "llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router}
 
 
 def _import_extended_routers() -> dict:
