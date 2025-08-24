@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Union
 from netra_backend.app.core.health.telemetry import telemetry_manager
 from netra_backend.app.core.shared_health_types import HealthStatus
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.schemas.core_models import HealthCheckResult
 
 logger = central_logger.get_logger(__name__)
@@ -30,7 +31,7 @@ class BaseHealthChecker(ABC):
     
     def __init__(self, name: str, timeout: float = 5.0):
         self.name = name
-        self.timeout = timeout
+        self.timeout = self._resolve_timeout(timeout)
         self.circuit_breaker_enabled = True
     
     @abstractmethod
@@ -49,6 +50,10 @@ class BaseHealthChecker(ABC):
         """Create timeout result for health check."""
         timeout_details = self._build_timeout_details()
         return HealthCheckResult(
+            component_name=self.name,
+            success=False,
+            health_score=0.0,
+            response_time_ms=self.timeout * 1000,
             status="unhealthy",
             response_time=self.timeout,
             details=timeout_details
@@ -58,6 +63,21 @@ class BaseHealthChecker(ABC):
         """Build timeout result details."""
         return {"component_name": self.name, "success": False, "health_score": 0.0,
                 "error_message": f"Health check timeout after {self.timeout}s"}
+        
+    def _resolve_timeout(self, default_timeout: float) -> float:
+        """Resolve timeout from environment or use default."""
+        env = get_env()
+        env_timeout = env.get("HEALTH_CHECK_TIMEOUT")
+        logger.debug(f"_resolve_timeout: env_timeout={env_timeout}, default_timeout={default_timeout}")
+        if env_timeout is not None:
+            try:
+                resolved_timeout = float(env_timeout)
+                logger.debug(f"_resolve_timeout: resolved timeout from env: {resolved_timeout}")
+                return resolved_timeout
+            except (ValueError, TypeError):
+                logger.warning(f"Invalid HEALTH_CHECK_TIMEOUT value: {env_timeout}, using default: {default_timeout}")
+        logger.debug(f"_resolve_timeout: using default timeout: {default_timeout}")
+        return default_timeout
 
 
 class HealthInterface:

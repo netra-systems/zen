@@ -7,6 +7,7 @@ ensuring compliance with unified_environment_management.xml specification.
 Business Value: Platform/Internal - Test Stability  
 Prevents test environment pollution and ensures reliable test execution.
 """
+import os
 import pytest
 from typing import Dict, Optional, Any
 from pathlib import Path
@@ -14,7 +15,32 @@ import sys
 
 # Add project root for imports
 
-from dev_launcher.isolated_environment import get_env, IsolatedEnvironment
+# Conditional import to avoid dev_launcher environment setup during pytest
+def get_env():
+    """Get appropriate environment manager based on context."""
+    # Check if we're in pytest environment
+    if 'pytest' in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+        # During pytest, use a minimal environment wrapper that doesn't trigger dev setup
+        class TestEnvironmentWrapper:
+            def get(self, key: str, default=None):
+                return os.environ.get(key, default)
+            def set(self, key: str, value: str, source: str = "test"):
+                os.environ[key] = value
+        return TestEnvironmentWrapper()
+    else:
+        # Normal execution, use dev_launcher environment
+        from dev_launcher.isolated_environment import get_env as dev_get_env
+        return dev_get_env()
+
+# Import IsolatedEnvironment only when not in pytest to avoid triggering dev setup
+try:
+    if 'pytest' not in sys.modules and not os.environ.get("PYTEST_CURRENT_TEST"):
+        from dev_launcher.isolated_environment import IsolatedEnvironment
+    else:
+        # Define a minimal IsolatedEnvironment for tests
+        IsolatedEnvironment = None
+except ImportError:
+    IsolatedEnvironment = None
 
 
 class TestEnvironmentManager:

@@ -31,8 +31,13 @@ from netra_backend.app.db.health_checks import (
 class UnifiedDatabaseHealthChecker(BaseHealthChecker):
     """Unified database health checker supporting PostgreSQL and ClickHouse."""
     
-    def __init__(self, db_type: str = "postgres", timeout: float = 5.0):
-        super().__init__(f"database_{db_type}", timeout)
+    def __init__(self, db_type: str = "postgres", timeout: Optional[float] = None):
+        # Only pass timeout if explicitly provided, otherwise let BaseHealthChecker resolve from env
+        if timeout is not None:
+            super().__init__(f"database_{db_type}", timeout)
+        else:
+            # Let BaseHealthChecker resolve from environment with default fallback
+            super().__init__(f"database_{db_type}", 5.0)
         self.db_type = db_type
         self._check_function = self._get_check_function()
     
@@ -56,6 +61,10 @@ class UnifiedDatabaseHealthChecker(BaseHealthChecker):
         """Create error result for health check."""
         error_details = self._build_error_details(error_msg)
         return HealthCheckResult(
+            component_name=self.name,
+            success=False,
+            health_score=0.0,
+            response_time_ms=0.0,
             status="unhealthy",
             response_time=0.0,
             details=error_details
@@ -113,6 +122,10 @@ class ServiceHealthChecker(BaseHealthChecker):
         health_score = 1.0 if success else 0.0
         details = self._build_service_details(success, health_score, result)
         return HealthCheckResult(
+            component_name=self.name,
+            success=success,
+            health_score=health_score,
+            response_time_ms=response_time,
             status="healthy" if success else "unhealthy",
             response_time=response_time / 1000,
             details=details
@@ -135,6 +148,10 @@ class ServiceHealthChecker(BaseHealthChecker):
         """Create error result for service check."""
         details = self._build_service_error_details(error_msg)
         return HealthCheckResult(
+            component_name=self.name,
+            success=False,
+            health_score=0.0,
+            response_time_ms=response_time,
             status="unhealthy",
             response_time=response_time / 1000,
             details=details
@@ -209,6 +226,10 @@ class DependencyHealthChecker(BaseHealthChecker):
         """Create dependency health result."""
         details = self._build_dependency_details(success)
         return HealthCheckResult(
+            component_name=self.name,
+            success=success,
+            health_score=1.0 if success else 0.0,
+            response_time_ms=response_time,
             status="healthy" if success else "unhealthy",
             response_time=response_time / 1000,
             details=details
@@ -226,6 +247,10 @@ class DependencyHealthChecker(BaseHealthChecker):
         """Create error result for dependency check."""
         details = self._build_dependency_error_details(error_msg)
         return HealthCheckResult(
+            component_name=self.name,
+            success=False,
+            health_score=0.0,
+            response_time_ms=response_time,
             status="unhealthy",
             response_time=response_time / 1000,
             details=details
@@ -327,6 +352,10 @@ class CircuitBreakerHealthChecker(BaseHealthChecker):
         """Create result when circuit breaker is open."""
         details = self._build_circuit_open_details()
         return HealthCheckResult(
+            component_name=self.name,
+            success=False,
+            health_score=0.0,
+            response_time_ms=0.0,
             status="unhealthy",
             response_time=0.0,
             details=details
@@ -345,6 +374,10 @@ class CircuitBreakerHealthChecker(BaseHealthChecker):
         """Create error result for circuit breaker failure."""
         details = self._build_circuit_error_details(error_msg)
         return HealthCheckResult(
+            component_name=self.name,
+            success=False,
+            health_score=0.0,
+            response_time_ms=0.0,
             status="unhealthy",
             response_time=0.0,
             details=details

@@ -175,6 +175,11 @@ class HealthCheckResult:
     metadata: Dict[str, Any] = field(default_factory=dict)
     details: Dict[str, Any] = field(default_factory=dict)
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    # Additional attributes expected by health service and routes
+    message: Optional[str] = None
+    labels: Dict[str, str] = field(default_factory=dict)
+    last_check: Optional[datetime] = None
 
 
 @dataclass

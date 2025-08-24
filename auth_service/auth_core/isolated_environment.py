@@ -65,6 +65,13 @@ class IsolatedEnvironment:
     
     def _auto_load_env_file(self) -> None:
         """Automatically load .env file if it exists."""
+        import sys
+        
+        # Skip auto-loading .env during pytest to allow test configuration to take precedence
+        if 'pytest' in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+            logger.debug("Skipping .env auto-load during pytest execution")
+            return
+            
         try:
             # Look for .env file in project root
             env_file = Path.cwd() / ".env"

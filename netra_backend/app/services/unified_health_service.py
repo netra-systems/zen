@@ -181,7 +181,9 @@ class UnifiedHealthService:
             component_name=check_name,
             status=HealthStatus.UNHEALTHY.value,
             response_time_ms=response_time_ms,
-            message=f"Check failed: {error}",
+            success=False,
+            health_score=0.0,
+            error_message=f"Check failed: {error}",
             details={"error": error}
         )
     
