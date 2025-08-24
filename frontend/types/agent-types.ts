@@ -6,22 +6,24 @@
  * 
  * BVJ: Enterprise segment - agent reliability critical for AI workload optimization value
  * 
- * Architecture: Uses backend_schema_auto_generated.ts as authoritative source,
+ * Architecture: Uses canonical type sources (backend-sync, domains) as authoritative,
  * extending with frontend-specific UI types only where necessary.
  */
 
-// Import authoritative backend schema types
+// Import authoritative backend schema types from canonical sources
 import type {
-  AgentStatus as BackendAgentStatus,
   AgentStartedPayload,
   AgentCompletedPayload,
   SubAgentUpdatePayload,
   StopAgentPayload,
   ErrorPayload,
-  AgentResult,
+  AgentResult
+} from './backend-sync/payloads';
+import type {
   WebSocketMessage,
   WebSocketMessageType
-} from './backend_schema_auto_generated';
+} from './domains/websocket';
+import type { AgentStatus as BackendAgentStatus } from './shared/enums';
 
 // Import supporting types
 import type { ReferenceItem } from './backend_schema_tools';
@@ -32,7 +34,7 @@ import type { ReferenceItem } from './backend_schema_tools';
 
 /**
  * Agent execution status - mirrors backend AgentStatus enum exactly
- * Source: backend_schema_auto_generated.ts
+ * Source: backend-sync/payloads.ts (canonical SSOT)
  */
 export type AgentStatus = BackendAgentStatus;
 
@@ -292,8 +294,10 @@ export function toLegacyStatus(status: AgentStatus): LegacyAgentStatus {
 // Re-export commonly used types for convenience
 export type {
   WebSocketMessage,
-  WebSocketMessageType,
+  WebSocketMessageType
+} from './domains/websocket';
+export type {
   AgentResult
-} from './backend_schema_auto_generated';
+} from './backend-sync/payloads';
 
 export type { ReferenceItem } from './backend_schema_tools';

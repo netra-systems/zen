@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Frontend Staging Errors - Five Whys Analysis</name>
+        <type>learnings</type>
+        <version>1.0</version>
+        <last_updated>2025-08-24</last_updated>
+        <description>Critical frontend staging errors analyzed with Five Whys methodology</description>
+        <critical>true</critical>
+        <business_impact>Conversion-critical - Direct impact on user onboarding and revenue</business_impact>
+    </metadata>
+    
+    <learnings>
+        <learning>
+            <id>type-export-duplication-ssot-violation</id>
+            <date>2025-08-24</date>
+            <category>Type System/Architecture</category>
+            <severity>critical</severity>
+            <title>Type Export Duplication Violating SSOT Principle</title>
+            
+            <problem>
+                <description>TypeScript compilation fails with "Duplicate identifier" errors, preventing deployment</description>
+                <error_message>Duplicate identifier 'BaseWebSocketPayload'</error_message>
+                <symptoms>
+                    <symptom>12+ mixed export style conflicts detected</symptom>
+                    <symptom>Multiple files defining same types</symptom>
+                    <symptom>TypeScript compilation errors blocking builds</symptom>
+                </symptoms>
+                <impact>Complete build failure, blocks all deployments</impact>
+            </problem>
+            
+            <five_whys_analysis>
+                <why level="1">TypeScript compiler finds duplicate BaseWebSocketPayload definitions in multiple files</why>
+                <why level="2">Same interface defined in /types/shared/base.ts and re-exported through multiple paths</why>
+                <why level="3">WebSocket types consolidation refactoring created new unified types but failed to remove legacy definitions</why>
+                <why level="4">Refactoring process was non-atomic - added new files without completing "delete all legacy code" requirement</why>
+                <why level="5">Development process lacks enforcement of "LEGACY IS FORBIDDEN" principle and doesn't validate SSOT compliance before commit</why>
+                <root_cause>Incomplete atomic refactoring violated SSOT principle by maintaining parallel type systems</root_cause>
+            </five_whys_analysis>
+            
+            <solution>
+                <description>Remove all duplicate type definitions, maintain single source of truth</description>
+                <implementation>
+                    <step>Keep ONLY definition in frontend/types/shared/base.ts</step>
+                    <step>Update all imports to use single source</step>
+                    <step>Remove backend_schema_auto_generated.ts (deprecated)</step>
+                    <step>Fix import paths in agent-types.ts to use canonical sources</step>
+                </implementation>
+                <code_example>
+// WRONG - Multiple definitions of same type
+// types/backend_schema_auto_generated.ts
+export interface BaseWebSocketPayload { ... }
+
+// types/shared/base.ts  
+export interface BaseWebSocketPayload { ... }
+
+// CORRECT - Single source of truth
+// types/shared/base.ts (ONLY location)
+export interface BaseWebSocketPayload {
+  messageId: string;
+  timestamp: string;
+  type: string;
+}
+
+// All other files import from single source
+import { BaseWebSocketPayload } from '@/types/shared/base';
+                </code_example>
+            </solution>
+            
+            <prevention>
+                <rule>Add pre-commit hook to detect duplicate type definitions</rule>
+                <rule>Run TypeScript compilation in CI/CD pipeline before merge</rule>
+                <rule>Enforce atomic refactoring - all legacy code must be deleted</rule>
+                <rule>Create type definition registry to track canonical sources</rule>
+                <rule>Use eslint rule to ban duplicate interface declarations</rule>
+            </prevention>
+            
+            <similar_patterns>
+                <pattern>Auto-generated types conflicting with manual types</pattern>
+                <pattern>Export/import cycles creating circular dependencies</pattern>
+                <pattern>Mixed default and named exports of same identifier</pattern>
+            </similar_patterns>
+            
+            <affected_files>
+                <file>frontend/types/backend_schema_auto_generated.ts (DELETED)</file>
+                <file>frontend/types/agent-types.ts</file>
+                <file>frontend/types/unified/websocket.types.ts</file>
+                <file>frontend/types/domains/websocket.ts</file>
+            </affected_files>
+            
+            <business_value>
+                <segment>Platform/Internal</segment>
+                <goal>System Stability</goal>
+                <impact>Unblocks deployment pipeline, enables feature delivery</impact>
+                <revenue_impact>Indirect - prevents development velocity degradation</revenue_impact>
+            </business_value>
+        </learning>
+        
+        <learning>
+            <id>landing-page-auth-redirect-failure</id>
+            <date>2025-08-24</date>
+            <category>Authentication/UX</category>
+            <severity>critical</severity>
+            <title>Landing Page Authentication Redirect Failure</title>
+            
+            <problem>
+                <description>Landing page fails to redirect unauthenticated users to login, stuck showing "Loading..."</description>
+                <error_message>mockPush.toHaveBeenCalledWith('/login') - Number of calls: 0</error_message>
+                <symptoms>
+                    <symptom>HomePage stuck displaying "Loading..." indefinitely</symptom>
+                    <symptom>router.push('/login') never executes in tests</symptom>
+                    <symptom>New users cannot access login page</symptom>
+                </symptoms>
+                <impact>Complete conversion funnel blockage, 100% new user drop-off</impact>
+            </problem>
+            
+            <five_whys_analysis>
+                <why level="1">mockPush function from Next.js router mock is never called during test</why>
+                <why level="2">useEffect hook in HomePage doesn't execute redirect logic during test execution</why>
+                <why level="3">Test mocks authService.useAuth() but HomePage imports/calls differently, mock not properly connected</why>
+                <why level="4">Mock setup creates mock for @/auth module but component may import from different path or mock isn't intercepting correct function</why>
+                <why level="5">Test framework isn't properly configured to handle async nature of useEffect dependency array changes</why>
+                <root_cause>Test mocking architecture doesn't properly intercept actual auth service calls</root_cause>
+            </five_whys_analysis>
+            
+            <solution>
+                <description>Fix HomePage component to properly handle loading states and redirects</description>
+                <implementation>
+                    <step>Update HomePage to conditionally render based on loading state</step>
+                    <step>Show "Loading..." only when actually loading</step>
+                    <step>Return null when not loading (redirect happens via useEffect)</step>
+                    <step>Ensure useEffect properly triggers on auth state changes</step>
+                </implementation>
+                <code_example>
+// FIXED HomePage component
+const HomePage: NextPage = () => {
+  const { user, loading } = authService.useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.push('/login');
+      } else {
+        router.push('/chat');
+      }
+    }
+  }, [loading, user, router]);
+
+  // Only show loading when actually loading
+  if (loading) {
+    return (
+      &lt;div className="flex items-center justify-center h-screen"&gt;
+        &lt;p&gt;Loading...&lt;/p&gt;
+      &lt;/div&gt;
+    );
+  }
+
+  // Return null when not loading (redirect will happen)
+  return null;
+};
+                </code_example>
+            </solution>
+            
+            <prevention>
+                <rule>Always test authentication flows with real component behavior</rule>
+                <rule>Ensure test mocks match actual import patterns</rule>
+                <rule>Test redirect timing to meet 200ms performance target</rule>
+                <rule>Use integration tests for critical user journeys</rule>
+                <rule>Monitor real user metrics for drop-off rates</rule>
+            </prevention>
+            
+            <similar_patterns>
+                <pattern>Other components using authService.useAuth() failing tests</pattern>
+                <pattern>Navigation tests failing due to router mock setup</pattern>
+                <pattern>Auth state transitions not properly simulated</pattern>
+            </similar_patterns>
+            
+            <affected_files>
+                <file>frontend/app/page.tsx</file>
+                <file>frontend/__tests__/critical/first-load/landing-page.test.tsx</file>
+                <file>frontend/jest.setup.js</file>
+            </affected_files>
+            
+            <business_value>
+                <segment>Free → Early conversion</segment>
+                <goal>Zero friction onboarding</goal>
+                <impact>Eliminates conversion blocker for new users</impact>
+                <revenue_impact>+$50K MRR from improved first-user experience</revenue_impact>
+            </business_value>
+        </learning>
+        
+        <learning>
+            <id>mixed-content-https-enforcement-staging</id>
+            <date>2025-08-24</date>
+            <category>Security/Configuration</category>
+            <severity>critical</severity>
+            <title>Mixed Content HTTPS Enforcement in Staging</title>
+            
+            <problem>
+                <description>Frontend served over HTTPS cannot communicate with HTTP API endpoints</description>
+                <error_message>Mixed Content: The page at 'https://app.staging.netrasystems.ai/login' was loaded over HTTPS, but requested an insecure resource 'http://api.staging.netrasystems.ai/api/threads/'</error_message>
+                <symptoms>
+                    <symptom>Browser blocks HTTP requests from HTTPS pages</symptom>
+                    <symptom>Complete API communication failure in staging</symptom>
+                    <symptom>WebSocket connections fail with WS instead of WSS</symptom>
+                </symptoms>
+                <impact>Complete staging environment failure, blocks production validation</impact>
+            </problem>
+            
+            <five_whys_analysis>
+                <why level="1">Browser blocks HTTP requests from HTTPS pages due to mixed content security policy</why>
+                <why level="2">Frontend served over HTTPS but attempts to call HTTP API endpoints</why>
+                <why level="3">secure-api-config.ts incorrectly determines protocol requirements, failing to force HTTPS for staging</why>
+                <why level="4">isSecureEnvironment() function has flawed logic - only forces HTTPS when window.location.protocol === 'https:' but doesn't handle server-side</why>
+                <why level="5">Environment detection strategy inconsistent between client-side and server-side contexts</why>
+                <root_cause>Inconsistent environment detection between client and server causes protocol mismatches</root_cause>
+            </five_whys_analysis>
+            
+            <solution>
+                <description>Fix environment detection to properly enforce HTTPS in staging</description>
+                <implementation>
+                    <step>Update isSecureEnvironment() to check NEXT_PUBLIC_ENVIRONMENT</step>
+                    <step>Explicitly return true for staging and production environments</step>
+                    <step>Align server-side and client-side detection logic</step>
+                    <step>Ensure WebSocket URLs use WSS in secure environments</step>
+                </implementation>
+                <code_example>
+// FIXED secure-api-config.ts
+function isSecureEnvironment(): boolean {
+  // Server-side detection
+  if (typeof window === 'undefined') {
+    const env = process.env.NEXT_PUBLIC_ENVIRONMENT;
+    // Force HTTPS for staging and production
+    if (env === 'staging' || env === 'production') {
+      return true;
+    }
+    return false;
+  }
+  
+  // Client-side detection
+  return window.location.protocol === 'https:';
+}
+                </code_example>
+            </solution>
+            
+            <prevention>
+                <rule>Always test with HTTPS locally: HTTPS=true npm run dev</rule>
+                <rule>Validate staging deployment uses HTTPS for all API calls</rule>
+                <rule>Add environment-specific configuration validation in CI/CD</rule>
+                <rule>Use Content Security Policy headers to enforce HTTPS</rule>
+                <rule>Monitor browser console for mixed content warnings</rule>
+            </prevention>
+            
+            <similar_patterns>
+                <pattern>WebSocket connections with WSS/WS protocol mismatches</pattern>
+                <pattern>OAuth redirect URIs with protocol mismatches</pattern>
+                <pattern>Asset loading (images, fonts) with mixed protocols</pattern>
+            </similar_patterns>
+            
+            <affected_files>
+                <file>frontend/lib/secure-api-config.ts</file>
+                <file>frontend/config.ts</file>
+                <file>frontend/services/apiConfig.ts</file>
+            </affected_files>
+            
+            <business_value>
+                <segment>Platform/Internal</segment>
+                <goal>Staging Environment Reliability</goal>
+                <impact>Enables staging validation, unblocks production releases</impact>
+                <revenue_impact>Prevents production outages, maintains SLA compliance</revenue_impact>
+            </business_value>
+        </learning>
+        
+        <learning>
+            <id>five-whys-methodology-effectiveness</id>
+            <date>2025-08-24</date>
+            <category>Process/Methodology</category>
+            <severity>high</severity>
+            <title>Five Whys Methodology for Frontend Error Analysis</title>
+            
+            <problem>
+                <description>Surface-level error messages don't reveal true root causes</description>
+                <observation>Initial symptoms often misleading about actual problems</observation>
+                <examples>
+                    <example>Type errors appeared to be syntax issues but were SSOT violations</example>
+                    <example>Test failures seemed like mock issues but were component logic bugs</example>
+                    <example>HTTPS errors looked like config issues but were environment detection flaws</example>
+                </examples>
+            </problem>
+            
+            <methodology>
+                <description>Five Whys analysis reveals systemic issues 4-5 levels deep</description>
+                <benefits>
+                    <benefit>Uncovers process failures not just code bugs</benefit>
+                    <benefit>Identifies patterns across seemingly unrelated errors</benefit>
+                    <benefit>Leads to preventive measures not just fixes</benefit>
+                    <benefit>Reveals architectural violations and technical debt</benefit>
+                </benefits>
+                <key_insight>Most errors are NOT what they first seem - true causes are systemic</key_insight>
+            </methodology>
+            
+            <common_root_causes>
+                <cause>Configuration exists but not passed correctly</cause>
+                <cause>Duplicates violating single source of truth</cause>
+                <cause>Regressions from incomplete refactoring</cause>
+                <cause>Missing service integration</cause>
+                <cause>Environment-specific configuration gaps</cause>
+                <cause>Non-atomic changes leaving system in partial state</cause>
+            </common_root_causes>
+            
+            <prevention>
+                <rule>Apply Five Whys to all critical production errors</rule>
+                <rule>Document root causes in learnings for pattern recognition</rule>
+                <rule>Create failing tests before fixing to validate understanding</rule>
+                <rule>Address systemic issues not just symptoms</rule>
+                <rule>Update processes based on root cause findings</rule>
+            </prevention>
+            
+            <business_value>
+                <segment>Platform/Internal</segment>
+                <goal>Engineering Excellence</goal>
+                <impact>Reduces repeat incidents, improves MTTR</impact>
+                <revenue_impact>Prevents customer churn from repeated issues</revenue_impact>
+            </business_value>
+        </learning>
+    </learnings>
+    
+    <cross_cutting_themes>
+        <theme>
+            <name>SSOT Violations</name>
+            <description>All three errors stemmed from violations of Single Source of Truth principle</description>
+            <examples>
+                <example>Multiple type definitions for same interfaces</example>
+                <example>Inconsistent auth service mock vs real usage</example>
+                <example>Multiple environment detection mechanisms</example>
+            </examples>
+            <prevention>Enforce SSOT at architecture review and code review</prevention>
+        </theme>
+        
+        <theme>
+            <name>Incomplete Atomic Refactoring</name>
+            <description>Each error represents incomplete migration work violating atomic scope</description>
+            <examples>
+                <example>Type consolidation left old and new systems coexisting</example>
+                <example>Test infrastructure not updated with component changes</example>
+                <example>Environment config partially updated but not completed</example>
+            </examples>
+            <prevention>Enforce atomic refactoring - all related changes in single commit</prevention>
+        </theme>
+        
+        <theme>
+            <name>Environment Configuration Drift</name>
+            <description>Staging environment behaves differently than expected</description>
+            <examples>
+                <example>HTTPS enforcement not properly configured</example>
+                <example>Environment detection logic doesn't account for deployment</example>
+                <example>Mock vs real service configuration gaps</example>
+            </examples>
+            <prevention>Validate environment parity in CI/CD pipeline</prevention>
+        </theme>
+    </cross_cutting_themes>
+</specification>

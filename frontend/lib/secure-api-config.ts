@@ -20,9 +20,14 @@ export interface ApiConfig {
  * Detects if we're in a secure environment that requires HTTPS
  */
 const isSecureEnvironment = (): boolean => {
-  // Server-side: check environment variables
+  // Server-side: check environment variables explicitly
   if (typeof window === 'undefined') {
-    return process.env.NEXT_PUBLIC_ENVIRONMENT !== 'development';
+    const env = process.env.NEXT_PUBLIC_ENVIRONMENT;
+    return (
+      env === 'staging' ||
+      env === 'production' ||
+      process.env.NEXT_PUBLIC_FORCE_HTTPS === 'true'
+    );
   }
   
   // Client-side: check protocol and environment

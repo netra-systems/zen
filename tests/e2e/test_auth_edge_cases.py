@@ -381,7 +381,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         assert len(sync_issues) == 0, (
             f"Cross-tab authentication synchronization failed:\n" +
             '\n'.join([
-                f"  {issue['tab']}: {issue.get('issue', f\"State mismatch - expected {issue.get('expected_state')}, got {issue.get('actual_state')}\")}"
+                f"  {issue['tab']}: {issue.get('issue', 'State mismatch - expected ' + str(issue.get('expected_state')) + ', got ' + str(issue.get('actual_state')))}"
                 for issue in sync_issues
             ]) +
             f"\n\nAuth state must be synchronized across all browser tabs."

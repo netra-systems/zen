@@ -47,7 +47,7 @@ class TestWebSocketMetricsRegression:
         mock_orchestrator.get_connection_stats.return_value = mock_result
         mock_manager.orchestrator = mock_orchestrator
         
-        with patch('app.monitoring.metrics_collector.get_connection_manager', 
+        with patch('app.monitoring.metrics_collector.get_connection_monitor', 
                   return_value=mock_manager):
             metrics = await collector._gather_websocket_metrics()
             
@@ -77,7 +77,7 @@ class TestWebSocketMetricsRegression:
         mock_orchestrator.get_connection_stats.return_value = mock_result
         mock_manager.orchestrator = mock_orchestrator
         
-        with patch('app.monitoring.metrics_collector.get_connection_manager',
+        with patch('app.monitoring.metrics_collector.get_connection_monitor',
                   return_value=mock_manager):
             metrics = await collector._gather_websocket_metrics()
             
@@ -107,7 +107,7 @@ class TestWebSocketMetricsRegression:
         mock_orchestrator.get_connection_stats.return_value = mock_result
         mock_manager.orchestrator = mock_orchestrator
         
-        with patch('app.monitoring.metrics_collector.get_connection_manager',
+        with patch('app.monitoring.metrics_collector.get_connection_monitor',
                   return_value=mock_manager):
             metrics = await collector._gather_websocket_metrics()
             
@@ -148,7 +148,7 @@ class TestWebSocketMetricsRegression:
         }
         mock_manager._get_user_connection_stats.return_value = {}
         
-        with patch('app.monitoring.metrics_collector.get_connection_manager',
+        with patch('app.monitoring.metrics_collector.get_connection_monitor',
                   return_value=mock_manager):
             metrics = await collector._gather_websocket_metrics()
             

@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.manager import WebSocketManager, manager
+from netra_backend.app.websocket_core.manager import WebSocketManager, get_websocket_manager
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.db.models_postgres import Message, Thread

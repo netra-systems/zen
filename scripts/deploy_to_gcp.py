@@ -88,7 +88,7 @@ class GCPDeployer:
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                     "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
-                    "FRONTEND_URL": "https://frontend.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://app.staging.netrasystems.ai",
                 }
             ),
             ServiceConfig(
@@ -104,7 +104,7 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "FRONTEND_URL": "https://frontend.staging.netrasystems.ai",
+                    "FRONTEND_URL": "https://app.staging.netrasystems.ai",
                 }
             ),
             ServiceConfig(

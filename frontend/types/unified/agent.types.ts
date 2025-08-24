@@ -3,7 +3,7 @@
  * 
  * Consolidates ALL agent-related types from:
  * - types/agent-types.ts
- * - types/backend_schema_auto_generated.ts (AgentStatus)
+ * - types/shared/enums.ts (AgentStatus)
  * - components/chat/AgentStatusIndicator.tsx
  * - components/chat/agent-status/types.ts
  * - store/chatStore.ts

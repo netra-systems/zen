@@ -437,3 +437,31 @@ async def websocket_context():
     finally:
         # Perform any necessary cleanup
         await manager.cleanup_stale_connections()
+
+
+async def broadcast_message(message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 
+                          user_id: Optional[str] = None, 
+                          room_id: Optional[str] = None) -> BroadcastResult:
+    """
+    Broadcast message - backward compatibility function.
+    
+    Args:
+        message: Message to broadcast
+        user_id: If provided, send to specific user
+        room_id: If provided, send to specific room
+    
+    Returns:
+        BroadcastResult with success status and counts
+    """
+    manager = get_websocket_manager()
+    
+    if user_id:
+        # Send to specific user
+        success = await manager.send_to_user(user_id, message)
+        return BroadcastResult(success=success, delivered_count=1 if success else 0, failed_count=0 if success else 1)
+    elif room_id:
+        # Broadcast to room
+        return await manager.broadcast_to_room(room_id, message)
+    else:
+        # Broadcast to all
+        return await manager.broadcast_to_all(message)

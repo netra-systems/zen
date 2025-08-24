@@ -41,7 +41,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import redis.asyncio as aioredis
 import websockets
-from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager as get_manager
+from netra_backend.app.websocket_core.manager import get_websocket_manager
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 

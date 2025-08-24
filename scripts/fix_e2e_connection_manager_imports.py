@@ -60,7 +60,7 @@ def fix_connection_manager_imports(file_path: Path) -> Tuple[bool, List[str]]:
         
         # Pattern 1: Direct import replacement
         pattern1 = r'from app\.websocket\.connection_manager import ConnectionManager'
-        replacement1 = 'from netra_backend.app.websocket.connection_manager import get_connection_manager, ConnectionManager'
+        replacement1 = 'from netra_backend.app.websocket.connection_manager import get_connection_monitor, ConnectionManager'
         if re.search(pattern1, content):
             content = re.sub(pattern1, replacement1, content)
             changes.append("Updated import statement to use ConnectionManager")
@@ -69,8 +69,8 @@ def fix_connection_manager_imports(file_path: Path) -> Tuple[bool, List[str]]:
         pattern2 = r'from app\.websocket\.connection_manager import ([^,]*,\s*)*ConnectionManager([^,\n]*)'
         def replace_mixed_import(match):
             full_match = match.group(0)
-            if 'get_connection_manager' not in full_match and 'ConnectionManager' not in full_match:
-                return full_match.replace('ConnectionManager', 'get_connection_manager, ConnectionManager')
+            if 'get_connection_monitor' not in full_match and 'ConnectionManager' not in full_match:
+                return full_match.replace('ConnectionManager', 'get_connection_monitor, ConnectionManager')
             elif 'ConnectionManager' in full_match and 'ConnectionManager' not in full_match:
                 return full_match.replace('ConnectionManager', 'ConnectionManager')
             return full_match
@@ -82,14 +82,14 @@ def fix_connection_manager_imports(file_path: Path) -> Tuple[bool, List[str]]:
         content = re.sub(r':\s*ConnectionManager\b', ': ConnectionManager', content)
         content = re.sub(r'spec=ConnectionManager\b', 'spec=ConnectionManager', content)
         
-        # Instantiation fixes - replace ConnectionManager() with get_connection_manager()
+        # Instantiation fixes - replace ConnectionManager() with get_connection_monitor()
         pattern3 = r'\bConnectionManager\(\)'
         if re.search(pattern3, content):
-            content = re.sub(pattern3, 'get_connection_manager()', content)
-            changes.append("Updated instantiation to use get_connection_manager()")
+            content = re.sub(pattern3, 'get_connection_monitor()', content)
+            changes.append("Updated instantiation to use get_connection_monitor()")
         
         # Pattern 4: Variable assignments
-        content = re.sub(r'=\s*ConnectionManager\b', '= get_connection_manager', content)
+        content = re.sub(r'=\s*ConnectionManager\b', '= get_connection_monitor', content)
         
         if content != original_content:
             with open(file_path, 'w', encoding='utf-8') as f:

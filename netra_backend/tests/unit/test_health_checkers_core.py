@@ -171,7 +171,7 @@ class TestHealthCheckersCore:
         assert result.details["success"] is False
         assert "Redis client not available" in result.details["error_message"]
     
-    @patch('app.core.health_checkers.get_connection_manager')
+    @patch('app.core.health_checkers.get_connection_monitor')
     async def test_check_websocket_health_success(self, mock_get_manager):
         """Test successful WebSocket health check."""
         mock_manager = self._create_mock_websocket_manager()
@@ -184,7 +184,7 @@ class TestHealthCheckersCore:
         assert result.details["success"] is True
         assert "metadata" in result.details
     
-    @patch('app.core.health_checkers.get_connection_manager')
+    @patch('app.core.health_checkers.get_connection_monitor')
     async def test_check_websocket_health_manager_error(self, mock_get_manager):
         """Test WebSocket health check with manager error."""
         mock_get_manager.side_effect = Exception("WebSocket manager error")

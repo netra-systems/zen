@@ -44,7 +44,7 @@ Thread = Mock
 from unittest.mock import Mock
 Message = Mock
 from netra_backend.app.services.user_service import UserService as UsageService
-from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager as IWebSocketService
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 
 # UserFlowTestBase - using unittest.TestCase

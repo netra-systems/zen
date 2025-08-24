@@ -216,8 +216,8 @@ class TransactionCoordinator:
         
         try:
             # Get connection manager
-            from netra_backend.app.services.database.connection_manager import get_connection_manager
-            connection_manager = get_connection_manager()
+            from netra_backend.app.services.database.connection_manager import get_connection_monitor
+            connection_manager = get_connection_monitor()
             
             async with connection_manager.get_session() as session:
                 # For PostgreSQL, we can use SAVEPOINT for preparation
@@ -261,8 +261,8 @@ class TransactionCoordinator:
             return True
         
         try:
-            from netra_backend.app.services.database.connection_manager import get_connection_manager
-            connection_manager = get_connection_manager()
+            from netra_backend.app.services.database.connection_manager import get_connection_monitor
+            connection_manager = get_connection_monitor()
             
             async with connection_manager.get_session() as session:
                 # Release the savepoint - operations are already executed
@@ -383,8 +383,8 @@ class TransactionCoordinator:
     
     async def _execute_postgres_compensation(self, action: CompensationAction) -> None:
         """Execute PostgreSQL compensation action."""
-        from netra_backend.app.services.database.connection_manager import get_connection_manager
-        connection_manager = get_connection_manager()
+        from netra_backend.app.services.database.connection_manager import get_connection_monitor
+        connection_manager = get_connection_monitor()
         
         async with connection_manager.get_session() as session:
             if action.action_type == "delete":

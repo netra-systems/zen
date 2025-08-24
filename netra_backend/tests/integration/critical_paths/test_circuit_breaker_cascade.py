@@ -38,7 +38,7 @@ from netra_backend.app.core.health_checkers import (
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.websocket_core import (
     WebSocketManager as ConnectionManager,
-    get_connection_manager,
+    get_connection_monitor,
 )
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ class CircuitBreakerCascadeManager:
         await self.db_manager.initialize()
         
         # Real WebSocket manager
-        self.websocket_manager = get_connection_manager()
+        self.websocket_manager = get_connection_monitor()
         # Note: ConnectionManager doesn't have initialize() method
         
         # Create real circuit breakers for each service

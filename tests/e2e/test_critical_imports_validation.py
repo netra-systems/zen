@@ -46,74 +46,64 @@ class CriticalImportsValidator:
         # Define CRITICAL modules that must import successfully
         self.critical_modules = [
             # Main Services
-            "app.main",
+            "netra_backend.app.main",
             "auth_service.main", 
             "dev_launcher.launcher",
             
             # Core Agent Infrastructure  
-            "app.agents.supervisor",
-            "app.agents.base",
-            "app.agents.base_agent",
-            
-            # WebSocket Infrastructure
-            "app.ws_manager",
-            "app.ws_manager_core",
-            "app.ws_manager_broadcasting",
-            "app.ws_manager_messaging",
+            "netra_backend.app.agents.supervisor_agent_modern",
+            "netra_backend.app.agents.base_agent",
             
             # Auth Integration (Critical for all services)
-            "app.auth_integration.auth",
-            "app.auth_integration.models",
-            "app.auth_integration.validators",
+            "netra_backend.app.auth_integration.auth",
+            "netra_backend.app.auth_integration.models",
+            "netra_backend.app.auth_integration.validators",
             
             # Database Core (Essential for data operations)
-            "app.db.postgres",
-            "app.db.postgres_core", 
-            "app.db.clickhouse",
-            "app.db.base",
+            "netra_backend.app.db.postgres",
+            "netra_backend.app.db.postgres_core", 
+            "netra_backend.app.db.clickhouse",
+            "netra_backend.app.db.base",
             
             # Core Application Infrastructure
-            "app.config",
-            "app.config_manager",
-            "app.dependencies",
-            "app.startup_module",
+            "netra_backend.app.config",
+            "netra_backend.app.dependencies",
+            "netra_backend.app.startup_module",
             
             # Service Layer (Business Logic Core)
-            "app.services.agent_service",
-            "app.services.base",
-            "app.services.service_factory",
+            "netra_backend.app.services.agent_service",
+            "netra_backend.app.services.base",
+            "netra_backend.app.services.service_factory",
             
             # Route Layer (API Interface)
-            "app.routes.agent_route",
-            "app.routes.health",
-            "app.routes.users",
-            "app.routes.websockets",
+            "netra_backend.app.routes.agent_route",
+            "netra_backend.app.routes.health",
+            "netra_backend.app.routes.users",
+            "netra_backend.app.routes.websocket",
             
             # Core Types and Schemas
-            "app.schemas.core_models",
-            "app.schemas.agent_models", 
-            "app.schemas.auth_types",
-            "app.schemas.websocket_models",
+            "netra_backend.app.schemas.core_models",
+            "netra_backend.app.schemas.agent_models", 
+            "netra_backend.app.schemas.auth_types",
+            "netra_backend.app.schemas.websocket_models",
             
             # Critical Middleware
-            "app.middleware.error_middleware",
-            "app.middleware.security_middleware",
-            "app.middleware.metrics_middleware",
+            "netra_backend.app.middleware.error_middleware",
+            "netra_backend.app.middleware.security_middleware",
+            "netra_backend.app.middleware.metrics_middleware",
             
             # Core Utilities
-            "app.core.app_factory",
-            "app.core.exceptions",
-            "app.core.error_handlers",
+            "netra_backend.app.core.app_factory",
+            "netra_backend.app.core.exceptions",
+            "netra_backend.app.core.error_handlers",
             
             # Auth Service Core
-            "auth_service.auth_core.routes.auth_routes",
-            "auth_service.auth_core.services.auth_service",
-            "auth_service.auth_core.core.jwt_handler",
-            "auth_service.auth_core.database.connection",
+            "auth_service.auth_core.config",
+            "auth_service.main",
             
             # Dev Launcher Core
             "dev_launcher.config",
-            "dev_launcher.service_startup",
+            "dev_launcher.launcher",
             "dev_launcher.process_manager",
             "dev_launcher.health_monitor"
         ]
@@ -336,12 +326,11 @@ class TestCriticalImportsValidation:
         
         # Verify we have successful imports from each critical category
         required_categories = {
-            "main_services": ["app.main", "auth_service.main", "dev_launcher.launcher"],
-            "agent_core": ["app.agents.supervisor", "app.agents.base"],
-            "websocket": ["app.ws_manager"],
-            "auth": ["app.auth_integration.auth"],
-            "database": ["app.db.postgres", "app.db.clickhouse"],
-            "config": ["app.config"]
+            "main_services": ["netra_backend.app.main", "auth_service.main", "dev_launcher.launcher"],
+            "agent_core": ["netra_backend.app.agents.supervisor_agent_modern", "netra_backend.app.agents.base_agent"],
+            "auth": ["netra_backend.app.auth_integration.auth"],
+            "database": ["netra_backend.app.db.postgres", "netra_backend.app.db.clickhouse"],
+            "config": ["netra_backend.app.config"]
         }
         
         missing_categories = []

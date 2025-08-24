@@ -34,7 +34,7 @@ from netra_backend.app.websocket_core.connection_info import ConnectionInfo, Con
 
 from netra_backend.app.websocket_core import (
     WebSocketManager as ConnectionManager,
-    get_connection_manager,
+    get_connection_monitor,
 )
 from netra_backend.app.websocket_core.reconnection_handler import (
     ReconnectionContext,
@@ -88,7 +88,7 @@ class TestWebSocketStateManagement:
     @pytest.fixture
     async def connection_manager(self):
         """Get connection manager instance."""
-        manager = get_connection_manager()
+        manager = get_connection_monitor()
         # Clear any existing connections without using the problematic cleanup method
         if hasattr(manager, 'registry') and hasattr(manager.registry, 'active_connections'):
             manager.registry.active_connections.clear()

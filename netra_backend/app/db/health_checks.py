@@ -220,18 +220,34 @@ class DatabaseHealthChecker:
             
             # Mock slow query data from session if available
             if hasattr(self.session, 'execute') and hasattr(self.session.execute, 'return_value'):
-                slow_queries_data = getattr(self.session.execute.return_value, 'all', lambda: [])()
+                # Check if we have the mock data structure
+                if hasattr(self.session.execute.return_value, 'all'):
+                    # Get the mock data
+                    all_func = self.session.execute.return_value.all
+                    if hasattr(all_func, 'return_value'):
+                        slow_queries_data = all_func.return_value
+                    else:
+                        # Handle case where all is a function/coroutine
+                        slow_queries_result = all_func()
+                        if hasattr(slow_queries_result, '__await__'):
+                            slow_queries_data = await slow_queries_result
+                        else:
+                            slow_queries_data = slow_queries_result
+                else:
+                    slow_queries_data = []
                 
-                for query_data in slow_queries_data:
-                    if isinstance(query_data, tuple) and len(query_data) >= 2:
-                        query, query_time = query_data
-                        if query_time > threshold_ms:
-                            alerts.append({
-                                "query": query,
-                                "query_time": query_time,
-                                "threshold": threshold_ms,
-                                "alert_type": "slow_query"
-                            })
+                # Ensure we have iterable data
+                if hasattr(slow_queries_data, '__iter__'):
+                    for query_data in slow_queries_data:
+                        if isinstance(query_data, tuple) and len(query_data) >= 2:
+                            query, query_time = query_data
+                            if query_time > threshold_ms:
+                                alerts.append({
+                                    "query": query,
+                                    "query_time": query_time,
+                                    "threshold": threshold_ms,
+                                    "alert_type": "slow_query"
+                                })
             
             return alerts
         except Exception as e:
@@ -243,8 +259,13 @@ class DatabaseHealthChecker:
         try:
             # Mock implementation - in real system would check actual pool stats
             if hasattr(self.session, 'execute') and hasattr(self.session.execute, 'return_value'):
-                scalar_value = getattr(self.session.execute.return_value, 'scalar', lambda: 95)()
-                current_usage = scalar_value
+                scalar_func = getattr(self.session.execute.return_value, 'scalar', lambda: 95)
+                scalar_value = scalar_func()
+                # Handle potential coroutine
+                if hasattr(scalar_value, '__await__'):
+                    current_usage = await scalar_value
+                else:
+                    current_usage = scalar_value
             else:
                 current_usage = 95  # Default mock value
             

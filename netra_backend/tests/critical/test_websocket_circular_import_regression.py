@@ -13,7 +13,7 @@ REGRESSION HISTORY:
 - Date: 2025-08-18
 - Issue: Circular import between connection.py, connection_executor.py, and connection_manager.py
 - Impact: Module-level initialization of connection_manager caused import loops
-- Fix: Made connection_manager lazy-loaded with get_connection_manager_instance()
+- Fix: Made connection_manager lazy-loaded with get_connection_monitor_instance()
 """
 
 import sys

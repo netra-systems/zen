@@ -19,11 +19,17 @@ const HomePage: NextPage = () => {
     }
   }, [loading, user, router]);
 
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <p>Loading...</p>
-    </div>
-  );
+  // Only show loading when actually loading
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Return null when not loading (redirect will happen via useEffect)
+  return null;
 };
 
 export default HomePage;

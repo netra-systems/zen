@@ -58,9 +58,12 @@ class TestDatabaseManagerURLConversion:
         with patch.dict(os.environ, {}, clear=True):
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "development"
-                result = DatabaseManager.get_base_database_url()
-                # In test environment, we expect the test database URL
-                assert result == "postgresql://test:test@localhost:5432/netra_test"
+                # Mock unified config to return config without database_url
+                with patch("netra_backend.app.db.database_manager.get_unified_config") as mock_config:
+                    mock_config.return_value.database_url = None
+                    result = DatabaseManager.get_base_database_url()
+                    # In test environment, we expect the test database URL
+                    assert result == "postgresql://test:test@localhost:5432/netra_test"
     
     @pytest.mark.parametrize("base_url,expected_migration_url", [
         # Standard sync URL conversion
@@ -347,18 +350,24 @@ class TestDatabaseManagerErrorHandling:
         with patch.dict(os.environ, {"DATABASE_URL": ""}):
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "development"
-                result = DatabaseManager.get_base_database_url()
-                # In test environment, we expect the test database URL
-                assert result == "postgresql://test:test@localhost:5432/netra_test"
+                # Mock unified config to return config without database_url
+                with patch("netra_backend.app.db.database_manager.get_unified_config") as mock_config:
+                    mock_config.return_value.database_url = None
+                    result = DatabaseManager.get_base_database_url()
+                    # In test environment, we expect the test database URL
+                    assert result == "postgresql://test:test@localhost:5432/netra_test"
     
     def test_missing_database_url_handling(self):
         """Test handling when DATABASE_URL is not set."""
         with patch.dict(os.environ, {}, clear=True):
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "testing"
-                result = DatabaseManager.get_base_database_url()
-                # In test environment, we expect the test database URL
-                assert result == "postgresql://test:test@localhost:5432/netra_test"
+                # Mock unified config to return config without database_url
+                with patch("netra_backend.app.db.database_manager.get_unified_config") as mock_config:
+                    mock_config.return_value.database_url = None
+                    result = DatabaseManager.get_base_database_url()
+                    # In test environment, we expect the test database URL
+                    assert result == "postgresql://test:test@localhost:5432/netra_test"
     
     def test_driver_mismatch_validation(self):
         """Test validation catches driver mismatches."""
@@ -385,9 +394,12 @@ class TestDatabaseManagerErrorHandling:
         with patch.dict(os.environ, {}, clear=True):
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "unknown_environment"
-                result = DatabaseManager._get_default_database_url()
-                # Should default to development settings
-                assert result == "postgresql://postgres:password@localhost:5432/netra"
+                # Mock sys.modules to not contain pytest so we don't get test URL
+                with patch("sys.modules", {}):
+                    with patch("sys.argv", ["python"]):
+                        result = DatabaseManager._get_default_database_url()
+                        # Should default to development settings
+                        assert result == "postgresql://postgres:password@localhost:5432/netra"
 
 
 class TestDatabaseManagerIntegration:

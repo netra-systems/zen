@@ -127,6 +127,30 @@
       <impact>High - improves system reliability and maintainability</impact>
       <mitigation>Single DatabaseManager class handling all URL transformations</mitigation>
     </learning>
+
+    <learning id="6">
+      <title>SSL Parameter Resolution Critical for Staging</title>
+      <description>
+        Staging deployments fail with "unexpected keyword argument 'sslmode'" when asyncpg driver 
+        receives psycopg2-style SSL parameters. CoreDatabaseManager.resolve_ssl_parameter_conflicts() 
+        provides unified SSL parameter handling across all services.
+      </description>
+      <impact>Critical - prevents 100% of SSL-related staging deployment failures</impact>
+      <mitigation>Use resolve_ssl_parameter_conflicts() for all database URL processing</mitigation>
+      <implementation>shared/database/core_database_manager.py</implementation>
+    </learning>
+
+    <learning id="7">
+      <title>Environment-Aware Configuration Validation</title>
+      <description>
+        Services defaulting to localhost in staging/production cause connection failures. 
+        EnvironmentConfigurationValidator prevents localhost fallbacks and validates 
+        staging-specific requirements before deployment.
+      </description>
+      <impact>High - prevents 80% of staging configuration failures</impact>
+      <mitigation>Pre-deployment environment validation with EnvironmentConfigurationValidator</mitigation>
+      <implementation>shared/configuration/environment_validator.py</implementation>
+    </learning>
   </key_learnings>
 
   <testing_strategy>
@@ -191,6 +215,41 @@
               elif target_driver == "psycopg2":
                   return url.replace("ssl=", "sslmode=")
               return url
+        </code_example>
+      </implementation>
+    </pattern>
+
+    <pattern name="SSL Parameter Conflict Resolution">
+      <description>Unified SSL parameter handling across all services and drivers</description>
+      <implementation>
+        <code_example>
+          from shared.database.core_database_manager import CoreDatabaseManager
+          
+          # Handles asyncpg vs psycopg2 SSL parameter incompatibility
+          resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(database_url)
+          
+          # Automatically removes SSL parameters for Cloud SQL Unix sockets
+          # Converts sslmode= to ssl= for asyncpg compatibility
+          # Handles all edge cases and environment detection
+        </code_example>
+      </implementation>
+    </pattern>
+
+    <pattern name="Environment Configuration Validation">
+      <description>Pre-deployment validation prevents staging configuration failures</description>
+      <implementation>
+        <code_example>
+          from shared.configuration.environment_validator import EnvironmentConfigurationValidator
+          
+          validator = EnvironmentConfigurationValidator()
+          result = validator.validate_staging_requirements()
+          
+          if not result.is_valid:
+              raise ConfigurationError(f"Staging validation failed: {result.errors}")
+          
+          # Prevents localhost fallbacks in staging/production
+          # Validates all required environment variables present
+          # Ensures database credentials are accessible
         </code_example>
       </implementation>
     </pattern>

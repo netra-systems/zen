@@ -30,7 +30,7 @@ class TestWebSocketConnectionLifecycle:
     def manager(self):
         """Create connection manager with mocked dependencies."""
         with patch('netra_backend.app.websocket.connection_manager.ConnectionExecutionOrchestrator'):
-            manager = Modernget_connection_manager()
+            manager = Modernget_connection_monitor()
             manager.orchestrator = Mock()
             return manager
     

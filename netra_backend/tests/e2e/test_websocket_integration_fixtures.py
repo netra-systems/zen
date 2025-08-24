@@ -1,6 +1,6 @@
 """WebSocket Integration Fixtures and Tests"""
 
-from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -22,14 +22,13 @@ from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 
 from netra_backend.app.websocket_core import (
     WebSocketManager as ConnectionManager,
-
-    get_connection_manager,
-
+    get_connection_monitor,
+    get_websocket_manager
 )
-from netra_backend.app.websocket_core.message_handler_core import (
-
-    ModernReliableMessageHandler,
-
+from netra_backend.app.websocket_core.handlers import (
+    BaseMessageHandler,
+    UserMessageHandler,
+    HeartbeatHandler
 )
 
 class MockWebSocket:
@@ -94,7 +93,7 @@ def connection_manager() -> ConnectionManager:
 
     """Create connection manager for testing."""
 
-    return get_connection_manager()
+    return get_websocket_manager()
 
 @pytest.fixture
 

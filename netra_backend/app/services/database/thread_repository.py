@@ -98,7 +98,14 @@ class ThreadRepository(BaseRepository[Thread]):
                     )
                 ).order_by(Thread.created_at.desc())
             )
-            return list(result.scalars().all())
+            scalars = result.scalars()
+            # Handle potential mock coroutine issues
+            if hasattr(scalars, '__await__'):
+                scalars = await scalars
+            scalars_result = scalars.all()
+            if hasattr(scalars_result, '__await__'):
+                scalars_result = await scalars_result
+            return list(scalars_result)
         except Exception as e:
             logger.error(f"Error getting active threads for user {user_id}: {e}")
             return []

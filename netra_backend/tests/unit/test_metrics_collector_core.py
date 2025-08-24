@@ -187,7 +187,7 @@ class TestMetricsCollectorCore:
 
         assert collector._metrics_buffer["database.cache_hit_ratio"][0].value == 0.92
     
-    @patch('app.monitoring.metrics_collector.get_connection_manager')
+    @patch('app.monitoring.metrics_collector.get_connection_monitor')
 
     async def test_gather_websocket_metrics_success(self, mock_get_manager, collector):
 

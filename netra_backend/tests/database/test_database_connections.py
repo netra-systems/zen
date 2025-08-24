@@ -86,7 +86,7 @@ class TestMigrationRunnerSafety:
     async def test_migration_rollback(self):
         """Test migration rollback on failure"""
         mock_session = AsyncMock(spec=AsyncSession)
-        runner = MigrationRunner()
+        runner = MigrationRunner(mock_session)
         
         # Mock the runner to raise an exception for testing
         with patch.object(runner, 'run_migrations', side_effect=Exception("Migration failed")):
@@ -98,7 +98,7 @@ class TestMigrationRunnerSafety:
     async def test_migration_transaction_safety(self):
         """Test migration transaction safety"""
         mock_session = AsyncMock(spec=AsyncSession)
-        runner = MigrationRunner()
+        runner = MigrationRunner(mock_session)
         
         # Test transaction boundaries
         migration = _create_test_migration()
