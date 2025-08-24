@@ -167,16 +167,13 @@ class TestAgentReliabilityIntegration:
         """Test agent reliability integration with fallback coordinator."""
         # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
             coordinator, mock_health_instance = self._setup_fallback_coordinator_mocks(mock_health_monitor, mock_emergency_manager)
             
             # Mock: Component isolation for testing without external dependencies
             with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
-                 # Mock: Component isolation for testing without external dependencies
                  patch('app.core.fallback_coordinator.CircuitBreaker'), \
-                 # Mock: Component isolation for testing without external dependencies
                  patch('app.core.fallback_coordinator.AgentFallbackStatus'):
                 
                 mock_handler = self._setup_coordination_handler_mocks(mock_handler_class)
@@ -189,7 +186,6 @@ class TestAgentReliabilityIntegration:
         """Test how agent failures propagate through the integrated system."""
         # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
             # Setup mocks for emergency scenario
@@ -222,9 +218,7 @@ class TestAgentReliabilityIntegration:
             
             # Mock: Component isolation for testing without external dependencies
             with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
-                 # Mock: Component isolation for testing without external dependencies
                  patch('app.core.fallback_coordinator.CircuitBreaker'), \
-                 # Mock: Component isolation for testing without external dependencies
                  patch('app.core.fallback_coordinator.AgentFallbackStatus'):
                 
                 # Mock: Generic component isolation for controlled unit testing

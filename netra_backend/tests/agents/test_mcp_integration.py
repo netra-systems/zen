@@ -84,7 +84,6 @@ class TestMCPContextManager:
         assert context.thread_id == "thread123"
     
     @pytest.mark.asyncio
-    
     async def test_get_available_tools(self, mcp_context_manager, sample_agent_context):
         """Test tool discovery with permissions."""
         tools = await mcp_context_manager.get_available_tools(
@@ -95,7 +94,6 @@ class TestMCPContextManager:
         assert all(isinstance(tool, MCPTool) for tool in tools)
     
     @pytest.mark.asyncio
-    
     async def test_execute_tool_with_context_success(self, mcp_context_manager, sample_agent_context):
         """Test successful tool execution."""
         # Mock permission checker to allow execution

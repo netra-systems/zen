@@ -177,7 +177,6 @@ class TestHealthCheckersL3Integration:
         # Mock managers to use real services
         # Mock: Component isolation for testing without external dependencies
         with pytest.mock.patch('netra_backend.app.core.unified.db_connection_manager.db_manager') as mock_db_manager, \
-             # Mock: Redis external service isolation for fast, reliable tests without network dependency
              pytest.mock.patch('netra_backend.app.redis_manager.redis_manager') as mock_redis_manager:
             
             # Setup real database session mock
@@ -233,7 +232,6 @@ class TestHealthCheckersL3Integration:
         
         # Mock: Component isolation for testing without external dependencies
         with pytest.mock.patch('netra_backend.app.core.unified.db_connection_manager.db_manager') as mock_db_manager, \
-             # Mock: Redis external service isolation for fast, reliable tests without network dependency
              pytest.mock.patch('netra_backend.app.redis_manager.redis_manager') as mock_redis_manager:
             
             # Mock: Database session isolation for transaction testing without real database dependency
