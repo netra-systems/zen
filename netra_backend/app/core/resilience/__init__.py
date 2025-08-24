@@ -82,6 +82,14 @@ from netra_backend.app.core.resilience.retry_manager import (
     RetryPresets,
     UnifiedRetryManager,
 )
+from netra_backend.app.core.resilience.unified_retry_handler import (
+    UnifiedRetryHandler,
+    RetryResult,
+    RetryStrategy,
+    exponential_backoff,
+    linear_backoff,
+    default_retry_handler,
+)
 
 # Export all public interfaces
 __all__ = [
@@ -144,5 +152,13 @@ __all__ = [
     "register_llm_service",
     "create_api_service_policy",
     "create_database_service_policy", 
-    "create_llm_service_policy"
+    "create_llm_service_policy",
+    
+    # Unified Retry Handler
+    "UnifiedRetryHandler",
+    "RetryResult",
+    "RetryStrategy",
+    "exponential_backoff",
+    "linear_backoff",
+    "default_retry_handler",
 ]

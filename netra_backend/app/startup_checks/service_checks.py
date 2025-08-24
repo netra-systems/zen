@@ -83,7 +83,7 @@ class ServiceChecker:
     
     async def _check_clickhouse_tables(self) -> List[str]:
         """Check ClickHouse tables"""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             client.ping()

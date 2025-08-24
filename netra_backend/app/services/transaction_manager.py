@@ -13,8 +13,7 @@ from enum import Enum
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Set
 
 from netra_backend.app.core.error_recovery import OperationType
-from netra_backend.app.db.clickhouse import get_clickhouse_client
-from netra_backend.app.db.postgres import get_postgres_session
+from netra_backend.app.database import get_clickhouse_client, get_postgres_db
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

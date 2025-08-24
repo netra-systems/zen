@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """PostgreSQL core connection and engine setup module.
 
 Handles database engine creation, connection management, and initialization.
@@ -507,7 +508,7 @@ def initialize_postgres():
     global async_engine, async_session_factory
     
     # Skip initialization during test collection to prevent hanging
-    if os.environ.get('TEST_COLLECTION_MODE') == '1':
+    if get_env().get('TEST_COLLECTION_MODE') == '1':
         logger.debug("Skipping PostgreSQL initialization during test collection")
         return None
         

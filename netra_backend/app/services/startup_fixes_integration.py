@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Integration module for startup fixes
 
 This module provides integration points for all the critical startup fixes
@@ -42,8 +43,8 @@ class StartupFixesIntegration:
         fixes = {}
         
         # FIX 1: ClickHouse password environment variable mapping
-        clickhouse_password = os.environ.get("CLICKHOUSE_PASSWORD")
-        clickhouse_default_password = os.environ.get("CLICKHOUSE_DEFAULT_PASSWORD")
+        clickhouse_password = get_env().get("CLICKHOUSE_PASSWORD")
+        clickhouse_default_password = get_env().get("CLICKHOUSE_DEFAULT_PASSWORD")
         
         if clickhouse_default_password and not clickhouse_password:
             os.environ["CLICKHOUSE_PASSWORD"] = clickhouse_default_password
@@ -55,7 +56,7 @@ class StartupFixesIntegration:
             logger.info("Applied reverse ClickHouse password environment variable mapping fix")
         
         # FIX 5: Redis mode local fallback
-        redis_mode = os.environ.get("REDIS_MODE")
+        redis_mode = get_env().get("REDIS_MODE")
         if not redis_mode:
             # Set default Redis mode that supports fallback
             os.environ["REDIS_MODE"] = "shared"  # Will fallback to local if remote fails
@@ -149,7 +150,7 @@ class StartupFixesIntegration:
         status = {
             "redis_manager_available": False,
             "fallback_configured": False,
-            "redis_mode": os.environ.get("REDIS_MODE")
+            "redis_mode": get_env().get("REDIS_MODE")
         }
         
         try:

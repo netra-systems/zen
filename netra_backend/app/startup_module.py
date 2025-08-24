@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """
 Application startup management module.
 Handles initialization of logging, database connections, services, and health checks.
@@ -334,7 +335,7 @@ def _is_postgres_service_mock_mode() -> bool:
         return getattr(config, 'postgres_mode', '').lower() == 'mock'
     except Exception:
         # Fallback for bootstrap
-        return os.environ.get("POSTGRES_MODE", "").lower() == "mock"
+        return get_env().get("POSTGRES_MODE", "").lower() == "mock"
 
 
 def _execute_migrations(logger: logging.Logger) -> None:

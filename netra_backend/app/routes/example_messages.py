@@ -12,7 +12,7 @@ from typing import Any, Dict
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 
-from netra_backend.app.auth_dependencies import get_current_user_from_websocket
+# WebSocket authentication is handled by the WebSocket manager
 from netra_backend.app.handlers.example_message_handler import (
     get_example_message_handler,
     handle_example_message,

@@ -1,14 +1,15 @@
 """IP blocking middleware for Cloud Run."""
 import ipaddress
 import json
-import logging
 from pathlib import Path
 from typing import Set
 
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
 
-logger = logging.getLogger(__name__)
+from netra_backend.app.core.unified_logging import get_logger
+
+logger = get_logger(__name__)
 
 def load_blocked_ips() -> tuple[Set[str], Set[ipaddress.IPv4Network]]:
     """Load blocked IPs from config file."""

@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """
 Unified health check service managing all health checks.
 """
@@ -327,4 +328,4 @@ class UnifiedHealthService:
     
     def _get_environment(self) -> str:
         """Get current environment."""
-        return os.getenv('ENVIRONMENT', 'development')
+        return get_env().get('ENVIRONMENT', 'development')

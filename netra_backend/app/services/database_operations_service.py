@@ -8,7 +8,7 @@ from sqlalchemy import func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select as future_select
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.models_content import Reference
 from netra_backend.app.logging_config import central_logger
 

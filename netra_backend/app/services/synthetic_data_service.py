@@ -5,7 +5,7 @@ Provides comprehensive synthetic data generation with modular architecture
 
 # Import the new modular service implementation
 # Import get_clickhouse_client for test patching compatibility
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.services.synthetic_data.core_service import (
     SyntheticDataService,
     synthetic_data_service,

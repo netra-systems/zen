@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Input filtering and validation for NACIS security.
 
 Date Created: 2025-01-22
@@ -20,7 +21,7 @@ class InputFilters:
     """Filters and validates input for security (<300 lines)."""
     
     def __init__(self):
-        self.enabled = os.getenv("GUARDRAILS_ENABLED", "true").lower() == "true"
+        self.enabled = get_env().get("GUARDRAILS_ENABLED", "true").lower() == "true"
         self._init_pii_patterns()
         self._init_jailbreak_patterns()
         self._init_spam_indicators()

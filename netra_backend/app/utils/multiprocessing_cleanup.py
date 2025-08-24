@@ -4,7 +4,6 @@ Handles proper cleanup of multiprocessing resources to prevent semaphore leaks.
 """
 
 import atexit
-import logging
 import multiprocessing
 import multiprocessing.synchronize
 import signal
@@ -12,7 +11,9 @@ import sys
 from types import FrameType
 from typing import List, Optional, Union
 
-logger = logging.getLogger(__name__)
+from netra_backend.app.core.unified_logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class MultiprocessingResourceManager:

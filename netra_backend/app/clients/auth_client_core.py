@@ -445,32 +445,10 @@ class AuthServiceClient:
     async def login(self, request) -> Optional[Dict]:
         """User login through auth service with LoginRequest object."""
         if not self.settings.enabled:
-            # Provide fallback mock implementation for testing
-            logger.info("Auth service disabled - using mock implementation")
-            
-            # Handle both dict and LoginRequest object
-            if hasattr(request, 'email'):
-                email = request.email
-                password = request.password or ""
-            else:
-                email = request.get('email')
-                password = request.get('password', '')
-                
-            # Extract role from email for testing (e.g., super_admin@test.com -> super_admin)
-            role = email.split('@')[0] if '@' in email else 'guest'
-            user_id = f"user_{role}"
-            
-            # Create mock token
-            access_token = self._create_mock_token(role, email, user_id)
-            
-            return type('LoginResponse', (), {
-                'access_token': access_token,
-                'refresh_token': f"refresh_{user_id}",
-                'role': role,
-                'user_id': user_id,
-                'token_type': 'Bearer',
-                'expires_in': 3600
-            })()
+            # Auth service is disabled - this should only occur in testing environments
+            # Return proper error instead of mock authentication
+            logger.error("Auth service is disabled - authentication unavailable")
+            return None
             
         # Handle both dict and LoginRequest object
         if hasattr(request, 'email'):
@@ -541,17 +519,12 @@ class AuthServiceClient:
     async def check_authorization(self, token: str, resource: str, action: str) -> Dict:
         """Check authorization for resource and action."""
         if not self.settings.enabled:
-            # Mock implementation
-            token_data = self._decode_token(token)
-            user_permissions = token_data.get('permissions', [])
-            required_permission = self._resource_to_permission(resource, action)
-            
-            authorized = self._check_permission_match(required_permission, user_permissions)
-            
+            # Auth service is disabled - return unauthorized instead of mock authorization
+            logger.error("Auth service disabled - authorization unavailable")
             return type('AuthorizationResult', (), {
-                'authorized': authorized,
-                'reason': 'Allowed' if authorized else f'Missing permission: {required_permission}',
-                'permissions': user_permissions
+                'authorized': False,
+                'reason': 'Auth service disabled',
+                'permissions': []
             })()
         
         try:
@@ -586,14 +559,11 @@ class AuthServiceClient:
     async def check_permission(self, token: str, permission: str) -> Dict:
         """Check if token has specific permission."""
         if not self.settings.enabled:
-            # Mock implementation
-            token_data = self._decode_token(token)
-            user_permissions = token_data.get('permissions', [])
-            has_permission = self._check_permission_match(permission, user_permissions)
-            
+            # Auth service is disabled - return no permission instead of mock authorization
+            logger.error("Auth service disabled - permission checking unavailable")
             return type('PermissionResult', (), {
-                'has_permission': has_permission,
-                'reason': 'Granted' if has_permission else f'Missing permission: {permission}'
+                'has_permission': False,
+                'reason': 'Auth service disabled'
             })()
         
         try:

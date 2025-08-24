@@ -8,7 +8,7 @@ import json
 import os
 from typing import Any, Dict, List
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Generation import DataIngestionParams
 from netra_backend.app.services.generation_job_manager import (

@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Unified Database Manager - Handles Sync and Async Connections
 
 Business Value Justification (BVJ):
@@ -49,7 +50,7 @@ class DatabaseManager:
         
         if is_pytest:
             # In pytest mode, directly check environment to handle dynamic test env changes
-            raw_url = os.environ.get("DATABASE_URL", "")
+            raw_url = get_env().get("DATABASE_URL", "")
             # Skip TEST_COLLECTION_MODE check since tests need to process URLs normally during execution
         else:
             # Get from unified configuration - single source of truth for non-test environments
@@ -62,8 +63,8 @@ class DatabaseManager:
                     return "sqlite:///:memory:"
             except Exception:
                 # Fallback for bootstrap or when config not available
-                raw_url = os.environ.get("DATABASE_URL", "")
-                test_collection_mode = os.environ.get('TEST_COLLECTION_MODE')
+                raw_url = get_env().get("DATABASE_URL", "")
+                test_collection_mode = get_env().get('TEST_COLLECTION_MODE')
                 if test_collection_mode == '1' and not raw_url:
                     return "sqlite:///:memory:"
         
@@ -280,7 +281,7 @@ class DatabaseManager:
         
         if is_pytest:
             # In pytest mode, directly check environment to handle dynamic test env changes
-            database_url = os.environ.get("DATABASE_URL", "")
+            database_url = get_env().get("DATABASE_URL", "")
         else:
             # Get from unified configuration - single source of truth for non-test environments
             try:
@@ -288,7 +289,7 @@ class DatabaseManager:
                 database_url = config.database_url or ""
             except Exception:
                 # Fallback for bootstrap
-                database_url = os.environ.get("DATABASE_URL", "")
+                database_url = get_env().get("DATABASE_URL", "")
         
         return CoreDatabaseManager.is_cloud_sql_connection(database_url)
     

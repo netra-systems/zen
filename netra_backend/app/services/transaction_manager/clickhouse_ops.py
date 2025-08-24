@@ -7,7 +7,7 @@ for distributed transaction rollback.
 from datetime import datetime
 from typing import Dict, List
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Semantic cache enhancement for NACIS with vector similarity search.
 
 Date Created: 2025-01-22
@@ -27,7 +28,7 @@ class SemanticCache(LLMCacheManager):
     
     def __init__(self, embedding_model: Optional[Any] = None):
         super().__init__()
-        self.enabled = os.getenv("SEMANTIC_CACHE_ENABLED", "true").lower() == "true"
+        self.enabled = get_env().get("SEMANTIC_CACHE_ENABLED", "true").lower() == "true"
         self._init_semantic_components(embedding_model)
         self._init_ttl_policies()
     
@@ -42,8 +43,8 @@ class SemanticCache(LLMCacheManager):
         """Initialize dynamic TTL policies based on data volatility."""
         # Use NACIS-specific TTL env vars if available
         self.ttl_policies = {
-            "pricing": int(os.getenv("SEMANTIC_CACHE_TTL_PRICING", "3600")),
-            "benchmarking": int(os.getenv("SEMANTIC_CACHE_TTL_BENCHMARKS", "3600")),
+            "pricing": int(get_env().get("SEMANTIC_CACHE_TTL_PRICING", "3600")),
+            "benchmarking": int(get_env().get("SEMANTIC_CACHE_TTL_BENCHMARKS", "3600")),
             "tco_analysis": 86400,  # 24 hours - semi-stable
             "optimization": 86400,  # 24 hours
             "general": 604800  # 1 week - stable

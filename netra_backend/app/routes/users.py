@@ -14,10 +14,13 @@ from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.dependencies import DbDep
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.tracing import TracingManager
+from netra_backend.app.db.repositories.user_repository import UserRepository
+from netra_backend.app.db.models_user import User as UserModel
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/api/users", tags=["users"])
 tracing_manager = TracingManager()
+user_repository = UserRepository()
 
 # Pydantic models for request/response
 class UserProfile(BaseModel):
@@ -71,7 +74,8 @@ class SessionInfo(BaseModel):
 @router.get("/profile")
 async def get_user_profile(
     current_user: Dict = Depends(get_current_user),
-    request: Request = None
+    request: Request = None,
+    db: AsyncSession = Depends(DbDep)
 ) -> UserProfile:
     """Get current user profile information with distributed tracing support."""
     try:
@@ -93,14 +97,23 @@ async def get_user_profile(
                 span.set_attribute("user.id", current_user.get("id", "unknown"))
                 span.set_attribute("user.email", current_user.get("email", "unknown"))
             
-            # Mock implementation - replace with actual database queries
+            # Get user profile from database
+            user_id = current_user.get("id") or current_user.get("user_id")
+            if not user_id:
+                raise HTTPException(status_code=400, detail="User ID not found in token")
+            
+            # Get user from database using repository
+            user = await user_repository.get_by_id(db, user_id)
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
+            
             profile = UserProfile(
-                name=current_user.get("name", ""),
-                email=current_user.get("email", ""),
-                avatar_url=current_user.get("avatar_url"),
-                bio=current_user.get("bio", ""),
-                company=current_user.get("company", ""),
-                location=current_user.get("location", "")
+                name=user.full_name,
+                email=user.email,
+                avatar_url=user.picture,
+                bio=None,  # No bio field in current model
+                company=None,  # No company field in current model
+                location=None  # No location field in current model
             )
             
             span.set_attribute("response.status", "success")
@@ -121,8 +134,29 @@ async def update_user_profile(
 ) -> Dict[str, str]:
     """Update user profile information."""
     try:
-        # Mock implementation - replace with actual database updates
-        logger.info(f"Updated profile for user {current_user.get('id')}")
+        # Update user profile in database
+        user_id = current_user.get("id") or current_user.get("user_id")
+        if not user_id:
+            raise HTTPException(status_code=400, detail="User ID not found in token")
+        
+        # Prepare update data (only non-None values)
+        update_data = {}
+        if profile_data.name is not None:
+            update_data['full_name'] = profile_data.name
+        if profile_data.email is not None:
+            update_data['email'] = profile_data.email
+        if profile_data.avatar_url is not None:
+            update_data['picture'] = profile_data.avatar_url
+        
+        if not update_data:
+            return {"message": "No data to update"}
+        
+        # Update user in database
+        updated_user = await user_repository.update(db, user_id, **update_data)
+        if not updated_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        logger.info(f"Updated profile for user {user_id}: {list(update_data.keys())}")
         return {"message": "Profile updated successfully"}
     except Exception as e:
         logger.error(f"Failed to update user profile: {e}")
@@ -131,16 +165,18 @@ async def update_user_profile(
 
 @router.get("/settings")
 async def get_user_settings(
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(get_current_user),
+    db: AsyncSession = Depends(DbDep)
 ) -> UserSettings:
     """Get current user settings."""
     try:
-        # Mock implementation
+        # User settings not yet implemented in database schema
+        # Return default settings instead of mock data
         return UserSettings(
-            theme=current_user.get("theme", "light"),
-            language=current_user.get("language", "en"),
-            timezone=current_user.get("timezone"),
-            email_notifications=current_user.get("email_notifications", True)
+            theme="light",
+            language="en",
+            timezone=None,
+            email_notifications=True
         )
     except Exception as e:
         logger.error(f"Failed to get user settings: {e}")
@@ -150,13 +186,18 @@ async def get_user_settings(
 @router.patch("/settings")
 async def update_user_settings(
     settings_data: UserSettings,
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(get_current_user),
+    db: AsyncSession = Depends(DbDep)
 ) -> Dict[str, str]:
     """Update user settings."""
     try:
-        # Mock implementation
-        logger.info(f"Updated settings for user {current_user.get('id')}")
-        return {"message": "Settings updated successfully"}
+        # User settings not yet implemented in database schema
+        # Log the attempt but don't persist until schema is updated
+        user_id = current_user.get("id") or current_user.get("user_id")
+        logger.info(f"Settings update requested for user {user_id}: {settings_data.dict()}")
+        raise HTTPException(status_code=501, detail="User settings not yet implemented")
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to update user settings: {e}")
         raise HTTPException(status_code=500, detail="Failed to update settings")
@@ -164,21 +205,14 @@ async def update_user_settings(
 
 @router.get("/api-keys")
 async def list_api_keys(
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(get_current_user),
+    db: AsyncSession = Depends(DbDep)
 ) -> List[ApiKeyResponse]:
     """List user's API keys."""
     try:
-        # Mock implementation
-        return [
-            ApiKeyResponse(
-                id="key-1",
-                name="Production Key",
-                description="Main production API key",
-                created_at="2024-01-01T00:00:00Z",
-                last_used="2024-01-15T12:00:00Z",
-                permissions=["read", "write"]
-            )
-        ]
+        # API key management not yet implemented in database schema
+        # Return empty list instead of mock data
+        return []
     except Exception as e:
         logger.error(f"Failed to list API keys: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve API keys")
@@ -191,18 +225,8 @@ async def create_api_key(
 ) -> ApiKeyResponse:
     """Create a new API key."""
     try:
-        # Mock implementation
-        import secrets
-        new_key = f"nk_{secrets.token_urlsafe(32)}"
-        
-        return ApiKeyResponse(
-            id=f"key-{secrets.token_hex(8)}",
-            name=key_data.name,
-            description=key_data.description,
-            key=new_key,  # Only returned on creation
-            created_at="2024-01-01T00:00:00Z",
-            permissions=key_data.permissions
-        )
+        # API key management not yet implemented in database schema
+        raise HTTPException(status_code=501, detail="API key creation not yet implemented")
     except Exception as e:
         logger.error(f"Failed to create API key: {e}")
         raise HTTPException(status_code=500, detail="Failed to create API key")
@@ -215,9 +239,8 @@ async def delete_api_key(
 ) -> Dict[str, str]:
     """Delete an API key."""
     try:
-        # Mock implementation
-        logger.info(f"Deleted API key {key_id} for user {current_user.get('id')}")
-        return {"message": "API key deleted successfully"}
+        # API key management not yet implemented in database schema
+        raise HTTPException(status_code=501, detail="API key deletion not yet implemented")
     except Exception as e:
         logger.error(f"Failed to delete API key: {e}")
         raise HTTPException(status_code=500, detail="Failed to delete API key")
@@ -229,16 +252,9 @@ async def list_user_sessions(
 ) -> List[SessionInfo]:
     """List user's active sessions."""
     try:
-        # Mock implementation
-        return [
-            SessionInfo(
-                id="session-1",
-                device="Chrome on Windows",
-                location="New York, US",
-                last_active="2024-01-15T12:00:00Z",
-                current=True
-            )
-        ]
+        # Session management not yet implemented in database schema
+        # Return empty list instead of mock data
+        return []
     except Exception as e:
         logger.error(f"Failed to list sessions: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve sessions")
@@ -251,9 +267,8 @@ async def revoke_session(
 ) -> Dict[str, str]:
     """Revoke a user session."""
     try:
-        # Mock implementation
-        logger.info(f"Revoked session {session_id} for user {current_user.get('id')}")
-        return {"message": "Session revoked successfully"}
+        # Session management not yet implemented in database schema
+        raise HTTPException(status_code=501, detail="Session revocation not yet implemented")
     except Exception as e:
         logger.error(f"Failed to revoke session: {e}")
         raise HTTPException(status_code=500, detail="Failed to revoke session")
@@ -265,7 +280,8 @@ async def get_notification_settings(
 ) -> NotificationSettings:
     """Get user notification settings."""
     try:
-        # Mock implementation
+        # Notification settings not yet implemented in database schema
+        # Return default settings instead of mock data
         return NotificationSettings(
             email_alerts=True,
             push_notifications=True,
@@ -284,9 +300,10 @@ async def update_notification_settings(
 ) -> Dict[str, str]:
     """Update user notification settings."""
     try:
-        # Mock implementation
-        logger.info(f"Updated notification settings for user {current_user.get('id')}")
-        return {"message": "Notification settings updated successfully"}
+        # Notification settings not yet implemented in database schema
+        user_id = current_user.get("id") or current_user.get("user_id")
+        logger.info(f"Notification settings update requested for user {user_id}: {settings_data.dict()}")
+        raise HTTPException(status_code=501, detail="Notification settings update not yet implemented")
     except Exception as e:
         logger.error(f"Failed to update notification settings: {e}")
         raise HTTPException(status_code=500, detail="Failed to update notification settings")
@@ -298,9 +315,10 @@ async def get_user_preferences(
 ) -> UserPreferences:
     """Get user preferences."""
     try:
-        # Mock implementation
+        # User preferences not yet implemented in database schema
+        # Return default preferences instead of mock data
         return UserPreferences(
-            dashboard_layout="grid",
+            dashboard_layout="default",
             default_view="overview",
             items_per_page=20,
             auto_save=True
@@ -317,9 +335,10 @@ async def update_user_preferences(
 ) -> Dict[str, str]:
     """Update user preferences."""
     try:
-        # Mock implementation
-        logger.info(f"Updated preferences for user {current_user.get('id')}")
-        return {"message": "Preferences updated successfully"}
+        # User preferences not yet implemented in database schema
+        user_id = current_user.get("id") or current_user.get("user_id")
+        logger.info(f"Preferences update requested for user {user_id}: {preferences_data.dict()}")
+        raise HTTPException(status_code=501, detail="User preferences update not yet implemented")
     except Exception as e:
         logger.error(f"Failed to update preferences: {e}")
         raise HTTPException(status_code=500, detail="Failed to update preferences")
@@ -338,9 +357,11 @@ async def change_user_password(
         if not current_password or not new_password:
             raise HTTPException(status_code=400, detail="Missing password fields")
             
-        # Mock implementation - add real password change logic
-        logger.info(f"Changed password for user {current_user.get('id')}")
-        return {"message": "Password changed successfully"}
+        # Password changes must go through auth service per architecture
+        # This endpoint should delegate to auth service client
+        user_id = current_user.get("id") or current_user.get("user_id")
+        logger.info(f"Password change requested for user {user_id}")
+        raise HTTPException(status_code=501, detail="Password changes must be implemented via auth service delegation")
     except Exception as e:
         logger.error(f"Failed to change password: {e}")
         raise HTTPException(status_code=500, detail="Failed to change password")
@@ -358,11 +379,11 @@ async def delete_user_account(
         if confirmation != "DELETE":
             raise HTTPException(status_code=400, detail="Invalid confirmation")
             
-        # Mock implementation - add real account deletion logic
-        background_tasks.add_task(
-            lambda: logger.info(f"Account deletion queued for user {current_user.get('id')}")
-        )
-        return {"message": "Account deletion initiated"}
+        # Account deletion must coordinate with auth service per architecture
+        # This requires careful multi-service coordination
+        user_id = current_user.get("id") or current_user.get("user_id")
+        logger.info(f"Account deletion requested for user {user_id}")
+        raise HTTPException(status_code=501, detail="Account deletion must be implemented via auth service coordination")
     except Exception as e:
         logger.error(f"Failed to delete account: {e}")
         raise HTTPException(status_code=500, detail="Failed to delete account")
