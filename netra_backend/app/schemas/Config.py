@@ -10,7 +10,20 @@ from netra_backend.app.core.configuration import unified_config_manager
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.core.isolated_environment import get_env
+# Use backend-specific isolated environment
+try:
+    from netra_backend.app.core.isolated_environment import get_env
+except ImportError:
+    # Production fallback if isolated_environment module unavailable
+    import os
+    def get_env():
+        """Fallback environment accessor for production."""
+        class FallbackEnv:
+            def get(self, key, default=None):
+                return os.environ.get(key, default)
+            def set(self, key, value, source="production"):
+                os.environ[key] = value
+        return FallbackEnv()
 
 from pydantic import BaseModel, Field, validator
 

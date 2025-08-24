@@ -1,4 +1,17 @@
-from netra_backend.app.core.isolated_environment import get_env
+# Use backend-specific isolated environment
+try:
+    from netra_backend.app.core.isolated_environment import get_env
+except ImportError:
+    # Production fallback if isolated_environment module unavailable
+    import os
+    def get_env():
+        """Fallback environment accessor for production."""
+        class FallbackEnv:
+            def get(self, key, default=None):
+                return os.environ.get(key, default)
+            def set(self, key, value, source="production"):
+                os.environ[key] = value
+        return FallbackEnv()
 """
 Containerized services for L3 realism level integration testing.
 Simplified version that uses existing database connections for testing.

@@ -16,7 +16,7 @@ import pytest
 
 # Import required test utilities - no fallbacks
 from test_framework.auth_helpers import (
-    create_test_token,
+    get_test_token,
 )
 from netra_backend.tests.helpers.websocket_test_helpers import (
     MockWebSocket,
@@ -34,9 +34,9 @@ class ReconnectionTestFixture:
         self.reconnection_attempts: List[Dict[str, Any]] = []
         self.preserved_state: Dict[str, Any] = {}
         
-    def create_connection_with_state(self, user_id: str) -> MockWebSocket:
+    async def create_connection_with_state(self, user_id: str) -> MockWebSocket:
         """Create WebSocket connection with preserved state."""
-        token = create_test_token(user_id)
+        token = await get_test_token(user_id)
         websocket = create_mock_websocket().with_user_id(user_id).with_authentication(token).build()
         self.active_connections.append(websocket)
         return websocket

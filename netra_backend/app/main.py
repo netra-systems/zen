@@ -18,18 +18,20 @@ from pathlib import Path
 
 # Conditional import of environment management
 try:
+    # Use backend-specific isolated environment
     from netra_backend.app.core.isolated_environment import get_env
     _env_available = True
 except ImportError:
-    # Fallback for production environments where dev_launcher might not be available
+    # Production fallback if isolated_environment module unavailable
+    import os
     def get_env():
-        """Fallback environment manager for production."""
-        class ProductionEnv:
-            def get(self, key: str, default=None):
+        """Fallback environment accessor for production."""
+        class FallbackEnv:
+            def get(self, key, default=None):
                 return os.environ.get(key, default)
-            def set(self, key: str, value: str, source: str = "production"):
+            def set(self, key, value, source="production"):
                 os.environ[key] = value
-        return ProductionEnv()
+        return FallbackEnv()
     _env_available = False
 
 # Add the project root to the Python path

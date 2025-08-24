@@ -7,6 +7,7 @@ Contains pytest fixtures for the resource isolation test suite.
 import logging
 
 import pytest
+import pytest_asyncio
 
 from tests.e2e.resource_isolation.suite.test_suite_core import (
     ResourceIsolationTestSuite,
@@ -14,7 +15,7 @@ from tests.e2e.resource_isolation.suite.test_suite_core import (
 
 logger = logging.getLogger(__name__)
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def resource_isolation_suite():
     """Fixture providing a configured resource isolation test suite."""
     suite = ResourceIsolationTestSuite()
@@ -25,7 +26,7 @@ async def resource_isolation_suite():
     finally:
         await suite.cleanup_test_environment()
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def tenant_agents(resource_isolation_suite):
     """Fixture providing connected tenant agents."""
     suite = resource_isolation_suite

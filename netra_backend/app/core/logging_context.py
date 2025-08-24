@@ -1,9 +1,8 @@
 # Environment access: Development vs Production
 try:
     # Development: Use IsolatedEnvironment for full feature set
-    # Use backend-specific isolated environment
-try:
     from netra_backend.app.core.isolated_environment import get_env
+    _has_isolated_env = True
 except ImportError:
     # Production fallback if isolated_environment module unavailable
     import os
@@ -15,10 +14,6 @@ except ImportError:
             def set(self, key, value, source="production"):
                 os.environ[key] = value
         return FallbackEnv()
-    _has_isolated_env = True
-except ImportError:
-    # Production: Direct environment access when dev_launcher unavailable
-    import os
     _has_isolated_env = False
 """Logging context management and correlation IDs for the unified logging system.
 
