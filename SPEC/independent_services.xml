@@ -18,6 +18,7 @@
       Each service MAY have its own implementations of similar infrastructure (e.g., DatabaseManager, Config, Monitoring).
       This is NOT duplication but necessary for service independence. 
       See SPEC/learnings/microservice_independence.xml for detailed explanation of "Unique Concept = ONCE per service" principle.
+      See SPEC/acceptable_duplicates.xml for the canonical list of acceptable cross-service duplicates.
     </clarification>
   </critical-principle>
   <scope-clarification id="MS-SCOPE-001">

@@ -6,6 +6,12 @@
         <version>1.0</version>
         <description>Core specification for unified environment variable management across the platform</description>
         <created>2025-08-24</created>
+        <cross_references>
+            <ref>environment_aware_testing.xml</ref>
+            <ref>deployment_architecture.xml</ref>
+            <ref>test_infrastructure_architecture.xml</ref>
+            <ref>database_connectivity_architecture.xml</ref>
+        </cross_references>
     </metadata>
 
     <core_principle>

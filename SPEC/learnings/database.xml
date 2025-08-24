@@ -151,6 +151,47 @@
       <mitigation>Pre-deployment environment validation with EnvironmentConfigurationValidator</mitigation>
       <implementation>shared/configuration/environment_validator.py</implementation>
     </learning>
+
+    <learning id="8">
+      <title>Health Checker Direct Engine Import Causes Authentication Failures</title>
+      <description>
+        Health checkers directly importing async_engine from postgres_core.py bypass the unified 
+        DatabaseManager configuration, leading to authentication failures. The engine may not be 
+        properly initialized with credentials from IsolatedEnvironment, causing "password 
+        authentication failed" errors.
+      </description>
+      <impact>Critical - prevents health monitoring and causes false-positive health check failures</impact>
+      <mitigation>Always use DatabaseManager.create_application_engine() for database connections</mitigation>
+      <implementation>netra_backend/app/services/database/health_checker.py</implementation>
+      <date_discovered>2025-08-24</date_discovered>
+    </learning>
+
+    <learning id="9">
+      <title>Database Connection Resource Management in Health Checks</title>
+      <description>
+        Health checks should create and dispose of their own database engines to prevent connection 
+        pool exhaustion and ensure fresh connections with proper configuration. Reusing global 
+        engine instances can lead to stale connections and configuration drift.
+      </description>
+      <impact>High - prevents connection pool exhaustion during continuous health monitoring</impact>
+      <mitigation>Create engine, perform check, dispose engine in each health check cycle</mitigation>
+      <implementation>netra_backend/app/services/database/health_checker.py</implementation>
+      <date_discovered>2025-08-24</date_discovered>
+    </learning>
+
+    <learning id="10">
+      <title>Unified Database Manager Ensures Credential Consistency</title>
+      <description>
+        All database connections must go through DatabaseManager to ensure consistent credential 
+        loading from IsolatedEnvironment. Direct engine creation or imports bypass the unified 
+        configuration system, leading to authentication failures when credentials change or 
+        differ between environments.
+      </description>
+      <impact>Critical - ensures 100% credential consistency across all services</impact>
+      <mitigation>Enforce DatabaseManager usage through code reviews and architecture compliance checks</mitigation>
+      <implementation>netra_backend/app/db/database_manager.py</implementation>
+      <date_discovered>2025-08-24</date_discovered>
+    </learning>
   </key_learnings>
 
   <testing_strategy>

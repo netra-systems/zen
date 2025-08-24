@@ -11,6 +11,7 @@
             <ref>TESTING.md</ref>
             <ref>testing.xml</ref>
             <ref>coverage_requirements.xml</ref>
+            <ref>environment_aware_testing.xml</ref>
             <ref>learnings/testing.xml</ref>
         </cross_references>
     </metadata>
@@ -99,17 +100,36 @@ from netra_backend.app.services.some_service import SomeService
         </requirement>
 
         <requirement priority="HIGH">
-            <name>Async Test Decoration</name>
+            <name>Async Test Configuration</name>
             <description>
-                ALL async test functions MUST have @pytest.mark.asyncio decorator
-                or tests will hang/timeout.
+                Async test functions are automatically detected when asyncio_mode=auto
+                is configured in pytest.ini. This eliminates the need for @pytest.mark.asyncio
+                decorators on every async test. See learnings/testing.xml#pytest-asyncio-configuration-tradeoffs
+                for detailed analysis.
             </description>
+            <configuration>
+                <!-- In pytest.ini -->
+                [pytest]
+                asyncio_mode = auto
+                asyncio_default_fixture_loop_scope = function
+            </configuration>
             <pattern>
-                @pytest.mark.asyncio
+                # With asyncio_mode=auto, no decorator needed:
                 async def test_async_operation():
                     result = await async_function()
                     assert result is not None
+                    
+                # Decorator still works but is optional:
+                @pytest.mark.asyncio  # Optional with auto mode
+                async def test_another_operation():
+                    pass
             </pattern>
+            <migration_note>
+                The codebase currently has 10,833 @pytest.mark.asyncio decorators.
+                These are being gradually removed as asyncio_mode=auto is already
+                configured in all service pytest.ini files. Decorators are harmless
+                with auto mode enabled, so no immediate removal is required.
+            </migration_note>
         </requirement>
     </import_requirements>
 
@@ -158,6 +178,24 @@ from netra_backend.app.services.some_service import SomeService
             <command>python unified_test_runner.py --level agents --real-llm</command>
         </level>
     </test_levels>
+
+    <environment_aware_testing>
+        <description>
+            Tests are marked with environment compatibility to ensure safe execution
+            across test, dev, staging, and production environments.
+        </description>
+        <reference>environment_aware_testing.xml</reference>
+        <key_features>
+            <feature>Environment-specific test filtering</feature>
+            <feature>Production safety constraints</feature>
+            <feature>Progressive environment validation</feature>
+            <feature>Service dependency declaration</feature>
+        </key_features>
+        <usage>
+            <command>python unified_test_runner.py --env staging</command>
+            <command>python unified_test_runner.py --env prod --allow-prod</command>
+        </usage>
+    </environment_aware_testing>
 
     <test_patterns>
         <pattern name="Database Session Factory">
@@ -235,12 +273,14 @@ async def test_websocket_flow():
         <issue name="Async Test Timeouts">
             <symptom>Tests hang or timeout</symptom>
             <causes>
-                <cause>Missing @pytest.mark.asyncio decorator</cause>
+                <cause>Missing asyncio_mode=auto configuration in pytest.ini</cause>
                 <cause>Unawaited async operations</cause>
                 <cause>Deadlocks in async code</cause>
             </causes>
             <solution>
-                Add @pytest.mark.asyncio to all async tests
+                Ensure asyncio_mode=auto is configured in pytest.ini.
+                With auto mode, async tests are automatically detected without decorators.
+                Legacy @pytest.mark.asyncio decorators still work but are no longer required.
             </solution>
         </issue>
 
@@ -308,7 +348,7 @@ async def test_websocket_flow():
     <compliance_checklist>
         <check>All tests use absolute imports</check>
         <check>setup_test_path() used consistently</check>
-        <check>Async tests have @pytest.mark.asyncio</check>
+        <check>asyncio_mode=auto configured in pytest.ini</check>
         <check>Test isolation implemented</check>
         <check>Service boundaries respected</check>
         <check>Coverage targets met</check>

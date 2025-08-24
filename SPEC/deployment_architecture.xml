@@ -6,6 +6,12 @@
         <version>1.0</version>
         <description>Core specification for deployment architecture across all environments</description>
         <created>2025-08-24</created>
+        <cross_references>
+            <ref>environment_aware_testing.xml</ref>
+            <ref>test_infrastructure_architecture.xml</ref>
+            <ref>gcp_deployment.xml</ref>
+            <ref>unified_environment_management.xml</ref>
+        </cross_references>
     </metadata>
 
     <core_principle>

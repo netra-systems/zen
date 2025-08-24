@@ -47,6 +47,8 @@
                 - WITHIN each service: No duplicate implementations
                 - ACROSS services: Each service maintains its own implementations
                 - Services communicate via APIs, not shared code
+                
+                See SPEC/acceptable_duplicates.xml for the canonical master list of acceptable duplicates.
             </correct_interpretation>
 
             <implementation>

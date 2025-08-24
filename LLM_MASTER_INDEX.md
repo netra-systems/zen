@@ -291,6 +291,7 @@ Services MUST remain 100% independent and communicate only through APIs:
 ### Core Utilities (`/app/core/`)
 | File | Purpose | Key Functions |
 |------|---------|---------------|
+| `unified_logging.py` | Advanced Loguru-based logging for netra_backend | UnifiedLogger, get_logger |
 | `exceptions_base.py` | Base exception classes | NetraException |
 | `exceptions_auth.py` | Auth exceptions | AuthenticationError |
 | `exceptions_db.py` | Database exceptions | DatabaseError |
@@ -298,6 +299,14 @@ Services MUST remain 100% independent and communicate only through APIs:
 | `interfaces_agent.py` | Agent interfaces | AgentInterface |
 | `system_health_monitor.py` | System monitoring | HealthMonitor class |
 | `fallback_coordinator.py` | Fallback handling | FallbackCoordinator |
+
+### Shared Modules (`/shared/`)
+| Module | Purpose | Used By |
+|--------|---------|---------|
+| `logging/unified_logger_factory.py` | Simplified logging for auxiliary services | auth_service, dev_launcher, tests |
+| `health/` | Health check utilities | All services |
+| `resilience/` | Resilience patterns | All services |
+| `serialization/` | Serialization utilities | All services |
 
 ### GCP Deployment Modules (`/organized_root/deployment_configs/`)
 | Module | Location | Purpose | Key Components |
@@ -357,6 +366,7 @@ Services MUST remain 100% independent and communicate only through APIs:
 | **`learnings/index.xml`** | Index of all past issues & solutions | ALWAYS check first |
 | **`anti_regression.xml`** | System stability requirements | Before commits |
 | **`audit.xml`** | Comprehensive audit framework | AFTER every session (MANDATORY) |
+| **`acceptable_duplicates.xml`** | Master list of strategic duplicates | When evaluating code duplication |
 
 ### 🚀 COLD START DOCUMENTATION (Critical for Startup)
 | Document | Purpose | When to Use |
@@ -395,6 +405,7 @@ Services MUST remain 100% independent and communicate only through APIs:
 | **`architecture.xml`** | System architecture | Component relationships |
 | **`system_boundaries.xml`** | Boundary definitions | Module separation |
 | **`independent_services.xml`** | Microservice independence | 100% isolation requirement |
+| **`acceptable_duplicates.xml`** | Strategic duplication patterns | Cross-service vs within-service |
 | **`growth_control.xml`** | Healthy growth patterns | Composition over monoliths |
 | **`directory_structure.xml`** | File organization | Standard layout |
 
@@ -580,6 +591,7 @@ Services MUST remain 100% independent and communicate only through APIs:
 | `test_infrastructure_architecture.xml` | Test organization | CRITICAL |
 | `import_management_architecture.xml` | Import enforcement | CRITICAL |
 | `deployment_architecture.xml` | Deployment pipeline | CRITICAL |
+| `logging_architecture.xml` | Service-specific logging | CRITICAL |
 
 ### Critical Update Reminders
 - **ALWAYS** check `learnings/index.xml` before any task
@@ -589,6 +601,7 @@ Services MUST remain 100% independent and communicate only through APIs:
 - **ENFORCE** type safety per `type_safety.xml`
 - **USE** `IsolatedEnvironment` for ALL environment access
 - **MAINTAIN** absolute imports - relative imports cause test failures
+- **RESPECT** logging boundaries - netra_backend uses its own logger, others use shared
 
 ---
 

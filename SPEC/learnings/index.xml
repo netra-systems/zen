@@ -94,10 +94,12 @@
             <critical-takeaway>Use DynamicCORSMiddleware when CORS_ORIGINS=* to handle credentials properly (RFC 6454).</critical-takeaway>
         </category>
 
-        <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest, Test Discovery, Test Runner">
+        <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest, Test Discovery, Test Runner, Environment Testing">
             <critical-takeaway>Adhere to the Feature Flag TDD workflow (feature-flags-tdd-workflow).</critical-takeaway>
             <critical-takeaway>Tests must validate REAL functionality, not mocks (frontend-test-paradox-report).</critical-takeaway>
             <critical-takeaway>All test directories MUST be added to test_scanners.py for discovery (test-discovery-all-directories).</critical-takeaway>
+            <critical-takeaway>Tests MUST declare environment compatibility using @env markers (environment_aware_testing.xml).</critical-takeaway>
+            <critical-takeaway>Production tests require @env_safe decorator and ALLOW_PROD_TESTS flag.</critical-takeaway>
             <critical-takeaway>Test runner requires PROJECT_ROOT in sys.path for imports (test-import-project-root).</critical-takeaway>
         </category>
         
@@ -185,12 +187,15 @@
             <critical-takeaway>ClickHouse driver: Use OperationalError instead of NetworkError (which doesn't exist) for network-related exceptions.</critical-takeaway>
         </category>
         
-        <category name="Database Architecture" path="SPEC/learnings/database.xml" keywords="Database, Connection, Driver, AsyncPG, Psycopg2, SSL, Cloud SQL, URL, Architecture">
+        <category name="Database Architecture" path="SPEC/learnings/database.xml" keywords="Database, Connection, Driver, AsyncPG, Psycopg2, SSL, Cloud SQL, URL, Architecture, Health Check, Authentication, DatabaseManager, IsolatedEnvironment">
             <critical-takeaway>Sync drivers (psycopg2) use sslmode= parameter, async drivers (asyncpg) use ssl= parameter - incompatibility causes connection failures.</critical-takeaway>
             <critical-takeaway>Cloud SQL Unix socket connections must have NO SSL parameters - SSL is handled at socket level.</critical-takeaway>
             <critical-takeaway>Alembic migrations must use sync drivers (psycopg2), not async drivers - prevents greenlet/asyncio compatibility issues.</critical-takeaway>
             <critical-takeaway>Use centralized DatabaseManager for URL transformations to ensure driver compatibility and prevent configuration errors.</critical-takeaway>
             <critical-takeaway>Environment-aware connection strategy required - local uses TCP, Cloud SQL can use TCP+SSL or Unix sockets without SSL.</critical-takeaway>
+            <critical-takeaway>Health checkers MUST use DatabaseManager.create_application_engine() - direct async_engine imports cause authentication failures.</critical-takeaway>
+            <critical-takeaway>Database connections in health checks should create and dispose engines per check to prevent pool exhaustion.</critical-takeaway>
+            <critical-takeaway>All services MUST use DatabaseManager for database connections to ensure credential consistency from IsolatedEnvironment.</critical-takeaway>
         </category>
         
         <category name="Database Config Migration" path="SPEC/learnings/database_config_migration.xml" keywords="DatabaseConfig, Migration, Unified Config, postgres_events, Configuration Migration">
