@@ -22,7 +22,7 @@ from netra_backend.app.core.error_handlers import ErrorRecoveryStrategy
 from netra_backend.app.services.agent_service_core import AgentService
 
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.websocket_core.unified.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.websocket_core.unified.telemetry_manager import TelemetryManager
 from test_framework.mock_utils import mock_justified
 

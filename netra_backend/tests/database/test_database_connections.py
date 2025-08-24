@@ -124,8 +124,11 @@ class TestDatabaseHealthChecks:
         assert health["overall_status"] == "healthy"
         assert "database_checks" in health
         
-        # Test unhealthy connection
-        mock_session.execute.side_effect = Exception("Connection failed")
+        # Test unhealthy connection - inject a failing checker
+        async def failing_postgres_check(response_time: float):
+            raise Exception("Connection failed")
+        
+        checker.set_database_checker("postgres", failing_postgres_check)
         
         health = await checker.check_database_health(["postgres"])
         assert health["overall_status"] == "unhealthy"

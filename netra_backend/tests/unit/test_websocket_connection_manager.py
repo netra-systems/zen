@@ -19,7 +19,7 @@ from fastapi import WebSocket
 
 from netra_backend.app.websocket_core_info import ConnectionInfo
 
-from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 class TestWebSocketConnectionManager:
     """Test suite for WebSocket connection information and statistics."""

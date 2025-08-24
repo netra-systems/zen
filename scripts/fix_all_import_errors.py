@@ -43,7 +43,7 @@ def analyze_import_errors() -> Dict[str, str]:
             'from netra_backend.app.monitoring.metrics_collector import PerformanceMetric',
         
         # WebSocket refactoring (already fixed)
-        'from netra_backend.app.websocket_core.connection_manager import ConnectionManager':
+        'from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager':
             'from netra_backend.app.websocket_core import WebSocketManager',
         
         # BackgroundTaskManager refactoring
@@ -170,7 +170,7 @@ def main():
     import_fixes.update({
         'from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric':
             'from netra_backend.app.monitoring.metrics_collector import PerformanceMetric',
-        'from netra_backend.app.websocket_core.connection_manager import ConnectionManager':
+        'from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager':
             'from netra_backend.app.websocket_core import WebSocketManager',
     })
     

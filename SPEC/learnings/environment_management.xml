@@ -44,10 +44,14 @@
     </problem>
 
     <solution>
-        <title>Centralized IsolatedEnvironment Manager</title>
+        <title>SINGLE Unified Config System - Complete Environment Consolidation</title>
         <description>
-            Created a centralized singleton IsolatedEnvironment class that manages all environment
-            variable access across the dev launcher. In isolation mode, it maintains an internal
+            Achieved complete consolidation to a SINGLE unified config system by:
+            1. Created centralized IsolatedEnvironment class as the ONLY environment manager
+            2. Deleted 100% of legacy environment management code (environment_manager.py, local_secrets.py, secret_loader.py)
+            3. Removed ALL direct os.environ references outside the unified config
+            4. All environment access now goes through the singular IsolatedEnvironment class
+            5. In isolation mode (default for development), maintains an internal
             dictionary to prevent polluting os.environ during development and testing.
         </description>
         
@@ -283,6 +287,37 @@ def test_no_pollution(isolated_env):
             <solution>Use isolated environment in tests  # GOOD</solution>
         </anti_pattern>
     </anti_patterns>
+
+    <critical_takeaways>
+        <takeaway priority="CRITICAL">
+            SINGLE UNIFIED CONFIG ONLY - All environment access MUST go through IsolatedEnvironment.
+            NO exceptions. Zero direct os.environ access outside the unified config.
+        </takeaway>
+        <takeaway priority="CRITICAL">
+            DELETE ALL LEGACY CODE - When consolidating to unified config, delete 100% of legacy
+            environment management code. Do not keep duplicates or wrappers.
+        </takeaway>
+        <takeaway priority="HIGH">
+            ISOLATION BY DEFAULT IN DEVELOPMENT - Development mode should ONLY load from .env files,
+            NOT from system environment. This prevents unpredictable behavior and conflicts.
+        </takeaway>
+        <takeaway priority="HIGH">
+            SOURCE TRACKING IS MANDATORY - Always provide meaningful source names when setting
+            environment variables. This enables debugging when conflicts occur.
+        </takeaway>
+        <takeaway priority="HIGH">
+            TEST ISOLATION IS CRITICAL - All tests MUST use isolation mode to prevent environment
+            pollution between test runs. Reset to original state after each test.
+        </takeaway>
+        <takeaway priority="MEDIUM">
+            SUBPROCESS ENVIRONMENT - When launching subprocesses, use get_subprocess_env() to
+            provide the complete environment including isolated variables.
+        </takeaway>
+        <takeaway priority="MEDIUM">
+            FILE LOADING HIERARCHY - In development: .env files only. In production: System env
+            takes precedence. This provides predictable development and secure production.
+        </takeaway>
+    </critical_takeaways>
 
     <future_enhancements>
         <enhancement>Environment variable validation and type checking</enhancement>

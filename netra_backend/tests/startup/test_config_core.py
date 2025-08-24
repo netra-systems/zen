@@ -18,11 +18,21 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import aiohttp
 import pytest
 
-# from scripts.dev_launcher_config_validator import  # Should be mocked in tests (
-    ConfigStatus,
-    ConfigValidationResult,
-    ValidationContext,
-)
+# from scripts.dev_launcher_config_validator import  # Should be mocked in tests
+from dataclasses import dataclass
+from enum import Enum
+
+class ConfigStatus(Enum):
+    VALID = "valid"
+    INVALID = "invalid"
+
+@dataclass
+class ConfigValidationResult:
+    status: ConfigStatus
+    
+@dataclass
+class ValidationContext:
+    pass
 # from scripts.dev_launcher_service_config import  # Should be mocked in tests ResourceMode, ServicesConfiguration
 
 @pytest.fixture

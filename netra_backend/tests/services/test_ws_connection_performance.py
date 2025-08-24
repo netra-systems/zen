@@ -20,13 +20,8 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect, WebSocketState
 
 from netra_backend.app.core.exceptions_base import NetraException
-
-
-    ConnectionInfo,
-
-    WebSocketManager,
-
-)
+from netra_backend.app.websocket_core.connection_info import ConnectionInfo
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.services.test_ws_connection_mocks import (
 
     MockConnectionPool,

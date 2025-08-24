@@ -185,7 +185,7 @@ class SystemInitializationTestBase:
             time.sleep(1)
         return False
         
-    def create_websocket_connection(self, token: str = None) -> websocket.WebSocket:
+    def create_websocket_connection(self, token: str = None):
         """Create authenticated WebSocket connection."""
         headers = {}
         if token:

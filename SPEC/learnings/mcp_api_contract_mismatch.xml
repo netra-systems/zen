@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>MCP API Contract Mismatch</name>
+        <category>Frontend-Backend Integration</category>
+        <keywords>MCP, API Contract, Architectural Mismatch, 404 Errors, Frontend, Backend, Five Whys</keywords>
+        <date>2025-08-24</date>
+        <severity>CRITICAL</severity>
+    </metadata>
+    
+    <problem_statement>
+        Frontend service in staging experiencing persistent HTTP 404 errors when calling MCP endpoints:
+        - /api/mcp/servers - Failed to list MCP servers
+        - /api/mcp/tools/discover - Failed to discover MCP tools
+        These errors appear in test logs and would affect production functionality.
+    </problem_statement>
+    
+    <five_whys_analysis>
+        <error_1>
+            <description>Failed to list MCP servers - HTTP 404</description>
+            <why level="1">
+                <question>Why is the frontend getting 404 for /api/mcp/servers?</question>
+                <answer>The backend does NOT have a /servers endpoint in the MCP router</answer>
+            </why>
+            <why level="2">
+                <question>Why is the MCP /servers endpoint not available?</question>
+                <answer>Backend MCP router only implements /info, /status, /clients, /sessions, /tools, /resources, /prompts - NO /servers</answer>
+            </why>
+            <why level="3">
+                <question>Why was the /servers endpoint not implemented?</question>
+                <answer>Mismatch between frontend expectations and backend implementation - different architectural models</answer>
+            </why>
+            <why level="4">
+                <question>Why is there a mismatch between frontend and backend MCP API design?</question>
+                <answer>Two different MCP architectures were implemented simultaneously without coordination</answer>
+            </why>
+            <why level="5">
+                <question>Why were two different MCP architectures developed?</question>
+                <answer>Lack of unified specification during development - teams worked from different assumptions</answer>
+            </why>
+        </error_1>
+        
+        <error_2>
+            <description>Failed to discover MCP tools - HTTP 404</description>
+            <why level="1">
+                <question>Why is the frontend getting 404 for /api/mcp/tools/discover?</question>
+                <answer>Backend has /api/mcp/tools (GET) but NO /api/mcp/tools/discover endpoint</answer>
+            </why>
+            <why level="2">
+                <question>Why is the /tools/discover endpoint missing?</question>
+                <answer>Backend uses RESTful naming (GET /tools), frontend expects action-based naming (/tools/discover)</answer>
+            </why>
+            <why level="3">
+                <question>Why is there an endpoint naming mismatch?</question>
+                <answer>Inconsistent API design conventions between frontend and backend</answer>
+            </why>
+            <why level="4">
+                <question>Why were different API conventions used?</question>
+                <answer>Same root cause - architectural mismatch led to different API patterns</answer>
+            </why>
+            <why level="5">
+                <question>Why wasn't this caught during development?</question>
+                <answer>Testing was performed with mocks that provided expected endpoints, masking real integration issues</answer>
+            </why>
+        </error_2>
+    </five_whys_analysis>
+    
+    <root_cause>
+        <primary>Architectural Mismatch Between Frontend and Backend</primary>
+        <details>
+            TWO INCOMPATIBLE MCP IMPLEMENTATIONS:
+            
+            1. Frontend Implementation (External Server Management Model):
+               - Expects to manage external MCP servers
+               - Endpoints: /api/mcp/servers, /api/mcp/servers/{name}/status, /api/mcp/tools/discover
+               - Model: Netra acts as MCP client managing external servers
+            
+            2. Backend Implementation (Internal Service Model):
+               - Provides internal MCP services directly
+               - Endpoints: /api/mcp/info, /api/mcp/clients, /api/mcp/tools, /api/mcp/sessions
+               - Model: Netra acts as MCP server providing capabilities
+        </details>
+        <contributing_factors>
+            <factor>Missing unified API specification</factor>
+            <factor>Development proceeded with mocks, masking integration issues</factor>
+            <factor>No end-to-end testing between real frontend and backend</factor>
+            <factor>Deploy process doesn't validate API contract compatibility</factor>
+        </contributing_factors>
+    </root_cause>
+    
+    <solution_implemented>
+        <approach>Bridge Endpoints for Compatibility</approach>
+        <description>
+            Added bridge endpoints to backend to support frontend's expected API contract
+            while maintaining backend's internal MCP service model.
+        </description>
+        <changes>
+            <change file="netra_backend/app/routes/mcp/main.py">
+                Added /servers endpoint returning virtual server representing backend capabilities
+            </change>
+            <change file="netra_backend/app/routes/mcp/main.py">
+                Added /servers/{server_name}/status endpoint for specific server status
+            </change>
+            <change file="netra_backend/app/routes/mcp/main.py">
+                Added /tools/discover endpoint as alias for /tools with format wrapping
+            </change>
+        </changes>
+        <code_example><![CDATA[
+@router.get("/servers")
+async def list_servers(...):
+    """Bridge endpoint for frontend compatibility"""
+    return {
+        "data": [{
+            "name": "netra-mcp",
+            "status": "connected",
+            "version": "1.0.0",
+            "capabilities": {...}
+        }],
+        "status": "success"
+    }
+
+@router.get("/tools/discover")
+async def discover_tools(...):
+    """Alias for list_tools for frontend compatibility"""
+    result = await MCPHandlers.list_tools(...)
+    if isinstance(result, list):
+        return {"data": result, "status": "success"}
+    return result
+        ]]></code_example>
+    </solution_implemented>
+    
+    <tests_created>
+        <test file="tests/e2e/test_mcp_api_contract.py">
+            Comprehensive E2E test suite demonstrating API contract mismatches
+            and verifying bridge endpoints work correctly.
+        </test>
+        <test_cases>
+            <case>test_frontend_expects_servers_endpoint</case>
+            <case>test_frontend_expects_server_status_endpoint</case>
+            <case>test_frontend_expects_tools_discover_endpoint</case>
+            <case>test_architectural_mismatch_client_vs_server_model</case>
+            <case>test_mcp_feature_flag_consistency</case>
+            <case>test_mcp_auth_requirements</case>
+            <case>test_mcp_error_response_format</case>
+        </test_cases>
+    </tests_created>
+    
+    <learnings>
+        <learning id="mcp-api-contract-define-first">
+            ALWAYS define API contracts BEFORE implementation - use OpenAPI/Swagger specs
+        </learning>
+        <learning id="mcp-architecture-alignment">
+            Frontend and backend teams MUST align on architectural model before coding
+        </learning>
+        <learning id="mcp-mock-testing-danger">
+            Mock testing can mask critical integration issues - always test with real services
+        </learning>
+        <learning id="mcp-e2e-testing-required">
+            E2E tests between real frontend and backend are MANDATORY before deployment
+        </learning>
+        <learning id="mcp-api-versioning">
+            Consider API versioning to support different client expectations during transitions
+        </learning>
+        <learning id="mcp-bridge-pattern">
+            Bridge endpoints can provide compatibility layer between different architectural models
+        </learning>
+        <learning id="mcp-deployment-validation">
+            Deployment pipeline should validate API contracts between services
+        </learning>
+    </learnings>
+    
+    <prevention_measures>
+        <measure>Create OpenAPI specifications for all APIs before implementation</measure>
+        <measure>Use contract testing tools (e.g., Pact) to validate API compatibility</measure>
+        <measure>Implement E2E smoke tests that run on every deployment</measure>
+        <measure>Regular integration testing between real services, not just mocks</measure>
+        <measure>Architecture review meetings before major feature implementation</measure>
+        <measure>API design documentation in SPEC folder as source of truth</measure>
+    </prevention_measures>
+    
+    <business_impact>
+        <impact type="functionality">
+            MCP features completely broken in staging without these fixes
+        </impact>
+        <impact type="user_experience">
+            Users would see errors when trying to use MCP tools and resources
+        </impact>
+        <impact type="development_velocity">
+            Time wasted debugging integration issues that could have been prevented
+        </impact>
+        <impact type="technical_debt">
+            Bridge endpoints add complexity but enable gradual migration
+        </impact>
+    </business_impact>
+</specification>

@@ -175,7 +175,7 @@ class DevLauncher:
         env_file = project_root / ".env"
         if env_file.exists():
             try:
-                loaded_count, errors = env.load_from_file(env_file, source="env_file")
+                loaded_count, errors = env.load_from_file(env_file, source="env_file", override_existing=True)
                 if self.config.verbose:
                     logger.info(f"Loaded {loaded_count} variables from .env")
                 if errors:
@@ -835,7 +835,7 @@ class DevLauncher:
             self.service_discovery.set_cross_service_auth_token(token)
             # Use environment manager to set token
             self.env.set('CROSS_SERVICE_AUTH_TOKEN', token, 
-                                           source="launcher_auth_token", allow_override=True)
+                                           source="launcher_auth_token", force=True)
             self._print("🔑", "TOKEN", f"Generated secure cross-service auth token ({len(token)} chars)")
             
             # Log token characteristics for debugging (without revealing token)
@@ -843,7 +843,7 @@ class DevLauncher:
         else:
             # Use environment manager to set existing token
             self.env.set('CROSS_SERVICE_AUTH_TOKEN', existing_token, 
-                                           source="launcher_auth_token", allow_override=True)
+                                           source="launcher_auth_token", force=True)
             self._print("🔑", "TOKEN", f"Using existing cross-service auth token ({len(existing_token)} chars)")
     
     def _validate_critical_env_vars(self):
@@ -1423,53 +1423,67 @@ class DevLauncher:
         """Validate database connections with network resilience and enhanced error handling."""
         try:
             # Create startup barrier for database initialization to prevent race conditions
-            with self.race_condition_manager.create_barrier(
-                "database_validation", required_participants=1, timeout=30
-            ) as barrier_ready:
-                if not barrier_ready:
-                    logger.warning("Failed to create database validation barrier")
-                    return await self._validate_databases()  # Fallback to standard validation
+            barrier_created = self.race_condition_manager.create_barrier(
+                "database_validation", required_participants={"database_validator"}, timeout_seconds=30
+            )
+            if not barrier_created:
+                logger.warning("Failed to create database validation barrier")
+                return await self._validate_databases()  # Fallback to standard validation
                 
-                # Use network resilient client for database checks
-                db_policy = RetryPolicy(
-                    max_attempts=5,
-                    initial_delay=2.0,
-                    max_delay=10.0,
-                    timeout_per_attempt=15.0
+            # Wait for the barrier to be ready
+            barrier_ready = self.race_condition_manager.wait_for_barrier(
+                "database_validation", "database_validator", timeout=30
+            )
+            if not barrier_ready:
+                logger.warning("Database validation barrier timed out")
+                return await self._validate_databases()  # Fallback to standard validation
+                
+            # Use network resilient client for database checks
+            db_policy = RetryPolicy(
+                max_attempts=5,
+                initial_delay=2.0,
+                max_delay=10.0,
+                timeout_per_attempt=15.0
+            )
+            
+            # Check individual database services with resilience
+            db_services = ['postgres', 'redis', 'clickhouse']
+            successful_connections = []
+            failed_connections = []
+            
+            for db_service in db_services:
+                success, error = await self.network_client.resilient_database_check(
+                    db_service,
+                    retry_policy=db_policy,
+                    allow_degradation=True
                 )
                 
-                # Check individual database services with resilience
-                db_services = ['postgres', 'redis', 'clickhouse']
-                successful_connections = []
-                failed_connections = []
-                
-                for db_service in db_services:
-                    success, error = await self.network_client.resilient_database_check(
-                        db_service,
-                        retry_policy=db_policy,
-                        allow_degradation=True
-                    )
-                    
-                    if success:
-                        successful_connections.append(db_service)
-                        self._print("✅", "DB-RESILIENT", f"{db_service.capitalize()} connection validated")
-                    else:
-                        failed_connections.append((db_service, error))
-                        self._print("⚠️", "DB-RESILIENT", f"{db_service.capitalize()} connection failed: {error}")
-                
-                # Report resilience results
-                if successful_connections:
-                    self._print("✅", "RESILIENCE", f"Connected to {len(successful_connections)} database service(s)")
-                
-                if failed_connections:
-                    self._print("⚠️", "RESILIENCE", f"{len(failed_connections)} database service(s) failed - using fallback validation")
-                    # Fallback to standard validation for failed services
-                    return await self._validate_databases()
-                
-                return len(successful_connections) > 0  # Success if at least one DB is available
+                if success:
+                    successful_connections.append(db_service)
+                    self._print("✅", "DB-RESILIENT", f"{db_service.capitalize()} connection validated")
+                else:
+                    failed_connections.append((db_service, error))
+                    self._print("⚠️", "DB-RESILIENT", f"{db_service.capitalize()} connection failed: {error}")
+            
+            # Report resilience results
+            if successful_connections:
+                self._print("✅", "RESILIENCE", f"Connected to {len(successful_connections)} database service(s)")
+            
+            if failed_connections:
+                self._print("⚠️", "RESILIENCE", f"{len(failed_connections)} database service(s) failed - using fallback validation")
+                # Complete barrier before fallback
+                self.race_condition_manager.complete_barrier("database_validation", "database_validator")
+                # Fallback to standard validation for failed services
+                return await self._validate_databases()
+            
+            # Complete barrier before success return
+            self.race_condition_manager.complete_barrier("database_validation", "database_validator")
+            return len(successful_connections) > 0  # Success if at least one DB is available
                 
         except Exception as e:
             logger.error(f"Resilient database validation failed: {e}")
+            # Complete barrier before fallback
+            self.race_condition_manager.complete_barrier("database_validation", "database_validator")
             # Fallback to standard validation
             return await self._validate_databases()
     

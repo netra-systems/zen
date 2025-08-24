@@ -27,7 +27,7 @@ from netra_backend.app.routes.websocket_unified import (
     unified_websocket_health,
 )
 
-from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 @pytest.fixture
 def mock_websocket():

@@ -19,12 +19,8 @@ import pytest
 from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect, WebSocketState
 
-
-    ConnectionInfo,
-
-    WebSocketManager,
-
-)
+from netra_backend.app.websocket_core.connection_info import ConnectionInfo
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 class MockWebSocket:
 

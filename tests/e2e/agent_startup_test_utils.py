@@ -18,7 +18,7 @@ Architecture:
 """
 
 from dataclasses import dataclass
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 from tests.e2e.load_test_utilities import SystemResourceMonitor
 from tests.e2e.real_client_factory import create_real_client_factory
 from tests.e2e.real_services_manager import create_real_services_manager
@@ -186,6 +186,14 @@ def create_startup_test_suite(
     from tests.e2e.agent_startup_user_manager import UserManager
     from tests.e2e.agent_startup_websocket_manager import WebSocketManager
     
+
+
+# Backward compatibility alias
+
+# Backward compatibility alias
+UnifiedWebSocketManager = WebSocketManager
+
+WebSocketManager = WebSocketManager
 
     return {
 

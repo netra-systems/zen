@@ -93,8 +93,13 @@ class GoogleSecretManager:
                 logger.debug(f"    Failed {env_var}: {str(e)[:50]}")
     
     def _get_secret_mappings(self) -> Dict[str, str]:
-        """Get mapping of Google secret names to environment variables."""
+        """Get mapping of Google secret names to environment variables.
+        
+        Note: These mappings are for Google Secret Manager (GCP) which uses
+        dash-separated names. Local .env files use underscore-separated names.
+        """
         return {
+            # Google Secret Manager name -> Local environment variable name
             "gemini-api-key": "GEMINI_API_KEY",
             "google-client-id": "GOOGLE_CLIENT_ID",
             "google-client-secret": "GOOGLE_CLIENT_SECRET",

@@ -4,7 +4,7 @@ Tests real LLM agents with complete data flow validation.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-from netra_backend.app.websocket_core.unified.manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

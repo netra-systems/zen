@@ -49,6 +49,69 @@ async def get_mcp_status(
     return await MCPHandlers.get_server_info(mcp_service, user)
 
 
+@router.get("/servers")
+async def list_servers(
+    mcp_service = Depends(get_mcp_service),
+    user: Optional[UserInDB] = Depends(get_current_user_optional)
+):
+    """
+    List available MCP servers - Bridge endpoint for frontend compatibility.
+    
+    The frontend expects to manage external MCP servers, but backend
+    provides MCP capabilities directly. This endpoint translates between
+    the two architectural models.
+    """
+    # Return a virtual "server" representing the backend's MCP capabilities
+    return {
+        "data": [
+            {
+                "name": "netra-mcp",
+                "status": "connected",
+                "version": "1.0.0",
+                "capabilities": {
+                    "tools": True,
+                    "resources": True,
+                    "prompts": True
+                },
+                "description": "Netra internal MCP service"
+            }
+        ],
+        "status": "success"
+    }
+
+
+@router.get("/servers/{server_name}/status")
+async def get_server_status(
+    server_name: str,
+    mcp_service = Depends(get_mcp_service),
+    user: Optional[UserInDB] = Depends(get_current_user_optional)
+):
+    """
+    Get specific MCP server status - Bridge endpoint for frontend compatibility.
+    """
+    # Since we only have one virtual "server", always return its status
+    if server_name == "netra-mcp":
+        info = await MCPHandlers.get_server_info(mcp_service, user)
+        return {
+            "data": {
+                "name": "netra-mcp",
+                "status": "connected",
+                "version": info.get("version", "1.0.0"),
+                "capabilities": info.get("capabilities", {}),
+                "description": "Netra internal MCP service",
+                "info": info
+            },
+            "status": "success"
+        }
+    else:
+        # Frontend might request other servers that don't exist
+        return {
+            "data": None,
+            "status": "not_found",
+            "message": f"Server '{server_name}' not found"
+        }
+
+
 @router.post("/clients")
 async def register_client(
     request: MCPClientCreateRequest,
@@ -98,6 +161,22 @@ async def list_tools(
 ):
     """List available MCP tools"""
     return await MCPHandlers.list_tools(category, mcp_service, current_user)
+
+
+@router.get("/tools/discover")
+async def discover_tools(
+    category: Optional[str] = None,
+    mcp_service = Depends(get_mcp_service),
+    current_user: Optional[UserInDB] = Depends(get_current_user_optional)
+):
+    """Discover available MCP tools - alias for list_tools for frontend compatibility"""
+    # Frontend expects /tools/discover, backend implements as /tools
+    # This endpoint bridges the API contract mismatch
+    result = await MCPHandlers.list_tools(category, mcp_service, current_user)
+    # Wrap in expected format if needed
+    if isinstance(result, list):
+        return {"data": result, "status": "success"}
+    return result
 
 
 @router.post("/tools/call")

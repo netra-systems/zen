@@ -207,10 +207,10 @@ class AuthStarter:
             self._write_auth_discovery(port)
             
             # Update backend environment to use correct auth port using environment manager
-            self.env_manager.set_environment("AUTH_SERVICE_PORT", str(port), 
-                                           source="auth_starter", allow_override=True)
-            self.env_manager.set_environment("AUTH_SERVICE_URL", f"http://localhost:{port}", 
-                                           source="auth_starter", allow_override=True)
+            self.env_manager.set("AUTH_SERVICE_PORT", str(port), 
+                                           source="auth_starter", force=True)
+            self.env_manager.set("AUTH_SERVICE_URL", f"http://localhost:{port}", 
+                                           source="auth_starter", force=True)
             
             self._print("✅", "AUTH", f"Auth service started on port {port}")
             return process, streamer

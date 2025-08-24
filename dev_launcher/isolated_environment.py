@@ -107,8 +107,33 @@ class IsolatedEnvironment:
             # Track initial os.environ state
             self._original_environ_backup = dict(os.environ)
             
+            # Automatically load .env file if it exists for dev mode
+            self._auto_load_env_file()
+            
             self._initialized = True
             logger.debug("IsolatedEnvironment initialized")
+    
+    def _auto_load_env_file(self) -> None:
+        """Automatically load .env file if it exists in the current directory.
+        
+        This ensures that environment variables are available immediately
+        when the IsolatedEnvironment is first created, before any backend
+        imports that might trigger configuration loading.
+        """
+        try:
+            # Look for .env file in current working directory
+            env_file = Path.cwd() / ".env"
+            if env_file.exists():
+                # Load with override to ensure we get the latest values
+                loaded_count, errors = self.load_from_file(env_file, source="auto_load", override_existing=True)
+                if loaded_count > 0:
+                    logger.debug(f"Auto-loaded {loaded_count} variables from .env")
+                if errors:
+                    for error in errors:
+                        logger.warning(f"Auto-load error: {error}")
+        except Exception as e:
+            # Don't fail initialization if env loading fails
+            logger.warning(f"Failed to auto-load .env file: {e}")
     
     @classmethod
     def get_instance(cls) -> 'IsolatedEnvironment':

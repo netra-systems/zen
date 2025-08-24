@@ -1,6 +1,6 @@
 """Core Tests - Split from test_websocket_integration.py"""
 
-from netra_backend.app.websocket_core.unified.manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager as WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
