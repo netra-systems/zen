@@ -14,8 +14,6 @@ from datetime import datetime
 import argparse
 
 # Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
 @dataclass
 class ValidationResult:

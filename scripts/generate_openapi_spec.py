@@ -22,7 +22,6 @@ from typing import Optional
 import requests
 
 # Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 # Disable LLM calls during spec generation
 os.environ["DEV_MODE_DISABLE_LLM"] = "true"

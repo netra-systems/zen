@@ -31,7 +31,6 @@ from rich.panel import Panel
 from rich.table import Table
 
 # Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 console = Console(force_terminal=True if sys.platform == 'win32' else None)
 

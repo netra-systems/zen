@@ -15,7 +15,6 @@ from typing import Optional
 if sys.platform == "win32":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-sys.path.insert(0, str(Path(__file__).parent))
 from audit_config import (
     AuditConfig, AuditLevel, DuplicateThreshold, 
     FeatureFlags, TeamPermissions, get_default_config

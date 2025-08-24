@@ -11,7 +11,6 @@ from typing import List
 
 # Add scripts directory to path for imports
 script_dir = Path(__file__).parent
-sys.path.insert(0, str(script_dir))
 
 from config_setup_core import create_environment_file, setup_databases
 from config_setup_scripts import create_startup_scripts, test_installation

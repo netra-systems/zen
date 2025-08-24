@@ -18,9 +18,6 @@ from dotenv import load_dotenv
 
 # Add paths for imports
 script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(script_dir)
-sys.path.insert(0, os.path.join(project_root, "auth_service"))
-sys.path.insert(0, project_root)
 
 # Load environment variables from .env file
 env_file = os.path.join(project_root, ".env")

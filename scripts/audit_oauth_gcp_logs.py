@@ -26,7 +26,6 @@ if sys.platform == 'win32':
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 # Import centralized GCP authentication
-sys.path.insert(0, str(Path(__file__).parent))
 from gcp_auth_config import GCPAuthConfig
 
 import click

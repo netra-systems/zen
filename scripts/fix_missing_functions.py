@@ -6,8 +6,6 @@ Fix missing functions in services and routes based on test requirements
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
 # Define all missing functions that need to be added
 MISSING_FUNCTIONS = {

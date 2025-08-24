@@ -23,8 +23,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 # Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
 
 class TestExecutionBenchmark:

@@ -39,8 +39,6 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
 # Add project root to Python path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
 
 # Try to import our comprehensive validation framework
 try:

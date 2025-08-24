@@ -13,8 +13,6 @@ from pathlib import Path
 from typing import Dict, List
 
 # Add project root to path
-PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
 
 from dev_launcher.dependency_manager import setup_default_dependency_manager
 from dev_launcher.service_coordinator import ServiceCoordinator, CoordinationConfig

@@ -24,7 +24,6 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
 # Import centralized GCP authentication
-sys.path.insert(0, str(Path(__file__).parent))
 from gcp_auth_config import GCPAuthConfig
 
 # Fix Unicode encoding issues on Windows

@@ -13,7 +13,6 @@ from typing import List, Optional
 
 # Add scripts directory to path for imports
 script_dir = Path(__file__).parent
-sys.path.insert(0, str(script_dir))
 
 from dependency_services import install_all_services
 from env_checker import run_command

@@ -31,8 +31,6 @@ import urllib.request
 import urllib.error
 
 # Add project root to Python path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
 
 class ColdStartVerifier:
     """Comprehensive cold start verification for Netra Apex."""
@@ -292,7 +290,6 @@ class ColdStartVerifier:
                 """
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path.cwd()))
 from auth_service.main import app
 print("Auth service import successful")
 """

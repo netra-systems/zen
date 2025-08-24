@@ -108,8 +108,6 @@ def _check_platform_emoji_support() -> bool:
 
 def setup_project_path() -> None:
     """Add project root to Python path."""
-    project_root = get_project_root()
-    sys.path.insert(0, str(project_root))
 
 
 def print_with_emoji_fallback(emoji: str, text: str, 
@@ -236,7 +234,6 @@ def _try_last_resort_import():
     scripts_dir = project_root / 'scripts'
     
     if scripts_dir.exists():
-        sys.path.insert(0, str(scripts_dir))
         from service_discovery import ServiceDiscovery
         return ServiceDiscovery
     else:

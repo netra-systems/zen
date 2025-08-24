@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 # Add app to path for imports
-sys.path.append(str(Path(__file__).parent / "app"))
 
 import asyncpg
 import clickhouse_driver
