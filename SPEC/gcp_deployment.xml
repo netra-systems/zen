@@ -197,7 +197,7 @@
       </service>
       <service name="frontend">
         <directory>frontend</directory>
-        <dockerfile>Dockerfile.frontend</dockerfile>
+        <dockerfile>deployment/docker/Dockerfile.frontend</dockerfile>
         <port>3000</port>
         <cloud_run_name>netra-frontend-staging</cloud_run_name>
         <resources>

@@ -154,7 +154,7 @@
             Organized directory structure for test reports and artifacts
         </description>
     <directory_structure>
-      <directory name="test_reports" purpose="Root directory for all test artifacts">
+      <directory name="tests/test_reports" purpose="Root directory for all test artifacts">
         <subdirectory name="latest" purpose="Current test reports (one per level)">
           <file>smoke_report.md</file>
           <file>unit_report.md</file>
@@ -216,7 +216,7 @@
             Structured data formats for CI/CD integration
         </description>
     <json_metrics>
-      <location>test_reports/metrics/{level}_metrics.json</location>
+      <location>tests/test_reports/metrics/{level}_metrics.json</location>
       <schema>
                 {
                     "timestamp": "ISO-8601",
@@ -244,7 +244,7 @@
             </schema>
     </json_metrics>
     <historical_data>
-      <location>test_reports/metrics/test_history.json</location>
+      <location>tests/test_reports/metrics/test_history.json</location>
       <content>
         <item>Run history with timestamps</item>
         <item>Flaky test tracking</item>
@@ -297,7 +297,7 @@
     </command>
     <command name="view_test_metrics">
       <description>View test metrics and trends</description>
-      <usage>cat test_reports/metrics/test_history.json | python -m json.tool</usage>
+      <usage>cat tests/test_reports/metrics/test_history.json | python -m json.tool</usage>
     </command>
     <command name="generate_custom_report">
       <description>Generate custom test report</description>

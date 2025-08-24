@@ -579,7 +579,7 @@ frontend/cypress
         <guideline>Test exclusions work for all services</guideline>
         <guideline>Remove any subdirectory .dockerignore files to avoid confusion</guideline>
       </prevention>
-      <key_insight>When Docker builds from root with "docker build -f Dockerfile.frontend .", it uses root .dockerignore, NOT frontend/.dockerignore</key_insight>
+      <key_insight>When Docker builds from root with "docker build -f deployment/docker/Dockerfile.frontend .", it uses root .dockerignore, NOT frontend/.dockerignore</key_insight>
     </learning>
 
     <learning>

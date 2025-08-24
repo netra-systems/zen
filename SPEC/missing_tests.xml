@@ -215,10 +215,10 @@
     
     <reporting>
       <report frequency="Weekly" format="JSON">
-        <location>test_reports/coverage_summary.json</location>
+        <location>tests/test_reports/coverage_summary.json</location>
       </report>
       <report frequency="Per-Sprint" format="Markdown">
-        <location>test_reports/sprint_coverage_report.md</location>
+        <location>tests/test_reports/sprint_coverage_report.md</location>
       </report>
     </reporting>
   </coverage_tracking>

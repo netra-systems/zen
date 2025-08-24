@@ -196,7 +196,7 @@
         <action priority="1">Read SPEC/test_runner_guide.xml for test runner commands</action>
         <action priority="2">Read SPEC/testing.xml for testing standards</action>
         <action priority="3">Check SPEC/learnings/testing.xml for known issues</action>
-        <action priority="4">Review test_reports/failing_tests.json if exists</action>
+        <action priority="4">Review tests/test_reports/failing_tests.json if exists</action>
       </actions>
     </step>
     <step number="2" name="Use Unified Test Runner">

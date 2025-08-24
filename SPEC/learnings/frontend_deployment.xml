@@ -99,7 +99,7 @@
     
     <step order="3">
       <action>Build Docker image with correct platform</action>
-      <command>docker build -t gcr.io/netra-staging/netra-frontend-staging:latest -f Dockerfile.frontend --platform linux/amd64 .</command>
+      <command>docker build -t gcr.io/netra-staging/netra-frontend-staging:latest -f deployment/docker/Dockerfile.frontend --platform linux/amd64 .</command>
       <expected>Build succeeds with linux/amd64 platform for Cloud Run compatibility</expected>
     </step>
     

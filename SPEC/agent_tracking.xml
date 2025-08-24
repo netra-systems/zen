@@ -2,11 +2,6 @@
 <specification>
   <metadata>
     <last_edited>2025-08-21T08:47:28.346450</last_edited>
-    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.346450">
-      <reasons>
-        <reason>Content contains: old</reason>
-      </reasons>
-    </legacy_status>
   </metadata>
   <title>Agent Code Modification Tracking Specification</title>
   <version>1.0.0</version>

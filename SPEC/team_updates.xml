@@ -83,7 +83,7 @@
       <module name="test_report_analyzer" max_lines="300">
         <responsibility>Analyze test reports and identify issues</responsibility>
         <functions>
-          <function name="load_latest_reports" max_lines="8">Load test reports from test_reports/</function>
+          <function name="load_latest_reports" max_lines="8">Load test reports from tests/test_reports/</function>
           <function name="extract_failures" max_lines="8">Identify test failures and flaky tests</function>
           <function name="calculate_coverage_delta" max_lines="8">Show coverage changes</function>
         </functions>

@@ -6,11 +6,6 @@
     <description>System architecture, components, and design patterns for the Netra platform</description>
     <created>2025-01-11</created>
     <last_edited>2025-08-21T08:47:28.359941</last_edited>
-    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.359941">
-      <reasons>
-        <reason>Likely outdated spec: architecture.xml</reason>
-      </reasons>
-    </legacy_status>
   </metadata>
   <system_overview>
     <description>Netra AI Optimization Platform - Enterprise-grade AI workload optimization system</description>
