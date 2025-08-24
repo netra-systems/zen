@@ -133,9 +133,8 @@ class DatabaseConnector:
         env_manager = get_env()
         postgres_url = env_manager.get(DatabaseConstants.DATABASE_URL)
         if postgres_url:
-            # Normalize the URL using shared CoreDatabaseManager
-            normalized_url = CoreDatabaseManager.normalize_postgres_url(postgres_url)
-            self._add_connection("main_postgres", DatabaseType.POSTGRESQL, normalized_url)
+            # Use the URL directly - normalization can be done if needed
+            self._add_connection("main_postgres", DatabaseType.POSTGRESQL, postgres_url)
     
     def _discover_clickhouse_connection(self) -> None:
         """Discover ClickHouse connection."""
