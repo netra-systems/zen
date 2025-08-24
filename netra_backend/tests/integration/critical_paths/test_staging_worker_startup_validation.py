@@ -20,7 +20,6 @@ from pathlib import Path
 import asyncio
 import json
 import logging
-import os
 import subprocess
 import time
 from dataclasses import dataclass, field
@@ -32,6 +31,7 @@ import httpx
 import pytest
 from loguru import logger
 
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.health_check_service import HealthCheckService
 
@@ -85,7 +85,7 @@ class StagingWorkerValidator:
             
             # Check critical configuration
             for config_key in self.critical_configs:
-                value = os.getenv(config_key)
+                value = get_env().get(config_key)
                 if not value:
                     metrics.config_errors.append(f"Missing {config_key}")
                 elif config_key == "DATABASE_URL" and "cloudsql" in value:
@@ -152,7 +152,7 @@ class StagingWorkerValidator:
     async def _check_redis_connection(self) -> bool:
         """Check Redis connectivity."""
         try:
-            redis_url = os.getenv("REDIS_URL", "")
+            redis_url = get_env().get("REDIS_URL", "")
             if not redis_url:
                 return False
                 
@@ -165,7 +165,7 @@ class StagingWorkerValidator:
     async def _check_postgres_connection(self) -> bool:
         """Check PostgreSQL connectivity."""
         try:
-            db_url = os.getenv("DATABASE_URL", "")
+            db_url = get_env().get("DATABASE_URL", "")
             if not db_url:
                 return False
                 
@@ -178,7 +178,7 @@ class StagingWorkerValidator:
     async def _check_auth_service(self) -> bool:
         """Check auth service availability."""
         try:
-            auth_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8001")
+            auth_url = get_env().get("AUTH_SERVICE_URL", "http://localhost:8001")
             async with httpx.AsyncClient() as client:
                 response = await client.get(f"{auth_url}/health", timeout=5.0)
                 return response.status_code == 200
@@ -194,14 +194,14 @@ class StagingWorkerValidator:
         issues = []
         
         # Configuration validation issues
-        if not os.getenv("WORKERS", ""):
+        if not get_env().get("WORKERS", ""):
             issues.append("Missing WORKERS configuration")
             
-        if not os.getenv("PORT", ""):
+        if not get_env().get("PORT", ""):
             issues.append("Missing PORT configuration")
             
         # Database connection issues
-        db_url = os.getenv("DATABASE_URL", "")
+        db_url = get_env().get("DATABASE_URL", "")
         if not db_url:
             issues.append("Missing DATABASE_URL configuration")
         elif "cloudsql" in db_url:
@@ -211,11 +211,11 @@ class StagingWorkerValidator:
                 issues.append("Cloud SQL proxy socket not available")
                 
         # Redis connection issues
-        if not os.getenv("REDIS_URL", ""):
+        if not get_env().get("REDIS_URL", ""):
             issues.append("Missing REDIS_URL configuration")
             
         # Auth service configuration issues
-        if not os.getenv("NETRA_API_KEY", ""):
+        if not get_env().get("NETRA_API_KEY", ""):
             issues.append("Missing NETRA_API_KEY configuration")
             
         # Permission issues (common cause of exit code 3)

@@ -42,7 +42,6 @@ class DatabaseManager:
         """
         # Check if we're in a test environment and should bypass config caching
         import sys
-        import os
         is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
         
         raw_url = ""
@@ -295,7 +294,6 @@ class DatabaseManager:
         """
         # Check if we're in pytest mode and should directly read environment
         import sys
-        import os
         is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
         
         if is_pytest:

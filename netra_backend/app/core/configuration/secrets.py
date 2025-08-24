@@ -18,20 +18,7 @@ import json
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-# Use backend-specific isolated environment
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.Config import AppConfig

@@ -1,17 +1,3 @@
-# Use backend-specific isolated environment
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
 """Unified Configuration Management - Core Orchestration
 
 **CRITICAL: Single Source of Truth for All Configuration**
@@ -25,7 +11,6 @@ All configuration access MUST go through this system.
 Each function ≤8 lines, file ≤300 lines.
 """
 
-import os
 import threading
 from datetime import datetime
 from functools import lru_cache
@@ -33,6 +18,7 @@ from typing import Any, Dict, Optional, Tuple
 
 from pydantic import ValidationError
 
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.schemas.Config import AppConfig
 
@@ -157,13 +143,10 @@ class UnifiedConfigManager:
     def _detect_environment(self) -> str:
         """Detect current environment from configuration.
         
-        CRITICAL: NEVER use direct os.environ calls.
-        This is a bootstrap method that must access env vars directly
-        only during initial setup. All other access goes through config.
+        CRITICAL: Bootstrap method for initial config load.
+        All other access goes through unified config system.
         """
         # Bootstrap-only environment detection - required for initial config load
-        # This is the ONLY acceptable direct env var access in the system
-        import os
         if get_env().get("TESTING"):
             return "testing"
         env = get_env().get("ENVIRONMENT", "development").lower()
@@ -177,7 +160,6 @@ class UnifiedConfigManager:
         After bootstrap, use config.hot_reload_enabled instead.
         """
         # Bootstrap-only check - required before config is loaded
-        import os
         return get_env().get("CONFIG_HOT_RELOAD", "false").lower() == "true"
     
     @lru_cache(maxsize=1)
