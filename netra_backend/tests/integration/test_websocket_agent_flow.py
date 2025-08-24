@@ -22,7 +22,7 @@ import asyncio
 import json
 import pytest
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler

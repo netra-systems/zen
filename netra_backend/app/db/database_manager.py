@@ -1,4 +1,3 @@
-from dev_launcher.isolated_environment import get_env
 """Unified Database Manager - Handles Sync and Async Connections
 
 Business Value Justification (BVJ):
@@ -23,6 +22,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.exc import OperationalError, DisconnectionError
 
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger

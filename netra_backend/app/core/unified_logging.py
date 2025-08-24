@@ -1,4 +1,3 @@
-from dev_launcher.isolated_environment import get_env
 """Unified, optimized logging system for Netra backend with security and performance improvements.
 
 Main logger interface providing:
@@ -10,10 +9,10 @@ Main logger interface providing:
 
 import asyncio
 import logging
-import os
 from typing import Any, Dict, Optional
 
 from loguru import logger
+from netra_backend.app.core.isolated_environment import get_env
 
 from netra_backend.app.core.logging_context import (
     ExecutionTimeDecorator,

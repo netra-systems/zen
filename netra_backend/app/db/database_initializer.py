@@ -1,4 +1,5 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
+
 """
 Database Initializer with Auto-Creation, Migration, and Recovery
 

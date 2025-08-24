@@ -19,7 +19,7 @@ import json
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, mock_open, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, mock_open, patch
 
 import pytest
 from fastapi import WebSocket, WebSocketDisconnect

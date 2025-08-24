@@ -14,7 +14,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 import aiohttp
 import jwt
@@ -1375,7 +1375,6 @@ class TestAuthLoginCore:
     """20 Auth/Login tests focusing on basic authentication flows"""
     
     @pytest.mark.asyncio
-
     async def test_login_with_invalid_credentials_timing_attack(self):
 
         """Test that invalid login attempts have consistent timing"""
@@ -1411,7 +1410,6 @@ class TestAuthLoginCore:
         assert abs(avg_valid - avg_invalid) < 0.005  # Should be within 5ms
     
     @pytest.mark.asyncio
-
     async def test_concurrent_login_race_condition(self):
 
         """Test multiple concurrent login attempts for same user"""
@@ -1434,7 +1432,6 @@ class TestAuthLoginCore:
         assert len(successful_logins) == 1  # Only one should succeed
     
     @pytest.mark.asyncio
-
     async def test_jwt_token_expiry_boundary(self):
 
         """Test JWT token behavior at exact expiry moment"""
@@ -1456,7 +1453,6 @@ class TestAuthLoginCore:
         assert jwt_handler.verify_token(token) is None
     
     @pytest.mark.asyncio
-
     async def test_jwt_token_expiry(self):
 
         """Test JWT token expiry with get_current_user context"""
@@ -1476,7 +1472,6 @@ class TestAuthLoginCore:
         assert jwt_handler.get_current_user() is None
     
     @pytest.mark.asyncio
-
     async def test_refresh_token_rotation_security(self):
 
         """Test that refresh tokens are properly rotated and old ones invalidated"""
@@ -1498,7 +1493,6 @@ class TestAuthLoginCore:
             await auth_service.refresh_token(refresh_token_1)
     
     @pytest.mark.asyncio
-
     async def test_password_reset_token_single_use(self):
 
         """Test password reset tokens can only be used once"""
@@ -1518,7 +1512,6 @@ class TestAuthLoginCore:
             await auth_service.reset_password("token123", "another_password")
     
     @pytest.mark.asyncio
-
     async def test_session_fixation_prevention(self):
 
         """Test that session IDs change after successful login"""
@@ -1538,7 +1531,6 @@ class TestAuthLoginCore:
         assert session_after is None or session_after["id"] != session_id_before
     
     @pytest.mark.asyncio
-
     async def test_brute_force_lockout_mechanism(self):
 
         """Test account lockout after multiple failed login attempts"""
@@ -1568,7 +1560,6 @@ class TestAuthLoginCore:
         assert "locked" in str(exc.value).lower()
     
     @pytest.mark.asyncio
-
     async def test_oauth_state_parameter_validation(self):
 
         """Test OAuth state parameter prevents CSRF attacks"""
@@ -1584,7 +1575,6 @@ class TestAuthLoginCore:
             await oauth_handler.handle_callback("google", "code123", "wrong_state")
     
     @pytest.mark.asyncio
-
     async def test_jwt_algorithm_confusion_attack(self):
 
         """Test JWT is resistant to algorithm confusion attacks"""
@@ -1606,7 +1596,6 @@ class TestAuthLoginCore:
         assert jwt_handler.verify_token(malicious_token) is None
     
     @pytest.mark.asyncio
-
     async def test_login_with_sql_injection_attempt(self):
 
         """Test login is safe from SQL injection"""
@@ -1639,7 +1628,6 @@ class TestWebSocketCore:
     """20 WebSocket tests focusing on connection and messaging"""
     
     @pytest.mark.asyncio
-
     async def test_websocket_connection_without_auth(self):
 
         """Test WebSocket connection rejected without authentication"""
@@ -1653,7 +1641,6 @@ class TestWebSocketCore:
         assert "unauthorized" in str(exc.value).lower()
     
     @pytest.mark.asyncio
-
     async def test_websocket_reconnection_with_stale_token(self):
 
         """Test WebSocket reconnection with expired token"""
@@ -1679,7 +1666,6 @@ class TestSessionManagementCore:
     """20 Session management tests"""
     
     @pytest.mark.asyncio
-
     async def test_session_creation_without_user(self):
 
         """Test anonymous session creation"""
@@ -1719,7 +1705,6 @@ class TestDataPersistenceCore:
     """20 Data persistence tests"""
     
     @pytest.mark.asyncio
-
     async def test_database_connection_pooling(self):
 
         """Test database connection pool management"""
@@ -1751,7 +1736,6 @@ class TestErrorHandlingCore:
     """20 Error handling and edge case tests"""
     
     @pytest.mark.asyncio
-
     async def test_circuit_breaker_activation(self):
 
         """Test circuit breaker activates after failures"""

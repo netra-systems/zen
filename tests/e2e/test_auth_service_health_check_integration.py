@@ -22,6 +22,8 @@ import pytest
 # Add auth_service to Python path for imports
 auth_service_path = Path(__file__).parent.parent.parent / "auth_service"
 if str(auth_service_path) not in sys.path:
+    sys.path.append(str(auth_service_path))
+
 logger = logging.getLogger(__name__)
 
 @dataclass

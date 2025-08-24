@@ -22,7 +22,7 @@ from netra_backend.app.db.migration_utils import (
     needs_migration,
 )
 from netra_backend.app.migration_models import FailedMigration, MigrationState
-from netra_backend.app.migration_state_manager import MigrationStateManager
+from netra_backend.app.startup.migration_state_manager import MigrationStateManager
 
 
 class MigrationTracker:

@@ -14,7 +14,7 @@ import json
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 

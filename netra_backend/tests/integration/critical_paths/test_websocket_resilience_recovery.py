@@ -22,7 +22,7 @@ import time
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -64,7 +64,7 @@ class WebSocketResilienceManager:
 
         }
         
-    async def initialize_services(self):
+async def initialize_services(self):
 
         """Initialize WebSocket resilience services."""
 
@@ -90,7 +90,7 @@ class WebSocketResilienceManager:
 
             raise
     
-    async def create_websocket_session(self, user_id: str, session_data: Dict = None) -> str:
+async def create_websocket_session(self, user_id: str, session_data: Dict = None) -> str:
 
         """Create a WebSocket session with state tracking."""
 
@@ -131,7 +131,7 @@ class WebSocketResilienceManager:
 
             raise
     
-    async def simulate_connection_loss(self, session_id: str, 
+async def simulate_connection_loss(self, session_id: str, 
 
                                      disconnection_type: str = "network_timeout") -> Dict[str, Any]:
 
@@ -200,7 +200,7 @@ class WebSocketResilienceManager:
 
             }
     
-    async def preserve_connection_state(self, session_id: str, connection: Dict) -> bool:
+async def preserve_connection_state(self, session_id: str, connection: Dict) -> bool:
 
         """Preserve connection state before disconnection."""
 
@@ -232,7 +232,7 @@ class WebSocketResilienceManager:
 
             return False
     
-    async def attempt_reconnection(self, session_id: str, recovery_token: str = None) -> Dict[str, Any]:
+async def attempt_reconnection(self, session_id: str, recovery_token: str = None) -> Dict[str, Any]:
 
         """Attempt to reconnect and recover session state."""
 
@@ -313,7 +313,7 @@ class WebSocketResilienceManager:
 
             }
     
-    async def validate_recovery_token(self, session_id: str, recovery_token: str) -> bool:
+async def validate_recovery_token(self, session_id: str, recovery_token: str) -> bool:
 
         """Validate recovery token for session restoration."""
 
@@ -328,7 +328,7 @@ class WebSocketResilienceManager:
 
             return False
     
-    async def recover_session_state(self, session_id: str) -> Dict[str, Any]:
+async def recover_session_state(self, session_id: str) -> Dict[str, Any]:
 
         """Recover session state from persistence layer."""
 
@@ -351,88 +351,41 @@ class WebSocketResilienceManager:
                     return {"success": False, "error": f"Missing field: {field}"}
             
             return {
-
                 "success": True,
-
                 "recovered_state": preserved_state
-
             }
             
         except Exception as e:
-
             return {
-
                 "success": False,
-
                 "error": str(e)
-
             }
+
+@pytest.mark.asyncio
+async def test_message_delivery_during_reconnection(resilience_manager):
+    """Test message delivery and queuing during reconnection process."""
+    # Test message delivery during reconnection
+    session_id = await resilience_manager.create_test_session("test_user")
     
-    @pytest.mark.asyncio
-    async def test_message_delivery_during_reconnection(self, session_id: str) -> Dict[str, Any]:
-
-        """Test message delivery and queuing during reconnection process."""
-
-        if session_id not in self.active_connections:
-
-            return {"success": False, "error": "Session not found"}
-        
-        connection = self.active_connections[session_id]
-        
-        try:
-            # Send messages while disconnected
-
-            test_messages = [
-
-                {"id": str(uuid.uuid4()), "content": f"Test message {i}", "timestamp": time.time()}
-
-                for i in range(3)
-
-            ]
-            
-            if connection["status"] == "disconnected":
-                # Queue messages for delivery after reconnection
-
-                connection["message_queue"].extend(test_messages)
-                
-                return {
-
-                    "success": True,
-
-                    "messages_queued": len(test_messages),
-
-                    "total_queue_size": len(connection["message_queue"])
-
-                }
-
-            else:
-                # Deliver immediately if connected
-
-                for message in test_messages:
-
-                    await self.deliver_message(session_id, message)
-                
-                return {
-
-                    "success": True,
-
-                    "messages_delivered": len(test_messages),
-
-                    "delivery_method": "immediate"
-
-                }
-            
-        except Exception as e:
-
-            return {
-
-                "success": False,
-
-                "error": str(e)
-
-            }
+    # Simulate disconnection
+    await resilience_manager.simulate_disconnection(session_id)
     
-    async def deliver_message(self, session_id: str, message: Dict[str, Any]):
+    # Test message queuing during disconnection
+    test_messages = [
+        {"id": f"msg_{i}", "content": f"Test message {i}", "timestamp": time.time()}
+        for i in range(3)
+    ]
+    
+    # Queue messages during disconnection
+    for message in test_messages:
+        await resilience_manager.queue_message(session_id, message)
+    
+    # Simulate reconnection and verify message delivery
+    reconnection_result = await resilience_manager.simulate_reconnection(session_id)
+    
+    assert reconnection_result["success"] is True
+    
+async def deliver_message(self, session_id: str, message: Dict[str, Any]):
 
         """Deliver message to WebSocket connection."""
         # Simulate message delivery
@@ -449,7 +402,7 @@ class WebSocketResilienceManager:
 
         connection["delivered_messages"].append(message)
     
-    def update_average_recovery_time(self, new_recovery_time: float):
+def update_average_recovery_time(self, new_recovery_time: float):
 
         """Update running average of recovery times."""
 
@@ -469,7 +422,7 @@ class WebSocketResilienceManager:
 
             )
     
-    async def get_resilience_metrics(self) -> Dict[str, Any]:
+async def get_resilience_metrics(self) -> Dict[str, Any]:
 
         """Get comprehensive resilience metrics."""
 
@@ -515,7 +468,7 @@ class WebSocketResilienceManager:
 
         }
     
-    def get_disconnection_type_breakdown(self) -> Dict[str, int]:
+def get_disconnection_type_breakdown(self) -> Dict[str, int]:
 
         """Get breakdown of disconnection types."""
 
@@ -529,7 +482,7 @@ class WebSocketResilienceManager:
 
         return breakdown
     
-    async def cleanup(self):
+async def cleanup(self):
 
         """Clean up resources."""
 
@@ -566,7 +519,6 @@ async def resilience_manager():
     await manager.cleanup()
 
 @pytest.mark.asyncio
-
 async def test_network_timeout_recovery(resilience_manager):
 
     """Test recovery from network timeout disconnection."""
@@ -610,7 +562,6 @@ async def test_network_timeout_recovery(resilience_manager):
     assert recovered_state["application_state"]["message_count"] == 5
 
 @pytest.mark.asyncio
-
 async def test_server_restart_recovery(resilience_manager):
 
     """Test recovery from server restart scenario."""
@@ -656,7 +607,6 @@ async def test_server_restart_recovery(resilience_manager):
     assert "search" in recovered_state["application_state"]["active_tools"]
 
 @pytest.mark.asyncio
-
 async def test_message_queuing_during_disconnection(resilience_manager):
 
     """Test message queuing and delivery after reconnection."""
@@ -696,7 +646,6 @@ async def test_message_queuing_during_disconnection(resilience_manager):
     assert post_reconnection_result["delivery_method"] == "immediate"
 
 @pytest.mark.asyncio
-
 async def test_concurrent_reconnection_attempts(resilience_manager):
 
     """Test handling of multiple concurrent reconnection attempts."""
@@ -746,7 +695,6 @@ async def test_concurrent_reconnection_attempts(resilience_manager):
         assert result["recovery_time"] < 5.0
 
 @pytest.mark.asyncio
-
 async def test_invalid_recovery_token_handling(resilience_manager):
 
     """Test handling of invalid recovery tokens."""
@@ -778,7 +726,6 @@ async def test_invalid_recovery_token_handling(resilience_manager):
     assert recovery_result_no_token["success"] is True
 
 @pytest.mark.asyncio
-
 async def test_resilience_performance_metrics(resilience_manager):
 
     """Test resilience performance meets requirements."""
@@ -837,7 +784,6 @@ async def test_resilience_performance_metrics(resilience_manager):
     assert metrics["state_preservation_rate"] >= 95.0
 
 @pytest.mark.asyncio
-
 async def test_state_preservation_integrity(resilience_manager):
 
     """Test that state preservation maintains data integrity."""

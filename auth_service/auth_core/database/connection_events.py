@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 def get_settings():
     """Get settings lazily to avoid circular import.
     
-    Auth service can run standalone or with backend, so we need to handle both cases.
+    Auth service runs standalone - NEVER import from netra_backend.
     """
     try:
-        # First try auth service config
+        # Use auth service config only - maintain service independence
         from auth_service.auth_core.config import AuthConfig
         # Create a settings-like object with required attributes
         class AuthSettings:
@@ -29,14 +29,9 @@ def get_settings():
                 self.environment = AuthConfig.ENVIRONMENT if hasattr(AuthConfig, 'ENVIRONMENT') else 'development'
         return AuthSettings()
     except ImportError:
-        try:
-            # Fallback to netra_backend config if available (integrated mode)
-            from netra_backend.app.config import get_config
-            return get_config()
-        except ImportError:
-            # Handle case where neither is available (isolated testing)
-            logger.debug("No config available, using defaults")
-            return None
+        # Handle case where config is not available (isolated testing)
+        logger.debug("No config available, using defaults")
+        return None
 
 # Initialize settings at module level
 settings = get_settings()

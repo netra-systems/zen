@@ -35,7 +35,7 @@ from functools import wraps
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Type, Union, Tuple
 from datetime import datetime, timedelta, timezone
 
-from netra_backend.app.core.configuration.environment import IsolatedEnvironment
+from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 

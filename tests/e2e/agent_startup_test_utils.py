@@ -186,28 +186,17 @@ def create_startup_test_suite(
     from tests.e2e.agent_startup_user_manager import UserManager
     from tests.e2e.agent_startup_websocket_manager import WebSocketManager
     
+    return {
+        "orchestrator": ServiceOrchestrator(),
+        "user_manager": UserManager(auth_url),
+        "websocket_manager": WebSocketManager(websocket_url),
+        "performance_measurer": PerformanceMeasurer(),
+        "failure_simulator": FailureSimulator()
+    }
 
-
-# Backward compatibility alias
 
 # Backward compatibility alias
 UnifiedWebSocketManager = WebSocketManager
-
-WebSocketManager = WebSocketManager
-
-    return {
-
-        "orchestrator": ServiceOrchestrator(),
-
-        "user_manager": UserManager(auth_url),
-
-        "websocket_manager": WebSocketManager(websocket_url),
-
-        "performance_measurer": PerformanceMeasurer(),
-
-        "failure_simulator": FailureSimulator()
-
-    }
 
 # Export key classes and functions for easy importing
 

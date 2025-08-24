@@ -2265,6 +2265,10 @@ class DevLauncher:
                 self.process_manager.add_process("Backend", backend_result[0])
                 backend_success = True
                 self._print("✅", "BACKEND", "Backend service started successfully")
+                
+                # Update WebSocket validator with actual backend port
+                actual_backend_port = self.config.backend_port or 8000
+                self.websocket_validator.update_backend_port(actual_backend_port)
             else:
                 self._print("❌", "BACKEND", "Backend service failed to start")
         except Exception as e:

@@ -18,7 +18,7 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 from netra_backend.app.services.billing.revenue_calculator import RevenueCalculator
 

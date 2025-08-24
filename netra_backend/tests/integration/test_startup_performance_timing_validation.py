@@ -27,7 +27,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import aiohttp
 import asyncpg
@@ -46,12 +46,15 @@ class TestStartupPerformanceTimingValidation:
     
     @pytest.fixture
     @pytest.mark.asyncio
-    async def test_containers(self):
+    async def test_containers(self, request):
         """Set up containerized services for L3 testing."""
         # Container setup based on test requirements
         containers = {}
         
-        if 'database' in test_def['name'].lower() or 'connection' in test_def['name'].lower():
+        # Get test name from request
+        test_name = request.node.name.lower()
+        
+        if 'database' in test_name or 'connection' in test_name:
             # PostgreSQL container
             containers["postgres"] = {
                 "url": "postgresql://test:test@localhost:5433/netra_test",
@@ -59,7 +62,7 @@ class TestStartupPerformanceTimingValidation:
                 "pool_size": 20
             }
         
-        if 'clickhouse' in test_def['name'].lower():
+        if 'clickhouse' in test_name:
             # ClickHouse container
             containers["clickhouse"] = {
                 "url": "http://localhost:8124",
@@ -67,7 +70,7 @@ class TestStartupPerformanceTimingValidation:
                 "max_connections": 100
             }
         
-        if 'redis' in test_def['name'].lower() or 'session' in test_def['name'].lower():
+        if 'redis' in test_name or 'session' in test_name:
             # Redis container
             containers["redis"] = {
                 "url": "redis://localhost:6380",

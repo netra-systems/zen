@@ -76,7 +76,6 @@ class TestCreateThread:
         """Test error handling in create_thread"""
         # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler, \
-             # Mock: Component isolation for testing without external dependencies
              patch('netra_backend.app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             mock_handler.side_effect = Exception("Database error")

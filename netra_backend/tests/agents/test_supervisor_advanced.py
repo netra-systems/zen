@@ -13,7 +13,7 @@ import asyncio
 import json
 import time
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, call, patch
 
 import pytest
 from netra_backend.app.schemas import (
@@ -347,7 +347,6 @@ class TestSupervisorAdvancedFeatures:
         assert supervisor.circuit_breaker["failures"] == 0
 
     @pytest.mark.asyncio
-
     async def test_supervisor_circuit_breaker_recovery(self):
         """Test supervisor can recover from circuit breaker state"""
         supervisor = self._setup_circuit_breaker_supervisor()

@@ -63,9 +63,7 @@ class TestSystemComponentIntegration:
         """Test HTTP client integration with JSON parsing."""
         # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.services.external_api_client.circuit_registry') as mock_registry, \
-             # Mock: Database session isolation for transaction testing without real database dependency
              patch('app.services.external_api_client.ClientSession') as mock_session_class:
             
             # Setup mocks
@@ -146,9 +144,7 @@ class TestSystemComponentIntegration:
             # Mock HTTP client operations
             # Mock: Component isolation for testing without external dependencies
             with patch('app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
-                 # Mock: Component isolation for testing without external dependencies
                  patch('app.services.external_api_client.circuit_registry') as mock_registry, \
-                 # Mock: Database session isolation for transaction testing without real database dependency
                  patch('app.services.external_api_client.ClientSession') as mock_session_class:
                 
                 # Mock: Generic component isolation for controlled unit testing

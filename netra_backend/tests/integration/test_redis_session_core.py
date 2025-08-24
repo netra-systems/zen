@@ -76,7 +76,6 @@ class TestRedisSessionStateCore:
         return MockWebSocketManagerWithRedis(session_manager)
 
     @pytest.mark.asyncio
-
     async def test_websocket_connection_redis_state_creation(self, websocket_manager, session_manager):
 
         """BVJ: Validates WebSocket connection triggers Redis state creation."""
@@ -126,7 +125,6 @@ class TestRedisSessionStateCore:
         logger.info(f"WebSocket Redis state creation validated: {connection_time:.2f}s creation time")
 
     @pytest.mark.asyncio
-
     async def test_multiple_connection_state_consistency(self, websocket_manager, session_manager):
 
         """BVJ: Validates multiple connections share consistent state."""
@@ -182,7 +180,6 @@ class TestRedisSessionStateCore:
         logger.info(f"Multiple connection consistency validated: {synced_count} connections in {sync_time:.2f}s")
 
     @pytest.mark.asyncio
-
     async def test_session_persistence_across_reconnections(self, websocket_manager, session_manager):
 
         """BVJ: Validates session persistence across connection drops and reconnections."""

@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 """Unified Secret Management Module
 
 Provides a unified interface for all secret management operations.
@@ -193,8 +193,8 @@ class UnifiedSecretManager:
             self._logger.error("Cannot set secrets in production")
             return False
             
-        # CONFIG BOOTSTRAP: Direct env access for secret setting (dev/test only)
-        os.environ[key] = value
+        # CONFIG BOOTSTRAP: Use get_env for secret setting (dev/test only)
+        get_env().set(key, value, "unified_secrets")
         self._cache[key] = value
         return True
     

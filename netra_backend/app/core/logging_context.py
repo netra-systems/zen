@@ -1,4 +1,3 @@
-from dev_launcher.isolated_environment import get_env
 """Logging context management and correlation IDs for the unified logging system.
 
 This module handles:
@@ -10,13 +9,13 @@ This module handles:
 """
 
 import asyncio
-import os
 import time
 from contextvars import ContextVar
 from functools import wraps
 from typing import Any, Dict, Optional
 
 from loguru import logger
+from netra_backend.app.core.isolated_environment import get_env
 
 # Context variables for request tracking
 request_id_context: ContextVar[Optional[str]] = ContextVar('request_id', default=None)
@@ -178,7 +177,6 @@ class ContextFilter:
         """Check if running in production environment."""
         # Read environment directly to avoid circular dependency
         # This prevents loading the full configuration during logging initialization
-        import os
         environment = get_env().get('ENVIRONMENT', 'development').lower()
         return environment == 'production'
     

@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 """Input filtering and validation for NACIS security.
 
 Date Created: 2025-01-22

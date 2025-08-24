@@ -35,7 +35,7 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from datetime import datetime, timezone
 
-from netra_backend.app.core.configuration.environment import IsolatedEnvironment
+from netra_backend.app.core.isolated_environment import IsolatedEnvironment
 
 logger = logging.getLogger(__name__)
 

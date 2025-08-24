@@ -34,7 +34,6 @@ class TestResilientHTTPClientHealth:
     async def test_health_check_error(self, client):
         """Test health check with error."""
         with patch.object(client, '_get_circuit', side_effect=Exception("Circuit error")), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.services.external_api_client.logger') as mock_logger:
             result = await client.health_check("test_api")
             verify_error_health_check(result, mock_logger)

@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 """L4 Staging Critical Path Base Test Suite
 
 Business Value Justification (BVJ):

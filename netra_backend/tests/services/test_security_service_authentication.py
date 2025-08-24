@@ -8,7 +8,7 @@ from pathlib import Path
 
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from cryptography.fernet import Fernet

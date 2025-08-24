@@ -287,7 +287,7 @@ async def real_agent_service(real_supervisor_agent):
 @pytest.fixture
 def mock_db_session():
     """Fixture providing mock database session."""
-    from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock
+    from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock
     from sqlalchemy.ext.asyncio import AsyncSession
     
     # Mock: Database session isolation for transaction testing without real database dependency
@@ -342,7 +342,7 @@ def mock_db_session():
 @pytest.fixture(autouse=True)
 def setup_database_and_mocks():
     """Auto-setup database session factory and mocks for all tests in this file."""
-    from unittest.mock import patch, AsyncMock, MagicMock, MagicMock, Mock
+    from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock
     import netra_backend.app.db.postgres_core as postgres_module
     import netra_backend.app.services.database.unit_of_work as uow_module
     from netra_backend.app.db.models_postgres import Thread, Run

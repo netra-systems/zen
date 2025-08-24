@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 import time
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -105,7 +105,6 @@ class TestThreadService:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('uuid.uuid4', return_value="test-uuid"), \
-             # Mock: Component isolation for testing without external dependencies
              patch('time.time', return_value=1234567890):
             result = await thread_service.create_message(
                 "thread_123", "user", "Hello world"
@@ -168,7 +167,6 @@ class TestThreadService:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('uuid.uuid4', return_value="test-uuid"), \
-             # Mock: Component isolation for testing without external dependencies
              patch('time.time', return_value=1234567890):
             result = await thread_service.create_run(
                 "thread_123", "asst_456"

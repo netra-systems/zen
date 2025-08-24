@@ -5,7 +5,7 @@ This module provides mock classes and enums for testing agent services.
 
 import asyncio
 from enum import Enum
-from unittest.mock import AsyncMock, MagicMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, Any, Optional
 
 

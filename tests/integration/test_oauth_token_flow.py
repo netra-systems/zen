@@ -23,9 +23,7 @@ async def test_oauth_callback_token_exchange():
     
     # Mock: Component isolation for testing without external dependencies
     with patch('auth_service.auth_core.config.AuthConfig.get_google_client_id', return_value='test-client-id'), \
-         # Mock: Component isolation for testing without external dependencies
          patch('auth_service.auth_core.config.AuthConfig.get_google_client_secret', return_value='test-secret'), \
-         # Mock: Component isolation for testing without external dependencies
          patch('auth_service.auth_core.routes.auth_routes._determine_urls', return_value=('http://auth.test', 'http://app.test')):
         
         # Mock Google token exchange
@@ -66,9 +64,7 @@ async def test_oauth_callback_token_exchange():
             # Mock database operations
             # Mock: Component isolation for testing without external dependencies
             with patch('auth_service.auth_core.routes.auth_routes.auth_db') as mock_db, \
-                 # Mock: Component isolation for testing without external dependencies
                  patch('auth_service.auth_core.routes.auth_routes.AuthUserRepository') as mock_repo, \
-                 # Mock: Authentication service isolation for testing without real auth flows
                  patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth_service:
                 
                 # Setup mocks
@@ -168,9 +164,7 @@ async def test_oauth_error_handling():
     
     # Mock: Component isolation for testing without external dependencies
     with patch('auth_service.auth_core.config.AuthConfig.get_google_client_id', return_value='test-client-id'), \
-         # Mock: Component isolation for testing without external dependencies
          patch('auth_service.auth_core.config.AuthConfig.get_google_client_secret', return_value='test-secret'), \
-         # Mock: Component isolation for testing without external dependencies
          patch('auth_service.auth_core.routes.auth_routes._determine_urls', return_value=('http://auth.test', 'http://app.test')):
         
         # Mock: Component isolation for testing without external dependencies

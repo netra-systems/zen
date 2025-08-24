@@ -13,7 +13,7 @@ import json
 import os
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, call, patch
 
 import pytest
 from netra_backend.app.schemas import ContentGenParams, CorpusCreate, CorpusUpdate

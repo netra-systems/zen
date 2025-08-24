@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.tests.test_route_fixtures import (
+from netra_backend.tests.routes.test_route_fixtures import (
     CommonResponseValidators,
     MockServiceFactory,
     agent_test_client,

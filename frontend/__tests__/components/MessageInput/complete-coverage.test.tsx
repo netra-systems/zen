@@ -102,7 +102,14 @@ describe('MessageInput - Core Functionality', () => {
     });
 
     it('updates rows based on content', () => {
-      mockUseTextareaResize.mockReturnValue({ rows: 3 });
+      // Mock the useTextareaResize hook to return 3 rows
+      const useTextareaResizeMock = require('./shared-test-setup').mockUseTextareaResize;
+      useTextareaResizeMock.mockReturnValue({ rows: 3 });
+      
+      // Mock the hook in the component module
+      jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
+        useTextareaResize: () => ({ rows: 3 })
+      }));
       
       render(<MessageInput />);
       

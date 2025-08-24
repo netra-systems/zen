@@ -8,7 +8,15 @@ import os
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
-import websockets
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", DeprecationWarning)
+    import websockets
+    try:
+        from websockets import WebSocketServerProtocol
+    except ImportError:
+        # Fallback for older versions
+        from websockets.server import WebSocketServerProtocol
 
 # Performance Requirements
 RESOURCE_LIMITS = {
@@ -38,7 +46,7 @@ class TenantAgent:
     user_id: str
     websocket_uri: str
     jwt_token: str
-    connection: Optional[websockets.WebSocketServerProtocol] = None
+    connection: Optional[WebSocketServerProtocol] = None
     process_info: Optional[Dict] = None
     
 @dataclass

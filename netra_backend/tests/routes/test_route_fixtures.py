@@ -9,7 +9,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -37,7 +37,7 @@ class MockDependencyManager:
     @staticmethod
     def setup_core_dependencies(app):
         """Set up core application dependencies for testing."""
-        from unittest.mock import AsyncMock, MagicMock, MagicMock
+        from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
         from sqlalchemy.ext.asyncio import AsyncSession
 

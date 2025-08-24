@@ -1,4 +1,3 @@
-from dev_launcher.isolated_environment import get_env
 """Environment Constants Module
 
 Single source of truth for all environment-related constants and utilities.
@@ -21,9 +20,10 @@ Business Value: Platform/Internal - Deployment Stability - Prevents deployment
 errors and ensures consistent environment handling across all services.
 """
 
-import os
 from enum import Enum
 from typing import Any, Dict, List, Optional
+
+from netra_backend.app.core.isolated_environment import get_env
 
 # Import unified config for non-bootstrap functionality
 try:

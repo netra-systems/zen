@@ -123,7 +123,7 @@ class DashboardPerformanceMetrics:
 class DashboardPerformanceValidator:
 
     """Validates dashboard query performance with real infrastructure."""
-    
+
     def __init__(self):
 
         self.query_engine = None
@@ -139,8 +139,8 @@ class DashboardPerformanceValidator:
         self.performance_baselines = {}
 
         self.optimization_strategies = []
-        
-    async def initialize_dashboard_services(self):
+
+async def initialize_dashboard_services(self):
 
         """Initialize dashboard performance services for L3 testing."""
 
@@ -149,30 +149,30 @@ class DashboardPerformanceValidator:
             self.query_engine = DashboardQueryEngine()
 
             await self.query_engine.initialize()
-            
+
             self.cache_manager = QueryCacheManager()
 
             await self.cache_manager.initialize()
-            
+
             self.performance_monitor = QueryPerformanceMonitor()
-            
+
             # Setup realistic dashboard queries
 
             await self._setup_dashboard_queries()
-            
+
             # Establish performance baselines
 
             await self._establish_performance_baselines()
-            
+
             logger.info("Dashboard performance L3 services initialized")
-            
+
         except Exception as e:
 
             logger.error(f"Failed to initialize dashboard services: {e}")
 
             raise
-    
-    async def _setup_dashboard_queries(self):
+
+async def _setup_dashboard_queries(self):
 
         """Setup realistic dashboard queries for different business scenarios."""
 
@@ -207,7 +207,7 @@ class DashboardPerformanceValidator:
 
                 query_id="exec_user_growth",
 
-                dashboard_name="Executive Dashboard", 
+                dashboard_name="Executive Dashboard",
 
                 query_type="time_series",
 
@@ -226,7 +226,7 @@ class DashboardPerformanceValidator:
                 business_criticality="critical"
 
             ),
-            
+
             # Operations Dashboard - Real-time monitoring
 
             DashboardQuery(
@@ -276,7 +276,7 @@ class DashboardPerformanceValidator:
                 business_criticality="high"
 
             ),
-            
+
             # Product Analytics - Deep insights
 
             DashboardQuery(
@@ -326,7 +326,7 @@ class DashboardPerformanceValidator:
                 business_criticality="medium"
 
             ),
-            
+
             # Customer Success - User behavior
 
             DashboardQuery(
@@ -376,7 +376,7 @@ class DashboardPerformanceValidator:
                 business_criticality="high"
 
             ),
-            
+
             # Engineering Dashboard - Technical metrics
 
             DashboardQuery(
@@ -428,7 +428,7 @@ class DashboardPerformanceValidator:
             )
 
         ]
-        
+
         # Fix complexity_score type issue
 
         for query in dashboard_queries:
@@ -436,10 +436,10 @@ class DashboardPerformanceValidator:
             if isinstance(query.complexity_score, str):
 
                 query.complexity_score = int(query.complexity_score)
-        
+
         self.dashboard_queries = dashboard_queries
-    
-    async def _establish_performance_baselines(self):
+
+async def _establish_performance_baselines(self):
 
         """Establish performance baselines for each query type."""
 
@@ -454,8 +454,8 @@ class DashboardPerformanceValidator:
             "historical": {"max_response_ms": 5000, "target_p95_ms": 3000}
 
         }
-    
-    async def execute_dashboard_queries(self, concurrent_users: int = 10, 
+
+async def execute_dashboard_queries(self, concurrent_users: int = 10,
 
                                       duration_seconds: int = 30) -> Dict[str, Any]:
 
@@ -478,7 +478,7 @@ class DashboardPerformanceValidator:
             "test_duration_seconds": duration_seconds
 
         }
-        
+
         # Create tasks for concurrent users
 
         user_tasks = []
@@ -488,7 +488,7 @@ class DashboardPerformanceValidator:
             task = self._simulate_user_dashboard_usage(user_id, duration_seconds)
 
             user_tasks.append(task)
-        
+
         # Execute concurrent dashboard usage
 
         test_start = time.time()
@@ -496,7 +496,7 @@ class DashboardPerformanceValidator:
         user_results = await asyncio.gather(*user_tasks, return_exceptions=True)
 
         test_duration = time.time() - test_start
-        
+
         # Aggregate results
 
         for user_result in user_results:
@@ -506,7 +506,7 @@ class DashboardPerformanceValidator:
                 execution_results["failed_executions"] += 1
 
                 continue
-            
+
             execution_results["total_executions"] += user_result["queries_executed"]
 
             execution_results["successful_executions"] += user_result["successful_queries"]
@@ -514,21 +514,21 @@ class DashboardPerformanceValidator:
             execution_results["failed_executions"] += user_result["failed_queries"]
 
             execution_results["execution_details"].extend(user_result["query_executions"])
-        
+
         # Analyze performance by query type
 
         for query in self.dashboard_queries:
 
-            query_executions = [ex for ex in execution_results["execution_details"] 
+            query_executions = [ex for ex in execution_results["execution_details"]
 
                               if ex.query_id == query.query_id]
-            
+
             if query_executions:
 
                 response_times = [ex.execution_time_ms for ex in query_executions if not ex.error_occurred]
 
                 cache_hits = [ex.cache_hit for ex in query_executions]
-                
+
                 execution_results["performance_by_query"][query.query_id] = {
 
                     "total_executions": len(query_executions),
@@ -542,12 +542,12 @@ class DashboardPerformanceValidator:
                     "error_rate": sum(1 for ex in query_executions if ex.error_occurred) / len(query_executions)
 
                 }
-        
+
         execution_results["actual_test_duration"] = test_duration
 
         return execution_results
-    
-    async def _simulate_user_dashboard_usage(self, user_id: int, duration_seconds: int) -> Dict[str, Any]:
+
+async def _simulate_user_dashboard_usage(self, user_id: int, duration_seconds: int) -> Dict[str, Any]:
 
         """Simulate realistic user dashboard usage patterns."""
 
@@ -564,23 +564,23 @@ class DashboardPerformanceValidator:
             "query_executions": []
 
         }
-        
+
         end_time = time.time() + duration_seconds
-        
+
         while time.time() < end_time:
             # Select query based on realistic usage patterns
 
             query = self._select_query_for_user(user_id)
-            
+
             try:
                 # Execute query
 
                 execution_result = await self._execute_single_query(query, user_id)
-                
+
                 user_results["queries_executed"] += 1
 
                 user_results["query_executions"].append(execution_result)
-                
+
                 if execution_result.error_occurred:
 
                     user_results["failed_queries"] += 1
@@ -588,26 +588,26 @@ class DashboardPerformanceValidator:
                 else:
 
                     user_results["successful_queries"] += 1
-                
+
                 # Add realistic delay between queries
 
                 await asyncio.sleep(random.uniform(1, 5))
-                
+
             except Exception as e:
 
                 user_results["failed_queries"] += 1
 
                 logger.error(f"Query execution failed for user {user_id}: {e}")
-        
+
         return user_results
-    
-    def _select_query_for_user(self, user_id: int) -> DashboardQuery:
+
+def _select_query_for_user(self, user_id: int) -> DashboardQuery:
 
         """Select query based on user role simulation."""
         # Simulate different user types with different query preferences
 
         user_type = user_id % 4
-        
+
         if user_type == 0:  # Executive user - focuses on business metrics
 
             exec_queries = [q for q in self.dashboard_queries if q.dashboard_name == "Executive Dashboard"]
@@ -629,13 +629,13 @@ class DashboardPerformanceValidator:
         else:  # General user - mixed usage
 
             return random.choice(self.dashboard_queries)
-    
-    async def _execute_single_query(self, query: DashboardQuery, user_id: int) -> QueryExecution:
+
+async def _execute_single_query(self, query: DashboardQuery, user_id: int) -> QueryExecution:
 
         """Execute a single dashboard query with performance monitoring."""
 
         execution_start = time.time()
-        
+
         try:
             # Check cache first
 
@@ -644,7 +644,7 @@ class DashboardPerformanceValidator:
             if query.cache_eligible:
 
                 cache_result = await self.cache_manager.get_cached_result(query.query_id, query.time_range)
-            
+
             if cache_result:
                 # Cache hit
 
@@ -669,19 +669,19 @@ class DashboardPerformanceValidator:
                     database_connections_used=0
 
                 )
-            
+
             # Execute query against data source
 
             query_result = await self.query_engine.execute_query(query)
-            
+
             # Cache result if eligible
 
             if query.cache_eligible and not query_result["error"]:
 
                 await self.cache_manager.cache_result(query.query_id, query.time_range, query_result)
-            
+
             execution_time = (time.time() - execution_start) * 1000
-            
+
             return QueryExecution(
 
                 query_id=query.query_id,
@@ -705,7 +705,7 @@ class DashboardPerformanceValidator:
                 error_message=query_result.get("error_message")
 
             )
-            
+
         except Exception as e:
 
             execution_time = (time.time() - execution_start) * 1000
@@ -731,29 +731,29 @@ class DashboardPerformanceValidator:
                 error_message=str(e)
 
             )
-    
-    def _calculate_percentile(self, values: List[float], percentile: int) -> float:
+
+def _calculate_percentile(self, values: List[float], percentile: int) -> float:
 
         """Calculate percentile from list of values."""
 
         if not values:
 
             return 0.0
-        
+
         sorted_values = sorted(values)
 
         index = int((percentile / 100) * len(sorted_values))
 
         return sorted_values[min(index, len(sorted_values) - 1)]
-    
-    async def analyze_query_performance(self, execution_results: Dict[str, Any]) -> DashboardPerformanceMetrics:
+
+async def analyze_query_performance(self, execution_results: Dict[str, Any]) -> DashboardPerformanceMetrics:
 
         """Analyze query performance against baselines and requirements."""
 
         all_executions = execution_results["execution_details"]
 
         successful_executions = [ex for ex in all_executions if not ex.error_occurred]
-        
+
         if not successful_executions:
 
             return DashboardPerformanceMetrics(
@@ -765,7 +765,7 @@ class DashboardPerformanceValidator:
                 throughput_queries_per_second=0, resource_efficiency_score=0
 
             )
-        
+
         # Calculate response time metrics
 
         response_times = [ex.execution_time_ms for ex in successful_executions]
@@ -775,25 +775,25 @@ class DashboardPerformanceValidator:
         p95_response_time = self._calculate_percentile(response_times, 95)
 
         p99_response_time = self._calculate_percentile(response_times, 99)
-        
+
         # Calculate cache hit rate
 
         cache_hits = sum(1 for ex in all_executions if ex.cache_hit)
 
         cache_hit_rate = cache_hits / len(all_executions) if all_executions else 0
-        
+
         # Calculate error rate
 
         errors = sum(1 for ex in all_executions if ex.error_occurred)
 
         error_rate = errors / len(all_executions) if all_executions else 0
-        
+
         # Calculate throughput
 
         test_duration = execution_results.get("actual_test_duration", 1)
 
         throughput = len(all_executions) / test_duration
-        
+
         # Calculate resource efficiency
 
         avg_memory = statistics.mean([ex.memory_usage_mb for ex in successful_executions]) if successful_executions else 0
@@ -801,7 +801,7 @@ class DashboardPerformanceValidator:
         avg_cpu = statistics.mean([ex.cpu_usage_percentage for ex in successful_executions]) if successful_executions else 0
 
         resource_efficiency = max(0, 100 - (avg_memory * 2) - avg_cpu)  # Simplified efficiency score
-        
+
         return DashboardPerformanceMetrics(
 
             total_queries=len(all_executions),
@@ -821,194 +821,145 @@ class DashboardPerformanceValidator:
             resource_efficiency_score=resource_efficiency
 
         )
-    
-    @pytest.mark.asyncio
-    async def test_cache_effectiveness(self, cache_test_duration: int = 20) -> Dict[str, Any]:
 
-        """Test effectiveness of query caching strategies."""
+@pytest.mark.asyncio
+async def test_cache_effectiveness(dashboard_performance_validator, cache_test_duration: int = 20) -> Dict[str, Any]:
 
-        cache_results = {
+    """Test effectiveness of query caching strategies."""
 
-            "cache_test_duration": cache_test_duration,
+    cache_results = {
 
-            "queries_with_cache": 0,
+        "cache_test_duration": cache_test_duration,
 
-            "cache_hit_improvement": 0.0,
+        "queries_with_cache": 0,
 
-            "response_time_improvement": 0.0,
+        "cache_hit_improvement": 0.0,
 
-            "cache_effectiveness_score": 0.0
+        "response_time_improvement": 0.0,
 
-        }
-        
-        # Test queries without cache
+        "cache_effectiveness_score": 0.0
 
-        await self.cache_manager.clear_cache()
+    }
 
-        no_cache_results = await self.execute_dashboard_queries(
+    # Test queries without cache
 
-            concurrent_users=5, duration_seconds=cache_test_duration // 2
+    await dashboard_performance_validator.cache_manager.clear_cache()
 
+    no_cache_results = await dashboard_performance_validator.execute_dashboard_queries(
+
+        concurrent_users=5, duration_seconds=cache_test_duration // 2
+
+    )
+
+    # Test queries with cache (repeat same queries)
+    cache_results_data = await dashboard_performance_validator.execute_dashboard_queries(
+        concurrent_users=5, duration_seconds=cache_test_duration // 2
+    )
+
+    # Analyze cache effectiveness
+    no_cache_avg_time = statistics.mean([
+        ex.execution_time_ms for ex in no_cache_results["execution_details"]
+        if not ex.error_occurred
+    ]) if no_cache_results["execution_details"] else 0
+
+    cache_avg_time = statistics.mean([
+        ex.execution_time_ms for ex in cache_results_data["execution_details"]
+        if not ex.error_occurred
+    ]) if cache_results_data["execution_details"] else 0
+
+    cache_hit_rate = sum(1 for ex in cache_results_data["execution_details"] if ex.cache_hit) / \
+                    max(1, len(cache_results_data["execution_details"])) * 100
+
+    if no_cache_avg_time > 0:
+        response_time_improvement = ((no_cache_avg_time - cache_avg_time) / no_cache_avg_time) * 100
+    else:
+        response_time_improvement = 0
+
+    cache_results.update({
+        "queries_with_cache": len([q for q in dashboard_performance_validator.dashboard_queries if q.cache_eligible]),
+        "cache_hit_improvement": cache_hit_rate,
+        "response_time_improvement": response_time_improvement,
+        "cache_effectiveness_score": (cache_hit_rate + response_time_improvement) / 2
+    })
+
+    return cache_results
+
+@pytest.mark.asyncio
+async def test_concurrent_user_scaling(dashboard_performance_validator, max_users: int = 20) -> Dict[str, Any]:
+
+    """Test dashboard performance under increasing concurrent user load."""
+
+    scaling_results = {
+        "user_loads_tested": [],
+        "performance_degradation": [],
+        "scaling_limit": 0,
+        "performance_by_load": {}
+    }
+
+    # Test increasing user loads
+    user_loads = [1, 5, 10, 15, max_users]
+
+    for user_count in user_loads:
+        # Execute test with current user load
+        load_results = await dashboard_performance_validator.execute_dashboard_queries(
+            concurrent_users=user_count, duration_seconds=15
         )
-        
-        # Test queries with cache (repeat same queries)
 
-        cache_results_data = await self.execute_dashboard_queries(
+        # Analyze performance
+        performance_metrics = await dashboard_performance_validator.analyze_query_performance(load_results)
 
-            concurrent_users=5, duration_seconds=cache_test_duration // 2
+        scaling_results["user_loads_tested"].append(user_count)
 
-        )
-        
-        # Analyze cache effectiveness
-
-        no_cache_avg_time = statistics.mean([
-
-            ex.execution_time_ms for ex in no_cache_results["execution_details"] 
-
-            if not ex.error_occurred
-
-        ]) if no_cache_results["execution_details"] else 0
-        
-        cache_avg_time = statistics.mean([
-
-            ex.execution_time_ms for ex in cache_results_data["execution_details"] 
-
-            if not ex.error_occurred
-
-        ]) if cache_results_data["execution_details"] else 0
-        
-        cache_hit_rate = sum(1 for ex in cache_results_data["execution_details"] if ex.cache_hit) / \
-                        max(1, len(cache_results_data["execution_details"])) * 100
-        
-        if no_cache_avg_time > 0:
-
-            response_time_improvement = ((no_cache_avg_time - cache_avg_time) / no_cache_avg_time) * 100
-
-        else:
-
-            response_time_improvement = 0
-        
-        cache_results.update({
-
-            "queries_with_cache": len([q for q in self.dashboard_queries if q.cache_eligible]),
-
-            "cache_hit_improvement": cache_hit_rate,
-
-            "response_time_improvement": response_time_improvement,
-
-            "cache_effectiveness_score": (cache_hit_rate + response_time_improvement) / 2
-
-        })
-        
-        return cache_results
-    
-    @pytest.mark.asyncio
-    async def test_concurrent_user_scaling(self, max_users: int = 20) -> Dict[str, Any]:
-
-        """Test dashboard performance under increasing concurrent user load."""
-
-        scaling_results = {
-
-            "user_loads_tested": [],
-
-            "performance_degradation": [],
-
-            "scaling_limit": 0,
-
-            "performance_by_load": {}
-
+        scaling_results["performance_by_load"][user_count] = {
+            "average_response_time_ms": performance_metrics.average_response_time_ms,
+            "p95_response_time_ms": performance_metrics.p95_response_time_ms,
+            "error_rate": performance_metrics.error_rate,
+            "throughput_qps": performance_metrics.throughput_queries_per_second
         }
-        
-        # Test increasing user loads
 
-        user_loads = [1, 5, 10, 15, max_users]
-        
-        for user_count in user_loads:
-            # Execute test with current user load
+        # Check if performance degrades significantly
+        if user_count > 1:
+            prev_user_count = scaling_results["user_loads_tested"][-2]
+            prev_response_time = scaling_results["performance_by_load"][prev_user_count]["average_response_time_ms"]
+            current_response_time = performance_metrics.average_response_time_ms
 
-            load_results = await self.execute_dashboard_queries(
+            if prev_response_time > 0:
+                degradation = ((current_response_time - prev_response_time) / prev_response_time) * 100
+                scaling_results["performance_degradation"].append(degradation)
 
-                concurrent_users=user_count, duration_seconds=15
+                # Determine scaling limit (>50% performance degradation)
+                if degradation > 50 and scaling_results["scaling_limit"] == 0:
+                    scaling_results["scaling_limit"] = prev_user_count
 
-            )
-            
-            # Analyze performance
-
-            performance_metrics = await self.analyze_query_performance(load_results)
-            
-            scaling_results["user_loads_tested"].append(user_count)
-
-            scaling_results["performance_by_load"][user_count] = {
-
-                "average_response_time_ms": performance_metrics.average_response_time_ms,
-
-                "p95_response_time_ms": performance_metrics.p95_response_time_ms,
-
-                "error_rate": performance_metrics.error_rate,
-
-                "throughput_qps": performance_metrics.throughput_queries_per_second
-
-            }
-            
-            # Check if performance degrades significantly
-
-            if user_count > 1:
-
-                prev_user_count = scaling_results["user_loads_tested"][-2]
-
-                prev_response_time = scaling_results["performance_by_load"][prev_user_count]["average_response_time_ms"]
-
-                current_response_time = performance_metrics.average_response_time_ms
-                
-                if prev_response_time > 0:
-
-                    degradation = ((current_response_time - prev_response_time) / prev_response_time) * 100
-
-                    scaling_results["performance_degradation"].append(degradation)
-                    
-                    # Determine scaling limit (>50% performance degradation)
-
-                    if degradation > 50 and scaling_results["scaling_limit"] == 0:
-
-                        scaling_results["scaling_limit"] = prev_user_count
-        
         # If no scaling limit found, use max tested
 
         if scaling_results["scaling_limit"] == 0:
 
             scaling_results["scaling_limit"] = max_users
-        
+
         return scaling_results
-    
-    async def cleanup(self):
 
-        """Clean up dashboard performance test resources."""
-
-        try:
-
-            if self.query_engine:
-
-                await self.query_engine.shutdown()
-
-            if self.cache_manager:
-
-                await self.cache_manager.shutdown()
-
-        except Exception as e:
-
-            logger.error(f"Dashboard performance cleanup failed: {e}")
+async def cleanup_dashboard_performance_validator(validator):
+    """Clean up dashboard performance test resources."""
+    try:
+        if validator.query_engine:
+            await validator.query_engine.shutdown()
+        if validator.cache_manager:
+            await validator.cache_manager.shutdown()
+    except Exception as e:
+        logger.error(f"Dashboard performance cleanup failed: {e}")
 
 class DashboardQueryEngine:
 
     """Mock dashboard query engine for L3 testing."""
-    
+
     async def initialize(self):
 
         """Initialize query engine."""
 
         pass
-    
-    async def execute_query(self, query: DashboardQuery) -> Dict[str, Any]:
+
+async def execute_query(self, query: DashboardQuery) -> Dict[str, Any]:
 
         """Execute dashboard query with realistic performance characteristics."""
         # Simulate query execution time based on complexity and type
@@ -1024,19 +975,19 @@ class DashboardQueryEngine:
             "historical": 1.0
 
         }.get(query.query_type, 0.3)
-        
+
         # Add complexity factor
 
         complexity_factor = query.complexity_score / 10.0
 
         execution_time = base_time * (1 + complexity_factor)
-        
+
         # Add some randomness
 
         execution_time *= random.uniform(0.8, 1.3)
-        
+
         await asyncio.sleep(execution_time)
-        
+
         # Simulate different row counts based on query type
 
         row_counts = {
@@ -1050,19 +1001,19 @@ class DashboardQueryEngine:
             "historical": random.randint(1000, 10000)
 
         }
-        
+
         row_count = row_counts.get(query.query_type, 100)
-        
+
         # Simulate resource usage
 
         memory_usage = max(5, row_count / 200)  # Rough memory estimation
 
         cpu_usage = min(100, query.complexity_score * 5 + random.randint(0, 20))
-        
+
         # Simulate occasional errors (5% error rate)
 
         error_occurred = random.random() < 0.05
-        
+
         return {
 
             "row_count": row_count if not error_occurred else 0,
@@ -1080,8 +1031,8 @@ class DashboardQueryEngine:
             "error_message": "Simulated database timeout" if error_occurred else None
 
         }
-    
-    async def shutdown(self):
+
+async def shutdown(self):
 
         """Shutdown query engine."""
 
@@ -1090,29 +1041,29 @@ class DashboardQueryEngine:
 class QueryCacheManager:
 
     """Mock query cache manager for L3 testing."""
-    
+
     async def initialize(self):
 
         """Initialize cache manager."""
 
         self.cache = {}
-    
-    async def get_cached_result(self, query_id: str, time_range: str) -> Optional[Dict[str, Any]]:
+
+async def get_cached_result(self, query_id: str, time_range: str) -> Optional[Dict[str, Any]]:
 
         """Get cached query result."""
 
         cache_key = f"{query_id}:{time_range}"
-        
+
         if cache_key in self.cache:
             # Simulate cache hit with 90% probability for cached items
 
             if random.random() < 0.9:
 
                 return self.cache[cache_key]
-        
+
         return None
-    
-    async def cache_result(self, query_id: str, time_range: str, result: Dict[str, Any]):
+
+async def cache_result(self, query_id: str, time_range: str, result: Dict[str, Any]):
 
         """Cache query result."""
 
@@ -1125,14 +1076,14 @@ class QueryCacheManager:
             "cached_at": datetime.now(timezone.utc)
 
         }
-    
-    async def clear_cache(self):
+
+async def clear_cache(self):
 
         """Clear all cached results."""
 
         self.cache.clear()
-    
-    async def shutdown(self):
+
+async def shutdown(self):
 
         """Shutdown cache manager."""
 
@@ -1141,12 +1092,12 @@ class QueryCacheManager:
 class QueryPerformanceMonitor:
 
     """Monitor query performance metrics."""
-    
+
     def __init__(self):
 
         self.metrics = []
-    
-    def record_execution(self, execution: QueryExecution):
+
+def record_execution(self, execution: QueryExecution):
 
         """Record query execution metrics."""
 
@@ -1167,11 +1118,10 @@ async def dashboard_performance_validator():
     await validator.cleanup()
 
 @pytest.mark.asyncio
-
 async def test_dashboard_query_response_times_l3(dashboard_performance_validator):
 
     """Test dashboard query response times meet business requirements.
-    
+
     L3: Tests with real dashboard queries and performance baselines.
 
     """
@@ -1182,11 +1132,11 @@ async def test_dashboard_query_response_times_l3(dashboard_performance_validator
         concurrent_users=8, duration_seconds=25
 
     )
-    
+
     # Analyze performance
 
     performance_metrics = await dashboard_performance_validator.analyze_query_performance(execution_results)
-    
+
     # Verify response time requirements
 
     assert performance_metrics.average_response_time_ms <= 1000  # Average under 1 second
@@ -1194,28 +1144,27 @@ async def test_dashboard_query_response_times_l3(dashboard_performance_validator
     assert performance_metrics.p95_response_time_ms <= 2000     # P95 under 2 seconds
 
     assert performance_metrics.p99_response_time_ms <= 5000     # P99 under 5 seconds
-    
+
     # Verify error rate
 
     assert performance_metrics.error_rate <= 5.0  # Error rate under 5%
-    
+
     # Verify throughput
 
     assert performance_metrics.throughput_queries_per_second >= 2.0  # Minimum throughput
 
 @pytest.mark.asyncio
-
 async def test_dashboard_cache_effectiveness_l3(dashboard_performance_validator):
 
     """Test effectiveness of dashboard query caching.
-    
+
     L3: Tests caching strategies with real cache infrastructure.
 
     """
     # Test cache effectiveness
 
     cache_results = await dashboard_performance_validator.test_cache_effectiveness(cache_test_duration=15)
-    
+
     # Verify cache effectiveness
 
     assert cache_results["queries_with_cache"] > 0  # Some queries should be cacheable
@@ -1227,22 +1176,21 @@ async def test_dashboard_cache_effectiveness_l3(dashboard_performance_validator)
     assert cache_results["cache_effectiveness_score"] >= 30.0  # Overall cache effectiveness
 
 @pytest.mark.asyncio
-
 async def test_concurrent_user_performance_l3(dashboard_performance_validator):
 
     """Test dashboard performance under concurrent user load.
-    
+
     L3: Tests scalability with realistic concurrent usage patterns.
 
     """
     # Test concurrent user scaling
 
     scaling_results = await dashboard_performance_validator.test_concurrent_user_scaling(max_users=15)
-    
+
     # Verify scaling characteristics
 
     assert scaling_results["scaling_limit"] >= 10  # Should support at least 10 concurrent users
-    
+
     # Verify performance degradation is reasonable
 
     if scaling_results["performance_degradation"]:
@@ -1250,7 +1198,7 @@ async def test_concurrent_user_performance_l3(dashboard_performance_validator):
         max_degradation = max(scaling_results["performance_degradation"])
 
         assert max_degradation <= 100  # Performance shouldn't degrade more than 100%
-    
+
     # Verify performance at different load levels
 
     for user_count, metrics in scaling_results["performance_by_load"].items():
@@ -1262,11 +1210,10 @@ async def test_concurrent_user_performance_l3(dashboard_performance_validator):
             assert metrics["average_response_time_ms"] <= 3000  # Response time should be acceptable
 
 @pytest.mark.asyncio
-
 async def test_critical_dashboard_performance_l3(dashboard_performance_validator):
 
     """Test performance of business-critical dashboards.
-    
+
     L3: Tests critical business dashboards meet strict performance requirements.
 
     """
@@ -1277,33 +1224,33 @@ async def test_critical_dashboard_performance_l3(dashboard_performance_validator
         concurrent_users=6, duration_seconds=20
 
     )
-    
+
     # Analyze critical query performance
 
-    critical_queries = [q for q in dashboard_performance_validator.dashboard_queries 
+    critical_queries = [q for q in dashboard_performance_validator.dashboard_queries
 
                        if q.business_criticality == "critical"]
-    
+
     critical_executions = []
 
     for query in critical_queries:
 
-        query_executions = [ex for ex in execution_results["execution_details"] 
+        query_executions = [ex for ex in execution_results["execution_details"]
 
                           if ex.query_id == query.query_id and not ex.error_occurred]
 
         critical_executions.extend(query_executions)
-    
+
     assert len(critical_executions) > 0  # Should have critical query executions
-    
+
     # Verify critical query performance
 
     critical_response_times = [ex.execution_time_ms for ex in critical_executions]
 
     avg_critical_response = statistics.mean(critical_response_times)
-    
+
     assert avg_critical_response <= 800  # Critical queries should be fast
-    
+
     # Verify no critical query failures
 
     critical_errors = [ex for ex in critical_executions if ex.error_occurred]
@@ -1311,11 +1258,10 @@ async def test_critical_dashboard_performance_l3(dashboard_performance_validator
     assert len(critical_errors) == 0  # Zero tolerance for critical query errors
 
 @pytest.mark.asyncio
-
 async def test_real_time_dashboard_performance_l3(dashboard_performance_validator):
 
     """Test real-time dashboard query performance.
-    
+
     L3: Tests real-time monitoring dashboards meet strict latency requirements.
 
     """
@@ -1326,25 +1272,25 @@ async def test_real_time_dashboard_performance_l3(dashboard_performance_validato
         concurrent_users=5, duration_seconds=15
 
     )
-    
+
     # Filter real-time query executions
 
-    real_time_queries = [q for q in dashboard_performance_validator.dashboard_queries 
+    real_time_queries = [q for q in dashboard_performance_validator.dashboard_queries
 
                         if q.query_type == "real_time"]
-    
+
     real_time_executions = []
 
     for query in real_time_queries:
 
-        query_executions = [ex for ex in execution_results["execution_details"] 
+        query_executions = [ex for ex in execution_results["execution_details"]
 
                           if ex.query_id == query.query_id and not ex.error_occurred]
 
         real_time_executions.extend(query_executions)
-    
+
     assert len(real_time_executions) > 0  # Should have real-time executions
-    
+
     # Verify real-time performance requirements
 
     real_time_response_times = [ex.execution_time_ms for ex in real_time_executions]
@@ -1352,11 +1298,11 @@ async def test_real_time_dashboard_performance_l3(dashboard_performance_validato
     max_real_time_response = max(real_time_response_times)
 
     avg_real_time_response = statistics.mean(real_time_response_times)
-    
+
     assert max_real_time_response <= 500  # No real-time query should exceed 500ms
 
     assert avg_real_time_response <= 250  # Average should be very fast
-    
+
     # Verify real-time queries are not cached (for data freshness)
 
     real_time_cache_hits = [ex for ex in real_time_executions if ex.cache_hit]
@@ -1366,11 +1312,10 @@ async def test_real_time_dashboard_performance_l3(dashboard_performance_validato
     assert cache_hit_rate <= 10.0  # Real-time queries should rarely hit cache
 
 @pytest.mark.asyncio
-
 async def test_dashboard_resource_efficiency_l3(dashboard_performance_validator):
 
     """Test resource efficiency of dashboard queries.
-    
+
     L3: Tests memory and CPU usage efficiency under load.
 
     """
@@ -1381,29 +1326,29 @@ async def test_dashboard_resource_efficiency_l3(dashboard_performance_validator)
         concurrent_users=7, duration_seconds=18
 
     )
-    
+
     # Analyze resource usage
 
     performance_metrics = await dashboard_performance_validator.analyze_query_performance(execution_results)
-    
+
     # Verify resource efficiency
 
     assert performance_metrics.resource_efficiency_score >= 50.0  # Reasonable resource efficiency
-    
+
     # Analyze individual query resource usage
 
     successful_executions = [ex for ex in execution_results["execution_details"] if not ex.error_occurred]
-    
+
     if successful_executions:
 
         avg_memory_usage = statistics.mean([ex.memory_usage_mb for ex in successful_executions])
 
         avg_cpu_usage = statistics.mean([ex.cpu_usage_percentage for ex in successful_executions])
-        
+
         assert avg_memory_usage <= 50.0  # Memory usage should be reasonable
 
         assert avg_cpu_usage <= 70.0     # CPU usage should be efficient
-    
+
     # Verify database connection efficiency
 
     max_db_connections = max([ex.database_connections_used for ex in successful_executions], default=0)

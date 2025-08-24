@@ -210,7 +210,6 @@ class OAuthFlowTestRunner:
         # Patch the OAuth provider calls
         # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient.post') as mock_post, \
-             # Mock: Component isolation for testing without external dependencies
              patch('httpx.AsyncClient.get') as mock_get:
             
             # Mock token exchange response

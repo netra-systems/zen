@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 """
 Containerized services for L3 realism level integration testing.
 Simplified version that uses existing database connections for testing.

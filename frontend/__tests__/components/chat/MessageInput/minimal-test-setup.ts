@@ -51,6 +51,27 @@ export const setupMinimalMocks = () => {
   jest.mock('@/hooks/useWebSocket', () => ({
     useWebSocket: mockUseWebSocket
   }));
+
+  // Mock the message sending hook
+  jest.mock('@/components/chat/hooks/useMessageSending', () => ({
+    useMessageSending: () => ({
+      isSending: false,
+      handleSend: mockSendMessage
+    })
+  }));
+
+  // Mock other hooks with minimal implementation
+  jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
+    useMessageHistory: () => ({
+      messageHistory: [],
+      addToHistory: jest.fn(),
+      navigateHistory: jest.fn(() => '')
+    })
+  }));
+
+  jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
+    useTextareaResize: () => ({ rows: 1 })
+  }));
 };
 
 // Reset function

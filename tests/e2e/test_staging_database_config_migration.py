@@ -168,7 +168,7 @@ class TestStagingDeploymentValidation:
             config = get_unified_config()
             
             # Verify staging-specific settings
-            assert config.environment in [\'staging\', \'testing\']
+            assert config.environment in ['staging', 'testing']
             
             # Verify database pool settings are appropriate for Cloud Run
             assert config.db_pool_size >= 5, "Pool size too small for staging"

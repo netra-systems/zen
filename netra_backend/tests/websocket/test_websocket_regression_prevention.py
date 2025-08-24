@@ -9,7 +9,7 @@ from pathlib import Path
 import sys
 
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 import pytest
 
@@ -296,7 +296,6 @@ class TestAgentExecutionPipeline:
         assert engine is not None
     
     @pytest.mark.asyncio
-
     async def test_agent_execution_core(self):
 
         """Test agent execution core functionality."""
@@ -344,7 +343,6 @@ class TestWebSocketBroadcasting:
     """Test WebSocket broadcasting functionality."""
     
     @pytest.mark.asyncio
-
     async def test_broadcast_to_user(self):
 
         """Test broadcasting message to specific user."""
@@ -357,8 +355,7 @@ class TestWebSocketBroadcasting:
 
             mock_send.assert_called_once_with("user_123", {"type": "test"})
     
-    @pytest.mark.asyncio  
-
+    @pytest.mark.asyncio
     async def test_broadcast_to_room(self):
 
         """Test broadcasting message to room."""

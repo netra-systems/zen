@@ -1,4 +1,8 @@
-from dev_launcher.isolated_environment import get_env, IsolatedEnvironment
+from netra_backend.app.core.isolated_environment import IsolatedEnvironment, get_env
+
+# Always export IsolatedEnvironment for imports
+__all__ = ['IsolatedEnvironment', 'get_env', 'EnvironmentDetector']
+
 """Environment Detection Module
 
 Handles environment detection for configuration loading.
@@ -126,7 +130,7 @@ class EnvironmentDetector:
         Returns:
             bool: True if on AWS
         """
-        return EnvironmentDetector.is_aws()
+        return ConstantsEnvironmentDetector.is_aws()
     
     def _get_aws_environment(self) -> str:
         """Get environment for AWS deployment (deprecated).
@@ -136,7 +140,7 @@ class EnvironmentDetector:
         Returns:
             str: Environment based on AWS settings
         """
-        return EnvironmentDetector.get_aws_environment()
+        return ConstantsEnvironmentDetector.get_aws_environment()
     
     def is_production(self) -> bool:
         """Check if current environment is production.

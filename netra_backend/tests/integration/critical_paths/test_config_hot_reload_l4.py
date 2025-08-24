@@ -75,7 +75,7 @@ class ConfigurationHotReloadL4Manager:
 
         self.staging_services_health = {}
         
-    async def initialize_services(self):
+async def initialize_services(self):
 
         """Initialize L4 configuration hot reload services with staging infrastructure."""
 
@@ -180,7 +180,7 @@ class ConfigurationHotReloadL4Manager:
 
             raise
     
-    async def _verify_staging_services_health(self):
+async def _verify_staging_services_health(self):
 
         """Verify health of all staging services before testing."""
 
@@ -229,7 +229,7 @@ class ConfigurationHotReloadL4Manager:
 
             raise RuntimeError(f"Staging services health verification failed: {e}")
     
-    async def create_staging_config(self, config_name: str, config_data: Dict[str, Any]) -> str:
+async def create_staging_config(self, config_name: str, config_data: Dict[str, Any]) -> str:
 
         """Create a configuration in staging storage systems."""
 
@@ -263,7 +263,7 @@ class ConfigurationHotReloadL4Manager:
         
         return config_path
     
-    async def update_staging_config(self, config_name: str, new_config: Dict[str, Any], 
+async def update_staging_config(self, config_name: str, new_config: Dict[str, Any], 
 
                                   validate: bool = True, simulate_production: bool = True) -> Dict[str, Any]:
 
@@ -406,7 +406,7 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-    async def validate_staging_config(self, config_name: str, config_data: Dict[str, Any]) -> Dict[str, Any]:
+async def validate_staging_config(self, config_name: str, config_data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Validate configuration with staging-specific requirements."""
 
@@ -572,7 +572,7 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-    async def _create_config_backup(self, config_name: str) -> Dict[str, Any]:
+async def _create_config_backup(self, config_name: str) -> Dict[str, Any]:
 
         """Create backup of current configuration before update."""
 
@@ -623,7 +623,7 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-    async def trigger_staging_hot_reload(self, config_name: str, new_config: Dict[str, Any]) -> Dict[str, Any]:
+async def trigger_staging_hot_reload(self, config_name: str, new_config: Dict[str, Any]) -> Dict[str, Any]:
 
         """Trigger hot reload across staging services with production coordination."""
 
@@ -750,7 +750,7 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-    async def simulate_staging_config_update(self, service_name: str, config_name: str, 
+async def simulate_staging_config_update(self, service_name: str, config_name: str, 
 
                                            new_config: Dict[str, Any]):
 
@@ -789,7 +789,7 @@ class ConfigurationHotReloadL4Manager:
 
             await asyncio.sleep(0.05)
     
-    async def propagate_config_via_staging_redis(self, config_name: str, new_config: Dict[str, Any]) -> Dict[str, Any]:
+async def propagate_config_via_staging_redis(self, config_name: str, new_config: Dict[str, Any]) -> Dict[str, Any]:
 
         """Propagate configuration changes via staging Redis pub/sub."""
 
@@ -847,7 +847,7 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-    async def verify_staging_config_propagation(self, config_name: str, 
+async def verify_staging_config_propagation(self, config_name: str, 
 
                                               expected_config: Dict[str, Any],
 
@@ -969,7 +969,7 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-    def _configs_match(self, config1: Dict[str, Any], config2: Dict[str, Any]) -> bool:
+def _configs_match(self, config1: Dict[str, Any], config2: Dict[str, Any]) -> bool:
 
         """Compare two configurations for equivalence."""
 
@@ -986,7 +986,7 @@ class ConfigurationHotReloadL4Manager:
 
             return False
     
-    async def _simulate_multi_instance_propagation(self, config_name: str, expected_config: Dict[str, Any]):
+async def _simulate_multi_instance_propagation(self, config_name: str, expected_config: Dict[str, Any]):
 
         """Simulate configuration propagation to multiple service instances."""
         # Simulate 3 service instances receiving config
@@ -1009,7 +1009,7 @@ class ConfigurationHotReloadL4Manager:
             
             await self.redis_service.set(instance_key, json.dumps(instance_data), ex=3600)
     
-    async def _verify_services_health_post_reload(self) -> Dict[str, Any]:
+async def _verify_services_health_post_reload(self) -> Dict[str, Any]:
 
         """Verify all services remain healthy after configuration reload."""
 
@@ -1092,7 +1092,7 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-    async def _attempt_automatic_rollback(self, config_name: str) -> Dict[str, Any]:
+async def _attempt_automatic_rollback(self, config_name: str) -> Dict[str, Any]:
 
         """Attempt automatic rollback to previous configuration."""
 
@@ -1161,8 +1161,7 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-    @pytest.mark.asyncio
-    async def test_secret_rotation_hot_reload(self, secret_name: str, new_secret_value: str) -> Dict[str, Any]:
+async def test_secret_rotation_hot_reload(self, secret_name: str, new_secret_value: str) -> Dict[str, Any]:
 
         """Test secret rotation with hot reload in staging."""
 
@@ -1264,7 +1263,7 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-    async def _simulate_secret_reload(self, service_name: str, secret_name: str, new_secret_value: str):
+async def _simulate_secret_reload(self, service_name: str, secret_name: str, new_secret_value: str):
 
         """Simulate secret reload for services without explicit secret management."""
         # Store secret metadata in Redis
@@ -1287,7 +1286,7 @@ class ConfigurationHotReloadL4Manager:
         
         await self.redis_service.set(secret_key, json.dumps(secret_metadata))
     
-    async def _verify_secret_propagation(self, secret_name: str, expected_secret_value: str) -> Dict[str, Any]:
+async def _verify_secret_propagation(self, secret_name: str, expected_secret_value: str) -> Dict[str, Any]:
 
         """Verify secret propagation across staging services."""
 
@@ -1357,7 +1356,7 @@ class ConfigurationHotReloadL4Manager:
 
             }
     
-    def get_next_global_version(self) -> int:
+def get_next_global_version(self) -> int:
 
         """Get next global configuration version."""
 
@@ -1371,7 +1370,7 @@ class ConfigurationHotReloadL4Manager:
 
         return max_version + 1
     
-    async def get_hot_reload_metrics(self) -> Dict[str, Any]:
+async def get_hot_reload_metrics(self) -> Dict[str, Any]:
 
         """Get comprehensive L4 hot reload metrics."""
 
@@ -1431,7 +1430,7 @@ class ConfigurationHotReloadL4Manager:
 
         }
     
-    async def cleanup(self):
+async def cleanup(self):
 
         """Clean up L4 resources and staging connections."""
 
@@ -1489,9 +1488,7 @@ async def l4_hot_reload_manager():
     await manager.cleanup()
 
 @pytest.mark.staging
-
 @pytest.mark.asyncio
-
 async def test_l4_websocket_config_production_hot_reload(l4_hot_reload_manager):
 
     """Test WebSocket configuration hot reload with production coordination in staging."""
@@ -1598,7 +1595,6 @@ async def test_l4_websocket_config_production_hot_reload(l4_hot_reload_manager):
 @pytest.mark.staging
 
 @pytest.mark.asyncio
-
 async def test_l4_feature_flag_hot_reload_with_rollout(l4_hot_reload_manager):
 
     """Test feature flag hot reload with gradual rollout in staging."""
@@ -1721,7 +1717,6 @@ async def test_l4_feature_flag_hot_reload_with_rollout(l4_hot_reload_manager):
 @pytest.mark.staging
 
 @pytest.mark.asyncio
-
 async def test_l4_secret_rotation_with_zero_downtime(l4_hot_reload_manager):
 
     """Test secret rotation with zero-downtime hot reload in staging."""
@@ -1802,7 +1797,6 @@ async def test_l4_secret_rotation_with_zero_downtime(l4_hot_reload_manager):
 @pytest.mark.staging
 
 @pytest.mark.asyncio
-
 async def test_l4_config_validation_and_error_handling(l4_hot_reload_manager):
 
     """Test configuration validation and error handling in staging."""
@@ -1919,7 +1913,6 @@ async def test_l4_config_validation_and_error_handling(l4_hot_reload_manager):
 @pytest.mark.staging
 
 @pytest.mark.asyncio
-
 async def test_l4_concurrent_config_updates_coordination(l4_hot_reload_manager):
 
     """Test coordination of concurrent configuration updates in staging."""
@@ -2011,7 +2004,6 @@ async def test_l4_concurrent_config_updates_coordination(l4_hot_reload_manager):
 @pytest.mark.staging
 
 @pytest.mark.asyncio
-
 async def test_l4_hot_reload_performance_and_sla_compliance(l4_hot_reload_manager):
 
     """Test hot reload performance and SLA compliance in staging."""
@@ -2103,7 +2095,6 @@ async def test_l4_hot_reload_performance_and_sla_compliance(l4_hot_reload_manage
 @pytest.mark.staging
 
 @pytest.mark.asyncio
-
 async def test_l4_disaster_recovery_and_rollback(l4_hot_reload_manager):
 
     """Test disaster recovery and automatic rollback capabilities."""

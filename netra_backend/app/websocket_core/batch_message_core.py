@@ -9,6 +9,31 @@ from collections import defaultdict
 # Legacy aliases
 BatchMessageHandler = WebSocketManager
 
+# Export classes for external imports
+__all__ = ['LoadMonitor', 'MessageBatcher', 'BatchMessageHandler', 'handle_message', 'process_batch']
+
+
+class LoadMonitor:
+    """Monitor load metrics for batch processing."""
+    
+    def __init__(self):
+        """Initialize load monitor."""
+        self._metrics = {
+            "current_load": 0,
+            "peak_load": 0,
+            "average_load": 0.0
+        }
+    
+    def update_load(self, load_value: float) -> None:
+        """Update current load value."""
+        self._metrics["current_load"] = load_value
+        if load_value > self._metrics["peak_load"]:
+            self._metrics["peak_load"] = load_value
+    
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get load metrics."""
+        return self._metrics.copy()
+
 
 class MockRetryManager:
     """Mock retry manager for test compatibility."""

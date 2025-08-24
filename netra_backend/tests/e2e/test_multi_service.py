@@ -130,7 +130,6 @@ class TestCrossServiceAuthentication:
         # Mock the complete auth chain
         # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.services.user_service.CRUDUser.get') as mock_get_user:
             
             mock_validate.return_value = test_user_data
@@ -188,7 +187,6 @@ class TestDatabaseConsistency:
         # Mock database clients
         # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.get_async_db') as mock_postgres, \
-             # Mock: ClickHouse database isolation for fast testing without external database dependency
              patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
             
             # Mock user data in PostgreSQL
@@ -584,7 +582,6 @@ class TestMultiServiceIntegration:
             # Mock service chain: Frontend -> Backend -> Auth -> Database
             # Mock: Authentication service isolation for testing without real auth flows
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth, \
-                 # Mock: Component isolation for testing without external dependencies
                  patch('app.services.user_service.CRUDUser.get') as mock_user:
                 
                 mock_auth.return_value = {"user_id": f"user_{request_id}"}

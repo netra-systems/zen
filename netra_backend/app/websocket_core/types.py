@@ -26,6 +26,15 @@ class WebSocketConnectionState(str, Enum):
     ERROR = "error"
 
 
+class ReconnectionState(str, Enum):
+    """States for reconnection process."""
+    IDLE = "idle"
+    ATTEMPTING = "attempting"
+    CONNECTED = "connected"
+    FAILED = "failed"
+    DISABLED = "disabled"
+
+
 class MessageType(str, Enum):
     """Standard WebSocket message types."""
     # Connection lifecycle

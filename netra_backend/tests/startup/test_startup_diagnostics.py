@@ -17,11 +17,11 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
-from unittest.mock import patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.core.configuration.database import get_unified_config
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.db.postgres_core import AsyncDatabase
 from netra_backend.app.schemas.diagnostic_types import (
     DiagnosticError,
@@ -34,12 +34,17 @@ from netra_backend.app.schemas.diagnostic_types import (
 from scripts.startup_diagnostics import (
     StartupDiagnostics,
     apply_fixes,
+    apply_single_fix,
     check_database_connection,
     check_dependencies,
     check_environment_variables,
+    check_migrations,
     check_port_conflicts,
     collect_system_errors,
     diagnose_startup,
+    fix_dependencies,
+    fix_migrations,
+    fix_port_conflict,
     generate_recommendations,
 )
 from test_framework.decorators import mock_justified
@@ -64,6 +69,18 @@ def sample_diagnostic_error() -> DiagnosticError:
 def startup_diagnostics() -> StartupDiagnostics:
     """Create startup diagnostics instance."""
     return StartupDiagnostics()
+
+@pytest.fixture
+def mock_diagnostic_error() -> DiagnosticError:
+    """Create mock diagnostic error for testing."""
+    return DiagnosticError(
+        service="backend",
+        phase="startup", 
+        severity=DiagnosticSeverity.HIGH,
+        message="Mock error for testing",
+        suggested_fix="Mock fix",
+        can_auto_fix=True
+    )
 
 class TestStartupDiagnosticsInit:
     """Test initialization and setup."""
@@ -178,7 +195,6 @@ class TestRealDatabaseConnectionChecking:
                 assert isinstance(error, DiagnosticError)
                 assert "database" in error.message.lower()
     
-    @with_test_database
     @pytest.mark.asyncio
     async def test_database_connection_with_test_db(self, test_db_url: str) -> None:
         """Test database connection with test database."""

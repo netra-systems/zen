@@ -45,7 +45,6 @@ class TestCompleteUserJourney:
     """Integration tests for complete end-to-end user journeys"""
     
     @pytest.mark.asyncio
-
     async def test_complete_new_user_journey(self, 
 
                                            test_session: AsyncSession,
@@ -101,7 +100,6 @@ class TestCompleteUserJourney:
         assert "session" in result["step_results"][2].get("context", {})
     
     @pytest.mark.asyncio
-
     async def test_user_journey_with_interruptions(self, test_session: AsyncSession):
 
         """Test user journey resilience with interruptions"""
@@ -153,7 +151,6 @@ class TestCompleteUserJourney:
         assert continuation_result["success"] is True
     
     @pytest.mark.asyncio
-
     async def test_multiple_user_concurrent_journeys(self, test_session: AsyncSession):
 
         """Test multiple users going through journeys concurrently"""
@@ -205,7 +202,6 @@ class TestCompleteUserJourney:
         assert total_time < 10.0, f"Concurrent journeys took too long: {total_time:.2f}s"
     
     @pytest.mark.asyncio
-
     async def test_user_journey_performance_metrics(self, test_session: AsyncSession):
 
         """Test user journey performance and timing metrics"""

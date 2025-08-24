@@ -12,7 +12,7 @@ import asyncio
 import os
 import sys
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 # Add parent directory to path for imports
 from dev_launcher.database_connector import DatabaseConnector, DatabaseType, ConnectionStatus

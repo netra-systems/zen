@@ -34,7 +34,6 @@ class TestUserWebSocketLifecycle:
     """Test user WebSocket connection lifecycle"""
     
     @pytest.mark.asyncio
-
     async def test_websocket_connection_establishment(self, test_session: AsyncSession):
 
         """Test WebSocket connection establishment for authenticated users"""
@@ -56,7 +55,6 @@ class TestUserWebSocketLifecycle:
         assert connection_result["connection_time"] < 5.0  # Should connect quickly
     
     @pytest.mark.asyncio
-
     async def test_websocket_message_flow(self, test_session: AsyncSession):
 
         """Test bidirectional message flow over WebSocket"""
@@ -96,7 +94,6 @@ class TestUserWebSocketLifecycle:
         assert mock_ws.messages[0]["user_id"] == user_id
     
     @pytest.mark.asyncio
-
     async def test_websocket_reconnection_handling(self, test_session: AsyncSession):
 
         """Test WebSocket reconnection after disconnection"""
@@ -130,7 +127,6 @@ class TestUserWebSocketLifecycle:
         assert user_id in mock_ws.connections
     
     @pytest.mark.asyncio
-
     async def test_websocket_error_handling(self, test_session: AsyncSession):
 
         """Test WebSocket error handling and recovery"""

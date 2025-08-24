@@ -327,15 +327,10 @@ class TestAntiPatternsWhatNotToDo:
         # BAD: Mocking internal components (>30% of imports)
         # Mock: Component isolation for testing without external dependencies
         with patch('app.models.user.User'), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.models.thread.Thread'), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.services.user_service.UserService'), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.services.thread_service.ThreadService'), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.utils.validation.validate_email'), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.utils.formatting.format_name'):
             
             # With everything mocked, this test tells us nothing
@@ -349,11 +344,8 @@ class TestAntiPatternsWhatNotToDo:
         # BAD: Integration test with all components mocked
         # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService'), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.services.thread_service.ThreadService'), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.models.user.User'), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.models.thread.Thread'):
             
             # This isn't testing integration at all!

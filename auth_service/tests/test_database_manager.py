@@ -13,7 +13,7 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
-from netra_backend.app.db.database_manager import DatabaseManager as AuthDatabaseManager
+from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from test_framework.environment_markers import env
 
 

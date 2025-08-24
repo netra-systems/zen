@@ -7,10 +7,10 @@ from pathlib import Path
 
 import json
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
-from netra_mcp.netra_mcp_server import NetraMCPServer
+from netra_backend.app.netra_mcp.netra_mcp_server import NetraMCPServer
 
 from netra_backend.app.services.mcp_service import (
     MCPClient,
@@ -55,7 +55,6 @@ class TestSyntaxFix:
         """Test basic service creation"""
         # Mock: Component isolation for testing without external dependencies
         with patch('app.services.mcp_service.MCPClientRepository'), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.services.mcp_service.MCPToolExecutionRepository'):
             service = MCPService(**mock_services)
             assert service is not None
@@ -87,7 +86,6 @@ class TestSyntaxFix:
         """Test basic service creation"""
         # Mock: Component isolation for testing without external dependencies
         with patch('app.services.mcp_service.MCPClientRepository'), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.services.mcp_service.MCPToolExecutionRepository'):
             service = MCPService(**mock_services)
             assert service is not None

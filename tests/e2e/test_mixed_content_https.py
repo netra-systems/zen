@@ -40,8 +40,8 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         self.mixed_content_violations = []
         self.protocol_inconsistencies = []
         
-@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
-        def test_staging_environment_https_detection_FAILING(self):
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    def test_staging_environment_https_detection_FAILING(self):
         """
         FAILING TEST: secure-api-config.ts should detect staging as secure environment.
         

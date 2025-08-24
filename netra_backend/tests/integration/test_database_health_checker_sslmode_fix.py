@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 
 import asyncio
 import os
-from unittest.mock import patch, AsyncMock, MagicMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine
 from netra_backend.app.services.database.health_checker import ConnectionHealthChecker

@@ -13,7 +13,7 @@ import asyncio
 import json
 import time
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, call, patch
 
 import pytest
 from netra_backend.app.schemas import (
@@ -142,7 +142,6 @@ class TestCorpusAdminDocumentManagement:
         corpus_admin.vector_store.add_documents.assert_called_once()
     
     @pytest.mark.asyncio
-    
     async def test_document_indexing_workflow(self):
         """Test document indexing workflow"""
         corpus_admin, documents = self._setup_indexing_test()
@@ -175,7 +174,6 @@ class TestCorpusAdminDocumentManagement:
         assert results[0]["id"] == "doc1"
     
     @pytest.mark.asyncio
-    
     async def test_document_retrieval_with_similarity_search(self):
         """Test document retrieval using similarity search"""
         corpus_admin = self._setup_retrieval_test()
@@ -214,7 +212,6 @@ class TestCorpusAdminDocumentManagement:
         corpus_admin.vector_store.update_document.assert_called_with(update)
     
     @pytest.mark.asyncio
-    
     async def test_corpus_update_operations(self):
         """Test corpus update operations"""
         corpus_admin = self._setup_update_test()
@@ -254,7 +251,6 @@ class TestSupplyResearcherDataCollection:
         assert result["inventory"]["gpu"] == 1000
     
     @pytest.mark.asyncio
-    
     async def test_supply_chain_data_collection(self):
         """Test supply chain data collection workflow"""
         supply_researcher = self._setup_supply_collection_test()
@@ -298,7 +294,6 @@ class TestSupplyResearcherDataCollection:
         assert "quality_score" in result
     
     @pytest.mark.asyncio
-    
     async def test_data_validation_and_enrichment(self):
         """Test data validation and enrichment process"""
         supply_researcher = self._setup_validation_test()
@@ -333,7 +328,6 @@ class TestDemoServiceWorkflow:
         assert len(result["recommendations"]) == 2
     
     @pytest.mark.asyncio
-    
     async def test_demo_scenario_execution(self):
         """Test execution of demo scenarios"""
         demo_service = self._setup_demo_scenario_test()
@@ -366,7 +360,6 @@ class TestDemoServiceWorkflow:
         assert all("timestamp" in r for r in results)
     
     @pytest.mark.asyncio
-    
     async def test_demo_data_generation_variety(self):
         """Test variety in demo data generation"""
         demo_service = self._setup_demo_variety_test()

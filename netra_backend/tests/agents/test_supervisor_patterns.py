@@ -124,7 +124,6 @@ class TestWorkflowPatterns:
         assert validation_result and validation_result.state.data_result["validation"]["status"] == "valid"
 
     @pytest.mark.asyncio
-
     async def test_fan_out_fan_in_pattern(self):
         """Test fan-out/fan-in pattern for parallel processing"""
         supervisor = await self._setup_fanout_supervisor()
@@ -136,7 +135,6 @@ class TestWorkflowPatterns:
         self._verify_fanin_results(parallel_results)
         
     @pytest.mark.asyncio
-        
     async def test_pipeline_with_feedback_loops(self):
         """Test pipeline with feedback loops and iterative refinement"""
         mocks = create_supervisor_mocks()
@@ -188,7 +186,6 @@ class TestResourceManagement:
     """Test resource management and coordination"""
     
     @pytest.mark.asyncio
-    
     async def test_resource_contention_handling(self):
         """Test handling of resource contention between agents"""
         mocks = create_supervisor_mocks()

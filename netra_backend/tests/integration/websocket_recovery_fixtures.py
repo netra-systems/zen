@@ -20,7 +20,7 @@ from netra_backend.app.schemas.websocket_models import WebSocketValidationError
 from netra_backend.app.websocket_core.types import ConnectionInfo
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.reconnection_manager import (
-    WebSocketReconnectionManager,
+    ReconnectionManager,
 )
 from starlette.websockets import WebSocketDisconnect, WebSocketState
 from typing import Any, Dict, List, Optional, Tuple
@@ -31,7 +31,6 @@ import random
 import time
 import uuid
 from netra_backend.app.websocket_core.reconnection_types import (
-    DisconnectReason,
     ReconnectionConfig,
     ReconnectionState,
 )

@@ -27,7 +27,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import aiohttp
 import asyncpg
@@ -45,35 +45,21 @@ class TestWebSocketInfrastructureStartupValidation:
     """
     
     @pytest.fixture
-    @pytest.mark.asyncio
     async def test_containers(self):
         """Set up containerized services for L3 testing."""
-        # Container setup based on test requirements
-        containers = {}
-        
-        if 'database' in test_def['name'].lower() or 'connection' in test_def['name'].lower():
-            # PostgreSQL container
-            containers["postgres"] = {
+        # Container setup for websocket infrastructure tests
+        containers = {
+            "postgres": {
                 "url": "postgresql://test:test@localhost:5433/netra_test",
                 "max_connections": 200,
                 "pool_size": 20
-            }
-        
-        if 'clickhouse' in test_def['name'].lower():
-            # ClickHouse container
-            containers["clickhouse"] = {
-                "url": "http://localhost:8124",
-                "native_port": 9001,
-                "max_connections": 100
-            }
-        
-        if 'redis' in test_def['name'].lower() or 'session' in test_def['name'].lower():
-            # Redis container
-            containers["redis"] = {
+            },
+            "redis": {
                 "url": "redis://localhost:6380",
                 "max_memory": "256mb",
                 "max_clients": 10000
             }
+        }
         
         yield containers
     

@@ -104,9 +104,10 @@ class AuthStarter:
             return []
         
         # Build uvicorn command to run auth service
+        # Use auth_service.main:app to run from project root with proper imports
         cmd = [
             sys.executable, "-m", "uvicorn",
-            "main:app",
+            "auth_service.main:app",
             "--host", "0.0.0.0",
             "--port", str(port)
         ]
@@ -170,15 +171,15 @@ class AuthStarter:
         if not cmd:
             return None, None
         
-        # Change to auth service directory
-        auth_service_dir = self.config.project_root / "auth_service"
+        # Run from project root directory for proper module imports
+        project_root = self.config.project_root
         
         try:
-            # Create the subprocess
+            # Create the subprocess from project root with auth_service module available
             process = create_subprocess(
                 cmd,
                 env=env,
-                cwd=str(auth_service_dir)
+                cwd=str(project_root)
             )
             
             if not process:

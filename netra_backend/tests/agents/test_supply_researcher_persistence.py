@@ -27,7 +27,6 @@ class TestSupplyResearcherPersistence:
     """Database and persistence tests"""
 
     @pytest.mark.asyncio
-
     async def test_database_transaction_rollback(self, agent, mock_db):
         """Test database transaction rollback on failure"""
         state = _create_transaction_test_state()
@@ -96,7 +95,6 @@ class TestSupplyResearcherPersistence:
         assert anomalies[0]["percent_change"] == 150
 
     @pytest.mark.asyncio
-
     async def test_audit_trail_generation(self, agent, mock_db):
         """Test comprehensive audit trail generation"""
         state = _create_audit_test_state()
@@ -219,7 +217,6 @@ class TestSupplyResearcherPersistence:
         assert result is not None
 
     @pytest.mark.asyncio
-
     async def test_backup_and_recovery(self, agent, mock_db):
         """Test backup and recovery functionality"""
         _setup_backup_scenario(mock_db)

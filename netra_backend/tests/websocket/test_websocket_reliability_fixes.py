@@ -22,7 +22,7 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -44,7 +44,6 @@ class TestDatabaseConnectionPooling:
     """Test database connection pooling to prevent session-per-message anti-pattern."""
     
     @pytest.mark.asyncio
-
     async def test_connection_pool_initialization(self):
 
         """Test that connection pool initializes correctly."""
@@ -58,7 +57,6 @@ class TestDatabaseConnectionPooling:
         assert pool.session_queue.maxsize == 5
     
     @pytest.mark.asyncio
-
     async def test_pooled_session_creation(self):
 
         """Test getting session from pool."""
@@ -82,7 +80,6 @@ class TestDatabaseConnectionPooling:
             assert pool.active_sessions == 1
     
     @pytest.mark.asyncio
-
     async def test_connection_pool_exhaustion_prevention(self):
 
         """Test that pool prevents exhaustion by enforcing limits."""
@@ -108,7 +105,6 @@ class TestDatabaseConnectionPooling:
                 await pool.get_pooled_session()
     
     @pytest.mark.asyncio
-
     async def test_session_return_to_pool(self):
 
         """Test that sessions are properly returned to pool."""
@@ -128,7 +124,6 @@ class TestJWTTokenRefresh:
     """Test JWT token refresh mechanism for long-lived connections."""
     
     @pytest.mark.asyncio
-
     async def test_token_refresh_scheduling(self):
 
         """Test that token refresh is scheduled properly."""
@@ -161,7 +156,6 @@ class TestJWTTokenRefresh:
             assert not manager.token_refresh_tasks[connection_id].done()
     
     @pytest.mark.asyncio
-
     async def test_token_refresh_calculation(self):
 
         """Test that refresh time is calculated correctly (5 minutes before expiry)."""
@@ -204,7 +198,6 @@ class TestJWTTokenRefresh:
                     assert 295 <= sleep_time <= 305  # Allow some timing variance
     
     @pytest.mark.asyncio
-
     async def test_token_expiry_handling(self):
 
         """Test that expired tokens are handled gracefully."""
@@ -247,7 +240,6 @@ class TestJWTTokenRefresh:
         mock_websocket.close.assert_called_once_with(code=1008, reason="Token expired - please re-authenticate")
     
     @pytest.mark.asyncio
-
     async def test_token_refresh_success_notification(self):
 
         """Test that successful token refresh notifies client."""
@@ -367,7 +359,6 @@ class TestTransactionalMessageProcessing:
     """Test transactional message processing per websocket_reliability.xml."""
     
     @pytest.mark.asyncio
-
     async def test_message_marked_sending_before_send(self):
 
         """Test that messages are marked as 'sending' before attempting to send."""
@@ -394,7 +385,6 @@ class TestTransactionalMessageProcessing:
                     mock_mark_sent.assert_called_once()
     
     @pytest.mark.asyncio
-
     async def test_message_reverted_to_pending_on_failure(self):
 
         """Test that messages are reverted to 'pending' on send failure."""
@@ -414,7 +404,6 @@ class TestTransactionalMessageProcessing:
                     mock_mark_pending.assert_called_once()
     
     @pytest.mark.asyncio
-
     async def test_message_reverted_to_pending_on_exception(self):
 
         """Test that messages are reverted to 'pending' on exception."""
@@ -434,7 +423,6 @@ class TestTransactionalMessageProcessing:
                     mock_mark_pending.assert_called_once()
     
     @pytest.mark.asyncio
-
     async def test_pending_message_retry_mechanism(self):
 
         """Test that pending messages are retried according to policy."""
@@ -470,7 +458,6 @@ class TestTransactionalMessageProcessing:
             mock_send.assert_called_once_with("user_1", {"type": "test"}, retry=False)
     
     @pytest.mark.asyncio
-
     async def test_message_dropped_after_max_retries(self):
 
         """Test that messages are dropped after maximum retry attempts."""
@@ -781,7 +768,6 @@ class TestIntegrationScenarios:
     """Test integration scenarios combining multiple fixes."""
     
     @pytest.mark.asyncio
-
     async def test_network_failure_during_token_refresh(self):
 
         """Test token refresh failure during network issues."""
@@ -814,8 +800,7 @@ class TestIntegrationScenarios:
             assert result is False
             # Should not crash, should handle gracefully
     
-    @pytest.mark.asyncio  
-
+    @pytest.mark.asyncio
     async def test_memory_cleanup_during_connection_pool_exhaustion(self):
 
         """Test that memory cleanup works even when connection pool is exhausted."""
@@ -844,7 +829,6 @@ class TestIntegrationScenarios:
             assert pool.active_sessions == 1  # Pool state is still consistent
     
     @pytest.mark.asyncio
-
     async def test_transactional_processing_with_cors_rejection(self):
 
         """Test that transactional processing handles CORS rejection properly."""

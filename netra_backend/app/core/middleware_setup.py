@@ -84,16 +84,8 @@ def _get_localhost_origins() -> list[str]:
         for port in frontend_ports + backend_ports:
             origins.append(f"{host}:{port}")
     
-    # Add service discovery origins if available
-    try:
-        from pathlib import Path
-        from dev_launcher.service_discovery import ServiceDiscovery
-        service_discovery = ServiceDiscovery(Path.cwd())
-        discovered_origins = service_discovery.get_all_service_origins()
-        origins.extend(discovered_origins)
-    except (ImportError, Exception):
-        # Service discovery not available or failed - continue with static list
-        pass
+    # Service discovery removed for microservice independence
+    # Origins are managed through configuration only
     
     return list(set(origins))  # Remove duplicates
 
@@ -132,19 +124,9 @@ def setup_cors_middleware(app: FastAPI) -> None:
 
 def _setup_custom_cors_middleware(app: FastAPI) -> None:
     """Setup custom CORS middleware for staging/development with service discovery integration."""
-    # Only use ServiceDiscovery in local development, not in staging
+    # Service discovery removed for microservice independence
     config = get_configuration()
     service_discovery = None
-    if config.environment == "development":
-        try:
-            from pathlib import Path
-
-            from dev_launcher.service_discovery import ServiceDiscovery
-            # Initialize service discovery for CORS integration
-            service_discovery = ServiceDiscovery(Path.cwd())
-        except ImportError:
-            # dev_launcher is not available (expected in non-dev environments)
-            pass
     
     app.add_middleware(
         CustomCORSMiddleware,

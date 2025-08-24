@@ -12,7 +12,15 @@ import time
 import uuid
 from typing import Any, Dict, List, Optional
 
-import websockets
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", DeprecationWarning)
+    import websockets
+    try:
+        from websockets import WebSocketServerProtocol
+    except ImportError:
+        # Fallback for older versions
+        from websockets.server import WebSocketServerProtocol
 
 from tests.e2e.resource_isolation.test_infrastructure import TenantAgent
 
@@ -81,7 +89,7 @@ class TenantAgentManager:
         logger.info(f"Established connections for {len(connected_agents)}/{len(agents)} agents")
         return connected_agents
 
-    async def _establish_single_connection(self, agent: TenantAgent) -> Optional[websockets.WebSocketServerProtocol]:
+    async def _establish_single_connection(self, agent: TenantAgent) -> Optional[WebSocketServerProtocol]:
         """Establish a single WebSocket connection."""
         try:
             # Add authentication headers

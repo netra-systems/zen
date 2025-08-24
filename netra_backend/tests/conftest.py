@@ -1,8 +1,9 @@
-from dev_launcher.isolated_environment import get_env
 """
 Backend-specific test configuration.
 Uses consolidated test framework infrastructure with backend-specific customizations.
 """
+
+from netra_backend.app.core.isolated_environment import get_env
 
 # Import all common fixtures from the consolidated base
 from test_framework.conftest_base import *
@@ -16,8 +17,6 @@ import sys
 from pathlib import Path
 
 # Add project root to Python path for netra_backend imports
-
-import os
 
 # Import constants at module level only if not in collection mode  
 if not get_env().get("TEST_COLLECTION_MODE"):

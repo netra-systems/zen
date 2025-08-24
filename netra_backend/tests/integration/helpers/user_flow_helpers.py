@@ -518,3 +518,124 @@ async def teardown_test_infrastructure(infrastructure: Dict[str, Any]) -> None:
         duration = (datetime.utcnow() - infrastructure["started_at"]).total_seconds()
 
         print(f"Test infrastructure ran for {duration:.2f} seconds")
+
+
+class DatabaseTestHelpers:
+    """Helper class for database operations in tests."""
+    
+    def __init__(self):
+        self.test_data = {}
+        self.transactions = []
+    
+    async def setup_test_database(self, db_session: AsyncSession):
+        """Setup test database with sample data."""
+        # Mock database setup
+        self.test_data["users"] = []
+        self.test_data["transactions"] = []
+        return True
+    
+    async def cleanup_test_database(self, db_session: AsyncSession):
+        """Clean up test database after tests."""
+        # Mock database cleanup
+        self.test_data.clear()
+        self.transactions.clear()
+        return True
+    
+    async def create_test_transaction(self, user_id: str, amount: float, transaction_type: str = "payment"):
+        """Create a test transaction record."""
+        transaction = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "amount": amount,
+            "type": transaction_type,
+            "status": "completed",
+            "created_at": datetime.utcnow().isoformat()
+        }
+        self.transactions.append(transaction)
+        return transaction
+    
+    async def verify_transaction_integrity(self, transaction_id: str) -> bool:
+        """Verify transaction data integrity."""
+        for transaction in self.transactions:
+            if transaction["id"] == transaction_id:
+                return transaction["status"] == "completed"
+        return False
+
+
+class MiscTestHelpers:
+    """Miscellaneous helper utilities for testing."""
+    
+    def __init__(self):
+        self.test_context = {}
+    
+    def generate_test_id(self, prefix: str = "test") -> str:
+        """Generate a unique test ID."""
+        return f"{prefix}_{uuid.uuid4().hex[:8]}"
+    
+    def create_mock_request_data(self, **kwargs) -> Dict[str, Any]:
+        """Create mock HTTP request data."""
+        base_data = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "request_id": self.generate_test_id("req"),
+            "user_agent": "TestClient/1.0"
+        }
+        base_data.update(kwargs)
+        return base_data
+    
+    def validate_response_structure(self, response: Dict[str, Any], expected_fields: List[str]) -> bool:
+        """Validate that response contains expected fields."""
+        return all(field in response for field in expected_fields)
+    
+    async def simulate_delay(self, seconds: float = 0.1):
+        """Simulate processing delay in tests."""
+        await asyncio.sleep(seconds)
+
+
+class RevenueTestHelpers:
+    """Helper class for revenue-related testing operations."""
+    
+    def __init__(self):
+        self.revenue_records = []
+        self.subscription_data = {}
+    
+    async def create_test_subscription(self, user_id: str, plan: str = "free", status: str = "active"):
+        """Create a test subscription record."""
+        subscription = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "plan": plan,
+            "status": status,
+            "created_at": datetime.utcnow().isoformat(),
+            "billing_period": "monthly" if plan != "free" else None,
+            "amount": 0 if plan == "free" else 29.99
+        }
+        self.subscription_data[user_id] = subscription
+        return subscription
+    
+    async def record_revenue_event(self, user_id: str, event_type: str, amount: float):
+        """Record a revenue event for testing."""
+        event = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "event_type": event_type,  # e.g., "subscription", "upgrade", "usage"
+            "amount": amount,
+            "recorded_at": datetime.utcnow().isoformat()
+        }
+        self.revenue_records.append(event)
+        return event
+    
+    async def calculate_test_revenue(self, user_id: str, period_days: int = 30) -> float:
+        """Calculate total revenue for a user within a period."""
+        cutoff_date = datetime.utcnow() - timedelta(days=period_days)
+        total_revenue = 0.0
+        
+        for record in self.revenue_records:
+            if (record["user_id"] == user_id and 
+                datetime.fromisoformat(record["recorded_at"]) > cutoff_date):
+                total_revenue += record["amount"]
+        
+        return total_revenue
+    
+    def get_subscription_status(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get subscription status for a user."""
+        return self.subscription_data.get(user_id)

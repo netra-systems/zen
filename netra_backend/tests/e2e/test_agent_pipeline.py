@@ -32,7 +32,7 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, patch
 
 import pytest
 
@@ -226,7 +226,6 @@ class TestSupervisorAgentOrchestration:
         # Mock multiple sub-agents
         # Mock: Component isolation for testing without external dependencies
         with patch('app.agents.data_sub_agent.agent.DataSubAgent.process_request') as mock_data, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.agents.reporting_sub_agent.ReportingSubAgent.process_request') as mock_reporting:
             
             mock_data.return_value = {"cost_analysis": "Current: $5000, Potential: $3500"}

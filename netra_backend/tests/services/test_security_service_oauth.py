@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 from cryptography.fernet import Fernet
@@ -52,7 +52,6 @@ class TestSecurityServiceOAuth:
     async def _execute_oauth_user_creation(self, oauth_security_service, mock_db_session, oauth_user_info, created_user):
         """Execute OAuth user creation with patches"""
         with patch.object(oauth_security_service, 'get_user', return_value=None), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.db.models_postgres.User', return_value=created_user):
             return await oauth_security_service.get_or_create_user_from_oauth(
                 mock_db_session, oauth_user_info

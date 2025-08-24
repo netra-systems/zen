@@ -1,4 +1,5 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
+
 """
 Central health check configuration.
 Provides unified configuration for all health checks across the platform.

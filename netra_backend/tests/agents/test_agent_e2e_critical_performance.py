@@ -206,7 +206,6 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         self._verify_performance_metrics(performance_metrics)
 
     @pytest.mark.asyncio
-
     async def test_load_balancing_and_degradation(self, setup_agent_infrastructure):
         """Test graceful degradation under different load levels"""
         infra = setup_agent_infrastructure

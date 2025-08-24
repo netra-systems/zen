@@ -13,7 +13,7 @@ from pathlib import Path
 import json
 import uuid
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 

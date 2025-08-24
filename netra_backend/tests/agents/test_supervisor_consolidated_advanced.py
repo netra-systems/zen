@@ -62,7 +62,6 @@ class TestSupervisorAgentEdgeCases:
     """Test edge cases and error scenarios."""
     
     @pytest.mark.asyncio
-    
     async def test_concurrent_execution_locking(self):
         """Test that execution lock prevents concurrent runs."""
         # Mock: LLM service isolation for fast testing without API calls or rate limits

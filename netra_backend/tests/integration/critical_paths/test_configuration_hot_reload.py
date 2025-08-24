@@ -22,7 +22,7 @@ import os
 import tempfile
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import pytest
 
@@ -58,7 +58,7 @@ class ConfigurationHotReloadManager:
 
         self.temp_config_dir = None
         
-    async def initialize_services(self):
+async def initialize_services(self):
 
         """Initialize services for configuration hot reload testing."""
 
@@ -127,7 +127,7 @@ class ConfigurationHotReloadManager:
 
             raise
     
-    async def create_test_config(self, config_name: str, config_data: Dict[str, Any]) -> str:
+async def create_test_config(self, config_name: str, config_data: Dict[str, Any]) -> str:
 
         """Create a test configuration file."""
 
@@ -139,7 +139,7 @@ class ConfigurationHotReloadManager:
         
         return config_path
     
-    async def update_config(self, config_name: str, new_config: Dict[str, Any], 
+async def update_config(self, config_name: str, new_config: Dict[str, Any], 
 
                           validate: bool = True) -> Dict[str, Any]:
 
@@ -240,7 +240,7 @@ class ConfigurationHotReloadManager:
 
             }
     
-    async def validate_config(self, config_name: str, config_data: Dict[str, Any]) -> Dict[str, Any]:
+async def validate_config(self, config_name: str, config_data: Dict[str, Any]) -> Dict[str, Any]:
 
         """Validate configuration before applying."""
 
@@ -329,7 +329,7 @@ class ConfigurationHotReloadManager:
 
             }
     
-    async def trigger_hot_reload(self, config_name: str, new_config: Dict[str, Any]) -> Dict[str, Any]:
+async def trigger_hot_reload(self, config_name: str, new_config: Dict[str, Any]) -> Dict[str, Any]:
 
         """Trigger hot reload across all services."""
 
@@ -396,7 +396,7 @@ class ConfigurationHotReloadManager:
 
             }
     
-    async def simulate_config_update(self, service_name: str, config_name: str, 
+async def simulate_config_update(self, service_name: str, config_name: str, 
 
                                    new_config: Dict[str, Any]):
 
@@ -413,7 +413,7 @@ class ConfigurationHotReloadManager:
 
             await self.redis_service.set(config_key, json.dumps(new_config))
     
-    async def propagate_config_via_redis(self, config_name: str, new_config: Dict[str, Any]):
+async def propagate_config_via_redis(self, config_name: str, new_config: Dict[str, Any]):
 
         """Propagate configuration changes via Redis pub/sub."""
 
@@ -441,7 +441,7 @@ class ConfigurationHotReloadManager:
 
             logger.error(f"Failed to propagate config via Redis: {e}")
     
-    async def verify_config_propagation(self, config_name: str, 
+async def verify_config_propagation(self, config_name: str, 
 
                                       expected_config: Dict[str, Any]) -> Dict[str, Any]:
 
@@ -521,7 +521,7 @@ class ConfigurationHotReloadManager:
 
             }
     
-    def get_next_global_version(self) -> int:
+def get_next_global_version(self) -> int:
 
         """Get next global configuration version."""
 
@@ -535,7 +535,7 @@ class ConfigurationHotReloadManager:
 
         return max_version + 1
     
-    async def rollback_config(self, config_name: str, target_version: int) -> Dict[str, Any]:
+async def rollback_config(self, config_name: str, target_version: int) -> Dict[str, Any]:
 
         """Rollback configuration to a previous version."""
 
@@ -585,7 +585,7 @@ class ConfigurationHotReloadManager:
 
             }
     
-    async def get_reload_metrics(self) -> Dict[str, Any]:
+async def get_reload_metrics(self) -> Dict[str, Any]:
 
         """Get hot reload performance and reliability metrics."""
 
@@ -619,7 +619,7 @@ class ConfigurationHotReloadManager:
 
         }
     
-    async def cleanup(self):
+async def cleanup(self):
 
         """Clean up resources and temporary files."""
 
@@ -658,7 +658,6 @@ async def hot_reload_manager():
     await manager.cleanup()
 
 @pytest.mark.asyncio
-
 async def test_websocket_config_hot_reload(hot_reload_manager):
 
     """Test WebSocket configuration hot reload without service restart."""
@@ -716,8 +715,7 @@ async def test_websocket_config_hot_reload(hot_reload_manager):
 
     assert result["verification"]["success"] is True
 
-@pytest.mark.asyncio  
-
+@pytest.mark.asyncio
 async def test_config_validation_and_rejection(hot_reload_manager):
 
     """Test configuration validation rejects invalid configurations."""
@@ -759,7 +757,6 @@ async def test_config_validation_and_rejection(hot_reload_manager):
     assert result2["success"] is False
 
 @pytest.mark.asyncio
-
 async def test_multi_service_config_propagation(hot_reload_manager):
 
     """Test configuration propagation across multiple services."""
@@ -818,7 +815,6 @@ async def test_multi_service_config_propagation(hot_reload_manager):
         assert service_verification["config_propagated"] is True
 
 @pytest.mark.asyncio
-
 async def test_hot_reload_performance_requirements(hot_reload_manager):
 
     """Test hot reload meets performance requirements."""
@@ -872,7 +868,6 @@ async def test_hot_reload_performance_requirements(hot_reload_manager):
     assert metrics["max_reload_time"] < 2.0
 
 @pytest.mark.asyncio
-
 async def test_config_rollback_capability(hot_reload_manager):
 
     """Test configuration rollback to previous version."""
@@ -921,7 +916,6 @@ async def test_config_rollback_capability(hot_reload_manager):
     assert metrics["total_reloads"] >= 3  # initial + problematic + rollback
 
 @pytest.mark.asyncio
-
 async def test_concurrent_config_updates(hot_reload_manager):
 
     """Test handling of concurrent configuration updates."""

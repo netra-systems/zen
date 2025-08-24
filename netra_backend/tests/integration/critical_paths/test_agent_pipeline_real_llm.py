@@ -600,7 +600,7 @@ class AgentPipelineRealLLMTester:
 
         """Initialize supervisor agent for test session."""
         # Create mock dependencies for supervisor agent
-        from unittest.mock import AsyncMock, MagicMock, MagicMock
+        from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
         from sqlalchemy.ext.asyncio import AsyncSession
         

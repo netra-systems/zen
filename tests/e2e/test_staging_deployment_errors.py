@@ -173,8 +173,8 @@ class TestStagingDeploymentErrors:
         assert "sslmode=" not in auth_async
 
     # Test 6: Deployment Configuration Validation
-@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
-        def test_staging_deployment_configuration(self):
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    def test_staging_deployment_configuration(self):
         """
         Test that validates all required staging configuration is present.
         """

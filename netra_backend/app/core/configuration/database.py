@@ -17,7 +17,7 @@ Each function ≤8 lines, file ≤300 lines.
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urlunparse
 
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.logging_config import central_logger as logger
@@ -407,3 +407,19 @@ class DatabaseConfigManager:
             "environment": self._environment,
             "ssl_required": str(self._validation_rules.get(self._environment, {}).get("require_ssl", False))
         }
+
+
+# Global database config manager instance
+_config_manager = None
+
+
+def get_unified_config() -> DatabaseConfigManager:
+    """Get unified database configuration manager instance.
+    
+    Returns:
+        DatabaseConfigManager: The global database configuration manager
+    """
+    global _config_manager
+    if _config_manager is None:
+        _config_manager = DatabaseConfigManager()
+    return _config_manager

@@ -155,7 +155,7 @@ def _get_postgres_defaults():
         name="postgres",
         mode=ResourceMode(postgres_mode.lower()) if postgres_mode else ResourceMode.DOCKER,
         local_config={
-            "host": "localhost",
+            "host": "127.0.0.1",
             "port": 5433,
             "database": "netra_dev",
             "user": "netra_dev",
@@ -169,7 +169,7 @@ def _get_postgres_defaults():
             "password": "bGBaG2g4Cfa&Q@cNxGZ3"
         },
         docker_config={
-            "host": "localhost",
+            "host": "127.0.0.1",
             "port": 5433,
             "database": "netra_dev",
             "user": "netra_dev", 

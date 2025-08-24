@@ -14,7 +14,7 @@ import time
 import uuid
 from collections import defaultdict
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch, Mock, call, patch
 
 import pytest
 

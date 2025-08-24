@@ -145,7 +145,6 @@ class TestSupplyResearcherManagement:
             assert keyword in query_lower, f"Expected '{keyword}' in query"
 
     @pytest.mark.asyncio
-
     async def test_change_notification_triggers(self, agent, mock_supply_service):
         """Test notification triggers for significant changes"""
         _setup_significant_changes(mock_supply_service)
@@ -273,7 +272,6 @@ class TestSupplyResearcherManagement:
         assert len(batches["anthropic"]) == 2
 
     @pytest.mark.asyncio
-
     async def test_schedule_health_monitoring(self):
         """Test schedule health and failure monitoring"""
         schedule_health = _create_schedule_health_data()

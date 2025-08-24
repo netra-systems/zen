@@ -51,9 +51,9 @@ async def test_initialization_manager():
             MockAgent, mock_llm_manager, mock_tool_dispatcher, "test_agent"
         )
         
-        print(f"✓ Initialization result: {result.status}")
-        print(f"✓ Agent created: {result.agent is not None}")
-        print(f"✓ Initialization time: {result.initialization_time_ms:.2f}ms")
+        print(f"[PASS] Initialization result: {result.status}")
+        print(f"[PASS] Agent created: {result.agent is not None}")
+        print(f"[PASS] Initialization time: {result.initialization_time_ms:.2f}ms")
         
         # Test with failing LLM manager (should fallback)
         class FailingAgent:
@@ -71,13 +71,13 @@ async def test_initialization_manager():
             FailingAgent, failing_llm, mock_tool_dispatcher, "failing_agent"
         )
         
-        print(f"✓ Fallback result: {fallback_result.status}")
-        print(f"✓ Fallback used: {fallback_result.fallback_used}")
+        print(f"[PASS] Fallback result: {fallback_result.status}")
+        print(f"[PASS] Fallback used: {fallback_result.fallback_used}")
         
         return True
         
     except Exception as e:
-        print(f"✗ InitializationManager test failed: {e}")
+        print(f"[FAIL] InitializationManager test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -101,12 +101,12 @@ async def test_data_agent_modular():
         # Test initialization
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
-        print(f"✓ Agent created: {agent.name}")
-        print(f"✓ Fallback mode: {agent._is_fallback_mode()}")
+        print(f"[PASS] Agent created: {agent.name}")
+        print(f"[PASS] Fallback mode: {agent._is_fallback_mode()}")
         
         # Test health status
         health = agent.get_health_status()
-        print(f"✓ Health status: {health}")
+        print(f"[PASS] Health status: {health}")
         
         # Test execution context creation
         from netra_backend.app.agents.state import DeepAgentState
@@ -116,12 +116,12 @@ async def test_data_agent_modular():
         mock_state.user_request = "test request"
         
         context = agent._create_execution_context(mock_state, "test_run_123", False)
-        print(f"✓ Execution context created: {context.run_id}")
+        print(f"[PASS] Execution context created: {context.run_id}")
         
         return True
         
     except Exception as e:
-        print(f"✗ DataSubAgent test failed: {e}")
+        print(f"[FAIL] DataSubAgent test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -147,7 +147,7 @@ async def test_enhanced_registry():
         # Create registry
         registry = EnhancedAgentRegistry(mock_llm_manager, mock_tool_dispatcher)
         
-        print(f"✓ Registry created")
+        print(f"[PASS] Registry created")
         
         # Test individual agent registration
         class SimpleAgent:
@@ -161,20 +161,20 @@ async def test_enhanced_registry():
                 return {"status": "healthy"}
         
         success = await registry.register_agent_safely("simple", SimpleAgent)
-        print(f"✓ Individual agent registration: {success}")
+        print(f"[PASS] Individual agent registration: {success}")
         
         # Test agent retrieval
         agent = registry.get("simple")
-        print(f"✓ Agent retrieved: {agent is not None}")
+        print(f"[PASS] Agent retrieved: {agent is not None}")
         
         # Test registry health
         health = registry.get_registry_health()
-        print(f"✓ Registry health: {health['total_agents']} agents")
+        print(f"[PASS] Registry health: {health['total_agents']} agents")
         
         return True
         
     except Exception as e:
-        print(f"✗ Enhanced registry test failed: {e}")
+        print(f"[FAIL] Enhanced registry test failed: {e}")
         import traceback
         traceback.print_exc()
         return False

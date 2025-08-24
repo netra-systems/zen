@@ -110,7 +110,6 @@ class TestCleanup:
     """Test cleanup functionality."""
     
     @pytest.mark.asyncio
-    
     async def test_cleanup_with_metrics(self, triage_agent, sample_state):
         """Test cleanup logs metrics when available."""
         sample_state.triage_result = {

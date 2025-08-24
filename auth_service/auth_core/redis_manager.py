@@ -53,6 +53,24 @@ class AuthRedisManager:
             self.enabled = False
             self.redis_client = None
     
+    def connect(self) -> bool:
+        """Synchronous connect method for compatibility with session manager"""
+        try:
+            # For synchronous compatibility, just check if we're enabled
+            # Actual connection will be established on first use
+            return self.enabled
+        except Exception as e:
+            logger.warning(f"Redis connection check failed: {e}")
+            return False
+    
+    async def async_connect(self) -> None:
+        """Connect to Redis - async version"""
+        await self.initialize()
+    
+    def get_client(self) -> Optional[redis.Redis]:
+        """Get Redis client instance"""
+        return self.redis_client
+    
     async def get(self, key: str) -> Optional[str]:
         """Get value from Redis"""
         if not self.redis_client:

@@ -19,7 +19,7 @@ import asyncio
 import json
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from redis.asyncio import Redis
@@ -37,7 +37,6 @@ class TestUserOnboardingFlow:
     """Test user onboarding and first session flow"""
     
     @pytest.mark.asyncio
-
     async def test_first_chat_session_initialization(self, 
 
                                                    test_session: AsyncSession,
@@ -76,7 +75,6 @@ class TestUserOnboardingFlow:
         assert session_result["onboarding_state"] == "chat_initialized"
     
     @pytest.mark.asyncio
-
     async def test_user_profile_setup_and_preferences(self, test_session: AsyncSession):
 
         """Test user profile setup during onboarding"""
@@ -98,7 +96,6 @@ class TestUserOnboardingFlow:
         assert "notification_preferences" in profile_setup["profile_data"]
     
     @pytest.mark.asyncio
-
     async def test_onboarding_progress_tracking(self, test_session: AsyncSession):
 
         """Test onboarding progress tracking"""
@@ -146,7 +143,6 @@ class TestUserOnboardingFlow:
         assert progress["completion_percentage"] >= 60  # Based on total steps
     
     @pytest.mark.asyncio
-
     async def test_onboarding_tutorial_flow(self, test_session: AsyncSession):
 
         """Test interactive onboarding tutorial"""
@@ -170,7 +166,6 @@ class TestUserOnboardingFlow:
         assert tutorial_result["user_engagement_score"] >= 0.7
     
     @pytest.mark.asyncio
-
     async def test_onboarding_skip_options(self, test_session: AsyncSession):
 
         """Test user ability to skip onboarding steps"""
