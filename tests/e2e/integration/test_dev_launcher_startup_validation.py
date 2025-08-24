@@ -291,7 +291,7 @@ class DevLauncherStartupValidator:
             assert coordinator.config is not None
             assert hasattr(coordinator, 'register_service')
             assert hasattr(coordinator, 'coordinate_startup')
-            assert hasattr(coordinator, 'get_service_status')
+            assert hasattr(coordinator, 'get_startup_status')
             
             # Test service registration
             def mock_startup():
@@ -312,7 +312,7 @@ class DevLauncherStartupValidator:
             
             # Test dependency manager integration
             assert coordinator.dependency_manager is not None
-            assert hasattr(coordinator.dependency_manager, 'get_dependencies')
+            assert hasattr(coordinator.dependency_manager, 'get_dependency_status')
             
             self.validation_results[phase_name] = True
             logger.info("Phase 5: Service coordination validated successfully")
@@ -379,7 +379,7 @@ class DevLauncherStartupValidator:
                 project_root=self.project_root,
                 dynamic_ports=True,
                 non_interactive=True,
-                minimal=True
+                startup_mode="minimal"
             )
             
             # Create DevLauncher instance (but don't start it)
@@ -388,7 +388,7 @@ class DevLauncherStartupValidator:
             # Validate launcher configuration
             assert launcher.config.project_root == self.project_root
             assert launcher.config.non_interactive is True
-            assert launcher.config.minimal is True
+            assert launcher.config.startup_mode == "minimal"
             
             # Test readiness detection methods
             assert hasattr(launcher, '_check_system_ready')

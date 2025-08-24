@@ -18,6 +18,13 @@ from test_framework.decorators import mock_justified
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.core.environment_constants import Environment
 
+# Test markers for unified test runner
+pytestmark = [
+    pytest.mark.env_test,  # For test environment compatibility
+    pytest.mark.database,  # Database category marker
+    pytest.mark.unit       # Unit test marker
+]
+
 
 class TestDatabaseManagerURLConversion:
     """Test URL conversion between sync and async formats."""
