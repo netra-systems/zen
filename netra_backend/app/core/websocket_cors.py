@@ -342,18 +342,8 @@ def get_environment_origins() -> List[str]:
         # Development/test environment: use development origins + custom + service discovery
         allowed_origins = DEFAULT_WEBSOCKET_ORIGINS + custom_list
         
-        # Add service discovery origins if available
-        try:
-            from pathlib import Path
-            from dev_launcher.service_discovery import ServiceDiscovery
-            
-            service_discovery = ServiceDiscovery(Path.cwd())
-            discovered_origins = service_discovery.get_all_service_origins()
-            allowed_origins.extend(discovered_origins)
-            
-            logger.debug(f"Added {len(discovered_origins)} service discovery origins for WebSocket CORS")
-        except (ImportError, Exception) as e:
-            logger.debug(f"Service discovery not available for WebSocket CORS: {e}")
+        # Service discovery removed for microservice independence
+        # Origins are managed through configuration only
     
     # Remove duplicates while preserving order
     unique_origins = []

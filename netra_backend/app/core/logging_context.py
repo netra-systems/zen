@@ -1,4 +1,25 @@
-from dev_launcher.isolated_environment import get_env
+# Environment access: Development vs Production
+try:
+    # Development: Use IsolatedEnvironment for full feature set
+    # Use backend-specific isolated environment
+try:
+    from netra_backend.app.core.isolated_environment import get_env
+except ImportError:
+    # Production fallback if isolated_environment module unavailable
+    import os
+    def get_env():
+        """Fallback environment accessor for production."""
+        class FallbackEnv:
+            def get(self, key, default=None):
+                return os.environ.get(key, default)
+            def set(self, key, value, source="production"):
+                os.environ[key] = value
+        return FallbackEnv()
+    _has_isolated_env = True
+except ImportError:
+    # Production: Direct environment access when dev_launcher unavailable
+    import os
+    _has_isolated_env = False
 """Logging context management and correlation IDs for the unified logging system.
 
 This module handles:
@@ -178,8 +199,14 @@ class ContextFilter:
         """Check if running in production environment."""
         # Read environment directly to avoid circular dependency
         # This prevents loading the full configuration during logging initialization
-        import os
-        environment = get_env().get('ENVIRONMENT', 'development').lower()
+        if _has_isolated_env:
+            # Development: Use IsolatedEnvironment
+            environment = get_env().get('ENVIRONMENT', 'development').lower()
+        else:
+            # Production: Direct access when IsolatedEnvironment unavailable
+            import os
+            environment = os.environ.get('ENVIRONMENT', 'development').lower()
+        
         return environment == 'production'
     
     def _should_log_in_production(self, record) -> bool:
