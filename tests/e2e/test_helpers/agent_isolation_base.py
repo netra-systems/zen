@@ -22,7 +22,15 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
 import psutil
-import websockets
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", DeprecationWarning)
+    import websockets
+    try:
+        from websockets import WebSocketServerProtocol
+    except ImportError:
+        # Fallback for older versions
+        from websockets.server import WebSocketServerProtocol
 
 logger = logging.getLogger(__name__)
 
@@ -197,7 +205,7 @@ class AgentIsolationBase:
         else:
             return "low"
 
-    async def simulate_workload_burst(self, connection: websockets.WebSocketServerProtocol, 
+    async def simulate_workload_burst(self, connection: WebSocketServerProtocol, 
                                     tenant_id: str, burst_size: int = 50, 
                                     burst_delay: float = 0.01) -> Dict[str, Any]:
         """Simulate a workload burst for testing isolation."""
