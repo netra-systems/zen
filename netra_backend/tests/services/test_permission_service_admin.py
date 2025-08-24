@@ -7,8 +7,6 @@ Split from test_permission_service.py to maintain 450-line limit
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import os
 from unittest.mock import MagicMock, Mock, patch
 

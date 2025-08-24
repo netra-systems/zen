@@ -6,8 +6,6 @@ Functions refactored to ≤8 lines each using helper functions
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from unittest.mock import patch
 
 import pytest

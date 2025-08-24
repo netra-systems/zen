@@ -17,8 +17,6 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch

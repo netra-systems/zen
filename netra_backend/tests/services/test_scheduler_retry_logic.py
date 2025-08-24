@@ -7,8 +7,6 @@ COMPLIANCE: 450-line max file, 25-line max functions
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch

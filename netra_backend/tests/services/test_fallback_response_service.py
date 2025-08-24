@@ -6,8 +6,6 @@ Tests context-aware fallback response generation for various failure scenarios
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import json
 import re
 from unittest.mock import Mock, patch

@@ -7,8 +7,6 @@ Each test must be concise and focused as per architecture requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import json
 import time
 from unittest.mock import MagicMock, patch

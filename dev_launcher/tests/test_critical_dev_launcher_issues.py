@@ -513,19 +513,21 @@ REDIS_URL=redis://localhost:6379
         env_local = self.test_path / '.env.local'
         env_local.write_text(f'{test_var_name}=from_env_local')
         
-        # Layer 4: OS environment (highest priority)
-        os.environ[test_var_name] = 'from_os_environment'
-        
         # Load using unified config
         env = get_env()
         env.reset_to_original()
         env.disable_isolation()
         
+        # Layer 4: OS environment (highest priority)
+        # Must set AFTER reset_to_original() which clears the environment
+        os.environ[test_var_name] = 'from_os_environment'
+        
         # Load files in priority order (reversed for proper layering)
+        # Later files override earlier ones
         for file_name in ['.secrets', '.env', '.env.local']:
             file_path = self.test_path / file_name
             if file_path.exists():
-                env.load_from_file(str(file_path))
+                env.load_from_file(str(file_path), override_existing=True)
         
         secrets = {test_var_name: env.get(test_var_name)}
         
@@ -542,7 +544,7 @@ REDIS_URL=redis://localhost:6379
         for file_name in ['.secrets', '.env', '.env.local']:
             file_path = self.test_path / file_name
             if file_path.exists():
-                env.load_from_file(str(file_path))
+                env.load_from_file(str(file_path), override_existing=True)
         secrets = {test_var_name: env.get(test_var_name)}
         
         self.assertEqual(
@@ -557,7 +559,7 @@ REDIS_URL=redis://localhost:6379
         for file_name in ['.secrets', '.env', '.env.local']:
             file_path = self.test_path / file_name
             if file_path.exists():
-                env.load_from_file(str(file_path))
+                env.load_from_file(str(file_path), override_existing=True)
         secrets = {test_var_name: env.get(test_var_name)}
         
         self.assertEqual(
@@ -572,7 +574,7 @@ REDIS_URL=redis://localhost:6379
         for file_name in ['.secrets', '.env', '.env.local']:
             file_path = self.test_path / file_name
             if file_path.exists():
-                env.load_from_file(str(file_path))
+                env.load_from_file(str(file_path), override_existing=True)
         secrets = {test_var_name: env.get(test_var_name)}
         
         self.assertEqual(

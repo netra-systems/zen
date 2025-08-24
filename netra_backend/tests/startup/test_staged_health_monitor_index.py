@@ -9,8 +9,6 @@ COMPLIANCE: Modular split from 514-line monolith
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from netra_backend.tests.test_health_monitor_adaptive import (
     TestAdaptiveRules,
     TestHealthCheckFactories,

@@ -6,8 +6,6 @@ Common fixtures and mock classes used across all test modules
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import uuid
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock

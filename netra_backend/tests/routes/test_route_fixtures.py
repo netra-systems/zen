@@ -6,8 +6,6 @@ Shared components extracted from oversized test file to maintain 450-line archit
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional

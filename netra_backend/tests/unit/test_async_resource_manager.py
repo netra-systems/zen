@@ -11,8 +11,6 @@ background task handling, and shutdown procedures.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor

@@ -6,8 +6,6 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, patch

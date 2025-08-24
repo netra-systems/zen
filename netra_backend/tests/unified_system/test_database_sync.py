@@ -8,7 +8,6 @@ Business Value: $12K MRR - Data consistency and real-time synchronization
 """
 
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 

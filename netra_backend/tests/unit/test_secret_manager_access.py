@@ -10,8 +10,6 @@ breaches that could result in lost enterprise customers.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 

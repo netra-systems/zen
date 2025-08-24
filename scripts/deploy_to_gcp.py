@@ -113,12 +113,13 @@ class GCPDeployer:
                 port=3000,
                 dockerfile="Dockerfile.frontend",
                 cloud_run_name="netra-frontend-staging",
-                memory="8Gi",
+                memory="2Gi",
                 cpu="1",
-                min_instances=0,
+                min_instances=1,
                 max_instances=10,
                 environment_vars={
                     "NODE_ENV": "production",
+                    "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",
                 }
             )
         ]

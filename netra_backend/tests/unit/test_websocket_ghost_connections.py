@@ -10,8 +10,6 @@ resource exhaustion that could impact all users ($50K+ MRR protection).
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, Mock, patch
 

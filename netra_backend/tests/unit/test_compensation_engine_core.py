@@ -17,8 +17,6 @@ Target Coverage:
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import uuid
 from datetime import datetime, timezone

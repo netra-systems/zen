@@ -42,7 +42,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.configuration import get_configuration, unified_config_manager
 from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
-from netra_backend.app.dependencies import get_async_db
+# get_async_db doesn't exist - using get_db_session
+from netra_backend.app.dependencies import get_db_session as get_async_db
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.main import app
 from netra_backend.app.services.security_service import SecurityService

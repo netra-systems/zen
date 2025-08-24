@@ -20,11 +20,8 @@ from unittest.mock import patch, MagicMock, AsyncMock
 from typing import Optional
 
 # Add project root to path for imports
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.startup_module import initialize_websocket_components
-
 
 class TestWebSocketInitialization:
     """Test suite for WebSocket component initialization."""
@@ -140,7 +137,6 @@ class TestWebSocketInitialization:
         assert not hasattr(manager, 'large_message_handler')
         assert not hasattr(manager, 'get_large_message_handler')
 
-
 class TestWebSocketMessageSizeHandling:
     """Test message size handling without large_message_handler."""
     
@@ -190,7 +186,6 @@ class TestWebSocketMessageSizeHandling:
         assert message.content == "This is a test message that would have been chunked"
         assert hasattr(message, 'chunk_index') == False  # No chunking fields
         assert hasattr(message, 'total_chunks') == False
-
 
 class TestStartupModuleFix:
     """Test the fix for startup_module WebSocket initialization."""

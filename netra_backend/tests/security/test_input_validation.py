@@ -6,8 +6,6 @@ Tests enhanced input validation functionality
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import pytest
 
 from netra_backend.app.core.enhanced_input_validation import (

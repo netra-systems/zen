@@ -7,8 +7,6 @@ Test classes: TestCheckToolPermission, TestGetUserToolAvailability, TestUpgradeP
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List, Set

@@ -17,8 +17,6 @@ Each test failure = potential lost customer = lost $99-999/month recurring reven
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import json
 import os
 import uuid

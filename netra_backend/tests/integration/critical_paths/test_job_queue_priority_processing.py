@@ -40,7 +40,8 @@ from netra_backend.app.services.websocket.message_queue import (
     MessageStatus,
     QueuedMessage,
 )
-from netra_backend.app.websocket_core.unified.job_queue import JobQueueManager
+# JobQueueManager doesn't exist - using MessageQueue for priority processing tests
+# from netra_backend.app.websocket_core.unified.job_queue import JobQueueManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -49,7 +50,7 @@ class PriorityProcessingL3Manager:
     
     def __init__(self):
         self.message_queue = MessageQueue()
-        self.job_queue = JobQueueManager()
+        # self.job_queue = JobQueueManager()  # Removed - doesn't exist
         self.processed_jobs = []
         self.processing_times = {}
         self.priority_violations = []

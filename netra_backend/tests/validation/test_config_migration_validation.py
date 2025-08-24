@@ -9,8 +9,6 @@ and no regressions were introduced during the migration.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import os
 import sys
 from pathlib import Path

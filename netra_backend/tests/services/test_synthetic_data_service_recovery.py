@@ -6,8 +6,6 @@ Testing error handling and recovery mechanisms
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch

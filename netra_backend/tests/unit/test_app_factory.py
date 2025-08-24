@@ -11,8 +11,6 @@ error handling, and security configurations.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest

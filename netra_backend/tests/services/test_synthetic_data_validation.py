@@ -6,8 +6,6 @@ Tests to validate that the implementation matches the specification
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import os
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, List

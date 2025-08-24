@@ -6,8 +6,6 @@ Integration tests of all performance improvements working together.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 from datetime import datetime, timezone

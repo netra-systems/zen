@@ -4,8 +4,6 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from typing import AsyncGenerator
 from unittest.mock import AsyncMock, Mock

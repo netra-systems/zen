@@ -88,6 +88,7 @@
     "generate_thread_id",
     "generated_at",
     "generated_id",
+    "get_connection_by_id",
     "get_or_create_session_id",
     "google_client_id",
     "group_id",

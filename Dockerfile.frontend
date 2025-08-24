@@ -14,7 +14,7 @@ COPY shared/ ../shared/
 # Set memory limit for build process
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-# Build the application
+# Build the application (creates standalone build)
 RUN npm run build
 
 # Production stage
@@ -22,21 +22,20 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy built application
-COPY --from=builder /app/.next ./.next
+# Copy standalone build output
+# The standalone build includes all necessary dependencies
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/next.config.ts ./
-
-# Install production dependencies only
-RUN npm ci --production
 
 # Set environment variables
 ENV NODE_ENV=production
-# Set memory limit for runtime (can be lower than build time)
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+# Set memory limit for runtime
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 EXPOSE 3000
 
-# Run the application
-CMD ["npm", "start"]
+# Run the standalone server directly
+CMD ["node", "server.js"]

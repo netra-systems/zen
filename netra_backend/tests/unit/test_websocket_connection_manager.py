@@ -10,8 +10,6 @@ for operational insights and user experience optimization.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest

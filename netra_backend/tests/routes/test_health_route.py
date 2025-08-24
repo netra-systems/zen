@@ -2,8 +2,6 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 """Simple health test without complex imports"""
 
 def test_basic_import():

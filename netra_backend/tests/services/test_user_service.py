@@ -6,8 +6,6 @@ Tests user CRUD operations including password hashing
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import uuid
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 

@@ -6,8 +6,6 @@ Tests message sequencing, protocol version handling, and binary data transmissio
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import hashlib
 import json

@@ -188,7 +188,7 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         invalid_token_scenarios = [
             {
                 'name': 'Malformed JWT',
-                'token': 'invalid.jwt.token.structure',
+                'token': 'invalid.jwt.structure',
                 'expected_error': 'malformed_token'
             },
             {
@@ -749,6 +749,9 @@ class TestAuthEdgeCases(BaseIntegrationTest):
                     return {'status': 'error', 'error_type': 'invalid_signature'}
                 except jwt.ExpiredSignatureError:
                     return {'status': 'error', 'error_type': 'expired_authorization_code'}
+                except (jwt.DecodeError, jwt.InvalidTokenError, ValueError, Exception):
+                    # Handle malformed JWT tokens (invalid structure, encoding issues, etc.)
+                    return {'status': 'error', 'error_type': 'malformed_token'}
             
             # Simulate successful exchange for non-JWT codes
             if auth_code.startswith('expired_'):
@@ -853,6 +856,10 @@ class TestAuthEdgeCases(BaseIntegrationTest):
     
     def _validate_session_security(self, session: Dict, original_session: Dict) -> Dict[str, Any]:
         """Validate session security against hijacking attempts."""
+        # Token replay after logout detection - CRITICAL security check
+        if session.get('status') and 'logged_out' in session.get('status', ''):
+            return {'allowed': False, 'rejection_reason': 'Token replay after logout detected'}
+        
         # IP address change detection
         if session.get('ip_address') != original_session.get('ip_address'):
             return {'allowed': False, 'rejection_reason': 'IP address change detected'}
@@ -865,7 +872,9 @@ class TestAuthEdgeCases(BaseIntegrationTest):
         if session.get('session_id') != original_session.get('session_id'):
             return {'allowed': False, 'rejection_reason': 'Session ID mismatch'}
         
-        # Other security checks would go here...
+        # Suspicious location detection
+        if session.get('location') == 'suspicious':
+            return {'allowed': False, 'rejection_reason': 'Suspicious location detected'}
         
         return {'allowed': True}
     

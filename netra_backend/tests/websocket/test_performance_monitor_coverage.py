@@ -7,8 +7,6 @@ Verifies 100% monitoring coverage despite individual check failures.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch

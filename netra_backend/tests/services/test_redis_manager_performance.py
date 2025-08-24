@@ -6,8 +6,6 @@ Tests high throughput, memory usage, latency, and concurrent safety
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 import tracemalloc

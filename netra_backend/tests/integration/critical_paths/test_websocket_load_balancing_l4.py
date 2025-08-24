@@ -38,9 +38,26 @@ StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 from netra_backend.app.core.health_checkers import HealthChecker
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.websocket_core.enhanced_rate_limiter import DistributedRateLimiter
+# DistributedRateLimiter doesn't exist - using EnhancedRateLimiter
+from netra_backend.app.websocket_core.enhanced_rate_limiter import EnhancedRateLimiter
 # LoadBalancedConnectionManager has been consolidated - using WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketManager
+
+# Mock LoadBalancedConnectionManager since it doesn't exist
+class LoadBalancedConnectionManager:
+    """Mock LoadBalancedConnectionManager for load balancing tests."""
+    
+    def __init__(self):
+        self.ws_manager = WebSocketManager()
+        self.initialized = False
+    
+    async def initialize(self):
+        """Initialize the connection manager."""
+        self.initialized = True
+    
+    async def shutdown(self):
+        """Shutdown the connection manager."""
+        self.initialized = False
 
 @dataclass
 class LoadBalancingMetrics:

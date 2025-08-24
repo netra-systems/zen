@@ -6,8 +6,6 @@ Tests validation for different content types and scenarios
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import pytest
 
 from netra_backend.app.services.quality_gate_service import ContentType

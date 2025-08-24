@@ -19,9 +19,8 @@ in the current implementation (DistributedRateLimiter, RateLimitConfig, Backpres
 """
 
 import pytest
-pytestmark = pytest.mark.skip(reason="Test depends on unimplemented classes: DistributedRateLimiter, RateLimitConfig, BackpressureManager")
+pytestmark = pytest.mark.skip(reason="Test depends on unimplemented classes: DistributedRateLimiter, RateLimitConfig, BackpressureManager, HighPerformanceBroadcaster")
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -37,44 +36,51 @@ from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import psutil
-import pytest
 from fastapi import WebSocket
 from netra_backend.app.schemas import User
 from starlette.websockets import WebSocketState
 
 from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
+from enum import Enum
+
+class LoadBalancingStrategy(Enum):
+    ADAPTIVE = "adaptive"
+
+# Mock classes for missing implementations
+class BroadcastPerformanceConfig:
+    pass
+
+class HighPerformanceBroadcaster:
+    pass
+
+class MemoryEfficientWebSocketManager:
+    pass
+
+class MessagePriority(Enum):
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+class OptimizedMessageProcessor:
+    pass
 
 # NOTE: These classes don't exist in the current implementation
 # from netra_backend.app.websocket_core.enhanced_rate_limiter import (
 #     DistributedRateLimiter,
 #     RateLimitConfig,
 # )
-from netra_backend.app.websocket_core.high_performance_broadcast import (
-
-    BroadcastPerformanceConfig,
-
-    HighPerformanceBroadcaster,
-
-)
-# LoadBalancedConnectionManager has been consolidated - using WebSocketManager
-from netra_backend.app.websocket_core.manager import WebSocketManager
-from enum import Enum
-
-class LoadBalancingStrategy(Enum):
-    ADAPTIVE = "adaptive"
-from netra_backend.app.websocket_core.memory_efficient_manager import (
-
-    MemoryEfficientWebSocketManager,
-
-)
-from netra_backend.app.websocket_core.optimized_message_processor import (
-
-    MessagePriority,
-
-    OptimizedMessageProcessor,
-
-)
-from test_framework.mock_utils import mock_justified
+# from netra_backend.app.websocket_core.high_performance_broadcast import (
+#     BroadcastPerformanceConfig,
+#     HighPerformanceBroadcaster,
+# )
+# from netra_backend.app.websocket_core.memory_efficient_manager import (
+#     MemoryEfficientWebSocketManager,
+# )
+# from netra_backend.app.websocket_core.optimized_message_processor import (
+#     MessagePriority,
+#     OptimizedMessageProcessor,
+# )
 
 class MockWebSocketForStress:
 

@@ -10,8 +10,6 @@ and edge cases that could lead to cost overruns.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 from unittest.mock import patch

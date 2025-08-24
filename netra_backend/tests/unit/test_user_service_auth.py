@@ -32,8 +32,6 @@ Architecture: 450-line module limit, 25-line function limit enforced
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import time
 import uuid
 from datetime import datetime, timedelta, timezone

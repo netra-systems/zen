@@ -3,8 +3,6 @@
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import json
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch

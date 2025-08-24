@@ -7,8 +7,6 @@ Tests for JWT token creation, validation, and claims extraction.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import uuid
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch

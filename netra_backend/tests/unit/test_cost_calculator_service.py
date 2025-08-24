@@ -14,8 +14,6 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from decimal import ROUND_HALF_UP, Decimal
 from unittest.mock import Mock, patch
 

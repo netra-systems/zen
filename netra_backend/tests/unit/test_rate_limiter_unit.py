@@ -14,8 +14,6 @@ usage tracking, and upgrade prompts. Critical for conversion funnel and cost con
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import UTC, datetime
 from unittest.mock import AsyncMock, Mock, patch

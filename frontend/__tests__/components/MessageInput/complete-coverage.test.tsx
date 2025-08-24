@@ -31,7 +31,7 @@ describe('MessageInput - Core Functionality', () => {
       
       const textarea = screen.getByRole('textbox');
       expect(textarea).toBeInTheDocument();
-      expect(textarea).toHaveAttribute('placeholder', 'Type a message... (Shift+Enter for new line)');
+      expect(textarea).toHaveAttribute('placeholder', 'Start typing your AI optimization request... (Shift+Enter for new line)');
     });
 
     it('updates text value in real-time', async () => {

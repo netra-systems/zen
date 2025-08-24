@@ -12,8 +12,6 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from typing import Optional
 from unittest.mock import AsyncMock, Mock, patch
 

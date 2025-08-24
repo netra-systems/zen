@@ -16,8 +16,6 @@ CRITICAL: Every test protects revenue by ensuring new user flows work perfectly.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional

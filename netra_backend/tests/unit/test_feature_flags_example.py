@@ -7,8 +7,6 @@ enabling TDD workflow while maintaining 100% pass rate for CI/CD.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import pytest
 
 from test_framework.decorators import (

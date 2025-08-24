@@ -8,8 +8,6 @@ or removed as the functionality no longer exists in the current implementation.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from unittest.mock import Mock, patch
 
 import pytest

@@ -6,8 +6,6 @@ Tests tool discovery and search functionality
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, call, patch
 

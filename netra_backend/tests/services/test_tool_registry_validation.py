@@ -6,8 +6,6 @@ Tests tool validation functionality
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import sys
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional

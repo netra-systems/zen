@@ -14,8 +14,6 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Console output formatting verification
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone

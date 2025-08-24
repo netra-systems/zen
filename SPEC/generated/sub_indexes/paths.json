@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-08-23T16:14:32.596866",
+    "generated_at": "2025-08-24T02:12:32.042324",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 394
+    "total_literals": 481
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -497,6 +497,13 @@
         "netra_backend/app/routes/websocket.py:312"
       ]
     },
+    "/api/poll": {
+      "value": "/api/poll",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/core/degradation_strategies.py:249"
+      ]
+    },
     "/api/references": {
       "value": "/api/references",
       "category": "paths",
@@ -770,6 +777,13 @@
       "value": "/ws/stats",
       "category": "paths",
       "locations": [
+        "netra_backend/app/routes/websocket.py:475"
+      ]
+    },
+    "/ws/test": {
+      "value": "/ws/test",
+      "category": "paths",
+      "locations": [
         "netra_backend/app/routes/websocket.py:367"
       ]
     },
@@ -952,7 +966,7 @@
       "value": "Example: python scripts/deploy_to_gcp.py --project {} --build-local",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:956"
+        "scripts/deploy_to_gcp.py:998"
       ]
     },
     "Examples:\n  # Check specific workflow run\n  python verify_workflow_status.py --repo owner/repo --run-id 123456\n  \n  # Check latest workflow run by name\n  python verify_workflow_status.py --repo owner/repo --workflow-name \"test-suite\"\n  \n  # Wait for workflow completion\n  python verify_workflow_status.py --repo owner/repo --workflow-name \"deploy\" --wait-for-completion\n  \n  # JSON output\n  python verify_workflow_status.py --repo owner/repo --run-id 123456 --output json": {
@@ -973,7 +987,7 @@
       "value": "Examples:\n  Default deployment (fast, no checks):\n    python scripts/deploy_to_gcp.py --project netra-staging --build-local\n    \n  With pre-deployment checks:\n    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks\n    \n  Cloud Build (slower):\n    python scripts/deploy_to_gcp.py --project netra-staging\n    \nSee SPEC/gcp_deployment.xml for detailed guidelines.",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:924"
+        "scripts/deploy_to_gcp.py:966"
       ]
     },
     "Examples:\n  Default deployment (with checks):\n    python scripts/deploy_staging_with_sa.py\n    \n  Quick deployment (no checks):\n    python scripts/deploy_staging_with_sa.py --no-checks\n    \n  Specify service account key:\n    python scripts/deploy_staging_with_sa.py --key path/to/key.json": {
@@ -1071,7 +1085,7 @@
       "value": "Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:949"
+        "scripts/deploy_to_gcp.py:991"
       ]
     },
     "Pre-commit hook for duplicate code detection.\nIntegrates with existing detect_duplicate_code.py for fast incremental checks.\n\nUsage:\n    python scripts/precommit_duplicate_detector.py [files...]\n    \nThis script:\n1. Performs fast duplicate detection on changed files\n2. Checks against known duplicate patterns\n3. Integrates with existing architecture compliance": {
@@ -1187,7 +1201,7 @@
       "value": "See SPEC/gcp_deployment.xml for deployment guidelines.",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:236"
+        "scripts/deploy_to_gcp.py:269"
       ]
     },
     "Status:  python scripts/manage_precommit.py status": {
@@ -1202,6 +1216,13 @@
       "category": "paths",
       "locations": [
         "scripts/manage_precommit.py:72"
+      ]
+    },
+    "Update staging secrets for GCP deployment.\nThis script updates critical secrets in GCP Secret Manager for staging environment.\n\nUsage:\n    python scripts/update_staging_secrets.py --check  # Check current values\n    python scripts/update_staging_secrets.py --update # Update secrets": {
+      "value": "Update staging secrets for GCP deployment.\nThis script updates critical secrets in GCP Secret Manager for staging environment.\n\nUsage:\n    python scripts/update_staging_secrets.py --check  # Check current values\n    python scripts/update_staging_secrets.py --update # Update secrets",
+      "category": "paths",
+      "locations": [
+        "scripts/update_staging_secrets.py:2"
       ]
     },
     "Usage: python scripts/deduplicate_types.py [--dry-run|--migrate|--validate|--clean]": {
@@ -1680,6 +1701,20 @@
         "scripts/fix_import_issues.py:131"
       ]
     },
+    "background_jobs/__init__.py": {
+      "value": "background_jobs/__init__.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:225"
+      ]
+    },
+    "caching/__init__.py": {
+      "value": "caching/__init__.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:230"
+      ]
+    },
     "cat SPEC/learnings/import_management.xml": {
       "value": "cat SPEC/learnings/import_management.xml",
       "category": "paths",
@@ -1706,6 +1741,20 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/middleware/path_traversal_protection.py:29"
+      ]
+    },
+    "dev_launcher/secret_loader.py": {
+      "value": "dev_launcher/secret_loader.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:251"
+      ]
+    },
+    "discovery/__init__.py": {
+      "value": "discovery/__init__.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:240"
       ]
     },
     "frontend/**/*.ts": {
@@ -1907,11 +1956,46 @@
         "scripts/fix_comprehensive_imports.py:277"
       ]
     },
+    "netra_backend/app/clickhouse/__init__.py": {
+      "value": "netra_backend/app/clickhouse/__init__.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:16"
+      ]
+    },
     "netra_backend/app/core/configuration/services.py": {
       "value": "netra_backend/app/core/configuration/services.py",
       "category": "paths",
       "locations": [
         "scripts/fast_import_checker.py:64"
+      ]
+    },
+    "netra_backend/app/core/database.py": {
+      "value": "netra_backend/app/core/database.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:21"
+      ]
+    },
+    "netra_backend/app/core/transaction_core.py": {
+      "value": "netra_backend/app/core/transaction_core.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:32"
+      ]
+    },
+    "netra_backend/app/database/migration_manager.py": {
+      "value": "netra_backend/app/database/migration_manager.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:37"
+      ]
+    },
+    "netra_backend/app/db/models.py": {
+      "value": "netra_backend/app/db/models.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:27"
       ]
     },
     "netra_backend/app/dependencies.py": {
@@ -1921,11 +2005,53 @@
         "scripts/fast_import_checker.py:201"
       ]
     },
+    "netra_backend/app/error_aggregator.py": {
+      "value": "netra_backend/app/error_aggregator.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:120"
+      ]
+    },
+    "netra_backend/app/models/message.py": {
+      "value": "netra_backend/app/models/message.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:214"
+      ]
+    },
+    "netra_backend/app/monitoring/prometheus_exporter.py": {
+      "value": "netra_backend/app/monitoring/prometheus_exporter.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:59"
+      ]
+    },
+    "netra_backend/app/routes/websocket_unified.py": {
+      "value": "netra_backend/app/routes/websocket_unified.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_import_shims.py:62"
+      ]
+    },
     "netra_backend/app/services/apex_optimizer_agent/models.py": {
       "value": "netra_backend/app/services/apex_optimizer_agent/models.py",
       "category": "paths",
       "locations": [
         "scripts/fast_import_checker.py:110"
+      ]
+    },
+    "netra_backend/app/services/external_service_client.py": {
+      "value": "netra_backend/app/services/external_service_client.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:48"
+      ]
+    },
+    "netra_backend/app/services/file_storage_service.py": {
+      "value": "netra_backend/app/services/file_storage_service.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:43"
       ]
     },
     "netra_backend/app/services/llm/cost_optimizer.py": {
@@ -1935,11 +2061,221 @@
         "scripts/fast_import_checker.py:151"
       ]
     },
+    "netra_backend/app/services/supply_research_scheduler.py": {
+      "value": "netra_backend/app/services/supply_research_scheduler.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_background_imports.py:51"
+      ]
+    },
+    "netra_backend/app/services/tenant_service.py": {
+      "value": "netra_backend/app/services/tenant_service.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:53"
+      ]
+    },
+    "netra_backend/app/services/user_auth_service.py": {
+      "value": "netra_backend/app/services/user_auth_service.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_import_shims.py:68"
+      ]
+    },
+    "netra_backend/app/websocket/__init__.py": {
+      "value": "netra_backend/app/websocket/__init__.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_import_shims.py:81"
+      ]
+    },
+    "netra_backend/app/websocket_core/batch_message_core.py": {
+      "value": "netra_backend/app/websocket_core/batch_message_core.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_import_shims.py:25"
+      ]
+    },
+    "netra_backend/app/websocket_core/batch_message_handler.py": {
+      "value": "netra_backend/app/websocket_core/batch_message_handler.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:70"
+      ]
+    },
+    "netra_backend/app/websocket_core/broadcast.py": {
+      "value": "netra_backend/app/websocket_core/broadcast.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:115"
+      ]
+    },
+    "netra_backend/app/websocket_core/broadcast_core.py": {
+      "value": "netra_backend/app/websocket_core/broadcast_core.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:95"
+      ]
+    },
+    "netra_backend/app/websocket_core/compression.py": {
+      "value": "netra_backend/app/websocket_core/compression.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:110"
+      ]
+    },
+    "netra_backend/app/websocket_core/connection_executor.py": {
+      "value": "netra_backend/app/websocket_core/connection_executor.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:85"
+      ]
+    },
+    "netra_backend/app/websocket_core/connection_info.py": {
+      "value": "netra_backend/app/websocket_core/connection_info.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:75"
+      ]
+    },
+    "netra_backend/app/websocket_core/enhanced_rate_limiter.py": {
+      "value": "netra_backend/app/websocket_core/enhanced_rate_limiter.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_import_shims.py:46"
+      ]
+    },
+    "netra_backend/app/websocket_core/error_recovery_handler.py": {
+      "value": "netra_backend/app/websocket_core/error_recovery_handler.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:80"
+      ]
+    },
+    "netra_backend/app/websocket_core/performance_monitor_core.py": {
+      "value": "netra_backend/app/websocket_core/performance_monitor_core.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:105"
+      ]
+    },
+    "netra_backend/app/websocket_core/rate_limiter.py": {
+      "value": "netra_backend/app/websocket_core/rate_limiter.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_import_shims.py:37"
+      ]
+    },
+    "netra_backend/app/websocket_core/reconnection_types.py": {
+      "value": "netra_backend/app/websocket_core/reconnection_types.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:65"
+      ]
+    },
+    "netra_backend/app/websocket_core/state_synchronization_manager.py": {
+      "value": "netra_backend/app/websocket_core/state_synchronization_manager.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_import_shims.py:54"
+      ]
+    },
+    "netra_backend/app/websocket_core/state_synchronizer.py": {
+      "value": "netra_backend/app/websocket_core/state_synchronizer.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:100"
+      ]
+    },
+    "netra_backend/app/websocket_core/unified.py": {
+      "value": "netra_backend/app/websocket_core/unified.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_import_shims.py:17"
+      ]
+    },
+    "netra_backend/app/websocket_core_info.py": {
+      "value": "netra_backend/app/websocket_core_info.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:90"
+      ]
+    },
     "netra_backend/tests/agents/test_data_sub_agent_consolidated.py": {
       "value": "netra_backend/tests/agents/test_data_sub_agent_consolidated.py",
       "category": "paths",
       "locations": [
         "scripts/fix_comprehensive_imports.py:278"
+      ]
+    },
+    "netra_backend/tests/agents/test_supply_researcher_scheduler.py": {
+      "value": "netra_backend/tests/agents/test_supply_researcher_scheduler.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_background_imports.py:47"
+      ]
+    },
+    "netra_backend/tests/clickhouse/metrics_aggregation_tests.py": {
+      "value": "netra_backend/tests/clickhouse/metrics_aggregation_tests.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:105"
+      ]
+    },
+    "netra_backend/tests/clickhouse/test_performance_metrics_extraction.py": {
+      "value": "netra_backend/tests/clickhouse/test_performance_metrics_extraction.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:107"
+      ]
+    },
+    "netra_backend/tests/clickhouse/test_query_correctness.py": {
+      "value": "netra_backend/tests/clickhouse/test_query_correctness.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:106"
+      ]
+    },
+    "netra_backend/tests/datetime_string_test_helpers.py": {
+      "value": "netra_backend/tests/datetime_string_test_helpers.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:182"
+      ]
+    },
+    "netra_backend/tests/debug_migration_test_helpers.py": {
+      "value": "netra_backend/tests/debug_migration_test_helpers.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:197"
+      ]
+    },
+    "netra_backend/tests/e2e/test_complete_real_pipeline_e2e.py": {
+      "value": "netra_backend/tests/e2e/test_complete_real_pipeline_e2e.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:108"
+      ]
+    },
+    "netra_backend/tests/integration/base.py": {
+      "value": "netra_backend/tests/integration/base.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_import_shims.py:91"
+      ]
+    },
+    "netra_backend/tests/integration/critical_paths/test_billing_accuracy_l4.py": {
+      "value": "netra_backend/tests/integration/critical_paths/test_billing_accuracy_l4.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:109"
+      ]
+    },
+    "netra_backend/tests/integration/critical_paths/test_dashboard_query_performance.py": {
+      "value": "netra_backend/tests/integration/critical_paths/test_dashboard_query_performance.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:117"
       ]
     },
     "netra_backend/tests/integration/critical_paths/test_enterprise_auth_integration_l4.py": {
@@ -1956,6 +2292,13 @@
         "scripts/fix_netra_domain.py:48"
       ]
     },
+    "netra_backend/tests/integration/critical_paths/test_performance_scalability_l2.py": {
+      "value": "netra_backend/tests/integration/critical_paths/test_performance_scalability_l2.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:122"
+      ]
+    },
     "netra_backend/tests/integration/critical_paths/test_production_deployment_e2e_l4.py": {
       "value": "netra_backend/tests/integration/critical_paths/test_production_deployment_e2e_l4.py",
       "category": "paths",
@@ -1970,11 +2313,39 @@
         "scripts/fix_netra_domain.py:50"
       ]
     },
+    "netra_backend/tests/integration/deployment_config_fixtures.py": {
+      "value": "netra_backend/tests/integration/deployment_config_fixtures.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:132"
+      ]
+    },
+    "netra_backend/tests/integration/integration.py": {
+      "value": "netra_backend/tests/integration/integration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:126"
+      ]
+    },
+    "netra_backend/tests/integration/sso_saml_components.py": {
+      "value": "netra_backend/tests/integration/sso_saml_components.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:137"
+      ]
+    },
     "netra_backend/tests/integration/test_auth_edge_cases_l3.py": {
       "value": "netra_backend/tests/integration/test_auth_edge_cases_l3.py",
       "category": "paths",
       "locations": [
         "scripts/fix_netra_domain.py:53"
+      ]
+    },
+    "netra_backend/tests/integration/test_unified_message_flow.py": {
+      "value": "netra_backend/tests/integration/test_unified_message_flow.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_import_shims.py:106"
       ]
     },
     "netra_backend/tests/integration/test_user_login_flows_l3.py": {
@@ -1996,6 +2367,181 @@
       "category": "paths",
       "locations": [
         "scripts/fix_netra_domain.py:54"
+      ]
+    },
+    "netra_backend/tests/integration/test_ws_connection_mocks.py": {
+      "value": "netra_backend/tests/integration/test_ws_connection_mocks.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:142"
+      ]
+    },
+    "netra_backend/tests/json_file_crypto_test_helpers.py": {
+      "value": "netra_backend/tests/json_file_crypto_test_helpers.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:187"
+      ]
+    },
+    "netra_backend/tests/llm_mocks.py": {
+      "value": "netra_backend/tests/llm_mocks.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:147"
+      ]
+    },
+    "netra_backend/tests/network_pagination_test_helpers.py": {
+      "value": "netra_backend/tests/network_pagination_test_helpers.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:192"
+      ]
+    },
+    "netra_backend/tests/performance/performance_baseline_config.py": {
+      "value": "netra_backend/tests/performance/performance_baseline_config.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:110"
+      ]
+    },
+    "netra_backend/tests/performance/test_agent_load_stress.py": {
+      "value": "netra_backend/tests/performance/test_agent_load_stress.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:111"
+      ]
+    },
+    "netra_backend/tests/performance/test_comprehensive_backend_performance.py": {
+      "value": "netra_backend/tests/performance/test_comprehensive_backend_performance.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:112"
+      ]
+    },
+    "netra_backend/tests/performance/test_performance_monitoring.py": {
+      "value": "netra_backend/tests/performance/test_performance_monitoring.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:116"
+      ]
+    },
+    "netra_backend/tests/performance/test_sla_compliance.py": {
+      "value": "netra_backend/tests/performance/test_sla_compliance.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:114"
+      ]
+    },
+    "netra_backend/tests/services/test_scheduler_jobs_core.py": {
+      "value": "netra_backend/tests/services/test_scheduler_jobs_core.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_background_imports.py:50"
+      ]
+    },
+    "netra_backend/tests/services/test_scheduler_retry_logic.py": {
+      "value": "netra_backend/tests/services/test_scheduler_retry_logic.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_background_imports.py:49"
+      ]
+    },
+    "netra_backend/tests/services/test_supply_research_scheduler_jobs.py": {
+      "value": "netra_backend/tests/services/test_supply_research_scheduler_jobs.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_background_imports.py:48"
+      ]
+    },
+    "netra_backend/tests/test_compression_auth.py": {
+      "value": "netra_backend/tests/test_compression_auth.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:172"
+      ]
+    },
+    "netra_backend/tests/test_config_core.py": {
+      "value": "netra_backend/tests/test_config_core.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:162"
+      ]
+    },
+    "netra_backend/tests/test_health_monitor_adaptive.py": {
+      "value": "netra_backend/tests/test_health_monitor_adaptive.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:167"
+      ]
+    },
+    "netra_backend/tests/test_performance_batching.py": {
+      "value": "netra_backend/tests/test_performance_batching.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:152"
+      ]
+    },
+    "netra_backend/tests/test_route_fixtures.py": {
+      "value": "netra_backend/tests/test_route_fixtures.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_import_shims.py:100"
+      ]
+    },
+    "netra_backend/tests/test_utilities.py": {
+      "value": "netra_backend/tests/test_utilities.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:157"
+      ]
+    },
+    "netra_backend/tests/test_websocket_bidirectional_types.py": {
+      "value": "netra_backend/tests/test_websocket_bidirectional_types.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:177"
+      ]
+    },
+    "netra_backend/tests/unified_system/test_dev_launcher_startup.py": {
+      "value": "netra_backend/tests/unified_system/test_dev_launcher_startup.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:104"
+      ]
+    },
+    "netra_backend/tests/unified_system/test_service_recovery.py": {
+      "value": "netra_backend/tests/unified_system/test_service_recovery.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:102"
+      ]
+    },
+    "netra_backend/tests/unit/test_metrics_collector_core.py": {
+      "value": "netra_backend/tests/unit/test_metrics_collector_core.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:101"
+      ]
+    },
+    "netra_backend/tests/websocket/test_websocket_integration_performance.py": {
+      "value": "netra_backend/tests/websocket/test_websocket_integration_performance.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:100"
+      ]
+    },
+    "netra_mcp/__init__.py": {
+      "value": "netra_mcp/__init__.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:220"
+      ]
+    },
+    "payments/__init__.py": {
+      "value": "payments/__init__.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:235"
       ]
     },
     "providers/WebSocketProvider.tsx": {
@@ -2184,7 +2730,7 @@
       "value": "scripts/check_architecture_compliance.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:192",
+        "scripts/deploy_to_gcp.py:225",
         "scripts/team_updates_sync.py:86"
       ]
     },
@@ -2192,7 +2738,7 @@
       "value": "scripts/code_audit_orchestrator.py",
       "category": "paths",
       "locations": [
-        "scripts/configure_audit.py:232"
+        "scripts/configure_audit.py:231"
       ]
     },
     "scripts/deploy_to_gcp.py": {
@@ -2214,7 +2760,8 @@
       "value": "scripts/fix_e2e_imports.py",
       "category": "paths",
       "locations": [
-        "scripts/fix_netra_domain.py:56"
+        "scripts/fix_netra_domain.py:56",
+        "scripts/fix_performance_monitor_imports.py:103"
       ]
     },
     "scripts/fix_staging_deployment.py": {
@@ -2228,7 +2775,7 @@
       "value": "scripts/scan_string_literals.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:197"
+        "scripts/deploy_to_gcp.py:230"
       ]
     },
     "scripts/start_with_discovery.js": {
@@ -2300,6 +2847,13 @@
         "scripts/function_complexity_analyzer.py:150"
       ]
     },
+    "test_framework/real_services_test_fixtures.py": {
+      "value": "test_framework/real_services_test_fixtures.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:203"
+      ]
+    },
     "test_framework/runner.py": {
       "value": "test_framework/runner.py",
       "category": "paths",
@@ -2353,6 +2907,13 @@
         "scripts/fix_simple_import_errors.py:85"
       ]
     },
+    "tests/e2e/agent_startup_performance_measurer.py": {
+      "value": "tests/e2e/agent_startup_performance_measurer.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:113"
+      ]
+    },
     "tests/e2e/fixtures/__init__.py": {
       "value": "tests/e2e/fixtures/__init__.py",
       "category": "paths",
@@ -2379,6 +2940,13 @@
       "category": "paths",
       "locations": [
         "scripts/fix_all_e2e_imports.py:125"
+      ]
+    },
+    "tests/e2e/performance/test_performance_sla_validation.py": {
+      "value": "tests/e2e/performance/test_performance_sla_validation.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:119"
       ]
     },
     "tests/e2e/resource_isolation/infrastructure/__init__.py": {
@@ -2411,6 +2979,27 @@
         "scripts/fix_simple_import_errors.py:88"
       ]
     },
+    "tests/e2e/service_failure_tester.py": {
+      "value": "tests/e2e/service_failure_tester.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:118"
+      ]
+    },
+    "tests/e2e/test_concurrent_agent_startup_core.py": {
+      "value": "tests/e2e/test_concurrent_agent_startup_core.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:120"
+      ]
+    },
+    "tests/e2e/test_concurrent_agent_startup_performance.py": {
+      "value": "tests/e2e/test_concurrent_agent_startup_performance.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:121"
+      ]
+    },
     "tests/e2e/test_data_factory.py": {
       "value": "tests/e2e/test_data_factory.py",
       "category": "paths",
@@ -2439,6 +3028,20 @@
         "scripts/fix_import_indents.py:67",
         "scripts/fix_remaining_imports.py:78",
         "scripts/fix_simple_import_errors.py:91"
+      ]
+    },
+    "tests/e2e/test_soak_testing.py": {
+      "value": "tests/e2e/test_soak_testing.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_performance_monitor_imports.py:115"
+      ]
+    },
+    "tests/e2e/test_startup_initialization.py": {
+      "value": "tests/e2e/test_startup_initialization.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_background_imports.py:52"
       ]
     },
     "tests/e2e/websocket_resilience/test_2_midstream_disconnection_recovery_websocket.py": {
@@ -2813,6 +3416,13 @@
       "category": "paths",
       "locations": [
         "scripts/fix_import_indents.py:70"
+      ]
+    },
+    "tracing/__init__.py": {
+      "value": "tracing/__init__.py",
+      "category": "paths",
+      "locations": [
+        "scripts/create_additional_shims.py:245"
       ]
     },
     "unified_tool_registry/__init__.py": {

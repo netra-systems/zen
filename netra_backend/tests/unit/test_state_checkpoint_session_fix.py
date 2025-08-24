@@ -7,8 +7,6 @@ db_session_factory as an async context manager.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 

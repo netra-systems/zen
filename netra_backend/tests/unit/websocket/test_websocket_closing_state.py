@@ -6,8 +6,6 @@ Tests to prevent regression of the "Cannot call send once a close message has be
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, Mock, patch

@@ -6,8 +6,6 @@ Each function ≤8 lines, using helper functions for setup and assertions.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import time
 from datetime import datetime

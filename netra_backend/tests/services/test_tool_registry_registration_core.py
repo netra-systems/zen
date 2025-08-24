@@ -6,8 +6,6 @@ Tests basic tool registration functionality
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import json
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional

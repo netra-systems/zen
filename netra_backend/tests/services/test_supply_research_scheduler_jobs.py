@@ -6,8 +6,6 @@ Tests scheduling, execution, background tasks, retry mechanisms, and error handl
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import json
 from datetime import UTC, datetime, timedelta

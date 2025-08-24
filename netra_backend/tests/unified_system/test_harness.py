@@ -11,8 +11,6 @@ Supports Auth Service, Backend, and Frontend together with real communication.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 import logging
 import platform

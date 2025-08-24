@@ -7,7 +7,6 @@ Business Value: Provides billing analytics and usage pattern insights
 for customer optimization and revenue forecasting.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
 

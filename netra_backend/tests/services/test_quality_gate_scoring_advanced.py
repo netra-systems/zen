@@ -7,8 +7,6 @@ redundancy, hallucination risk, and weighted scoring calculations.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, Mock, patch

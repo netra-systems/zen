@@ -7,8 +7,6 @@ Compliance: <300 lines, 25-line max functions, modular design.
 import sys
 from pathlib import Path
 
-from netra_backend.tests.test_utils import setup_test_path
-
 import asyncio
 from pathlib import Path
 from typing import Dict, List, Optional

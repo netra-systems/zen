@@ -411,7 +411,12 @@ class IsolatedEnvironment:
                     key = key.strip()
                     value = value.strip('\'"').strip()
                     
-                    # Skip if exists and not overriding
+                    # OS environment variables always have priority over file-based configs
+                    # regardless of override_existing setting
+                    if not self._isolation_enabled and key in os.environ:
+                        continue
+                    
+                    # Skip if exists and not overriding (for non-OS env vars)
                     if not override_existing and self.get(key) is not None:
                         continue
                     
