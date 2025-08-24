@@ -375,48 +375,15 @@ async def test_message_delivery_during_reconnection(resilience_manager):
         {"id": f"msg_{i}", "content": f"Test message {i}", "timestamp": time.time()}
         for i in range(3)
     ]
-            
-            if connection["status"] == "disconnected":
-                # Queue messages for delivery after reconnection
-
-                connection["message_queue"].extend(test_messages)
-                
-                return {
-
-                    "success": True,
-
-                    "messages_queued": len(test_messages),
-
-                    "total_queue_size": len(connection["message_queue"])
-
-                }
-
-            else:
-                # Deliver immediately if connected
-
-                for message in test_messages:
-
-                    await self.deliver_message(session_id, message)
-                
-                return {
-
-                    "success": True,
-
-                    "messages_delivered": len(test_messages),
-
-                    "delivery_method": "immediate"
-
-                }
-            
-        except Exception as e:
-
-            return {
-
-                "success": False,
-
-                "error": str(e)
-
-            }
+    
+    # Queue messages during disconnection
+    for message in test_messages:
+        await resilience_manager.queue_message(session_id, message)
+    
+    # Simulate reconnection and verify message delivery
+    reconnection_result = await resilience_manager.simulate_reconnection(session_id)
+    
+    assert reconnection_result["success"] is True
     
 async def deliver_message(self, session_id: str, message: Dict[str, Any]):
 

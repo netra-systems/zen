@@ -22,7 +22,6 @@ from typing import Optional
 
 import pytest
 import requests
-from auth_service.tests.conftest import TEST_ENVIRONMENT_MANAGER
 
 
 class AuthServiceStartupTester:

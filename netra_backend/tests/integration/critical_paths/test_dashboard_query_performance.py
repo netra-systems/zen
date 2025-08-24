@@ -887,44 +887,32 @@ async def test_cache_effectiveness(dashboard_performance_validator, cache_test_d
 @pytest.mark.asyncio
 async def test_concurrent_user_scaling(dashboard_performance_validator, max_users: int = 20) -> Dict[str, Any]:
 
-        """Test dashboard performance under increasing concurrent user load."""
+    """Test dashboard performance under increasing concurrent user load."""
 
-        scaling_results = {
-
-            "user_loads_tested": [],
-
-            "performance_degradation": [],
-
-            "scaling_limit": 0,
-
-            "performance_by_load": {}
-
-        }
+    scaling_results = {
+        "user_loads_tested": [],
+        "performance_degradation": [],
+        "scaling_limit": 0,
+        "performance_by_load": {}
+    }
+    
+    # Test increasing user loads
+    user_loads = [1, 5, 10, 15, max_users]
+    
+    for user_count in user_loads:
+        # Execute test with current user load
+        load_results = await dashboard_performance_validator.execute_dashboard_queries(
+            concurrent_users=user_count, duration_seconds=15
+        )
         
-        # Test increasing user loads
-
-        user_loads = [1, 5, 10, 15, max_users]
+        # Analyze performance
+        performance_metrics = await dashboard_performance_validator.analyze_query_performance(load_results)
         
-        for user_count in user_loads:
-            # Execute test with current user load
-
-            load_results = await self.execute_dashboard_queries(
-
-                concurrent_users=user_count, duration_seconds=15
-
-            )
-            
-            # Analyze performance
-
-            performance_metrics = await self.analyze_query_performance(load_results)
-            
-            scaling_results["user_loads_tested"].append(user_count)
-
-            scaling_results["performance_by_load"][user_count] = {
-
-                "average_response_time_ms": performance_metrics.average_response_time_ms,
-
-                "p95_response_time_ms": performance_metrics.p95_response_time_ms,
+        scaling_results["user_loads_tested"].append(user_count)
+        
+        scaling_results["performance_by_load"][user_count] = {
+            "average_response_time_ms": performance_metrics.average_response_time_ms,
+            "p95_response_time_ms": performance_metrics.p95_response_time_ms,
 
                 "error_rate": performance_metrics.error_rate,
 
