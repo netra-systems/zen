@@ -26,6 +26,12 @@ def get_env():
                 return os.environ.get(key, default)
             def set(self, key: str, value: str, source: str = "test"):
                 os.environ[key] = value
+            def is_isolation_enabled(self):
+                # Always return True for test environment wrapper
+                return True
+            def enable_isolation(self):
+                # No-op for test environment wrapper since isolation is already enabled
+                pass
         return TestEnvironmentWrapper()
     else:
         # Normal execution, use dev_launcher environment

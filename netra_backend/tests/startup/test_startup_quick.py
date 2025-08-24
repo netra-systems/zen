@@ -84,7 +84,7 @@ async def test_critical_imports():
         "netra_backend.app.services.redis_service",
         "netra_backend.app.auth_integration",
         "netra_backend.app.core.exceptions",
-        "netra_backend.app.websocket.connection",
+        "netra_backend.app.websocket.connection_manager",
         "netra_backend.app.agents.supervisor"
     ]
     

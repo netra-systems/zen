@@ -460,18 +460,18 @@ class TestOAuthErrorHandling:
         # Test CSRF attack scenarios
         csrf_scenarios = [
             # No state parameter (CSRF vulnerable)
-            f"/auth/callback?code={oauth_code}",
+            f"/api/v1/auth/callback?code={oauth_code}",
             
             # Predictable state parameter
-            f"/auth/callback?code={oauth_code}&state=123456",
-            f"/auth/callback?code={oauth_code}&state=predictable_state",
+            f"/api/v1/auth/callback?code={oauth_code}&state=123456",
+            f"/api/v1/auth/callback?code={oauth_code}&state=predictable_state",
             
             # Reused state parameter
-            f"/auth/callback?code={oauth_code}&state=reused_state_123",
-            f"/auth/callback?code={oauth_code}&state=reused_state_123",  # Same state twice
+            f"/api/v1/auth/callback?code={oauth_code}&state=reused_state_123",
+            f"/api/v1/auth/callback?code={oauth_code}&state=reused_state_123",  # Same state twice
             
             # State parameter from different session
-            f"/auth/callback?code={oauth_code}&state=other_session_state",
+            f"/api/v1/auth/callback?code={oauth_code}&state=other_session_state",
         ]
         
         for scenario_url in csrf_scenarios:

@@ -24,7 +24,7 @@ class TestOAuthBasicEndpoints:
     
     def test_auth_config_endpoint(self):
         """Test OAuth configuration endpoint"""
-        response = client.get("/auth/config")
+        response = client.get("/api/v1/auth/config")
         assert response.status_code == 200
         
         config = response.json()
@@ -129,7 +129,7 @@ class TestOAuthProviderSupport:
     
     def test_oauth_endpoints_configured(self):
         """Test OAuth endpoints are properly configured"""
-        response = client.get("/auth/config")
+        response = client.get("/api/v1/auth/config")
         assert response.status_code == 200
         
         config = response.json()

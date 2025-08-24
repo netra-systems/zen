@@ -52,7 +52,18 @@ async def l3_services():
 async def agent_service(l3_services):
     """Agent service with L3 real dependencies"""
     orchestrator, connections = l3_services
-    supervisor = SupervisorAgent()
+    
+    # Create the required dependencies for SupervisorAgent
+    from unittest.mock import AsyncMock, Mock
+    from netra_backend.app.llm.llm_manager import LLMManager
+    from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    
+    db_session = AsyncMock()
+    llm_manager = Mock(spec=LLMManager)
+    websocket_manager = AsyncMock()
+    tool_dispatcher = Mock(spec=ToolDispatcher)
+    
+    supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
     yield AgentService(supervisor)
 
 @pytest.fixture
@@ -64,11 +75,31 @@ async def reset_services(l3_services):
 class TestAgentToolExecutionPipeline:
     """Test end-to-end agent tool execution pipeline"""
 
+    def _create_test_request(self, query: str, run_id: str, user_id: str = "test_user", table_suffix: str = "table") -> RequestModel:
+        """Helper to create a valid RequestModel for testing"""
+        from netra_backend.app.schemas.Request import DataSource, TimeRange, Workload
+        
+        data_source = DataSource(source_table=f"test_{table_suffix}")
+        time_range = TimeRange(start_time="2025-01-01T00:00:00Z", end_time="2025-01-01T01:00:00Z")
+        workload = Workload(
+            run_id=run_id,
+            query=query,
+            data_source=data_source,
+            time_range=time_range
+        )
+        
+        return RequestModel(
+            user_id=user_id,
+            query=query,
+            workloads=[workload]
+        )
+
     @pytest.mark.asyncio
     async def test_basic_tool_execution_pipeline(self, agent_service, reset_services):
         """Test basic end-to-end tool execution < 2 seconds"""
         start_time = time.time()
-        request = RequestModel(query="List available tools", user_request="test_basic")
+        
+        request = self._create_test_request("List available tools", "test_run_basic")
         result = await agent_service.run(request, "test_run_basic", False)
         execution_time = time.time() - start_time
         
@@ -78,7 +109,7 @@ class TestAgentToolExecutionPipeline:
     @pytest.mark.asyncio
     async def test_permission_failure_handling(self, agent_service, reset_services):
         """Test permission failure handling in tool execution"""
-        request = RequestModel(query="Execute admin tool", user_request="test_permission")
+        request = self._create_test_request("Execute admin tool", "test_run_permission", table_suffix="admin_table")
         
         with pytest.raises(AgentPermissionError):
             await agent_service.run(request, "test_run_permission", False)
@@ -86,7 +117,7 @@ class TestAgentToolExecutionPipeline:
     @pytest.mark.asyncio
     async def test_timeout_handling(self, agent_service, reset_services):
         """Test timeout handling in long-running tool execution"""
-        request = RequestModel(query="Long running task", user_request="test_timeout")
+        request = self._create_test_request("Long running task", "test_run_timeout", table_suffix="slow_table")
         
         with pytest.raises(AgentTimeoutError):
             await asyncio.wait_for(
@@ -98,8 +129,9 @@ class TestAgentToolExecutionPipeline:
     async def test_concurrent_tool_executions(self, agent_service, reset_services):
         """Test concurrent tool executions performance"""
         start_time = time.time()
+        
         requests = [
-            RequestModel(query=f"Tool execution {i}", user_request=f"test_concurrent_{i}")
+            self._create_test_request(f"Tool execution {i}", f"test_run_concurrent_{i}", table_suffix=f"table_{i}")
             for i in range(5)
         ]
         
@@ -116,7 +148,7 @@ class TestAgentToolExecutionPipeline:
     @pytest.mark.asyncio
     async def test_supervisor_to_subagent_delegation(self, agent_service, reset_services):
         """Test supervisor delegation to sub-agents"""
-        request = RequestModel(query="Analyze data", user_request="test_delegation")
+        request = self._create_test_request("Analyze data", "test_run_delegation", table_suffix="analysis_table")
         result = await agent_service.run(request, "test_run_delegation", False)
         
         assert result is not None
@@ -125,8 +157,8 @@ class TestAgentToolExecutionPipeline:
     async def test_tool_execution_with_database_recovery(self, agent_service, reset_services):
         """Test tool execution continues after database recovery"""
         recovery_strategy = ConnectionPoolRefreshStrategy()
-        request = RequestModel(query="Database operation", user_request="test_recovery")
         
+        request = self._create_test_request("Database operation", "test_run_recovery", table_suffix="recovery_table")
         result = await agent_service.run(request, "test_run_recovery", False)
         assert result is not None
 

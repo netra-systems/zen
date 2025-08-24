@@ -57,7 +57,7 @@ class TestAdaptiveRules:
         state.start_time = datetime.now() - timedelta(seconds=70)
         state.current_stage = HealthStage.INITIALIZATION
         
-        await health_monitor._apply_adaptive_rules("test_service")
+        await health_monitor.apply_adaptive_rules("test_service")
         
         assert state.grace_multiplier == 1.5
 
@@ -69,7 +69,7 @@ class TestAdaptiveRules:
         
         # Mock frequent failures
         with patch.object(health_monitor, '_count_recent_failures', return_value=5):
-            await health_monitor._apply_adaptive_rules("test_service")
+            await health_monitor.apply_adaptive_rules("test_service")
             # Rule applied internally (increases check interval)
 
     def test_count_recent_failures(self, health_monitor: StagedHealthMonitor,

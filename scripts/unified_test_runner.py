@@ -497,13 +497,9 @@ class UnifiedTestRunner:
         
         # Add environment-specific filtering
         if hasattr(args, 'env') and args.env:
-            # Add environment marker to filter tests
-            env_marker = f'env={args.env}'
-            if category_name in category_markers:
-                # Combine with existing marker
-                cmd_parts[-1] = f'"{cmd_parts[-1][1:-1]} and {env_marker}"'
-            else:
-                cmd_parts.extend(["-m", f'"{env_marker}"'])
+            # Add environment marker to filter tests - use pytest markers, not -k expressions
+            env_marker = f'env_{args.env}'
+            cmd_parts.extend(["-m", env_marker])
         
         # Add coverage options
         if not args.no_coverage:

@@ -21,9 +21,10 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.websocket_core.compression import WebSocketCompressor
 
 # TODO: Implement these modules when performance optimization is prioritized
-# from netra_backend.app.websocket_core.memory_manager import WebSocketMemoryManager
-# from netra_backend.app.websocket_core.message_batcher import WebSocketMessageBatcher
-# from netra_backend.app.monitoring.system_monitor import SystemPerformanceMonitor as PerformanceMonitor
+# These imports are intentionally commented out as the modules don't exist yet:
+# - netra_backend.app.websocket_core.memory_manager
+# - netra_backend.app.websocket_core.message_batcher  
+# - netra_backend.app.monitoring.system_monitor
 
 class WebSocketIntegrationTestHelper:
     """Helper class for integration testing."""
