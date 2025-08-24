@@ -47,6 +47,33 @@ export type { BaseWebSocketPayload } from '../shared/base';
 export { isValidWebSocketMessageType } from '../shared/enums';
 
 // ============================================================================
+// WEBSOCKET STATUS & STATE TYPES - Consolidated from services
+// ============================================================================
+
+/**
+ * WebSocket connection status - matches native WebSocket readyState values
+ * CONNECTING = 0, OPEN = 1, CLOSING = 2, CLOSED = 3
+ */
+export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
+
+/**
+ * WebSocket logical state - higher-level state tracking
+ * Used for application-level connection management
+ */
+export type WebSocketState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
+
+/**
+ * WebSocket service error interface - standardized error format
+ */
+export interface WebSocketServiceError {
+  code: number;
+  message: string;
+  timestamp: number;
+  type: 'connection' | 'parse' | 'auth' | 'timeout' | 'rate_limit' | 'unknown';
+  recoverable: boolean;
+}
+
+// ============================================================================
 // WEBSOCKET MESSAGE TYPE IMPORTS
 // ============================================================================
 

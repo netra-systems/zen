@@ -16,18 +16,18 @@
 
 import { jest } from '@jest/globals';
 
+import {
+  MockUser,
+  MockThread,
+  MockMessage,
+  MockWebSocketMessage,
+  MockStoreState
+} from './test-helpers';
+
 // ============================================================================
 // USER MOCK FACTORIES - User account generation
+// Types imported from test-helpers.tsx - single source of truth
 // ============================================================================
-
-export interface MockUser {
-  id: string;
-  email: string;
-  name: string;
-  role: 'free' | 'early' | 'mid' | 'enterprise';
-  created_at: string;
-  settings?: Record<string, any>;
-}
 
 /**
  * Create mock user with minimal data
@@ -83,16 +83,7 @@ export function createMockUserList(count: number = 3): MockUser[] {
 // THREAD MOCK FACTORIES - Conversation thread generation
 // ============================================================================
 
-export interface MockThread {
-  id: string;
-  title: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-  message_count: number;
-  is_archived: boolean;
-  metadata?: Record<string, any>;
-}
+// MockThread type imported from test-helpers.tsx
 
 /**
  * Create mock thread with default values
@@ -157,15 +148,7 @@ export function createMockThreadList(count: number = 5, userId: string = 'user_t
 // MESSAGE MOCK FACTORIES - Message content generation
 // ============================================================================
 
-export interface MockMessage {
-  id: string;
-  thread_id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  created_at: string;
-  metadata?: Record<string, any>;
-  attachments?: Array<{ id: string; filename: string; type: string }>;
-}
+// MockMessage type imported from test-helpers.tsx
 
 /**
  * Create basic mock message
@@ -246,11 +229,7 @@ export function createMockConversation(
 // WEBSOCKET MOCK FACTORIES - Real-time event simulation
 // ============================================================================
 
-export interface MockWebSocketMessage {
-  type: string;
-  payload: Record<string, any>;
-  timestamp: string;
-}
+// MockWebSocketMessage type imported from test-helpers.tsx
 
 /**
  * Create WebSocket message event
@@ -316,24 +295,7 @@ export function createErrorMessage(
 // STORE STATE MOCK FACTORIES - Application state simulation
 // ============================================================================
 
-export interface MockStoreState {
-  auth: {
-    user: MockUser | null;
-    isAuthenticated: boolean;
-    token: string | null;
-  };
-  chat: {
-    threads: MockThread[];
-    currentThread: MockThread | null;
-    messages: MockMessage[];
-    isLoading: boolean;
-  };
-  connection: {
-    isConnected: boolean;
-    reconnectAttempts: number;
-    lastHeartbeat: string | null;
-  };
-}
+// MockStoreState type imported from test-helpers.tsx
 
 /**
  * Create authenticated store state

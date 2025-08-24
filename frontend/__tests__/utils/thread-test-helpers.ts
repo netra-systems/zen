@@ -15,7 +15,7 @@
  */
 
 import { jest } from '@jest/globals';
-import { createMockMessage, MockMessage } from './message-test-helpers';
+import { createMockMessage, MockMessage, MockThread } from './test-helpers';
 
 // Define types locally to avoid import issues during testing
 export interface ThreadMetadata {
@@ -59,19 +59,7 @@ export interface ThreadState {
 // THREAD MOCK FACTORIES - Thread generation utilities
 // ============================================================================
 
-export interface MockThread {
-  id: string;
-  title: string;
-  name?: string;
-  user_id?: string;
-  created_at: string;
-  updated_at: string;
-  message_count: number;
-  is_active?: boolean;
-  status?: 'active' | 'archived' | 'deleted';
-  metadata?: ThreadMetadata;
-  tags?: string[];
-}
+// MockThread type imported from test-helpers.tsx
 
 /**
  * Create mock thread with minimal data

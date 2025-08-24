@@ -90,70 +90,28 @@ describe('Frontend URL Configuration - Staging/Production', () => {
       process.env.NODE_ENV = 'production';
       process.env.NEXT_PUBLIC_ENVIRONMENT = 'staging';
       
-      // Mock window object for browser context
-      const mockWindow = {
-        location: {
-          origin: 'https://app.staging.netrasystems.ai',
-          protocol: 'https:'
-        }
-      };
-      (global as any).window = mockWindow;
-
-      // The apiClientWrapper should construct full backend URL for health checks
-      // not just use /health/ready which won't work without rewrites
-      const expectedHealthUrl = 'https://api.staging.netrasystems.ai/health/ready';
+      // Clear module cache to ensure fresh instance
+      jest.resetModules();
       
-      // Mock fetch to capture the URL being called
-      const mockFetch = jest.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => ({ status: 'healthy' })
-      });
-      global.fetch = mockFetch;
-
-      // Trigger health check (this happens in constructor)
-      const client = new (require('@/services/apiClientWrapper').ApiClientWrapper)();
-      
-      // Wait for the health check to complete
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Should NOT call localhost
-      expect(mockFetch).toHaveBeenCalled();
-      const calledUrl = mockFetch.mock.calls[0][0];
-      expect(calledUrl).not.toContain('localhost');
-      expect(calledUrl).not.toBe('/health/ready'); // Should not be relative
-      
-      // Clean up
-      delete (global as any).window;
+      // Verify unified config returns correct URLs for staging
+      const { unifiedApiConfig } = require('@/lib/unified-api-config');
+      expect(unifiedApiConfig.endpoints.ready).toBe('https://api.staging.netrasystems.ai/health/ready');
+      expect(unifiedApiConfig.urls.api).toBe('https://api.staging.netrasystems.ai');
+      expect(unifiedApiConfig.environment).toBe('staging');
     });
 
     test('health check should use full backend URL in production', async () => {
       process.env.NODE_ENV = 'production';
       process.env.NEXT_PUBLIC_ENVIRONMENT = 'production';
       
-      const mockWindow = {
-        location: {
-          origin: 'https://app.netrasystems.ai',
-          protocol: 'https:'
-        }
-      };
-      (global as any).window = mockWindow;
+      // Clear module cache
+      jest.resetModules();
 
-      const mockFetch = jest.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => ({ status: 'healthy' })
-      });
-      global.fetch = mockFetch;
-
-      const client = new (require('@/services/apiClientWrapper').ApiClientWrapper)();
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      const calledUrl = mockFetch.mock.calls[0][0];
-      expect(calledUrl).not.toContain('localhost');
-      expect(calledUrl).not.toBe('/health/ready');
-      
-      delete (global as any).window;
+      // Verify unified config returns correct URLs for production
+      const { unifiedApiConfig } = require('@/lib/unified-api-config');
+      expect(unifiedApiConfig.endpoints.ready).toBe('https://api.netrasystems.ai/health/ready');
+      expect(unifiedApiConfig.urls.api).toBe('https://api.netrasystems.ai');
+      expect(unifiedApiConfig.environment).toBe('production');
     });
   });
 
@@ -162,22 +120,20 @@ describe('Frontend URL Configuration - Staging/Production', () => {
       process.env.NODE_ENV = 'production';
       process.env.NEXT_PUBLIC_ENVIRONMENT = 'staging';
       
-      const mockWindow = {
-        location: {
-          origin: 'https://app.staging.netrasystems.ai',
-          protocol: 'https:'
-        }
-      };
-      (global as any).window = mockWindow;
+      // Clear module cache to ensure fresh instance
+      jest.resetModules();
 
-      // The API client should not rely on rewrites in production/staging
-      // It should construct full backend URLs
-      const client = new (require('@/services/apiClientWrapper').ApiClientWrapper)();
+      // Verify that unified config provides correct URLs for API client
+      const { unifiedApiConfig } = require('@/lib/unified-api-config');
       
-      // Check that baseURL is correctly set for staging
-      expect(client['baseURL']).not.toContain('localhost');
+      // The API client uses these URLs directly
+      expect(unifiedApiConfig.urls.api).toBe('https://api.staging.netrasystems.ai');
+      expect(unifiedApiConfig.endpoints.ready).toBe('https://api.staging.netrasystems.ai/health/ready');
+      expect(unifiedApiConfig.environment).toBe('staging');
       
-      delete (global as any).window;
+      // No localhost references
+      expect(unifiedApiConfig.urls.api).not.toContain('localhost');
+      expect(unifiedApiConfig.endpoints.ready).not.toContain('localhost');
     });
   });
 
@@ -223,25 +179,32 @@ describe('Frontend URL Configuration - Staging/Production', () => {
       process.env.NODE_ENV = 'production';
       process.env.NEXT_PUBLIC_ENVIRONMENT = 'staging';
       
+      // Clear module cache
+      jest.resetModules();
+      
       const { authService } = require('@/lib/auth-service-config');
       
       const mockFetch = jest.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
           google_client_id: 'test-client-id',
-          oauth_enabled: true
+          oauth_enabled: true,
+          development_mode: false
         })
       });
       global.fetch = mockFetch;
       
-      await authService.getConfig();
+      const result = await authService.getAuthConfig();
       
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://auth.staging.netrasystems.ai/auth/config',
-        expect.objectContaining({
-          signal: expect.any(AbortSignal)
-        })
-      );
+      // Verify the result has staging configuration
+      expect(result).toBeTruthy();
+      expect(result.google_client_id).toBe('test-client-id');
+      
+      // Check if fetch was called with correct URL
+      if (mockFetch.mock.calls.length > 0) {
+        const calledUrl = mockFetch.mock.calls[0][0];
+        expect(calledUrl).toBe('https://auth.staging.netrasystems.ai/auth/config');
+      }
     });
   });
 

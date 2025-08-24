@@ -30,46 +30,226 @@ export interface TestRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   initialAuthState?: any;
 }
 
+// ============================================================================
+// PERFORMANCE & SYSTEM METRICS - Consolidated testing metrics
+// ============================================================================
+
 export interface PerformanceMetrics {
   renderTime: number;
   paintTime: number;
   interactionTime: number;
   memoryUsage?: number;
+  cpuUsage?: number;
+  networkLatency?: number;
+  bundleSize?: number;
 }
+
+// ============================================================================
+// MOCK USER TYPES - Consolidated from all test files
+// ============================================================================
 
 export interface MockUser {
   id: string;
   email: string;
   name: string;
+  full_name?: string;
   role: 'free' | 'early' | 'mid' | 'enterprise';
+  created_at: string;
+  is_active?: boolean;
+  is_superuser?: boolean;
+  picture?: string | null;
+  settings?: Record<string, any>;
+  access_token?: string;
+  token_type?: string;
 }
+
+export interface MockToken {
+  access_token: string;
+  token_type: string;
+  expires_in?: number;
+  refresh_token?: string;
+  scope?: string;
+}
+
+export interface MockAuthState {
+  user: MockUser | null;
+  isAuthenticated: boolean;
+  token: string | null;
+  isLoading?: boolean;
+  error?: string | null;
+  tokens?: MockToken;
+}
+
+// ============================================================================
+// MOCK THREAD TYPES - Consolidated from all test files
+// ============================================================================
 
 export interface MockThread {
   id: string;
   title: string;
+  name?: string; // For backward compatibility
   user_id: string;
   created_at: string;
+  updated_at: string;
   message_count: number;
+  is_active?: boolean;
+  is_archived?: boolean;
+  status?: 'active' | 'archived' | 'deleted';
+  participants?: string[];
+  metadata?: Record<string, any>;
+  tags?: string[];
+  last_message?: string;
 }
+
+// ============================================================================
+// MOCK MESSAGE TYPES - Consolidated from all test files
+// ============================================================================
 
 export interface MockMessage {
   id: string;
   thread_id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system' | 'agent';
   content: string;
   created_at: string;
+  timestamp?: number | Date;
+  displayed_to_user?: boolean;
+  error?: string;
+  type?: string;
+  metadata?: Record<string, any>;
+  attachments?: any[];
+  reactions?: any[];
+  run_id?: string;
+  agent_name?: string;
+  tool_calls?: any[];
 }
+
+// ============================================================================
+// MOCK WEBSOCKET TYPES - Consolidated from all test files
+// ============================================================================
 
 export interface MockWebSocketMessage {
   type: string;
   payload: Record<string, any>;
   timestamp: string;
+  message_id?: string;
+  correlation_id?: string;
+  error?: boolean;
+  retry_count?: number;
+}
+
+export interface MockWebSocketError {
+  code: number;
+  message: string;
+  timestamp: string;
+  recoverable: boolean;
+}
+
+export interface MockWebSocket {
+  url: string;
+  readyState: number;
+  connect: jest.Mock;
+  disconnect: jest.Mock;
+  send: jest.Mock;
+  on: jest.Mock;
+  off: jest.Mock;
+}
+
+// ============================================================================
+// MOCK STORE STATES - Consolidated from all test files
+// ============================================================================
+
+export interface MockAuthStore {
+  user: MockUser | null;
+  isAuthenticated: boolean;
+  token: string | null;
+  isLoading: boolean;
+  error: string | null;
+  login: jest.Mock;
+  logout: jest.Mock;
+  refreshToken: jest.Mock;
+}
+
+export interface MockChatStore {
+  threads: MockThread[];
+  currentThread: MockThread | null;
+  activeThreadId: string | null;
+  messages: MockMessage[];
+  isLoading: boolean;
+  error: string | null;
+  sendMessage: jest.Mock;
+  createThread: jest.Mock;
+  switchThread: jest.Mock;
+}
+
+export interface MockThreadStore {
+  threads: MockThread[];
+  activeThread: MockThread | null;
+  isLoading: boolean;
+  loadThreads: jest.Mock;
+  createThread: jest.Mock;
+  updateThread: jest.Mock;
+  deleteThread: jest.Mock;
 }
 
 export interface MockStoreState {
-  auth: { user: MockUser | null; isAuthenticated: boolean; token: string | null };
-  chat: { threads: MockThread[]; currentThread: MockThread | null; messages: MockMessage[]; isLoading: boolean };
-  connection: { isConnected: boolean; reconnectAttempts: number; lastHeartbeat: string | null };
+  auth: MockAuthStore;
+  chat: MockChatStore;
+  threads?: MockThreadStore;
+  connection: {
+    isConnected: boolean;
+    reconnectAttempts: number;
+    lastHeartbeat: string | null;
+    status: 'connecting' | 'connected' | 'disconnected' | 'error';
+  };
+  performance?: {
+    metrics: PerformanceMetrics;
+    isRecording: boolean;
+  };
+}
+
+// ============================================================================
+// MOCK MCP TYPES - For Model Context Protocol testing
+// ============================================================================
+
+export interface MockMCPServer {
+  name: string;
+  version: string;
+  capabilities: string[];
+  status: 'connected' | 'disconnected' | 'error';
+  tools: MockMCPTool[];
+}
+
+export interface MockMCPTool {
+  name: string;
+  description: string;
+  parameters: Record<string, any>;
+  execute: jest.Mock;
+}
+
+export interface MockMCPToolResult {
+  success: boolean;
+  result?: any;
+  error?: string;
+  executionTime: number;
+}
+
+// ============================================================================
+// MOCK API TYPES - For API testing
+// ============================================================================
+
+export interface MockAPIResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  status: number;
+  timestamp: string;
+}
+
+export interface MockAPIError {
+  code: string;
+  message: string;
+  details?: Record<string, any>;
+  status: number;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { WebSocketMessage, AuthMessage, PingMessage, PongMessage } from '@/types/unified';
 import { UnifiedWebSocketEvent } from '../types/unified-chat';
+import { WebSocketStatus, WebSocketState, WebSocketServiceError } from '../types/domains/websocket';
 import { config } from '@/config';
 import { logger } from '@/lib/logger';
 import { logger as debugLogger } from '@/utils/debug-logger';
@@ -12,16 +13,9 @@ interface JWTPayload {
   permissions?: string[];
 }
 
-export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
-export type WebSocketState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
-
-export interface WebSocketServiceError {
-  code: number;
-  message: string;
-  timestamp: number;
-  type: 'connection' | 'parse' | 'auth' | 'timeout' | 'rate_limit' | 'unknown';
-  recoverable: boolean;
-}
+// WebSocketStatus, WebSocketState, and WebSocketServiceError types imported from domains/websocket.ts
+// Re-export for backward compatibility
+export type { WebSocketStatus, WebSocketState, WebSocketServiceError } from '../types/domains/websocket';
 
 interface RateLimitConfig {
   messages: number;
