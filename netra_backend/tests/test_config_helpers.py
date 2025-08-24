@@ -12,11 +12,12 @@ through the unified system while maintaining test isolation.
 Each function ≤8 lines, file ≤300 lines.
 """
 
-import os
 from typing import Any, Dict, Optional
 from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
+
+from netra_backend.app.core.isolated_environment import get_env
 
 # Import unified configuration system
 try:
@@ -92,25 +93,26 @@ def mock_config_env_vars():
     **IMPORTANT**: Use this instead of direct os.environ access in tests.
     Ensures proper cleanup and isolation between tests.
     """
-    original_env = os.environ.copy()
+    env_manager = get_env()
+    original_env = env_manager.get_all()
     
     def set_env_var(key: str, value: str):
         """Set environment variable for test duration."""
-        os.environ[key] = value
+        env_manager.set(key, value, "test_config_helpers")
         
     def get_env_var(key: str, default: Optional[str] = None) -> Optional[str]:
         """Get environment variable safely."""
-        return os.environ.get(key, default)
+        return env_manager.get(key, default)
         
     yield {
         'set': set_env_var,
         'get': get_env_var,
-        'environ': os.environ
+        'environ': env_manager.get_all()
     }
     
     # Restore original environment
-    os.environ.clear()
-    os.environ.update(original_env)
+    env_manager.clear()
+    env_manager.update(original_env, "test_config_helpers_restore")
     # Reload config to pick up environment changes
     reload_config(force=True)
 
@@ -144,9 +146,10 @@ def get_test_database_config() -> Dict[str, str]:
 def get_test_llm_config() -> Dict[str, Any]:
     """Get LLM configuration for tests using unified system.""" 
     config = get_test_config()
+    env_manager = get_env()
     return {
         'llm_configs': getattr(config, 'llm_configs', {}),
-        'enable_real_llm': os.environ.get('ENABLE_REAL_LLM_TESTING') == 'true'
+        'enable_real_llm': env_manager.get('ENABLE_REAL_LLM_TESTING') == 'true'
     }
 
 

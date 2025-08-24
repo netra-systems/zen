@@ -1,21 +1,9 @@
-# Use backend-specific isolated environment
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
 """
 Backend-specific test configuration.
 Uses consolidated test framework infrastructure with backend-specific customizations.
 """
+
+from netra_backend.app.core.isolated_environment import get_env
 
 # Import all common fixtures from the consolidated base
 from test_framework.conftest_base import *
@@ -29,8 +17,6 @@ import sys
 from pathlib import Path
 
 # Add project root to Python path for netra_backend imports
-
-import os
 
 # Import constants at module level only if not in collection mode  
 if not get_env().get("TEST_COLLECTION_MODE"):
