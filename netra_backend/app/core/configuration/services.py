@@ -169,7 +169,8 @@ class ServiceConfigManager:
         # CONFIG BOOTSTRAP: Direct env access for CORS configuration
         cors_origins_env = os.environ.get("CORS_ORIGINS")
         if cors_origins_env:
-            config.cors_origins = self._parse_cors_origins(cors_origins_env)
+            # Store as string for consistency with schema
+            config.cors_origins = cors_origins_env
     
     def _get_llm_api_key(self) -> Optional[str]:
         """Get LLM API key from environment.

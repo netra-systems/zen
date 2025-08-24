@@ -9,8 +9,8 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.pool import ConnectionPoolEntry, _ConnectionFairy
 
-from netra_backend.app.db.postgres_config import DatabaseConfig
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.config import get_unified_config
 
 
 # Import settings lazily to avoid circular dependency
@@ -21,13 +21,15 @@ def get_settings():
 
 # Initialize settings at module level
 settings = get_settings()
+# Get unified config for database settings
+config = get_unified_config()
 
 logger = central_logger.get_logger(__name__)
 
 
 def _execute_timeout_statements(cursor):
     """Execute timeout configuration statements."""
-    cursor.execute(f"SET statement_timeout = {DatabaseConfig.STATEMENT_TIMEOUT}")
+    cursor.execute(f"SET statement_timeout = {config.db_statement_timeout}")
     cursor.execute("SET idle_in_transaction_session_timeout = 60000")
     cursor.execute("SET lock_timeout = 10000")
 
@@ -76,9 +78,9 @@ def _monitor_async_pool_usage(pool):
     """Monitor async connection pool usage and warn if high."""
     if hasattr(pool, 'size') and hasattr(pool, 'overflow'):
         active = pool.size() - pool.checkedin() + pool.overflow()
-        threshold = (DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW) * 0.8
+        threshold = (config.db_pool_size + config.db_max_overflow) * 0.8
         if active > threshold:
-            logger.warning(f"Async connection pool usage high: {active}/{DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW}")
+            logger.warning(f"Async connection pool usage high: {active}/{config.db_pool_size + config.db_max_overflow}")
 
 
 def _create_async_connect_handler(engine: AsyncEngine):
@@ -111,7 +113,7 @@ def setup_async_engine_events(engine: AsyncEngine):
 def _configure_sync_connection_timeouts(dbapi_conn: Connection):
     """Configure statement and transaction timeouts for sync connection."""
     with dbapi_conn.cursor() as cursor:
-        cursor.execute(f"SET statement_timeout = {DatabaseConfig.STATEMENT_TIMEOUT}")
+        cursor.execute(f"SET statement_timeout = {config.db_statement_timeout}")
         cursor.execute("SET idle_in_transaction_session_timeout = 60000")
         cursor.execute("SET lock_timeout = 10000")
 
@@ -129,8 +131,8 @@ def _check_sync_pool_usage_warning(pool):
     """Check and warn if sync pool usage is high."""
     if hasattr(pool, 'size') and hasattr(pool, 'overflow'):
         active = pool.size() - pool.checkedin() + pool.overflow()
-        if active > (DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW) * 0.8:
-            logger.warning(f"Connection pool usage high: {active}/{DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW}")
+        if active > (config.db_pool_size + config.db_max_overflow) * 0.8:
+            logger.warning(f"Connection pool usage high: {active}/{config.db_pool_size + config.db_max_overflow}")
 
 def _log_sync_checkout_if_enabled(connection_record: ConnectionPoolEntry):
     """Log sync checkout if enabled in settings."""

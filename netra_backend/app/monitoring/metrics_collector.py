@@ -297,7 +297,7 @@ class MetricsCollector:
     async def _gather_websocket_metrics(self) -> WebSocketMetrics:
         """Gather WebSocket metrics from connection manager."""
         try:
-            from netra_backend.app.websocket_core_manager import (
+            from netra_backend.app.websocket_core.utils import (
                 get_connection_monitor,
             )
             conn_manager = get_connection_monitor()

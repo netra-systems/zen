@@ -197,14 +197,23 @@
       </service>
       <service name="frontend">
         <directory>frontend</directory>
+        <dockerfile>Dockerfile.frontend</dockerfile>
         <port>3000</port>
-        <cloud_run_name>netra-frontend</cloud_run_name>
+        <cloud_run_name>netra-frontend-staging</cloud_run_name>
         <resources>
-          <memory>512Mi</memory>
+          <memory>2Gi</memory>
           <cpu>1</cpu>
-          <min_instances>0</min_instances>
+          <min_instances>1</min_instances>
           <max_instances>10</max_instances>
         </resources>
+        <environment>
+          <NODE_ENV>production</NODE_ENV>
+          <NEXT_PUBLIC_API_URL>https://api.staging.netrasystems.ai</NEXT_PUBLIC_API_URL>
+        </environment>
+        <docker_configuration>
+          <build_mode>standalone</build_mode>
+          <note>Next.js standalone mode requires copying .next/standalone and running server.js directly</note>
+        </docker_configuration>
       </service>
     </project_structure>
 

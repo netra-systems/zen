@@ -41,8 +41,8 @@ except ImportError:
         def build_validation_error(errors):
             return {"validation_errors": errors, "status_code": 400}
 
-# ErrorMiddleware exists
-from netra_backend.app.middleware.error_middleware import ErrorMiddleware
+# Error middleware components exist
+from netra_backend.app.middleware.error_middleware import ErrorRecoveryMiddleware
 
 try:
     from netra_backend.app.core.error_handlers import (

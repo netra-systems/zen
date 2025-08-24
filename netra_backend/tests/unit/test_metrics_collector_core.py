@@ -100,7 +100,7 @@ class TestMetricsCollectorCore:
 
         assert initial_task_count == 5
     
-    @patch('app.monitoring.metrics_collector.psutil')
+    @patch('netra_backend.app.monitoring.metrics_collector.psutil')
 
     def test_gather_system_metrics_success(self, mock_psutil, collector):
 
@@ -118,7 +118,7 @@ class TestMetricsCollectorCore:
 
         assert metrics.active_connections == 10
     
-    @patch('app.monitoring.metrics_collector.psutil')
+    @patch('netra_backend.app.monitoring.metrics_collector.psutil')
 
     def test_gather_system_metrics_with_none_values(self, mock_psutil, collector):
 
@@ -150,9 +150,9 @@ class TestMetricsCollectorCore:
 
         assert collector._metrics_buffer["system.cpu_percent"][0].value == 45.2
     
-    @patch('app.monitoring.metrics_collector.get_pool_status')
+    @patch('netra_backend.app.db.postgres.get_pool_status')
 
-    @patch('app.monitoring.metrics_collector.performance_manager')
+    @patch('netra_backend.app.monitoring.metrics_collector.performance_manager')
 
     def test_gather_database_metrics_success(self, mock_perf_manager, mock_pool_status, collector):
 
@@ -186,7 +186,7 @@ class TestMetricsCollectorCore:
 
         assert collector._metrics_buffer["database.cache_hit_ratio"][0].value == 0.92
     
-    @patch('app.monitoring.metrics_collector.get_connection_monitor')
+    @patch('netra_backend.app.websocket_core.utils.get_connection_monitor')
 
     async def test_gather_websocket_metrics_success(self, mock_get_manager, collector):
 
@@ -220,7 +220,7 @@ class TestMetricsCollectorCore:
 
         assert efficiency_metric.value == 0.15  # 15/100
     
-    @patch('app.monitoring.metrics_collector.gc')
+    @patch('netra_backend.app.monitoring.metrics_collector.gc')
 
     def test_gather_memory_metrics(self, mock_gc, collector):
 
@@ -238,9 +238,9 @@ class TestMetricsCollectorCore:
 
         assert collector._metrics_buffer["memory.gc_generation_0"][0].value == 100
     
-    @patch('app.monitoring.metrics_collector.time.time')
+    @patch('netra_backend.app.monitoring.metrics_collector.time.time')
 
-    @patch('app.monitoring.metrics_collector.gc.collect')
+    @patch('netra_backend.app.monitoring.metrics_collector.gc.collect')
 
     def test_periodic_gc_triggered(self, mock_collect, mock_time, collector):
 
@@ -347,6 +347,8 @@ class TestMetricsCollectorCore:
         """Helper to create test database metrics."""
 
         return DatabaseMetrics(
+
+            timestamp=datetime.now(),
 
             active_connections=10, pool_size=20, pool_overflow=2,
 

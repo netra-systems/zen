@@ -61,14 +61,34 @@ class SecretManager:
     
     def _get_llm_secret_mappings(self) -> Dict[str, dict]:
         """Get LLM-related secret mappings."""
-        return {"GEMINI_API_KEY": self._get_gemini_api_key_mapping()}
+        return {
+            "GEMINI_API_KEY": self._get_gemini_api_key_mapping(),
+            "ANTHROPIC_API_KEY": self._get_anthropic_api_key_mapping(),
+            "OPENAI_API_KEY": self._get_openai_api_key_mapping()
+        }
     
     def _get_gemini_api_key_mapping(self) -> Dict[str, Any]:
         """Get Gemini API key mapping configuration."""
         return {
             "target_models": ["llm_configs.default", "llm_configs.triage", 
                             "llm_configs.data", "llm_configs.optimizations_core"],
-            "target_field": "api_key", "required": True, "rotation_enabled": True
+            "target_field": "gemini_api_key", "required": False, "rotation_enabled": True
+        }
+    
+    def _get_anthropic_api_key_mapping(self) -> Dict[str, Any]:
+        """Get Anthropic API key mapping configuration."""
+        return {
+            "target_field": "anthropic_api_key",
+            "required": False,
+            "rotation_enabled": True
+        }
+    
+    def _get_openai_api_key_mapping(self) -> Dict[str, Any]:
+        """Get OpenAI API key mapping configuration."""
+        return {
+            "target_field": "openai_api_key",
+            "required": False,
+            "rotation_enabled": True
         }
     
     def _get_oauth_secret_mappings(self) -> Dict[str, dict]:
@@ -178,10 +198,50 @@ class SecretManager:
         if self._is_cache_valid():
             return
         self._secret_cache = {}
+        self._load_dotenv_if_development()
         self._load_from_environment_variables()
         self._load_from_gcp_secret_manager()
         self._load_from_local_files()
         self._cache_timestamp = datetime.now()
+    
+    def _load_dotenv_if_development(self) -> None:
+        """Load .env files in development mode.
+        
+        CONFIG MANAGER: Direct env loading for development secrets.
+        """
+        if self._environment not in ["development", "testing"]:
+            return
+            
+        try:
+            from pathlib import Path
+            from dotenv import load_dotenv
+            
+            # Find project root
+            current_file = Path(__file__)
+            project_root = current_file.parent.parent.parent.parent
+            
+            # Load .env file if it exists
+            env_path = project_root / ".env"
+            if env_path.exists():
+                load_dotenv(env_path, override=False)
+                self._logger.debug(f"Loaded .env file from {env_path}")
+            
+            # Load .env.dev if it exists (higher priority)
+            env_dev_path = project_root / ".env.dev"
+            if env_dev_path.exists():
+                load_dotenv(env_dev_path, override=True)
+                self._logger.debug(f"Loaded .env.dev file from {env_dev_path}")
+            
+            # Load .env.local if it exists (highest priority)
+            env_local_path = project_root / ".env.local"
+            if env_local_path.exists():
+                load_dotenv(env_local_path, override=True)
+                self._logger.debug(f"Loaded .env.local file from {env_local_path}")
+        except ImportError:
+            # dotenv not available, skip
+            pass
+        except Exception as e:
+            self._logger.debug(f"Could not load .env files: {e}")
     
     def _load_from_environment_variables(self) -> None:
         """Load secrets from environment variables.
@@ -290,7 +350,9 @@ class SecretManager:
             "FERNET_KEY": "FERNET_KEY",
             "SERVICE_SECRET": "SERVICE_SECRET",
             "CLICKHOUSE_DEFAULT_PASSWORD": "CLICKHOUSE_DEFAULT_PASSWORD",
-            "REDIS_PASSWORD": "REDIS_PASSWORD"
+            "REDIS_PASSWORD": "REDIS_PASSWORD",
+            "ANTHROPIC_API_KEY": "ANTHROPIC_API_KEY",
+            "OPENAI_API_KEY": "OPENAI_API_KEY"
         }
     
     def _is_gcp_available(self) -> bool:

@@ -235,10 +235,24 @@ class AppConfig(BaseModel):
         description="GitHub token for repository access"
     )
     
-    # CORS configuration
-    cors_origins: Optional[List[str]] = Field(
+    # LLM API Keys
+    gemini_api_key: Optional[str] = Field(
         default=None,
-        description="Allowed CORS origins - can be list or comma-separated string"
+        description="Gemini API key for Google AI models"
+    )
+    anthropic_api_key: Optional[str] = Field(
+        default=None,
+        description="Anthropic API key for Claude models"
+    )
+    openai_api_key: Optional[str] = Field(
+        default=None,
+        description="OpenAI API key for GPT models"
+    )
+    
+    # CORS configuration
+    cors_origins: Optional[str] = Field(
+        default=None,
+        description="Allowed CORS origins - comma-separated string or '*' for all"
     )
     
     # Additional middleware configuration
@@ -288,7 +302,8 @@ class AppConfig(BaseModel):
     pr_number: Optional[str] = Field(default=None, description="Pull request number for PR environments")
     
     # OAuth client ID fallback variables
-    google_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID fallback")
+    google_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID")
+    google_client_secret: Optional[str] = Field(default=None, description="Google OAuth client secret")
     google_oauth_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID alternative")
     
     # Google App Engine environment variables

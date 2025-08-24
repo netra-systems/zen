@@ -712,5 +712,157 @@ frontend/cypress
         <benefit>Cleaner CORS configuration</benefit>
       </benefits>
     </learning>
+
+    <learning>
+      <id>nextjs-standalone-docker-configuration</id>
+      <category>deployment</category>
+      <date>2025-08-24</date>
+      <severity>critical</severity>
+      <title>Next.js Standalone Mode Requires Specific Docker Configuration</title>
+      <problem>
+        <description>Frontend staging deployment hangs due to incorrect Dockerfile configuration for Next.js standalone builds</description>
+        <symptoms>
+          <symptom>Container appears to start but application never becomes available</symptom>
+          <symptom>Health checks timeout waiting for port 3000</symptom>
+          <symptom>No error messages but service is unreachable</symptom>
+          <symptom>Cloud Run deployment appears stuck in "deploying" state</symptom>
+          <symptom>Service eventually fails with timeout errors</symptom>
+        </symptoms>
+        <root_cause>Dockerfile using "npm start" instead of running standalone server.js directly</root_cause>
+      </problem>
+      <solution>
+        <description>Configure Dockerfile to properly handle Next.js standalone build output</description>
+        <implementation>
+          <incorrect_approach>
+            # WRONG - This won't work with standalone builds
+            COPY --from=builder /app/.next ./.next
+            COPY --from=builder /app/package*.json ./
+            RUN npm ci --production
+            CMD ["npm", "start"]
+          </incorrect_approach>
+          <correct_approach>
+            # CORRECT - Copy standalone build and run server.js directly
+            COPY --from=builder /app/.next/standalone ./
+            COPY --from=builder /app/.next/static ./.next/static
+            COPY --from=builder /app/public ./public
+            CMD ["node", "server.js"]
+          </correct_approach>
+          <key_differences>
+            <difference>Copy .next/standalone directory contents to root</difference>
+            <difference>Copy static files separately to .next/static</difference>
+            <difference>No need for npm ci in production stage</difference>
+            <difference>Run server.js directly with node, not npm start</difference>
+          </key_differences>
+        </implementation>
+        <verification>
+          <step>Build Docker image locally and test it runs</step>
+          <step>Verify server.js exists in container root</step>
+          <step>Check application responds on port 3000</step>
+          <step>Deploy to staging and verify health checks pass</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Always test Docker builds locally before deploying</guideline>
+        <guideline>Understand Next.js build output modes (standalone vs standard)</guideline>
+        <guideline>Match Dockerfile configuration to Next.js build mode</guideline>
+        <guideline>Document build mode requirements in deployment docs</guideline>
+      </prevention>
+      <technical_details>
+        <detail>Next.js standalone mode creates a self-contained server at .next/standalone/server.js</detail>
+        <detail>Standalone includes all necessary dependencies, no npm install needed</detail>
+        <detail>Static files must be copied separately as they're not in standalone directory</detail>
+        <detail>Environment variables like PORT and HOSTNAME control server behavior</detail>
+      </technical_details>
+    </learning>
+
+    <learning>
+      <id>frontend-memory-allocation-optimization</id>
+      <category>deployment</category>
+      <date>2025-08-24</date>
+      <severity>high</severity>
+      <title>Frontend Memory Allocation Should Match NODE_OPTIONS Settings</title>
+      <problem>
+        <description>Mismatch between Cloud Run memory allocation and Node.js memory limits</description>
+        <symptoms>
+          <symptom>Frontend allocated 8Gi in Cloud Run but NODE_OPTIONS limited to 2048MB</symptom>
+          <symptom>Excessive resource usage and cost</symptom>
+          <symptom>Potential memory pressure issues</symptom>
+          <symptom>Slower cold starts due to large container size</symptom>
+        </symptoms>
+        <root_cause>Over-provisioning memory without matching Node.js configuration</root_cause>
+      </problem>
+      <solution>
+        <description>Align Cloud Run memory allocation with NODE_OPTIONS settings</description>
+        <implementation>
+          <cloud_run_config>
+            memory="2Gi"  # Match NODE_OPTIONS limit
+            cpu="1"
+            min_instances=1  # Keep warm for better performance
+          </cloud_run_config>
+          <node_options>
+            ENV NODE_OPTIONS="--max-old-space-size=2048"
+          </node_options>
+          <rationale>2Gi is sufficient for Next.js production workloads</rationale>
+        </implementation>
+        <verification>
+          <step>Monitor memory usage in Cloud Run metrics</step>
+          <step>Verify no out-of-memory errors occur</step>
+          <step>Check application performance remains good</step>
+          <step>Validate cost reduction from lower memory allocation</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Match container memory allocation to application limits</guideline>
+        <guideline>Monitor actual memory usage before increasing allocation</guideline>
+        <guideline>Start with conservative memory settings and scale up if needed</guideline>
+        <guideline>Use min_instances=1 for critical services to avoid cold starts</guideline>
+      </prevention>
+      <cost_impact>Reduces Cloud Run costs by 75% for frontend service</cost_impact>
+    </learning>
+
+    <learning>
+      <id>frontend-api-url-configuration-requirement</id>
+      <category>deployment</category>
+      <date>2025-08-24</date>
+      <severity>high</severity>
+      <title>Frontend Requires NEXT_PUBLIC_API_URL in Deployment Configuration</title>
+      <problem>
+        <description>Frontend cannot connect to backend API without proper environment variable</description>
+        <symptoms>
+          <symptom>API calls fail with connection errors</symptom>
+          <symptom>Next.js rewrites not working correctly</symptom>
+          <symptom>Frontend appears to work but has no data</symptom>
+          <symptom>WebSocket connections fail to establish</symptom>
+        </symptoms>
+        <root_cause>Missing NEXT_PUBLIC_API_URL environment variable in deployment</root_cause>
+      </problem>
+      <solution>
+        <description>Add NEXT_PUBLIC_API_URL to frontend deployment configuration</description>
+        <implementation>
+          <deployment_config>
+            environment_vars={
+                "NODE_ENV": "production",
+                "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",
+            }
+          </deployment_config>
+          <next_config_rewrites>
+            # next.config.ts uses this for API proxy rewrites
+            const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+          </next_config_rewrites>
+        </implementation>
+        <verification>
+          <step>Check environment variable is set in Cloud Run</step>
+          <step>Verify API calls from frontend succeed</step>
+          <step>Test WebSocket connections work</step>
+          <step>Confirm data loads in frontend UI</step>
+        </verification>
+      </solution>
+      <prevention>
+        <guideline>Document all required environment variables for each service</guideline>
+        <guideline>Include environment variables in deployment scripts</guideline>
+        <guideline>Test frontend-backend connectivity after deployment</guideline>
+        <guideline>Use staging domain URLs, not Cloud Run URLs</guideline>
+      </prevention>
+    </learning>
   </critical_deployment_learnings>
 </specification>
