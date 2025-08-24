@@ -206,7 +206,8 @@ class TestStagingSecretsManagerIntegration:
             assert secrets == {}
     
     @mock_justified("Environment variables are external system state not available in test")
-    def test_secret_validation_against_staging_requirements(self, secret_loader, staging_secrets):
+@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+        def test_secret_validation_against_staging_requirements(self, secret_loader, staging_secrets):
         """Test secret validation against staging environment requirements."""
         # Test with minimal valid staging secrets
         valid_staging_env = {

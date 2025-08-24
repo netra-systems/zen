@@ -166,6 +166,20 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         logger.error(f"WebSocket error: {e}", exc_info=True)
         if is_websocket_connected(websocket):
+            # Send error message before closing
+            try:
+                error_msg = create_server_message(
+                    MessageType.ERROR,
+                    {
+                        "error": "Internal server error",
+                        "message": "An unexpected error occurred. Please reconnect.",
+                        "code": "INTERNAL_ERROR"
+                    }
+                )
+                await safe_websocket_send(websocket, error_msg.model_dump())
+            except Exception:
+                pass  # Best effort to send error message
+            
             await safe_websocket_close(websocket, code=1011, reason="Internal error")
     
     finally:

@@ -300,7 +300,7 @@ class TestDatabasePoolIntegration:
     async def test_pool_configuration_validation(self):
         """Test database pool configuration validation and error handling."""
         with pytest.raises(Exception) as exc_info:
-            db_manager = ConnectionManager("sqlite+aiosqlite:///test.db", pool_size=-1)
+            db_manager = ConnectionManager("sqlite+aioDATABASE_URL_PLACEHOLDER", pool_size=-1)
             await db_manager.initialize()
         
         assert 'pool_size' in str(exc_info.value).lower()

@@ -54,6 +54,10 @@ export interface ExecutionMetrics {
   endTime?: number;
   duration?: number;
   
+  // Backend-compatible timing fields
+  total_duration?: number;        // From FinalReportTypes
+  total_duration_ms?: number;     // From layer-types and ExecutionMetricsSection
+  
   // Performance tracking
   renderTime?: number;
   processingTime?: number;
@@ -68,6 +72,10 @@ export interface ExecutionMetrics {
   tokensUsed?: number;
   tokenCost?: number;
   
+  // Backend-compatible token/cost fields
+  total_tokens?: number;          // From layer-types and ExecutionMetricsSection
+  total_cost?: number;            // From layer-types and ExecutionMetricsSection
+  
   // Success metrics
   successRate?: number;
   errorCount?: number;
@@ -75,6 +83,29 @@ export interface ExecutionMetrics {
   // Tool-specific metrics
   toolsExecuted?: number;
   toolExecutionTime?: number;
+  
+  // Agent and execution tracking (from FinalReportTypes)
+  agent_timings?: AgentTiming[];
+  tool_calls?: ToolCall[];
+  
+  // Cache and parallel execution (from layer-types)
+  cache_efficiency?: number;
+  parallel_executions?: number;
+  sequential_executions?: number;
+}
+
+// Supporting types for ExecutionMetrics
+export interface AgentTiming {
+  agent_name: string;
+  duration: number;
+  start_time: string;
+  end_time: string;
+}
+
+export interface ToolCall {
+  tool_name: string;
+  count: number;
+  avg_duration: number;
 }
 
 /**

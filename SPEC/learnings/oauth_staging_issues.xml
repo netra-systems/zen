@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="oauth_staging">
+  <title>OAuth Login Issues in Staging Environment</title>
+  <last_updated>2025-08-24</last_updated>
+  
+  <critical_findings>
+    <finding priority="critical">
+      <issue>Frontend Next.js proxy misconfiguration in production/staging</issue>
+      <symptom>Login button clicks appear to hang with no visible action</symptom>
+      <root_cause>
+        Next.js rewrites in next.config.ts use hardcoded localhost:8000 for API proxy,
+        which fails in production environments where backend runs on different URLs
+      </root_cause>
+      <evidence>
+        - ECONNREFUSED 127.0.0.1:8000 errors in frontend logs
+        - Next.js config line 52: backendUrl defaults to 'http://localhost:8000'
+        - Frontend trying to proxy /api/* and /health/* to localhost instead of actual backend
+      </evidence>
+    </finding>
+    
+    <finding priority="high">
+      <issue>Auth service OAuth flow is functional but unreachable</issue>
+      <verification>
+        - Auth service correctly configured with Google OAuth credentials
+        - Callback endpoint properly exchanges codes for tokens
+        - CORS headers properly configured
+        - Direct curl tests to auth service endpoints work correctly
+      </verification>
+      <working_endpoints>
+        - https://auth.staging.netrasystems.ai/auth/config (returns valid config)
+        - https://auth.staging.netrasystems.ai/auth/login?provider=google (redirects to Google)
+        - https://auth.staging.netrasystems.ai/health (returns 200)
+      </working_endpoints>
+    </finding>
+  </critical_findings>
+  
+  <solution>
+    <step number="1">
+      <action>Fix Next.js proxy configuration for production environments</action>
+      <implementation>
+        The rewrites() function in next.config.ts should not use localhost:8000 
+        in production. It should either:
+        1. Remove rewrites entirely in production (preferred)
+        2. Use actual backend service URLs from environment variables
+      </implementation>
+    </step>
+    
+    <step number="2">
+      <action>Frontend should call auth service directly</action>
+      <implementation>
+        Frontend auth code already correctly uses NEXT_PUBLIC_AUTH_SERVICE_URL
+        which is set to https://auth.staging.netrasystems.ai in staging.
+        The issue is only with the Next.js proxy rewrites.
+      </implementation>
+    </step>
+  </solution>
+  
+  <debugging_commands>
+    <command purpose="Check auth service logs">
+      gcloud run services logs read netra-auth-service --region us-central1 --limit 50
+    </command>
+    <command purpose="Test auth config">
+      curl -s https://auth.staging.netrasystems.ai/auth/config | python -m json.tool
+    </command>
+    <command purpose="Test OAuth redirect">
+      curl -v "https://auth.staging.netrasystems.ai/auth/login?provider=google"
+    </command>
+    <command purpose="Check frontend environment">
+      gcloud run services describe netra-frontend-staging --region us-central1 --format="yaml(spec.template.spec.containers[0].env)"
+    </command>
+  </debugging_commands>
+  
+  <environment_urls>
+    <staging>
+      <frontend>https://app.staging.netrasystems.ai</frontend>
+      <backend>https://netra-backend-staging-701982941522.us-central1.run.app</backend>
+      <auth>https://netra-auth-service-701982941522.us-central1.run.app</auth>
+      <auth_domain>https://auth.staging.netrasystems.ai</auth_domain>
+    </staging>
+  </environment_urls>
+  
+  <key_insights>
+    <insight>
+      The OAuth configuration in Google Console is correct with proper redirect URIs
+      pointing to https://app.staging.netrasystems.ai/auth/callback
+    </insight>
+    <insight>
+      The auth service is fully functional and properly handles OAuth flows,
+      the issue is purely with frontend proxy configuration
+    </insight>
+    <insight>
+      Next.js proxy rewrites should be disabled in production environments
+      as they're only needed for local development
+    </insight>
+  </key_insights>
+</learnings>

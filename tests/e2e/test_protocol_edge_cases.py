@@ -638,7 +638,8 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
             f"\n\nWebSocket connections must adapt properly to page redirects."
         )
     
-    def test_certificate_validation_staging_production_EDGE_CASE(self):
+@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+        def test_certificate_validation_staging_production_EDGE_CASE(self):
         """
         EDGE CASE: Certificate validation in staging/production environments.
         

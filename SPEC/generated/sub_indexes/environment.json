@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-08-24T04:00:02.861723",
+    "generated_at": "2025-08-24T08:13:15.963959",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 93
   },
@@ -144,11 +144,13 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/core/configuration/services.py:342",
-        "auth_service/auth_core/config.py:49",
-        "auth_service/auth_core/config.py:63",
-        "auth_service/auth_core/config.py:76",
+        "auth_service/auth_core/config.py:59",
+        "auth_service/auth_core/config.py:73",
+        "auth_service/auth_core/config.py:86",
         "auth_service/auth_core/database/connection.py:34",
-        "auth_service/main.py:89"
+        "auth_service/auth_core/validation/pre_deployment_validator.py:587",
+        "auth_service/auth_core/validation/pre_deployment_validator.py:702",
+        "auth_service/main.py:118"
       ]
     },
     "AUTH_MODE": {
@@ -171,7 +173,7 @@
       "locations": [
         "netra_backend/app/core/configuration/services.py:340",
         "netra_backend/app/core/network_constants.py:169",
-        "auth_service/auth_core/config.py:130",
+        "auth_service/auth_core/config.py:140",
         "scripts/deploy_to_gcp.py:90",
         "scripts/fetch_secrets_to_env.py:97",
         "scripts/fetch_secrets_to_env.py:199",
@@ -536,7 +538,7 @@
       "value": "NETRA_SERVICE_AUTH_V1",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/core/jwt_handler.py:517"
+        "auth_service/auth_core/core/jwt_handler.py:530"
       ]
     },
     "NEXT_PUBLIC_API_URL": {
@@ -552,14 +554,17 @@
       "value": "OAUTH_ALLOWED_REDIRECT_URIS",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/security/oauth_security.py:316"
+        "auth_service/auth_core/security/oauth_security.py:316",
+        "auth_service/auth_core/validation/pre_deployment_validator.py:382"
       ]
     },
     "OAUTH_HMAC_SECRET": {
       "value": "OAUTH_HMAC_SECRET",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/security/oauth_security.py:28"
+        "auth_service/auth_core/security/oauth_security.py:28",
+        "auth_service/auth_core/validation/pre_deployment_validator.py:415",
+        "auth_service/auth_core/validation/pre_deployment_validator.py:854"
       ]
     },
     "OPENAI_API_KEY": {
@@ -622,7 +627,7 @@
       "value": "REDIS_DISABLED",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/config.py:190"
+        "auth_service/auth_core/config.py:194"
       ]
     },
     "REDIS_HOST": {

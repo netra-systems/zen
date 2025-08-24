@@ -1,4 +1,4 @@
-import { WebSocketMessage } from '@/types/chat';
+import { WebSocketMessage } from '@/types/unified';
 
 /**
  * User Profile Management E2E Tests

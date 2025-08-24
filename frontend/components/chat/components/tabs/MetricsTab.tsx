@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LineChart, Code } from 'lucide-react';
-import type { ExecutionMetrics, ToolCall } from '../../types/FinalReportTypes';
+import type { ExecutionMetrics, ToolCall } from '@/types/unified/metrics.types';
 import { formatDuration } from '../../utils/reportUtils';
 
 interface MetricsTabProps {

@@ -150,6 +150,15 @@ class TestEnvironmentVariableLoading:
         """Test environment variable successfully loaded into config"""
         # Arrange - Mock config with field
         mock_config = Mock()
+
+        mock_config.db_pool_size = 10
+        mock_config.db_max_overflow = 20
+        mock_config.db_pool_timeout = 60
+        mock_config.db_pool_recycle = 3600
+        mock_config.db_echo = False
+        mock_config.db_echo_pool = False
+        mock_config.environment = 'testing'
+
         mock_config.test_field = None
         
         # Act - Load environment variable
@@ -456,7 +465,8 @@ class TestSecretApplicationLogic:
 class TestCloudRunEnvironmentDetection:
     """Business Value: Ensures proper Cloud Run deployment environment detection"""
     
-    def test_k_service_staging_detection(self):
+@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+        def test_k_service_staging_detection(self):
         """Test staging detection via K_SERVICE environment variable"""
         # Arrange - Mock K_SERVICE with staging
         with patch.dict(os.environ, {"K_SERVICE": "netra-backend-staging"}):

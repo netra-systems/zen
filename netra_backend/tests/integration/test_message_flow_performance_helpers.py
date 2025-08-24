@@ -21,8 +21,8 @@ from netra_backend.tests.integration.test_unified_message_flow import MessageFlo
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 
-    def __init__(self):
-        super().__init__()
+    def setup_method(self):
+        """Setup method for test class."""
         self.latency_measurements: List[float] = []
         self.throughput_measurements: List[float] = []
         self.resource_usage: List[Dict[str, Any]] = []

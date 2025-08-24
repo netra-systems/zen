@@ -1,3 +1,4 @@
+from netra_backend.app.core.configuration.base import get_unified_config
 """
 Test to reproduce and fix DatabaseConfig migration issues in postgres_events.py
 

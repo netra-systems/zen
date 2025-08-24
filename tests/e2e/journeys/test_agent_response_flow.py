@@ -267,7 +267,7 @@ class TestAgentResponseFlow:
             
             # Check that error was handled properly
             assert "status" in response_data, "Response should have status field"
-            assert response_data["status"] in ["error_handled", "fallback"], f"Unexpected status: {response_data.get('status')}"
+            assert response_data["status"] in ["error", "error_handled"], f"Unexpected status: {response_data.get('status')}"
             assert "error" in response_data, "Error details should be present"
     
     @pytest.mark.asyncio

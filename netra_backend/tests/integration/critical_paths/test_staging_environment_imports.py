@@ -85,7 +85,8 @@ class TestStagingEnvironmentImports:
         # Verify the app has CORS middleware configured  
         # The fact that we got here without ImportError means the test passed
 
-    def test_staging_cors_configuration(self):
+@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+        def test_staging_cors_configuration(self):
         """Test CORS configuration in staging environment.
         
         L3 Test - Validates that CORS is properly configured for staging.

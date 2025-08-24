@@ -5,13 +5,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Cpu, Clock, TrendingUp, CheckCircle } from 'lucide-react';
 import { formatDuration } from './slow-layer-utils';
-
-interface ExecutionMetrics {
-  total_duration_ms: number;
-  total_tokens?: number;
-  total_cost?: number;
-  cache_efficiency?: number;
-}
+import type { ExecutionMetrics } from '@/types/unified/metrics.types';
 
 interface ExecutionMetricsSectionProps {
   metrics: ExecutionMetrics;

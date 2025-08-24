@@ -327,3 +327,33 @@ skip_if_no_database = pytest.mark.skipif(
     os.environ.get("TEST_DISABLE_DATABASE") == "true",
     reason="Database disabled for testing"
 )
+
+
+def mock_justified(reason: str, level: str = "L1"):
+    """Decorator to justify the use of mocks in tests according to Mock-Real Spectrum.
+    
+    This decorator documents why mocks are being used instead of real services,
+    ensuring compliance with testing.xml Mock-Real Spectrum requirements.
+    
+    Args:
+        reason: Explanation of why mock is justified
+        level: Test spectrum level (L1, L2, L3, etc.)
+        
+    Usage:
+        @mock_justified("L1 Unit Test: Mocking DatabaseRepository to isolate UserService logic")
+        def test_user_service_logic():
+            # Test with justified mocking
+            pass
+    """
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        
+        # Add metadata for compliance checking
+        wrapper._mock_justified = True
+        wrapper._mock_justification = reason
+        wrapper._mock_level = level
+        return wrapper
+    
+    return decorator

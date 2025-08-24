@@ -148,6 +148,7 @@ When addressing bugs, understand the required behavior objectively. This process
 ## 4. Knowledge Management: The Living Source of Truth
 
 *   **Navigation:** Read [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md) before searching for files or functionality.
+*   **Cross-System Context:** Read [`SPEC/cross_system_context_reference.md`](SPEC/cross_system_context_reference.md) for EXPLICIT cross-system assumptions, data flows, and integration points. This document captures ALL implicit context about how the three services work together.
 `SPEC/*.xml` files are the **Living Source of Truth** for the system architecture and learnings.
 ALL relevent changes must update [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md).
 

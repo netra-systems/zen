@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "test_literals",
-    "generated_at": "2025-08-24T04:00:03.149954",
+    "generated_at": "2025-08-24T08:13:16.311996",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 5467
+    "total_literals": 5648
   },
   "literals": {
     "\u001b[0m": {
@@ -855,7 +855,8 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/config/test_settings.py:79",
-        "scripts/test_backend_optimized.py:47"
+        "scripts/test_backend_optimized.py:47",
+        "scripts/test_coordination_fixes.py:27"
       ]
     },
     "%)": {
@@ -886,7 +887,8 @@
       "locations": [
         "scripts/auto_fix_test_violations.py:753",
         "scripts/comprehensive_test_fixer.py:404",
-        "scripts/fix_test_batch.py:372"
+        "scripts/fix_test_batch.py:372",
+        "scripts/test_staging_deployment.py:225"
       ]
     },
     "%Y-%m-%d %H:%M:%S": {
@@ -2088,6 +2090,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/auto_fix_test_violations.py:796"
+      ]
+    },
+    ", service2=": {
+      "value": ", service2=",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:175"
       ]
     },
     ", skipping": {
@@ -3711,7 +3720,7 @@
       "value": "--tb=short",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_critical_staging_issues.py:256",
+        "auth_service/tests/test_critical_staging_issues.py:259",
         "scripts/auto_fix_test_violations.py:733",
         "scripts/comprehensive_test_fixer.py:367",
         "scripts/fix_common_test_issues.py:44",
@@ -4082,10 +4091,10 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_flows_sync.py:187",
-        "auth_service/tests/test_critical_staging_issues.py:256",
+        "auth_service/tests/test_critical_staging_issues.py:259",
         "auth_service/tests/test_postgres_compliance.py:250",
         "auth_service/tests/test_setup.py:50",
-        "auth_service/tests/test_single_database.py:115",
+        "auth_service/tests/test_single_database.py:118",
         "auth_service/tests/unit/test_oauth_models.py:241",
         "scripts/compliance/fake_test_scanner.py:388",
         "scripts/fix_common_test_issues.py:43",
@@ -4425,6 +4434,7 @@
       "locations": [
         "scripts/comprehensive_test_fixer.py:404",
         "scripts/fix_test_batch.py:372",
+        "scripts/test_staging_deployment.py:226",
         "scripts/test_workflows_with_act.py:198"
       ]
     },
@@ -4736,12 +4746,20 @@
         "scripts/test_auth_integration.py:70"
       ]
     },
+    "/api/v1/agents": {
+      "value": "/api/v1/agents",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:109"
+      ]
+    },
     "/api/v1/threads": {
       "value": "/api/v1/threads",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1270",
-        "scripts/test_cold_start_e2e.py:324"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1271",
+        "scripts/test_cold_start_e2e.py:324",
+        "scripts/test_staging_deployment.py:105"
       ]
     },
     "/api/v1/threads/": {
@@ -4756,6 +4774,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1218"
+      ]
+    },
+    "/api/v1/workspaces": {
+      "value": "/api/v1/workspaces",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:107"
       ]
     },
     "/app/tests/integration/": {
@@ -4776,7 +4801,8 @@
       "value": "/auth/callback",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_auth_oauth_errors.py:353"
+        "auth_service/tests/integration/test_auth_oauth_errors.py:353",
+        "scripts/test_staging_deployment.py:129"
       ]
     },
     "/auth/callback/google": {
@@ -4938,7 +4964,8 @@
         "auth_service/tests/test_security.py:319",
         "auth_service/tests/test_security.py:370",
         "auth_service/tests/test_security.py:677",
-        "scripts/test_auth_integration.py:44"
+        "scripts/test_auth_integration.py:44",
+        "scripts/test_staging_deployment.py:86"
       ]
     },
     "/auth/login": {
@@ -4961,7 +4988,7 @@
       "value": "/auth/login/google",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1252"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1253"
       ]
     },
     "/auth/login?provider=": {
@@ -5037,6 +5064,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/utils/test_client.py:200"
+      ]
+    },
+    "/auth/token": {
+      "value": "/auth/token",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:130"
       ]
     },
     "/auth/user": {
@@ -5116,7 +5150,7 @@
       "value": "/health",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1296",
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1298",
         "auth_service/tests/test_critical_staging_issues.py:197",
         "scripts/test_auth_integration.py:30",
         "scripts/test_auth_integration.py:65",
@@ -5126,6 +5160,13 @@
         "scripts/test_oauth_local.py:106",
         "scripts/test_oauth_local.py:121",
         "scripts/test_staging_env.py:31"
+      ]
+    },
+    "/health/": {
+      "value": "/health/",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:85"
       ]
     },
     "/health/live": {
@@ -5440,15 +5481,15 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_errors.py:256",
+        "auth_service/tests/test_five_whys_reproduction.py:106",
+        "auth_service/tests/test_five_whys_reproduction.py:140",
         "auth_service/tests/test_security.py:132",
         "auth_service/tests/test_security.py:179",
         "auth_service/tests/test_security.py:240",
         "auth_service/tests/test_security.py:269",
         "auth_service/tests/test_security.py:339",
         "auth_service/tests/test_security.py:418",
-        "auth_service/tests/test_security.py:598",
-        "scripts/test_verify_workflow_status.py:97",
-        "scripts/test_verify_workflow_status_corrected.py:106"
+        "auth_service/tests/test_security.py:598"
       ]
     },
     "123456": {
@@ -6664,6 +6705,13 @@
         "scripts/test_backend.py:84"
       ]
     },
+    "API Agents": {
+      "value": "API Agents",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:109"
+      ]
+    },
     "API Documentation": {
       "value": "API Documentation",
       "category": "test_literals",
@@ -6672,11 +6720,25 @@
         "scripts/test_staging_env.py:147"
       ]
     },
+    "API Threads List": {
+      "value": "API Threads List",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:105"
+      ]
+    },
     "API URL not found": {
       "value": "API URL not found",
       "category": "test_literals",
       "locations": [
         "scripts/test_cold_start_e2e.py:316"
+      ]
+    },
+    "API Workspaces": {
+      "value": "API Workspaces",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:107"
       ]
     },
     "API docs are accessible": {
@@ -7345,7 +7407,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_auth_integration.py:32",
-        "scripts/test_auth_integration.py:36"
+        "scripts/test_auth_integration.py:36",
+        "scripts/test_staging_deployment.py:86"
       ]
     },
     "Auth Service Integration Tests": {
@@ -7425,6 +7488,13 @@
         "scripts/test_oauth_local.py:439"
       ]
     },
+    "Auth must start before backend": {
+      "value": "Auth must start before backend",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:102"
+      ]
+    },
     "Auth service URL": {
       "value": "Auth service URL",
       "category": "test_literals",
@@ -7451,6 +7521,20 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/conftest.py:1"
+      ]
+    },
+    "Auth should be able to start, missing:": {
+      "value": "Auth should be able to start, missing:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:110"
+      ]
+    },
+    "Auth should be in degraded services": {
+      "value": "Auth should be in degraded services",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:267"
       ]
     },
     "AuthConfig should normalize DATABASE_URL": {
@@ -7607,13 +7691,14 @@
       "locations": [
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:995",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1219",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1271",
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1272",
         "auth_service/tests/utils/test_client.py:37",
         "scripts/test_cold_start_e2e.py:274",
         "scripts/test_cold_start_e2e.py:321",
         "scripts/test_cold_start_e2e.py:383",
         "scripts/test_oauth_local.py:304",
-        "scripts/test_websocket_dev_mode.py:177"
+        "scripts/test_staging_deployment.py:106",
+        "scripts/test_staging_deployment.py:108"
       ]
     },
     "Auto-fix functionality not implemented yet.": {
@@ -7799,6 +7884,13 @@
         "scripts/auto_fix_test_violations.py:763"
       ]
     },
+    "Backend API Health": {
+      "value": "Backend API Health",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:85"
+      ]
+    },
     "Backend Auth Required": {
       "value": "Backend Auth Required",
       "category": "test_literals",
@@ -7898,6 +7990,13 @@
         "scripts/test_staging_env.py:35"
       ]
     },
+    "Backend must start before frontend": {
+      "value": "Backend must start before frontend",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:103"
+      ]
+    },
     "Backend returned status": {
       "value": "Backend returned status",
       "category": "test_literals",
@@ -7912,6 +8011,27 @@
         "scripts/test_auth_integration.py:176"
       ]
     },
+    "Backend should be in registry": {
+      "value": "Backend should be in registry",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:341"
+      ]
+    },
+    "Backend should have started": {
+      "value": "Backend should have started",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:334"
+      ]
+    },
+    "Backend should not start before auth is ready": {
+      "value": "Backend should not start before auth is ready",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:114"
+      ]
+    },
     "Backend unhealthy:": {
       "value": "Backend unhealthy:",
       "category": "test_literals",
@@ -7924,6 +8044,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/auto_fix_test_violations.py:1012"
+      ]
+    },
+    "Bad file descriptor": {
+      "value": "Bad file descriptor",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:59"
       ]
     },
     "Base Test Classes\nCommon functionality for auth service tests with proper setup and teardown.\nFollows 450-line limit with focused test infrastructure.": {
@@ -7989,6 +8116,15 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_security.py:566"
+      ]
+    },
+    "Bearer test": {
+      "value": "Bearer test",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:106",
+        "scripts/test_staging_deployment.py:108",
+        "scripts/test_staging_deployment.py:110"
       ]
     },
     "Bearer test_token_123": {
@@ -8672,6 +8808,27 @@
         "scripts/compliance/test_refactor_helper.py:669"
       ]
     },
+    "Complete coordination workflow successful": {
+      "value": "Complete coordination workflow successful",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:344"
+      ]
+    },
+    "Complete workflow should succeed": {
+      "value": "Complete workflow should succeed",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:333"
+      ]
+    },
+    "Complete workflow test failed:": {
+      "value": "Complete workflow test failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:348"
+      ]
+    },
     "Complex async mocking required - tested in integration": {
       "value": "Complex async mocking required - tested in integration",
       "category": "test_literals",
@@ -8784,6 +8941,13 @@
         "scripts/fix_test_import_errors.py:2"
       ]
     },
+    "Comprehensive staging deployment validation script.\nTests all critical endpoints and services on staging environment.": {
+      "value": "Comprehensive staging deployment validation script.\nTests all critical endpoints and services on staging environment.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:2"
+      ]
+    },
     "Comprehensive suffix": {
       "value": "Comprehensive suffix",
       "category": "test_literals",
@@ -8796,6 +8960,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_size_validator.py:2"
+      ]
+    },
+    "Computed startup order:": {
+      "value": "Computed startup order:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:92"
       ]
     },
     "Concurrent validation failed:": {
@@ -8953,7 +9124,8 @@
       "locations": [
         "auth_service/tests/test_security.py:275",
         "auth_service/tests/test_security.py:352",
-        "auth_service/tests/utils/test_client.py:23"
+        "auth_service/tests/utils/test_client.py:23",
+        "scripts/test_staging_deployment.py:131"
       ]
     },
     "Continue testing even after failures": {
@@ -8961,6 +9133,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_imports.py:58"
+      ]
+    },
+    "Coordination should succeed with optional service failures": {
+      "value": "Coordination should succeed with optional service failures",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:262"
       ]
     },
     "Core AI optimization delivering 30-50% cost savings for": {
@@ -9650,6 +9829,13 @@
         "auth_service/debug_db_test.py:28"
       ]
     },
+    "Database must start before auth": {
+      "value": "Database must start before auth",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:101"
+      ]
+    },
     "Database session not configured": {
       "value": "Database session not configured",
       "category": "test_literals",
@@ -9751,6 +9937,20 @@
         "scripts/test_staging_startup.py:238"
       ]
     },
+    "Dependency resolution test failed:": {
+      "value": "Dependency resolution test failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:120"
+      ]
+    },
+    "Dependency resolution working correctly": {
+      "value": "Dependency resolution working correctly",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:116"
+      ]
+    },
     "Deployment errors:": {
       "value": "Deployment errors:",
       "category": "test_literals",
@@ -9802,6 +10002,14 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_oauth_local.py:353"
+      ]
+    },
+    "Dev OAuth client used in staging": {
+      "value": "Dev OAuth client used in staging",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:216",
+        "auth_service/tests/test_five_whys_reproduction.py:222"
       ]
     },
     "Dev launcher exited unexpectedly": {
@@ -10070,6 +10278,13 @@
         "scripts/test_staging_startup.py:267"
       ]
     },
+    "EXCEPTION (": {
+      "value": "EXCEPTION (",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:72"
+      ]
+    },
     "Either --run-id or --workflow-name must be specified": {
       "value": "Either --run-id or --workflow-name must be specified",
       "category": "test_literals",
@@ -10211,6 +10426,13 @@
       "locations": [
         "scripts/test_backend.py:368",
         "scripts/test_staging_config.py:98"
+      ]
+    },
+    "Environment: STAGING": {
+      "value": "Environment: STAGING",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:190"
       ]
     },
     "Error after deployment": {
@@ -10754,7 +10976,7 @@
       "value": "Expected staging frontend URL, got:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_critical_staging_issues.py:232"
+        "auth_service/tests/test_critical_staging_issues.py:235"
       ]
     },
     "Expected status": {
@@ -10821,11 +11043,25 @@
         "scripts/test_failure_scanner.py:142"
       ]
     },
+    "FAILED (": {
+      "value": "FAILED (",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:67"
+      ]
+    },
     "FAILED FILES (": {
       "value": "FAILED FILES (",
       "category": "test_literals",
       "locations": [
         "scripts/fix_test_import_errors.py:321"
+      ]
+    },
+    "FAILED TESTS:": {
+      "value": "FAILED TESTS:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:387"
       ]
     },
     "FAILED: Could not rename": {
@@ -10967,6 +11203,9 @@
       "locations": [
         "scripts/test_oauth_local.py:378",
         "scripts/test_oauth_local.py:380",
+        "scripts/test_staging_deployment.py:99",
+        "scripts/test_staging_deployment.py:122",
+        "scripts/test_staging_deployment.py:143",
         "scripts/test_workflows_with_act.py:207"
       ]
     },
@@ -11185,6 +11424,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/fix_test_batch.py:383",
+        "scripts/test_coordination_fixes.py:383",
         "scripts/test_example_message_flow.py:322",
         "scripts/test_staging_env.py:190",
         "scripts/test_verify_workflow_status_corrected.py:196",
@@ -11448,6 +11688,20 @@
         "scripts/test_verify_workflow_status_corrected.py:211"
       ]
     },
+    "First allocation failed:": {
+      "value": "First allocation failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:167"
+      ]
+    },
+    "Five Whys Reproduction Tests for Auth Service Staging Errors.\nReproduces each root cause identified in the Five Whys analysis.": {
+      "value": "Five Whys Reproduction Tests for Auth Service Staging Errors.\nReproduces each root cause identified in the Five Whys analysis.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:1"
+      ]
+    },
     "Fix Python syntax errors": {
       "value": "Fix Python syntax errors",
       "category": "test_literals",
@@ -11700,6 +11954,7 @@
       "value": "Frontend Health",
       "category": "test_literals",
       "locations": [
+        "scripts/test_staging_deployment.py:87",
         "scripts/test_staging_env.py:146"
       ]
     },
@@ -11750,6 +12005,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_env.py:50"
+      ]
+    },
+    "Frontend should be in registry": {
+      "value": "Frontend should be in registry",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:342"
+      ]
+    },
+    "Frontend should have started": {
+      "value": "Frontend should have started",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:335"
       ]
     },
     "Full reports saved to test_reports/": {
@@ -11875,6 +12144,21 @@
         "scripts/test_backend.py:91",
         "scripts/test_config_loading.py:34",
         "scripts/test_staging_config.py:53"
+      ]
+    },
+    "GET": {
+      "value": "GET",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:38",
+        "scripts/test_staging_deployment.py:85",
+        "scripts/test_staging_deployment.py:86",
+        "scripts/test_staging_deployment.py:87",
+        "scripts/test_staging_deployment.py:105",
+        "scripts/test_staging_deployment.py:107",
+        "scripts/test_staging_deployment.py:109",
+        "scripts/test_staging_deployment.py:128",
+        "scripts/test_staging_deployment.py:129"
       ]
     },
     "GITHUB_CLIENT_ID": {
@@ -12121,6 +12405,20 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_auth_oauth_google.py:380"
+      ]
+    },
+    "Graceful degradation test failed:": {
+      "value": "Graceful degradation test failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:276"
+      ]
+    },
+    "Graceful degradation working: degraded=": {
+      "value": "Graceful degradation working: degraded=",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:272"
       ]
     },
     "HEAD": {
@@ -12751,6 +13049,8 @@
         "auth_service/tests/config/test_env.py:22",
         "auth_service/tests/config/test_settings.py:176",
         "auth_service/tests/conftest.py:29",
+        "auth_service/tests/test_five_whys_reproduction.py:325",
+        "auth_service/tests/test_five_whys_reproduction.py:350",
         "auth_service/tests/test_setup.py:17",
         "auth_service/tests/test_setup.py:18"
       ]
@@ -12762,13 +13062,13 @@
         "auth_service/tests/test_auth_token_validation.py:152",
         "auth_service/tests/test_auth_token_validation.py:176",
         "auth_service/tests/test_auth_token_validation.py:253",
+        "auth_service/tests/test_five_whys_reproduction.py:326",
+        "auth_service/tests/test_five_whys_reproduction.py:351",
         "scripts/test_backend.py:82",
         "scripts/test_config_loading.py:34",
         "scripts/test_oauth_local.py:63",
         "scripts/test_oauth_local.py:63",
-        "scripts/test_oauth_local.py:403",
-        "scripts/test_staging_config.py:54",
-        "scripts/test_staging_startup.py:113"
+        "scripts/test_oauth_local.py:403"
       ]
     },
     "Jane Doe": {
@@ -13267,7 +13567,8 @@
       "value": "Main entry point.",
       "category": "test_literals",
       "locations": [
-        "scripts/test_cold_start_e2e.py:501"
+        "scripts/test_cold_start_e2e.py:501",
+        "scripts/test_coordination_fixes.py:406"
       ]
     },
     "Main test function.": {
@@ -13446,6 +13747,13 @@
         "scripts/test_staging_startup.py:130"
       ]
     },
+    "Missing fixes:": {
+      "value": "Missing fixes:",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:313"
+      ]
+    },
     "Missing method": {
       "value": "Missing method",
       "category": "test_literals",
@@ -13481,6 +13789,13 @@
         "auth_service/tests/utils/assertion_helpers.py:241"
       ]
     },
+    "Missing required field": {
+      "value": "Missing required field",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:182"
+      ]
+    },
     "Missing required field in audit log:": {
       "value": "Missing required field in audit log:",
       "category": "test_literals",
@@ -13507,8 +13822,16 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/base/test_mixins.py:240",
+        "auth_service/tests/test_five_whys_reproduction.py:177",
         "auth_service/tests/utils/assertion_helpers.py:95",
         "auth_service/tests/utils/assertion_helpers.py:114"
+      ]
+    },
+    "Missing required fields": {
+      "value": "Missing required fields",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:159"
       ]
     },
     "Missing required permission:": {
@@ -13862,6 +14185,13 @@
         "scripts/test_environment_detection.py:29"
       ]
     },
+    "No error details": {
+      "value": "No error details",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:390"
+      ]
+    },
     "No failing tests found!": {
       "value": "No failing tests found!",
       "category": "test_literals",
@@ -14091,6 +14421,23 @@
         "auth_service/tests/factories/audit_factory.py:171"
       ]
     },
+    "OAUTH_CLIENT_ID": {
+      "value": "OAUTH_CLIENT_ID",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:195",
+        "auth_service/tests/test_five_whys_reproduction.py:211",
+        "auth_service/tests/test_five_whys_reproduction.py:330",
+        "auth_service/tests/test_five_whys_reproduction.py:362"
+      ]
+    },
+    "OAUTH_CLIENT_SECRET": {
+      "value": "OAUTH_CLIENT_SECRET",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:196"
+      ]
+    },
     "OAUTH_ERROR": {
       "value": "OAUTH_ERROR",
       "category": "test_literals",
@@ -14098,11 +14445,26 @@
         "auth_service/tests/factories/audit_factory.py:34"
       ]
     },
+    "OAUTH_REDIRECT_URI": {
+      "value": "OAUTH_REDIRECT_URI",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:197",
+        "auth_service/tests/test_five_whys_reproduction.py:212"
+      ]
+    },
     "OAUTH_REDIRECT_URL": {
       "value": "OAUTH_REDIRECT_URL",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/config/test_env.py:206"
+      ]
+    },
+    "OAuth Callback": {
+      "value": "OAuth Callback",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:129"
       ]
     },
     "OAuth Configuration": {
@@ -14138,6 +14500,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_flows_sync.py:1"
+      ]
+    },
+    "OAuth Login Endpoint": {
+      "value": "OAuth Login Endpoint",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:128"
       ]
     },
     "OAuth config for": {
@@ -14331,6 +14700,13 @@
         "scripts/auto_fix_test_sizes.py:445"
       ]
     },
+    "Optional service failed": {
+      "value": "Optional service failed",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:250"
+      ]
+    },
     "Options:": {
       "value": "Options:",
       "category": "test_literals",
@@ -14445,6 +14821,13 @@
         "scripts/test_example_message_flow.py:157"
       ]
     },
+    "PASSED (": {
+      "value": "PASSED (",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:65"
+      ]
+    },
     "PASSWORD": {
       "value": "PASSWORD",
       "category": "test_literals",
@@ -14522,7 +14905,8 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_security.py:366",
-        "scripts/test_auth_integration.py:109"
+        "scripts/test_auth_integration.py:109",
+        "scripts/test_staging_deployment.py:130"
       ]
     },
     "POSTGRES_HOST": {
@@ -14614,6 +14998,7 @@
       "value": "Passed:",
       "category": "test_literals",
       "locations": [
+        "scripts/test_coordination_fixes.py:382",
         "scripts/test_example_message_flow.py:321",
         "scripts/test_staging_env.py:189",
         "scripts/test_verify_workflow_status_corrected.py:195",
@@ -14760,6 +15145,13 @@
         "scripts/test_example_message_flow.py:362"
       ]
     },
+    "Please review the failed tests and fix the issues": {
+      "value": "Please review the failed tests and fix the issues",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:426"
+      ]
+    },
     "Please review violations manually and implement proper solutions.": {
       "value": "Please review violations manually and implement proper solutions.",
       "category": "test_literals",
@@ -14772,6 +15164,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_async_postgres.py:158"
+      ]
+    },
+    "Port allocation test failed:": {
+      "value": "Port allocation test failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:184"
+      ]
+    },
+    "Port allocation working: service1=": {
+      "value": "Port allocation working: service1=",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:175"
       ]
     },
     "Post-deployment:": {
@@ -15047,6 +15453,13 @@
         "auth_service/tests/config/test_settings.py:182"
       ]
     },
+    "READY": {
+      "value": "READY",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:147"
+      ]
+    },
     "RECOMMENDATION": {
       "value": "RECOMMENDATION",
       "category": "test_literals",
@@ -15104,9 +15517,9 @@
         "auth_service/tests/config/test_env.py:194",
         "auth_service/tests/config/test_settings.py:170",
         "auth_service/tests/conftest.py:34",
-        "scripts/test_backend.py:81",
-        "scripts/test_staging_startup.py:111",
-        "scripts/test_staging_startup.py:217"
+        "auth_service/tests/test_critical_staging_issues.py:223",
+        "auth_service/tests/test_critical_staging_issues.py:224",
+        "scripts/test_backend.py:81"
       ]
     },
     "REDUNDANT TEST": {
@@ -15164,6 +15577,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/real_test_requirements_enforcer.py:68"
+      ]
+    },
+    "Readiness separation test failed:": {
+      "value": "Readiness separation test failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:155"
+      ]
+    },
+    "Readiness vs health separation working correctly": {
+      "value": "Readiness vs health separation working correctly",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:151"
       ]
     },
     "Real LLM Coverage:": {
@@ -15289,6 +15716,13 @@
         "scripts/compliance/test_size_validator.py:365"
       ]
     },
+    "Redirect URI doesn't match staging": {
+      "value": "Redirect URI doesn't match staging",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:218"
+      ]
+    },
     "Redirect to: [cyan]": {
       "value": "Redirect to: [cyan]",
       "category": "test_literals",
@@ -15300,7 +15734,7 @@
       "value": "Redis URL should not use localhost in staging, got:",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_critical_staging_issues.py:225"
+        "auth_service/tests/test_critical_staging_issues.py:228"
       ]
     },
     "Redis connection failed": {
@@ -15315,6 +15749,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:81"
+      ]
+    },
+    "Redis should be in degraded services": {
+      "value": "Redis should be in degraded services",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:266"
       ]
     },
     "RedisTestMixin": {
@@ -15497,6 +15938,48 @@
         "scripts/auto_fix_test_violations.py:1015"
       ]
     },
+    "Reproduces: Error while closing socket [Errno 9] Bad file descriptor\n        Root Cause: Inadequate container lifecycle management": {
+      "value": "Reproduces: Error while closing socket [Errno 9] Bad file descriptor\n        Root Cause: Inadequate container lifecycle management",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:48"
+      ]
+    },
+    "Reproduces: Invalid token: Signature verification failed\n        Root Cause: Fragmented secret management": {
+      "value": "Reproduces: Invalid token: Signature verification failed\n        Root Cause: Fragmented secret management",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:93"
+      ]
+    },
+    "Reproduces: JWT security validation error: Not enough segments\n        Root Cause: No validation of OAuth response completeness": {
+      "value": "Reproduces: JWT security validation error: Not enough segments\n        Root Cause: No validation of OAuth response completeness",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:131"
+      ]
+    },
+    "Reproduces: OAuth callback error: invalid_client (401)\n        Root Cause: Cross-environment credential misuse": {
+      "value": "Reproduces: OAuth callback error: invalid_client (401)\n        Root Cause: Cross-environment credential misuse",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:188"
+      ]
+    },
+    "Reproduces: connect() got an unexpected keyword argument 'sslmode'\n        Root Cause: Missing SSL parameter compatibility handling": {
+      "value": "Reproduces: connect() got an unexpected keyword argument 'sslmode'\n        Root Cause: Missing SSL parameter compatibility handling",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:228"
+      ]
+    },
+    "Reproduces: password authentication failed for user 'postgres'\n        Root Cause: No pre-deployment validation framework": {
+      "value": "Reproduces: password authentication failed for user 'postgres'\n        Root Cause: No pre-deployment validation framework",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:22"
+      ]
+    },
     "Request payload too large. Maximum size:": {
       "value": "Request payload too large. Maximum size:",
       "category": "test_literals",
@@ -15530,6 +16013,20 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/database/test_config.py:84"
+      ]
+    },
+    "Resource cleanup successful": {
+      "value": "Resource cleanup successful",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:364"
+      ]
+    },
+    "Resource cleanup test failed:": {
+      "value": "Resource cleanup test failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:368"
       ]
     },
     "Response:": {
@@ -15657,6 +16154,13 @@
         "scripts/test_websocket_dev_mode.py:259"
       ]
     },
+    "Run all coordination fix validation tests.": {
+      "value": "Run all coordination fix validation tests.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:40"
+      ]
+    },
     "Run all initialization tests.": {
       "value": "Run all initialization tests.",
       "category": "test_literals",
@@ -15669,6 +16173,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_auth_integration.py:128"
+      ]
+    },
+    "Run all staging deployment tests": {
+      "value": "Run all staging deployment tests",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:185"
       ]
     },
     "Run all tests": {
@@ -15828,6 +16339,13 @@
         "scripts/test_backend.py:372"
       ]
     },
+    "Running test:": {
+      "value": "Running test:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:56"
+      ]
+    },
     "Running verify_workflow_status.py validation tests...": {
       "value": "Running verify_workflow_status.py validation tests...",
       "category": "test_literals",
@@ -15960,6 +16478,13 @@
         "auth_service/tests/config/test_settings.py:19"
       ]
     },
+    "SERVICE COORDINATION FIX VALIDATION SUMMARY": {
+      "value": "SERVICE COORDINATION FIX VALIDATION SUMMARY",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:374"
+      ]
+    },
     "SERVICE_ID": {
       "value": "SERVICE_ID",
       "category": "test_literals",
@@ -16082,6 +16607,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_critical_staging_issues.py:110"
+      ]
+    },
+    "STAGING DEPLOYMENT VALIDATION TEST SUITE": {
+      "value": "STAGING DEPLOYMENT VALIDATION TEST SUITE",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:187"
       ]
     },
     "STAGING ENVIRONMENT TEST RUNNER": {
@@ -16389,6 +16921,13 @@
         "scripts/test_exclusion_check.py:22"
       ]
     },
+    "Second allocation failed:": {
+      "value": "Second allocation failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:170"
+      ]
+    },
     "Secret Access": {
       "value": "Secret Access",
       "category": "test_literals",
@@ -16433,11 +16972,67 @@
         "scripts/fix_test_batch.py:392"
       ]
     },
+    "Service Coordination Fix Validation": {
+      "value": "Service Coordination Fix Validation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:407"
+      ]
+    },
     "Service Initialization Order": {
       "value": "Service Initialization Order",
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_startup.py:237"
+      ]
+    },
+    "Service discovery failed with retry logic": {
+      "value": "Service discovery failed with retry logic",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:221"
+      ]
+    },
+    "Service discovery timing fixes working correctly": {
+      "value": "Service discovery timing fixes working correctly",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:224"
+      ]
+    },
+    "Service discovery timing test failed:": {
+      "value": "Service discovery timing test failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:228"
+      ]
+    },
+    "Service should be ready after marking": {
+      "value": "Service should be ready after marking",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:149"
+      ]
+    },
+    "Service should not be ready initially": {
+      "value": "Service should not be ready initially",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:134"
+      ]
+    },
+    "Service should not be ready while initializing": {
+      "value": "Service should not be ready while initializing",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:138"
+      ]
+    },
+    "Service should not be ready while starting": {
+      "value": "Service should not be ready while starting",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:142"
       ]
     },
     "Service temporarily unavailable": {
@@ -16452,6 +17047,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_auth_token_generation.py:273"
+      ]
+    },
+    "Services got same port - conflict not prevented": {
+      "value": "Services got same port - conflict not prevented",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:173"
       ]
     },
     "Session": {
@@ -16576,7 +17178,7 @@
       "value": "Should detect staging environment for CORS config",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_critical_staging_issues.py:251"
+        "auth_service/tests/test_critical_staging_issues.py:254"
       ]
     },
     "Should detect test environment during pytest run": {
@@ -16693,6 +17295,13 @@
         "scripts/test_error_monitor_logic.py:224"
       ]
     },
+    "Should have failed with authentication error": {
+      "value": "Should have failed with authentication error",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:36"
+      ]
+    },
     "Should have failed with invalid token": {
       "value": "Should have failed with invalid token",
       "category": "test_literals",
@@ -16705,6 +17314,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_session_cleanup.py:237"
+      ]
+    },
+    "Should normalize URL for asyncpg": {
+      "value": "Should normalize URL for asyncpg",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_single_database.py:108"
       ]
     },
     "Should not contain sslmode parameter, got:": {
@@ -16823,7 +17439,7 @@
       "value": "Should return empty string when DATABASE_URL not set",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_single_database.py:112"
+        "auth_service/tests/test_single_database.py:115"
       ]
     },
     "Should return string even for malformed URL:": {
@@ -16847,18 +17463,18 @@
         "auth_service/tests/test_staging_auth_ssl_failures.py:56"
       ]
     },
-    "Should use DATABASE_URL from environment": {
-      "value": "Should use DATABASE_URL from environment",
-      "category": "test_literals",
-      "locations": [
-        "auth_service/tests/test_single_database.py:105"
-      ]
-    },
     "Should use asyncpg driver, got:": {
       "value": "Should use asyncpg driver, got:",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_auth_database_manager_missing_method.py:86"
+      ]
+    },
+    "Should use raw DATABASE_URL from environment": {
+      "value": "Should use raw DATABASE_URL from environment",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_single_database.py:104"
       ]
     },
     "Should use staging defaults when DATABASE_URL not set, got:": {
@@ -16964,6 +17580,20 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/utils/test_helpers.py:102"
+      ]
+    },
+    "Simulates asyncpg connection.": {
+      "value": "Simulates asyncpg connection.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:237"
+      ]
+    },
+    "Simulates pre-deployment validation.": {
+      "value": "Simulates pre-deployment validation.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:318"
       ]
     },
     "Size violations addressed:": {
@@ -17141,29 +17771,29 @@
       "value": "Staging environment health check failed",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1299"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1301"
       ]
     },
     "Staging environment not available": {
       "value": "Staging environment not available",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1301"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1303"
       ]
     },
     "Staging environment not available for testing": {
       "value": "Staging environment not available for testing",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1281"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1282"
       ]
     },
     "Staging environment not reachable": {
       "value": "Staging environment not reachable",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1285",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1320"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1286",
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1322"
       ]
     },
     "Staging should not allow dev login": {
@@ -17278,6 +17908,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend_optimized.py:423"
+      ]
+    },
+    "Starting service coordination fix validation": {
+      "value": "Starting service coordination fix validation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:41"
       ]
     },
     "Starting services for E2E tests...": {
@@ -17419,7 +18056,9 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend_optimized.py:336",
+        "scripts/test_coordination_fixes.py:384",
         "scripts/test_example_message_flow.py:327",
+        "scripts/test_staging_deployment.py:219",
         "scripts/test_verify_workflow_status_corrected.py:197"
       ]
     },
@@ -17543,6 +18182,13 @@
         "scripts/test_system_startup.py:2"
       ]
     },
+    "System should be healthy despite degraded services": {
+      "value": "System should be healthy despite degraded services",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:270"
+      ]
+    },
     "TEST ALIGNMENT SUMMARY": {
       "value": "TEST ALIGNMENT SUMMARY",
       "category": "test_literals",
@@ -17583,6 +18229,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_violations_reporter.py:34"
+      ]
+    },
+    "TEST MAPPING TO ORIGINAL ISSUES:": {
+      "value": "TEST MAPPING TO ORIGINAL ISSUES:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:393"
       ]
     },
     "TEST OVERLAP ANALYSIS COMPLETE": {
@@ -17645,6 +18298,7 @@
       "value": "TEST SUMMARY",
       "category": "test_literals",
       "locations": [
+        "scripts/test_staging_deployment.py:214",
         "scripts/test_staging_env.py:186",
         "scripts/test_verify_workflow_status_corrected.py:188"
       ]
@@ -18196,6 +18850,13 @@
         "auth_service/tests/base/test_mixins.py:1"
       ]
     },
+    "Test OAuth authentication flow": {
+      "value": "Test OAuth authentication flow",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:126"
+      ]
+    },
     "Test OAuth configuration endpoint": {
       "value": "Test OAuth configuration endpoint",
       "category": "test_literals",
@@ -18221,7 +18882,7 @@
       "value": "Test OAuth provider failover in staging environment",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1290"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1292"
       ]
     },
     "Test Overlap Analyzer\nAnalyzes test files for similarity and potential duplication using vector similarity techniques.": {
@@ -18401,6 +19062,13 @@
         "scripts/test_cold_start_e2e.py:262"
       ]
     },
+    "Test WebSocket connectivity": {
+      "value": "Test WebSocket connectivity",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:147"
+      ]
+    },
     "Test WebSocket health endpoint.": {
       "value": "Test WebSocket health endpoint.",
       "category": "test_literals",
@@ -18427,6 +19095,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_security.py:235"
+      ]
+    },
+    "Test a single endpoint": {
+      "value": "Test a single endpoint",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:40"
       ]
     },
     "Test agent": {
@@ -18573,7 +19248,7 @@
       "value": "Test complete OAuth flow across all three services in staging",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1247"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1248"
       ]
     },
     "Test complete connection lifecycle with events.": {
@@ -18581,6 +19256,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_postgres_compliance.py:223"
+      ]
+    },
+    "Test complete end-to-end coordination workflow.": {
+      "value": "Test complete end-to-end coordination workflow.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:280"
       ]
     },
     "Test complete token flow from creation to validation.": {
@@ -18799,11 +19481,25 @@
         "scripts/compliance/demo_test_size_enforcement.py:156"
       ]
     },
+    "Test graceful degradation with optional service failures.": {
+      "value": "Test graceful degradation with optional service failures.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:232"
+      ]
+    },
     "Test handling multiple sessions for same user": {
       "value": "Test handling multiple sessions for same user",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_session_management.py:182"
+      ]
+    },
+    "Test health endpoints for all services": {
+      "value": "Test health endpoints for all services",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:83"
       ]
     },
     "Test if Cloud SQL connector can be imported": {
@@ -18832,6 +19528,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_session_management.py:246"
+      ]
+    },
+    "Test main API endpoints": {
+      "value": "Test main API endpoints",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:103"
       ]
     },
     "Test message for validation": {
@@ -18872,6 +19575,13 @@
         "auth_service/tests/test_postgres_compliance.py:156"
       ]
     },
+    "Test port allocation prevents conflicts.": {
+      "value": "Test port allocation prevents conflicts.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:159"
+      ]
+    },
     "Test prevention of HTTP method override attacks": {
       "value": "Test prevention of HTTP method override attacks",
       "category": "test_literals",
@@ -18891,6 +19601,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/cleanup_test_processes.py:164"
+      ]
+    },
+    "Test proper resource cleanup.": {
+      "value": "Test proper resource cleanup.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:352"
       ]
     },
     "Test protection against large payload attacks": {
@@ -18956,6 +19673,13 @@
         "scripts/test_verify_workflow_status.py:218"
       ]
     },
+    "Test runner to validate service coordination fixes.\n\nThis script runs the coordination system tests to ensure all issues\nidentified in test_critical_cold_start_initialization.py are resolved.": {
+      "value": "Test runner to validate service coordination fixes.\n\nThis script runs the coordination system tests to ensure all issues\nidentified in test_critical_cold_start_initialization.py are resolved.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:1"
+      ]
+    },
     "Test script for staging error monitor logic validation.\n\nThis script tests the error threshold and decision logic without requiring GCP access.": {
       "value": "Test script for staging error monitor logic validation.\n\nThis script tests the error threshold and decision logic without requiring GCP access.",
       "category": "test_literals",
@@ -18989,6 +19713,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cold_start_e2e.py:310"
+      ]
+    },
+    "Test separation between readiness and health checks.": {
+      "value": "Test separation between readiness and health checks.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:124"
+      ]
+    },
+    "Test service discovery handles timing issues.": {
+      "value": "Test service discovery handles timing issues.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:188"
       ]
     },
     "Test session created successfully!": {
@@ -19094,6 +19832,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/test_critical_staging_issues.py:73"
+      ]
+    },
+    "Test that dependency resolution prevents early startup.": {
+      "value": "Test that dependency resolution prevents early startup.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:83"
       ]
     },
     "Test that main_db_sync module does not exist (removed duplicate)": {
@@ -19238,6 +19983,13 @@
         "scripts/test_imports.py:70"
       ]
     },
+    "Testing complete coordination workflow": {
+      "value": "Testing complete coordination workflow",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:281"
+      ]
+    },
     "Testing configuration loading...": {
       "value": "Testing configuration loading...",
       "category": "test_literals",
@@ -19250,6 +20002,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_error_monitor_logic.py:187"
+      ]
+    },
+    "Testing dependency resolution fixes": {
+      "value": "Testing dependency resolution fixes",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:84"
       ]
     },
     "Testing dependency resolution...": {
@@ -19271,6 +20030,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_error_monitor_logic.py:211"
+      ]
+    },
+    "Testing graceful degradation": {
+      "value": "Testing graceful degradation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:233"
       ]
     },
     "Testing handler initialization...": {
@@ -19337,6 +20103,13 @@
         "scripts/test_error_monitor_logic.py:163"
       ]
     },
+    "Testing port allocation coordination": {
+      "value": "Testing port allocation coordination",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:160"
+      ]
+    },
     "Testing pre-run size validation...": {
       "value": "Testing pre-run size validation...",
       "category": "test_literals",
@@ -19344,11 +20117,32 @@
         "scripts/compliance/demo_test_size_enforcement.py:121"
       ]
     },
+    "Testing readiness vs health check separation": {
+      "value": "Testing readiness vs health check separation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:125"
+      ]
+    },
+    "Testing resource cleanup": {
+      "value": "Testing resource cleanup",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:353"
+      ]
+    },
     "Testing secret access...": {
       "value": "Testing secret access...",
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_startup.py:138"
+      ]
+    },
+    "Testing service discovery timing fixes": {
+      "value": "Testing service discovery timing fixes",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:189"
       ]
     },
     "Testing service initialization order...": {
@@ -19430,11 +20224,25 @@
         "scripts/test_verify_workflow.py:92"
       ]
     },
+    "Tests that all Five Whys fixes work together in staging environment.": {
+      "value": "Tests that all Five Whys fixes work together in staging environment.",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:267"
+      ]
+    },
     "The current configuration shows potential for improvement in the following areas:": {
       "value": "The current configuration shows potential for improvement in the following areas:",
       "category": "test_literals",
       "locations": [
         "netra_backend/app/services/realistic_test_data/llm_response_generator.py:159"
+      ]
+    },
+    "The service coordination system should now handle:": {
+      "value": "The service coordination system should now handle:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:417"
       ]
     },
     "The system analysis reveals the following insights:": {
@@ -19507,6 +20315,13 @@
         "scripts/auto_fix_test_violations.py:857"
       ]
     },
+    "This validates fixes for issues in test_critical_cold_start_initialization.py": {
+      "value": "This validates fixes for issues in test_critical_cold_start_initialization.py",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:408"
+      ]
+    },
     "This would contain:\n- All user creation tests\n- All authentication tests  \n- All permission tests\n- All user profile tests\n- Helper functions": {
       "value": "This would contain:\n- All user creation tests\n- All authentication tests  \n- All permission tests\n- All user profile tests\n- Helper functions",
       "category": "test_literals",
@@ -19540,6 +20355,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_example_message_flow.py:122"
+      ]
+    },
+    "Timestamp:": {
+      "value": "Timestamp:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:189"
       ]
     },
     "Timing difference too large:": {
@@ -19596,6 +20418,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_oauth_local.py:255"
+      ]
+    },
+    "Token Endpoint": {
+      "value": "Token Endpoint",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:130"
       ]
     },
     "Token Test Data Factory\nCreates JWT tokens and OAuth tokens for auth service testing.\nSupports access tokens, refresh tokens, and service tokens with proper claims.": {
@@ -19752,7 +20581,9 @@
       "category": "test_literals",
       "locations": [
         "scripts/business_value_test_index.py:737",
+        "scripts/test_coordination_fixes.py:381",
         "scripts/test_example_message_flow.py:320",
+        "scripts/test_staging_deployment.py:216",
         "scripts/test_staging_env.py:188",
         "scripts/test_verify_workflow_status_corrected.py:194",
         "scripts/test_websocket_dev_mode.py:295"
@@ -19969,6 +20800,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_imports.py:130"
+      ]
+    },
+    "Unexpected status:": {
+      "value": "Unexpected status:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:70"
       ]
     },
     "Unified JWT Validation Tests Package\n\nBusiness Value: Authentication security for cross-service communication": {
@@ -20334,6 +21172,13 @@
         "scripts/test_example_message_flow.py:284"
       ]
     },
+    "Validation failed with exception:": {
+      "value": "Validation failed with exception:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:430"
+      ]
+    },
     "Validation for": {
       "value": "Validation for",
       "category": "test_literals",
@@ -20521,10 +21366,18 @@
         "scripts/compliance/test_refactor_helper.py:734"
       ]
     },
+    "WebSocket": {
+      "value": "WebSocket",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:174"
+      ]
+    },
     "WebSocket Connection": {
       "value": "WebSocket Connection",
       "category": "test_literals",
       "locations": [
+        "scripts/test_staging_deployment.py:150",
         "scripts/test_staging_env.py:149"
       ]
     },
@@ -21017,6 +21870,9 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_failure_scanner.py:177",
+        "scripts/test_staging_deployment.py:99",
+        "scripts/test_staging_deployment.py:122",
+        "scripts/test_staging_deployment.py:143",
         "scripts/test_staging_startup.py:253",
         "scripts/test_staging_startup.py:257",
         "scripts/test_verify_workflow_status.py:178"
@@ -21048,6 +21904,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/startup_test_executor.py:263"
+      ]
+    },
+    "[FAIL] Failed:": {
+      "value": "[FAIL] Failed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:218"
       ]
     },
     "[FAIL] Frontend startup tests failed": {
@@ -21090,6 +21953,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_environment_detection.py:179"
+      ]
+    },
+    "[FAIL] WebSocket Connection:": {
+      "value": "[FAIL] WebSocket Connection:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:181"
       ]
     },
     "[FIXED] Fixed and verified": {
@@ -21441,6 +22311,9 @@
       "value": "[PASS]",
       "category": "test_literals",
       "locations": [
+        "scripts/test_staging_deployment.py:96",
+        "scripts/test_staging_deployment.py:119",
+        "scripts/test_staging_deployment.py:140",
         "scripts/test_staging_startup.py:250",
         "scripts/test_verify_workflow_status.py:178"
       ]
@@ -21557,6 +22430,13 @@
         "scripts/test_environment_detection.py:149"
       ]
     },
+    "[PASS] Passed:": {
+      "value": "[PASS] Passed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:217"
+      ]
+    },
     "[PASS] PermissionRequest schema defaults to staging": {
       "value": "[PASS] PermissionRequest schema defaults to staging",
       "category": "test_literals",
@@ -21569,6 +22449,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_environment_detection.py:82"
+      ]
+    },
+    "[PASS] WebSocket Connection: Connected": {
+      "value": "[PASS] WebSocket Connection: Connected",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:178"
       ]
     },
     "[QUALITY] Assessing test quality...": {
@@ -21590,6 +22477,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/autonomous_review/test_reviewer.py:58"
+      ]
+    },
+    "[REPORT] Detailed report saved to:": {
+      "value": "[REPORT] Detailed report saved to:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:231"
       ]
     },
     "[RESULT] Exit code:": {
@@ -21718,6 +22612,13 @@
         "scripts/test_async_postgres.py:189"
       ]
     },
+    "[SUCCESS] All tests passed! Staging deployment is healthy.": {
+      "value": "[SUCCESS] All tests passed! Staging deployment is healthy.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:238"
+      ]
+    },
     "[SUCCESS] Applied": {
       "value": "[SUCCESS] Applied",
       "category": "test_literals",
@@ -21775,6 +22676,34 @@
         "scripts/test_verify_workflow_status.py:35"
       ]
     },
+    "[TEST] Testing API Endpoints...": {
+      "value": "[TEST] Testing API Endpoints...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:200"
+      ]
+    },
+    "[TEST] Testing Authentication Flow...": {
+      "value": "[TEST] Testing Authentication Flow...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:204"
+      ]
+    },
+    "[TEST] Testing Service Health Endpoints...": {
+      "value": "[TEST] Testing Service Health Endpoints...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:196"
+      ]
+    },
+    "[TEST] Testing WebSocket Connectivity...": {
+      "value": "[TEST] Testing WebSocket Connectivity...",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:208"
+      ]
+    },
     "[TIMEOUT] Frontend tests timed out": {
       "value": "[TIMEOUT] Frontend tests timed out",
       "category": "test_literals",
@@ -21830,6 +22759,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_violations_reporter.py:58"
+      ]
+    },
+    "[WARNING] Some tests failed. Check the report for details.": {
+      "value": "[WARNING] Some tests failed. Check the report for details.",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:235"
       ]
     },
     "[WARNING] Some tests still failing - check individual test output above": {
@@ -22340,10 +23276,10 @@
         "netra_backend/app/agents/test_agent_initialization.py:206",
         "auth_service/debug_db_test.py:75",
         "auth_service/tests/integration/test_oauth_flows_sync.py:186",
-        "auth_service/tests/test_critical_staging_issues.py:254",
+        "auth_service/tests/test_critical_staging_issues.py:257",
         "auth_service/tests/test_postgres_compliance.py:249",
         "auth_service/tests/test_setup.py:49",
-        "auth_service/tests/test_single_database.py:114",
+        "auth_service/tests/test_single_database.py:117",
         "auth_service/tests/test_staging_auth_ssl_failures.py:322",
         "auth_service/tests/unit/test_oauth_models.py:240",
         "scripts/add_test_markers.py:247"
@@ -23239,7 +24175,8 @@
         "scripts/auto_fix_test_violations.py:501",
         "scripts/auto_fix_test_violations.py:502",
         "scripts/autonomous_review/test_reviewer.py:225",
-        "scripts/standardize_l3_test_names.py:205"
+        "scripts/standardize_l3_test_names.py:205",
+        "scripts/test_coordination_fixes.py:210"
       ]
     },
     "api_key": {
@@ -23589,7 +24526,8 @@
         "auth_service/tests/test_security.py:325",
         "auth_service/tests/test_security.py:352",
         "auth_service/tests/utils/test_client.py:23",
-        "auth_service/tests/utils/test_client.py:24"
+        "auth_service/tests/utils/test_client.py:24",
+        "scripts/test_staging_deployment.py:131"
       ]
     },
     "archive": {
@@ -23785,7 +24723,7 @@
       "value": "aud",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1333",
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1335",
         "auth_service/tests/test_auth_token_validation.py:95",
         "auth_service/tests/test_auth_token_validation.py:169",
         "auth_service/tests/test_auth_token_validation.py:246",
@@ -23807,7 +24745,7 @@
         "scripts/test_cold_start_e2e.py:284",
         "scripts/test_cold_start_e2e.py:391",
         "scripts/test_cold_start_e2e.py:440",
-        "scripts/test_frontend.py:33"
+        "scripts/test_coordination_fixes.py:96"
       ]
     },
     "auth-service": {
@@ -23866,6 +24804,13 @@
         "auth_service/tests/utils/assertion_helpers.py:92",
         "auth_service/tests/utils/assertion_helpers.py:105",
         "auth_service/tests/utils/assertion_helpers.py:106"
+      ]
+    },
+    "auth_secret_456": {
+      "value": "auth_secret_456",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:103"
       ]
     },
     "auth_service": {
@@ -23985,10 +24930,10 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:103",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1252",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1258",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1296",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1307"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1253",
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1259",
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1298",
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1309"
       ]
     },
     "auth_service|AuthService": {
@@ -24016,6 +24961,8 @@
       "value": "authentication",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:38",
+        "auth_service/tests/test_five_whys_reproduction.py:43",
         "scripts/business_value_test_index.py:95",
         "scripts/business_value_test_index.py:421",
         "scripts/business_value_test_index.py:468",
@@ -24161,9 +25108,9 @@
         "scripts/business_value_test_index.py:405",
         "scripts/test_cold_start_e2e.py:435",
         "scripts/test_cold_start_e2e.py:445",
-        "scripts/test_frontend.py:251",
-        "scripts/test_oauth_local.py:108",
-        "scripts/test_oauth_local.py:116"
+        "scripts/test_coordination_fixes.py:97",
+        "scripts/test_coordination_fixes.py:113",
+        "scripts/test_coordination_fixes.py:237"
       ]
     },
     "backend-service": {
@@ -24198,12 +25145,19 @@
         "scripts/test_oauth_local.py:410"
       ]
     },
+    "backend_secret_123": {
+      "value": "backend_secret_123",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:100"
+      ]
+    },
     "backend_url": {
       "value": "backend_url",
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:104",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1270",
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1271",
         "scripts/test_oauth_local.py:459"
       ]
     },
@@ -24310,6 +25264,16 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:577"
+      ]
+    },
+    "body": {
+      "value": "body",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:52",
+        "scripts/test_staging_deployment.py:66",
+        "scripts/test_staging_deployment.py:68",
+        "scripts/test_staging_deployment.py:72"
       ]
     },
     "bold magenta": {
@@ -24848,8 +25812,16 @@
       "value": "cleanup",
       "category": "test_literals",
       "locations": [
+        "scripts/test_coordination_fixes.py:50",
         "scripts/test_websocket_dev_mode.py:44",
         "scripts/test_websocket_dev_mode.py:253"
+      ]
+    },
+    "cleanup                   → Resource management validation": {
+      "value": "cleanup                   → Resource management validation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:400"
       ]
     },
     "cleanup_duration_seconds": {
@@ -25069,6 +26041,20 @@
         "scripts/compliance/test_refactor_helper.py:197"
       ]
     },
+    "complete_workflow": {
+      "value": "complete_workflow",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:49"
+      ]
+    },
+    "complete_workflow         → End-to-end integration validation": {
+      "value": "complete_workflow         → End-to-end integration validation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:399"
+      ]
+    },
     "completion_tokens": {
       "value": "completion_tokens",
       "category": "test_literals",
@@ -25268,6 +26254,13 @@
         "scripts/generate_test_audit.py:81",
         "scripts/generate_test_audit.py:146",
         "scripts/generate_test_audit.py:281"
+      ]
+    },
+    "connect() got an unexpected keyword argument 'sslmode'": {
+      "value": "connect() got an unexpected keyword argument 'sslmode'",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:239"
       ]
     },
     "connected": {
@@ -26230,7 +27223,9 @@
       "locations": [
         "auth_service/tests/base/test_base.py:108",
         "auth_service/tests/base/test_base.py:115",
-        "auth_service/tests/base/test_base.py:116"
+        "auth_service/tests/base/test_base.py:116",
+        "auth_service/tests/test_five_whys_reproduction.py:350",
+        "auth_service/tests/test_five_whys_reproduction.py:351"
       ]
     },
     "degradation_factor": {
@@ -26277,6 +27272,20 @@
       "locations": [
         "scripts/compliance/test_refactor_helper.py:105",
         "scripts/test_frontend.py:97"
+      ]
+    },
+    "dependency_resolution": {
+      "value": "dependency_resolution",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:44"
+      ]
+    },
+    "dependency_resolution     → test_06_services_starting_before_dependencies": {
+      "value": "dependency_resolution     → test_06_services_starting_before_dependencies",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:394"
       ]
     },
     "deployment_related": {
@@ -26391,6 +27400,8 @@
       "value": "dev",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:215",
+        "auth_service/tests/test_five_whys_reproduction.py:365",
         "scripts/test_frontend.py:287",
         "scripts/test_oauth_local.py:247"
       ]
@@ -26400,6 +27411,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_frontend.py:97"
+      ]
+    },
+    "dev_client_id_123": {
+      "value": "dev_client_id_123",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:195"
       ]
     },
     "dev_google_client_123": {
@@ -26416,6 +27434,13 @@
         "scripts/business_value_test_index.py:123"
       ]
     },
+    "dev_secret_456": {
+      "value": "dev_secret_456",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:196"
+      ]
+    },
     "development": {
       "value": "development",
       "category": "test_literals",
@@ -26426,10 +27451,10 @@
         "auth_service/tests/test_database_manager.py:155",
         "auth_service/tests/test_database_manager.py:171",
         "auth_service/tests/test_database_manager.py:179",
+        "auth_service/tests/test_five_whys_reproduction.py:331",
+        "auth_service/tests/test_five_whys_reproduction.py:361",
         "auth_service/tests/test_postgres_compliance.py:209",
-        "auth_service/tests/test_setup.py:43",
-        "auth_service/tests/test_single_database.py:40",
-        "auth_service/tests/unified/test_jwt_validation.py:183"
+        "auth_service/tests/test_setup.py:43"
       ]
     },
     "development mode": {
@@ -26996,7 +28021,8 @@
       "locations": [
         "auth_service/tests/test_postgres_compliance.py:124",
         "auth_service/tests/test_postgres_compliance.py:242",
-        "scripts/test_staging_config.py:97"
+        "scripts/test_staging_config.py:97",
+        "scripts/test_staging_deployment.py:28"
       ]
     },
     "environment_name": {
@@ -27326,7 +28352,7 @@
         "auth_service/tests/factories/token_factory.py:135",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:441",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:987",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1331",
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1333",
         "auth_service/tests/test_auth_token_generation.py:83",
         "auth_service/tests/test_auth_token_generation.py:86"
       ]
@@ -29671,6 +30697,20 @@
         "netra_backend/app/services/realistic_test_data/models.py:41"
       ]
     },
+    "graceful_degradation": {
+      "value": "graceful_degradation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:48"
+      ]
+    },
+    "graceful_degradation      → test_10_graceful_degradation_optional_services": {
+      "value": "graceful_degradation      → test_10_graceful_degradation_optional_services",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:398"
+      ]
+    },
     "gradual_increase": {
       "value": "gradual_increase",
       "category": "test_literals",
@@ -30139,8 +31179,17 @@
       "value": "http://localhost:",
       "category": "test_literals",
       "locations": [
+        "scripts/test_coordination_fixes.py:308",
+        "scripts/test_coordination_fixes.py:320",
         "scripts/test_frontend.py:254",
         "scripts/test_frontend.py:268"
+      ]
+    },
+    "http://localhost:18001": {
+      "value": "http://localhost:18001",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:211"
       ]
     },
     "http://localhost:3000": {
@@ -30276,7 +31325,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/factories/token_factory.py:201",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1332"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1334"
       ]
     },
     "https://api.staging.netra.ai": {
@@ -30290,9 +31339,10 @@
       "value": "https://api.staging.netrasystems.ai",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_critical_staging_issues.py:247",
+        "auth_service/tests/test_critical_staging_issues.py:250",
         "scripts/test_staging.py:24",
-        "scripts/test_staging.py:28"
+        "scripts/test_staging.py:28",
+        "scripts/test_staging_deployment.py:21"
       ]
     },
     "https://app.example.com": {
@@ -30323,12 +31373,13 @@
       "value": "https://app.staging.netrasystems.ai",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_critical_staging_issues.py:231",
-        "auth_service/tests/test_critical_staging_issues.py:245",
+        "auth_service/tests/test_critical_staging_issues.py:234",
+        "auth_service/tests/test_critical_staging_issues.py:248",
         "scripts/test_staging.py:23",
         "scripts/test_staging.py:26",
         "scripts/test_staging.py:27",
-        "scripts/test_staging.py:30"
+        "scripts/test_staging.py:30",
+        "scripts/test_staging_deployment.py:23"
       ]
     },
     "https://auth-service.staging.netra.ai": {
@@ -30378,9 +31429,10 @@
       "value": "https://auth.staging.netrasystems.ai",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/test_critical_staging_issues.py:246",
+        "auth_service/tests/test_critical_staging_issues.py:249",
         "scripts/test_staging.py:25",
-        "scripts/test_staging.py:29"
+        "scripts/test_staging.py:29",
+        "scripts/test_staging_deployment.py:22"
       ]
     },
     "https://avatars.githubusercontent.com/": {
@@ -30449,6 +31501,13 @@
         "auth_service/tests/test_security.py:351"
       ]
     },
+    "https://staging.netra.ai/auth/callback": {
+      "value": "https://staging.netra.ai/auth/callback",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:197"
+      ]
+    },
     "httpx.AsyncClient": {
       "value": "httpx.AsyncClient",
       "category": "test_literals",
@@ -30490,7 +31549,7 @@
         "auth_service/tests/factories/token_factory.py:40",
         "auth_service/tests/factories/token_factory.py:134",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:442",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1330",
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1332",
         "auth_service/tests/test_auth_token_generation.py:82",
         "auth_service/tests/test_auth_token_generation.py:110",
         "auth_service/tests/test_auth_token_generation.py:159",
@@ -31207,7 +32266,7 @@
       "value": "iss",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1332",
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1334",
         "auth_service/tests/test_auth_token_generation.py:81",
         "auth_service/tests/test_auth_token_generation.py:109",
         "auth_service/tests/test_auth_token_generation.py:158",
@@ -31223,6 +32282,7 @@
       "value": "issue",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:159",
         "scripts/test_workflows_with_act.py:295",
         "scripts/test_workflows_with_act.py:340"
       ]
@@ -31433,6 +32493,14 @@
         "auth_service/tests/base/test_mixins.py:163",
         "auth_service/tests/base/test_mixins.py:164",
         "auth_service/tests/base/test_mixins.py:165"
+      ]
+    },
+    "jwt_secret_consistency": {
+      "value": "jwt_secret_consistency",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:285",
+        "auth_service/tests/test_five_whys_reproduction.py:306"
       ]
     },
     "jwt_secret_key": {
@@ -31883,7 +32951,7 @@
         "auth_service/tests/database/test_config.py:104",
         "auth_service/tests/database/test_config.py:116",
         "auth_service/tests/database/test_config.py:141",
-        "auth_service/tests/test_critical_staging_issues.py:224",
+        "auth_service/tests/test_critical_staging_issues.py:227",
         "auth_service/tests/unit/test_oauth_models.py:211",
         "scripts/test_async_postgres.py:138",
         "scripts/test_backend.py:130"
@@ -32301,6 +33369,13 @@
         "scripts/business_value_test_index.py:617",
         "scripts/business_value_test_index.py:737",
         "scripts/business_value_test_index.py:738"
+      ]
+    },
+    "method": {
+      "value": "method",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:47"
       ]
     },
     "method\"\"\"\n        # TODO: Implement method test\n        pass": {
@@ -33352,7 +34427,7 @@
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:272",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:293",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:325",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1342"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1344"
       ]
     },
     "none": {
@@ -33554,6 +34629,14 @@
         "scripts/test_config_loading.py:100"
       ]
     },
+    "oauth_env_matching": {
+      "value": "oauth_env_matching",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:295",
+        "auth_service/tests/test_five_whys_reproduction.py:308"
+      ]
+    },
     "oauth_error": {
       "value": "oauth_error",
       "category": "test_literals",
@@ -33607,6 +34690,14 @@
       "locations": [
         "auth_service/tests/unit/test_oauth_models.py:54",
         "auth_service/tests/unit/test_oauth_models.py:58"
+      ]
+    },
+    "oauth_validation": {
+      "value": "oauth_validation",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:290",
+        "auth_service/tests/test_five_whys_reproduction.py:307"
       ]
     },
     "object_type": {
@@ -33987,6 +35078,7 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/factories/audit_factory.py:75",
+        "auth_service/tests/test_five_whys_reproduction.py:38",
         "auth_service/tests/test_security.py:141",
         "auth_service/tests/test_security.py:153",
         "auth_service/tests/test_security.py:246",
@@ -33994,8 +35086,7 @@
         "auth_service/tests/test_security.py:328",
         "auth_service/tests/test_security.py:345",
         "auth_service/tests/test_security.py:394",
-        "auth_service/tests/test_security.py:428",
-        "auth_service/tests/test_security.py:443"
+        "auth_service/tests/test_security.py:428"
       ]
     },
     "password_change": {
@@ -34326,6 +35417,28 @@
         "frontend/components/chat/ConnectionStatusIndicator.test.tsx:47"
       ]
     },
+    "port": {
+      "value": "port",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:312",
+        "scripts/test_coordination_fixes.py:324"
+      ]
+    },
+    "port_allocation": {
+      "value": "port_allocation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:46"
+      ]
+    },
+    "port_allocation           → test_08_port_binding_race_conditions": {
+      "value": "port_allocation           → test_08_port_binding_race_conditions",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:396"
+      ]
+    },
     "post-deploy-error": {
       "value": "post-deploy-error",
       "category": "test_literals",
@@ -34495,6 +35608,13 @@
         "auth_service/tests/config/test_env.py:193"
       ]
     },
+    "postgresql+asyncpg://test:test@localhost:5432/test_db": {
+      "value": "postgresql+asyncpg://test:test@localhost:5432/test_db",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_single_database.py:108"
+      ]
+    },
     "postgresql+asyncpg://user:pass@/db?host=/cloudsql/project:region:instance&sslmode=require": {
       "value": "postgresql+asyncpg://user:pass@/db?host=/cloudsql/project:region:instance&sslmode=require",
       "category": "test_literals",
@@ -34657,6 +35777,13 @@
         "auth_service/tests/test_staging_auth_ssl_failures.py:43"
       ]
     },
+    "postgresql://postgres:wrong_password@cloudsql/auth_db": {
+      "value": "postgresql://postgres:wrong_password@cloudsql/auth_db",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:29"
+      ]
+    },
     "postgresql://test:test@localhost:5432/netra_test": {
       "value": "postgresql://test:test@localhost:5432/netra_test",
       "category": "test_literals",
@@ -34758,6 +35885,14 @@
       "category": "test_literals",
       "locations": [
         "shared/database/tests/test_core_database_manager.py:57"
+      ]
+    },
+    "postgresql://user:pass@host/db?sslmode=require": {
+      "value": "postgresql://user:pass@host/db?sslmode=require",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:233",
+        "auth_service/tests/test_five_whys_reproduction.py:370"
       ]
     },
     "postgresql://user:pass@host:5432/db": {
@@ -34896,6 +36031,14 @@
         "scripts/test_error_monitor_logic.py:113"
       ]
     },
+    "pre_deployment_validation": {
+      "value": "pre_deployment_validation",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:275",
+        "auth_service/tests/test_five_whys_reproduction.py:304"
+      ]
+    },
     "pre_existing": {
       "value": "pre_existing",
       "category": "test_literals",
@@ -34979,6 +36122,13 @@
         "scripts/cleanup_test_processes.py:126"
       ]
     },
+    "process_id": {
+      "value": "process_id",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:246"
+      ]
+    },
     "processed": {
       "value": "processed",
       "category": "test_literals",
@@ -34989,6 +36139,13 @@
         "scripts/fix_test_batch.py:255",
         "scripts/fix_test_batch.py:255",
         "scripts/fix_test_batch.py:381"
+      ]
+    },
+    "prod": {
+      "value": "prod",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:334"
       ]
     },
     "production": {
@@ -35437,6 +36594,27 @@
         "auth_service/tests/unit/test_oauth_models.py:118"
       ]
     },
+    "readiness_separation": {
+      "value": "readiness_separation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:45"
+      ]
+    },
+    "readiness_separation      → test_07_health_check_false_positives_during_init": {
+      "value": "readiness_separation      → test_07_health_check_false_positives_during_init",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:395"
+      ]
+    },
+    "ready": {
+      "value": "ready",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:147"
+      ]
+    },
     "real e2e tests:": {
       "value": "real e2e tests:",
       "category": "test_literals",
@@ -35644,9 +36822,10 @@
         "scripts/business_value_test_index.py:438",
         "scripts/test_backend.py:115",
         "scripts/test_backend.py:132",
-        "scripts/test_staging_startup.py:81",
-        "scripts/test_staging_startup.py:83",
-        "scripts/test_staging_startup.py:217"
+        "scripts/test_coordination_fixes.py:238",
+        "scripts/test_coordination_fixes.py:255",
+        "scripts/test_coordination_fixes.py:259",
+        "scripts/test_coordination_fixes.py:266"
       ]
     },
     "redis://localhost:6379/1": {
@@ -35929,6 +37108,17 @@
         "auth_service/tests/integration/test_auth_oauth_google.py:193"
       ]
     },
+    "response_time": {
+      "value": "response_time",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:49",
+        "scripts/test_staging_deployment.py:59",
+        "scripts/test_staging_deployment.py:96",
+        "scripts/test_staging_deployment.py:119",
+        "scripts/test_staging_deployment.py:140"
+      ]
+    },
     "response_time_ms": {
       "value": "response_time_ms",
       "category": "test_literals",
@@ -36154,8 +37344,19 @@
         "scripts/startup_test_executor.py:97",
         "scripts/startup_test_executor.py:169",
         "scripts/startup_test_executor.py:261",
-        "scripts/test_staging_startup.py:201",
-        "scripts/test_staging_startup.py:206"
+        "scripts/test_coordination_fixes.py:65",
+        "scripts/test_coordination_fixes.py:67",
+        "scripts/test_staging_deployment.py:96",
+        "scripts/test_staging_deployment.py:119",
+        "scripts/test_staging_deployment.py:140",
+        "scripts/test_staging_startup.py:201"
+      ]
+    },
+    "s):": {
+      "value": "s):",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:72"
       ]
     },
     "s, invalid:": {
@@ -36312,6 +37513,8 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:444",
+        "auth_service/tests/test_five_whys_reproduction.py:150",
+        "auth_service/tests/test_five_whys_reproduction.py:153",
         "auth_service/tests/test_security.py:329"
       ]
     },
@@ -36522,6 +37725,22 @@
         "auth_service/tests/test_auth_token_generation.py:129"
       ]
     },
+    "service1": {
+      "value": "service1",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:166",
+        "scripts/test_coordination_fixes.py:178"
+      ]
+    },
+    "service2": {
+      "value": "service2",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:169",
+        "scripts/test_coordination_fixes.py:179"
+      ]
+    },
     "service:auth_validate": {
       "value": "service:auth_validate",
       "category": "test_literals",
@@ -36564,6 +37783,20 @@
         "auth_service/tests/factories/token_factory.py:108"
       ]
     },
+    "service_discovery": {
+      "value": "service_discovery",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:47"
+      ]
+    },
+    "service_discovery         → test_09_service_discovery_timing_issues": {
+      "value": "service_discovery         → test_09_service_discovery_timing_issues",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:397"
+      ]
+    },
     "service_id": {
       "value": "service_id",
       "category": "test_literals",
@@ -36604,7 +37837,9 @@
       "category": "test_literals",
       "locations": [
         "scripts/auto_fix_test_sizes.py:368",
-        "scripts/compliance/demo_test_size_enforcement.py:68"
+        "scripts/compliance/demo_test_size_enforcement.py:68",
+        "scripts/test_staging_deployment.py:29",
+        "scripts/test_staging_deployment.py:92"
       ]
     },
     "services/test_synthetic_data_service_v3.py": {
@@ -36887,6 +38122,14 @@
         "scripts/compliance/real_test_requirements_enforcer.py:357"
       ]
     },
+    "signal_handling": {
+      "value": "signal_handling",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:280",
+        "auth_service/tests/test_five_whys_reproduction.py:305"
+      ]
+    },
     "signature": {
       "value": "signature",
       "category": "test_literals",
@@ -36897,6 +38140,13 @@
         "netra_backend/app/services/realistic_test_data/models.py:103",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:317",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:432"
+      ]
+    },
+    "signature verification failed": {
+      "value": "signature verification failed",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:117"
       ]
     },
     "signature-user-789": {
@@ -37178,13 +38428,20 @@
         "auth_service/tests/test_database_manager.py:41",
         "auth_service/tests/test_database_manager.py:56",
         "auth_service/tests/test_database_manager.py:82",
+        "auth_service/tests/test_five_whys_reproduction.py:373",
         "auth_service/tests/test_staging_auth_ssl_failures.py:55",
         "auth_service/tests/test_staging_auth_ssl_failures.py:82",
         "auth_service/tests/test_staging_auth_ssl_failures.py:114",
         "auth_service/tests/test_staging_auth_ssl_failures.py:173",
         "auth_service/tests/test_staging_auth_ssl_failures.py:176",
-        "auth_service/tests/test_staging_auth_ssl_failures.py:282",
-        "shared/database/tests/test_core_database_manager.py:60"
+        "auth_service/tests/test_staging_auth_ssl_failures.py:282"
+      ]
+    },
+    "ssl=disable": {
+      "value": "ssl=disable",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:252"
       ]
     },
     "ssl=require": {
@@ -37195,8 +38452,18 @@
         "auth_service/tests/test_cloud_sql_url.py:65",
         "auth_service/tests/test_database_manager.py:72",
         "auth_service/tests/test_database_manager.py:201",
+        "auth_service/tests/test_five_whys_reproduction.py:250",
+        "auth_service/tests/test_five_whys_reproduction.py:257",
         "auth_service/tests/test_postgres_compliance.py:67",
         "shared/database/tests/test_core_database_manager.py:95"
+      ]
+    },
+    "ssl_parameter_resolution": {
+      "value": "ssl_parameter_resolution",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:300",
+        "auth_service/tests/test_five_whys_reproduction.py:309"
       ]
     },
     "sslcert=": {
@@ -37230,10 +38497,18 @@
         "auth_service/tests/test_database_manager.py:73",
         "auth_service/tests/test_database_manager.py:81",
         "auth_service/tests/test_database_manager.py:202",
-        "auth_service/tests/test_postgres_compliance.py:68",
-        "auth_service/tests/test_staging_auth_ssl_failures.py:54",
-        "auth_service/tests/test_staging_auth_ssl_failures.py:82",
-        "auth_service/tests/test_staging_auth_ssl_failures.py:111"
+        "auth_service/tests/test_five_whys_reproduction.py:238",
+        "auth_service/tests/test_five_whys_reproduction.py:258",
+        "auth_service/tests/test_five_whys_reproduction.py:373",
+        "auth_service/tests/test_postgres_compliance.py:68"
+      ]
+    },
+    "sslmode=disable": {
+      "value": "sslmode=disable",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:251",
+        "auth_service/tests/test_five_whys_reproduction.py:252"
       ]
     },
     "sslmode=require": {
@@ -37242,6 +38517,8 @@
       "locations": [
         "auth_service/tests/test_database_manager.py:55",
         "auth_service/tests/test_database_manager.py:196",
+        "auth_service/tests/test_five_whys_reproduction.py:249",
+        "auth_service/tests/test_five_whys_reproduction.py:250",
         "auth_service/tests/test_postgres_compliance.py:74",
         "shared/database/tests/test_core_database_manager.py:104"
       ]
@@ -37319,14 +38596,21 @@
       "value": "staging_test_code",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1260"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1261"
       ]
     },
     "staging_test_state": {
       "value": "staging_test_state",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1261"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1262"
+      ]
+    },
+    "staging_validation_": {
+      "value": "staging_validation_",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_staging_deployment.py:226"
       ]
     },
     "standalone": {
@@ -37356,7 +38640,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/real_service_test_metrics.py:18",
-        "scripts/real_service_test_metrics.py:85"
+        "scripts/real_service_test_metrics.py:85",
+        "scripts/test_coordination_fixes.py:71"
       ]
     },
     "startup or login or websocket": {
@@ -37560,8 +38845,8 @@
         "auth_service/tests/utils/assertion_helpers.py:266",
         "auth_service/tests/utils/assertion_helpers.py:267",
         "scripts/test_backend_optimized.py:256",
-        "scripts/test_oauth_local.py:162",
-        "scripts/test_oauth_local.py:169"
+        "scripts/test_coordination_fixes.py:246",
+        "scripts/test_coordination_fixes.py:312"
       ]
     },
     "success_count": {
@@ -38489,14 +39774,14 @@
       "value": "test_client_id",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1333"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1335"
       ]
     },
     "test_code": {
       "value": "test_code",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1309"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1311"
       ]
     },
     "test_config.py": {
@@ -38836,6 +40121,20 @@
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:937"
       ]
     },
+    "test_service": {
+      "value": "test_service",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:131",
+        "scripts/test_coordination_fixes.py:134",
+        "scripts/test_coordination_fixes.py:137",
+        "scripts/test_coordination_fixes.py:138",
+        "scripts/test_coordination_fixes.py:141",
+        "scripts/test_coordination_fixes.py:142",
+        "scripts/test_coordination_fixes.py:145",
+        "scripts/test_coordination_fixes.py:149"
+      ]
+    },
     "test_similarities.csv": {
       "value": "test_similarities.csv",
       "category": "test_literals",
@@ -38865,7 +40164,7 @@
         "auth_service/tests/integration/test_auth_oauth_errors.py:121",
         "auth_service/tests/integration/test_auth_oauth_errors.py:125",
         "auth_service/tests/integration/test_auth_oauth_errors.py:129",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1310"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1312"
       ]
     },
     "test_status": {
@@ -39426,7 +40725,17 @@
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:273",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:294",
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:326",
-        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1343"
+        "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1345"
+      ]
+    },
+    "timing_test_service": {
+      "value": "timing_test_service",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:198",
+        "scripts/test_coordination_fixes.py:215",
+        "scripts/test_coordination_fixes.py:216",
+        "scripts/test_coordination_fixes.py:222"
       ]
     },
     "title": {
@@ -40002,6 +41311,13 @@
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:674"
       ]
     },
+    "unexpected keyword argument 'sslmode'": {
+      "value": "unexpected keyword argument 'sslmode'",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:243"
+      ]
+    },
     "unexpectedly found in database": {
       "value": "unexpectedly found in database",
       "category": "test_literals",
@@ -40022,6 +41338,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/team_updates_test_analyzer.py:37"
+      ]
+    },
+    "unified_secret_789": {
+      "value": "unified_secret_789",
+      "category": "test_literals",
+      "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:120"
       ]
     },
     "unique_code_": {
@@ -40116,7 +41439,9 @@
         "scripts/test_cold_start_e2e.py:195",
         "scripts/test_cold_start_e2e.py:196",
         "scripts/test_cold_start_e2e.py:436",
-        "scripts/test_cold_start_e2e.py:441"
+        "scripts/test_cold_start_e2e.py:441",
+        "scripts/test_staging_deployment.py:46",
+        "scripts/test_staging_deployment.py:151"
       ]
     },
     "us-central1": {
@@ -40313,11 +41638,11 @@
         "auth_service/tests/factories/audit_factory.py:52",
         "auth_service/tests/factories/permission_factory.py:81",
         "auth_service/tests/factories/session_factory.py:34",
+        "auth_service/tests/test_five_whys_reproduction.py:106",
+        "auth_service/tests/test_five_whys_reproduction.py:126",
+        "auth_service/tests/test_five_whys_reproduction.py:126",
         "auth_service/tests/test_security.py:179",
-        "auth_service/tests/test_security.py:598",
-        "auth_service/tests/test_session_management.py:70",
-        "auth_service/tests/test_session_management.py:85",
-        "auth_service/tests/test_session_management.py:112"
+        "auth_service/tests/test_security.py:598"
       ]
     },
     "user_info": {
@@ -40432,6 +41757,7 @@
       "value": "valid",
       "category": "test_literals",
       "locations": [
+        "auth_service/tests/test_five_whys_reproduction.py:42",
         "auth_service/tests/test_security.py:179",
         "auth_service/tests/test_security.py:598",
         "auth_service/tests/utils/test_client.py:117",
@@ -40840,7 +42166,8 @@
       "value": "web",
       "category": "test_literals",
       "locations": [
-        "auth_service/tests/factories/audit_factory.py:157"
+        "auth_service/tests/factories/audit_factory.py:157",
+        "scripts/test_coordination_fixes.py:320"
       ]
     },
     "web_": {
@@ -41184,7 +42511,8 @@
       "value": "wss://api.staging.netrasystems.ai/ws",
       "category": "test_literals",
       "locations": [
-        "scripts/test_staging.py:31"
+        "scripts/test_staging.py:31",
+        "scripts/test_staging_deployment.py:148"
       ]
     },
     "wss://ws.staging.netra.ai": {
@@ -41411,6 +42739,7 @@
       "value": "→",
       "category": "test_literals",
       "locations": [
+        "scripts/test_coordination_fixes.py:92",
         "scripts/test_staging_env.py:182"
       ]
     },
@@ -41599,6 +42928,7 @@
       "locations": [
         "scripts/auto_fix_test_violations.py:883",
         "scripts/test_cold_start_e2e.py:206",
+        "scripts/test_coordination_fixes.py:65",
         "scripts/test_example_message_flow.py:112",
         "scripts/test_example_message_flow.py:321",
         "scripts/test_staging_env.py:189"
@@ -41709,6 +43039,13 @@
         "scripts/test_workflows_with_act.py:259"
       ]
     },
+    "✅ Graceful degradation with optional services": {
+      "value": "✅ Graceful degradation with optional services",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:422"
+      ]
+    },
     "✅ Handler initialization successful": {
       "value": "✅ Handler initialization successful",
       "category": "test_literals",
@@ -41781,6 +43118,20 @@
         "scripts/test_workflows_with_act.py:334"
       ]
     },
+    "✅ Port allocation conflict prevention": {
+      "value": "✅ Port allocation conflict prevention",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:420"
+      ]
+    },
+    "✅ Readiness vs health check separation": {
+      "value": "✅ Readiness vs health check separation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:419"
+      ]
+    },
     "✅ Received model event:": {
       "value": "✅ Received model event:",
       "category": "test_literals",
@@ -41793,6 +43144,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging.py:111"
+      ]
+    },
+    "✅ Service dependency ordering": {
+      "value": "✅ Service dependency ordering",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:418"
+      ]
+    },
+    "✅ Service discovery timing issues": {
+      "value": "✅ Service discovery timing issues",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:421"
       ]
     },
     "✅ Services started successfully": {
@@ -42081,6 +43446,8 @@
       "value": "❌",
       "category": "test_literals",
       "locations": [
+        "scripts/test_coordination_fixes.py:67",
+        "scripts/test_coordination_fixes.py:391",
         "scripts/test_example_message_flow.py:115",
         "scripts/test_example_message_flow.py:322",
         "scripts/test_staging_env.py:190"
@@ -42277,6 +43644,13 @@
         "scripts/test_cold_start_e2e.py:168"
       ]
     },
+    "❌ Some coordination fixes failed validation": {
+      "value": "❌ Some coordination fixes failed validation",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:425"
+      ]
+    },
     "❌ Syntax error:": {
       "value": "❌ Syntax error:",
       "category": "test_literals",
@@ -42317,6 +43691,13 @@
       "category": "test_literals",
       "locations": [
         "auth_service/tests/integration/test_oauth_comprehensive_failures.py:1085"
+      ]
+    },
+    "🎉 ALL COORDINATION FIXES VALIDATED SUCCESSFULLY!": {
+      "value": "🎉 ALL COORDINATION FIXES VALIDATED SUCCESSFULLY!",
+      "category": "test_literals",
+      "locations": [
+        "scripts/test_coordination_fixes.py:416"
       ]
     },
     "🎉 ALL TESTS PASSED!": {
@@ -42373,6 +43754,7 @@
       "value": "💥",
       "category": "test_literals",
       "locations": [
+        "scripts/test_coordination_fixes.py:72",
         "scripts/test_example_message_flow.py:323"
       ]
     },

@@ -36,7 +36,7 @@ class TestSystemStartupIntegration:
     def minimal_environment(self):
         """Create minimal environment for startup testing."""
         return {
-            "DATABASE_URL": "sqlite+aiosqlite:///test.db",
+            "DATABASE_URL": "sqlite+aioDATABASE_URL_PLACEHOLDER",
             "REDIS_URL": "redis://localhost:6379",
             "CLICKHOUSE_URL": "http://localhost:8123",
             "NETRA_API_KEY": "test-api-key",

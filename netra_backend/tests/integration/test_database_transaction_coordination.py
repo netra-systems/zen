@@ -194,6 +194,15 @@ class DatabaseTransactionCoordinatorL3:
         # Initialize with test URLs
         with patch('app.core.configuration.get_configuration') as mock_config:
             mock_config.return_value.DATABASE_URL = postgres_url
+
+        mock_config.db_pool_size = 10
+        mock_config.db_max_overflow = 20
+        mock_config.db_pool_timeout = 60
+        mock_config.db_pool_recycle = 3600
+        mock_config.db_echo = False
+        mock_config.db_echo_pool = False
+        mock_config.environment = 'testing'
+
             mock_config.return_value.CLICKHOUSE_URL = clickhouse_url
             
             await initialize_postgres()

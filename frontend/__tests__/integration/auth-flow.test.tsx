@@ -5,32 +5,25 @@
  * login, logout, and state management.
  */
 
-// Declare mocks first (Jest Module Hoisting)
-const mockUseAuthStore = jest.fn();
-const mockUseUnifiedChatStore = jest.fn();
-const mockUseWebSocket = jest.fn();
-const mockUseLoadingState = jest.fn();
-const mockUseThreadNavigation = jest.fn();
-
 // Mock hooks before imports
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: mockUseAuthStore
+  useAuthStore: jest.fn()
 }));
 
 jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: mockUseUnifiedChatStore
+  useUnifiedChatStore: jest.fn()
 }));
 
 jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: mockUseWebSocket
+  useWebSocket: jest.fn()
 }));
 
 jest.mock('@/hooks/useLoadingState', () => ({
-  useLoadingState: mockUseLoadingState
+  useLoadingState: jest.fn()
 }));
 
 jest.mock('@/hooks/useThreadNavigation', () => ({
-  useThreadNavigation: mockUseThreadNavigation
+  useThreadNavigation: jest.fn()
 }));
 
 // Mock AuthGate to always render children

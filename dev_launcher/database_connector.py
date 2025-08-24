@@ -133,7 +133,10 @@ class DatabaseConnector:
         env_manager = get_env()
         postgres_url = env_manager.get(DatabaseConstants.DATABASE_URL)
         if postgres_url:
-            self._add_connection("main_postgres", DatabaseType.POSTGRESQL, postgres_url)
+            # Normalize the URL before adding to connections
+            # Remove any driver-specific prefixes that might cause issues
+            normalized_url = self._normalize_postgres_url(postgres_url)
+            self._add_connection("main_postgres", DatabaseType.POSTGRESQL, normalized_url)
     
     def _discover_clickhouse_connection(self) -> None:
         """Discover ClickHouse connection."""
@@ -416,6 +419,11 @@ class DatabaseConnector:
             conn = await self._establish_postgres_connection(connection)
             await self._validate_postgres_health(conn)
             return True
+        except Exception as e:
+            # Log the actual error and URL being used for debugging
+            masked_url = self._mask_url_credentials(connection.url)
+            logger.debug(f"PostgreSQL connection attempt failed - URL: {masked_url}, Error: {str(e)}")
+            raise
         finally:
             if conn:
                 await conn.close()
@@ -440,6 +448,17 @@ class DatabaseConnector:
         import asyncpg
         # Fix URL format - asyncpg expects 'postgresql://' not 'postgresql+asyncpg://'
         clean_url = self._normalize_postgres_url(connection.url)
+        
+        # For local connections, remove SSL parameters that might cause issues
+        if 'localhost' in clean_url or '127.0.0.1' in clean_url or 'host.docker.internal' in clean_url:
+            # Remove SSL parameters for local connections
+            import re
+            clean_url = re.sub(r'[&?]sslmode=[^&]*', '', clean_url)
+            clean_url = re.sub(r'[&?]ssl=[^&]*', '', clean_url)
+            # Clean up any double ampersands or trailing ampersands/question marks
+            clean_url = re.sub(r'&&+', '&', clean_url)
+            clean_url = re.sub(r'[&?]$', '', clean_url)
+        
         return await asyncio.wait_for(
             asyncpg.connect(clean_url),
             timeout=self.retry_config.timeout
@@ -448,10 +467,11 @@ class DatabaseConnector:
     def _normalize_postgres_url(self, url: str) -> str:
         """Normalize PostgreSQL URL for asyncpg driver."""
         # Convert postgresql+asyncpg:// to postgresql:// for asyncpg
-        return url.replace(
-            DatabaseConstants.POSTGRES_ASYNC_SCHEME,
-            DatabaseConstants.POSTGRES_SCHEME
-        )
+        # Also handle postgres:// variant
+        normalized = url.replace("postgresql+asyncpg://", "postgresql://")
+        normalized = normalized.replace("postgres+asyncpg://", "postgresql://")
+        normalized = normalized.replace("postgres://", "postgresql://")
+        return normalized
     
     async def _validate_postgres_health(self, conn) -> None:
         """Validate PostgreSQL connection health."""

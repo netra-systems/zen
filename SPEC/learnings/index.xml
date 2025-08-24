@@ -25,6 +25,7 @@
             <critical-takeaway>OAuth redirect URIs must point to auth service (auth.staging.netrasystems.ai), not frontend (oauth_redirect_configuration.xml).</critical-takeaway>
             <critical-takeaway>Frontend pages receiving OAuth tokens via URL must handle token extraction and storage (oauth_token_persistence.xml).</critical-takeaway>
             <critical-takeaway>Always verify OAuth configuration matches between code and provider console (oauth_deployment_verification.xml).</critical-takeaway>
+            <critical-takeaway>Next.js proxy rewrites must be disabled in production - frontend should call services directly (oauth_staging_issues.xml).</critical-takeaway>
         </category>
         
         <category name="Auth Service Integration" path="SPEC/learnings/auth_service_integration.xml" keywords="Auth Service, Dev Login, JWT, OAuth Flow">

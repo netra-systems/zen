@@ -171,14 +171,10 @@ export interface AgentMetric {
   cache_misses?: number;
 }
 
-export interface ExecutionMetrics {
-  total_duration_ms: number;
-  total_tokens: number;
-  total_cost?: number;
-  cache_efficiency?: number;
-  parallel_executions?: number;
-  sequential_executions?: number;
-}
+// ExecutionMetrics is now imported from unified/metrics.types.ts - SINGLE SOURCE OF TRUTH
+// This import ensures compatibility with existing code
+import type { ExecutionMetrics } from './unified/metrics.types';
+export type { ExecutionMetrics };
 
 // ============================================
 // Data Type Definitions

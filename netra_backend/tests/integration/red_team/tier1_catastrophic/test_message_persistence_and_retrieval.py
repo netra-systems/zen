@@ -36,7 +36,7 @@ try:
 except ImportError:
     def get_unified_config():
         from types import SimpleNamespace
-        return SimpleNamespace(database_url="postgresql://test:test@localhost:5432/netra_test")
+        return SimpleNamespace(database_url="DATABASE_URL_PLACEHOLDER")
 
 # ThreadService exists
 from netra_backend.app.services.thread_service import ThreadService

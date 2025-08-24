@@ -86,7 +86,9 @@ python unified_test_runner.py [OPTIONS]
 | `--coverage` | Generate coverage | `--coverage` |
 | `--parallel` | Run in parallel | `--parallel` |
 | `--pattern` | Match pattern | `--pattern test_auth` |
-| `--fast-fail` | Stop on first failure | `--fast-fail` |
+| **`--fast-fail`** | **Stop on first failure (recommended)** | `--fast-fail` |
+| `--no-coverage` | Skip coverage for speed | `--no-coverage` |
+| `--max-failures` | Stop after N failures | `--max-failures 5` |
 
 ### Examples
 

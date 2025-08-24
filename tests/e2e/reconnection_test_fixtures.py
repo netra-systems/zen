@@ -14,48 +14,14 @@ from unittest.mock import MagicMock
 
 import pytest
 
-# Import test utilities with fallback mocks
-try:
-    from test_framework.auth_helpers import (
-        create_test_token,
-    )
-except ImportError:
-    def create_test_token(user_id: str, exp_offset: int = 3600) -> str:
-        return f"mock_token_{user_id}_{exp_offset}"
-
-try:
-    from netra_backend.tests.helpers.websocket_test_helpers import (
-        MockWebSocket,
-        create_mock_websocket,
-    )
-except ImportError:
-    # Fallback mock implementations
-    class MockWebSocket:
-        def __init__(self, user_id: str = None):
-            self.user_id = user_id or "test_user"
-            self.connection_id = f"conn_{int(time.time() * 1000)}"
-            self.state = "connected"
-            self.sent_messages = []
-            self.is_authenticated = True
-            self.auth_token = f"token_{self.user_id}"
-            
-        async def accept(self): pass
-        async def send_json(self, data: Dict[str, Any]): 
-            self.sent_messages.append(data)
-        async def close(self, code: int = 1000, reason: str = "Normal closure"): 
-            self.state = "disconnected"
-    
-    class create_mock_websocket:
-        def __init__(self):
-            self._websocket = MockWebSocket()
-        def with_user_id(self, user_id: str): 
-            self._websocket.user_id = user_id
-            return self
-        def with_authentication(self, token: str = None): 
-            self._websocket.auth_token = token
-            return self
-        def build(self): 
-            return self._websocket
+# Import required test utilities - no fallbacks
+from test_framework.auth_helpers import (
+    create_test_token,
+)
+from netra_backend.tests.helpers.websocket_test_helpers import (
+    MockWebSocket,
+    create_mock_websocket,
+)
 
 
 class ReconnectionTestFixture:

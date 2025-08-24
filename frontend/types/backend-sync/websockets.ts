@@ -9,6 +9,7 @@
  */
 
 import { WebSocketMessageType } from '../shared/enums';
+import type { WebSocketMessage } from '../domains/websocket';
 
 // Import all payload types from dedicated module
 export * from './payloads';
@@ -36,37 +37,15 @@ import {
 } from './payloads';
 
 // ============================================================================
-// COMPREHENSIVE WEBSOCKET MESSAGE INTERFACE
+// WEBSOCKET MESSAGE INTERFACE - MOVED TO CANONICAL LOCATION
 // ============================================================================
 
 /**
- * COMPREHENSIVE WEBSOCKET MESSAGE INTERFACE - SINGLE SOURCE OF TRUTH
- * This interface consolidates all possible WebSocket message types and payloads
- * DO NOT create alternative WebSocketMessage interfaces
+ * WebSocketMessage interface moved to domains/websocket.ts for single source of truth.
+ * Import from '@/types/domains/websocket' or '@/types/unified' instead.
+ * 
+ * This file now focuses only on type guards and utility functions.
  */
-export interface WebSocketMessage {
-  type: WebSocketMessageType;
-  payload: 
-    | Record<string, unknown>
-    | BaseWebSocketPayload
-    | StartAgentPayload
-    | UserMessagePayload
-    | StopAgentPayload
-    | CreateThreadPayload
-    | SwitchThreadPayload
-    | DeleteThreadPayload
-    | AgentUpdatePayload
-    | AgentStartedPayload
-    | AgentCompletedPayload
-    | SubAgentUpdatePayload
-    | ToolCallPayload
-    | ToolResultPayload
-    | StreamChunkPayload
-    | StreamCompletePayload
-    | ErrorPayload;
-  sender?: string;
-  timestamp?: string;
-}
 
 // ============================================================================
 // TYPE GUARDS AND VALIDATION - Each function ≤8 lines
@@ -124,22 +103,15 @@ export function isAgentUpdateMessage(
 }
 
 // ============================================================================
-// WEBSOCKET MESSAGE CREATION - Each function ≤8 lines
+// WEBSOCKET MESSAGE UTILITIES - MOVED TO CANONICAL LOCATION
 // ============================================================================
 
-export function createWebSocketMessage<T extends WebSocketMessage['payload']>(
-  type: WebSocketMessageType,
-  payload: T,
-  options?: { sender?: string; timestamp?: string }
-): WebSocketMessage {
-  return {
-    type,
-    payload,
-    sender: options?.sender,
-    timestamp: options?.timestamp || new Date().toISOString()
-  };
-}
+/**
+ * createWebSocketMessage function moved to domains/websocket.ts for single source of truth.
+ * Import from '@/types/domains/websocket' or '@/types/unified' instead.
+ */
 
+// Type aliases for backward compatibility - use canonical versions instead
 export type MessageTypeLiteral = keyof typeof WebSocketMessageType;
 export type WebSocketPayload = WebSocketMessage['payload'];
 
@@ -149,7 +121,6 @@ export type WebSocketPayload = WebSocketMessage['payload'];
 
 export default {
   createWebSocketError,
-  createWebSocketMessage,
   isWebSocketMessage,
   isAgentStartedMessage,
   isAgentCompletedMessage,

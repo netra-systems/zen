@@ -282,6 +282,7 @@ class TestAuthServiceDeploymentSpecificIssues:
             assert "ssl=" not in connection_url, "SSL parameters should be removed for Cloud SQL"
             assert connection_url.startswith("postgresql+asyncpg://"), "Should be formatted for asyncpg"
     
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_staging_secret_manager_url_format_mismatch(self):
         """
         FAILING TEST: Shows Secret Manager URL format mismatch with auth service expectations.

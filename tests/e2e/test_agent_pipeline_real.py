@@ -195,11 +195,12 @@ class TestAgentPipelineReal:
         error_message = AgentMessageFactory.create_error_prone_message(session["user_id"])
         
         with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
-            mock_llm.side_effect = [Exception("LLM timeout"), "Fallback response successful"]
+            mock_llm.side_effect = Exception("LLM service unavailable")
             start_time = time.time()
             await session["client"].send_message(error_message)
+            # Should receive error response, not recovery
             response = await self._await_agent_response(session["client"], timeout=6.0)
-            recovery_time = time.time() - start_time
+            response_time = time.time() - start_time
             
             return {
                 "error_detected": True,

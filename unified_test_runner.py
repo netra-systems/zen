@@ -388,6 +388,10 @@ class UnifiedTestRunner:
         else:
             cmd = self._build_pytest_command(service, category_name, args)
         
+        # Debug output
+        if args.verbose:
+            print(f"[DEBUG] Running command for {service}: {cmd}")
+        
         # Execute tests
         start_time = time.time()
         try:
@@ -426,20 +430,20 @@ class UnifiedTestRunner:
         
         # Add category-specific markers
         category_markers = {
-            "smoke": "-m 'smoke'",
-            "unit": "-m 'not integration and not e2e'",
-            "integration": "-m 'integration'",
-            "api": "-k 'api'",
-            "database": "-k \"database or db\"",
-            "websocket": "-k \"websocket or ws\"",
-            "agent": "-k 'agent'",
-            "security": "-k \"auth or security\"",
-            "e2e": "-m 'e2e'",
-            "performance": "-m 'performance'"
+            "smoke": ["-m", '"smoke"'],
+            "unit": ["-m", '"not integration and not e2e"'],
+            "integration": ["-m", '"integration"'],
+            "api": ["-k", '"api"'],
+            "database": ["-k", '"database or db"'],
+            "websocket": ["-k", '"websocket or ws"'],
+            "agent": ["-k", '"agent"'],
+            "security": ["-k", '"auth or security"'],
+            "e2e": ["-m", '"e2e"'],
+            "performance": ["-m", '"performance"']
         }
         
         if category_name in category_markers:
-            cmd_parts.append(category_markers[category_name])
+            cmd_parts.extend(category_markers[category_name])
         
         # Add coverage options
         if not args.no_coverage:
@@ -451,7 +455,7 @@ class UnifiedTestRunner:
         
         # Add parallelization
         if args.parallel:
-            cmd_parts.append(f"-n {args.workers}")
+            cmd_parts.extend(["-n", str(args.workers)])
         
         # Add verbosity
         if args.verbose:
@@ -463,7 +467,7 @@ class UnifiedTestRunner:
         
         # Add specific test pattern
         if args.pattern:
-            cmd_parts.append(f"-k '{args.pattern}'")
+            cmd_parts.extend(["-k", f'"{args.pattern}"'])
         
         return " ".join(cmd_parts)
     

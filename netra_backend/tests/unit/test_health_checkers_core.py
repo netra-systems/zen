@@ -14,6 +14,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
+from test_framework.decorators import mock_justified
 from netra_backend.app.core.health_checkers import (
     check_clickhouse_health,
     check_postgres_health,
@@ -54,6 +55,7 @@ class TestHealthCheckersCore:
         mock_manager.get_client = AsyncMock(return_value=mock_client)
         return mock_manager, mock_client
     
+    @mock_justified("L1 Unit Test: Mocking database manager to isolate health check logic. Real database connectivity tested in L3 integration tests.", "L1")
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
     @pytest.mark.asyncio
     async def test_check_postgres_health_success(self, mock_db_manager, mock_postgres_engine):
@@ -72,6 +74,7 @@ class TestHealthCheckersCore:
         assert result.details["component_name"] == "postgres"
         assert result.details["success"] is True
     
+    @mock_justified("L1 Unit Test: Mocking database manager to test error handling paths. Real database testing in L3 integration tests.", "L1")
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
     @pytest.mark.asyncio
     async def test_check_postgres_health_no_engine(self, mock_db_manager):
@@ -90,6 +93,7 @@ class TestHealthCheckersCore:
         error_msg = result.details["error_message"]
         assert "Connection failed" in error_msg or "Database engine not initialized" in error_msg
     
+    @mock_justified("L1 Unit Test: Mocking database manager to test connection failure scenarios. Real connectivity tested in L3 integration tests.", "L1")
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
     @pytest.mark.asyncio
     async def test_check_postgres_health_connection_error(self, mock_db_manager):
@@ -106,6 +110,7 @@ class TestHealthCheckersCore:
         error_msg = result.details["error_message"]
         assert "Connection failed" in error_msg or "Database engine not initialized" in error_msg
     
+    @mock_justified("L1 Unit Test: Mocking ClickHouse client and environment detection to isolate health check logic. Real ClickHouse tested in L3 integration tests.", "L1")
     @patch('netra_backend.app.db.clickhouse.get_clickhouse_client')
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
     @patch('netra_backend.app.core.health_checkers._is_clickhouse_disabled')
@@ -123,6 +128,7 @@ class TestHealthCheckersCore:
         assert result.details["success"] is True
         mock_clickhouse_client.execute.assert_called_once_with("SELECT 1")
     
+    @mock_justified("L1 Unit Test: Mocking environment detection to test disabled ClickHouse scenario. Real environment testing in L3 integration tests.", "L1")
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
     @patch('netra_backend.app.core.health_checkers._is_clickhouse_disabled')
     @pytest.mark.asyncio
@@ -137,6 +143,7 @@ class TestHealthCheckersCore:
         assert result.details["status"] == "disabled"
         assert "ClickHouse disabled in development" in result.details["reason"]
     
+    @mock_justified("L1 Unit Test: Mocking ClickHouse client to test connection error handling. Real connection failures tested in L3 integration tests.", "L1")
     @patch('netra_backend.app.db.clickhouse.get_clickhouse_client')
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
     @patch('netra_backend.app.core.health_checkers._is_clickhouse_disabled')
@@ -153,6 +160,7 @@ class TestHealthCheckersCore:
         assert result.details["success"] is False
         assert "ClickHouse connection failed" in result.details["error_message"]
     
+    @mock_justified("L1 Unit Test: Mocking Redis manager to isolate health check logic. Real Redis connectivity tested in L3 integration tests.", "L1")
     @patch('netra_backend.app.redis_manager.redis_manager')
     @pytest.mark.asyncio
     async def test_check_redis_health_success(self, mock_manager, mock_redis_manager):

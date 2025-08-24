@@ -252,7 +252,8 @@ class TestApplicationLifecycleInitializationOrder:
 class TestEnvironmentSpecificInitializationOrder:
     """Test environment-specific initialization order issues."""
     
-    def test_staging_environment_detection_during_early_startup_fails(self):
+@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+        def test_staging_environment_detection_during_early_startup_fails(self):
         """
         FAILING TEST: Staging environment detection fails during early startup.
         

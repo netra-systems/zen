@@ -229,6 +229,13 @@ class DatabaseConfigManager:
         # FIX: Support both CLICKHOUSE_PASSWORD and CLICKHOUSE_DEFAULT_PASSWORD for backward compatibility
         password = os.environ.get("CLICKHOUSE_PASSWORD") or os.environ.get("CLICKHOUSE_DEFAULT_PASSWORD", "")
         
+        # Log warning if no password is set in non-dev environments
+        if not password and self._environment not in ["development", "testing"]:
+            logger.warning(
+                "CLICKHOUSE_DEFAULT_PASSWORD or CLICKHOUSE_PASSWORD not set. "
+                "Database connections may fail. Please set one of these environment variables."
+            )
+        
         # Don't default to localhost in staging/production
         default_host = "localhost"
         if self._environment in ["staging", "production"]:

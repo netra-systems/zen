@@ -35,7 +35,7 @@ try:
 except ImportError:
     def get_settings():
         from types import SimpleNamespace
-        return SimpleNamespace(database_url="postgresql://test:test@localhost:5432/netra_test")
+        return SimpleNamespace(database_url="DATABASE_URL_PLACEHOLDER")
 
 # Import absolute paths
 # Mock database helpers since they don't exist
@@ -46,7 +46,7 @@ def cleanup_test_database():
     pass
 
 def get_test_database_url():
-    return "postgresql://test:test@localhost:5432/netra_test"
+    return "DATABASE_URL_PLACEHOLDER"
 
 
 class TestDatabaseMigrationFailureRecovery:

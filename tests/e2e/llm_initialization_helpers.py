@@ -182,42 +182,28 @@ class LLMTestHelpers:
         }
     
     @staticmethod
-    def create_fallback_mock_manager():
-        """Create mock manager with fallback behavior"""
+    def create_failing_mock_manager():
+        """Create mock manager that fails immediately"""
         mock_manager = MagicMock()
-        mock_manager.ask_llm = AsyncMock()
-        mock_manager.ask_llm.side_effect = [
-            Exception("Primary provider rate limit exceeded"),
-            "FALLBACK_SUCCESS"
-        ]
+        mock_manager.ask_llm = AsyncMock(
+            side_effect=RuntimeError("LLM provider unavailable - no fallback")
+        )
         return mock_manager
     
     @staticmethod
-    async def test_primary_failure(mock_manager):
-        """Test primary provider failure"""
-        try:
+    async def test_provider_failure(mock_manager):
+        """Test that provider failure is raised immediately"""
+        with pytest.raises(RuntimeError, match="LLM provider unavailable"):
             await mock_manager.ask_llm("test", "primary")
-            return False
-        except Exception:
-            return True
+        return True
     
     @staticmethod
-    async def test_secondary_success(mock_manager):
-        """Test secondary provider success"""
-        try:
-            response = await mock_manager.ask_llm("test", "secondary")
-            return "SUCCESS" in response
-        except Exception:
-            return False
-    
-    @staticmethod
-    def create_fallback_result(fallback_triggered, secondary_success):
-        """Create fallback test result"""
+    def create_failure_result():
+        """Create provider failure test result"""
         return {
-            "fallback_triggered": fallback_triggered,
-            "secondary_success": secondary_success,
-            "primary_provider": "primary",
-            "secondary_provider": "secondary"
+            "provider_available": False,
+            "error": "Provider unavailable",
+            "fallback_available": False
         }
 
 
@@ -271,4 +257,6 @@ class ReliabilityTestHelpers:
     def validate_degradation_handling(execution_time, response):
         """Validate degradation handling behavior"""
         assert execution_time < 2.0, "Degradation handling timeout failed"
-        assert response is not None, "Should provide fallback response"
+        if response is not None:
+            assert "error" in str(response).lower() or "unavailable" in str(response).lower(), \
+                "Response should indicate service unavailable"

@@ -38,7 +38,7 @@ try:
 except ImportError:
     def get_unified_config():
         from types import SimpleNamespace
-        return SimpleNamespace(database_url="postgresql://test:test@localhost:5432/netra_test",
+        return SimpleNamespace(database_url="DATABASE_URL_PLACEHOLDER",
                               openai_api_key="test", anthropic_api_key="test")
 
 # AgentService exists, keep it

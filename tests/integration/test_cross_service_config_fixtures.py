@@ -172,7 +172,7 @@ def mock_environment_variables(cross_service_config):
         'AUTH_PORT': str(cross_service_config.AUTH_PORT),
         'CROSS_SERVICE_AUTH_TOKEN': cross_service_config.TEST_CROSS_SERVICE_TOKEN,
         'JWT_SECRET_KEY': cross_service_config.TEST_JWT_SECRET,
-        'DATABASE_URL': 'sqlite:///test.db',
+        'DATABASE_URL': 'DATABASE_URL_PLACEHOLDER',
         'LOG_LEVEL': 'DEBUG'
     }
     

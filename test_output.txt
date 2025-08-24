@@ -1,0 +1,37 @@
+[32m2025-08-24 08:18:23.052[0m | [31m[1mERROR   [0m | [36mnetra_backend.app.core.unified_logging[0m:[36m_emit_log[0m:[36m165[0m | <red>Required secrets missing: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'JWT_SECRET_KEY', 'FERNET_KEY', 'SERVICE_SECRET', 'CLICKHOUSE_DEFAULT_PASSWORD']</red>
+[32m2025-08-24 08:18:23.052[0m | [1mINFO    [0m | [36mnetra_backend.app.core.unified_logging[0m:[36m_emit_log[0m:[36m165[0m | <white>Populated secrets for development</white>
+
+============================================================
+EXECUTION PLAN
+============================================================
+Total Categories: 1
+Execution Phases: 1
+Estimated Duration: 0:05:00
+
+Phase 1: 1 categories
+  - unit (HIGH, ~0:05:00)
+
+============================================================
+
+
+========================================
+PHASE 1: 1 categories
+========================================
+
+Executing category: unit
+Fast-fail triggered by category: unit
+
+Stopping execution: SkipReason.CATEGORY_FAILED
+
+============================================================
+TEST EXECUTION SUMMARY
+============================================================
+Environment: local
+Total Duration: 10.73s
+Categories Executed: 1
+
+Category Results:
+  unit            [FAIL] FAILED        (10.73s)
+
+Overall: [FAIL] FAILED
+Report: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_reports\test_report_20250824_081834.json

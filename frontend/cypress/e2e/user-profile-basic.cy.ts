@@ -1,4 +1,4 @@
-import { WebSocketMessage } from '@/types/chat';
+import { WebSocketMessage } from '@/types/unified';
 
 describe('User Profile Basic Information Management', () => {
   beforeEach(() => {

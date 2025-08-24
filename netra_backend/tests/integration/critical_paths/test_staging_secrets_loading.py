@@ -87,7 +87,8 @@ class TestStagingSecretsLoading:
             "should have loaded multiple secrets for staging environment"
         )
     
-    def test_staging_config_secret_loading_failure(self):
+@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+        def test_staging_config_secret_loading_failure(self):
         """Test that staging configuration fails to load secrets properly.
         
         This test demonstrates the configuration bug where secrets aren't

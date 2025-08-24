@@ -223,7 +223,8 @@ class TestClickHouseLocalhostConnection:
 class TestRedisConfigurationDefault:
     """Test suite reproducing Redis configuration errors."""
     
-    def test_hardcoded_localhost_overrides_staging_environment(self):
+@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+        def test_hardcoded_localhost_overrides_staging_environment(self):
         """
         FAILING TEST: Reproduces Redis connecting to localhost in staging.
         

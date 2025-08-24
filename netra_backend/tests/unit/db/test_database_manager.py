@@ -14,6 +14,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from urllib.parse import urlparse
 
+from test_framework.decorators import mock_justified
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.core.environment_constants import Environment
 
@@ -53,6 +54,7 @@ class TestDatabaseManagerURLConversion:
             result = DatabaseManager.get_base_database_url()
             assert result == expected_output
     
+    @mock_justified("L1 Unit Test: Mocking environment detection to test default URL fallback logic. Real environment configurations tested in L3 integration tests.", "L1")
     def test_get_base_database_url_default_fallback(self):
         """Test default URL when DATABASE_URL not set."""
         with patch.dict(os.environ, {}, clear=True):
@@ -192,6 +194,7 @@ class TestDatabaseManagerEnvironmentDetection:
             result = DatabaseManager.is_cloud_sql_environment()
             assert result is False
     
+    @mock_justified("L1 Unit Test: Mocking environment detection to test environment-specific logic. Real environment testing in L3 integration tests.", "L1")
     @patch("netra_backend.app.db.database_manager.get_current_environment")
     def test_is_local_development_true(self, mock_get_env):
         """Test local development detection - positive case."""
@@ -199,6 +202,7 @@ class TestDatabaseManagerEnvironmentDetection:
         result = DatabaseManager.is_local_development()
         assert result is True
     
+    @mock_justified("L1 Unit Test: Mocking environment detection to test environment-specific logic. Real environment testing in L3 integration tests.", "L1")
     @patch("netra_backend.app.db.database_manager.get_current_environment") 
     def test_is_local_development_false(self, mock_get_env):
         """Test local development detection - negative case."""

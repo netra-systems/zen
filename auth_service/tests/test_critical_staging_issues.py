@@ -96,6 +96,7 @@ class TestAuthDatabaseInitialization:
 class TestEnvironmentModeDetection:
     """Test environment mode detection issues."""
     
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_staging_environment_detected_correctly(self):
         """Test that staging environment is detected when ENVIRONMENT=staging.
         

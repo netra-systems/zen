@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-08-24T04:00:02.863637",
+    "generated_at": "2025-08-24T08:13:15.963959",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 26
   },
@@ -188,7 +188,7 @@
         "netra_backend/app/routes/mcp/websocket_handler.py:141",
         "netra_backend/app/routes/utils/websocket_helpers.py:206",
         "netra_backend/app/routes/utils/websocket_helpers.py:277",
-        "netra_backend/app/routes/websocket.py:435",
+        "netra_backend/app/routes/websocket.py:449",
         "netra_backend/app/schemas/core_enums.py:62",
         "netra_backend/app/schemas/core_enums.py:162",
         "netra_backend/app/services/external_api_client.py:172"
@@ -202,11 +202,11 @@
         "netra_backend/app/routes/mcp/websocket_handler.py:145",
         "netra_backend/app/routes/utils/websocket_helpers.py:198",
         "netra_backend/app/routes/utils/websocket_helpers.py:310",
-        "netra_backend/app/routes/websocket.py:235",
-        "netra_backend/app/routes/websocket.py:438",
+        "netra_backend/app/routes/websocket.py:249",
+        "netra_backend/app/routes/websocket.py:452",
         "netra_backend/app/schemas/core_enums.py:63",
         "netra_backend/app/schemas/core_enums.py:163",
-        "netra_backend/app/websocket_core/manager.py:321",
+        "netra_backend/app/websocket_core/manager.py:353",
         "netra_backend/app/websocket_core/types.py:37"
       ]
     },
@@ -214,6 +214,8 @@
       "value": "subscribe",
       "category": "events",
       "locations": [
+        "netra_backend/app/services/mcp_integration.py:43",
+        "netra_backend/app/services/mcp_integration.py:176",
         "netra_backend/app/services/websocket/quality_alert_handler.py:34",
         "netra_backend/app/services/websocket/quality_alert_handler.py:41",
         "scripts/scan_string_literals.py:138"
@@ -230,6 +232,7 @@
       "value": "unsubscribe",
       "category": "events",
       "locations": [
+        "netra_backend/app/services/mcp_integration.py:44",
         "netra_backend/app/services/websocket/quality_alert_handler.py:43",
         "scripts/scan_string_literals.py:138"
       ]

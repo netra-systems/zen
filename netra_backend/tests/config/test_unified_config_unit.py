@@ -59,6 +59,15 @@ class TestUnifiedConfigManager:
         manager = UnifiedConfigManager()
         with patch.object(manager, 'get_config') as mock_config:
             mock_config.return_value = Mock(
+
+        mock_config.db_pool_size = 10
+        mock_config.db_max_overflow = 20
+        mock_config.db_pool_timeout = 60
+        mock_config.db_pool_recycle = 3600
+        mock_config.db_echo = False
+        mock_config.db_echo_pool = False
+        mock_config.environment = 'testing'
+
                 database_url='postgresql://test',
                 environment='development'
             )

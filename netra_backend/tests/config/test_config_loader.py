@@ -89,7 +89,8 @@ class TestCloudEnvironmentDetection:
         # Assert
         assert result == "production"
 
-    def test_detect_cloud_run_environment_staging_pattern(self, clean_environment):
+@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+        def test_detect_cloud_run_environment_staging_pattern(self, clean_environment):
         """Test Cloud Run staging environment detection"""
         # Arrange
         os.environ['K_SERVICE'] = 'netra-backend-staging'

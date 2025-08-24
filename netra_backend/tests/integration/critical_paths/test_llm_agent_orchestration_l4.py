@@ -28,7 +28,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-# # # from app.agents.supervisor_agent_modern import SupervisorAgent
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -38,30 +37,32 @@ from netra_backend.tests.integration.critical_paths.l4_staging_critical_base imp
     L4StagingCriticalPathTestBase,
 )
 
-SupervisorAgent = AsyncMock
-from unittest.mock import AsyncMock, MagicMock
-
-SupervisorAgent = AsyncMock
-# # # from app.agents.base.interface import ExecutionContext, ExecutionResult
-from unittest.mock import AsyncMock, MagicMock
-
-ExecutionContext = dict
-ExecutionResult = dict
-ExecutionContext = dict
-ExecutionResult = dict
-ExecutionContext = dict  # Use dict as placeholder
-ExecutionResult = dict   # Use dict as placeholder
-# # from app.llm.llm_manager import LLMManager
-LLMManager = AsyncMock
-# # # from app.agents.tool_dispatcher import ToolDispatcher
-from unittest.mock import AsyncMock, MagicMock
-
+# Import real components for L4 testing
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.database.connection_manager import get_db_session
 
-ToolDispatcher = AsyncMock
-ToolDispatcher = AsyncMock
-# # from app.services.redis.session_manager import RedisSessionManager
-RedisSessionManager = AsyncMock
+# Define execution context and result for L4 real testing
+@dataclass
+class ExecutionContext:
+    """Real execution context for L4 agent orchestration"""
+    user_id: str
+    thread_id: str
+    message_id: str
+    user_message: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+@dataclass
+class ExecutionResult:
+    """Real execution result for L4 agent orchestration"""
+    success: bool
+    response_content: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    error: Optional[str] = None
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -250,26 +251,24 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
         """Setup LLM agent orchestration test environment."""
         try:
             # Initialize LLM manager with real API keys from staging config
-            self.llm_manager = LLMManager(self.config)
+            config = get_unified_config()
+            self.llm_manager = LLMManager(config)
             
             # Validate LLM connectivity before testing
             await self._validate_llm_connectivity()
             
-            # Initialize tool dispatcher
+            # Initialize tool dispatcher with real components
             self.tool_dispatcher = ToolDispatcher()
             await self.tool_dispatcher.initialize()
             
-            # Initialize supervisor agent with real dependencies
-            from sqlalchemy.ext.asyncio import AsyncSession
-
-            from netra_backend.app.database.connection_manager import get_db_session
-            
+            # Initialize real database session
             db_session = await get_db_session()
             
+            # Initialize supervisor agent with real dependencies for L4 testing
             self.supervisor_agent = SupervisorAgent(
                 db_session=db_session,
                 llm_manager=self.llm_manager,
-                websocket_manager=self.staging_suite.websocket_manager,
+                websocket_manager=None,  # WebSocket optional for orchestration tests
                 tool_dispatcher=self.tool_dispatcher
             )
             
@@ -476,16 +475,32 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
         self.llm_manager.ask_llm_full = monitored_ask_llm_full
         
         try:
-            # Execute through supervisor agent
-            execution_result = await self.supervisor_agent.execute_with_context(context)
+            # Convert ExecutionContext to DeepAgentState for supervisor agent
+            agent_state = DeepAgentState(
+                user_request=context.user_message,
+                chat_thread_id=context.thread_id,
+                user_id=context.user_id,
+                metadata=context.metadata
+            )
             
-            # Add monitoring metadata
-            execution_result.metadata.update({
-                "llm_calls": call_count,
-                "tokens_used": total_tokens,
-                "cost_usd": total_cost,
-                "agents_involved": execution_result.metadata.get("agent_flow", [])
-            })
+            # Execute through real supervisor agent with L4 realism
+            result_state = await self.supervisor_agent.execute(
+                state=agent_state,
+                run_id=context.message_id,
+                stream_updates=False
+            )
+            
+            # Create execution result from agent state
+            execution_result = ExecutionResult(
+                success=result_state is not None,
+                response_content=getattr(result_state, 'response', '') if result_state else '',
+                metadata={
+                    "llm_calls": call_count,
+                    "tokens_used": total_tokens,
+                    "cost_usd": total_cost,
+                    "agents_involved": getattr(result_state, 'agent_flow', []) if result_state else []
+                }
+            )
             
             self.orchestration_metrics.total_llm_calls += call_count
             self.orchestration_metrics.successful_llm_calls += call_count

@@ -23,16 +23,10 @@ import React, {
 } from 'react';
 import { logger } from '@/lib/logger';
 import { AuthContext } from '@/auth/context';
+import type { WebSocketMessage } from '@/types/domains/websocket';
 
 // Types
 export type WebSocketStatus = 'CONNECTING' | 'CONNECTED' | 'DISCONNECTING' | 'DISCONNECTED' | 'RECONNECTING' | 'ERROR';
-
-export interface WebSocketMessage {
-  type: string;
-  payload?: Record<string, any>;
-  timestamp?: number;
-  correlation_id?: string;
-}
 
 export interface WebSocketError {
   code: string;

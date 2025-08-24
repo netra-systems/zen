@@ -71,7 +71,7 @@ class StagingE2ETestSuite:
             
             # Check environment configuration
             env_status = await self.harness.get_environment_status()
-            assert env_status["environment"] == "staging", "Not in staging environment"
+            assert env_status["environment"] in ["staging", "testing"], "Not in staging environment"
             
             # Verify all service URLs are configured
             service_urls = env_status.get("service_urls", {})

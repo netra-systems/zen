@@ -83,6 +83,38 @@
             </business_value>
         </learning>
         
+        <learning id="e2e-test-no-fallback-to-mock">
+            <title>E2E Tests Must Fail When Services Unavailable</title>
+            <problem>
+                E2E tests had fallback to mock behavior when real services were unavailable
+                This masked infrastructure issues and gave false positives
+                Tests would pass using mocks even when real services were broken
+                Violated the principle that E2E tests must test real end-to-end flows
+            </problem>
+            <solution>
+                Removed all fallback to mock patterns from E2E test infrastructure:
+                1. real_service_config.py now raises RuntimeError when required services unavailable
+                2. high_volume_data.py fixture fails immediately if auth service unavailable
+                3. reconnection_test_fixtures.py requires real imports, no fallback mocks
+                4. agent_startup_test_helpers.py fails on provider unavailability
+                5. database_consistency_fixtures.py requires all services to be healthy
+                E2E tests now fail fast when infrastructure is not available
+            </solution>
+            <files_affected>
+                <file>tests/e2e/real_service_config.py</file>
+                <file>tests/e2e/fixtures/high_volume_data.py</file>
+                <file>tests/e2e/reconnection_test_fixtures.py</file>
+                <file>tests/e2e/agent_startup_test_helpers.py</file>
+                <file>tests/e2e/llm_initialization_helpers.py</file>
+                <file>tests/e2e/database_consistency_fixtures.py</file>
+            </files_affected>
+            <verification>E2E tests now properly fail when required services are unavailable</verification>
+            <business_value>
+                Ensures E2E tests validate actual infrastructure and service availability,
+                prevents false positive test results, enforces proper test environment setup
+            </business_value>
+        </learning>
+        
         <learning id="e2e-test-import-refactoring">
             <title>E2E Test Import Refactoring</title>
             <problem>

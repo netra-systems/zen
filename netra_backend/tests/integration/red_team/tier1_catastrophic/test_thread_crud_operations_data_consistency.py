@@ -57,7 +57,7 @@ try:
 except ImportError:
     def get_settings():
         from types import SimpleNamespace
-        return SimpleNamespace(database_url="postgresql://test:test@localhost:5432/netra_test")
+        return SimpleNamespace(database_url="DATABASE_URL_PLACEHOLDER")
 
 # Mock test helpers since they don't exist
 def create_test_database_session():

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Clock, Package, Zap } from 'lucide-react';
-import type { ExecutionMetrics, AgentTiming } from '../../types/FinalReportTypes';
+import type { ExecutionMetrics, AgentTiming } from '@/types/unified/metrics.types';
 import { formatDuration } from '../../utils/reportUtils';
 
 interface OverviewTabProps {

@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-08-24T04:00:03.147201",
+    "generated_at": "2025-08-24T08:13:16.311996",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 481
+    "total_literals": 482
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -257,6 +257,7 @@
       "value": "/api/",
       "category": "paths",
       "locations": [
+        "netra_backend/app/middleware/api_gateway_coordinator.py:449",
         "netra_backend/app/middleware/security_headers_middleware.py:112",
         "scripts/scan_string_literals.py:115"
       ]
@@ -342,7 +343,7 @@
       "value": "/api/auth/google/callback",
       "category": "paths",
       "locations": [
-        "scripts/verify_oauth_redirect_uris.py:82"
+        "scripts/verify_oauth_redirect_uris.py:86"
       ]
     },
     "/api/auth/login": {
@@ -494,7 +495,7 @@
       "value": "/api/mcp/ws (MCP-specific)",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:327"
+        "netra_backend/app/routes/websocket.py:341"
       ]
     },
     "/api/poll": {
@@ -558,7 +559,7 @@
       "value": "/api/test",
       "category": "paths",
       "locations": [
-        "netra_backend/app/clients/auth_client_core.py:634"
+        "netra_backend/app/clients/auth_client_core.py:632"
       ]
     },
     "/api/threads": {
@@ -700,7 +701,7 @@
       "value": "/openapi.json",
       "category": "paths",
       "locations": [
-        "auth_service/main.py:138"
+        "auth_service/main.py:210"
       ]
     },
     "/sandbox/script.py": {
@@ -763,28 +764,28 @@
       "value": "/ws/config",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:293"
+        "netra_backend/app/routes/websocket.py:307"
       ]
     },
     "/ws/health": {
       "value": "/ws/health",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:335"
+        "netra_backend/app/routes/websocket.py:349"
       ]
     },
     "/ws/stats": {
       "value": "/ws/stats",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:490"
+        "netra_backend/app/routes/websocket.py:504"
       ]
     },
     "/ws/test": {
       "value": "/ws/test",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:382"
+        "netra_backend/app/routes/websocket.py:396"
       ]
     },
     "/ws/{user_id}": {
@@ -931,7 +932,7 @@
       "value": "Deploy with: python scripts/deploy_to_gcp.py --project",
       "category": "paths",
       "locations": [
-        "scripts/validate_staging_deployment.py:86"
+        "scripts/validate_staging_deployment.py:176"
       ]
     },
     "Disable: python scripts/manage_precommit.py disable --reason 'Your reason'": {
@@ -1016,6 +1017,13 @@
       "category": "paths",
       "locations": [
         "scripts/unified_import_manager.py:591"
+      ]
+    },
+    "Examples:\n  python scripts/validate_staging_deployment.py\n  python scripts/validate_staging_deployment.py --verbose\n  python scripts/validate_staging_deployment.py --json\n  python scripts/validate_staging_deployment.py --no-comprehensive\n  python scripts/validate_staging_deployment.py --project netra-staging --verbose": {
+      "value": "Examples:\n  python scripts/validate_staging_deployment.py\n  python scripts/validate_staging_deployment.py --verbose\n  python scripts/validate_staging_deployment.py --json\n  python scripts/validate_staging_deployment.py --no-comprehensive\n  python scripts/validate_staging_deployment.py --project netra-staging --verbose",
+      "category": "paths",
+      "locations": [
+        "scripts/validate_staging_deployment.py:548"
       ]
     },
     "GCP Deployment Script for Netra Apex Platform\nDeploys all three services (backend, auth, frontend) to Google Cloud Run\n\nIMPORTANT: This is the OFFICIAL deployment script. Do NOT create new deployment scripts.\nUse this script with appropriate flags for all GCP staging deployments.\n\nQuick Start:\n    python scripts/deploy_to_gcp.py --project netra-staging --build-local\n\nSee SPEC/gcp_deployment.xml for comprehensive deployment guidelines.": {
@@ -1177,7 +1185,7 @@
       "value": "SPEC/gcp_deployment.xml",
       "category": "paths",
       "locations": [
-        "scripts/validate_staging_deployment.py:228"
+        "scripts/validate_staging_deployment.py:322"
       ]
     },
     "SPEC/generated/string_literals.json": {
@@ -1194,7 +1202,7 @@
       "value": "SPEC/staging_environment.xml",
       "category": "paths",
       "locations": [
-        "scripts/validate_staging_deployment.py:227"
+        "scripts/validate_staging_deployment.py:321"
       ]
     },
     "See SPEC/gcp_deployment.xml for deployment guidelines.": {
@@ -1251,7 +1259,7 @@
       "value": "[green]✓[/green] Configuration exported to oauth_redirect_uris.json",
       "category": "paths",
       "locations": [
-        "scripts/verify_oauth_redirect_uris.py:140"
+        "scripts/verify_oauth_redirect_uris.py:144"
       ]
     },
     "[yellow]Please ensure service account key is at: config/netra-staging-7a1059b7cf26.json[/yellow]": {

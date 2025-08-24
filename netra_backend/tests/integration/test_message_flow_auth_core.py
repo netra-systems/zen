@@ -25,8 +25,8 @@ from netra_backend.tests.integration.jwt_token_helpers import JWTTestHelper
 class TestSyntaxFix:
     """Test class for orphaned methods"""
 
-    def __init__(self):
-        super().__init__()
+    def setup_method(self):
+        """Setup method for test class."""
         self.auth_attempts: List[Dict[str, Any]] = []
         self.failed_auth_count = 0
 

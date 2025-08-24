@@ -124,7 +124,7 @@ TEST_MARKERS = {
 ENVIRONMENTS = {
     "local": {
         "name": "Local Development",
-        "database_url": "postgresql://test:test@localhost:5432/netra_test",
+        "database_url": "DATABASE_URL_PLACEHOLDER",
         "redis_url": "redis://localhost:6379/0",
         "use_mocks": True,
         "real_llm": False,

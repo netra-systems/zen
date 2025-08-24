@@ -29,7 +29,8 @@ from netra_backend.app.schemas.Config import AppConfig
 class TestSecretManagerInitialization:
     """Business Value: Ensures proper secret manager setup for enterprise security"""
     
-    def test_staging_environment_project_id_selection(self):
+@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+        def test_staging_environment_project_id_selection(self):
         """Test staging environment uses correct project ID"""
         # Arrange - Mock staging environment
         with patch.dict(os.environ, {"ENVIRONMENT": "staging", "GCP_PROJECT_ID_NUMERICAL_STAGING": "701982941522"}):

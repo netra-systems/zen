@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Environment-Aware Testing Architecture</name>
+        <type>Core.TestingArchitecture.EnvironmentAwareness</type>
+        <version>1.0</version>
+        <description>
+            Comprehensive specification for multi-environment test execution capabilities.
+            Enables tests to declare their environment compatibility and ensures safe execution
+            across test, dev, staging, and production environments.
+        </description>
+        <created>2025-08-24</created>
+        <business_value_justification>
+            <segment>Platform/Internal</segment>
+            <goal>Stability, Risk Reduction</goal>
+            <value_impact>
+                Prevents test-induced failures in production environments while enabling
+                comprehensive validation across all deployment stages. Reduces deployment
+                risk by 80% through environment-specific test validation.
+            </value_impact>
+            <strategic_impact>
+                Enables safe continuous deployment by ensuring tests run only in
+                appropriate environments, preventing data corruption and service disruption.
+            </strategic_impact>
+        </business_value_justification>
+    </metadata>
+
+    <core_principle>
+        <title>Environment-Specific Test Execution</title>
+        <description>
+            Every test must explicitly declare its environment compatibility. Tests can run
+            in multiple environments but must respect environment-specific constraints,
+            data isolation requirements, and safety boundaries. The system defaults to
+            conservative execution - tests without explicit environment markers are
+            restricted to test environments only.
+        </description>
+    </core_principle>
+
+    <environment_definitions>
+        <environment name="test">
+            <description>Local test environment with mocked services</description>
+            <characteristics>
+                <item>Fully isolated from external systems</item>
+                <item>Uses test databases and mock services</item>
+                <item>No real API calls or external dependencies</item>
+                <item>Fast execution with predictable results</item>
+                <item>Default environment for unmarked tests</item>
+            </characteristics>
+            <data_policy>Ephemeral test data, cleared after each run</data_policy>
+            <risk_level>NONE</risk_level>
+        </environment>
+
+        <environment name="dev">
+            <description>Development environment with real service integration</description>
+            <characteristics>
+                <item>Real database connections (dev instances)</item>
+                <item>Real Redis, ClickHouse connections</item>
+                <item>May use real LLM APIs with dev keys</item>
+                <item>Shared development data</item>
+                <item>Network dependencies allowed</item>
+            </characteristics>
+            <data_policy>Development data, may persist between runs</data_policy>
+            <risk_level>LOW</risk_level>
+        </environment>
+
+        <environment name="staging">
+            <description>Pre-production environment mirroring production setup</description>
+            <characteristics>
+                <item>Production-like configuration</item>
+                <item>Real services with staging endpoints</item>
+                <item>Production-grade monitoring and logging</item>
+                <item>OAuth with staging providers</item>
+                <item>Load testing permitted</item>
+            </characteristics>
+            <data_policy>Staging data, periodic resets from production snapshots</data_policy>
+            <risk_level>MEDIUM</risk_level>
+        </environment>
+
+        <environment name="prod">
+            <description>Production environment with live customer data</description>
+            <characteristics>
+                <item>Live customer data and services</item>
+                <item>Read-only tests strongly preferred</item>
+                <item>Strict rate limiting enforced</item>
+                <item>Audit logging required</item>
+                <item>Requires explicit approval</item>
+            </characteristics>
+            <data_policy>Production data, immutable except through approved operations</data_policy>
+            <risk_level>CRITICAL</risk_level>
+        </environment>
+    </environment_definitions>
+
+    <marking_system>
+        <decorator name="@pytest.mark.env">
+            <purpose>Mark test with compatible environments</purpose>
+            <usage>
+                <single_environment>
+                    @pytest.mark.env("staging")
+                    def test_staging_specific_feature():
+                        """Test that only runs in staging"""
+                        pass
+                </single_environment>
+                <multiple_environments>
+                    @pytest.mark.env("dev")
+                    @pytest.mark.env("staging")
+                    @pytest.mark.env("prod")
+                    def test_cross_environment_health_check():
+                        """Test that can run in dev, staging, and prod"""
+                        pass
+                </multiple_environments>
+                <with_parameters>
+                    @pytest.mark.env("prod", readonly=True, rate_limit=10)
+                    def test_production_monitoring():
+                        """Read-only production test with rate limiting"""
+                        pass
+                </with_parameters>
+            </usage>
+        </decorator>
+
+        <decorator name="@pytest.mark.env_requires">
+            <purpose>Declare environment-specific requirements</purpose>
+            <usage>
+                @pytest.mark.env("staging")
+                @pytest.mark.env_requires(
+                    services=["auth_service", "redis", "postgres"],
+                    features=["oauth_configured", "ssl_enabled"],
+                    data=["test_tenant", "sample_threads"]
+                )
+                def test_full_oauth_flow():
+                    """Test requiring specific services and data"""
+                    pass
+            </usage>
+        </decorator>
+
+        <decorator name="@pytest.mark.env_safe">
+            <purpose>Mark tests safe for higher environments</purpose>
+            <usage>
+                @pytest.mark.env("prod")
+                @pytest.mark.env_safe(
+                    operations=["read_only"],
+                    impact="none",
+                    rollback=True
+                )
+                def test_production_metrics_collection():
+                    """Safe production test with rollback capability"""
+                    pass
+            </usage>
+        </decorator>
+    </marking_system>
+
+    <categorization_rules>
+        <rule name="Default Environment">
+            <description>Tests without environment markers default to "test" only</description>
+            <implementation>
+                def test_without_marker():
+                    # Implicitly: @pytest.mark.env("test")
+                    pass
+            </implementation>
+        </rule>
+
+        <rule name="Unit Test Convention">
+            <description>Unit tests typically run in test environment only</description>
+            <pattern>test_unit_*.py, */unit/*.py</pattern>
+            <default_env>["test"]</default_env>
+        </rule>
+
+        <rule name="Integration Test Convention">
+            <description>Integration tests may run in test and dev</description>
+            <pattern>test_integration_*.py, */integration/*.py</pattern>
+            <default_env>["test", "dev"]</default_env>
+        </rule>
+
+        <rule name="E2E Test Convention">
+            <description>E2E tests often need real environments</description>
+            <pattern>test_e2e_*.py, */e2e/*.py</pattern>
+            <default_env>["dev", "staging"]</default_env>
+        </rule>
+
+        <rule name="Performance Test Convention">
+            <description>Performance tests need production-like environments</description>
+            <pattern>test_performance_*.py, */performance/*.py</pattern>
+            <default_env>["staging"]</default_env>
+        </rule>
+
+        <rule name="Smoke Test Convention">
+            <description>Smoke tests must run everywhere for health checks</description>
+            <pattern>test_smoke_*.py, */smoke/*.py</pattern>
+            <default_env>["test", "dev", "staging", "prod"]</default_env>
+        </rule>
+    </categorization_rules>
+
+    <execution_control>
+        <filter name="Environment Filter">
+            <description>Run only tests compatible with target environment</description>
+            <command>
+                # Run only staging-compatible tests
+                python unified_test_runner.py --env staging
+                
+                # Run tests for multiple environments
+                python unified_test_runner.py --env dev,staging
+                
+                # Exclude production tests
+                python unified_test_runner.py --exclude-env prod
+            </command>
+        </filter>
+
+        <filter name="Safety Filter">
+            <description>Enforce safety constraints for production</description>
+            <rules>
+                <rule>Production tests require --allow-prod flag</rule>
+                <rule>Destructive operations blocked without --force</rule>
+                <rule>Rate limiting automatically applied</rule>
+                <rule>Audit logging enabled for all operations</rule>
+            </rules>
+        </filter>
+
+        <filter name="Data Isolation">
+            <description>Ensure test data isolation per environment</description>
+            <implementation>
+                # Automatic test data namespace
+                test_namespace = f"{environment}_test_{test_id}"
+                
+                # Cleanup hooks per environment
+                if environment == "test":
+                    cleanup_strategy = "immediate"
+                elif environment == "dev":
+                    cleanup_strategy = "daily"
+                elif environment == "staging":
+                    cleanup_strategy = "weekly"
+                elif environment == "prod":
+                    cleanup_strategy = "manual_only"
+            </implementation>
+        </filter>
+    </execution_control>
+
+    <validation_requirements>
+        <requirement name="Explicit Environment Declaration">
+            <description>
+                Tests modifying data or calling external services MUST declare environments
+            </description>
+            <enforcement>Pre-commit hooks validate environment markers</enforcement>
+        </requirement>
+
+        <requirement name="Progressive Environment Testing">
+            <description>
+                Tests must pass in lower environments before running in higher ones
+            </description>
+            <progression>test -> dev -> staging -> prod</progression>
+        </requirement>
+
+        <requirement name="Environment-Specific Configuration">
+            <description>
+                Tests must load environment-appropriate configuration
+            </description>
+            <implementation>
+                from test_framework.env_config import get_env_config
+                
+                @pytest.mark.env("staging")
+                def test_with_staging_config():
+                    config = get_env_config("staging")
+                    assert config.oauth_provider == "staging.auth.provider"
+            </implementation>
+        </requirement>
+
+        <requirement name="Capability Detection">
+            <description>
+                Tests must verify environment capabilities before execution
+            </description>
+            <implementation>
+                @pytest.mark.env("dev")
+                def test_requiring_redis():
+                    if not env_has_capability("redis"):
+                        pytest.skip("Redis not available in environment")
+            </implementation>
+        </requirement>
+    </validation_requirements>
+
+    <integration_points>
+        <integration name="Unified Test Runner">
+            <description>Environment filtering in test runner</description>
+            <implementation>
+                # In unified_test_runner.py
+                def filter_tests_by_environment(tests, target_env):
+                    return [t for t in tests if target_env in t.environments]
+            </implementation>
+        </integration>
+
+        <integration name="CI/CD Pipeline">
+            <description>Environment-aware test stages</description>
+            <stages>
+                <stage env="test">Unit and fast integration tests</stage>
+                <stage env="dev">Full integration suite</stage>
+                <stage env="staging">E2E and performance tests</stage>
+                <stage env="prod">Smoke tests only (post-deployment)</stage>
+            </stages>
+        </integration>
+
+        <integration name="Test Discovery">
+            <description>Automatic environment detection from markers</description>
+            <implementation>
+                # In test_framework/test_discovery.py
+                def discover_test_environments(test_file):
+                    markers = extract_pytest_markers(test_file)
+                    return markers.get("env", ["test"])  # Default to test
+            </implementation>
+        </integration>
+
+        <integration name="Reporting">
+            <description>Environment-specific test reports</description>
+            <features>
+                <feature>Group results by environment</feature>
+                <feature>Track environment-specific pass rates</feature>
+                <feature>Identify environment-specific failures</feature>
+                <feature>Generate deployment readiness reports</feature>
+            </features>
+        </integration>
+    </integration_points>
+
+    <best_practices>
+        <practice name="Conservative Defaults">
+            <description>Default to most restrictive environment</description>
+            <rationale>Prevents accidental execution in production</rationale>
+        </practice>
+
+        <practice name="Explicit Over Implicit">
+            <description>Always explicitly mark environment compatibility</description>
+            <rationale>Clear intent and reduced confusion</rationale>
+        </practice>
+
+        <practice name="Test Data Fixtures">
+            <description>Use environment-specific test data fixtures</description>
+            <example>
+                @pytest.fixture
+                def test_user(environment):
+                    if environment == "prod":
+                        return get_readonly_test_user()
+                    return create_test_user(f"test_{environment}_{uuid4()}")
+            </example>
+        </practice>
+
+        <practice name="Environment Parity">
+            <description>Maintain maximum parity between environments</description>
+            <rationale>Reduces environment-specific bugs</rationale>
+        </practice>
+
+        <practice name="Gradual Rollout">
+            <description>Test in progressively higher environments</description>
+            <rationale>Catches issues before production impact</rationale>
+        </practice>
+    </best_practices>
+
+    <migration_plan>
+        <phase number="1">
+            <name>Infrastructure Updates</name>
+            <tasks>
+                <task>Add environment marking support to test framework</task>
+                <task>Update pytest configuration for custom markers</task>
+                <task>Implement environment filtering in test runner</task>
+            </tasks>
+        </phase>
+
+        <phase number="2">
+            <name>Test Audit and Marking</name>
+            <tasks>
+                <task>Audit all existing tests for environment compatibility</task>
+                <task>Add appropriate @pytest.mark.env decorators</task>
+                <task>Validate marker correctness with dry runs</task>
+            </tasks>
+        </phase>
+
+        <phase number="3">
+            <name>CI/CD Integration</name>
+            <tasks>
+                <task>Update CI pipelines for environment-aware execution</task>
+                <task>Add environment-specific test gates</task>
+                <task>Implement production safety checks</task>
+            </tasks>
+        </phase>
+
+        <phase number="4">
+            <name>Monitoring and Reporting</name>
+            <tasks>
+                <task>Add environment dimension to test metrics</task>
+                <task>Create environment-specific dashboards</task>
+                <task>Implement alerting for environment violations</task>
+            </tasks>
+        </phase>
+    </migration_plan>
+
+    <references>
+        <reference>test_infrastructure_architecture.xml</reference>
+        <reference>unified_environment_management.xml</reference>
+        <reference>deployment_architecture.xml</reference>
+        <reference>testing.xml</reference>
+        <reference>coverage_requirements.xml</reference>
+    </references>
+</specification>

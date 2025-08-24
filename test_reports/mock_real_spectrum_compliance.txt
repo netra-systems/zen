@@ -1,0 +1,1462 @@
+================================================================================
+MOCK-REAL SPECTRUM COMPLIANCE REPORT
+================================================================================
+Files Scanned: 1852
+Violations Found: 249
+Files with Justified Mocks: 11
+L3 Integration Test Files: 202
+Compliant Files: 1757
+
+Compliance Rate: 86.6%
+
+VIOLATIONS FOUND:
+----------------------------------------
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\test_database_connectivity_improvements.py:
+  Line 460 in test_query_performance_tracking():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 474 in test_error_tracking():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_agent_e2e_critical_setup.py:
+  Line 46 in _create_mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 47 in _create_mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 48 in _create_mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 49 in _create_mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 52 in _create_mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 54 in _create_mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_data_sub_agent_core.py:
+  Line 66 in test_initialization_with_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_data_sub_agent_reliability.py:
+  Line 34 in db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 35 in db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 44 in test_database_connection_failure():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 46 in test_database_connection_failure():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_example_prompts_base.py:
+  Line 88 in _create_mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 90 in _create_mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 92 in _create_mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 94 in _create_mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_helpers.py:
+  Line 21 in create_mock_infrastructure():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_llm_agent_e2e_flows.py:
+  Line 207 in _create_e2e_test_infrastructure():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_llm_agent_e2e_performance.py:
+  Line 229 in _create_e2e_infrastructure():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 337 in _create_mock_infrastructure_light():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_supervisor_advanced.py:
+  Line 241 in _setup_circuit_breaker_supervisor():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_supervisor_consolidated_advanced.py:
+  Line 26 in test_get_stats():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_supervisor_consolidated_core.py:
+  Line 29 in test_init_base():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 43 in test_init_services():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 58 in test_init_components():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 74 in test_init_hooks():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 88 in test_initialization_with_none_values():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 107 in test_register_agent():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 127 in test_register_hook():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 145 in test_register_hook_invalid_event():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 165 in test_agents_property():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 178 in test_sub_agents_property_getter():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 194 in test_sub_agents_property_setter():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_supervisor_consolidated_execution.py:
+  Line 83 in test_create_run_context():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_supply_researcher_agent_core.py:
+  Line 30 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 31 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 32 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 33 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 34 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_supply_researcher_agent_execution.py:
+  Line 30 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 31 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 32 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 33 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 34 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_supply_researcher_core.py:
+  Line 116 in _setup_redis_mock():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 117 in _setup_redis_mock():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 118 in _setup_redis_mock():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 142 in _verify_redis_integration():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_supply_researcher_error_handling.py:
+  Line 26 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 27 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 28 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 29 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 30 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_supply_researcher_infrastructure.py:
+  Line 47 in _setup_redis_cache():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 48 in _setup_redis_cache():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_supply_researcher_integration.py:
+  Line 61 in _setup_test_infrastructure():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 105 in _setup_database_mocks():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 106 in _setup_database_mocks():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_supply_researcher_service.py:
+  Line 24 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 25 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 26 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 27 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 28 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_triage_agent_caching.py:
+  Line 40 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_triage_agent_core.py:
+  Line 39 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_triage_agent_models.py:
+  Line 46 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_triage_agent_validation.py:
+  Line 40 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\agents\test_triage_sub_agent.py:
+  Line 51 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\clickhouse\test_corpus_content_ops.py:
+  Line 189 in _setup_batch_test_mocks():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\config\test_config_secrets_manager.py:
+  Line 132 in test_apply_secrets_to_config_with_nested_mapping():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\config\test_unified_config_integration.py:
+  Line 287 in test_postgres_mode_detection_from_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 292 in test_postgres_mode_detection_from_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 405 in test_redis_graceful_degradation():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\core\test_core_infrastructure_11_20.py:
+  Line 36 in mock_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 37 in mock_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 38 in mock_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 43 in mock_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 318 in mock_app():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 319 in mock_app():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\core\test_error_recovery_scenarios.py:
+  Line 91 in create_database_session_mock():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\core\test_missing_tests_services.py:
+  Line 252 in test_service_dependency_injection():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\core\test_missing_tests_validation.py:
+  Line 36 in mock_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 37 in mock_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 38 in mock_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 43 in mock_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\critical\test_postgres_settings_regression.py:
+  Line 34 in test_postgres_events_settings_not_defined():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 35 in test_postgres_events_settings_not_defined():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 36 in test_postgres_events_settings_not_defined():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 35 in test_postgres_events_settings_not_defined():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 64 in test_postgres_events_checkout_handler_settings_error():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\e2e\test_agent_orchestration_e2e.py:
+  Line 74 in _build_mock_dependency_dict():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 74 in _build_mock_dependency_dict():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\examples\test_pattern_examples.py:
+  Line 52 in mock_dependencies():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\fixtures\test_fixtures.py:
+  Line 12 in mock_database():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 13 in mock_database():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\test_core_basics_comprehensive.py:
+  Line 1034 in get_connection():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\test_critical_integration_helpers.py:
+  Line 53 in _setup_supervisor_with_database():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\test_redis_session_core.py:
+  Line 60 in redis_connection():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 68 in session_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 76 in websocket_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\test_redis_session_performance.py:
+  Line 60 in redis_connection():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 68 in session_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 76 in websocket_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\test_websocket_agent_flow.py:
+  Line 84 in mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 85 in mock_db_session():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\test_websocket_auth_cold_start.py:
+  Line 49 in mock_postgres():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 50 in mock_postgres():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 56 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 57 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 58 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\performance\test_agent_load_stress.py:
+  Line 50 in create_mock_dependencies():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\routes\test_route_fixtures.py:
+  Line 54 in setup_core_dependencies():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_corpus_service_comprehensive.py:
+  Line 25 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 26 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 27 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 28 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_database_basic_transactions.py:
+  Line 122 in _setup_successful_transaction_mocks():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_database_repository_transactions.py:
+  Line 140 in _setup_successful_creation():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_demo_service.py:
+  Line 29 in mock_redis_client():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 51 in mock_redis_client():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 52 in mock_redis_client():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 53 in mock_redis_client():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 54 in mock_redis_client():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 55 in mock_redis_client():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_permission_service_admin.py:
+  Line 114 in test_permission_escalation_attempt():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 135 in test_grant_permission():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 148 in test_grant_permission_existing_permissions():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 161 in test_grant_permission_duplicate():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 174 in test_revoke_permission():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 187 in test_revoke_permission_existing():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 200 in test_set_user_role_valid():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 215 in test_set_user_role_invalid():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_permission_service_core.py:
+  Line 132 in test_update_user_role_auto_elevate_to_developer():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 147 in test_update_user_role_no_elevation_for_admin():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 161 in test_update_user_role_no_elevation_for_super_admin():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 175 in test_update_user_role_skip_developer_check():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 190 in test_update_user_role_already_developer():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 204 in test_update_user_role_power_user_elevation():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_permission_service_integration.py:
+  Line 39 in test_full_workflow_integration():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 65 in test_new_user_onboarding_flow():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 106 in test_customer_support_workflow():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 125 in test_developer_debugging_workflow():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 148 in test_admin_user_management_workflow():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 186 in test_environment_based_access_control():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 196 in test_environment_based_access_control():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 206 in test_privilege_escalation_prevention():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 228 in test_role_transition_security():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 253 in test_custom_permission_security():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_quality_gate_integration_core_1.py:
+  Line 21 in service():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 22 in service():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 23 in service():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 24 in service():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_quality_gate_integration_fixtures.py:
+  Line 23 in service():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 24 in service():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 25 in service():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 26 in service():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_quality_gate_scoring_advanced.py:
+  Line 31 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_quality_gate_storage_stats.py:
+  Line 31 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_scheduler_jobs_core.py:
+  Line 34 in mock_dependencies():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 35 in mock_dependencies():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_scheduler_retry_logic.py:
+  Line 35 in scheduler_with_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_security_service_oauth.py:
+  Line 44 in _setup_new_oauth_user_test():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 71 in _setup_existing_oauth_user_test():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 106 in _setup_profile_update_test():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_supply_catalog_service.py:
+  Line 92 in test_create_option():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 93 in test_create_option():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 94 in test_create_option():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_supply_research_scheduler_jobs.py:
+  Line 38 in mock_dependencies():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 39 in mock_dependencies():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 255 in scheduler_with_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_supply_research_service_basic.py:
+  Line 24 in service():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 46 in test_initialization_with_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 58 in test_initialization_without_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_supply_research_service_error_handling.py:
+  Line 27 in service():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_synthetic_data_service_fixtures.py:
+  Line 65 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 66 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 67 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 68 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_tool_permission_availability.py:
+  Line 29 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_tool_permission_basic.py:
+  Line 62 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_tool_permission_business_rate.py:
+  Line 62 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_tool_permission_checking.py:
+  Line 32 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_tool_permission_integration.py:
+  Line 39 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_tool_permission_main.py:
+  Line 62 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_tool_permission_rate_limiting.py:
+  Line 30 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_tool_permission_service_initialization.py:
+  Line 25 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\startup\test_config_core.py:
+  Line 82 in mock_services_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 88 in mock_services_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\startup\test_config_validation.py:
+  Line 80 in mock_services_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 86 in mock_services_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 196 in test_get_service_endpoints_local_clickhouse():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 201 in test_get_service_endpoints_local_clickhouse():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 214 in test_get_service_endpoints_secure_clickhouse():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 219 in test_get_service_endpoints_secure_clickhouse():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\unit\test_error_recovery_integration_core.py:
+  Line 24 in __init__():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 116 in test_get_recovery_metrics():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\unit\test_error_recovery_integration_helpers.py:
+  Line 23 in get_breaker_side_effect():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\unit\test_key_parameters_pydantic_access.py:
+  Line 21 in execution_engine():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 24 in execution_engine():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\unit\test_postgres_events_config_migration.py:
+  Line 26 in test_postgres_events_should_not_import_database_config():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\unit\test_pr_router_state.py:
+  Line 26 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 28 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 29 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 30 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\unit\test_rate_limiter_unit.py:
+  Line 34 in mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\unit\test_threads_route_create.py:
+  Line 24 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 25 in mock_db():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\unit\test_token_manager_core.py:
+  Line 29 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 31 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 32 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\unit\test_token_manager_generation.py:
+  Line 32 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 34 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 35 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\unit\test_token_manager_operations.py:
+  Line 29 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 31 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 32 in mock_redis_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\unit\test_usage_tracker_unit.py:
+  Line 137 in usage_tracker():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_database_coordination_l2.py:
+  Line 358 in __init__():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\test_session_management.py:
+  Line 28 in session_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 63 in session_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 103 in session_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 143 in session_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 177 in session_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 232 in session_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 314 in session_manager():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\base\test_mixins.py:
+  Line 99 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 102 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 103 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 104 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 105 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 106 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 107 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 108 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 109 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 110 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 111 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 112 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 113 in create_mock_redis():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\utils\test_helpers.py:
+  Line 32 in __init__():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\test_agent_orchestration.py:
+  Line 60 in __init__():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\test_database_user_consistency.py:
+  Line 124 in __init__():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+  Line 125 in __init__():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\test_error_recovery.py:
+  Line 272 in database_pool():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\test_quality_gates.py:
+  Line 183 in quality_service():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\test_supervisor_pattern_compliance.py:
+  Line 327 in mock_dependencies():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\test_supervisor_real_llm_integration.py:
+  Line 39 in mock_dependencies():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\chat_system\unit\test_chat_orchestrator.py:
+  Line 21 in mock_dependencies():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\integration\test_agent_orchestration.py:
+  Line 58 in __init__():
+    Mock Type: Mock() instantiation
+    Issue: Database mock without justification
+    Fix: Use real containers (L3) or add @mock_justified decorator
+
+L3 INTEGRATION TESTS FOUND:
+------------------------------
+Found 202 files with L3 real container patterns
+These files properly use Testcontainers for L3 realism testing.
+
+RECOMMENDATIONS:
+--------------------
+1. Replace unjustified database mocks with L3 real containers using Testcontainers
+2. Add @mock_justified decorators to remaining L1 unit test mocks
+3. Ensure integration tests use L2 (real internal) or L3 (real containerized) services
+4. Move database connectivity tests to L3 integration test suites
+
+For more information, see SPEC/testing.xml Mock-Real Spectrum section.
+================================================================================

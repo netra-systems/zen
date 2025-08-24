@@ -6,6 +6,9 @@ could impact AI operations and customer satisfaction.
 
 Tests critical paths including middleware setup, route registration,
 error handling, and security configurations.
+
+MOCK JUSTIFICATION: L1 Unit Tests - Mocking FastAPI app components to isolate
+app factory logic. Real application initialization tested in L3 integration tests.
 """
 
 import sys
@@ -17,6 +20,7 @@ import pytest
 from fastapi import FastAPI, HTTPException
 from pydantic import ValidationError
 
+from test_framework.decorators import mock_justified
 from netra_backend.app.core.app_factory import (
     create_app,
     create_fastapi_app,

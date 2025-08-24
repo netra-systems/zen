@@ -139,6 +139,7 @@ class TestJWTSecretConsistency:
             auth_secret = AuthSecretLoader.get_jwt_secret()
             assert auth_secret == "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
     
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
     def test_staging_production_require_secret(self):
         """Test that staging and production environments require explicit secrets."""
         with patch.dict(os.environ, {

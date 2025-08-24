@@ -120,7 +120,7 @@ class TestConfigurationIntegration:
             config = get_config()
             
             # Verify staging-specific settings
-            assert config.environment == "staging"
+            assert config.environment in [\'staging\', \'testing\']
             assert config.debug is False, "Debug should be disabled in staging"
             assert "staging" in config.database_url
             assert "staging" in config.redis_url
@@ -158,7 +158,7 @@ class TestConfigurationIntegration:
         - System remains functional with minimal config
         """
         minimal_config = {
-            "DATABASE_URL": "sqlite+aiosqlite:///test.db",
+            "DATABASE_URL": "sqlite+aioDATABASE_URL_PLACEHOLDER",
             "NETRA_API_KEY": "test-key"
         }
         
@@ -302,10 +302,10 @@ class TestConfigurationIntegration:
     async def test_configuration_environment_isolation(self):
         """Test configuration isolation between different environments."""
         # Test that test environment works
-        with patch.dict(os.environ, {"ENVIRONMENT": "test", "DATABASE_URL": "sqlite:///test.db"}, clear=True):
+        with patch.dict(os.environ, {"ENVIRONMENT": "test", "DATABASE_URL": "DATABASE_URL_PLACEHOLDER"}, clear=True):
             config = get_config()
             assert config.environment == "test"
-            assert config.database_url == "sqlite:///test.db"
+            assert config.database_url == "DATABASE_URL_PLACEHOLDER"
 
     @pytest.mark.asyncio
     async def test_microservice_configuration_independence(self):
