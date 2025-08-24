@@ -15,8 +15,8 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.websocket_core.performance_monitor_core import PerformanceMonitor
-from netra_backend.app.websocket_core.performance_monitor_types import PerformanceThresholds
+from netra_backend.app.websocket_core.utils import WebSocketConnectionMonitor as PerformanceMonitor
+from netra_backend.app.websocket_core.types import ConnectionMetrics as PerformanceThresholds
 
 class TestMonitoringCoverage:
     """Test monitoring coverage and partial failure scenarios."""

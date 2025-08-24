@@ -5,7 +5,7 @@ Test 5: Multi-Agent Coordination First Response - $15K MRR
 Test 6: Session State Cross-Service Sync - $10K MRR
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -330,7 +330,7 @@ class TestSessionStateSync:
     async def test_websocket_state_synchronization(self):
 
         """Test WebSocket connection state syncs across services."""
-        from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+        from netra_backend.app.websocket_core.manager import WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
 

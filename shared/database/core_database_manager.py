@@ -313,6 +313,52 @@ class CoreDatabaseManager:
         if not url:
             return False
         return "ssl=" in url and "sslmode=" in url
+    
+    @staticmethod
+    def resolve_ssl_parameter_conflicts(url: str, target_driver: str = "asyncpg") -> str:
+        """Resolve SSL parameter conflicts for staging deployment.
+        
+        This function handles the critical staging deployment issue where
+        services have mixed ssl/sslmode parameters that cause connection failures.
+        
+        Args:
+            url: Database URL that may have conflicting SSL parameters
+            target_driver: Target driver ('asyncpg' or 'psycopg2')
+            
+        Returns:
+            URL with SSL parameters normalized for the target driver
+        """
+        if not url:
+            return url
+        
+        logger.debug(f"Resolving SSL conflicts for {target_driver}: {url[:50]}...")
+        
+        # Check for mixed parameters (critical staging issue)
+        if CoreDatabaseManager.has_mixed_ssl_params(url):
+            logger.warning(f"Found mixed SSL parameters in URL, resolving for {target_driver}")
+            
+            # Remove all SSL parameters first
+            clean_url = re.sub(r'[&?]sslmode=[^&]*', '', url)
+            clean_url = re.sub(r'[&?]ssl=[^&]*', '', clean_url)
+            
+            # Add the correct parameter for target driver
+            if target_driver == "asyncpg":
+                # Add ssl=require for asyncpg
+                separator = "&" if "?" in clean_url else "?"
+                clean_url += f"{separator}ssl=require"
+            else:
+                # Add sslmode=require for psycopg2
+                separator = "&" if "?" in clean_url else "?"
+                clean_url += f"{separator}sslmode=require"
+            
+            logger.debug(f"Resolved SSL conflicts: {clean_url[:50]}...")
+            return clean_url
+        
+        # No conflicts, use existing conversion functions
+        if target_driver == "asyncpg":
+            return CoreDatabaseManager.convert_ssl_params_for_asyncpg(url)
+        else:
+            return CoreDatabaseManager.convert_ssl_params_for_psycopg2(url)
 
 
 # Export the main class for backward compatibility

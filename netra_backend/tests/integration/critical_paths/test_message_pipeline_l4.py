@@ -11,7 +11,7 @@ L4 Realism: Real message queues, real WebSocket connections, real agent processi
 Performance Requirements: p99 < 500ms, 99.9% delivery success, message ordering guarantees, DLQ < 0.1%
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -39,7 +39,7 @@ from netra_backend.app.services.messaging.dead_letter_queue import DeadLetterQue
 from netra_backend.app.services.messaging.message_queue import MessageQueue
 from netra_backend.app.services.messaging.queue_manager import QueueManager
 from netra_backend.app.services.websocket.message_router import MessageRouter
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 SupervisorAgent = AsyncMock
 from netra_backend.app.schemas.registry import QueueMessage, WebSocketMessage

@@ -15,7 +15,7 @@ These tests validate Tests 9 and 10 from the critical conversion paths.
 import sys
 from pathlib import Path
 
-from tests.e2e.test_helpers import setup_test_path
+from test_framework import setup_test_path
 
 setup_test_path()
 

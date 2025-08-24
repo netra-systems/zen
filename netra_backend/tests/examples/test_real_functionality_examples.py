@@ -41,7 +41,7 @@ from netra_backend.app.schemas.core_models import Thread, User
 # Real imports - not mocked unless external API
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.user_service import UserService
-from netra_backend.app.websocket_core import ConnectionInfo
+from netra_backend.app.websocket_core.types import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)
 

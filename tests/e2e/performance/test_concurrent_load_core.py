@@ -8,7 +8,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from tests.e2e.test_helpers import setup_test_path
+from test_framework import setup_test_path
 
 
 setup_test_path()

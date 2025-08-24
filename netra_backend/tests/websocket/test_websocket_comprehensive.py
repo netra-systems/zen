@@ -49,7 +49,7 @@ from netra_backend.app.routes.utils.websocket_helpers import (
     authenticate_websocket_user,
     accept_websocket_connection,
 )
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.conftest import create_test_user, get_test_token
 
 class WebSocketTestClient:

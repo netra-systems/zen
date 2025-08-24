@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, Mock, call, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.websocket_core import get_unified_manager
+from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
 manager = get_unified_manager()
 
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage

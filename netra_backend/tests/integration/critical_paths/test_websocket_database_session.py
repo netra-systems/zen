@@ -24,7 +24,7 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -46,7 +46,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from netra_backend.app.db.postgres import get_postgres_session
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

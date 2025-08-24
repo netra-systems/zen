@@ -14,8 +14,8 @@ from datetime import datetime, timezone
 from fastapi import WebSocket
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock
 import asyncio

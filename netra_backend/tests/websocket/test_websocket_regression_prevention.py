@@ -4,7 +4,7 @@ Tests to prevent circular imports, agent registration failures, and message flow
 These tests ensure the WebSocket-Agent integration remains functional.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -327,7 +327,7 @@ class TestWebSocketBroadcasting:
     async def test_broadcast_to_user(self):
 
         """Test broadcasting message to specific user."""
-        from netra_backend.app.websocket_core import get_unified_manager
+        from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
 manager = get_unified_manager()
         
         with patch.object(manager, 'send_to_user', new_callable=AsyncMock) as mock_send:

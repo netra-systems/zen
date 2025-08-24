@@ -10,6 +10,19 @@ from collections import defaultdict
 BatchMessageHandler = WebSocketManager
 
 
+class MockRetryManager:
+    """Mock retry manager for test compatibility."""
+    
+    def _calculate_retry_delay(self, retry_count: int) -> float:
+        """Calculate exponential backoff delay."""
+        base_delay = 0.1
+        return base_delay * (2 ** retry_count)
+    
+    def should_retry(self, message: PendingMessage) -> bool:
+        """Check if message should be retried."""
+        return message.retry_count < message.max_retries
+
+
 class MessageBatcher:
     """Test-compatible wrapper for batch message handling."""
     
@@ -18,8 +31,9 @@ class MessageBatcher:
         self.config = config
         self.connection_manager = connection_manager
         self._pending_messages: Dict[str, List[PendingMessage]] = defaultdict(list)
+        self._retry_manager = MockRetryManager()
     
-    async def queue_message(self, user_id: str, message: Dict[str, Any]) -> None:
+    async def queue_message(self, user_id: str, message: Dict[str, Any]) -> bool:
         """Queue a message for batch processing."""
         # Get connection ID from user_id for simplicity
         connection_id = f"conn{user_id[-1]}" if user_id else "conn1"
@@ -30,6 +44,7 @@ class MessageBatcher:
             user_id=user_id
         )
         self._pending_messages[connection_id].append(pending_msg)
+        return True
     
     async def _flush_batch(self, connection_id: str) -> None:
         """Flush pending messages for a connection."""
@@ -86,7 +101,8 @@ class MessageBatcher:
         return {
             "pending_messages": pending_count,
             "sending_messages": sending_count,
-            "failed_messages": failed_count
+            "failed_messages": failed_count,
+            "total_messages": pending_count + sending_count + failed_count
         }
 
 

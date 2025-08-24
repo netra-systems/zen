@@ -10,7 +10,7 @@ L3 Test: Real Redis-backed session synchronization across multiple devices.
 Tests cross-device state consistency and conflict resolution.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -34,7 +34,7 @@ JWTService = AsyncMock
 # Session manager replaced with mock
 
 SessionManager = AsyncMock
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis

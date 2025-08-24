@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.websocket_core import get_unified_manager
+from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
 ws_manager = get_unified_manager()
 
 @pytest.fixture

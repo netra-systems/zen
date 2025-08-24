@@ -27,8 +27,9 @@ from netra_backend.app.websocket_core.types import (
     BatchingStrategy,
     MessageState,
     PendingMessage,
+    ConnectionInfo,
 )
-from netra_backend.app.websocket_core import ConnectionInfo, WebSocketManager as ConnectionManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 class TestTransactionalBatchProcessor:
     """Test transactional batch processing patterns."""

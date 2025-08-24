@@ -3,7 +3,7 @@ Base infrastructure and utilities for Example Prompts E2E Tests
 Provides shared fixtures and helper methods for test execution
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

@@ -4,7 +4,7 @@ Tests real LLM agents for model effectiveness and GPT-5 migration workflows.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

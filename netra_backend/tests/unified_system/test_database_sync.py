@@ -7,7 +7,7 @@ WebSocket event propagation, and frontend state consistency.
 Business Value: $12K MRR - Data consistency and real-time synchronization
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -26,7 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.fixtures import (
 
     clean_database_state,

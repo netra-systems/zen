@@ -3,7 +3,7 @@ WebSocket connection basic functionality tests
 Tests core connection management, pooling, heartbeat, and cleanup
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys

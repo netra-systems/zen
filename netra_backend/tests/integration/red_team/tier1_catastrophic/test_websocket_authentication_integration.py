@@ -21,7 +21,7 @@ from typing import Dict, Any
 
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.services.user_auth_service import UserAuthService
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.ws_auth import WebSocketAuth
 
 # Import absolute paths

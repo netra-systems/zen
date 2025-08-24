@@ -10,7 +10,7 @@ L3 Test: Real cross-service session invalidation with PostgreSQL, Redis, ClickHo
 Tests complete logout propagation and audit trail persistence.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -36,7 +36,7 @@ JWTService = AsyncMock
 # Session manager replaced with mock
 
 SessionManager = AsyncMock
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.db.models_postgres import User, ResearchSession as Session
 from tests.e2e.websocket_resilience.websocket_recovery_fixtures import SecurityAuditLogger

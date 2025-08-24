@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 from netra_backend.app.db.models_postgres import Run, Thread
-from netra_backend.app.websocket_core import get_websocket_manager
+from netra_backend.app.websocket_core.manager import get_websocket_manager
 
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService

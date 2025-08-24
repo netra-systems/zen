@@ -21,7 +21,7 @@ from fastapi import WebSocket
 
 from netra_backend.app.websocket_core_info import ConnectionInfo
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 class TestWebSocketConnectionLifecycle:
     """Test suite for WebSocket connection lifecycle management."""

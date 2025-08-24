@@ -46,7 +46,7 @@ from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 from netra_backend.app.schemas.registry import UserCreate
 from netra_backend.app.services.cost_calculator import CostCalculatorService, CostTier
 from netra_backend.app.services.user_service import user_service
-from netra_backend.app.websocket_core import ConnectionInfo
+from netra_backend.app.websocket_core.types import ConnectionInfo
 from netra_backend.app.websocket_core.rate_limiter import RateLimiter
 
 class TestFirstTimeUserRealCritical:

@@ -182,9 +182,42 @@ class GCPDeployer:
         print("🔍 Using centralized authentication configuration...")
         return GCPAuthConfig.ensure_authentication()
     
+    def validate_deployment_configuration(self) -> bool:
+        """Validate deployment configuration and environment variables."""
+        print("\n🔍 Validating deployment configuration...")
+        
+        # Required environment variables for staging deployment
+        required_env_vars = [
+            "GOOGLE_CLIENT_ID",
+            "GOOGLE_CLIENT_SECRET", 
+            "GEMINI_API_KEY"
+        ]
+        
+        missing_vars = []
+        for var in required_env_vars:
+            if not os.getenv(var):
+                missing_vars.append(var)
+        
+        if missing_vars:
+            print(f"  ❌ Missing required environment variables: {missing_vars}")
+            print("     Set these variables before deploying to staging")
+            return False
+        
+        # Validate database URL format (prevent localhost in staging)
+        database_url = os.getenv("DATABASE_URL", "")
+        if "localhost" in database_url:
+            print("  ⚠️ DATABASE_URL contains localhost - will use staging default")
+        
+        print("  ✅ Deployment configuration valid")
+        return True
+    
     def run_pre_deployment_checks(self) -> bool:
         """Run pre-deployment checks to ensure code quality."""
         print("\n🔍 Running pre-deployment checks...")
+        
+        # First validate configuration
+        if not self.validate_deployment_configuration():
+            return False
         
         checks = [
             {
@@ -554,7 +587,7 @@ CMD ["npm", "start"]
             # Backend needs connections to databases and all required secrets
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=session-secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_DEFAULT_PASSWORD=clickhouse-default-password-staging:latest"
+                "--set-secrets", "DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=session-secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_DEFAULT_PASSWORD=clickhouse-default-password-staging:latest,REDIS_URL=redis-url-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,REDIS_PASSWORD=redis-password-staging:latest"
             ])
         elif service.name == "auth":
             # Auth service needs database, JWT secrets, OAuth credentials, and enhanced security
@@ -721,7 +754,15 @@ CMD ["npm", "start"]
             "google-client-secret-staging": os.getenv("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_REAL_GOOGLE_CLIENT_SECRET"),
             # Enhanced JWT security for auth service
             "service-secret-staging": "REPLACE_WITH_SECURE_32_BYTE_HEX_STRING",
-            "service-id-staging": f"netra-auth-staging-{int(time.time())}"
+            "service-id-staging": f"netra-auth-staging-{int(time.time())}",
+            # CRITICAL: Missing secrets that were causing deployment failures
+            "redis-url-staging": "redis://default:REPLACE_WITH_REDIS_PASSWORD@10.128.0.3:6379/0",
+            "clickhouse-host-staging": "clickhouse.staging.netrasystems.ai",
+            "clickhouse-port-staging": "8123",
+            "clickhouse-default-password-staging": "REPLACE_WITH_CLICKHOUSE_PASSWORD",
+            # Additional required secrets for comprehensive staging support
+            "gemini-api-key-staging": os.getenv("GEMINI_API_KEY", "REPLACE_WITH_REAL_GEMINI_KEY"),
+            "redis-password-staging": "REPLACE_WITH_REDIS_PASSWORD"
         }
         
         for name, value in secrets.items():

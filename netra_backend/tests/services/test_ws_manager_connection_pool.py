@@ -5,7 +5,7 @@ Modular test suite split into focused test modules for maintainability
 
 # Import all test classes from modular test files to maintain backward compatibility
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys

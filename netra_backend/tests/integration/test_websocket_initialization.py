@@ -124,7 +124,7 @@ class TestWebSocketInitialization:
         """
         Test that WebSocket manager initializes correctly without large_message_handler.
         """
-        from netra_backend.app.websocket_core import get_websocket_manager
+        from netra_backend.app.websocket_core.manager import get_websocket_manager
         
         # Get the WebSocket manager instance
         manager = get_websocket_manager()

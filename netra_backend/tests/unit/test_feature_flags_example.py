@@ -116,7 +116,7 @@ def test_websocket_integration():
     
     Only runs during integration testing and when websocket_streaming is enabled.
     """
-    from netra_backend.app.websocket_core import WebSocketManager as WebSocketConnection
+    from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketConnection
     
     conn = WebSocketConnection()
     conn.connect("ws://localhost:8000/ws")

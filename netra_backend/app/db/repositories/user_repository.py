@@ -19,8 +19,8 @@ logger = central_logger.get_logger(__name__)
 class UserRepository(BaseRepository[User]):
     """Repository for User entity operations."""
     
-    def __init__(self, session: AsyncSession):
-        super().__init__(User, session)
+    def __init__(self):
+        super().__init__(User)
     
     async def get_by_email(self, email: str) -> Optional[User]:
         """Get user by email address."""

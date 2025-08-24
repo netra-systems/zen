@@ -99,8 +99,11 @@ class AuthDatabaseManager:
         
         logger.debug(f"Converting database URL for async: {database_url[:20]}...")
         
+        # CRITICAL FIX: Resolve SSL parameter conflicts first (staging deployment issue)
+        resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(database_url, "asyncpg")
+        
         # Use shared core database manager for URL conversion
-        converted_url = CoreDatabaseManager.format_url_for_async_driver(database_url)
+        converted_url = CoreDatabaseManager.format_url_for_async_driver(resolved_url)
         
         logger.debug(f"Converted async database URL: {converted_url[:20]}...")
         return converted_url

@@ -10,7 +10,7 @@ L2 Test: Uses real internal components within same process but mocks external LL
 Validates agent communication patterns, tool execution, state management, and error propagation.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -39,7 +39,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas.registry import AgentResult, DeepAgentState
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 logger = logging.getLogger(__name__)
 

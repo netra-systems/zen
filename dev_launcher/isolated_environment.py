@@ -905,30 +905,22 @@ def get_subprocess_env(additional_vars: Optional[Dict[str, str]] = None) -> Dict
     return get_env().get_subprocess_env(additional_vars)
 
 
-# Legacy compatibility function
-def get_environment_manager(isolation_mode: Optional[bool] = None) -> IsolatedEnvironment:
+# Legacy compatibility function  
+def get_environment_manager(isolation_mode: Optional[bool] = None):
     """
     Legacy compatibility function for get_environment_manager.
     
-    This function maintains backwards compatibility with existing code that expects
-    get_environment_manager() with isolation_mode parameter.
+    This function now delegates to the EnvironmentManager wrapper for full compatibility.
     
     Args:
         isolation_mode: If provided, enables/disables isolation mode
         
     Returns:
-        The global IsolatedEnvironment instance
+        EnvironmentManager instance wrapping IsolatedEnvironment
     """
-    env = get_env()
-    
-    # Enable/disable isolation if mode is specified
-    if isolation_mode is not None:
-        if isolation_mode and not env.is_isolation_enabled():
-            env.enable_isolation()
-        elif not isolation_mode and env.is_isolation_enabled():
-            env.disable_isolation()
-    
-    return env
+    # Import here to avoid circular dependency
+    from dev_launcher.environment_manager import get_environment_manager as get_manager
+    return get_manager(isolation_mode)
 
 
 # Backwards Compatibility: EnvironmentValidator class

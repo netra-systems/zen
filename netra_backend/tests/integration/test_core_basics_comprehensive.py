@@ -3,7 +3,7 @@ L3 Integration Tests - Core Basic Functionality (120 Tests)
 Designed to reveal system flaws in auth, login, websockets, and core operations
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 
 import asyncio

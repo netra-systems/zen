@@ -10,7 +10,7 @@ These tests verify that JWT tokens are properly encoded for WebSocket subprotoco
 to prevent "SyntaxError: Failed to construct 'WebSocket'" errors.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

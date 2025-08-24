@@ -15,7 +15,7 @@ These L3 integration tests validate:
 - Proper rate limiting and backpressure handling
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -55,7 +55,7 @@ from netra_backend.app.websocket_core.high_performance_broadcast import (
 
 )
 # LoadBalancedConnectionManager has been consolidated - using WebSocketManager
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as LoadBalancedConnectionManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager as LoadBalancedConnectionManager
 from enum import Enum
 
 class LoadBalancingStrategy(Enum):

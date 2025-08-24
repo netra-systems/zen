@@ -10,7 +10,7 @@ L3 Test: Real JWT refresh while maintaining active WebSocket connections.
 Tests seamless token rotation without disrupting real-time features.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -27,7 +27,7 @@ from unittest.mock import patch, AsyncMock
 import redis.asyncio as redis
 
 from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator, TokenType
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis

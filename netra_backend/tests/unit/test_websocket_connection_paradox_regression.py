@@ -7,7 +7,7 @@ Issue ID: websocket-manager-attribute-paradox
 Reference: SPEC/learnings.xml
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
@@ -18,8 +18,8 @@ import pytest
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.websocket_core import ConnectionInfo
+from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.types import ConnectionInfo
 
 class TestWebSocketConnectionParadoxPrevention:
 

@@ -10,7 +10,7 @@ Critical Path: Connection establishment -> Heartbeat monitoring -> Zombie detect
 Coverage: Heartbeat intervals, zombie detection <60s, connection pruning, resource reclamation, reconnection scenarios
 """
 
-from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -30,7 +30,7 @@ import pytest
 from netra_backend.app.schemas import User
 
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 logger = logging.getLogger(__name__)

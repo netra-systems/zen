@@ -10,7 +10,7 @@ Critical Path: Config change detection -> Validation -> Service notification -> 
 Coverage: Dynamic configuration updates, service coordination, rollback capabilities, consistency validation
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -32,7 +32,7 @@ from netra_backend.app.core.config import get_settings
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 logger = logging.getLogger(__name__)
 

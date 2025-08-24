@@ -13,7 +13,7 @@ Uses REAL agent components with NO MOCKS as required by unified system testing.
 Follows CLAUDE.md patterns for async testing and agent integration.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -27,7 +27,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager, manager
+from netra_backend.app.websocket_core.manager import WebSocketManager, manager
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.db.models_postgres import Message, Thread
@@ -168,7 +168,7 @@ def websocket_capture():
 @pytest.fixture
 def real_websocket_manager():
     """Fixture providing real WebSocket manager."""
-    from netra_backend.app.websocket_core import get_unified_manager
+    from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
     manager = get_unified_manager()
     from unittest.mock import MagicMock, AsyncMock
     

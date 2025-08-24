@@ -11,7 +11,7 @@ L2 Test: Real internal compression components with mocked external services.
 Performance target: >50% compression ratio, <10ms compression latency.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -33,7 +33,7 @@ import lz4.frame
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class CompressionAlgorithm(Enum):

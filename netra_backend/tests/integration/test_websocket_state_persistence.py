@@ -14,7 +14,7 @@ COVERAGE TARGET: 100% for message queue and state persistence functionality
 All functions ≤8 lines per CLAUDE.md requirements.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

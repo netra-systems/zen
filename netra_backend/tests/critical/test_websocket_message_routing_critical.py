@@ -24,9 +24,9 @@ from fastapi import WebSocket
 
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.websocket_core import ConnectionInfo
+from netra_backend.app.websocket_core.types import ConnectionInfo
 
-from netra_backend.app.websocket_core.unified.message_handlers import (
+from netra_backend.app.websocket_core.handlers import (
     MessageHandler,
     MessageProcessor,
 )

@@ -5,7 +5,7 @@ Tests the integration between triage, corpus admin, and tool dispatcher agents.
 All functions maintain 25-line limit with single responsibility.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -25,7 +25,7 @@ from netra_backend.app.agents.supervisor_consolidated import (
 
 )
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 class TestAdminAgentIntegration:
 

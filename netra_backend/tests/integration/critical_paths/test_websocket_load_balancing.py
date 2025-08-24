@@ -11,7 +11,7 @@ L2 Test: Real internal load balancing components with mocked external services.
 Performance target: <5ms routing decisions, 95% connection distribution accuracy.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -31,7 +31,7 @@ from uuid import uuid4
 import pytest
 from netra_backend.app.schemas import User
 
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 class LoadBalancingStrategy(Enum):

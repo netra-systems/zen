@@ -15,7 +15,7 @@ from pydantic import BaseModel, EmailStr, Field, ValidationError
 from netra_backend.app.schemas.registry import WebSocketMessageType
 from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
 
-from netra_backend.app.websocket_core.validation import MessageValidator
+from netra_backend.app.websocket_core.utils import validate_message_structure as MessageValidator
 
 class EmailValidationModel(BaseModel):
     """Test model for email validation."""

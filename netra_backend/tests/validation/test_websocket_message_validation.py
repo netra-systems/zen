@@ -15,9 +15,9 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.websocket_core import ConnectionInfo
+from netra_backend.app.websocket_core.types import ConnectionInfo
 
-from netra_backend.app.websocket_core.unified.message_handlers import (
+from netra_backend.app.websocket_core.handlers import (
     MessageBuilder,
     MessageHandler,
     MessageProcessor,

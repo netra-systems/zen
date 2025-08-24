@@ -17,7 +17,7 @@ import pytest
 
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.websocket_core import get_unified_manager
+from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
 manager = get_unified_manager()
 
 async def test_user_joins_thread_room_on_message():

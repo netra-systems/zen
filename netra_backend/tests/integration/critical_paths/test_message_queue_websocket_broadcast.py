@@ -24,7 +24,7 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -49,7 +49,7 @@ from netra_backend.app.schemas.websocket_message_types import (
     ServerMessage,
 
 )
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

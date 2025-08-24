@@ -1,6 +1,6 @@
 """Fixtures Tests - Split from test_critical_integration.py"""
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -40,7 +40,7 @@ from netra_backend.app.services.database.run_repository import RunRepository
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 @pytest.fixture
 

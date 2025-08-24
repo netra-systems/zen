@@ -11,7 +11,7 @@ L3 Test: Uses real Redis for at-least-once delivery guarantees.
 Delivery target: 99.9% delivery rate with retry mechanisms.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -26,7 +26,7 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import redis.asyncio as redis
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.schemas import User
 from test_framework.mock_utils import mock_justified

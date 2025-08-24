@@ -7,7 +7,7 @@ Maximum 300 lines, functions ≤8 lines.
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
     ActionsToMeetGoalsSubAgent,
 )
-from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 from typing import Dict, List
 import uuid
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
@@ -22,7 +22,7 @@ from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.agent_models import AgentMetadata
 from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 
 def create_test_llm_manager() -> LLMManager:
 

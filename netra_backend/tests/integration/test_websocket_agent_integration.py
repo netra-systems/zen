@@ -18,7 +18,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core import get_websocket_manager
+from netra_backend.app.websocket_core.manager import get_websocket_manager
 
 logger = central_logger.get_logger(__name__)
 

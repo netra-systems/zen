@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 This test validates WebSocket connection lifecycle for users.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

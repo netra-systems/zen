@@ -13,7 +13,7 @@ This test suite validates production-ready fixes addressing the
 identified WebSocket reliability concerns.
 """
 
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys
