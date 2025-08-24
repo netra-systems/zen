@@ -38,7 +38,7 @@ import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
 from dev_launcher.config import LauncherConfig
 from dev_launcher.database_connector import DatabaseConnector, DatabaseType, ConnectionStatus
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.port_manager import PortManager
 from dev_launcher.signal_handler import SignalHandler

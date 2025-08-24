@@ -21,7 +21,7 @@ from netra_backend.app.config import get_config
 from netra_backend.app.services.key_manager import KeyManager
 
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.tests.test_route_fixtures import (
+from netra_backend.tests.routes.test_route_fixtures import (
     TEST_DOCUMENT_DATA,
     CommonResponseValidators,
 )

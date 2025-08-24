@@ -10,7 +10,7 @@ from netra_backend.app.core.configuration import unified_config_manager
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 
 from pydantic import BaseModel, Field, validator
 

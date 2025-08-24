@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 """Integration module for startup fixes
 
 This module provides integration points for all the critical startup fixes
@@ -80,19 +80,11 @@ class StartupFixesIntegration:
             "port_conflict_resolution": False
         }
         
-        try:
-            # Check if service discovery system is available
-            from dev_launcher.service_discovery_system import service_discovery
-            status["service_discovery_available"] = True
-            
-            # Test port availability checking with valid port number
-            test_port_available = service_discovery.is_port_available(8080)  # Valid port in range 0-65535
-            if test_port_available:
-                status["port_conflict_resolution"] = True
-                logger.info("Port conflict resolution system is working")
-            
-        except ImportError:
-            logger.warning("Service discovery system not available")
+        # Service discovery removed for microservice independence
+        # Port conflict resolution handled at deployment level
+        status["service_discovery_available"] = False
+        status["port_conflict_resolution"] = False
+        logger.info("Service discovery disabled for microservice independence")
         
         # Check if dynamic port allocation is configured
         try:

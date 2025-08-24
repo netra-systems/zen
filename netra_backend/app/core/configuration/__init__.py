@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 """Unified Configuration Management System
 
 Enterprise-grade configuration management for Netra Apex.

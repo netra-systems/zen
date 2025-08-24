@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 """External Services Configuration Management
 
 **CRITICAL: Unified Service Configuration Management**

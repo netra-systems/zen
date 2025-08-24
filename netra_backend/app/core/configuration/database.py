@@ -17,7 +17,7 @@ Each function ≤8 lines, file ≤300 lines.
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urlunparse
 
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.logging_config import central_logger as logger

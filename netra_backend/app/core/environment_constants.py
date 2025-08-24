@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 """Environment Constants Module
 
 Single source of truth for all environment-related constants and utilities.

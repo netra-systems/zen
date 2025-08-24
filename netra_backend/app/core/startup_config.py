@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 """Startup configuration for robust initialization system.
 
 This module defines configuration settings for the startup manager

@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 """
 LLM Manager Test Helpers - Reusable functions for LLM testing
 Extracted from test_llm_manager_provider_switching.py for 25-line function compliance

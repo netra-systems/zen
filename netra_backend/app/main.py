@@ -18,7 +18,7 @@ from pathlib import Path
 
 # Conditional import of environment management
 try:
-    from dev_launcher.isolated_environment import get_env
+    from netra_backend.app.core.isolated_environment import get_env
     _env_available = True
 except ImportError:
     # Fallback for production environments where dev_launcher might not be available

@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env
+from netra_backend.app.core.isolated_environment import get_env
 """
 Application startup management module.
 Handles initialization of logging, database connections, services, and health checks.

@@ -1,4 +1,4 @@
-from dev_launcher.isolated_environment import get_env, IsolatedEnvironment
+from netra_backend.app.core.isolated_environment import get_env, IsolatedEnvironment
 """Environment Detection Module
 
 Handles environment detection for configuration loading.
