@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Database Connectivity Architecture</name>
+        <type>Core.DatabaseArchitecture</type>
+        <version>1.0</version>
+        <description>Core specification for database connectivity across all environments and drivers</description>
+        <created>2025-08-24</created>
+    </metadata>
+
+    <core_principle>
+        <title>Universal Database Connectivity</title>
+        <description>
+            The platform MUST maintain consistent database connectivity across all environments
+            (development, staging, production) and handle driver incompatibilities transparently.
+            SSL parameter conflicts between asyncpg and psycopg2 drivers MUST be resolved
+            automatically to prevent connection failures.
+        </description>
+    </core_principle>
+
+    <architectural_components>
+        <component name="CoreDatabaseManager">
+            <purpose>Centralized database URL management and driver compatibility</purpose>
+            <location>shared/database/core_database_manager.py</location>
+            <responsibilities>
+                <responsibility>SSL parameter resolution between drivers</responsibility>
+                <responsibility>Cloud SQL Unix socket handling</responsibility>
+                <responsibility>Environment-aware connection strategies</responsibility>
+                <responsibility>URL normalization and validation</responsibility>
+            </responsibilities>
+        </component>
+
+        <component name="DatabaseConfigManager">
+            <purpose>Configuration-aware database management</purpose>
+            <location>netra_backend/app/db/postgres_unified.py</location>
+            <responsibilities>
+                <responsibility>Automatic driver selection based on context</responsibility>
+                <responsibility>Connection pooling management</responsibility>
+                <responsibility>Health check implementation</responsibility>
+                <responsibility>Migration support</responsibility>
+            </responsibilities>
+        </component>
+
+        <component name="AuthDatabaseManager">
+            <purpose>Auth service specific database management</purpose>
+            <location>auth_service/auth_core/database/database_manager.py</location>
+            <responsibilities>
+                <responsibility>Auth service database isolation</responsibility>
+                <responsibility>Method parity with backend DatabaseManager</responsibility>
+                <responsibility>Service-specific connection handling</responsibility>
+            </responsibilities>
+        </component>
+    </architectural_components>
+
+    <connection_strategies>
+        <strategy environment="development">
+            <description>Local PostgreSQL with flexible SSL configuration</description>
+            <connection_type>TCP</connection_type>
+            <ssl_mode>Optional (prefer/disable)</ssl_mode>
+            <url_format>postgresql://user:pass@localhost:5432/db</url_format>
+        </strategy>
+
+        <strategy environment="staging">
+            <description>Cloud SQL with SSL or Unix socket</description>
+            <connection_types>
+                <type>TCP with SSL: postgresql://user:pass@ip:5432/db?sslmode=require</type>
+                <type>Unix Socket: postgresql://user:pass@/db?host=/cloudsql/project:region:instance</type>
+            </connection_types>
+            <ssl_requirement>Required for TCP, None for Unix socket</ssl_requirement>
+        </strategy>
+
+        <strategy environment="production">
+            <description>Cloud SQL with maximum security</description>
+            <connection_type>Unix socket preferred, TCP+SSL fallback</connection_type>
+            <ssl_requirement>Mandatory for TCP connections</ssl_requirement>
+            <additional_security>Certificate validation, encrypted credentials</additional_security>
+        </strategy>
+    </connection_strategies>
+
+    <ssl_parameter_resolution>
+        <problem>
+            asyncpg driver uses 'ssl=' parameter while psycopg2 uses 'sslmode=' parameter.
+            This incompatibility causes connection failures when URLs are shared between
+            sync and async operations.
+        </problem>
+        
+        <solution>
+            <method>CoreDatabaseManager.resolve_ssl_parameter_conflicts()</method>
+            <description>
+                Automatically converts SSL parameters based on the target driver
+                and connection type. Removes ALL SSL parameters for Unix socket
+                connections where SSL is handled at the socket level.
+            </description>
+        </solution>
+
+        <rules>
+            <rule>For asyncpg: Convert sslmode=require to ssl=require</rule>
+            <rule>For psycopg2: Convert ssl=require to sslmode=require</rule>
+            <rule>For Unix sockets (/cloudsql/): Remove ALL SSL parameters</rule>
+            <rule>Preserve other URL components unchanged</rule>
+        </rules>
+
+        <implementation>
+            <code>
+def resolve_ssl_parameter_conflicts(url: str) -> str:
+    """Resolve SSL parameter conflicts between database drivers"""
+    # Unix socket connections - no SSL parameters needed
+    if '/cloudsql/' in url:
+        url = re.sub(r'[?&]ssl(mode)?=[^&]*', '', url)
+        return url.rstrip('?&')
+    
+    # Driver-specific SSL parameter handling
+    if 'asyncpg' in url:
+        url = url.replace('sslmode=', 'ssl=')
+    elif 'psycopg2' in url or 'postgresql://' in url:
+        url = url.replace('ssl=', 'sslmode=')
+    
+    return url
+            </code>
+        </implementation>
+    </ssl_parameter_resolution>
+
+    <url_normalization>
+        <principle>Simplified URLs with automatic driver addition</principle>
+        <approach>
+            <step>Store simplified postgresql:// URLs in configuration</step>
+            <step>Add driver prefixes automatically at runtime</step>
+            <step>Apply SSL parameter resolution after driver selection</step>
+        </approach>
+        
+        <patterns>
+            <pattern context="Async operations">
+                <input>postgresql://user:pass@host/db</input>
+                <output>postgresql+asyncpg://user:pass@host/db</output>
+            </pattern>
+            <pattern context="Migrations">
+                <input>postgresql://user:pass@host/db</input>
+                <output>postgresql+psycopg2://user:pass@host/db</output>
+            </pattern>
+            <pattern context="Cloud SQL Unix">
+                <input>postgresql://user:pass@/db?host=/cloudsql/instance&sslmode=require</input>
+                <output>postgresql+asyncpg://user:pass@/db?host=/cloudsql/instance</output>
+            </pattern>
+        </patterns>
+    </url_normalization>
+
+    <health_checks>
+        <requirement>
+            Health check endpoints MUST handle database connectivity gracefully,
+            including lazy initialization and SSL parameter resolution.
+        </requirement>
+        
+        <implementation>
+            <endpoint>/health/ready</endpoint>
+            <checks>
+                <check>Database connectivity with timeout</check>
+                <check>SSL parameter compatibility</check>
+                <check>Connection pool health</check>
+                <check>Query execution capability</check>
+            </checks>
+        </implementation>
+    </health_checks>
+
+    <migration_support>
+        <requirement>
+            Alembic migrations MUST use synchronous drivers (psycopg2) to prevent
+            greenlet/asyncio compatibility issues.
+        </requirement>
+        
+        <implementation>
+            <code>
+def get_migration_url(base_url: str) -> str:
+    """Convert any PostgreSQL URL to migration-compatible format"""
+    # Remove async driver if present
+    url = base_url.replace('+asyncpg', '')
+    
+    # Ensure psycopg2 driver for migrations
+    if 'postgresql://' in url and '+' not in url:
+        url = url.replace('postgresql://', 'postgresql+psycopg2://')
+    
+    # Apply SSL parameter resolution
+    return CoreDatabaseManager.resolve_ssl_parameter_conflicts(url)
+            </code>
+        </implementation>
+    </migration_support>
+
+    <validation_requirements>
+        <requirement name="Pre-deployment Validation">
+            <description>
+                Database credentials and connectivity MUST be validated before
+                deployment completion to prevent startup failures.
+            </description>
+            <validation_steps>
+                <step>Verify DATABASE_URL secret exists</step>
+                <step>Test connection with resolved SSL parameters</step>
+                <step>Validate credentials are current</step>
+                <step>Ensure no localhost in staging/production</step>
+            </validation_steps>
+        </requirement>
+
+        <requirement name="Environment Detection">
+            <description>
+                Services MUST detect environment correctly to apply appropriate
+                connection strategies and SSL requirements.
+            </description>
+            <detection_methods>
+                <method>NETRA_ENVIRONMENT variable</method>
+                <method>K_SERVICE (Cloud Run indicator)</method>
+                <method>Cloud SQL socket presence</method>
+            </detection_methods>
+        </requirement>
+    </validation_requirements>
+
+    <error_handling>
+        <pattern name="Connection Failure">
+            <error>connect() got an unexpected keyword argument 'sslmode'</error>
+            <cause>Using psycopg2 SSL parameters with asyncpg driver</cause>
+            <solution>Apply resolve_ssl_parameter_conflicts() before connection</solution>
+        </pattern>
+
+        <pattern name="Authentication Failure">
+            <error>password authentication failed for user</error>
+            <cause>Incorrect or outdated credentials in DATABASE_URL</cause>
+            <solution>Update credentials in Secret Manager and validate</solution>
+        </pattern>
+
+        <pattern name="SSL Requirement">
+            <error>SSL connection required but not provided</error>
+            <cause>Missing SSL parameters for staging/production TCP connections</cause>
+            <solution>Add sslmode=require to DATABASE_URL for TCP connections</solution>
+        </pattern>
+    </error_handling>
+
+    <business_value>
+        <segment>Platform/Internal</segment>
+        <business_goal>Operational Excellence and Reliability</business_goal>
+        <metrics>
+            <metric>100% database connectivity success rate</metric>
+            <metric>Zero SSL parameter conflicts</metric>
+            <metric>60% reduction in deployment failures</metric>
+            <metric>Automatic driver compatibility</metric>
+        </metrics>
+    </business_value>
+
+    <compliance_checklist>
+        <check>All services use CoreDatabaseManager for URL resolution</check>
+        <check>SSL parameters resolved before connection attempts</check>
+        <check>Unix socket connections have no SSL parameters</check>
+        <check>Migrations use synchronous drivers</check>
+        <check>Health checks handle lazy initialization</check>
+        <check>Pre-deployment validation implemented</check>
+        <check>Environment detection working correctly</check>
+    </compliance_checklist>
+</specification>

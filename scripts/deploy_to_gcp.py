@@ -742,15 +742,18 @@ CMD ["npm", "start"]
         # NEVER store actual secrets in source code
         import os
         
+        # CRITICAL FIX: JWT secrets MUST be identical between services
+        jwt_secret_value = "your-secure-jwt-secret-key-staging-64-chars-minimum-for-security"
+        
         secrets = {
             # Note: Using standard psycopg2 format with sslmode=require
             # DatabaseManager will automatically convert to ssl=require for asyncpg
             "database-url-staging": "postgresql://netra_user:REPLACE_WITH_REAL_PASSWORD@34.132.142.103:5432/netra?sslmode=require",
-            "jwt-secret-key-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",
+            "jwt-secret-key-staging": jwt_secret_value,  # Backend uses JWT_SECRET_KEY
             "session-secret-key-staging": "your-secure-session-secret-key-staging-32-chars-minimum", 
             "openai-api-key-staging": "sk-REPLACE_WITH_REAL_OPENAI_KEY",
             "fernet-key-staging": "REPLACE_WITH_REAL_FERNET_KEY_BASE64_32_BYTES",
-            "jwt-secret-staging": "your-secure-jwt-secret-key-staging-32-chars-minimum",  # Auth service uses this name
+            "jwt-secret-staging": jwt_secret_value,  # Auth service uses JWT_SECRET - MUST BE SAME VALUE!
             "google-client-id-staging": os.getenv("GOOGLE_CLIENT_ID", "REPLACE_WITH_REAL_GOOGLE_CLIENT_ID"),
             "google-client-secret-staging": os.getenv("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_REAL_GOOGLE_CLIENT_SECRET"),
             # Enhanced JWT security for auth service

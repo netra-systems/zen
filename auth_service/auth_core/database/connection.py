@@ -65,12 +65,14 @@ class AuthDatabase:
             connect_args = {"check_same_thread": False}
         elif self.is_cloud_run or force_postgres_in_test:
             # Cloud Run with Cloud SQL OR test with PostgreSQL URL
-            database_url = AuthDatabaseManager.get_auth_database_url_async()
+            from auth_service.auth_core.config import AuthConfig
+            database_url = AuthConfig.get_database_url_for_connection()
             pool_class = NullPool  # Serverless requires NullPool
             connect_args = self._get_cloud_sql_connect_args()
         else:
             # Local development with PostgreSQL
-            database_url = AuthDatabaseManager.get_auth_database_url_async()
+            from auth_service.auth_core.config import AuthConfig
+            database_url = AuthConfig.get_database_url_for_connection()
             pool_class = AsyncAdaptedQueuePool
             connect_args = self._get_local_connect_args()
         

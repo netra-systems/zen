@@ -59,6 +59,8 @@ We prioritize logical clarity. Focus on maximizing clarity and minimizing Cyclom
 *   **Single Source of Truth (SSOT):** Ensure implementations are duplication-free. Extend existing functions with options/parameters instead of creating new variants.
 *   **Cleanliness:** Maintain a clean file system with unique, relevant files. Edit existing files or delete legacy ones entirely, ensuring finalized filenames free of suffixes.
 *   **Type Safety:** Adhere strictly to `SPEC/type_safety.xml`.
+*   **Environment Management:** Follow [`SPEC/unified_environment_management.xml`](SPEC/unified_environment_management.xml) - ALL environment access through IsolatedEnvironment.
+*   **Database Connectivity:** Use [`SPEC/database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml) for SSL parameter resolution.
 *   **Compliance Check:** Run `python scripts/check_architecture_compliance.py` to check status.
 
 ### 2.4. Strategic Trade-offs
@@ -222,6 +224,7 @@ CRITICAL: Always respect established directory organization patterns. Files MUST
 - **ALL Python files MUST use absolute imports** starting from the package root
 - **NEVER use relative imports** (. or ..) in ANY Python file, including tests
 - **This rule overrides any existing patterns in the codebase**
+- **See [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) for comprehensive import management rules**
 
 **Correct Import Examples:**
 ```python
@@ -269,7 +272,7 @@ python unified_test_runner.py
 ```
 
 ### 6.2. Unified Test Runner
-→ See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml).
+→ See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml) and [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml).
 
 *   **DEFAULT (Fast Feedback):** `python unified_test_runner.py --level integration --no-coverage --fast-fail`
 *   **AGENT CHANGES:** `python unified_test_runner.py --level agents --real-llm`
@@ -299,6 +302,7 @@ Ensure adherence to these core specifications throughout the development process
 | Spec | Purpose | When |
 | :--- | :--- | :--- |
 | [`learnings/index.xml`](SPEC/learnings/index.xml) | Index of all learnings | ALWAYS check first |
+| [`core.xml`](SPEC/core.xml) | Core system architecture | System design decisions |
 | [`type_safety.xml`](SPEC/type_safety.xml) | Type safety, duplication-free | BEFORE any code |
 | [`conventions.xml`](SPEC/conventions.xml) | Standards and guidelines | BEFORE any code |
 | [`code_changes.xml`](SPEC/code_changes.xml) | Change checklist | BEFORE changes |
@@ -306,13 +310,17 @@ Ensure adherence to these core specifications throughout the development process
 | [`anti_regression.xml`](SPEC/anti_regression.xml) | Ensure system stability | Before commits |
 | [`independent_services.xml`](SPEC/independent_services.xml) | Microservice independence | When modifying services |
 | [`string_literals_index.xml`](SPEC/string_literals_index.xml) | Index of platform constants | BEFORE using string literals |
+| [`import_management_architecture.xml`](SPEC/import_management_architecture.xml) | Import management rules | ALWAYS - zero tolerance for relative imports |
 
 ### 7.2. Domain Specs
 
 | Domain | Key Specs |
 | :--- | :--- |
-| **Testing** | [`testing.xml`](SPEC/testing.xml), [`coverage_requirements.xml`](SPEC/coverage_requirements.xml), [`learnings/testing.xml`](SPEC/learnings/testing.xml) |
-| **Database** | [`clickhouse.xml`](SPEC/clickhouse.xml), [`postgres.xml`](SPEC/postgres.xml) |
+| **Core Architecture** | [`core.xml`](SPEC/core.xml), [`unified_environment_management.xml`](SPEC/unified_environment_management.xml) |
+| **Testing** | [`test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml), [`testing.xml`](SPEC/testing.xml), [`coverage_requirements.xml`](SPEC/coverage_requirements.xml), [`learnings/testing.xml`](SPEC/learnings/testing.xml) |
+| **Database** | [`database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml), [`clickhouse.xml`](SPEC/clickhouse.xml), [`postgres.xml`](SPEC/postgres.xml) |
+| **Deployment** | [`deployment_architecture.xml`](SPEC/deployment_architecture.xml), [`gcp_deployment.xml`](SPEC/gcp_deployment.xml) |
+| **Imports** | [`import_management_architecture.xml`](SPEC/import_management_architecture.xml) - CRITICAL: Absolute imports only |
 | **WebSocket** | [`websockets.xml`](SPEC/websockets.xml), [`websocket_communication.xml`](SPEC/websocket_communication.xml) |
 | **Security** | [`security.xml`](SPEC/security.xml), [`PRODUCTION_SECRETS_ISOLATION.xml`](SPEC/PRODUCTION_SECRETS_ISOLATION.xml) |
 | **GitHub Actions** | [`github_actions.xml`](SPEC/github_actions.xml) - Check permissions first |

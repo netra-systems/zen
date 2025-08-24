@@ -240,3 +240,39 @@ class AuthDatabaseManager:
             Database URL ready for asyncpg connection
         """
         return AuthDatabaseManager.get_auth_database_url_async()
+    
+    @staticmethod
+    def validate_staging_readiness() -> bool:
+        """Validate auth service database configuration for staging deployment.
+        
+        Performs comprehensive validation including:
+        - Database URL format and SSL parameter handling
+        - Credential validation
+        - Cloud SQL compatibility checks
+        
+        Returns:
+            True if ready for staging deployment
+        """
+        try:
+            from auth_service.auth_core.database.staging_validation import StagingDatabaseValidator
+            
+            logger.info("Validating auth service for staging deployment...")
+            report = StagingDatabaseValidator.pre_deployment_validation()
+            
+            if report["overall_status"] == "failed":
+                logger.error("Staging validation failed:")
+                for issue in report.get("critical_issues", []):
+                    logger.error(f"  - {issue}")
+                return False
+            elif report["overall_status"] == "warning":
+                logger.warning("Staging validation passed with warnings:")
+                for warning in report.get("warnings", []):
+                    logger.warning(f"  - {warning}")
+            else:
+                logger.info("Staging validation passed successfully")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Staging validation failed with error: {e}")
+            return False

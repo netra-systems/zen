@@ -71,3 +71,15 @@ def get_thread_service(request: Request) -> "ThreadService":
 def get_corpus_service(request: Request) -> "CorpusService":
     """Get corpus service from app state"""
     return request.app.state.corpus_service
+
+def get_message_handler_service(request: Request):
+    """Get message handler service from app state or create one."""
+    # Try to get from app state first
+    if hasattr(request.app.state, 'message_handler_service'):
+        return request.app.state.message_handler_service
+    
+    # Create one using available dependencies
+    from netra_backend.app.services.message_handlers import MessageHandlerService
+    supervisor = get_agent_supervisor(request)
+    thread_service = get_thread_service(request)
+    return MessageHandlerService(supervisor, thread_service)

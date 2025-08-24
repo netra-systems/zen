@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "messages",
-    "generated_at": "2025-08-24T02:12:31.950618",
+    "generated_at": "2025-08-24T04:00:03.042543",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 12718
+    "total_literals": 12782
   },
   "literals": {
     "! Found LLMCostOptimizer - updating imports to use correct name": {
@@ -468,6 +468,13 @@
       "category": "messages",
       "locations": [
         "scripts/generate_startup_integration_tests.py:281"
+      ]
+    },
+    "# Cloud Run optimizations\n            # Use SIGTERM for graceful shutdown (Cloud Run sends this)\n            STOPSIGNAL SIGTERM\n            \n            # Health check for better container lifecycle management\n            HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \\\n                CMD curl -f http://localhost:$PORT/health || exit 1\n            \n            # Ensure proper signal handling\n            ENV PYTHONUNBUFFERED=1\n            ENV PYTHONDONTWRITEBYTECODE=1": {
+      "value": "# Cloud Run optimizations\n            # Use SIGTERM for graceful shutdown (Cloud Run sends this)\n            STOPSIGNAL SIGTERM\n            \n            # Health check for better container lifecycle management\n            HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \\\n                CMD curl -f http://localhost:$PORT/health || exit 1\n            \n            # Ensure proper signal handling\n            ENV PYTHONUNBUFFERED=1\n            ENV PYTHONDONTWRITEBYTECODE=1",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:231"
       ]
     },
     "# Cloud Services": {
@@ -3555,7 +3562,7 @@
       "value": "', switching to '",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:156"
+        "scripts/deploy_to_gcp.py:157"
       ]
     },
     "', using development default": {
@@ -4105,7 +4112,7 @@
       "value": "), but continuing in graceful mode",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:587"
+        "netra_backend/app/startup_module.py:593"
       ]
     },
     "):\n        \"\"\"Test": {
@@ -4624,8 +4631,8 @@
       "value": ", async_session_factory:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:328",
-        "netra_backend/app/db/postgres_core.py:344"
+        "netra_backend/app/db/postgres_core.py:332",
+        "netra_backend/app/db/postgres_core.py:348"
       ]
     },
     ", attempting email lookup": {
@@ -4756,7 +4763,7 @@
       "value": ", expected:",
       "category": "messages",
       "locations": [
-        "scripts/validate_staging_deployment.py:96"
+        "scripts/validate_staging_deployment.py:103"
       ]
     },
     ", failure[\"error_message\"][:500],": {
@@ -4847,7 +4854,7 @@
       "value": ", retrying...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:106"
+        "netra_backend/app/db/postgres_core.py:107"
       ]
     },
     ", retrying:": {
@@ -6419,7 +6426,7 @@
       "value": "- checking if already enabled...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:300"
+        "scripts/deploy_to_gcp.py:301"
       ]
     },
     "- continuing with degraded functionality": {
@@ -6603,7 +6610,7 @@
       "value": "- using mock database for graceful degradation",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:401"
+        "netra_backend/app/startup_module.py:407"
       ]
     },
     "- workload_type: One of [failed_request, tool_use, simple_chat, rag_pipeline]": {
@@ -6918,7 +6925,7 @@
       "value": "-c default_transaction_isolation=read_committed",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:69"
+        "netra_backend/app/db/postgres_core.py:70"
       ]
     },
     "-specific best practices and industry standards.": {
@@ -6983,7 +6990,7 @@
       "value": ". Attempting local fallback...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:110"
+        "netra_backend/app/redis_manager.py:108"
       ]
     },
     ". Average predicted latency:": {
@@ -7035,7 +7042,7 @@
         "netra_backend/app/agents/triage_sub_agent/error_reporting.py:63",
         "netra_backend/app/core/interfaces_execution.py:254",
         "netra_backend/app/core/reliability_retry.py:127",
-        "netra_backend/app/db/database_manager.py:314",
+        "netra_backend/app/db/database_manager.py:308",
         "netra_backend/app/llm/enhanced_retry.py:197",
         "netra_backend/app/llm/fallback_handler.py:173",
         "netra_backend/app/llm/fallback_strategies.py:103"
@@ -7045,7 +7052,7 @@
       "value": ". Service will operate without Redis.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:90"
+        "netra_backend/app/redis_manager.py:87"
       ]
     },
     ". This endpoint expects JSON-RPC format, not regular JSON. Use /ws for regular JSON messages.": {
@@ -7265,7 +7272,7 @@
       "value": "/ws (legacy insecure)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/websocket.py:311"
+        "netra_backend/app/routes/websocket.py:326"
       ]
     },
     "0 2px 6px 0 rgba(0, 0, 0, 0.05)": {
@@ -7606,6 +7613,13 @@
         "scripts/demo_real_llm_testing.py:179"
       ]
     },
+    "1. Test locally to ensure shutdown works correctly": {
+      "value": "1. Test locally to ensure shutdown works correctly",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:278"
+      ]
+    },
     "1. Try logging in at: https://app.staging.netrasystems.ai": {
       "value": "1. Try logging in at: https://app.staging.netrasystems.ai",
       "category": "messages",
@@ -7631,7 +7645,7 @@
       "value": "1. Update secrets in Secret Manager with real values",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:904"
+        "scripts/deploy_to_gcp.py:909"
       ]
     },
     "1. Write test BEFORE implementation (@tdd_test decorator)": {
@@ -7849,7 +7863,14 @@
       "value": "2. Configure Cloud SQL and Redis instances",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:905"
+        "scripts/deploy_to_gcp.py:910"
+      ]
+    },
+    "2. Deploy to staging and verify Cloud Run signal handling": {
+      "value": "2. Deploy to staging and verify Cloud Run signal handling",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:279"
       ]
     },
     "2. Deploy using the official deployment script": {
@@ -8321,6 +8342,13 @@
         "scripts/monitor_oauth_flow.py:194"
       ]
     },
+    "3. Monitor logs for graceful shutdown messages": {
+      "value": "3. Monitor logs for graceful shutdown messages",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:280"
+      ]
+    },
     "3. Optional: Add Google OAuth credentials (if needed):": {
       "value": "3. Optional: Add Google OAuth credentials (if needed):",
       "category": "messages",
@@ -8374,7 +8402,7 @@
       "value": "3. Set up custom domain and SSL certificates",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:906"
+        "scripts/deploy_to_gcp.py:911"
       ]
     },
     "3. Test thoroughly after splitting": {
@@ -8486,7 +8514,7 @@
       "value": "4. Configure authentication and remove --allow-unauthenticated",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:907"
+        "scripts/deploy_to_gcp.py:912"
       ]
     },
     "4. Consider creating a schema index for easier discovery": {
@@ -8703,7 +8731,7 @@
       "value": "5. Set up monitoring and alerting",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:908"
+        "scripts/deploy_to_gcp.py:913"
       ]
     },
     "5. Tests must now pass - quality gate enforced": {
@@ -9021,7 +9049,7 @@
       "value": ": No URL available",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:809"
+        "scripts/deploy_to_gcp.py:814"
       ]
     },
     ": Not configured": {
@@ -9058,7 +9086,7 @@
       "value": ": Permission denied",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:312"
+        "scripts/deploy_to_gcp.py:313"
       ]
     },
     ": Please use absolute imports in new code": {
@@ -11087,7 +11115,7 @@
       "value": "After _initialize_async_engine(), async_engine:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:344"
+        "netra_backend/app/db/postgres_core.py:348"
       ]
     },
     "After multiple attempts to optimize {context}, let's try a different approach.": {
@@ -11158,6 +11186,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/agents/supervisor/agent_manager.py:1"
+      ]
+    },
+    "Agent Message Handler for WebSocket Communication\n\nBusiness Value Justification:\n- Segment: Platform/Internal\n- Business Goal: Development Velocity & Agent Integration\n- Value Impact: Connects WebSocket infrastructure to agent execution\n- Strategic Impact: Enables real-time AI agent communication\n\nIntegrates the WebSocket message router with the agent execution engine.\nHandles \"start_agent\" and \"user_message\" message types with proper database session management.": {
+      "value": "Agent Message Handler for WebSocket Communication\n\nBusiness Value Justification:\n- Segment: Platform/Internal\n- Business Goal: Development Velocity & Agent Integration\n- Value Impact: Connects WebSocket infrastructure to agent execution\n- Strategic Impact: Enables real-time AI agent communication\n\nIntegrates the WebSocket message router with the agent execution engine.\nHandles \"start_agent\" and \"user_message\" message types with proper database session management.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/agent_handler.py:1"
       ]
     },
     "Agent Observability Module\n\nHandles agent logging, metrics, and observability functionality.": {
@@ -11784,14 +11819,14 @@
       "value": "Allow system to run in degraded mode if non-critical services fail",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/Config.py:309"
+        "netra_backend/app/schemas/Config.py:357"
       ]
     },
-    "Allowed CORS origins - can be list or comma-separated string": {
-      "value": "Allowed CORS origins - can be list or comma-separated string",
+    "Allowed CORS origins - comma-separated string or '*' for all": {
+      "value": "Allowed CORS origins - comma-separated string or '*' for all",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/Config.py:241"
+        "netra_backend/app/schemas/Config.py:255"
       ]
     },
     "Allowing Next.js to compile...": {
@@ -12738,7 +12773,7 @@
       "value": "Application shutting down due to startup failure.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:602"
+        "netra_backend/app/startup_module.py:608"
       ]
     },
     "Application startup management module.\nHandles initialization of logging, database connections, services, and health checks.": {
@@ -12934,7 +12969,7 @@
       "value": "Applying startup fixes for critical cold start issues...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:717"
+        "netra_backend/app/startup_module.py:723"
       ]
     },
     "Approve to proceed or reply 'modify' to adjust.": {
@@ -13281,7 +13316,7 @@
       "value": "Async connection checked out from pool: PID=",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_events.py:103"
+        "netra_backend/app/db/postgres_events.py:105"
       ]
     },
     "Async connection pooling utilities for resource management.": {
@@ -13323,7 +13358,7 @@
       "value": "Async database connection established with safety limits:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_events.py:72"
+        "netra_backend/app/db/postgres_events.py:74"
       ]
     },
     "Async engine not available, skipping": {
@@ -15038,6 +15073,13 @@
         "netra_backend/app/middleware/ip_blocking.py:63"
       ]
     },
+    "Both 'sslmode' and 'ssl' parameters present - conflict detected": {
+      "value": "Both 'sslmode' and 'ssl' parameters present - conflict detected",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_staging_deployment.py:400"
+      ]
+    },
     "Both database_password and password in database_url specified": {
       "value": "Both database_password and password in database_url specified",
       "category": "messages",
@@ -15323,7 +15365,7 @@
       "value": "Build images locally (5-10x faster than Cloud Build)",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:985"
+        "scripts/deploy_to_gcp.py:990"
       ]
     },
     "Build index usage statistics query.": {
@@ -15722,7 +15764,7 @@
       "value": "CRITICAL: Database URL validation failed. URL may contain incompatible parameters for asyncpg. URL:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:260"
+        "netra_backend/app/db/postgres_core.py:264"
       ]
     },
     "CRITICAL: Health checker detected sslmode error - this indicates URL conversion was bypassed:": {
@@ -15856,7 +15898,7 @@
       "value": "Cache query result.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:73",
+        "netra_backend/app/db/cache_core.py:92",
         "netra_backend/app/db/cache_storage.py:135"
       ]
     },
@@ -15902,6 +15944,13 @@
         "netra_backend/app/services/api_gateway/cache_strategies.py:1"
       ]
     },
+    "Cache strategy: lru, ttl, or adaptive": {
+      "value": "Cache strategy: lru, ttl, or adaptive",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/schemas/Config.py:341"
+      ]
+    },
     "Cache structured response if appropriate.": {
       "value": "Cache structured response if appropriate.",
       "category": "messages",
@@ -15920,14 +15969,14 @@
       "value": "Cache the query result with tags.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:145"
+        "netra_backend/app/db/cache_core.py:164"
       ]
     },
     "Cache the query result.": {
       "value": "Cache the query result.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:129"
+        "netra_backend/app/db/cache_core.py:148"
       ]
     },
     "Cache the response.": {
@@ -16517,14 +16566,14 @@
       "value": "Calling initialize_postgres()...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:394"
+        "netra_backend/app/startup_module.py:400"
       ]
     },
     "Calling run_startup_checks...": {
       "value": "Calling run_startup_checks...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:578"
+        "netra_backend/app/startup_module.py:584"
       ]
     },
     "Can you help me with my order?": {
@@ -17206,7 +17255,7 @@
       "value": "Check cache for existing result if not forcing refresh.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:115"
+        "netra_backend/app/db/cache_core.py:134"
       ]
     },
     "Check cache for existing result.": {
@@ -18641,7 +18690,7 @@
       "value": "Checking database migrations...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:344"
+        "netra_backend/app/startup_module.py:350"
       ]
     },
     "Checking databases...": {
@@ -19117,6 +19166,13 @@
         "netra_backend/app/websocket_core/manager.py:375"
       ]
     },
+    "Clean up data older than specified days.\n        \n        Args:\n            older_than_days: Delete data older than this many days\n            \n        Returns:\n            Cleanup result with status": {
+      "value": "Clean up data older than specified days.\n        \n        Args:\n            older_than_days: Delete data older than this many days\n            \n        Returns:\n            Cleanup result with status",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/data_ingestion_service.py:155"
+      ]
+    },
     "Clean up database entries from context metadata.": {
       "value": "Clean up database entries from context metadata.",
       "category": "messages",
@@ -19340,7 +19396,7 @@
       "value": "Cleanup Redis connections.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:619"
+        "netra_backend/app/startup_module.py:625"
       ]
     },
     "Cleanup after execution.": {
@@ -19470,7 +19526,7 @@
       "value": "Clear all cached entries.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:87",
+        "netra_backend/app/db/cache_core.py:106",
         "netra_backend/app/db/cache_retrieval.py:211",
         "netra_backend/app/routes/database_monitoring/cache_routes.py:104",
         "netra_backend/app/routes/database_monitoring/router.py:101"
@@ -19748,7 +19804,7 @@
       "value": "ClickHouse initialization failed but continuing (optional service):",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:461"
+        "netra_backend/app/startup_module.py:467"
       ]
     },
     "ClickHouse is disabled (mode: disabled) - skipping initialization": {
@@ -19863,11 +19919,25 @@
         "netra_backend/app/services/database/rollback_manager_clickhouse.py:1"
       ]
     },
+    "Client ID appears to be for development environment": {
+      "value": "Client ID appears to be for development environment",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_staging_deployment.py:364"
+      ]
+    },
     "Client modules for external service communication.": {
       "value": "Client modules for external service communication.",
       "category": "messages",
       "locations": [
         "netra_backend/app/clients/__init__.py:1"
+      ]
+    },
+    "Client secret appears to be for development environment": {
+      "value": "Client secret appears to be for development environment",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_staging_deployment.py:367"
       ]
     },
     "Clone corpus with ownership verification.": {
@@ -20144,6 +20214,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/configuration/database.py:184"
+      ]
+    },
+    "Cloud SQL Unix socket should not have SSL parameters": {
+      "value": "Cloud SQL Unix socket should not have SSL parameters",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_staging_deployment.py:404"
       ]
     },
     "Cloud SQL already initialized, skipping": {
@@ -21458,7 +21535,7 @@
       "value": "Connect to Redis if enabled with local fallback.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:98"
+        "netra_backend/app/redis_manager.py:95"
       ]
     },
     "Connect to Redis.": {
@@ -21551,6 +21628,13 @@
       "category": "messages",
       "locations": [
         "scripts/fix_websocket_connection_manager_imports.py:45"
+      ]
+    },
+    "Consider adding ssl=require for production security": {
+      "value": "Consider adding ssl=require for production security",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:130"
       ]
     },
     "Consider consolidating into single handler/manager": {
@@ -21686,6 +21770,13 @@
         "scripts/check_imports.py:318"
       ]
     },
+    "Consider using service-specific username for security": {
+      "value": "Consider using service-specific username for security",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:172"
+      ]
+    },
     "Consolidate '": {
       "value": "Consolidate '",
       "category": "messages",
@@ -21742,6 +21833,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/quota/quota_manager.py:87"
+      ]
+    },
+    "Container Lifecycle Management Setup\nAdds graceful shutdown handling for Cloud Run deployments": {
+      "value": "Container Lifecycle Management Setup\nAdds graceful shutdown handling for Cloud Run deployments",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:2"
       ]
     },
     "Content analysis methods for quality validation.\n\nAnalysis methods for evaluating content quality metrics.\nPart of the modular quality validation system.": {
@@ -23006,6 +23104,13 @@
         "scripts/dev_launcher_config.py:243"
       ]
     },
+    "Could not load .env files:": {
+      "value": "Could not load .env files:",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/configuration/secrets.py:244"
+      ]
+    },
     "Could not load existing corpus, starting fresh": {
       "value": "Could not load existing corpus, starting fresh",
       "category": "messages",
@@ -23683,7 +23788,7 @@
       "value": "Create comprehensive monitoring tasks.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:668"
+        "netra_backend/app/startup_module.py:674"
       ]
     },
     "Create concurrent processing task.": {
@@ -23747,7 +23852,7 @@
       "value": "Create database tables if they don't exist",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:170"
+        "auth_service/auth_core/database/connection.py:172"
       ]
     },
     "Create default PostgreSQL tables for the application": {
@@ -24275,7 +24380,7 @@
       "value": "Create user with proper transaction rollback handling.\n        \n        FIX: Ensures complete rollback on failure to prevent partial user records.\n        \n        Args:\n            user_data: User data dictionary with email, name, etc.\n            \n        Returns:\n            Created user data or raises exception with cleanup",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:343"
+        "netra_backend/app/db/database_manager.py:337"
       ]
     },
     "Create validation report for manual review.": {
@@ -24488,6 +24593,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/startup_checks/database_checks.py:102"
+      ]
+    },
+    "Critical Issues (": {
+      "value": "Critical Issues (",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:326"
       ]
     },
     "Critical component failed, cannot start system": {
@@ -25229,7 +25341,7 @@
       "value": "Database URL: NOT SET (will use in-memory SQLite)",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/config.py:213"
+        "auth_service/auth_core/config.py:224"
       ]
     },
     "Database Upgrade Workflow Functions\nOrchestrates the table creation process during migration upgrade": {
@@ -25243,7 +25355,7 @@
       "value": "Database already initialized, reusing existing connection",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:332"
+        "netra_backend/app/db/postgres_core.py:336"
       ]
     },
     "Database already initialized, skipping": {
@@ -25271,7 +25383,7 @@
       "value": "Database connection established with safety limits:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_events.py:126"
+        "netra_backend/app/db/postgres_events.py:128"
       ]
     },
     "Database connection management with ≤8 line functions.\n\nManages database connections with recovery capabilities using aggressive\nfunction decomposition. All functions ≤8 lines.": {
@@ -25307,7 +25419,7 @@
       "value": "Database engine not initialized, skipping schema validation",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:634"
+        "netra_backend/app/startup_module.py:640"
       ]
     },
     "Database engine/bind is None": {
@@ -25386,7 +25498,7 @@
       "value": "Database initialization failed but continuing in graceful mode:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:423"
+        "netra_backend/app/startup_module.py:429"
       ]
     },
     "Database integrity error: {}": {
@@ -25430,7 +25542,7 @@
       "value": "Database not fully initialized, performing clean initialization...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:337"
+        "netra_backend/app/db/postgres_core.py:341"
       ]
     },
     "Database query optimization and caching for performance enhancement.\n\nThis module provides intelligent query caching and performance metrics\ntracking for database operations.": {
@@ -25509,7 +25621,7 @@
       "value": "Database session factory successfully set on app.state",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:413"
+        "netra_backend/app/startup_module.py:419"
       ]
     },
     "Database tables created/verified for OAuth POST callback": {
@@ -26366,7 +26478,7 @@
       "value": "Detailed WebSocket statistics (for development/monitoring).",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/websocket.py:477"
+        "netra_backend/app/routes/websocket.py:492"
       ]
     },
     "Detailed report saved to: environment_validation_report.json": {
@@ -26638,7 +26750,7 @@
       "value": "Disable HTTPS-only mode for sessions (dev/testing)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/Config.py:247"
+        "netra_backend/app/schemas/Config.py:261"
       ]
     },
     "Disable a route rule.": {
@@ -26928,14 +27040,14 @@
       "value": "Docker image locally...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:431"
+        "scripts/deploy_to_gcp.py:432"
       ]
     },
     "Docker image with Cloud Build...": {
       "value": "Docker image with Cloud Build...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:487"
+        "scripts/deploy_to_gcp.py:488"
       ]
     },
     "Docs: http://localhost:8081/docs": {
@@ -27261,7 +27373,7 @@
       "value": "ERROR: app.state.db_session_factory is None after setting!",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:419"
+        "netra_backend/app/startup_module.py:425"
       ]
     },
     "Each analysis is normally customized to your specific needs": {
@@ -27433,6 +27545,13 @@
         "netra_backend/app/services/api_gateway/gateway_manager.py:212"
       ]
     },
+    "Enable read/write splitting": {
+      "value": "Enable read/write splitting",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/schemas/Config.py:327"
+      ]
+    },
     "Enable row-level security for a table and tenant.\n        \n        Args:\n            table_name: Database table name\n            tenant_id: Tenant identifier\n            \n        Returns:\n            True if RLS is enabled successfully": {
       "value": "Enable row-level security for a table and tenant.\n        \n        Args:\n            table_name: Database table name\n            tenant_id: Tenant identifier\n            \n        Returns:\n            True if RLS is enabled successfully",
       "category": "messages",
@@ -27516,7 +27635,7 @@
       "value": "Engine or session factory is None after initialization",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:347"
+        "netra_backend/app/db/postgres_core.py:351"
       ]
     },
     "Engineering Domain Expert Agent for NACIS.\n\nDate Created: 2025-01-22\nLast Updated: 2025-01-22\n\nBusiness Value: Provides technical expertise for optimization and performance analysis.": {
@@ -31707,7 +31826,7 @@
       "value": "Execute query and format result.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:122"
+        "netra_backend/app/db/cache_core.py:141"
       ]
     },
     "Execute query building with performance tracking.": {
@@ -31833,7 +31952,7 @@
       "value": "Execute query using cache strategy.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:179"
+        "netra_backend/app/db/cache_core.py:198"
       ]
     },
     "Execute query with additional retry logic for critical operations.": {
@@ -31847,21 +31966,21 @@
       "value": "Execute query with cache check.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:135"
+        "netra_backend/app/db/cache_core.py:154"
       ]
     },
     "Execute query with cache tags strategy.": {
       "value": "Execute query with cache tags strategy.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:167"
+        "netra_backend/app/db/cache_core.py:186"
       ]
     },
     "Execute query with cache tags.": {
       "value": "Execute query with cache tags.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:151"
+        "netra_backend/app/db/cache_core.py:170"
       ]
     },
     "Execute query with caching and metrics tracking.": {
@@ -31882,7 +32001,7 @@
       "value": "Execute query with force refresh strategy.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:161"
+        "netra_backend/app/db/cache_core.py:180"
       ]
     },
     "Execute query with pagination.": {
@@ -31903,7 +32022,7 @@
       "value": "Execute query with standard cache strategy.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:173"
+        "netra_backend/app/db/cache_core.py:192"
       ]
     },
     "Execute query with timing and metrics collection.": {
@@ -33960,6 +34079,13 @@
         "scripts/monitor_oauth_flow.py:147"
       ]
     },
+    "Expected format: /cloudsql/project:region:instance": {
+      "value": "Expected format: /cloudsql/project:region:instance",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:101"
+      ]
+    },
     "Expected list or string, got": {
       "value": "Expected list or string, got",
       "category": "messages",
@@ -33993,6 +34119,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/session_service.py:136"
+      ]
+    },
+    "Explicitly specify port (usually 5432)": {
+      "value": "Explicitly specify port (usually 5432)",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:142"
       ]
     },
     "Export corpus with execution monitoring.": {
@@ -34676,8 +34809,8 @@
       "value": "Falling back to legacy startup sequence...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:765",
-        "netra_backend/app/startup_module.py:776"
+        "netra_backend/app/startup_module.py:771",
+        "netra_backend/app/startup_module.py:782"
       ]
     },
     "Fast Import Checker and Fixer\nFocused on quickly finding and fixing the critical import issues": {
@@ -34765,7 +34898,7 @@
       "value": "Fernet key invalid format (must be 44 characters)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:443"
+        "netra_backend/app/core/configuration/secrets.py:505"
       ]
     },
     "Fetch a specific metric value.": {
@@ -34966,7 +35099,7 @@
       "value": "Fetch list items from Redis.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:162"
+        "netra_backend/app/redis_manager.py:163"
       ]
     },
     "Fetch metric data with caching.": {
@@ -35783,7 +35916,7 @@
       "value": "Fix issues and try again, or use --no-checks to skip (not recommended)",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:853"
+        "scripts/deploy_to_gcp.py:858"
       ]
     },
     "Fix legacy import patterns in netra_backend structure": {
@@ -36179,6 +36312,13 @@
         "netra_backend/app/routes/auth_routes/callback_processor.py:46"
       ]
     },
+    "Found 'sslmode' parameter - should be converted to 'ssl' for asyncpg": {
+      "value": "Found 'sslmode' parameter - should be converted to 'ssl' for asyncpg",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_staging_deployment.py:396"
+      ]
+    },
     "Found 3 optimization opportunities with potential 25% cost reduction": {
       "value": "Found 3 optimization opportunities with potential 25% cost reduction",
       "category": "messages",
@@ -36394,7 +36534,7 @@
       "value": "GCP Region (default: us-central1)",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:981"
+        "scripts/deploy_to_gcp.py:986"
       ]
     },
     "GET request with retry logic.": {
@@ -37495,7 +37635,7 @@
       "value": "Get WebSocket configuration for clients.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/websocket.py:280"
+        "netra_backend/app/routes/websocket.py:295"
       ]
     },
     "Get WebSocket connection stats and calculate health score.": {
@@ -37915,7 +38055,7 @@
       "locations": [
         "netra_backend/app/db/postgres_async.py:96",
         "netra_backend/app/db/postgres_cloud.py:129",
-        "auth_service/auth_core/database/connection.py:184"
+        "auth_service/auth_core/database/connection.py:186"
       ]
     },
     "Get audit activity summary for the specified days with resilient validation.": {
@@ -38121,7 +38261,7 @@
       "value": "Get cached query result.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:53",
+        "netra_backend/app/db/cache_core.py:72",
         "netra_backend/app/db/cache_retrieval.py:105"
       ]
     },
@@ -38593,6 +38733,13 @@
         "netra_backend/app/agents/data_sub_agent/fallback_helpers.py:207"
       ]
     },
+    "Get current schema version.\n        \n        Returns:\n            Schema version string": {
+      "value": "Get current schema version.\n        \n        Returns:\n            Schema version string",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/data_ingestion_service.py:168"
+      ]
+    },
     "Get current service port mappings and URLs.\n    \n    Reads service discovery JSON files from .service_discovery/ directory\n    and returns current port mappings for all services.": {
       "value": "Get current service port mappings and URLs.\n    \n    Reads service discovery JSON files from .service_discovery/ directory\n    and returns current port mappings for all services.",
       "category": "messages",
@@ -38685,6 +38832,13 @@
         "netra_backend/app/routes/factory_compliance_reports.py:52"
       ]
     },
+    "Get data retention policy configuration.\n        \n        Returns:\n            Retention policy settings": {
+      "value": "Get data retention policy configuration.\n        \n        Returns:\n            Retention policy settings",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/data_ingestion_service.py:145"
+      ]
+    },
     "Get database alerts.": {
       "value": "Get database alerts.",
       "category": "messages",
@@ -38741,6 +38895,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/database/connection_manager.py:283"
+      ]
+    },
+    "Get database session using dependency injection pattern.": {
+      "value": "Get database session using dependency injection pattern.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/agent_handler.py:80"
       ]
     },
     "Get database session with circuit breaker protection.": {
@@ -39288,7 +39449,7 @@
       "value": "Get list with error handling.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:173"
+        "netra_backend/app/redis_manager.py:174"
       ]
     },
     "Get liveness status - is the service alive?": {
@@ -40254,7 +40415,7 @@
       "value": "Get the Redis client instance. Returns None if not connected or disabled.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:127"
+        "netra_backend/app/redis_manager.py:128"
       ]
     },
     "Get the current state of a circuit breaker.": {
@@ -41237,7 +41398,7 @@
       "value": "Handle WebSocket message loop with error recovery.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/websocket.py:186"
+        "netra_backend/app/routes/websocket.py:201"
       ]
     },
     "Handle a WebSocket message with proper type and payload.": {
@@ -41296,6 +41457,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/websocket_core/handlers.py:180"
+      ]
+    },
+    "Handle agent-related WebSocket messages with database session.": {
+      "value": "Handle agent-related WebSocket messages with database session.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/agent_handler.py:49"
       ]
     },
     "Handle alert (backward compatibility).": {
@@ -42937,11 +43105,18 @@
         "netra_backend/app/routes/quality_handlers.py:246"
       ]
     },
+    "Handle start_agent message type.": {
+      "value": "Handle start_agent message type.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/agent_handler.py:107"
+      ]
+    },
     "Handle startup check failures.": {
       "value": "Handle startup check failures.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:600"
+        "netra_backend/app/startup_module.py:606"
       ]
     },
     "Handle stop monitoring request.": {
@@ -43261,6 +43436,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/services/unified_tool_registry/system_handlers.py:105"
+      ]
+    },
+    "Handle user_message message type.": {
+      "value": "Handle user_message message type.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/agent_handler.py:132"
       ]
     },
     "Handle validation error and fallback.": {
@@ -43977,14 +44159,14 @@
       "value": "INSERT INTO user_profiles (user_id, data, created_at) VALUES (:user_id, :data, NOW())",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:370"
+        "netra_backend/app/db/database_manager.py:364"
       ]
     },
     "INSERT INTO users (email, name, created_at) VALUES (:email, :name, NOW()) RETURNING id": {
       "value": "INSERT INTO users (email, name, created_at) VALUES (:email, :name, NOW()) RETURNING id",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:362"
+        "netra_backend/app/db/database_manager.py:356"
       ]
     },
     "INSERT OR REPLACE INTO error_patterns (pattern, frequency, last_seen, suggested_fix) VALUES (?, ?, ?, ?)": {
@@ -44564,6 +44746,27 @@
         "netra_backend/app/services/synthetic_data/synthetic_data_service_main.py:130"
       ]
     },
+    "Ingest log data into ClickHouse.\n        \n        Args:\n            logs: List of log entry dictionaries\n            \n        Returns:\n            Ingestion result with status and count": {
+      "value": "Ingest log data into ClickHouse.\n        \n        Args:\n            logs: List of log entry dictionaries\n            \n        Returns:\n            Ingestion result with status and count",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/data_ingestion_service.py:118"
+      ]
+    },
+    "Ingest metrics data in batches.\n        \n        Args:\n            metrics: List of metric data dictionaries\n            batch_size: Size of each batch for processing\n            \n        Returns:\n            Batch ingestion result with status and count": {
+      "value": "Ingest metrics data in batches.\n        \n        Args:\n            metrics: List of metric data dictionaries\n            batch_size: Size of each batch for processing\n            \n        Returns:\n            Batch ingestion result with status and count",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/data_ingestion_service.py:131"
+      ]
+    },
+    "Ingest metrics data into ClickHouse.\n        \n        Args:\n            metrics: List of metric data dictionaries\n            \n        Returns:\n            Ingestion result with status and count": {
+      "value": "Ingest metrics data into ClickHouse.\n        \n        Args:\n            metrics: List of metric data dictionaries\n            \n        Returns:\n            Ingestion result with status and count",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/services/data_ingestion_service.py:105"
+      ]
+    },
     "Ingestion Manager Module - Handles data ingestion to ClickHouse": {
       "value": "Ingestion Manager Module - Handles data ingestion to ClickHouse",
       "category": "messages",
@@ -44603,7 +44806,7 @@
       "value": "Initialize ClickHouse tables based on service mode (optional service).",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:451"
+        "netra_backend/app/startup_module.py:457"
       ]
     },
     "Initialize GCP client and validate connection.": {
@@ -44652,7 +44855,7 @@
       "value": "Initialize Redis connection. Standard async initialization interface.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:94"
+        "netra_backend/app/redis_manager.py:91"
       ]
     },
     "Initialize SSL context based on configuration.": {
@@ -44666,7 +44869,7 @@
       "value": "Initialize WebSocket components that require async context (optional service).",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:539"
+        "netra_backend/app/startup_module.py:545"
       ]
     },
     "Initialize agent state with recovery support.": {
@@ -45028,7 +45231,7 @@
       "value": "Initializing ClickHouse tables (mode:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:483"
+        "netra_backend/app/startup_module.py:489"
       ]
     },
     "Initializing Cloud SQL manager for cloud environment": {
@@ -45049,7 +45252,7 @@
       "value": "Initializing async engine and session factory...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:342"
+        "netra_backend/app/db/postgres_core.py:346"
       ]
     },
     "Initializing auth service database...": {
@@ -45063,14 +45266,14 @@
       "value": "Initializing background task manager with 2-minute timeout...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:712"
+        "netra_backend/app/startup_module.py:718"
       ]
     },
     "Initializing engine with URL...": {
       "value": "Initializing engine with URL...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:292"
+        "netra_backend/app/db/postgres_core.py:296"
       ]
     },
     "Initializing service '": {
@@ -45484,7 +45687,7 @@
       "value": "Invalidate all cached entries with specific tag.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:79",
+        "netra_backend/app/db/cache_core.py:98",
         "netra_backend/app/db/cache_retrieval.py:153"
       ]
     },
@@ -45522,7 +45725,7 @@
       "value": "Invalidate cached entries matching pattern.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:83",
+        "netra_backend/app/db/cache_core.py:102",
         "netra_backend/app/db/cache_retrieval.py:185"
       ]
     },
@@ -45678,7 +45881,7 @@
       "value": "JWT secret key too short (minimum 32 characters)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:441",
+        "netra_backend/app/core/configuration/secrets.py:503",
         "netra_backend/app/core/configuration/validator_auth.py:50"
       ]
     },
@@ -45695,6 +45898,20 @@
       "category": "messages",
       "locations": [
         "scripts/validate_jwt_consistency.py:210"
+      ]
+    },
+    "JWT secret too short (": {
+      "value": "JWT secret too short (",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_staging_deployment.py:336"
+      ]
+    },
+    "JWT secrets mismatch between auth service and backend": {
+      "value": "JWT secrets mismatch between auth service and backend",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_staging_deployment.py:332"
       ]
     },
     "JWT signing secret (32+ chars)": {
@@ -45793,7 +46010,7 @@
       "value": "Key manager loaded.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:438"
+        "netra_backend/app/startup_module.py:444"
       ]
     },
     "Keyword-based search fallback using real search service": {
@@ -46689,6 +46906,27 @@
         "netra_backend/app/agents/supervisor/state_recovery_manager.py:105"
       ]
     },
+    "Loaded .env file from": {
+      "value": "Loaded .env file from",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/configuration/secrets.py:227"
+      ]
+    },
+    "Loaded .env.dev file from": {
+      "value": "Loaded .env.dev file from",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/configuration/secrets.py:233"
+      ]
+    },
+    "Loaded .env.local file from": {
+      "value": "Loaded .env.local file from",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/core/configuration/secrets.py:239"
+      ]
+    },
     "Loaded environment from current directory or system": {
       "value": "Loaded environment from current directory or system",
       "category": "messages",
@@ -46728,7 +46966,7 @@
       "value": "Loading key manager...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:436"
+        "netra_backend/app/startup_module.py:442"
       ]
     },
     "Loading production secrets from Google Secret Manager": {
@@ -46742,7 +46980,7 @@
       "value": "Local (Fast)",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:846"
+        "scripts/deploy_to_gcp.py:851"
       ]
     },
     "Local .env fallback": {
@@ -49375,7 +49613,7 @@
       "value": "Monitoring and optimizations failed to start but continuing (optional service):",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:661"
+        "netra_backend/app/startup_module.py:667"
       ]
     },
     "Monitoring for anomalies...": {
@@ -50081,7 +50319,7 @@
       "value": "Note: Cloud Build is slower. Use --build-local for faster builds.",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:517"
+        "scripts/deploy_to_gcp.py:518"
       ]
     },
     "Note: This will fail authentication but tests the flow": {
@@ -51438,7 +51676,7 @@
       "value": "Perform comprehensive schema validation.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:624"
+        "netra_backend/app/startup_module.py:630"
       ]
     },
     "Perform comprehensive usage pattern analysis.": {
@@ -51543,7 +51781,7 @@
       "value": "Perform emergency cleanup on startup failure.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:608"
+        "netra_backend/app/startup_module.py:614"
       ]
     },
     "Perform emergency resource cleanup.": {
@@ -52365,7 +52603,7 @@
       "value": "Please install: https://cloud.google.com/sdk/docs/install",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:168"
+        "scripts/deploy_to_gcp.py:169"
       ]
     },
     "Please provide official documentation links and pricing pages.": {
@@ -52487,6 +52725,13 @@
         "scripts/environment_validator_ports.py:1"
       ]
     },
+    "Port not specified, will use default": {
+      "value": "Port not specified, will use default",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:141"
+      ]
+    },
     "Positive (reduced churn)": {
       "value": "Positive (reduced churn)",
       "category": "messages",
@@ -52583,7 +52828,7 @@
       "value": "PostgreSQL async engine created with resilient AsyncAdaptedQueuePool connection pooling",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:278"
+        "netra_backend/app/db/postgres_core.py:282"
       ]
     },
     "PostgreSQL async engine initialized successfully for local development": {
@@ -52653,7 +52898,7 @@
       "value": "PostgreSQL in mock mode - using mock session factory",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:387"
+        "netra_backend/app/startup_module.py:393"
       ]
     },
     "PostgreSQL index optimization and management.\n\nMain PostgreSQL index optimizer with modular architecture.": {
@@ -52688,7 +52933,7 @@
       "value": "PostgreSQL resilience manager set to degraded state",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:250"
+        "netra_backend/app/db/postgres_core.py:254"
       ]
     },
     "PostgreSQL resilience utilities with retry logic and degraded operation.\n\nImplements pragmatic rigor principles:\n- Default to resilience with degraded operation when possible\n- Retry with exponential backoff for transient failures\n- Read-only mode fallbacks for write operation failures\n- Connection pool tolerance and graceful degradation": {
@@ -54933,7 +55178,7 @@
       "value": "Push item and trim list if needed.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:181"
+        "netra_backend/app/redis_manager.py:182"
       ]
     },
     "Python 3.8+": {
@@ -55294,6 +55539,20 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/agents/quality_supervisor.py:99"
+      ]
+    },
+    "Queries executed N+ times": {
+      "value": "Queries executed N+ times",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/schemas/Config.py:344"
+      ]
+    },
+    "Queries taking N+ seconds": {
+      "value": "Queries taking N+ seconds",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/schemas/Config.py:346"
       ]
     },
     "Query Execution Strategy Pattern\n\nThis module implements the Strategy pattern for different query execution approaches.\nBreaks down complex query logic into focused, ≤8 line functions.": {
@@ -55672,6 +55931,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/agents/github_analyzer/recommendation_generator.py:1"
+      ]
+    },
+    "Recommendations (": {
+      "value": "Recommendations (",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:336"
       ]
     },
     "Recommendations available - check report for details": {
@@ -56205,7 +56471,7 @@
       "value": "Redis connection skipped - service is disabled in development mode",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:100"
+        "netra_backend/app/redis_manager.py:97"
       ]
     },
     "Redis disabled in dev mode - skipping Redis validation": {
@@ -56219,7 +56485,7 @@
       "value": "Redis is disabled (mode: disabled)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:33"
+        "netra_backend/app/redis_manager.py:29"
       ]
     },
     "Redis read/write test failed": {
@@ -57040,6 +57306,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/configuration_validator.py:291"
+      ]
+    },
+    "Required packages (asyncpg) not available for database testing": {
+      "value": "Required packages (asyncpg) not available for database testing",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_staging_deployment.py:314"
       ]
     },
     "Research Execution and Notifications\nHandles execution of scheduled research tasks and change notifications": {
@@ -58101,6 +58374,13 @@
         "netra_backend/app/websocket_core/handlers.py:363"
       ]
     },
+    "Route message to appropriate message handler service method.": {
+      "value": "Route message to appropriate message handler service method.",
+      "category": "messages",
+      "locations": [
+        "netra_backend/app/websocket_core/agent_handler.py:91"
+      ]
+    },
     "Route message to specific handler.": {
       "value": "Route message to specific handler.",
       "category": "messages",
@@ -58413,7 +58693,7 @@
       "value": "Run application startup checks (graceful failure handling).",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:565"
+        "netra_backend/app/startup_module.py:571"
       ]
     },
     "Run background cache cleanup worker.": {
@@ -58476,7 +58756,7 @@
       "value": "Run complete startup sequence with improved initialization handling.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:745"
+        "netra_backend/app/startup_module.py:751"
       ]
     },
     "Run compliance checks in CI/CD pipeline": {
@@ -58581,14 +58861,14 @@
       "value": "Run initial startup phase.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:696"
+        "netra_backend/app/startup_module.py:702"
       ]
     },
     "Run legacy startup sequence (fallback).": {
       "value": "Run legacy startup sequence (fallback).",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:784"
+        "netra_backend/app/startup_module.py:790"
       ]
     },
     "Run message through supervisor agent.": {
@@ -58659,7 +58939,7 @@
       "value": "Run pre-deployment checks (architecture, tests, etc.) - optional for staging",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:987"
+        "scripts/deploy_to_gcp.py:992"
       ]
     },
     "Run registered hooks for an event.": {
@@ -58695,7 +58975,7 @@
       "value": "Run service initialization phase.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:705"
+        "netra_backend/app/startup_module.py:711"
       ]
     },
     "Run specific checks by name.": {
@@ -58829,7 +59109,7 @@
       "value": "Run validation and setup phase.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:735"
+        "netra_backend/app/startup_module.py:741"
       ]
     },
     "Run validation checks for analysis context.": {
@@ -59510,16 +59790,16 @@
       "value": "SET idle_in_transaction_session_timeout = 60000",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_events.py:31",
-        "netra_backend/app/db/postgres_events.py:115"
+        "netra_backend/app/db/postgres_events.py:33",
+        "netra_backend/app/db/postgres_events.py:117"
       ]
     },
     "SET lock_timeout = 10000": {
       "value": "SET lock_timeout = 10000",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_events.py:32",
-        "netra_backend/app/db/postgres_events.py:116"
+        "netra_backend/app/db/postgres_events.py:34",
+        "netra_backend/app/db/postgres_events.py:118"
       ]
     },
     "SET lock_timeout = 5000": {
@@ -59533,8 +59813,8 @@
       "value": "SET statement_timeout =",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_events.py:30",
-        "netra_backend/app/db/postgres_events.py:114",
+        "netra_backend/app/db/postgres_events.py:32",
+        "netra_backend/app/db/postgres_events.py:116",
         "auth_service/auth_core/database/connection_events.py:60"
       ]
     },
@@ -59592,6 +59872,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/network_handler.py:260"
+      ]
+    },
+    "SSL parameters will be automatically removed for Cloud SQL Unix sockets": {
+      "value": "SSL parameters will be automatically removed for Cloud SQL Unix sockets",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:92"
       ]
     },
     "SSL validation: URL scheme=": {
@@ -59937,7 +60224,7 @@
       "value": "Scan keys matching pattern (equivalent to keys but more efficient)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:334"
+        "netra_backend/app/redis_manager.py:335"
       ]
     },
     "Scan priority directories.": {
@@ -60140,14 +60427,14 @@
       "value": "Schema validation failed in production. Shutting down.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:644"
+        "netra_backend/app/startup_module.py:650"
       ]
     },
     "Schema validation failed. The application might not work as expected.": {
       "value": "Schema validation failed. The application might not work as expected.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:647"
+        "netra_backend/app/startup_module.py:653"
       ]
     },
     "Schema validation with Alembic finished successfully.": {
@@ -60613,7 +60900,7 @@
       "value": "See STAGING_DEPLOYMENT_CHECKLIST.md for fix instructions",
       "category": "messages",
       "locations": [
-        "scripts/validate_staging_deployment.py:82"
+        "scripts/validate_staging_deployment.py:89"
       ]
     },
     "See successful request examples with specific patterns": {
@@ -61070,7 +61357,7 @@
       "value": "Send format error message to client.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/websocket.py:271"
+        "netra_backend/app/routes/websocket.py:286"
       ]
     },
     "Send formatted report response to user.": {
@@ -61872,7 +62159,7 @@
       "value": "Set hash field(s)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:249"
+        "netra_backend/app/redis_manager.py:250"
       ]
     },
     "Set key expiration.": {
@@ -62019,7 +62306,7 @@
       "value": "Setting up database connections...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:378"
+        "netra_backend/app/startup_module.py:384"
       ]
     },
     "Setting up pre-commit hook for import validation...": {
@@ -62055,7 +62342,7 @@
       "value": "Setup ClickHouse tables.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:471"
+        "netra_backend/app/startup_module.py:477"
       ]
     },
     "Setup GCP Service Account for Netra Apex Platform Deployment\nThis script helps configure service account authentication for GCP deployments.": {
@@ -62076,7 +62363,7 @@
       "value": "Setup PostgreSQL connection factory (critical service).",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:376"
+        "netra_backend/app/startup_module.py:382"
       ]
     },
     "Setup analysis state and context.": {
@@ -62203,7 +62490,7 @@
       "value": "Shared secret for secure cross-service authentication. Must be at least 32 characters and different from JWT secret.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/Config.py:280"
+        "netra_backend/app/schemas/Config.py:294"
       ]
     },
     "Shim module for backward compatibility with UserService imports.\n\nThis module redirects imports to the actual user service implementation.\nAll imports should be updated to use the new location directly.": {
@@ -62522,7 +62809,7 @@
       "value": "Simple WebSocket test endpoint - NO AUTHENTICATION REQUIRED.\n    \n    This endpoint is for E2E testing and basic connectivity verification.\n    It accepts connections without JWT authentication and handles basic messages.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/websocket.py:369"
+        "netra_backend/app/routes/websocket.py:384"
       ]
     },
     "Simple check if request is allowed.": {
@@ -62767,7 +63054,7 @@
       "value": "Skip building images (use existing)",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:983"
+        "scripts/deploy_to_gcp.py:988"
       ]
     },
     "Skip in fast mode, enforce performance": {
@@ -62781,14 +63068,14 @@
       "value": "Skipping ClickHouse initialization (mode: disabled)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:489"
+        "netra_backend/app/startup_module.py:495"
       ]
     },
     "Skipping ClickHouse initialization (mode: mock)": {
       "value": "Skipping ClickHouse initialization (mode: mock)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:491"
+        "netra_backend/app/startup_module.py:497"
       ]
     },
     "Skipping ClickHouse initialization in testing environment": {
@@ -62802,7 +63089,7 @@
       "value": "Skipping PostgreSQL initialization during test collection",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:325"
+        "netra_backend/app/db/postgres_core.py:329"
       ]
     },
     "Skipping database migrations (PostgreSQL in mock mode)": {
@@ -62830,14 +63117,14 @@
       "value": "Skipping startup health checks (fast startup mode)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:572"
+        "netra_backend/app/startup_module.py:578"
       ]
     },
     "Skipping table creation due to error (likely in test):": {
       "value": "Skipping table creation due to error (likely in test):",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:125"
+        "auth_service/auth_core/database/connection.py:127"
       ]
     },
     "Sleep before the next health check cycle.": {
@@ -62928,14 +63215,14 @@
       "value": "Some startup checks failed (",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:587"
+        "netra_backend/app/startup_module.py:593"
       ]
     },
     "Some startup fixes could not be applied - check system configuration": {
       "value": "Some startup fixes could not be applied - check system configuration",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:724"
+        "netra_backend/app/startup_module.py:730"
       ]
     },
     "Something went wrong. Please try again later": {
@@ -63008,6 +63295,13 @@
       "category": "messages",
       "locations": [
         "scripts/cleanup_workflow_runs.py:187"
+      ]
+    },
+    "Specify database name after @/ in URL": {
+      "value": "Specify database name after @/ in URL",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:108"
       ]
     },
     "Split from large test file for architecture compliance": {
@@ -63173,7 +63467,7 @@
       "locations": [
         "netra_backend/app/core/interfaces_agent.py:15",
         "netra_backend/app/core/interfaces_service.py:95",
-        "netra_backend/app/db/cache_core.py:36",
+        "netra_backend/app/db/cache_core.py:55",
         "netra_backend/app/db/cache_strategies.py:252"
       ]
     },
@@ -63210,7 +63504,7 @@
       "value": "Start comprehensive performance monitoring (optional service).",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:651"
+        "netra_backend/app/startup_module.py:657"
       ]
     },
     "Start context manager tracking.": {
@@ -63266,7 +63560,7 @@
       "value": "Start database connection monitoring.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:675"
+        "netra_backend/app/startup_module.py:681"
       ]
     },
     "Start database health monitoring.": {
@@ -63378,7 +63672,7 @@
       "locations": [
         "netra_backend/app/monitoring/system_monitor.py:53",
         "netra_backend/app/schemas/monitoring.py:206",
-        "netra_backend/app/startup_module.py:684"
+        "netra_backend/app/startup_module.py:690"
       ]
     },
     "Start quality monitoring with configuration.\n    \n    Test-friendly wrapper for monitoring functionality.": {
@@ -63638,7 +63932,7 @@
       "value": "Starting comprehensive startup health checks...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:575"
+        "netra_backend/app/startup_module.py:581"
       ]
     },
     "Starting corpus administration...": {
@@ -63877,7 +64171,7 @@
       "value": "Startup health checks had issues but continuing in graceful mode:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:593"
+        "netra_backend/app/startup_module.py:599"
       ]
     },
     "Startup management module for Netra AI platform.\n\nProvides migration tracking, status persistence, and startup validation.\nAddresses GAP-001 (CRITICAL) and GAP-005 (MEDIUM) from startup_coverage.xml.": {
@@ -64162,7 +64456,7 @@
       "locations": [
         "netra_backend/app/core/interfaces_agent.py:27",
         "netra_backend/app/core/interfaces_service.py:99",
-        "netra_backend/app/db/cache_core.py:44",
+        "netra_backend/app/db/cache_core.py:63",
         "netra_backend/app/db/cache_strategies.py:276"
       ]
     },
@@ -64498,7 +64792,7 @@
       "value": "Store result in cache storage.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:59"
+        "netra_backend/app/db/cache_core.py:78"
       ]
     },
     "Store serialized data in Redis cache.": {
@@ -65351,7 +65645,7 @@
       "value": "System Ready (Took",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:692"
+        "netra_backend/app/startup_module.py:698"
       ]
     },
     "System Templates - Templates for system errors, timeouts, and general failures.\n\nThis module provides templates for system-related errors and general fallback\nscenarios with 25-line function compliance.": {
@@ -65674,7 +65968,7 @@
       "value": "Test Redis connection.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/redis_manager.py:84",
+        "netra_backend/app/redis_manager.py:81",
         "netra_backend/app/services/redis_service.py:51"
       ]
     },
@@ -65703,7 +65997,7 @@
       "value": "Test WebSocket connection accepted (no auth)",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/websocket.py:380"
+        "netra_backend/app/routes/websocket.py:395"
       ]
     },
     "Test WebSocket manager health.": {
@@ -65822,7 +66116,7 @@
       "value": "Test database connection with retry logic and connection pool awareness.\n        \n        Args:\n            engine: SQLAlchemy async engine\n            max_retries: Maximum number of retry attempts\n            delay: Delay between retries in seconds\n            \n        Returns:\n            True if connection successful, False otherwise",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/database_manager.py:295"
+        "netra_backend/app/db/database_manager.py:289"
       ]
     },
     "Test database connection.": {
@@ -66289,7 +66583,7 @@
       "value": "The service account may lack permissions to enable APIs.",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:313"
+        "scripts/deploy_to_gcp.py:314"
       ]
     },
     "The service is currently experiencing issues. Please try again later.": {
@@ -66515,7 +66809,7 @@
       "value": "This is 5-10x faster than Cloud Build...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:449"
+        "scripts/deploy_to_gcp.py:450"
       ]
     },
     "This is a fallback result. Real API unavailable.": {
@@ -67027,7 +67321,7 @@
       "value": "Too many errors, closing connection",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/websocket.py:259"
+        "netra_backend/app/routes/websocket.py:274"
       ]
     },
     "Too many requests. Please wait a moment and try again": {
@@ -67758,7 +68052,7 @@
       "value": "Trigger cache eviction based on strategy.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:91"
+        "netra_backend/app/db/cache_core.py:110"
       ]
     },
     "Trigger compliance analysis for specific modules.": {
@@ -67793,7 +68087,7 @@
       "value": "Trigger eviction if cache size exceeded.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/cache_core.py:68"
+        "netra_backend/app/db/cache_core.py:87"
       ]
     },
     "Trigger manual intervention for complex failures.": {
@@ -69437,6 +69731,13 @@
         "scripts/switch_hooks_mode.py:31"
       ]
     },
+    "Use postgresql:// or postgres:// scheme": {
+      "value": "Use postgresql:// or postgres:// scheme",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:61"
+      ]
+    },
     "Use pre-defined template responses.": {
       "value": "Use pre-defined template responses.",
       "category": "messages",
@@ -69455,7 +69756,7 @@
       "value": "Use robust startup manager with dependency resolution",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/Config.py:307"
+        "netra_backend/app/schemas/Config.py:355"
       ]
     },
     "Use smaller/faster model.": {
@@ -69662,6 +69963,13 @@
         "netra_backend/app/data/synthetic/synthetic_data_generator.py:185"
       ]
     },
+    "Using common username '": {
+      "value": "Using common username '",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:171"
+      ]
+    },
     "Using deprecated strict validation. Consider migrating to resilient validation.": {
       "value": "Using deprecated strict validation. Consider migrating to resilient validation.",
       "category": "messages",
@@ -69708,7 +70016,7 @@
       "value": "Using robust startup manager with dependency resolution...",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:755"
+        "netra_backend/app/startup_module.py:761"
       ]
     },
     "Using simple string state (test mode)": {
@@ -71201,7 +71509,7 @@
       "value": "Validate the current database URL configuration.\n        \n        Returns:\n            True if URL is valid, False otherwise",
       "category": "messages",
       "locations": [
-        "auth_service/auth_core/database/connection.py:135"
+        "auth_service/auth_core/database/connection.py:137"
       ]
     },
     "Validate thread context is established.": {
@@ -71372,11 +71680,25 @@
         "scripts/environment_validator.py:280"
       ]
     },
+    "Validating Auth Service for Staging Deployment...": {
+      "value": "Validating Auth Service for Staging Deployment...",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:349"
+      ]
+    },
     "Validating all E2E tests can be loaded...": {
       "value": "Validating all E2E tests can be loaded...",
       "category": "messages",
       "locations": [
         "scripts/e2e_import_fixer_comprehensive.py:480"
+      ]
+    },
+    "Validating auth service for staging deployment...": {
+      "value": "Validating auth service for staging deployment...",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/database_manager.py:259"
       ]
     },
     "Validating entries...": {
@@ -71472,6 +71794,13 @@
         "netra_backend/app/core/error_handlers/processors.py:283"
       ]
     },
+    "Validation failed. Fix critical issues before deploying.": {
+      "value": "Validation failed. Fix critical issues before deploying.",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:364"
+      ]
+    },
     "Validation failures detected - check report for details": {
       "value": "Validation failures detected - check report for details",
       "category": "messages",
@@ -71491,6 +71820,13 @@
       "category": "messages",
       "locations": [
         "netra_backend/app/core/interfaces_validation.py:1"
+      ]
+    },
+    "Validation passed. Ready for staging deployment.": {
+      "value": "Validation passed. Ready for staging deployment.",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:367"
       ]
     },
     "Validation requirements:\n- Ensure confidence score is between 0.0 and 1.0\n- Category must be from the provided list\n- All required fields must be present": {
@@ -71581,7 +71917,7 @@
       "value": "Verified: app.state.db_session_factory is accessible and not None",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:417"
+        "netra_backend/app/startup_module.py:423"
       ]
     },
     "Verify Auth Configuration Script\nChecks that auth service URLs are properly configured for each environment": {
@@ -72226,7 +72562,7 @@
       "value": "WebSocket components initialization failed but continuing (optional service):",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:558"
+        "netra_backend/app/startup_module.py:564"
       ]
     },
     "WebSocket connection attempted without Origin header": {
@@ -72366,7 +72702,7 @@
       "value": "WebSocket service health check.",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/websocket.py:322"
+        "netra_backend/app/routes/websocket.py:337"
       ]
     },
     "WebSocket services package.\n\nProvides subscription-based broadcasting and message management services.": {
@@ -77418,7 +77754,7 @@
       "value": "already receives 100%",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:698"
+        "scripts/deploy_to_gcp.py:699"
       ]
     },
     "already registered, returning existing handler": {
@@ -77461,6 +77797,24 @@
       "category": "messages",
       "locations": [
         "frontend/components/chat/ChatSidebarThreadList.tsx:188"
+      ]
+    },
+    "app = FastAPI(": {
+      "value": "app = FastAPI(",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:99",
+        "scripts/setup_graceful_shutdown.py:101",
+        "scripts/setup_graceful_shutdown.py:196",
+        "scripts/setup_graceful_shutdown.py:198"
+      ]
+    },
+    "app = FastAPI(lifespan=lifespan,": {
+      "value": "app = FastAPI(lifespan=lifespan,",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:102",
+        "scripts/setup_graceful_shutdown.py:199"
       ]
     },
     "app.state does not have db_session_factory attribute!": {
@@ -78189,6 +78543,13 @@
       "category": "messages",
       "locations": [
         "scripts/update_staging_secrets.py:154"
+      ]
+    },
+    "chars, minimum 32)": {
+      "value": "chars, minimum 32)",
+      "category": "messages",
+      "locations": [
+        "scripts/validate_staging_deployment.py:336"
       ]
     },
     "checks passed)": {
@@ -82416,21 +82777,21 @@
       "value": "initialize_postgres called. Current async_engine:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/db/postgres_core.py:328"
+        "netra_backend/app/db/postgres_core.py:332"
       ]
     },
     "initialize_postgres() returned None - database initialization failed": {
       "value": "initialize_postgres() returned None - database initialization failed",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:399"
+        "netra_backend/app/startup_module.py:405"
       ]
     },
     "initialize_postgres() returned:": {
       "value": "initialize_postgres() returned:",
       "category": "messages",
       "locations": [
-        "netra_backend/app/startup_module.py:396"
+        "netra_backend/app/startup_module.py:402"
       ]
     },
     "inline-block w-2 h-4 bg-emerald-500 ml-1 rounded-sm": {
@@ -82508,7 +82869,7 @@
       "value": "is enabled in the GCP Console.",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:314"
+        "scripts/deploy_to_gcp.py:315"
       ]
     },
     "is not None\n        # Basic validation that fixture is properly configured\n        if hasattr(": {
@@ -84107,7 +84468,7 @@
       "value": "revision to be ready...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:630"
+        "scripts/deploy_to_gcp.py:631"
       ]
     },
     "revoke_user_sessions via shim is DEPRECATED. Use auth_client_core directly": {
@@ -84329,21 +84690,21 @@
       "value": "service_secret must be at least 32 characters for security, got",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/Config.py:326"
+        "netra_backend/app/schemas/Config.py:374"
       ]
     },
     "service_secret must be different from jwt_secret_key for security isolation": {
       "value": "service_secret must be different from jwt_secret_key for security isolation",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/Config.py:331"
+        "netra_backend/app/schemas/Config.py:379"
       ]
     },
     "service_secret not configured - this reduces security": {
       "value": "service_secret not configured - this reduces security",
       "category": "messages",
       "locations": [
-        "netra_backend/app/schemas/Config.py:321"
+        "netra_backend/app/schemas/Config.py:369"
       ]
     },
     "set CLICKHOUSE_PASSWORD=your_password": {
@@ -84365,6 +84726,13 @@
       "category": "messages",
       "locations": [
         "frontend/components/chat/OptimisticMessage.tsx:245"
+      ]
+    },
+    "sslmode will be converted to ssl for asyncpg compatibility": {
+      "value": "sslmode will be converted to ssl for asyncpg compatibility",
+      "category": "messages",
+      "locations": [
+        "auth_service/auth_core/database/staging_validation.py:125"
       ]
     },
     "staging environment (Reason:": {
@@ -85052,7 +85420,7 @@
       "value": "to Cloud Run...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:544"
+        "scripts/deploy_to_gcp.py:545"
       ]
     },
     "to be ready...": {
@@ -85094,7 +85462,7 @@
       "value": "to start...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:886"
+        "scripts/deploy_to_gcp.py:891"
       ]
     },
     "toDate(timestamp) >= today() - 7": {
@@ -85716,7 +86084,7 @@
       "value": "websocket_unified.py endpoint",
       "category": "messages",
       "locations": [
-        "netra_backend/app/routes/websocket.py:313"
+        "netra_backend/app/routes/websocket.py:328"
       ]
     },
     "weeks\n- ROI typically realized within 2-3 months\n\n**Key Areas for": {
@@ -86716,7 +87084,7 @@
       "value": "⏳ Waiting for",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:630",
+        "scripts/deploy_to_gcp.py:631",
         "scripts/fix_staging_deployment.py:354"
       ]
     },
@@ -86867,6 +87235,13 @@
         "scripts/fix_staging_deployment.py:453"
       ]
     },
+    "⚠️  Some components failed to setup. Check logs above.": {
+      "value": "⚠️  Some components failed to setup. Check logs above.",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:283"
+      ]
+    },
     "⚠️  This is NOT a dry run. Continue? (yes/no):": {
       "value": "⚠️  This is NOT a dry run. Continue? (yes/no):",
       "category": "messages",
@@ -86948,7 +87323,7 @@
       "value": "⚠️ Could not delete",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:934"
+        "scripts/deploy_to_gcp.py:939"
       ]
     },
     "⚠️ Could not extract service account email from key file": {
@@ -86962,21 +87337,21 @@
       "value": "⚠️ Could not update traffic:",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:702"
+        "scripts/deploy_to_gcp.py:703"
       ]
     },
     "⚠️ Current project is '": {
       "value": "⚠️ Current project is '",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:156"
+        "scripts/deploy_to_gcp.py:157"
       ]
     },
     "⚠️ DATABASE_URL contains localhost - will use staging default": {
       "value": "⚠️ DATABASE_URL contains localhost - will use staging default",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:209"
+        "scripts/deploy_to_gcp.py:210"
       ]
     },
     "⚠️ Deployment interrupted": {
@@ -86991,7 +87366,7 @@
       "category": "messages",
       "locations": [
         "scripts/deploy_staging_with_validation.py:127",
-        "scripts/deploy_to_gcp.py:1016"
+        "scripts/deploy_to_gcp.py:1021"
       ]
     },
     "⚠️ Error activating service account:": {
@@ -87013,7 +87388,7 @@
       "value": "⚠️ Error updating traffic:",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:706"
+        "scripts/deploy_to_gcp.py:707"
       ]
     },
     "⚠️ Failed to activate service account in gcloud:": {
@@ -87027,7 +87402,7 @@
       "value": "⚠️ Failed to setup secrets, continuing anyway...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:864"
+        "scripts/deploy_to_gcp.py:869"
       ]
     },
     "⚠️ Fix process interrupted by user": {
@@ -87104,14 +87479,14 @@
       "value": "⚠️ NOTE: Using Cloud Build (slow). Consider using --build-local for 5-10x faster builds.",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:997"
+        "scripts/deploy_to_gcp.py:1002"
       ]
     },
     "⚠️ Revision not ready after": {
       "value": "⚠️ Revision not ready after",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:662"
+        "scripts/deploy_to_gcp.py:663"
       ]
     },
     "⚠️ STAGING DEPLOYMENT COMPLETED WITH WARNINGS": {
@@ -87125,7 +87500,7 @@
       "value": "⚠️ Skipping traffic update - revision not ready",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:671"
+        "scripts/deploy_to_gcp.py:672"
       ]
     },
     "⚠️ Some post-deployment validation checks failed": {
@@ -87139,7 +87514,7 @@
       "value": "⚠️ Some services may not be fully healthy",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:894"
+        "scripts/deploy_to_gcp.py:899"
       ]
     },
     "⚠️ Synchronization interrupted by user": {
@@ -87234,6 +87609,27 @@
         "scripts/create_staging_secrets_complete.py:35"
       ]
     },
+    "✅ Added Cloud Run optimizations to": {
+      "value": "✅ Added Cloud Run optimizations to",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:255"
+      ]
+    },
+    "✅ Added graceful shutdown to auth service": {
+      "value": "✅ Added graceful shutdown to auth service",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:109"
+      ]
+    },
+    "✅ Added graceful shutdown to backend": {
+      "value": "✅ Added graceful shutdown to backend",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:206"
+      ]
+    },
     "✅ Added team:": {
       "value": "✅ Added team:",
       "category": "messages",
@@ -87273,14 +87669,14 @@
       "value": "✅ All pre-deployment checks passed",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:272"
+        "scripts/deploy_to_gcp.py:273"
       ]
     },
     "✅ All required APIs enabled": {
       "value": "✅ All required APIs enabled",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:320"
+        "scripts/deploy_to_gcp.py:321"
       ]
     },
     "✅ All services are healthy and ready for testing!": {
@@ -87301,7 +87697,7 @@
       "value": "✅ All services deployed successfully!",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:892"
+        "scripts/deploy_to_gcp.py:897"
       ]
     },
     "✅ All type validations passed! Frontend and backend schemas are consistent.": {
@@ -87353,11 +87749,25 @@
         "auth_service/init_database.py:67"
       ]
     },
+    "✅ Auth service already has graceful shutdown": {
+      "value": "✅ Auth service already has graceful shutdown",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:34"
+      ]
+    },
     "✅ Authentication setup successful!": {
       "value": "✅ Authentication setup successful!",
       "category": "messages",
       "locations": [
         "scripts/gcp_auth_config.py:259"
+      ]
+    },
+    "✅ Backend already has graceful shutdown": {
+      "value": "✅ Backend already has graceful shutdown",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:125"
       ]
     },
     "✅ Backend image built successfully": {
@@ -87378,7 +87788,7 @@
       "value": "✅ Built successfully, now pushing to registry...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:461"
+        "scripts/deploy_to_gcp.py:462"
       ]
     },
     "✅ CORRECT EXAMPLE:": {
@@ -87448,7 +87858,7 @@
       "value": "✅ Deployment configuration valid",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:211"
+        "scripts/deploy_to_gcp.py:212"
       ]
     },
     "✅ Deployment wrapper created:": {
@@ -87637,7 +88047,7 @@
       "value": "✅ Revision is ready",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:654"
+        "scripts/deploy_to_gcp.py:655"
       ]
     },
     "✅ Risk Mitigation:": {
@@ -87658,7 +88068,7 @@
       "value": "✅ Secrets configured",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:796"
+        "scripts/deploy_to_gcp.py:801"
       ]
     },
     "✅ Service account activated in gcloud": {
@@ -87774,7 +88184,7 @@
       "value": "✅ Traffic updated to latest revision",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:693"
+        "scripts/deploy_to_gcp.py:694"
       ]
     },
     "✅ Type deduplication validation passed!": {
@@ -87816,7 +88226,7 @@
       "value": "✅ gcloud CLI configured for project:",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:163"
+        "scripts/deploy_to_gcp.py:164"
       ]
     },
     "✓ Added entry (total:": {
@@ -87998,7 +88408,7 @@
       "value": "✓ Traffic already routing to latest revision",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:699"
+        "scripts/deploy_to_gcp.py:700"
       ]
     },
     "✓ Would modify:": {
@@ -88149,6 +88559,13 @@
         "auth_service/init_database.py:70"
       ]
     },
+    "❌ Auth service main.py not found at": {
+      "value": "❌ Auth service main.py not found at",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:26"
+      ]
+    },
     "❌ Authentication setup failed!": {
       "value": "❌ Authentication setup failed!",
       "category": "messages",
@@ -88168,6 +88585,13 @@
       "category": "messages",
       "locations": [
         "scripts/build_staging.py:339"
+      ]
+    },
+    "❌ Backend main.py not found at": {
+      "value": "❌ Backend main.py not found at",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:117"
       ]
     },
     "❌ Benchmark failed:": {
@@ -88245,7 +88669,7 @@
       "category": "messages",
       "locations": [
         "scripts/deploy_staging_with_validation.py:130",
-        "scripts/deploy_to_gcp.py:1019"
+        "scripts/deploy_to_gcp.py:1024"
       ]
     },
     "❌ Deployment failed:": {
@@ -88357,9 +88781,9 @@
       "value": "❌ Failed to build",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:481",
-        "scripts/deploy_to_gcp.py:532",
-        "scripts/deploy_to_gcp.py:873"
+        "scripts/deploy_to_gcp.py:482",
+        "scripts/deploy_to_gcp.py:533",
+        "scripts/deploy_to_gcp.py:878"
       ]
     },
     "❌ Failed to build backend:": {
@@ -88415,16 +88839,16 @@
       "value": "❌ Failed to deploy",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:625",
-        "scripts/deploy_to_gcp.py:879"
+        "scripts/deploy_to_gcp.py:626",
+        "scripts/deploy_to_gcp.py:884"
       ]
     },
     "❌ Failed to enable": {
       "value": "❌ Failed to enable",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:312",
-        "scripts/deploy_to_gcp.py:317"
+        "scripts/deploy_to_gcp.py:313",
+        "scripts/deploy_to_gcp.py:318"
       ]
     },
     "❌ Failed to get config:": {
@@ -88635,7 +89059,7 @@
       "value": "❌ Missing required environment variables:",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:202"
+        "scripts/deploy_to_gcp.py:203"
       ]
     },
     "❌ Multiple restart failures. Stopping": {
@@ -88685,7 +89109,7 @@
       "value": "❌ Pre-deployment checks failed",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:852"
+        "scripts/deploy_to_gcp.py:857"
       ]
     },
     "❌ Pre-deployment fixes failed - please resolve issues first": {
@@ -88713,7 +89137,7 @@
       "value": "❌ Required checks failed. Please fix issues before deploying.",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:268"
+        "scripts/deploy_to_gcp.py:269"
       ]
     },
     "❌ Response:": {
@@ -88741,7 +89165,7 @@
       "value": "❌ Service account file not found:",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:177"
+        "scripts/deploy_to_gcp.py:178"
       ]
     },
     "❌ Service account key file not found:": {
@@ -88885,8 +89309,8 @@
       "value": "❌ gcloud CLI is not installed",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:137",
-        "scripts/deploy_to_gcp.py:167"
+        "scripts/deploy_to_gcp.py:138",
+        "scripts/deploy_to_gcp.py:168"
       ]
     },
     "❌ uvicorn not installed. Run: pip install uvicorn": {
@@ -88914,7 +89338,14 @@
       "value": "🎉 ALL CHECKS PASSED - Ready for deployment!",
       "category": "messages",
       "locations": [
-        "scripts/validate_staging_deployment.py:78"
+        "scripts/validate_staging_deployment.py:85"
+      ]
+    },
+    "🎉 All graceful shutdown components setup successfully!": {
+      "value": "🎉 All graceful shutdown components setup successfully!",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:276"
       ]
     },
     "🎉 Corpus creation complete!": {
@@ -89041,7 +89472,7 @@
       "category": "messages",
       "locations": [
         "scripts/build_staging.py:173",
-        "scripts/deploy_to_gcp.py:801"
+        "scripts/deploy_to_gcp.py:806"
       ]
     },
     "🏷️  AVAILABLE DECORATORS:": {
@@ -89327,6 +89758,13 @@
         "scripts/deduplicate_types.py:420"
       ]
     },
+    "📊 Setup complete:": {
+      "value": "📊 Setup complete:",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:273"
+      ]
+    },
     "📊 Synthetic Data Request:": {
       "value": "📊 Synthetic Data Request:",
       "category": "messages",
@@ -89385,7 +89823,7 @@
       "value": "📋 Deployment Summary:",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:897"
+        "scripts/deploy_to_gcp.py:902"
       ]
     },
     "📋 IMPORT RULES (from CLAUDE.md):": {
@@ -89441,7 +89879,7 @@
       "value": "📋 VALIDATION SUMMARY",
       "category": "messages",
       "locations": [
-        "scripts/validate_staging_deployment.py:68"
+        "scripts/validate_staging_deployment.py:75"
       ]
     },
     "📋 You can now use any GCP script with proper authentication.": {
@@ -89500,11 +89938,18 @@
         "scripts/setup_gcp_service_account.py:41"
       ]
     },
+    "📝 Next steps:": {
+      "value": "📝 Next steps:",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:277"
+      ]
+    },
     "📡 Updating traffic to latest revision for": {
       "value": "📡 Updating traffic to latest revision for",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:667"
+        "scripts/deploy_to_gcp.py:668"
       ]
     },
     "📥 Downloading key to:": {
@@ -89620,14 +90065,14 @@
       "value": "🔍 Running pre-deployment checks...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:216"
+        "scripts/deploy_to_gcp.py:217"
       ]
     },
     "🔍 STAGING DEPLOYMENT VALIDATION": {
       "value": "🔍 STAGING DEPLOYMENT VALIDATION",
       "category": "messages",
       "locations": [
-        "scripts/validate_staging_deployment.py:37"
+        "scripts/validate_staging_deployment.py:39"
       ]
     },
     "🔍 Scanning for duplicate type definitions...": {
@@ -89648,7 +90093,7 @@
       "value": "🔍 Using centralized authentication configuration...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:182"
+        "scripts/deploy_to_gcp.py:183"
       ]
     },
     "🔍 VALIDATING CREATED SECRETS": {
@@ -89669,7 +90114,7 @@
       "value": "🔍 Validating deployment configuration...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:187"
+        "scripts/deploy_to_gcp.py:188"
       ]
     },
     "🔐 Activating service account:": {
@@ -89697,7 +90142,7 @@
       "value": "🔐 Setting up secrets in Secret Manager...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:736"
+        "scripts/deploy_to_gcp.py:737"
       ]
     },
     "🔐 Testing Authentication Setup...": {
@@ -89725,14 +90170,14 @@
       "value": "🔑 Next Steps:",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:903"
+        "scripts/deploy_to_gcp.py:908"
       ]
     },
     "🔧 Enabling required GCP APIs...": {
       "value": "🔧 Enabling required GCP APIs...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:277"
+        "scripts/deploy_to_gcp.py:278"
       ]
     },
     "🔧 Fine-tune caching and parallelization for even better performance.": {
@@ -89761,6 +90206,13 @@
       "category": "messages",
       "locations": [
         "scripts/demo_feature_flag_system.py:93"
+      ]
+    },
+    "🔧 Setting up graceful shutdown for Cloud Run...": {
+      "value": "🔧 Setting up graceful shutdown for Cloud Run...",
+      "category": "messages",
+      "locations": [
+        "scripts/setup_graceful_shutdown.py:259"
       ]
     },
     "🔧 TEST SPLITTING SUGGESTIONS": {
@@ -89928,14 +90380,14 @@
       "value": "🚀 Deploying",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:544"
+        "scripts/deploy_to_gcp.py:545"
       ]
     },
     "🚀 Deploying Netra Apex Platform to GCP": {
       "value": "🚀 Deploying Netra Apex Platform to GCP",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:843"
+        "scripts/deploy_to_gcp.py:848"
       ]
     },
     "🚀 Deploying to GCP Staging...": {
@@ -90047,7 +90499,7 @@
       "value": "🚨 VALIDATION FAILED - Fix issues before deployment!",
       "category": "messages",
       "locations": [
-        "scripts/validate_staging_deployment.py:81"
+        "scripts/validate_staging_deployment.py:88"
       ]
     },
     "🚫 DEPLOYMENT BLOCKED": {
@@ -90243,7 +90695,7 @@
       "value": "🧹 Cleaning up deployments...",
       "category": "messages",
       "locations": [
-        "scripts/deploy_to_gcp.py:914"
+        "scripts/deploy_to_gcp.py:919"
       ]
     },
     "🧹 NETRA APEX CLEAN SLATE EXECUTOR": {

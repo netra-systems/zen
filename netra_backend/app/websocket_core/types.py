@@ -42,6 +42,7 @@ class MessageType(str, Enum):
     ERROR_MESSAGE = "error_message"
     
     # Agent communication
+    START_AGENT = "start_agent"
     AGENT_RESPONSE = "agent_response"
     AGENT_PROGRESS = "agent_progress"
     AGENT_ERROR = "agent_error"

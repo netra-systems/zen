@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "test_literals",
-    "generated_at": "2025-08-24T02:12:32.048112",
+    "generated_at": "2025-08-24T04:00:03.149954",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 5439
+    "total_literals": 5467
   },
   "literals": {
     "\u001b[0m": {
@@ -205,11 +205,11 @@
         "scripts/auto_fix_test_violations.py:260",
         "scripts/compliance/project_test_validator.py:226",
         "scripts/compliance/real_test_requirements_enforcer.py:308",
+        "scripts/compliance/real_test_validator.py:193",
         "scripts/compliance/test_fixer.py:188",
         "scripts/compliance/test_fixer.py:273",
         "scripts/compliance/test_size_validator.py:305",
-        "scripts/fix_all_test_issues.py:55",
-        "scripts/fix_all_test_issues.py:66"
+        "scripts/fix_all_test_issues.py:55"
       ]
     },
     "# ACT Secrets for local testing\nGITHUB_TOKEN=mock_github_token\nGCP_CREDENTIALS={\"type\":\"service_account\"}\nGCP_PROJECT_ID=mock-project\nDOCKER_REGISTRY=localhost:5000\nSTAGING_SSH_KEY=mock_ssh_key\nSTAGING_HOST=localhost\nSTAGING_USER=testuser\nSLACK_WEBHOOK_URL=https://mock.webhook.url": {
@@ -365,7 +365,8 @@
       "value": "# Real Test Requirements Violations Report",
       "category": "test_literals",
       "locations": [
-        "scripts/compliance/real_test_requirements_enforcer.py:482"
+        "scripts/compliance/real_test_requirements_enforcer.py:482",
+        "scripts/compliance/real_test_validator.py:278"
       ]
     },
     "# Real component behavior: \\1 handles \\2": {
@@ -387,6 +388,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_backend.py:459"
+      ]
+    },
+    "# Setup test path\\n(?=\\n)": {
+      "value": "# Setup test path\\n(?=\\n)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/fix_test_utils_imports.py:38"
       ]
     },
     "# TODO: Implement split test logic": {
@@ -585,6 +593,13 @@
         "scripts/compliance/real_test_linter.py:216"
       ]
     },
+    "## Most Problematic Files": {
+      "value": "## Most Problematic Files",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:316"
+      ]
+    },
     "## Quality Gate Scores": {
       "value": "## Quality Gate Scores",
       "category": "test_literals",
@@ -655,6 +670,13 @@
         "scripts/compliance/test_size_validator.py:466"
       ]
     },
+    "## Violations by Type": {
+      "value": "## Violations by Type",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:295"
+      ]
+    },
     "## Warnings": {
       "value": "## Warnings",
       "category": "test_literals",
@@ -697,6 +719,7 @@
         "scripts/analyze_test_overlap.py:559",
         "scripts/compliance/project_test_validator.py:355",
         "scripts/compliance/real_test_requirements_enforcer.py:519",
+        "scripts/compliance/real_test_validator.py:298",
         "scripts/compliance/test_size_validator.py:496",
         "scripts/real_service_test_metrics.py:198",
         "scripts/test_verify_workflow_status.py:179"
@@ -823,6 +846,7 @@
         "scripts/align_test_imports.py:19",
         "scripts/auto_fix_test_sizes.py:29",
         "scripts/auto_fix_test_violations.py:43",
+        "scripts/fix_test_utils_imports.py:19",
         "scripts/test_cold_start_e2e.py:38"
       ]
     },
@@ -975,7 +999,9 @@
         "scripts/compliance/project_test_validator.py:175",
         "scripts/compliance/project_test_validator.py:187",
         "scripts/compliance/real_test_requirements_enforcer.py:248",
-        "scripts/compliance/real_test_requirements_enforcer.py:265"
+        "scripts/compliance/real_test_requirements_enforcer.py:265",
+        "scripts/compliance/real_test_validator.py:128",
+        "scripts/compliance/real_test_validator.py:139"
       ]
     },
     "' exceeds": {
@@ -997,8 +1023,8 @@
         "scripts/auto_fix_test_violations.py:307",
         "scripts/compliance/project_test_validator.py:251",
         "scripts/compliance/real_test_requirements_enforcer.py:329",
-        "scripts/compliance/test_limits_checker.py:156",
-        "scripts/compliance/test_limits_checker.py:209"
+        "scripts/compliance/real_test_validator.py:213",
+        "scripts/compliance/test_limits_checker.py:156"
       ]
     },
     "' has high average complexity (": {
@@ -1044,6 +1070,7 @@
         "scripts/compliance/project_test_validator.py:235",
         "scripts/compliance/project_test_validator.py:236",
         "scripts/compliance/real_test_requirements_enforcer.py:312",
+        "scripts/compliance/real_test_validator.py:197",
         "scripts/compliance/test_fixer.py:171",
         "scripts/fix_all_test_issues.py:142",
         "scripts/fix_test_syntax_errors.py:84",
@@ -1522,14 +1549,23 @@
         "scripts/compliance/project_test_validator.py:358",
         "scripts/compliance/real_test_requirements_enforcer.py:524",
         "scripts/compliance/real_test_requirements_enforcer.py:524",
-        "scripts/compliance/real_test_requirements_enforcer.py:550"
+        "scripts/compliance/real_test_requirements_enforcer.py:550",
+        "scripts/compliance/real_test_validator.py:302"
       ]
     },
     "** (": {
       "value": "** (",
       "category": "test_literals",
       "locations": [
-        "scripts/compliance/real_test_requirements_enforcer.py:550"
+        "scripts/compliance/real_test_requirements_enforcer.py:550",
+        "scripts/compliance/real_test_validator.py:318"
+      ]
+    },
+    "** -": {
+      "value": "** -",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:302"
       ]
     },
     "***": {
@@ -1618,6 +1654,7 @@
       "locations": [
         "scripts/compliance/project_test_validator.py:73",
         "scripts/compliance/real_test_requirements_enforcer.py:98",
+        "scripts/compliance/real_test_validator.py:46",
         "scripts/compliance/test_limits_checker.py:58"
       ]
     },
@@ -1714,6 +1751,7 @@
         "scripts/compliance/fake_test_scanner.py:110",
         "scripts/compliance/project_test_validator.py:73",
         "scripts/compliance/real_test_requirements_enforcer.py:97",
+        "scripts/compliance/real_test_validator.py:45",
         "scripts/compliance/test_limits_checker.py:57"
       ]
     },
@@ -1721,7 +1759,8 @@
       "value": "**/tests/**/*.py",
       "category": "test_literals",
       "locations": [
-        "scripts/compliance/real_test_requirements_enforcer.py:99"
+        "scripts/compliance/real_test_requirements_enforcer.py:99",
+        "scripts/compliance/real_test_validator.py:47"
       ]
     },
     "**Description**:": {
@@ -1793,7 +1832,8 @@
       "locations": [
         "scripts/auto_fix_test_violations.py:866",
         "scripts/compliance/project_test_validator.py:331",
-        "scripts/compliance/real_test_requirements_enforcer.py:491"
+        "scripts/compliance/real_test_requirements_enforcer.py:491",
+        "scripts/compliance/real_test_validator.py:287"
       ]
     },
     "**⚠️ WARNING:** Some tests are already failing. Fix these before refactoring!": {
@@ -2113,6 +2153,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:358",
+        "scripts/compliance/real_test_validator.py:318",
         "scripts/generate_test_audit.py:165"
       ]
     },
@@ -2438,6 +2479,13 @@
         "scripts/compliance/fake_test_scanner.py:316"
       ]
     },
+    "- CRITICAL:": {
+      "value": "- CRITICAL:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:288"
+      ]
+    },
     "- Configuration files:": {
       "value": "- Configuration files:",
       "category": "test_literals",
@@ -2555,6 +2603,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/analyze_test_overlap.py:564"
+      ]
+    },
+    "- MAJOR:": {
+      "value": "- MAJOR:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:289"
+      ]
+    },
+    "- MINOR:": {
+      "value": "- MINOR:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:290"
       ]
     },
     "- Max violation:": {
@@ -4149,7 +4211,7 @@
         "scripts/ci/check_test_stubs.py:52",
         "scripts/compliance/real_test_linter.py:212",
         "scripts/compliance/real_test_requirements_enforcer.py:537",
-        "scripts/compliance/test_violations_reporter.py:86"
+        "scripts/compliance/real_test_validator.py:305"
       ]
     },
     "...[/cyan]": {
@@ -6923,6 +6985,13 @@
         "scripts/fix_test_syntax_errors.py:268"
       ]
     },
+    "All tests comply with real test requirements!": {
+      "value": "All tests comply with real test requirements!",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:266"
+      ]
+    },
     "All tests comply with requirements!": {
       "value": "All tests comply with requirements!",
       "category": "test_literals",
@@ -7180,6 +7249,7 @@
       "value": "AsyncMock\\(\\)",
       "category": "test_literals",
       "locations": [
+        "scripts/compliance/real_test_validator.py:235",
         "scripts/compliance/test_fixer.py:317"
       ]
     },
@@ -8954,7 +9024,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:148",
-        "scripts/compliance/real_test_requirements_enforcer.py:180"
+        "scripts/compliance/real_test_requirements_enforcer.py:180",
+        "scripts/compliance/real_test_validator.py:103"
       ]
     },
     "Could not save report to": {
@@ -10163,6 +10234,13 @@
         "scripts/auto_fix_test_violations.py:145"
       ]
     },
+    "Error checking": {
+      "value": "Error checking",
+      "category": "test_literals",
+      "locations": [
+        "scripts/fix_test_utils_imports.py:86"
+      ]
+    },
     "Error checking git diff:": {
       "value": "Error checking git diff:",
       "category": "test_literals",
@@ -10271,7 +10349,8 @@
         "scripts/add_test_markers.py:175",
         "scripts/align_test_imports.py:370",
         "scripts/analyze_test_overlap.py:132",
-        "scripts/fix_e2e_test_imports.py:187"
+        "scripts/fix_e2e_test_imports.py:187",
+        "scripts/fix_test_utils_imports.py:56"
       ]
     },
     "Error rate reduced from 2.3% to 0.8%.": {
@@ -10314,6 +10393,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_fixer.py:338"
+      ]
+    },
+    "Error running validator:": {
+      "value": "Error running validator:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:353"
       ]
     },
     "Error scanning": {
@@ -10440,6 +10526,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/fix_test_import_order.py:113",
+        "scripts/fix_test_utils_imports.py:93",
         "scripts/test_example_message_flow.py:117",
         "scripts/test_example_message_flow.py:323"
       ]
@@ -11246,6 +11333,7 @@
         "scripts/compliance/project_test_validator.py:156",
         "scripts/compliance/real_test_requirements_enforcer.py:222",
         "scripts/compliance/real_test_requirements_enforcer.py:399",
+        "scripts/compliance/real_test_validator.py:111",
         "scripts/compliance/test_size_validator.py:364"
       ]
     },
@@ -11285,6 +11373,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/test_size_validator.py:421"
+      ]
+    },
+    "Files fixed:": {
+      "value": "Files fixed:",
+      "category": "test_literals",
+      "locations": [
+        "scripts/fix_test_utils_imports.py:92"
       ]
     },
     "Files modified:": {
@@ -11388,6 +11483,13 @@
         "scripts/compliance/test_fixer.py:353"
       ]
     },
+    "Fix test_utils import errors in test files.\n\nThis script fixes the incorrect import:\n    from netra_backend.tests.test_utils import setup_test_path\n    \nAnd removes it since it's not needed (tests should be run from proper context).": {
+      "value": "Fix test_utils import errors in test files.\n\nThis script fixes the incorrect import:\n    from netra_backend.tests.test_utils import setup_test_path\n    \nAnd removes it since it's not needed (tests should be run from proper context).",
+      "category": "test_literals",
+      "locations": [
+        "scripts/fix_test_utils_imports.py:2"
+      ]
+    },
     "Fix the import order in test files to ensure setup_test_path() is called first.": {
       "value": "Fix the import order in test files to ensure setup_test_path() is called first.",
       "category": "test_literals",
@@ -11482,6 +11584,7 @@
         "scripts/fix_test_batch.py:382",
         "scripts/fix_test_import_order.py:101",
         "scripts/fix_test_syntax_errors.py:252",
+        "scripts/fix_test_utils_imports.py:50",
         "scripts/remove_duplicate_test_setup.py:61"
       ]
     },
@@ -11672,6 +11775,7 @@
         "scripts/auto_fix_test_violations.py:294",
         "scripts/auto_fix_test_violations.py:307",
         "scripts/compliance/project_test_validator.py:251",
+        "scripts/compliance/real_test_validator.py:213",
         "scripts/compliance/test_limits_checker.py:209"
       ]
     },
@@ -12424,7 +12528,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:287",
-        "scripts/compliance/real_test_requirements_enforcer.py:367"
+        "scripts/compliance/real_test_requirements_enforcer.py:367",
+        "scripts/compliance/real_test_validator.py:248"
       ]
     },
     "Internal server error": {
@@ -13137,6 +13242,13 @@
         "scripts/compliance/project_test_validator.py:273"
       ]
     },
+    "MagicMock\\(\\)": {
+      "value": "MagicMock\\(\\)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:235"
+      ]
+    },
     "Main": {
       "value": "Main",
       "category": "test_literals",
@@ -13439,7 +13551,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:175",
-        "scripts/compliance/real_test_requirements_enforcer.py:248"
+        "scripts/compliance/real_test_requirements_enforcer.py:248",
+        "scripts/compliance/real_test_validator.py:128"
       ]
     },
     "Mock component function '": {
@@ -13447,14 +13560,16 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:187",
-        "scripts/compliance/real_test_requirements_enforcer.py:265"
+        "scripts/compliance/real_test_requirements_enforcer.py:265",
+        "scripts/compliance/real_test_validator.py:139"
       ]
     },
     "Mock component pattern found:": {
       "value": "Mock component pattern found:",
       "category": "test_literals",
       "locations": [
-        "scripts/compliance/real_test_requirements_enforcer.py:381"
+        "scripts/compliance/real_test_requirements_enforcer.py:381",
+        "scripts/compliance/real_test_validator.py:159"
       ]
     },
     "Mock response": {
@@ -13505,6 +13620,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:273"
+      ]
+    },
+    "Mock\\(\\)": {
+      "value": "Mock\\(\\)",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:235"
       ]
     },
     "Mock\\(spec=ToolDispatcher\\)": {
@@ -15063,6 +15185,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/real_test_linter.py:2"
+      ]
+    },
+    "Real Test Requirements Validator\n\nValidates test files against SPEC/testing.xml real test requirements:\n1. No mock component implementations inside test files\n2. Integration tests use real child components  \n3. Files must not exceed 300 lines\n4. Functions must not exceed 8 lines\n5. Minimal mocking (only external APIs)\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Development Velocity, Risk Reduction\n- Value Impact: Prevents regression from invalid test patterns\n- Strategic Impact: Ensures test reliability and system integrity": {
+      "value": "Real Test Requirements Validator\n\nValidates test files against SPEC/testing.xml real test requirements:\n1. No mock component implementations inside test files\n2. Integration tests use real child components  \n3. Files must not exceed 300 lines\n4. Functions must not exceed 8 lines\n5. Minimal mocking (only external APIs)\n\nBusiness Value Justification (BVJ):\n- Segment: Platform/Internal\n- Business Goal: Development Velocity, Risk Reduction\n- Value Impact: Prevents regression from invalid test patterns\n- Strategic Impact: Ensures test reliability and system integrity",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:1"
       ]
     },
     "Realistic Test Data Models and Configuration\n\nThis module defines models, enums, and configuration data for realistic test data generation.": {
@@ -17389,6 +17518,7 @@
       "locations": [
         "scripts/compliance/project_test_validator.py:142",
         "scripts/compliance/real_test_requirements_enforcer.py:201",
+        "scripts/compliance/real_test_validator.py:97",
         "scripts/compliance/test_refactor_helper.py:82"
       ]
     },
@@ -17586,6 +17716,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/generate_test_audit.py:267"
+      ]
+    },
+    "TEST_UTILS IMPORT FIX RESULTS": {
+      "value": "TEST_UTILS IMPORT FIX RESULTS",
+      "category": "test_literals",
+      "locations": [
+        "scripts/fix_test_utils_imports.py:90"
       ]
     },
     "TIER COVERAGE:": {
@@ -20710,6 +20847,13 @@
         "scripts/autonomous_review/test_reviewer.py:46"
       ]
     },
+    "[CRITICAL]": {
+      "value": "[CRITICAL]",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:301"
+      ]
+    },
     "[CRITICAL] Configuration Status:": {
       "value": "[CRITICAL] Configuration Status:",
       "category": "test_literals",
@@ -21044,6 +21188,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_staging_startup.py:232"
+      ]
+    },
+    "[MAJOR]": {
+      "value": "[MAJOR]",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:301"
+      ]
+    },
+    "[MINOR]": {
+      "value": "[MINOR]",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:301"
       ]
     },
     "[MISSING]": {
@@ -22007,7 +22165,8 @@
       "value": "\\.return_value\\s*=",
       "category": "test_literals",
       "locations": [
-        "scripts/compliance/project_test_validator.py:275"
+        "scripts/compliance/project_test_validator.py:275",
+        "scripts/compliance/real_test_validator.py:236"
       ]
     },
     "\\.side_effect\\s*=": {
@@ -22022,6 +22181,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/remove_test_stubs.py:59"
+      ]
+    },
+    "\\n\\n\\n+": {
+      "value": "\\n\\n\\n+",
+      "category": "test_literals",
+      "locations": [
+        "scripts/fix_test_utils_imports.py:40"
       ]
     },
     "]": {
@@ -22163,7 +22329,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:113",
-        "scripts/compliance/real_test_requirements_enforcer.py:140"
+        "scripts/compliance/real_test_requirements_enforcer.py:140",
+        "scripts/compliance/real_test_validator.py:70"
       ]
     },
     "__main__": {
@@ -24601,6 +24768,13 @@
         "scripts/compliance/real_test_requirements_enforcer.py:52"
       ]
     },
+    "class\\s+Mock\\w*Component": {
+      "value": "class\\s+Mock\\w*Component",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:149"
+      ]
+    },
     "class\\s+Test\\w*Component\\w*:": {
       "value": "class\\s+Test\\w*Component\\w*:",
       "category": "test_literals",
@@ -24942,7 +25116,9 @@
         "scripts/compliance/project_test_validator.py:172",
         "scripts/compliance/project_test_validator.py:184",
         "scripts/compliance/real_test_requirements_enforcer.py:239",
-        "scripts/compliance/real_test_requirements_enforcer.py:261"
+        "scripts/compliance/real_test_requirements_enforcer.py:261",
+        "scripts/compliance/real_test_validator.py:125",
+        "scripts/compliance/real_test_validator.py:136"
       ]
     },
     "component_coverage": {
@@ -25073,6 +25249,7 @@
         "scripts/check_conftest_violations.py:35",
         "scripts/check_conftest_violations.py:36",
         "scripts/compliance/project_test_validator.py:112",
+        "scripts/compliance/real_test_validator.py:69",
         "scripts/generate_test_audit.py:79"
       ]
     },
@@ -25919,13 +26096,13 @@
         "scripts/auto_fix_test_sizes.py:572",
         "scripts/compliance/project_test_validator.py:230",
         "scripts/compliance/real_test_requirements_enforcer.py:320",
+        "scripts/compliance/real_test_validator.py:205",
         "scripts/compliance/test_fixer.py:225",
         "scripts/compliance/test_fixer.py:280",
         "scripts/comprehensive_test_fixer.py:102",
         "scripts/comprehensive_test_fixer.py:111",
         "scripts/comprehensive_test_fixer.py:120",
-        "scripts/comprehensive_test_fixer.py:129",
-        "scripts/comprehensive_test_fixer.py:138"
+        "scripts/comprehensive_test_fixer.py:129"
       ]
     },
     "def _setup_test_data(self):\n        \"\"\"Setup test data and configurations\"\"\"": {
@@ -26024,6 +26201,20 @@
       "category": "test_literals",
       "locations": [
         "scripts/remove_test_stubs.py:63"
+      ]
+    },
+    "def\\s+create_mock_\\w*component": {
+      "value": "def\\s+create_mock_\\w*component",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:150"
+      ]
+    },
+    "def\\s+mock_\\w*_component": {
+      "value": "def\\s+mock_\\w*_component",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:151"
       ]
     },
     "def\\s+mock_\\w+": {
@@ -26560,7 +26751,8 @@
       "locations": [
         "scripts/compliance/project_test_validator.py:172",
         "scripts/compliance/project_test_validator.py:184",
-        "scripts/compliance/real_test_requirements_enforcer.py:239"
+        "scripts/compliance/real_test_requirements_enforcer.py:239",
+        "scripts/compliance/real_test_validator.py:136"
       ]
     },
     "email": {
@@ -26620,7 +26812,8 @@
       "value": "end-to-end",
       "category": "test_literals",
       "locations": [
-        "scripts/compliance/project_test_validator.py:264"
+        "scripts/compliance/project_test_validator.py:264",
+        "scripts/compliance/real_test_validator.py:226"
       ]
     },
     "end_line": {
@@ -26638,6 +26831,7 @@
         "scripts/auto_fix_test_violations.py:173",
         "scripts/compliance/project_test_validator.py:214",
         "scripts/compliance/real_test_requirements_enforcer.py:297",
+        "scripts/compliance/real_test_validator.py:182",
         "scripts/compliance/test_fixer.py:152",
         "scripts/compliance/test_limits_checker.py:187",
         "scripts/compliance/test_refactor_helper.py:151",
@@ -27094,6 +27288,7 @@
         "scripts/compliance/real_test_linter.py:164",
         "scripts/compliance/real_test_requirements_enforcer.py:366",
         "scripts/compliance/real_test_requirements_enforcer.py:514",
+        "scripts/compliance/real_test_validator.py:247",
         "scripts/compliance/test_fixer.py:363"
       ]
     },
@@ -27694,7 +27889,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:147",
-        "scripts/compliance/real_test_requirements_enforcer.py:179"
+        "scripts/compliance/real_test_requirements_enforcer.py:179",
+        "scripts/compliance/real_test_validator.py:102"
       ]
     },
     "file_fixes": {
@@ -27738,7 +27934,7 @@
         "scripts/compliance/real_test_linter.py:171",
         "scripts/compliance/real_test_requirements_enforcer.py:221",
         "scripts/compliance/real_test_requirements_enforcer.py:514",
-        "scripts/compliance/test_fixer.py:355"
+        "scripts/compliance/real_test_validator.py:110"
       ]
     },
     "file_splits": {
@@ -28097,7 +28293,8 @@
       "value": "fixtures.py",
       "category": "test_literals",
       "locations": [
-        "scripts/compliance/project_test_validator.py:112"
+        "scripts/compliance/project_test_validator.py:112",
+        "scripts/compliance/real_test_validator.py:69"
       ]
     },
     "flaky_tests": {
@@ -28334,7 +28531,8 @@
       "value": "from netra_backend.tests.test_utils import setup_test_path",
       "category": "test_literals",
       "locations": [
-        "scripts/fix_test_import_order.py:23"
+        "scripts/fix_test_import_order.py:23",
+        "scripts/fix_test_utils_imports.py:80"
       ]
     },
     "from netra_backend\\.app\\.db\\.clickhouse import ClickHouseManager": {
@@ -28454,6 +28652,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/fix_e2e_test_imports.py:50"
+      ]
+    },
+    "from netra_backend\\.tests\\.test_utils import setup_test_path\\n": {
+      "value": "from netra_backend\\.tests\\.test_utils import setup_test_path\\n",
+      "category": "test_literals",
+      "locations": [
+        "scripts/fix_test_utils_imports.py:34"
       ]
     },
     "from netra_backend\\.tests\\.user_flow_base import.*": {
@@ -29732,7 +29937,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:112",
-        "scripts/compliance/real_test_requirements_enforcer.py:140"
+        "scripts/compliance/real_test_requirements_enforcer.py:140",
+        "scripts/compliance/real_test_validator.py:69"
       ]
     },
     "high": {
@@ -31453,7 +31659,8 @@
       "locations": [
         "scripts/auto_fix_test_sizes.py:135",
         "scripts/compliance/project_test_validator.py:141",
-        "scripts/compliance/real_test_requirements_enforcer.py:200"
+        "scripts/compliance/real_test_requirements_enforcer.py:200",
+        "scripts/compliance/real_test_validator.py:96"
       ]
     },
     "lines": {
@@ -31535,7 +31742,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:251",
-        "scripts/compliance/real_test_requirements_enforcer.py:329"
+        "scripts/compliance/real_test_requirements_enforcer.py:329",
+        "scripts/compliance/real_test_validator.py:213"
       ]
     },
     "lines, exceeds 450-line limit": {
@@ -31543,7 +31751,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:156",
-        "scripts/compliance/real_test_requirements_enforcer.py:222"
+        "scripts/compliance/real_test_requirements_enforcer.py:222",
+        "scripts/compliance/real_test_validator.py:111"
       ]
     },
     "lines, exceeds reasonable limit": {
@@ -32342,6 +32551,8 @@
         "scripts/compliance/project_test_validator.py:183",
         "scripts/compliance/real_test_requirements_enforcer.py:238",
         "scripts/compliance/real_test_requirements_enforcer.py:260",
+        "scripts/compliance/real_test_validator.py:125",
+        "scripts/compliance/real_test_validator.py:135",
         "scripts/compliance/test_refactor_helper.py:200"
       ]
     },
@@ -32356,7 +32567,8 @@
       "value": "mock usages, should use real components",
       "category": "test_literals",
       "locations": [
-        "scripts/compliance/project_test_validator.py:287"
+        "scripts/compliance/project_test_validator.py:287",
+        "scripts/compliance/real_test_validator.py:248"
       ]
     },
     "mock-only tests in current sprint": {
@@ -32384,7 +32596,8 @@
       "value": "mock_\\w+\\s*=",
       "category": "test_literals",
       "locations": [
-        "scripts/compliance/project_test_validator.py:274"
+        "scripts/compliance/project_test_validator.py:274",
+        "scripts/compliance/real_test_validator.py:236"
       ]
     },
     "mock_access_token": {
@@ -32417,7 +32630,8 @@
       "locations": [
         "scripts/compliance/project_test_validator.py:174",
         "scripts/compliance/real_test_requirements_enforcer.py:247",
-        "scripts/compliance/real_test_requirements_enforcer.py:513"
+        "scripts/compliance/real_test_requirements_enforcer.py:513",
+        "scripts/compliance/real_test_validator.py:127"
       ]
     },
     "mock_component_function": {
@@ -32428,7 +32642,15 @@
         "scripts/compliance/real_test_linter.py:158",
         "scripts/compliance/real_test_requirements_enforcer.py:264",
         "scripts/compliance/real_test_requirements_enforcer.py:513",
+        "scripts/compliance/real_test_validator.py:138",
         "scripts/compliance/test_fixer.py:351"
+      ]
+    },
+    "mock_component_pattern": {
+      "value": "mock_component_pattern",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:158"
       ]
     },
     "mock_components": {
@@ -32573,6 +32795,7 @@
         "scripts/check_test_compliance.py:187",
         "scripts/compliance/project_test_validator.py:361",
         "scripts/compliance/real_test_linter.py:212",
+        "scripts/compliance/real_test_validator.py:305",
         "scripts/test_discovery_report.py:79",
         "scripts/test_failure_scanner.py:188"
       ]
@@ -32818,6 +33041,7 @@
         "scripts/check_test_import_order.py:39",
         "scripts/check_test_import_order.py:44",
         "scripts/fix_test_import_errors.py:25",
+        "scripts/fix_test_utils_imports.py:64",
         "scripts/remove_duplicate_test_setup.py:38",
         "scripts/standardize_l3_test_names.py:59",
         "scripts/test_backend.py:187"
@@ -33815,7 +34039,8 @@
       "value": "patch\\(",
       "category": "test_literals",
       "locations": [
-        "scripts/compliance/project_test_validator.py:274"
+        "scripts/compliance/project_test_validator.py:274",
+        "scripts/compliance/real_test_validator.py:236"
       ]
     },
     "path": {
@@ -35333,6 +35558,13 @@
         "scripts/business_value_test_index.py:765"
       ]
     },
+    "reconfigure": {
+      "value": "reconfigure",
+      "category": "test_literals",
+      "locations": [
+        "scripts/compliance/real_test_validator.py:343"
+      ]
+    },
     "reconnecting": {
       "value": "reconnecting",
       "category": "test_literals",
@@ -36572,6 +36804,13 @@
         "scripts/check_test_import_order.py:52"
       ]
     },
+    "setup_test_path\\(\\)\\n": {
+      "value": "setup_test_path\\(\\)\\n",
+      "category": "test_literals",
+      "locations": [
+        "scripts/fix_test_utils_imports.py:36"
+      ]
+    },
     "severities": {
       "value": "severities",
       "category": "test_literals",
@@ -37439,7 +37678,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:141",
-        "scripts/compliance/real_test_requirements_enforcer.py:200"
+        "scripts/compliance/real_test_requirements_enforcer.py:200",
+        "scripts/compliance/real_test_validator.py:96"
       ]
     },
     "syntax_valid": {
@@ -38131,8 +38371,8 @@
         "scripts/compliance/test_limits_checker.py:56",
         "scripts/compliance/test_size_validator.py:143",
         "scripts/fix_test_import_order.py:90",
-        "scripts/remove_duplicate_test_setup.py:51",
-        "scripts/test_backend_optimized.py:290"
+        "scripts/fix_test_utils_imports.py:76",
+        "scripts/remove_duplicate_test_setup.py:51"
       ]
     },
     "test_.*?(\\w+)_\\w+$": {
@@ -38431,7 +38671,8 @@
       "value": "test_integration",
       "category": "test_literals",
       "locations": [
-        "scripts/compliance/project_test_validator.py:264"
+        "scripts/compliance/project_test_validator.py:264",
+        "scripts/compliance/real_test_validator.py:226"
       ]
     },
     "test_jwt_secret_key_that_is_long_enough_for_testing_purposes": {
@@ -40176,7 +40417,8 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/project_test_validator.py:113",
-        "scripts/compliance/real_test_requirements_enforcer.py:140"
+        "scripts/compliance/real_test_requirements_enforcer.py:140",
+        "scripts/compliance/real_test_validator.py:70"
       ]
     },
     "uvicorn": {
@@ -40520,6 +40762,7 @@
       "category": "test_literals",
       "locations": [
         "scripts/compliance/real_test_requirements_enforcer.py:550",
+        "scripts/compliance/real_test_validator.py:318",
         "scripts/compliance/test_violations_reporter.py:116"
       ]
     },
@@ -40723,7 +40966,8 @@
         "scripts/compliance/project_test_validator.py:172",
         "scripts/compliance/project_test_validator.py:184",
         "scripts/compliance/real_test_requirements_enforcer.py:239",
-        "scripts/compliance/real_test_requirements_enforcer.py:261"
+        "scripts/compliance/real_test_requirements_enforcer.py:261",
+        "scripts/compliance/real_test_validator.py:136"
       ]
     },
     "win32": {
@@ -41563,6 +41807,13 @@
       "category": "test_literals",
       "locations": [
         "scripts/test_cold_start_e2e.py:475"
+      ]
+    },
+    "✅ Successfully fixed test_utils imports!": {
+      "value": "✅ Successfully fixed test_utils imports!",
+      "category": "test_literals",
+      "locations": [
+        "scripts/fix_test_utils_imports.py:96"
       ]
     },
     "✅ Syntax valid": {

@@ -1,0 +1,257 @@
+<?xml version='1.0' encoding='utf-8'?>
+<specification>
+  <metadata>
+    <name>Next.js Standalone Deployment Configuration</name>
+    <type>deployment</type>
+    <version>1.0</version>
+    <last_updated>2025-08-24</last_updated>
+    <description>Complete specification for Next.js standalone mode deployment in Docker</description>
+    <critical>true</critical>
+    <business_impact>Frontend availability and performance in staging/production</business_impact>
+  </metadata>
+  
+  <overview>
+    <description>
+      Next.js supports multiple output modes for production builds. The "standalone" mode creates
+      a self-contained server that includes all necessary dependencies, eliminating the need for
+      node_modules in production. This significantly reduces deployment size and improves startup time.
+    </description>
+    <key_benefits>
+      <benefit>Smaller Docker images (reduced by 80-90%)</benefit>
+      <benefit>Faster deployment times</benefit>
+      <benefit>Self-contained server with all dependencies</benefit>
+      <benefit>Better security (no dev dependencies in production)</benefit>
+      <benefit>Simplified production runtime</benefit>
+    </key_benefits>
+  </overview>
+  
+  <configuration>
+    <next_config_settings>
+      <file>next.config.ts</file>
+      <required_setting>
+        <name>output</name>
+        <value>standalone</value>
+        <description>Enables standalone build mode</description>
+        <example>
+          const nextConfig: NextConfig = {
+            output: 'standalone',
+            // other settings...
+          };
+        </example>
+      </required_setting>
+    </next_config_settings>
+    
+    <build_output_structure>
+      <description>When output: 'standalone' is set, Next.js creates this structure:</description>
+      <directory_tree>
+        .next/
+        ├── standalone/
+        │   ├── server.js          # Main server file to run
+        │   ├── node_modules/       # Production dependencies only
+        │   └── .next/              # Minimal Next.js runtime files
+        ├── static/                 # Static assets (CSS, JS, images)
+        └── cache/                  # Build cache
+      </directory_tree>
+      <key_files>
+        <file>
+          <path>.next/standalone/server.js</path>
+          <description>The main server file that runs the Next.js application</description>
+          <execution>node server.js</execution>
+        </file>
+      </key_files>
+    </build_output_structure>
+  </configuration>
+  
+  <dockerfile_configuration>
+    <correct_implementation>
+      <description>Proper Dockerfile for Next.js standalone mode</description>
+      <dockerfile>
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files for dependency installation
+COPY frontend/package*.json ./
+RUN npm ci
+
+# Copy source code
+COPY frontend/ .
+COPY shared/ ../shared/
+
+# Set build-time memory limit
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# Build creates .next/standalone directory
+RUN npm run build
+
+# Production stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy standalone server (includes node_modules and server.js)
+COPY --from=builder /app/.next/standalone ./
+
+# Copy static files separately (not included in standalone)
+COPY --from=builder /app/.next/static ./.next/static
+
+# Copy public files if needed
+COPY --from=builder /app/public ./public
+
+# Set runtime environment
+ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+
+EXPOSE 3000
+
+# Run the standalone server directly
+CMD ["node", "server.js"]
+      </dockerfile>
+    </correct_implementation>
+    
+    <common_mistakes>
+      <mistake>
+        <description>Using npm start with standalone build</description>
+        <incorrect>CMD ["npm", "start"]</incorrect>
+        <correct>CMD ["node", "server.js"]</correct>
+        <reason>Standalone build doesn't use package.json scripts</reason>
+      </mistake>
+      <mistake>
+        <description>Copying wrong directories</description>
+        <incorrect>COPY --from=builder /app/.next ./.next</incorrect>
+        <correct>COPY --from=builder /app/.next/standalone ./</correct>
+        <reason>Must copy standalone contents to root, not .next directory</reason>
+      </mistake>
+      <mistake>
+        <description>Installing production dependencies</description>
+        <incorrect>RUN npm ci --production</incorrect>
+        <correct># No npm install needed in production stage</correct>
+        <reason>Standalone includes all necessary dependencies</reason>
+      </mistake>
+      <mistake>
+        <description>Forgetting static files</description>
+        <incorrect># Only copying standalone</incorrect>
+        <correct>COPY --from=builder /app/.next/static ./.next/static</correct>
+        <reason>Static files must be copied separately</reason>
+      </mistake>
+    </common_mistakes>
+  </dockerfile_configuration>
+  
+  <environment_variables>
+    <variable>
+      <name>NODE_ENV</name>
+      <value>production</value>
+      <required>true</required>
+      <description>Sets Node.js to production mode</description>
+    </variable>
+    <variable>
+      <name>HOSTNAME</name>
+      <value>0.0.0.0</value>
+      <required>true</required>
+      <description>Binds to all network interfaces in container</description>
+    </variable>
+    <variable>
+      <name>PORT</name>
+      <value>3000</value>
+      <required>false</required>
+      <description>Port for the server (default: 3000)</description>
+    </variable>
+    <variable>
+      <name>NODE_OPTIONS</name>
+      <value>--max-old-space-size=2048</value>
+      <required>false</required>
+      <description>Node.js memory limit for runtime</description>
+    </variable>
+    <variable>
+      <name>NEXT_PUBLIC_API_URL</name>
+      <value>https://api.staging.netrasystems.ai</value>
+      <required>true</required>
+      <description>Backend API URL for frontend to connect to</description>
+    </variable>
+  </environment_variables>
+  
+  <deployment_settings>
+    <cloud_run_configuration>
+      <memory>2Gi</memory>
+      <cpu>1</cpu>
+      <min_instances>1</min_instances>
+      <max_instances>10</max_instances>
+      <note>Memory should match NODE_OPTIONS max-old-space-size</note>
+    </cloud_run_configuration>
+    
+    <health_checks>
+      <path>/</path>
+      <interval>30s</interval>
+      <timeout>10s</timeout>
+      <success_threshold>1</success_threshold>
+      <failure_threshold>3</failure_threshold>
+    </health_checks>
+  </deployment_settings>
+  
+  <troubleshooting>
+    <issue>
+      <symptom>Container starts but application never becomes available</symptom>
+      <cause>Using npm start instead of node server.js</cause>
+      <solution>Change CMD to ["node", "server.js"]</solution>
+    </issue>
+    <issue>
+      <symptom>Static assets (CSS, JS) not loading</symptom>
+      <cause>Forgot to copy .next/static directory</cause>
+      <solution>Add COPY --from=builder /app/.next/static ./.next/static</solution>
+    </issue>
+    <issue>
+      <symptom>server.js not found error</symptom>
+      <cause>Copying wrong directory or not using standalone mode</cause>
+      <solution>Ensure output: 'standalone' in next.config.ts and copy .next/standalone contents to root</solution>
+    </issue>
+    <issue>
+      <symptom>API calls failing from frontend</symptom>
+      <cause>Missing NEXT_PUBLIC_API_URL environment variable</cause>
+      <solution>Set NEXT_PUBLIC_API_URL to backend API URL</solution>
+    </issue>
+    <issue>
+      <symptom>Out of memory errors</symptom>
+      <cause>NODE_OPTIONS memory limit too low or Cloud Run memory insufficient</cause>
+      <solution>Increase both NODE_OPTIONS and Cloud Run memory allocation</solution>
+    </issue>
+  </troubleshooting>
+  
+  <verification>
+    <local_testing>
+      <step>Build Docker image: docker build -f Dockerfile.frontend -t frontend-test .</step>
+      <step>Run container: docker run -p 3000:3000 frontend-test</step>
+      <step>Verify server starts and responds on http://localhost:3000</step>
+      <step>Check that static assets load correctly</step>
+      <step>Verify API proxy rewrites work</step>
+    </local_testing>
+    
+    <deployment_validation>
+      <step>Deploy to staging environment</step>
+      <step>Check Cloud Run logs for successful startup</step>
+      <step>Verify health checks pass</step>
+      <step>Test frontend loads in browser</step>
+      <step>Verify API connectivity to backend</step>
+      <step>Check WebSocket connections work</step>
+    </deployment_validation>
+  </verification>
+  
+  <best_practices>
+    <practice>Always test Docker builds locally before deploying</practice>
+    <practice>Match NODE_OPTIONS memory to Cloud Run memory allocation</practice>
+    <practice>Use min_instances=1 for production to avoid cold starts</practice>
+    <practice>Monitor actual memory usage and adjust as needed</practice>
+    <practice>Keep Dockerfile simple - let Next.js handle complexity</practice>
+    <practice>Document all required environment variables</practice>
+    <practice>Use domain names not Cloud Run URLs for service communication</practice>
+  </best_practices>
+  
+  <references>
+    <reference>https://nextjs.org/docs/app/api-reference/next-config-js/output</reference>
+    <reference>SPEC/gcp_deployment.xml</reference>
+    <reference>SPEC/learnings/deployment.xml</reference>
+    <reference>Dockerfile.frontend</reference>
+    <reference>scripts/deploy_to_gcp.py</reference>
+  </references>
+</specification>

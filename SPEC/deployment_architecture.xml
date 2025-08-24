@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Deployment Architecture</name>
+        <type>Core.DeploymentArchitecture</type>
+        <version>1.0</version>
+        <description>Core specification for deployment architecture across all environments</description>
+        <created>2025-08-24</created>
+    </metadata>
+
+    <core_principle>
+        <title>Reliable Multi-Environment Deployment</title>
+        <description>
+            The platform maintains a robust deployment architecture that ensures
+            reliable deployments across development, staging, and production environments.
+            All deployments MUST pass comprehensive validation before traffic routing,
+            and configuration MUST be environment-aware with proper secret management.
+        </description>
+    </core_principle>
+
+    <deployment_environments>
+        <environment name="Development">
+            <description>Local development environment</description>
+            <characteristics>
+                <item>Dynamic port allocation</item>
+                <item>Service discovery via JSON files</item>
+                <item>Mock LLM mode available</item>
+                <item>Hot reload enabled</item>
+                <item>Isolated environment variables</item>
+            </characteristics>
+            <launch_command>python scripts/dev_launcher.py</launch_command>
+        </environment>
+
+        <environment name="Staging">
+            <description>Pre-production validation environment</description>
+            <characteristics>
+                <item>Cloud Run deployment</item>
+                <item>Cloud SQL database</item>
+                <item>GCP Secret Manager</item>
+                <item>SSL/TLS required</item>
+                <item>OAuth authentication</item>
+            </characteristics>
+            <deployment_command>python scripts/deploy_to_gcp.py --project netra-staging --build-local</deployment_command>
+        </environment>
+
+        <environment name="Production">
+            <description>Live production environment</description>
+            <characteristics>
+                <item>Multi-region deployment</item>
+                <item>Auto-scaling enabled</item>
+                <item>Full monitoring/alerting</item>
+                <item>Zero-downtime deployments</item>
+                <item>Traffic management</item>
+            </characteristics>
+            <deployment_command>python scripts/deploy_to_gcp.py --project netra-production --run-checks</deployment_command>
+        </environment>
+    </deployment_environments>
+
+    <secret_management>
+        <principle>Centralized secret management with environment isolation</principle>
+        
+        <approach environment="Development">
+            <source>.env files</source>
+            <manager>IsolatedEnvironment</manager>
+            <isolation>Complete isolation from system environment</isolation>
+        </approach>
+
+        <approach environment="Staging/Production">
+            <source>GCP Secret Manager</source>
+            <manager>SecretManager class</manager>
+            <validation>Pre-deployment secret validation</validation>
+        </approach>
+
+        <required_secrets>
+            <secret name="DATABASE_URL" critical="true">
+                <description>PostgreSQL connection string</description>
+                <format>postgresql://user:pass@host/db?sslmode=require</format>
+                <validation>Connection test required</validation>
+            </secret>
+            <secret name="REDIS_URL" critical="true">
+                <description>Redis connection string</description>
+                <format>redis://host:port/db</format>
+            </secret>
+            <secret name="CLICKHOUSE_HOST" critical="true">
+                <description>ClickHouse server hostname</description>
+                <validation>No localhost in staging/production</validation>
+            </secret>
+            <secret name="JWT_SECRET_KEY" critical="true">
+                <description>JWT signing key</description>
+                <requirements>64+ characters, synchronized across services</requirements>
+            </secret>
+            <secret name="OAUTH_CLIENT_ID" critical="false">
+                <description>OAuth provider client ID</description>
+            </secret>
+            <secret name="OAUTH_CLIENT_SECRET" critical="false">
+                <description>OAuth provider client secret</description>
+            </secret>
+        </required_secrets>
+    </secret_management>
+
+    <deployment_pipeline>
+        <stage name="Pre-deployment Validation">
+            <steps>
+                <step>Validate all required secrets exist</step>
+                <step>Test database connectivity with SSL resolution</step>
+                <step>Verify no localhost references in configuration</step>
+                <step>Run environment configuration validator</step>
+                <step>Check service dependencies</step>
+            </steps>
+            <implementation>
+                <code>
+def validate_deployment_readiness():
+    # Check secrets
+    validator = EnvironmentConfigurationValidator()
+    result = validator.validate_staging_requirements()
+    
+    # Test database
+    db_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(
+        get_secret("DATABASE_URL")
+    )
+    test_database_connection(db_url)
+    
+    # Verify configuration
+    if "localhost" in get_config().to_dict().values():
+        raise DeploymentError("Localhost found in staging config")
+                </code>
+            </implementation>
+        </stage>
+
+        <stage name="Build and Deploy">
+            <steps>
+                <step>Build Docker images locally (5x faster)</step>
+                <step>Push images to Artifact Registry</step>
+                <step>Deploy to Cloud Run</step>
+                <step>Wait for health checks</step>
+            </steps>
+            <options>
+                <option name="--build-local">Build locally instead of Cloud Build</option>
+                <option name="--run-checks">Run comprehensive checks</option>
+                <option name="--cleanup">Remove old revisions</option>
+            </options>
+        </stage>
+
+        <stage name="Traffic Management">
+            <description>
+                Cloud Run does NOT automatically route traffic to new revisions.
+                Traffic must be explicitly updated after successful deployment.
+            </description>
+            <steps>
+                <step>Wait for revision readiness</step>
+                <step>Run smoke tests on new revision</step>
+                <step>Update traffic to latest revision</step>
+                <step>Monitor error rates</step>
+                <step>Rollback if errors exceed threshold</step>
+            </steps>
+            <implementation>
+                <code>
+# Wait for revision ready
+gcloud run services describe SERVICE --region=REGION --format="value(status.conditions[0].status)"
+
+# Update traffic to latest
+gcloud run services update-traffic SERVICE --to-latest --region=REGION
+
+# Monitor and rollback if needed
+if error_rate > threshold:
+    gcloud run services update-traffic SERVICE --to-revisions=PREVIOUS=100
+                </code>
+            </implementation>
+        </stage>
+
+        <stage name="Post-deployment Validation">
+            <steps>
+                <step>Verify all health endpoints return 200</step>
+                <step>Test authentication flow end-to-end</step>
+                <step>Validate WebSocket connectivity</step>
+                <step>Run smoke test suite</step>
+                <step>Check monitoring metrics</step>
+            </steps>
+        </stage>
+    </deployment_pipeline>
+
+    <service_configuration>
+        <service name="Backend">
+            <dockerfile>Dockerfile.backend</dockerfile>
+            <port>8000</port>
+            <health_check>/health/ready</health_check>
+            <environment_vars>
+                <var>DATABASE_URL</var>
+                <var>REDIS_URL</var>
+                <var>USE_OAUTH_PROXY=true</var>
+            </environment_vars>
+            <cloud_run_config>
+                <cpu>1</cpu>
+                <memory>512Mi</memory>
+                <min_instances>1</min_instances>
+                <max_instances>10</max_instances>
+                <concurrency>100</concurrency>
+            </cloud_run_config>
+        </service>
+
+        <service name="Auth">
+            <dockerfile>Dockerfile.auth</dockerfile>
+            <port>8080</port>
+            <health_check>/health/ready</health_check>
+            <domain>auth.staging.netrasystems.ai</domain>
+            <environment_vars>
+                <var>DATABASE_URL</var>
+                <var>JWT_SECRET_KEY</var>
+                <var>OAUTH_CLIENT_ID</var>
+                <var>OAUTH_CLIENT_SECRET</var>
+            </environment_vars>
+            <cloud_run_config>
+                <cpu>0.5</cpu>
+                <memory>256Mi</memory>
+                <min_instances>1</min_instances>
+                <max_instances>5</max_instances>
+            </cloud_run_config>
+        </service>
+
+        <service name="Frontend">
+            <dockerfile>Dockerfile.frontend</dockerfile>
+            <port>3000</port>
+            <health_check>/</health_check>
+            <domain>staging.netrasystems.ai</domain>
+            <environment_vars>
+                <var>NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai</var>
+                <var>NEXT_PUBLIC_AUTH_URL=https://auth.staging.netrasystems.ai</var>
+            </environment_vars>
+            <cloud_run_config>
+                <cpu>0.5</cpu>
+                <memory>256Mi</memory>
+                <min_instances>1</min_instances>
+                <max_instances>5</max_instances>
+            </cloud_run_config>
+        </service>
+    </service_configuration>
+
+    <health_monitoring>
+        <health_checks>
+            <endpoint service="all">/health/live</endpoint>
+            <endpoint service="all">/health/ready</endpoint>
+            <timeout>30 seconds</timeout>
+            <interval>10 seconds</interval>
+            <failure_threshold>3</failure_threshold>
+        </health_checks>
+
+        <monitoring_metrics>
+            <metric>Request latency (p50, p95, p99)</metric>
+            <metric>Error rate by endpoint</metric>
+            <metric>Database connection pool usage</metric>
+            <metric>WebSocket connection count</metric>
+            <metric>Authentication success rate</metric>
+        </monitoring_metrics>
+
+        <alerting_rules>
+            <alert name="High Error Rate" threshold="5%" window="5m"/>
+            <alert name="Health Check Failure" threshold="2 consecutive"/>
+            <alert name="Database Connection Failure" threshold="any"/>
+            <alert name="High Latency" threshold="p95 > 1s" window="5m"/>
+        </alerting_rules>
+    </health_monitoring>
+
+    <rollback_strategy>
+        <automatic_rollback>
+            <trigger>Error rate > 10% for 5 minutes</trigger>
+            <trigger>Health checks failing for 10 minutes</trigger>
+            <action>Route 100% traffic to previous stable revision</action>
+        </automatic_rollback>
+
+        <manual_rollback>
+            <command>gcloud run services update-traffic SERVICE --to-revisions=REVISION=100</command>
+            <verification>Run smoke tests on rolled-back version</verification>
+        </manual_rollback>
+    </rollback_strategy>
+
+    <deployment_checklist>
+        <pre_deployment>
+            <item>All tests passing in CI/CD</item>
+            <item>Code review approved</item>
+            <item>Secrets validated in target environment</item>
+            <item>Database migrations completed</item>
+            <item>Feature flags configured</item>
+        </pre_deployment>
+
+        <during_deployment>
+            <item>Monitor deployment logs</item>
+            <item>Watch health check status</item>
+            <item>Verify secret loading</item>
+            <item>Check resource utilization</item>
+        </during_deployment>
+
+        <post_deployment>
+            <item>All health checks green</item>
+            <item>Smoke tests passing</item>
+            <item>Authentication flow working</item>
+            <item>Monitoring metrics normal</item>
+            <item>No elevated error rates</item>
+        </post_deployment>
+    </deployment_checklist>
+
+    <business_value>
+        <segment>Platform/Internal</segment>
+        <business_goal>Operational Excellence and Reliability</business_goal>
+        <metrics>
+            <metric>99.9% deployment success rate</metric>
+            <metric>Zero-downtime deployments achieved</metric>
+            <metric>60% reduction in deployment time with local builds</metric>
+            <metric>Automatic rollback prevents outages</metric>
+            <metric>Complete deployment traceability</metric>
+        </metrics>
+    </business_value>
+
+    <compliance_checklist>
+        <check>Pre-deployment validation implemented</check>
+        <check>SSL parameters resolved for all database connections</check>
+        <check>No localhost in staging/production configs</check>
+        <check>Traffic management after deployment</check>
+        <check>Health monitoring configured</check>
+        <check>Rollback strategy documented and tested</check>
+        <check>All required secrets available</check>
+    </compliance_checklist>
+</specification>

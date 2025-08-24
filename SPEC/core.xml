@@ -1,47 +1,298 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <specification>
-  <metadata>
-    <name>Core</name>
-    <type>core</type>
-    <version>1.0</version>
-    <last_edited>2025-08-21T08:47:28.401907</last_edited>
-    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:28.401907">
-      <reasons>
-        <reason>Likely outdated spec: core.xml</reason>
-      </reasons>
-    </legacy_status>
-  </metadata>
-  <primary-spec>
-    <description>Core Specification</description>
-    <goals>
-      <goal priority="high">Core components working as a complete end to end system</goal>
-      <goal priority="critical">The Coherence of the system working in harmony with the application</goal>
-    </goals>
-  </primary-spec>
-  <sections>
-    <section id="utilities" order="1">
-      <title>Utilities</title>
-      <requirements>
-        <requirement>Core utilities are located in app/utils</requirement>
-        <requirement>Utilities are generic and reusable</requirement>
-        <requirement>Utilities are well-documented and tested</requirement>
-      </requirements>
-    </section>
-    <section id="config" order="2">
-      <title>Config</title>
-      <requirements>
-        <requirement>Application configuration is handled by app/config.py</requirement>
-        <requirement>Configuration can be loaded from multiple sources</requirement>
-        <requirement>Configuration is validated on startup</requirement>
-      </requirements>
-    </section>
-    <section id="logging" order="3">
-      <title>Logging</title>
-      <requirements>
-        <requirement>Logging is configured in app/logging_config.py</requirement>
-        <requirement>Logs are structured and easily searchable</requirement>
-        <requirement>Log levels are configurable</requirement>
-      </requirements>
-    </section>
-  </sections>
+    <metadata>
+        <name>Core System Architecture</name>
+        <type>Core.SystemArchitecture</type>
+        <version>2.0</version>
+        <description>Core architectural principles and system coherence requirements</description>
+        <created>2025-08-24</created>
+    </metadata>
+
+    <core_principles>
+        <principle priority="CRITICAL">
+            <name>System Coherence</name>
+            <description>
+                The entire platform operates as a unified, coherent system where all
+                components work in harmony. Each service maintains independence while
+                contributing to the overall system functionality.
+            </description>
+        </principle>
+
+        <principle priority="CRITICAL">
+            <name>Single Source of Truth</name>
+            <description>
+                Every concept, configuration, and implementation MUST exist exactly ONCE
+                within each service. Duplication within a service is forbidden. Similar
+                patterns across services are acceptable for maintaining independence.
+            </description>
+        </principle>
+
+        <principle priority="HIGH">
+            <name>Atomic Operations</name>
+            <description>
+                All changes MUST be atomic and complete. Partial implementations,
+                half-finished refactors, or broken intermediate states are forbidden.
+                Every edit represents a complete update to the system.
+            </description>
+        </principle>
+
+        <principle priority="HIGH">
+            <name>Environment Isolation</name>
+            <description>
+                Development, staging, and production environments MUST be properly
+                isolated with environment-specific configurations and no cross-contamination.
+            </description>
+        </principle>
+    </core_principles>
+
+    <system_architecture>
+        <microservices>
+            <service name="Backend">
+                <path>netra_backend/app</path>
+                <purpose>Main application logic and API</purpose>
+                <port>8000</port>
+                <database>PostgreSQL, ClickHouse, Redis</database>
+            </service>
+
+            <service name="Auth Service">
+                <path>auth_service</path>
+                <purpose>Centralized authentication and authorization</purpose>
+                <port>8080</port>
+                <database>PostgreSQL (separate auth_users table)</database>
+            </service>
+
+            <service name="Frontend">
+                <path>frontend</path>
+                <purpose>Next.js web application</purpose>
+                <port>3000</port>
+                <framework>React with TypeScript</framework>
+            </service>
+        </microservices>
+
+        <shared_components>
+            <component name="Database Management">
+                <path>shared/database/</path>
+                <purpose>Unified database connectivity and SSL resolution</purpose>
+            </component>
+
+            <component name="Configuration">
+                <path>shared/configuration/</path>
+                <purpose>Environment validation and configuration management</purpose>
+            </component>
+
+            <component name="Test Framework">
+                <path>test_framework/</path>
+                <purpose>Centralized test utilities and fixtures</purpose>
+            </component>
+        </shared_components>
+    </system_architecture>
+
+    <configuration_management>
+        <unified_config>
+            <description>
+                Single unified configuration system using IsolatedEnvironment
+                for all environment variable access.
+            </description>
+            <location>dev_launcher/isolated_environment.py</location>
+            <features>
+                <feature>Environment isolation in development</feature>
+                <feature>Source tracking for debugging</feature>
+                <feature>Thread-safe operations</feature>
+                <feature>Subprocess environment management</feature>
+            </features>
+        </unified_config>
+
+        <secret_management>
+            <development>Local .env files with isolation</development>
+            <staging>GCP Secret Manager with validation</staging>
+            <production>GCP Secret Manager with encryption</production>
+        </secret_management>
+    </configuration_management>
+
+    <database_architecture>
+        <connectivity>
+            <description>
+                Unified database connectivity with automatic SSL parameter
+                resolution between asyncpg and psycopg2 drivers.
+            </description>
+            <manager>CoreDatabaseManager</manager>
+            <features>
+                <feature>SSL parameter conflict resolution</feature>
+                <feature>Cloud SQL Unix socket support</feature>
+                <feature>Environment-aware connection strategies</feature>
+                <feature>Automatic driver selection</feature>
+            </features>
+        </connectivity>
+
+        <databases>
+            <database name="PostgreSQL">
+                <purpose>Primary data store</purpose>
+                <async_driver>asyncpg</async_driver>
+                <sync_driver>psycopg2</sync_driver>
+            </database>
+            <database name="ClickHouse">
+                <purpose>Analytics and metrics</purpose>
+                <driver>clickhouse-driver</driver>
+            </database>
+            <database name="Redis">
+                <purpose>Caching and sessions</purpose>
+                <driver>redis.asyncio</driver>
+            </database>
+        </databases>
+    </database_architecture>
+
+    <testing_infrastructure>
+        <unified_test_runner>
+            <description>Single entry point for all test operations</description>
+            <location>unified_test_runner.py</location>
+            <levels>unit, integration, e2e, agents</levels>
+        </unified_test_runner>
+
+        <test_requirements>
+            <requirement>Absolute imports only (no relative imports)</requirement>
+            <requirement>Centralized path setup with setup_test_path()</requirement>
+            <requirement>@pytest.mark.asyncio for all async tests</requirement>
+            <requirement>Environment isolation for all tests</requirement>
+            <requirement>Service boundary respect</requirement>
+        </test_requirements>
+
+        <coverage_targets>
+            <overall>80%</overall>
+            <authentication>90%</authentication>
+            <api_endpoints>90%</api_endpoints>
+            <database_operations>85%</database_operations>
+        </coverage_targets>
+    </testing_infrastructure>
+
+    <deployment_pipeline>
+        <environments>
+            <env name="development">Local with dev_launcher.py</env>
+            <env name="staging">GCP Cloud Run with validation</env>
+            <env name="production">GCP Cloud Run with full monitoring</env>
+        </environments>
+
+        <deployment_process>
+            <step>Pre-deployment validation</step>
+            <step>Build and push images</step>
+            <step>Deploy to Cloud Run</step>
+            <step>Health check validation</step>
+            <step>Traffic management</step>
+            <step>Post-deployment verification</step>
+        </deployment_process>
+
+        <rollback_strategy>
+            <automatic>On error rate > 10%</automatic>
+            <manual>Route traffic to previous revision</manual>
+        </rollback_strategy>
+    </deployment_pipeline>
+
+    <monitoring_observability>
+        <health_checks>
+            <endpoint>/health/live</endpoint>
+            <endpoint>/health/ready</endpoint>
+            <timeout>30 seconds</timeout>
+        </health_checks>
+
+        <metrics>
+            <metric>Request latency (p50, p95, p99)</metric>
+            <metric>Error rates by endpoint</metric>
+            <metric>Database pool utilization</metric>
+            <metric>WebSocket connections</metric>
+        </metrics>
+
+        <logging>
+            <framework>Loguru with structured logging</framework>
+            <correlation>Request ID tracking</correlation>
+            <aggregation>GCP Cloud Logging</aggregation>
+        </logging>
+    </monitoring_observability>
+
+    <development_workflow>
+        <local_development>
+            <command>python scripts/dev_launcher.py</command>
+            <features>
+                <feature>Dynamic port allocation</feature>
+                <feature>Service discovery</feature>
+                <feature>Hot reload</feature>
+                <feature>Mock LLM mode</feature>
+            </features>
+        </local_development>
+
+        <testing>
+            <quick>python unified_test_runner.py --level integration --no-coverage --fast-fail</quick>
+            <comprehensive>python unified_test_runner.py --level e2e --real-llm</comprehensive>
+            <staging>python unified_test_runner.py --level e2e --env staging</staging>
+        </testing>
+
+        <deployment>
+            <staging>python scripts/deploy_to_gcp.py --project netra-staging --build-local</staging>
+            <production>python scripts/deploy_to_gcp.py --project netra-production --run-checks</production>
+        </deployment>
+    </development_workflow>
+
+    <quality_standards>
+        <code_quality>
+            <standard>450 lines per file maximum</standard>
+            <standard>25 lines per function maximum</standard>
+            <standard>Cyclomatic complexity < 10</standard>
+            <standard>Type hints required</standard>
+        </code_quality>
+
+        <documentation>
+            <requirement>All public APIs documented</requirement>
+            <requirement>Complex logic explained</requirement>
+            <requirement>Configuration examples provided</requirement>
+        </documentation>
+
+        <security>
+            <requirement>No secrets in code</requirement>
+            <requirement>Input validation required</requirement>
+            <requirement>SQL injection prevention</requirement>
+            <requirement>XSS protection</requirement>
+        </security>
+    </quality_standards>
+
+    <business_alignment>
+        <goal>Enterprise AI workload optimization</goal>
+        <value_proposition>
+            Reduce AI/LLM costs while improving performance through
+            intelligent orchestration and optimization.
+        </value_proposition>
+        <customer_segments>
+            <segment>Free - Conversion focus</segment>
+            <segment>Early - Feature adoption</segment>
+            <segment>Mid - Expansion</segment>
+            <segment>Enterprise - Full platform</segment>
+        </customer_segments>
+    </business_alignment>
+
+    <compliance_checklist>
+        <system_coherence>
+            <check>All services working in harmony</check>
+            <check>No duplicate implementations within services</check>
+            <check>Atomic operations completed</check>
+            <check>Clean codebase without legacy artifacts</check>
+        </system_coherence>
+
+        <configuration>
+            <check>Unified environment management in use</check>
+            <check>Secrets properly managed per environment</check>
+            <check>No localhost in staging/production</check>
+            <check>SSL parameters resolved correctly</check>
+        </configuration>
+
+        <quality>
+            <check>Test coverage targets met</check>
+            <check>Code quality standards enforced</check>
+            <check>Documentation up to date</check>
+            <check>Security requirements satisfied</check>
+        </quality>
+
+        <operations>
+            <check>Health monitoring active</check>
+            <check>Deployment pipeline functional</check>
+            <check>Rollback strategy tested</check>
+            <check>Metrics and logging operational</check>
+        </operations>
+    </compliance_checklist>
 </specification>

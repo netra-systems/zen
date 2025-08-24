@@ -140,6 +140,17 @@ class AuthConfig:
             logger.warning("No database URL configured, will use in-memory SQLite")
             return database_url
         
+        # Return raw URL from environment - normalization happens at connection time
+        return database_url
+    
+    @staticmethod
+    def get_database_url_for_connection() -> str:
+        """Get database URL normalized for asyncpg connections"""
+        database_url = AuthConfig.get_database_url()
+        
+        if not database_url:
+            return database_url
+        
         # Import here to avoid circular imports
         from auth_service.auth_core.database.database_manager import AuthDatabaseManager
         
@@ -211,3 +222,12 @@ class AuthConfig:
                 logger.info(f"  Database URL: {'*' * 10 if db_url else 'NOT SET'}")
         else:
             logger.info(f"  Database URL: NOT SET (will use in-memory SQLite)")
+
+
+def get_config() -> AuthConfig:
+    """Get auth service configuration instance.
+    
+    Provides compatibility with test imports that expect get_config function.
+    Returns a singleton instance of AuthConfig for consistent configuration access.
+    """
+    return AuthConfig()

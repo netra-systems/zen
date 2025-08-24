@@ -100,7 +100,7 @@ class TestCoroutineHandling:
         websocket.send_json = AsyncMock()
         
         ping_message = {"type": "ping"}
-        with patch('app.routes.utils.websocket_helpers._send_pong_response', new=AsyncMock()):
+        with patch('netra_backend.app.routes.utils.websocket_helpers._send_pong_response', new=AsyncMock()):
             result = await _handle_ping_message(ping_message, websocket)
         
         assert result is True
@@ -122,7 +122,7 @@ class TestCoroutineHandling:
         manager = Mock()
         
         ping_message = {"type": "ping"}
-        with patch('app.routes.utils.websocket_helpers._handle_ping_message', 
+        with patch('netra_backend.app.routes.utils.websocket_helpers._handle_ping_message', 
                   new=AsyncMock(return_value=True)):
             result = await validate_and_handle_message(
                 "test_user", websocket, ping_message, manager
@@ -138,7 +138,7 @@ class TestCoroutineHandling:
         manager.handle_message = AsyncMock(return_value=True)
         
         regular_message = {"type": "message", "content": "test"}
-        with patch('app.routes.utils.websocket_helpers._handle_ping_message',
+        with patch('netra_backend.app.routes.utils.websocket_helpers._handle_ping_message',
                   new=AsyncMock(return_value=False)):
             result = await validate_and_handle_message(
                 "test_user", websocket, regular_message, manager
@@ -254,7 +254,7 @@ class TestCoroutineErrorScenarios:
         async def fake_msg():
             return {"type": "message"}
         
-        with patch('app.routes.utils.websocket_helpers._handle_ping_message',
+        with patch('netra_backend.app.routes.utils.websocket_helpers._handle_ping_message',
                   new=AsyncMock(return_value=False)):
             coroutine_msg = fake_msg()
             # Should handle without crashing

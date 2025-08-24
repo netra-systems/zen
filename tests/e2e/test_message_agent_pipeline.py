@@ -139,7 +139,7 @@ class TestMessagePipelineCore:
     async def _test_message_authentication(self, websocket: MockWebSocket,
                                          message: Dict[str, Any]) -> Dict[str, Any]:
         """Test message authentication."""
-        with patch('app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth:
+        with patch('netra_backend.app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth:
             mock_auth.return_value = "test_pipeline_user"
             return {"authenticated": True, "user_id": "test_pipeline_user"}
     

@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Import Management Architecture</name>
+        <type>Core.ImportManagement</type>
+        <version>1.0</version>
+        <description>Core specification for import management and resolution patterns</description>
+        <created>2025-08-24</created>
+    </metadata>
+
+    <core_principle>
+        <title>Absolute Imports with Zero Tolerance for Relative Imports</title>
+        <description>
+            ALL Python files across the entire platform MUST use absolute imports
+            starting from the package root. Relative imports are FORBIDDEN without
+            exception. This is the #1 cause of test infrastructure failures and
+            MUST be enforced through automated tooling.
+        </description>
+    </core_principle>
+
+    <import_rules>
+        <rule priority="CRITICAL">
+            <name>Absolute Imports Only</name>
+            <description>
+                Every import statement MUST use the full package path starting
+                from the package root (e.g., netra_backend, auth_service, test_framework).
+            </description>
+            <correct_examples>
+                <example>from netra_backend.app.services.user_service import UserService</example>
+                <example>from auth_service.auth_core.models import User</example>
+                <example>from test_framework.fixtures import create_test_user</example>
+            </correct_examples>
+            <incorrect_examples>
+                <example>from ..services.user_service import UserService  # FORBIDDEN</example>
+                <example>from .models import User  # FORBIDDEN</example>
+                <example>from ...app.services import SomeService  # FORBIDDEN</example>
+            </incorrect_examples>
+        </rule>
+
+        <rule priority="CRITICAL">
+            <name>Service Boundary Respect</name>
+            <description>
+                Cross-service imports are FORBIDDEN. Services MUST communicate
+                through APIs, never through direct code imports.
+            </description>
+            <violations>
+                <violation>Importing netra_backend code in auth_service</violation>
+                <violation>Importing auth_service code in frontend tests</violation>
+                <violation>Sharing models directly between services</violation>
+            </violations>
+            <solution>Use API clients or shared interfaces in shared/ directory</solution>
+        </rule>
+
+        <rule priority="HIGH">
+            <name>Test Import Structure</name>
+            <description>
+                Test files MUST use setup_test_path() before any project imports
+                to ensure proper path configuration.
+            </description>
+            <pattern>
+                <code>
+import pytest
+from test_framework.setup_test_path import setup_test_path
+setup_test_path()  # MUST be before project imports
+
+from netra_backend.app.services.some_service import SomeService
+                </code>
+            </pattern>
+        </rule>
+
+        <rule priority="HIGH">
+            <name>Canonical Import Paths</name>
+            <description>
+                Use the canonical import path for commonly misimported modules.
+            </description>
+            <canonical_paths>
+                <path module="UserAuthService">
+                    <correct>from netra_backend.app.services.user_auth_service import UserAuthService</correct>
+                    <alias>UserAuthService as AuthService</alias>
+                </path>
+                <path module="DatabaseManager">
+                    <correct>from netra_backend.app.db.postgres_unified import DatabaseConfigManager</correct>
+                </path>
+                <path module="MetricsCollector">
+                    <correct>from netra_backend.app.monitoring.metrics_collector import MetricsCollector</correct>
+                    <incorrect>from netra_backend.app.monitoring.performance_monitor</incorrect>
+                </path>
+                <path module="WebSocketManager">
+                    <correct>from netra_backend.app.websocket_core import get_websocket_manager</correct>
+                    <incorrect>from netra_backend.app.websocket.connection_manager</incorrect>
+                </path>
+            </canonical_paths>
+        </rule>
+    </import_rules>
+
+    <common_import_patterns>
+        <pattern name="Backend Service Imports">
+            <description>Standard imports for backend services</description>
+            <imports>
+                <import>from netra_backend.app.config import get_config</import>
+                <import>from netra_backend.app.db.postgres_unified import get_db_session</import>
+                <import>from netra_backend.app.services.user_auth_service import UserAuthService</import>
+                <import>from netra_backend.app.websocket_core import get_websocket_manager</import>
+            </imports>
+        </pattern>
+
+        <pattern name="Auth Service Imports">
+            <description>Standard imports for auth service</description>
+            <imports>
+                <import>from auth_service.auth_core.config import get_config</import>
+                <import>from auth_service.auth_core.database.database_manager import AuthDatabaseManager</import>
+                <import>from auth_service.auth_core.models import User</import>
+                <import>from auth_service.auth_core.jwt_handler import JWTHandler</import>
+            </imports>
+        </pattern>
+
+        <pattern name="Test File Imports">
+            <description>Standard imports for test files</description>
+            <imports>
+                <import>import pytest</import>
+                <import>from test_framework.setup_test_path import setup_test_path</import>
+                <import>setup_test_path()  # Call before project imports</import>
+                <import>from netra_backend.tests.test_utils import create_test_client</import>
+            </imports>
+        </pattern>
+    </common_import_patterns>
+
+    <import_resolution_strategies>
+        <strategy name="Module Refactoring">
+            <description>
+                When refactoring modules, create backward compatibility aliases
+                to prevent import failures during transition.
+            </description>
+            <implementation>
+                <code>
+# In the old location, create an alias
+from netra_backend.app.new_location import NewClass
+OldClass = NewClass  # Backward compatibility alias
+
+# Add deprecation warning
+import warnings
+warnings.warn(
+    "OldClass has moved to new_location.NewClass",
+    DeprecationWarning,
+    stacklevel=2
+)
+                </code>
+            </implementation>
+        </strategy>
+
+        <strategy name="Circular Import Prevention">
+            <description>
+                Use TYPE_CHECKING guards and lazy imports to prevent circular dependencies.
+            </description>
+            <implementation>
+                <code>
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from netra_backend.app.services.some_service import SomeService
+
+def get_service() -> "SomeService":
+    # Lazy import inside function
+    from netra_backend.app.services.some_service import SomeService
+    return SomeService()
+                </code>
+            </implementation>
+        </strategy>
+
+        <strategy name="Missing Module Creation">
+            <description>
+                When modules are missing, create stub implementations rather
+                than removing test coverage.
+            </description>
+            <implementation>
+                <code>
+# Create stub module with required exports
+class MissingClass:
+    """Stub implementation for missing module"""
+    def __init__(self):
+        raise NotImplementedError("This is a stub implementation")
+
+__all__ = ["MissingClass"]
+                </code>
+            </implementation>
+        </strategy>
+    </import_resolution_strategies>
+
+    <automated_tooling>
+        <tool name="Import Fixer Script">
+            <purpose>Automatically fix import issues across the codebase</purpose>
+            <location>scripts/fix_all_import_issues.py</location>
+            <capabilities>
+                <capability>Convert relative imports to absolute</capability>
+                <capability>Fix common import path errors</capability>
+                <capability>Add missing setup_test_path() calls</capability>
+                <capability>Validate import structure</capability>
+            </capabilities>
+            <usage>python scripts/fix_all_import_issues.py --absolute-only</usage>
+        </tool>
+
+        <tool name="Pre-commit Hooks">
+            <purpose>Prevent relative imports from being committed</purpose>
+            <configuration>.pre-commit-config.yaml</configuration>
+            <checks>
+                <check>No relative imports in Python files</check>
+                <check>setup_test_path() in test files</check>
+                <check>Service boundary violations</check>
+            </checks>
+        </tool>
+
+        <tool name="CI/CD Validation">
+            <purpose>Fail builds with import violations</purpose>
+            <checks>
+                <check>pytest --collect-only to catch import errors</check>
+                <check>Import structure validation</check>
+                <check>Cross-service import detection</check>
+            </checks>
+        </tool>
+    </automated_tooling>
+
+    <migration_process>
+        <step order="1">
+            <name>Audit Current Imports</name>
+            <command>python scripts/audit_imports.py</command>
+            <output>Report of all relative imports and violations</output>
+        </step>
+
+        <step order="2">
+            <name>Automated Fix Application</name>
+            <command>python scripts/fix_all_import_issues.py --absolute-only</command>
+            <description>Convert all relative imports to absolute</description>
+        </step>
+
+        <step order="3">
+            <name>Test Collection Validation</name>
+            <command>pytest --collect-only</command>
+            <description>Ensure all tests can be collected without import errors</description>
+        </step>
+
+        <step order="4">
+            <name>Run Test Suite</name>
+            <command>python unified_test_runner.py --level integration</command>
+            <description>Validate functionality after import fixes</description>
+        </step>
+
+        <step order="5">
+            <name>Enable Enforcement</name>
+            <actions>
+                <action>Enable pre-commit hooks</action>
+                <action>Add CI/CD validation</action>
+                <action>Document in team guidelines</action>
+            </actions>
+        </step>
+    </migration_process>
+
+    <common_errors_solutions>
+        <error name="ModuleNotFoundError">
+            <symptom>ModuleNotFoundError: No module named 'app'</symptom>
+            <cause>Using relative import or missing package prefix</cause>
+            <solution>Use full import: from netra_backend.app.module import Class</solution>
+        </error>
+
+        <error name="ImportError">
+            <symptom>ImportError: cannot import name 'OldClass'</symptom>
+            <cause>Module was refactored without backward compatibility</cause>
+            <solution>Create alias in old location or update import path</solution>
+        </error>
+
+        <error name="Circular Import">
+            <symptom>ImportError: cannot import name X (circular import)</symptom>
+            <cause>Two modules importing each other directly</cause>
+            <solution>Use TYPE_CHECKING guards or lazy imports</solution>
+        </error>
+
+        <error name="Test Path Issues">
+            <symptom>Tests fail with import errors but code runs fine</symptom>
+            <cause>Missing setup_test_path() call</cause>
+            <solution>Add setup_test_path() before project imports</solution>
+        </error>
+    </common_errors_solutions>
+
+    <monitoring_compliance>
+        <metric name="Relative Import Count">
+            <target>0</target>
+            <measurement>grep -r "from \.\." --include="*.py" | wc -l</measurement>
+        </metric>
+
+        <metric name="Test Collection Success">
+            <target>100%</target>
+            <measurement>pytest --collect-only success rate</measurement>
+        </metric>
+
+        <metric name="Cross-Service Imports">
+            <target>0</target>
+            <measurement>Custom script to detect service boundary violations</measurement>
+        </metric>
+
+        <metric name="Import Error Rate">
+            <target><1% in CI/CD</target>
+            <measurement>CI/CD pipeline import validation failures</measurement>
+        </metric>
+    </monitoring_compliance>
+
+    <business_value>
+        <segment>Platform/Internal</segment>
+        <business_goal>Development Velocity and Code Quality</business_goal>
+        <metrics>
+            <metric>60% reduction in import-related debugging time</metric>
+            <metric>95% reduction in test infrastructure failures</metric>
+            <metric>100% automated import validation</metric>
+            <metric>Zero tolerance for relative imports enforced</metric>
+        </metrics>
+    </business_value>
+
+    <compliance_checklist>
+        <check>All Python files use absolute imports</check>
+        <check>No relative imports exist in codebase</check>
+        <check>Test files use setup_test_path()</check>
+        <check>Service boundaries respected</check>
+        <check>Backward compatibility aliases for refactored modules</check>
+        <check>Pre-commit hooks enabled</check>
+        <check>CI/CD import validation active</check>
+        <check>Team trained on import requirements</check>
+    </compliance_checklist>
+</specification>

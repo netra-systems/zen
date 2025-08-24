@@ -92,6 +92,21 @@ async def websocket_endpoint(websocket: WebSocket):
         message_router = get_message_router()
         connection_monitor = get_connection_monitor()
         
+        # Initialize MessageHandlerService and AgentMessageHandler
+        from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
+        from netra_backend.app.services.message_handlers import MessageHandlerService
+        
+        # Get dependencies from app state
+        supervisor = websocket.app.state.agent_supervisor
+        thread_service = websocket.app.state.thread_service
+        
+        # Create MessageHandlerService and AgentMessageHandler
+        message_handler_service = MessageHandlerService(supervisor, thread_service)
+        agent_handler = AgentMessageHandler(message_handler_service)
+        
+        # Register agent handler with message router
+        message_router.add_handler(agent_handler)
+        
         # Authenticate and establish secure connection
         async with secure_websocket_context(websocket) as (auth_info, security_manager):
             user_id = auth_info.user_id

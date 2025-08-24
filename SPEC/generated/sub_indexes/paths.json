@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-08-24T02:12:32.042324",
+    "generated_at": "2025-08-24T04:00:03.147201",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 481
   },
@@ -494,7 +494,7 @@
       "value": "/api/mcp/ws (MCP-specific)",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:312"
+        "netra_backend/app/routes/websocket.py:327"
       ]
     },
     "/api/poll": {
@@ -763,28 +763,28 @@
       "value": "/ws/config",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:278"
+        "netra_backend/app/routes/websocket.py:293"
       ]
     },
     "/ws/health": {
       "value": "/ws/health",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:320"
+        "netra_backend/app/routes/websocket.py:335"
       ]
     },
     "/ws/stats": {
       "value": "/ws/stats",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:475"
+        "netra_backend/app/routes/websocket.py:490"
       ]
     },
     "/ws/test": {
       "value": "/ws/test",
       "category": "paths",
       "locations": [
-        "netra_backend/app/routes/websocket.py:367"
+        "netra_backend/app/routes/websocket.py:382"
       ]
     },
     "/ws/{user_id}": {
@@ -931,7 +931,7 @@
       "value": "Deploy with: python scripts/deploy_to_gcp.py --project",
       "category": "paths",
       "locations": [
-        "scripts/validate_staging_deployment.py:79"
+        "scripts/validate_staging_deployment.py:86"
       ]
     },
     "Disable: python scripts/manage_precommit.py disable --reason 'Your reason'": {
@@ -966,7 +966,7 @@
       "value": "Example: python scripts/deploy_to_gcp.py --project {} --build-local",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:998"
+        "scripts/deploy_to_gcp.py:1003"
       ]
     },
     "Examples:\n  # Check specific workflow run\n  python verify_workflow_status.py --repo owner/repo --run-id 123456\n  \n  # Check latest workflow run by name\n  python verify_workflow_status.py --repo owner/repo --workflow-name \"test-suite\"\n  \n  # Wait for workflow completion\n  python verify_workflow_status.py --repo owner/repo --workflow-name \"deploy\" --wait-for-completion\n  \n  # JSON output\n  python verify_workflow_status.py --repo owner/repo --run-id 123456 --output json": {
@@ -987,7 +987,7 @@
       "value": "Examples:\n  Default deployment (fast, no checks):\n    python scripts/deploy_to_gcp.py --project netra-staging --build-local\n    \n  With pre-deployment checks:\n    python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks\n    \n  Cloud Build (slower):\n    python scripts/deploy_to_gcp.py --project netra-staging\n    \nSee SPEC/gcp_deployment.xml for detailed guidelines.",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:966"
+        "scripts/deploy_to_gcp.py:971"
       ]
     },
     "Examples:\n  Default deployment (with checks):\n    python scripts/deploy_staging_with_sa.py\n    \n  Quick deployment (no checks):\n    python scripts/deploy_staging_with_sa.py --no-checks\n    \n  Specify service account key:\n    python scripts/deploy_staging_with_sa.py --key path/to/key.json": {
@@ -1085,7 +1085,7 @@
       "value": "Path to service account JSON key file (default: config/netra-staging-7a1059b7cf26.json)",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:991"
+        "scripts/deploy_to_gcp.py:996"
       ]
     },
     "Pre-commit hook for duplicate code detection.\nIntegrates with existing detect_duplicate_code.py for fast incremental checks.\n\nUsage:\n    python scripts/precommit_duplicate_detector.py [files...]\n    \nThis script:\n1. Performs fast duplicate detection on changed files\n2. Checks against known duplicate patterns\n3. Integrates with existing architecture compliance": {
@@ -1177,7 +1177,7 @@
       "value": "SPEC/gcp_deployment.xml",
       "category": "paths",
       "locations": [
-        "scripts/validate_staging_deployment.py:221"
+        "scripts/validate_staging_deployment.py:228"
       ]
     },
     "SPEC/generated/string_literals.json": {
@@ -1194,14 +1194,14 @@
       "value": "SPEC/staging_environment.xml",
       "category": "paths",
       "locations": [
-        "scripts/validate_staging_deployment.py:220"
+        "scripts/validate_staging_deployment.py:227"
       ]
     },
     "See SPEC/gcp_deployment.xml for deployment guidelines.": {
       "value": "See SPEC/gcp_deployment.xml for deployment guidelines.",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:269"
+        "scripts/deploy_to_gcp.py:270"
       ]
     },
     "Status:  python scripts/manage_precommit.py status": {
@@ -2730,7 +2730,7 @@
       "value": "scripts/check_architecture_compliance.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:225",
+        "scripts/deploy_to_gcp.py:226",
         "scripts/team_updates_sync.py:86"
       ]
     },
@@ -2775,7 +2775,7 @@
       "value": "scripts/scan_string_literals.py",
       "category": "paths",
       "locations": [
-        "scripts/deploy_to_gcp.py:230"
+        "scripts/deploy_to_gcp.py:231"
       ]
     },
     "scripts/start_with_discovery.js": {

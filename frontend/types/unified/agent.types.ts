@@ -36,10 +36,7 @@ export type {
 
 // Re-export utility functions
 export {
-  // WebSocket message helpers
-  isAgentStartedMessage,
-  isAgentCompletedMessage,
-  isSubAgentUpdateMessage,
+  // Agent error message helper
   isAgentErrorMessage,
   
   // Legacy compatibility functions
