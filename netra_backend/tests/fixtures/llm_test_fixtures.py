@@ -64,8 +64,11 @@ def create_token_counting_manager() -> Mock:
 
 def _setup_token_counting(manager: Mock) -> None:
     """Setup token counting methods."""
+    # Mock: Component isolation for controlled unit testing
     manager.count_tokens = Mock(return_value=100)
+    # Mock: Component isolation for controlled unit testing
     manager.estimate_cost = Mock(return_value=0.002)
+    # Mock: Async component isolation for testing without real async operations
     manager.get_token_usage = AsyncMock(return_value={"prompt": 50, "completion": 50})
 
 def create_caching_llm_manager() -> Mock:
@@ -84,6 +87,7 @@ def _setup_caching_methods(manager: Mock, cache: Dict[str, Any]) -> None:
         cache[prompt] = response
         return response
     
+    # Mock: Async component isolation for testing without real async operations
     manager.call_llm = AsyncMock(side_effect=cached_call)
 
 def create_model_specific_manager(model_configs: Dict[ModelName, Dict[str, Any]]) -> Mock:
@@ -98,6 +102,7 @@ def _setup_model_specific_behavior(manager: Mock, model_configs: Dict[ModelName,
         config = model_configs.get(model, {"response": "default response"})
         return {"content": config["response"], "model": model}
     
+    # Mock: Async component isolation for testing without real async operations
     manager.call_llm = AsyncMock(side_effect=model_specific_call)
 
 def create_comprehensive_test_manager() -> Mock:
@@ -108,11 +113,17 @@ def create_comprehensive_test_manager() -> Mock:
 
 def _setup_comprehensive_features(manager: Mock) -> None:
     """Setup all features for comprehensive testing."""
+    # Mock: Generic component isolation for controlled unit testing
     manager.stream_response = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     manager.batch_process = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     manager.health_check = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     manager.get_available_models = AsyncMock(return_value=["gpt-4", "claude-3"])
+    # Mock: Component isolation for controlled unit testing
     manager.estimate_tokens = Mock(return_value=150)
+    # Mock: Component isolation for controlled unit testing
     manager.validate_request = Mock(return_value=True)
 
 # Factory function for common test scenarios

@@ -18,6 +18,7 @@ from netra_backend.app.core.exceptions_auth import AuthenticationError
 @pytest.fixture
 def mock_config():
     """Mock configuration with JWT secret."""
+    # Mock: Generic component isolation for controlled unit testing
     config = Mock()
     config.jwt_secret_key = "test_secret_key_12345"
     return config
@@ -26,9 +27,12 @@ def mock_config():
 def mock_redis_manager():
     """Mock Redis manager with enabled state."""
     from unittest.mock import AsyncMock, MagicMock
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis = AsyncMock()
     redis.enabled = True
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.get = AsyncMock(return_value=None)
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.set = AsyncMock()
     return redis
 

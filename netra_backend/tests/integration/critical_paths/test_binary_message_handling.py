@@ -379,6 +379,7 @@ class TestBinaryMessageHandling:
 
         """Create WebSocket manager with mocked external services."""
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.ws_manager.redis_manager') as mock_redis:
 
             mock_redis.enabled = False  # Use in-memory storage
@@ -658,8 +659,10 @@ class TestBinaryMessageHandling:
         """Test binary message transmission through WebSocket."""
         # Mock WebSocket connection
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send = AsyncMock()
         
         # Connect user

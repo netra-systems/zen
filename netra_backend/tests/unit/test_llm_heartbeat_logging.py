@@ -56,6 +56,7 @@ class TestHeartbeatLogger:
     @pytest.mark.asyncio
     async def test_heartbeat_logging_flow(self):
         """Test complete heartbeat logging flow."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.llm.observability.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.1)
             correlation_id = generate_llm_correlation_id()
@@ -165,6 +166,7 @@ class TestSupervisorHeartbeatScenarios:
     @pytest.mark.asyncio
     async def test_supervisor_agent_coordination_heartbeat(self):
         """Test heartbeat during supervisor agent coordination."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.llm.observability.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.1)
             correlation_id = generate_llm_correlation_id()
@@ -180,6 +182,7 @@ class TestSupervisorHeartbeatScenarios:
     @pytest.mark.asyncio
     async def test_heartbeat_during_pipeline_execution(self):
         """Test heartbeat continues during long pipeline operations."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.llm.observability.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.1)
             correlation_id = generate_llm_correlation_id()
@@ -195,6 +198,7 @@ class TestSupervisorHeartbeatScenarios:
     @pytest.mark.asyncio
     async def test_concurrent_supervisor_agents_heartbeat(self):
         """Test heartbeat for multiple concurrent supervisor agents."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.llm.observability.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.1)
             
@@ -237,6 +241,7 @@ class TestSupervisorHeartbeatScenarios:
     @pytest.mark.asyncio
     async def test_supervisor_state_checkpoint_heartbeat(self):
         """Test heartbeat during supervisor state checkpointing."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.llm.observability.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.1)
             correlation_id = generate_llm_correlation_id()
@@ -267,6 +272,7 @@ class TestSupervisorHeartbeatScenarios:
     @pytest.mark.asyncio
     async def test_supervisor_long_operation_heartbeat_persistence(self):
         """Test heartbeat persists through long supervisor operations."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.llm.observability.logger') as mock_logger:
             logger = HeartbeatLogger(interval_seconds=0.05)
             correlation_id = generate_llm_correlation_id()

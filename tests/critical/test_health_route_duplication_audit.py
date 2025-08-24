@@ -188,7 +188,9 @@ class TestHealthRouteDuplicationAudit:
         auth_client = TestClient(auth_test_app)
         
         # Mock database connections
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.async_engine'):
+            # Mock: Component isolation for testing without external dependencies
             with patch('auth_service.auth_core.database.connection.auth_db'):
                 # Get health responses
                 backend_health = backend_client.get('/health')

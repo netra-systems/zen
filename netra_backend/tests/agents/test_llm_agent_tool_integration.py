@@ -43,6 +43,7 @@ async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     assert "result" in result
     
     # Test tool error handling
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     mock_tool_dispatcher.dispatch_tool = AsyncMock(side_effect=Exception("Tool error"))
     
     with pytest.raises(Exception) as exc_info:
@@ -55,9 +56,11 @@ async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     dispatcher = Mock(spec=ToolDispatcher)
     tool_results = []
     
+    # Mock: Component isolation for testing without external dependencies
     async def mock_dispatch(tool_name, params):
         result = {
             "tool": tool_name,
@@ -68,6 +71,7 @@ async def test_tool_execution_with_llm():
         tool_results.append(result)
         return result
     
+    # Mock: Async component isolation for testing without real async operations
     dispatcher.dispatch_tool = AsyncMock(side_effect=mock_dispatch)
     
     # Simulate LLM response with tool calls
@@ -92,6 +96,7 @@ async def test_tool_execution_with_llm():
 
 async def test_real_llm_interaction():
     """Test real LLM interaction with proper error handling"""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
     
     # Simulate real LLM call with retry logic
@@ -107,6 +112,7 @@ async def test_real_llm_interaction():
             "tool_calls": []
         }
     
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager.call_llm = AsyncMock(side_effect=mock_llm_call)
     
     # Test retry mechanism
@@ -125,9 +131,11 @@ async def test_tool_call_integration_complex():
     """Test complex tool call integration scenarios"""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     dispatcher = Mock(spec=ToolDispatcher)
     execution_log = []
     
+    # Mock: Component isolation for testing without external dependencies
     async def mock_complex_dispatch(tool_name, params):
         execution_log.append(f"Starting {tool_name}")
         
@@ -143,6 +151,7 @@ async def test_tool_call_integration_complex():
         execution_log.append(f"Completed {tool_name}")
         return {"tool": tool_name, "result": result, "status": "success"}
     
+    # Mock: Async component isolation for testing without real async operations
     dispatcher.dispatch_tool = AsyncMock(side_effect=mock_complex_dispatch)
     
     # Execute multiple tools in sequence
@@ -163,6 +172,7 @@ async def test_tool_call_integration_complex():
 
 async def test_llm_tool_chain_execution():
     """Test LLM-driven tool chain execution"""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
     
     # Mock LLM responses that trigger different tools
@@ -188,6 +198,7 @@ async def test_llm_tool_chain_execution():
         call_count += 1
         return result
     
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager.call_llm = AsyncMock(side_effect=mock_sequential_llm)
     
     # Execute chain

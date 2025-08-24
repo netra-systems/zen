@@ -198,7 +198,9 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         assert token_valid, "JWT token should be valid"
         
         # 3. WebSocket connection establishment with mock
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
             mock_ws.recv.return_value = json.dumps({
                 "type": "auth_success",
@@ -245,7 +247,9 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         oauth_result = await self.auth_tester.perform_oauth_flow("testuser", "password123")
         expired_token = oauth_result["access_token"]  # Would be expired in real scenario
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
             mock_ws.recv.return_value = json.dumps({
                 "type": "auth_error",
@@ -275,7 +279,9 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         """Test multiple concurrent WebSocket connections with same auth."""
         oauth_result = await self.auth_tester.perform_oauth_flow("testuser", "password123")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
             mock_ws.recv.return_value = json.dumps({
                 "type": "auth_success",
@@ -315,7 +321,9 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         oauth_result = await self.auth_tester.perform_oauth_flow("testuser", "password123")
         
         # First connection
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
             mock_ws.recv.return_value = json.dumps({
                 "type": "auth_success",
@@ -332,7 +340,9 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         await asyncio.sleep(0.1)  # Brief pause
         
         # Second connection with same token
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
             mock_ws.recv.return_value = json.dumps({
                 "type": "auth_success",
@@ -353,7 +363,9 @@ class TestWebSocketAuthHandshakeCompleteFlow(BaseIntegrationTest):
         """Test handling of malformed authentication messages."""
         oauth_result = await self.auth_tester.perform_oauth_flow("testuser", "password123")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
             # Return malformed response
             mock_ws.recv.return_value = "not valid json"

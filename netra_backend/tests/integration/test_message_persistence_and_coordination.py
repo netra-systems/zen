@@ -51,8 +51,10 @@ class TestMessagePersistence:
         """Ensure messages persist before agent processing."""
         from netra_backend.app.services.message_service import MessageService
         
+        # Mock: Component isolation for controlled unit testing
         message_service = Mock(spec=MessageService)
 
+        # Mock: Async component isolation for testing without real async operations
         message_service.save_message = AsyncMock(return_value={
 
             "id": str(uuid.uuid4()),
@@ -118,12 +120,16 @@ class TestMessagePersistence:
         """Test message queue persists during processing."""
         from netra_backend.app.services.queue_service import QueueService
         
+        # Mock: Component isolation for controlled unit testing
         queue = Mock(spec=QueueService)
 
+        # Mock: Generic component isolation for controlled unit testing
         queue.enqueue = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         queue.dequeue = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         queue.persist = AsyncMock()
         
         # Add messages to queue
@@ -156,16 +162,21 @@ class TestMultiAgentCoordination:
 
         mock_agents = {
 
+            # Mock: Async component isolation for testing without real async operations
             "triage": Mock(process=AsyncMock(return_value={"category": "cost"})),
 
+            # Mock: Async component isolation for testing without real async operations
             "cost_optimizer": Mock(process=AsyncMock(return_value={"savings": 0.3})),
 
+            # Mock: Async component isolation for testing without real async operations
             "performance": Mock(process=AsyncMock(return_value={"latency": 200}))
 
         }
         
+        # Mock: Agent service isolation for testing without LLM agent execution
         supervisor = Mock(spec=SupervisorAgent)
 
+        # Mock: Async component isolation for testing without real async operations
         supervisor.coordinate_agents = AsyncMock(return_value={
 
             "triage_result": mock_agents["triage"].process.return_value,
@@ -273,8 +284,10 @@ class TestSessionStateSync:
         """Test session syncs from auth service to backend."""
         from netra_backend.app.services.session_service import SessionService
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         session_service = Mock(spec=SessionService)
 
+        # Mock: Session isolation for controlled testing without external state
         session_service.sync_session = AsyncMock(return_value=True)
         
         session_data = {
@@ -311,10 +324,13 @@ class TestSessionStateSync:
         """Test Redis maintains session consistency."""
         from netra_backend.app.services.redis_manager import RedisManager
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         redis = Mock(spec=RedisManager)
 
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.set = AsyncMock(return_value=True)
 
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.get = AsyncMock()
         
         session_key = "session:user_123"
@@ -345,8 +361,10 @@ class TestSessionStateSync:
         """Test WebSocket connection state syncs across services."""
         from netra_backend.app.websocket_core.manager import WebSocketManager
         
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         ws_manager = Mock(spec=WebSocketManager)
 
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.sync_connection_state = AsyncMock()
         
         connection_state = {

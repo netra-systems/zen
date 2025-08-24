@@ -44,6 +44,7 @@ class TestDevModeAuthentication:
     @pytest.fixture
     def mock_dev_mode_config(self):
         """Mock configuration with dev mode enabled"""
+        # Mock: Service component isolation for predictable testing behavior
         config = MagicMock(spec=AppConfig)
         config.DEV_MODE = True
         config.ENVIRONMENT = "development"
@@ -71,6 +72,7 @@ class TestDevModeAuthentication:
     @pytest.fixture
     def client_with_dev_mode(self, mock_dev_mode_config):
         """Test client with dev mode enabled"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.config.get_config', return_value=mock_dev_mode_config):
             with TestClient(app) as client:
                 yield client
@@ -82,7 +84,9 @@ class TestDevModeAuthentication:
         Business Value: Developer productivity - instant authentication
         bypasses OAuth flow for 70% faster dev cycles
         """
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.config.get_config', return_value=mock_dev_mode_config):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
                 # Setup: Dev mode auto-creates and validates dev user
                 mock_validate.return_value = {
@@ -113,14 +117,17 @@ class TestDevModeAuthentication:
                 )
                 
                 # Mock database session and query
+                # Mock: Generic component isolation for controlled unit testing
                 mock_result = MagicMock()
                 mock_result.scalar_one_or_none.return_value = mock_db_user
                 
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session = AsyncMock()
                 mock_session.execute.return_value = mock_result
                 mock_session.__aenter__.return_value = mock_session
                 mock_session.__aexit__.return_value = None
                 
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_db = AsyncMock(spec=AsyncSession)
                 mock_db.__aenter__.return_value = mock_session
                 mock_db.__aexit__.return_value = None
@@ -149,6 +156,7 @@ class TestDevModeAuthentication:
         Business Value: Eliminates OAuth setup complexity in dev,
         reducing developer onboarding time from hours to minutes
         """
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.config.get_config', return_value=mock_dev_mode_config):
             # Test: Check dev mode configuration
             config = get_config()
@@ -156,6 +164,7 @@ class TestDevModeAuthentication:
             assert config.SKIP_AUTH_IN_DEV is True
 
             # Test: Auth endpoints should bypass OAuth in dev
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.clients.auth_client.auth_client.create_dev_user') as mock_create_dev:
                 mock_create_dev.return_value = {
                     "token": "dev-token-instant",
@@ -186,6 +195,7 @@ class TestDevModeAuthentication:
         """
         start_time = datetime.utcnow()
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
@@ -223,6 +233,7 @@ class TestDevModeAuthentication:
         Business Value: Enhanced debugging and development experience
         with exposed internals for faster troubleshooting
         """
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
@@ -230,6 +241,7 @@ class TestDevModeAuthentication:
                 "permissions": ["read", "write"]
             }
 
+            # Mock: Agent supervisor isolation for testing without spawning real agents
             with patch('app.agents.supervisor.supervisor.process_message') as mock_supervisor:
                 # Setup: Mock dev mode supervisor with debug info
                 mock_supervisor.return_value = {
@@ -289,6 +301,7 @@ class TestDevModeAuthentication:
         Business Value: Detailed error information speeds up debugging
         and reduces development time by exposing stack traces and internals
         """
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
@@ -296,6 +309,7 @@ class TestDevModeAuthentication:
                 "permissions": ["read", "write"]
             }
 
+            # Mock: Agent supervisor isolation for testing without spawning real agents
             with patch('app.agents.supervisor.supervisor.process_message') as mock_supervisor:
                 # Setup: Simulate error in dev mode
                 test_error = ValueError("Test error for dev mode")
@@ -336,6 +350,7 @@ class TestDevModeAuthentication:
         """
         from netra_backend.app.core.config import get_config
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.config.get_config') as mock_config:
             mock_config.return_value.DEV_MODE = True
             mock_config.return_value.USE_MOCK_LLM = True
@@ -346,6 +361,7 @@ class TestDevModeAuthentication:
             assert config.USE_MOCK_LLM is True
 
             # Test: Mock LLM responses
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.llm.llm_client.LLMClient.generate') as mock_generate:
                 mock_generate.return_value = {
                     "response": "Mock LLM response for testing",
@@ -407,6 +423,7 @@ class TestDevModeAuthentication:
         """
         performance_metrics = []
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
@@ -453,8 +470,10 @@ class TestDevModeIntegration:
         Business Value: Validates end-to-end dev experience
         ensuring all components work together seamlessly
         """
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.config.get_config') as mock_config:
             # Setup: Full dev mode configuration
+            # Mock: Generic component isolation for controlled unit testing
             config = MagicMock()
             config.DEV_MODE = True
             config.ENVIRONMENT = "development"
@@ -464,6 +483,7 @@ class TestDevModeIntegration:
             mock_config.return_value = config
 
             # Test: Auth integration
+            # Mock: Authentication service isolation for testing without real auth flows
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth:
                 mock_auth.return_value = {
                     "valid": True,
@@ -471,10 +491,12 @@ class TestDevModeIntegration:
                 }
 
                 # Test: WebSocket integration
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.ws_manager.ws_manager.send_message') as mock_ws:
                     mock_ws.return_value = True
 
                     # Test: Agent integration
+                    # Mock: Agent service isolation for testing without LLM agent execution
                     with patch('app.agents.supervisor.supervisor.process_message') as mock_agent:
                         mock_agent.return_value = {
                             "response": "Full stack dev response",
@@ -497,7 +519,9 @@ class TestDevModeIntegration:
         Business Value: Pre-populated dev data enables immediate testing
         of features without manual data creation
         """
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.config.get_config') as mock_config:
+            # Mock: Generic component isolation for controlled unit testing
             config = MagicMock()
             config.DEV_MODE = True
             config.SEED_DEV_DATA = True

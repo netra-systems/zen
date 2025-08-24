@@ -41,11 +41,17 @@ class TestAgentReliabilityIntegration:
     @pytest.fixture
     def reliable_agent(self):
         """Create mock reliable agent."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.execute_safely = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.circuit_breaker = Mock()
+            # Mock: Component isolation for controlled unit testing
             mock_reliability.circuit_breaker.get_status = Mock(return_value={"state": "closed"})
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.circuit_breaker.reset = Mock()
             mock_wrapper.return_value = mock_reliability
             
@@ -98,18 +104,26 @@ class TestAgentReliabilityIntegration:
     
     def _create_mock_health_instance(self):
         """Create mock health monitor instance."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_health_instance = Mock()
+        # Mock: Async component isolation for testing without real async operations
         mock_health_instance.is_emergency_mode_active = AsyncMock(return_value=False)
+        # Mock: Async component isolation for testing without real async operations
         mock_health_instance.should_prevent_cascade = AsyncMock(return_value=False)
+        # Mock: Generic component isolation for controlled unit testing
         mock_health_instance.record_success = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_health_instance.record_failure = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_health_instance.update_circuit_breaker_status = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_health_instance.update_system_health = AsyncMock()
         return mock_health_instance
     
     def _setup_fallback_coordinator_mocks(self, mock_health_monitor, mock_emergency_manager):
         """Setup fallback coordinator with mocks."""
         mock_health_instance = self._create_mock_health_instance()
+        # Mock: Generic component isolation for controlled unit testing
         mock_emergency_instance = Mock()
         mock_health_monitor.return_value = mock_health_instance
         mock_emergency_manager.return_value = mock_emergency_instance
@@ -121,6 +135,7 @@ class TestAgentReliabilityIntegration:
     
     def _setup_coordination_handler_mocks(self, mock_handler_class):
         """Setup coordination handler mocks."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         mock_handler.execute_with_fallback.return_value = {"coordinated": True, "agent": "TestAgent"}
         mock_handler_class.return_value = mock_handler
@@ -150,13 +165,18 @@ class TestAgentReliabilityIntegration:
     @pytest.mark.asyncio
     async def test_agent_reliability_with_fallback_coordinator(self, reliable_agent):
         """Test agent reliability integration with fallback coordinator."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
             coordinator, mock_health_instance = self._setup_fallback_coordinator_mocks(mock_health_monitor, mock_emergency_manager)
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
+                 # Mock: Component isolation for testing without external dependencies
                  patch('app.core.fallback_coordinator.CircuitBreaker'), \
+                 # Mock: Component isolation for testing without external dependencies
                  patch('app.core.fallback_coordinator.AgentFallbackStatus'):
                 
                 mock_handler = self._setup_coordination_handler_mocks(mock_handler_class)
@@ -167,18 +187,28 @@ class TestAgentReliabilityIntegration:
     @pytest.mark.asyncio
     async def test_agent_failure_propagation_through_system(self, reliable_agent):
         """Test how agent failures propagate through the integrated system."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
             # Setup mocks for emergency scenario
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance = Mock()
+            # Mock: Async component isolation for testing without real async operations
             mock_health_instance.is_emergency_mode_active = AsyncMock(return_value=False)
+            # Mock: Async component isolation for testing without real async operations
             mock_health_instance.should_prevent_cascade = AsyncMock(return_value=False)
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.record_success = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.record_failure = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.update_circuit_breaker_status = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.update_system_health = AsyncMock()
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_emergency_instance = Mock()
             mock_health_monitor.return_value = mock_health_instance
             mock_emergency_manager.return_value = mock_emergency_instance
@@ -190,10 +220,14 @@ class TestAgentReliabilityIntegration:
             # Setup failure scenario
             test_error = RuntimeError("Critical system failure")
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
+                 # Mock: Component isolation for testing without external dependencies
                  patch('app.core.fallback_coordinator.CircuitBreaker'), \
+                 # Mock: Component isolation for testing without external dependencies
                  patch('app.core.fallback_coordinator.AgentFallbackStatus'):
                 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_handler = AsyncMock()
                 mock_handler.execute_with_fallback.side_effect = test_error
                 mock_handler_class.return_value = mock_handler

@@ -43,7 +43,9 @@ class TestAgentService(BaseAgentService):
     def __init__(self, db_session=None):
         # Create a mock supervisor for testing
         from unittest.mock import AsyncMock, MagicMock, Mock
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor.run = AsyncMock()
         super().__init__(mock_supervisor)
         self.db_session = db_session

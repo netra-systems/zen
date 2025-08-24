@@ -142,11 +142,13 @@ class TestBasicWebSocketConnection:
         websocket.is_authenticated = False
         
         # Mock authentication failure
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth:
             mock_auth.side_effect = ValueError("Invalid token")
             
             # Verify connection rejected
             with pytest.raises(ValueError, match="Invalid token"):
+                # Mock: Authentication service isolation for testing without real auth flows
                 await mock_auth(websocket, websocket.auth_token, Mock())
     
     async def test_6_websocket_message_round_trip(self):
@@ -259,6 +261,7 @@ class TestCoreServiceCommunication:
         )
         
         # Mock auth service validation
+        # Mock: JWT processing isolation for fast authentication testing
         with patch('auth_service.auth_core.core.jwt_handler.JWTHandler.validate_token') as mock_verify:
             mock_verify.return_value = {
                 "sub": "test_user_9",

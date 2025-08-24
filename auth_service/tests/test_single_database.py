@@ -33,6 +33,7 @@ async def test_single_database_initialization():
         mock_init.return_value = None
         
         # Import main after patching to test startup
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('auth_service.auth_core.database.connection.auth_db.initialize', mock_init):
             # Set environment to staging to test real initialization, but with AUTH_FAST_TEST_MODE to bypass SERVICE_ID
             os.environ['AUTH_FAST_TEST_MODE'] = 'false'
@@ -75,6 +76,7 @@ async def test_auth_routes_no_duplicate_sync():
     from auth_service.auth_core.routes.auth_routes import _sync_user_to_main_db
     
     # Create a mock user
+    # Mock: Generic component isolation for controlled unit testing
     mock_user = MagicMock()
     mock_user.id = "test-user-123"
     

@@ -195,6 +195,7 @@ class TestL4CriticalWebSocketIntegration:
         # Create mock websockets
         connections = []
         for i in range(100):
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
             mock_ws.client_id = f"flood_client_{i}"
             mock_ws.remote_address = ("127.0.0.1", 5000 + i)
@@ -220,11 +221,13 @@ class TestL4CriticalWebSocketIntegration:
         ws_service = WebSocketService()
         
         # Setup legitimate connection
+        # Mock: Generic component isolation for controlled unit testing
         legit_ws = AsyncMock()
         legit_ws.client_id = "legit_client"
         await ws_service.handle_connection(legit_ws)
         
         # Setup attacker connection
+        # Mock: Generic component isolation for controlled unit testing
         attacker_ws = AsyncMock()
         attacker_ws.client_id = "attacker_client"
         await ws_service.handle_connection(attacker_ws)
@@ -252,8 +255,10 @@ class TestL4CriticalWebSocketIntegration:
         ws_service = WebSocketService()
         
         # Initial connection
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = AsyncMock()
         ws1.client_id = "reconnect_client"
+        # Mock: Generic component isolation for controlled unit testing
         ws1.send = AsyncMock()
         await ws_service.handle_connection(ws1)
         
@@ -267,8 +272,10 @@ class TestL4CriticalWebSocketIntegration:
         await ws_service.handle_disconnect(ws1)
         
         # Reconnect with different client but same user
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = AsyncMock()
         ws2.client_id = "reconnect_client_new"
+        # Mock: Generic component isolation for controlled unit testing
         ws2.send = AsyncMock()
         await ws_service.handle_connection(ws2)
         
@@ -293,8 +300,10 @@ class TestL4CriticalWebSocketIntegration:
         
         ws_service = WebSocketService()
         
+        # Mock: Generic component isolation for controlled unit testing
         ws = AsyncMock()
         ws.client_id = "memory_test"
+        # Mock: Generic component isolation for controlled unit testing
         ws.send = AsyncMock()
         await ws_service.handle_connection(ws)
         
@@ -328,8 +337,10 @@ class TestL4CriticalWebSocketIntegration:
         
         ws_service = WebSocketService()
         
+        # Mock: Generic component isolation for controlled unit testing
         ws = AsyncMock()
         ws.client_id = "protocol_test"
+        # Mock: Generic component isolation for controlled unit testing
         ws.send = AsyncMock()
         await ws_service.handle_connection(ws)
         
@@ -512,6 +523,7 @@ class TestL4CriticalAPIIntegration:
                 update_tasks = []
                 for i in range(10):
                     update_data = {"status": f"status_{i}"}
+                    # Mock: Component isolation for testing without external dependencies
                     task = session.patch(
                         f"{api_url}/api/threads/{thread_id}",
                         json=update_data,
@@ -602,7 +614,9 @@ class TestL4CriticalDatabaseIntegration:
         # Mock ClickHouse client for testing
         from unittest.mock import MagicMock
         
+        # Mock: Generic component isolation for controlled unit testing
         ch_client = MagicMock()
+        # Mock: Async component isolation for testing without real async operations
         ch_client.execute = AsyncMock(return_value=[])
         
         # Test injection attempts

@@ -85,14 +85,19 @@ class TestFirstMessageThreadInit:
         from netra_backend.app.services.message_service import MessageService
         from netra_backend.app.services.thread_service import ThreadService
         
+        # Mock: Component isolation for controlled unit testing
         thread_service = Mock(spec=ThreadService)
 
+        # Mock: Async component isolation for testing without real async operations
         thread_service.create_thread = AsyncMock(return_value=thread_data)
 
+        # Mock: Async component isolation for testing without real async operations
         thread_service.get_thread = AsyncMock(return_value=None)
         
+        # Mock: Component isolation for controlled unit testing
         message_service = Mock(spec=MessageService)
 
+        # Mock: Generic component isolation for controlled unit testing
         message_service.add_message = AsyncMock()
         
         # User sends first message (no thread exists)
@@ -189,8 +194,10 @@ class TestFirstMessageThreadInit:
         """Test thread context properly initialized for agents."""
         from netra_backend.app.services.context_service import ContextService
         
+        # Mock: Component isolation for controlled unit testing
         context_service = Mock(spec=ContextService)
 
+        # Mock: Async component isolation for testing without real async operations
         context_service.initialize_context = AsyncMock(return_value={
 
             "thread_id": thread_data["id"],
@@ -228,6 +235,7 @@ class TestFirstMessageThreadInit:
 
         """Test handling of concurrent thread creation attempts."""
         
+        # Mock: Component isolation for controlled unit testing
         thread_service = Mock(spec=ThreadService)
 
         creation_count = 0
@@ -273,6 +281,7 @@ class TestFirstMessageThreadInit:
 
         """Test automatic thread title generation from first message."""
         
+        # Mock: Component isolation for controlled unit testing
         thread_service = Mock(spec=ThreadService)
         
         def generate_title(message: str) -> str:
@@ -299,8 +308,10 @@ class TestFirstMessageThreadInit:
         """Test thread metadata includes agent routing information."""
         from netra_backend.app.services.agent_router import AgentRouter
         
+        # Mock: Agent service isolation for testing without LLM agent execution
         router = Mock(spec=AgentRouter)
 
+        # Mock: Async component isolation for testing without real async operations
         router.determine_agent = AsyncMock(return_value={
 
             "primary_agent": "cost_optimizer",
@@ -333,8 +344,10 @@ class TestFirstMessageThreadInit:
         """Test WebSocket notification sent when thread created."""
         from netra_backend.app.websocket_core.manager import WebSocketManager
         
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         ws_manager = Mock(spec=WebSocketManager)
 
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.send_message = AsyncMock()
         
         # Send thread creation notification

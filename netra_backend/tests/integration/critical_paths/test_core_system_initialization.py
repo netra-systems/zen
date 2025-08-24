@@ -255,6 +255,7 @@ async def test_dependency_resolution_chain(system_manager):
     
     # Simulate database failure
 
+    # Mock: Component isolation for testing without external dependencies
     with patch('app.services.database.connection_manager.ConnectionManager.initialize', 
 
                side_effect=Exception("Database unavailable")):

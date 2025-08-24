@@ -404,6 +404,7 @@ class TestHealthRouteIntegrationFailures:
         for endpoint in auth_endpoints:
             try:
                 # Mock auth dependencies to test the endpoint
+                # Mock: Component isolation for testing without external dependencies
                 with patch('auth_service.auth_core.database.connection.auth_db'):
                     response = client.get(endpoint)
                     if response.status_code == 401:  # Requires authentication

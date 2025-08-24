@@ -120,12 +120,16 @@ class TestHealthRouteResponseValidation:
         test_scenarios = [
             {
                 'name': 'database_unavailable',
+                # Mock: Database isolation for unit testing without external database connections
                 'backend_patches': {'netra_backend.app.dependencies.get_db_dependency': MagicMock(side_effect=Exception("Database unavailable"))},
+                # Mock: Database isolation for unit testing without external database connections
                 'auth_patches': {'auth_service.auth_core.database.connection.auth_db': MagicMock(side_effect=Exception("Database unavailable"))}
             },
             {
                 'name': 'timeout_error',
+                # Mock: Service component isolation for predictable testing behavior
                 'backend_patches': {'asyncio.wait_for': MagicMock(side_effect=asyncio.TimeoutError("Health check timeout"))},
+                # Mock: Service component isolation for predictable testing behavior
                 'auth_patches': {'asyncio.wait_for': MagicMock(side_effect=asyncio.TimeoutError("Health check timeout"))}
             }
         ]
@@ -258,6 +262,7 @@ class TestHealthRouteResponseValidation:
         
         # Backend responses
         try:
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.dependencies.get_db_dependency'):
                 backend_health = backend_client.get('/health')
                 backend_ready = backend_client.get('/ready')
@@ -271,6 +276,7 @@ class TestHealthRouteResponseValidation:
         
         # Auth responses
         try:
+            # Mock: Component isolation for testing without external dependencies
             with patch('auth_service.auth_core.database.connection.auth_db'):
                 auth_health = auth_client.get('/health')
                 auth_ready = auth_client.get('/health/ready')
@@ -390,6 +396,7 @@ class TestHealthRouteResponseValidation:
         
         # Backend timestamps
         try:
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.dependencies.get_db_dependency'):
                 backend_health = backend_client.get('/health')
                 backend_ready = backend_client.get('/ready')
@@ -407,6 +414,7 @@ class TestHealthRouteResponseValidation:
         
         # Auth timestamps
         try:
+            # Mock: Component isolation for testing without external dependencies
             with patch('auth_service.auth_core.database.connection.auth_db'):
                 auth_health = auth_client.get('/health')
                 auth_ready = auth_client.get('/health/ready')
@@ -588,7 +596,9 @@ class TestHealthRouteResponseValidation:
             },
             {
                 'name': 'database_error',
+                # Mock: Service component isolation for predictable testing behavior
                 'backend_patches': {'netra_backend.app.dependencies.get_db_dependency': MagicMock(side_effect=Exception("DB Error"))},
+                # Mock: Database access isolation for fast, reliable unit testing
                 'auth_patches': {'auth_service.auth_core.database.connection.auth_db': MagicMock(side_effect=Exception("DB Error"))}
             }
         ]
@@ -754,6 +764,7 @@ class TestHealthRouteResponseValidation:
         
         for endpoint in comprehensive_endpoints:
             try:
+                # Mock: Component isolation for testing without external dependencies
                 with patch('netra_backend.app.dependencies.get_db_dependency'):
                     response = client.get(endpoint)
                     
@@ -893,6 +904,7 @@ class TestHealthRouteResponseValidation:
         backend_endpoints = ['/health', '/ready', '/ws/health']
         for endpoint in backend_endpoints:
             try:
+                # Mock: Component isolation for testing without external dependencies
                 with patch('netra_backend.app.dependencies.get_db_dependency'):
                     response = backend_client.get(endpoint)
                     endpoint_headers[f'backend_{endpoint}'] = dict(response.headers)
@@ -903,6 +915,7 @@ class TestHealthRouteResponseValidation:
         auth_endpoints = ['/health', '/health/ready']
         for endpoint in auth_endpoints:
             try:
+                # Mock: Component isolation for testing without external dependencies
                 with patch('auth_service.auth_core.database.connection.auth_db'):
                     response = auth_client.get(endpoint)
                     endpoint_headers[f'auth_{endpoint}'] = dict(response.headers)
@@ -1030,12 +1043,15 @@ class TestHealthRouteResponseValidation:
                 
                 # Backend responses
                 try:
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('netra_backend.app.dependencies.get_db_dependency'):
                         # Apply mock conditions
                         patches = {}
                         if not condition.get('redis_available', True):
+                            # Mock: Redis external service isolation for fast, reliable tests without network dependency
                             patches['redis.Redis'] = MagicMock(side_effect=Exception("Redis unavailable"))
                         if not condition.get('clickhouse_available', True):
+                            # Mock: ClickHouse database isolation for fast testing without external database dependency
                             patches['netra_backend.app.services.clickhouse_service'] = MagicMock(side_effect=Exception("ClickHouse unavailable"))
                         
                         with patch.dict('sys.modules', patches, clear=False):
@@ -1050,6 +1066,7 @@ class TestHealthRouteResponseValidation:
                 
                 # Auth responses
                 try:
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('auth_service.auth_core.database.connection.auth_db'):
                         # Apply similar mock conditions for auth
                         auth_response = auth_client.get('/health')

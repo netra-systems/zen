@@ -29,8 +29,11 @@ class TestCRUDService:
         
         # Mock session factory
         async def mock_factory():
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session.__aexit__ = AsyncMock(return_value=None)
             return mock_session
         
@@ -39,16 +42,23 @@ class TestCRUDService:
 
     def _setup_session_mock(self):
         """Helper: Setup mock session context."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session_ctx = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         session_ctx.__aenter__ = AsyncMock(return_value=mock_session)
+        # Mock: Session isolation for controlled testing without external state
         session_ctx.__aexit__ = AsyncMock(return_value=None)
         return mock_session, session_ctx
 
     def _mock_entity_creation(self, mock_session, entity):
         """Helper: Setup entity creation mocks."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.add = Mock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.commit = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.refresh = AsyncMock()
         return entity
 
@@ -76,6 +86,7 @@ class TestCRUDService:
 
     def _setup_get_by_id_mock(self, mock_session, entity):
         """Helper: Setup get by ID mock."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.get = AsyncMock(return_value=entity)
 
     def _verify_get_by_id_call(self, mock_session, entity_id):
@@ -113,8 +124,11 @@ class TestCRUDService:
 
     def _setup_update_mocks(self, mock_session, entity):
         """Helper: Setup update operation mocks."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.get = AsyncMock(return_value=entity)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.commit = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.refresh = AsyncMock()
 
     def _apply_update_data(self, entity, update_data):
@@ -160,8 +174,11 @@ class TestCRUDService:
 
     def _setup_delete_mocks(self, mock_session, entity):
         """Helper: Setup delete operation mocks."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.get = AsyncMock(return_value=entity)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.delete = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.commit = AsyncMock()
 
     def _verify_delete_calls(self, mock_session, entity):
@@ -199,6 +216,7 @@ class TestCRUDService:
 
     def _setup_exists_mock(self, mock_session, entity):
         """Helper: Setup exists check mock."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.get = AsyncMock(return_value=entity)
 
     @pytest.mark.asyncio

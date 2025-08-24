@@ -55,6 +55,7 @@ class WebSocketIntegrationTestHelper:
     async def process_single_message(self, i: int, memory_manager, compressor, batcher, performance_monitor):
         """Process a single message through all components."""
         connection_id = f"conn_{i % 10}"
+        # Mock: Async component isolation for testing without real async operations
         memory_manager.register_connection(AsyncMock(connection_id=connection_id))
         
         message_data = self.create_test_message(i)

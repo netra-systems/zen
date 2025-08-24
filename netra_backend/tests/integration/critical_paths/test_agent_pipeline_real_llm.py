@@ -606,18 +606,24 @@ class AgentPipelineRealLLMTester:
         
         # Create mock database session
 
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session = MagicMock(spec=AsyncSession)
 
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.execute = AsyncMock()
 
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.commit = AsyncMock()
 
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.rollback = AsyncMock()
         
         # Create mock tool dispatcher
 
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = MagicMock()
 
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher.dispatch = AsyncMock()
         
         # Initialize supervisor agent with all required parameters

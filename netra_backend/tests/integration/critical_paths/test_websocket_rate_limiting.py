@@ -767,6 +767,7 @@ class WebSocketRateLimitManager:
 
             client_id = f"load_test_client_{client_index}"
 
+            # Mock: Generic component isolation for controlled unit testing
             websocket_mock = AsyncMock()
             
             client_results = {
@@ -924,28 +925,39 @@ async def redis_client():
     except Exception:
         # Use mock for CI environments
 
+        # Mock: Generic component isolation for controlled unit testing
         client = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         client.get = AsyncMock(return_value=None)
 
+        # Mock: Async component isolation for testing without real async operations
         client.incr = AsyncMock(return_value=1)
 
+        # Mock: Async component isolation for testing without real async operations
         client.expire = AsyncMock(return_value=True)
 
+        # Mock: Async component isolation for testing without real async operations
         client.hgetall = AsyncMock(return_value={})
 
+        # Mock: Async component isolation for testing without real async operations
         client.hset = AsyncMock(return_value=True)
 
+        # Mock: Async component isolation for testing without real async operations
         client.delete = AsyncMock(return_value=1)
 
+        # Mock: Generic component isolation for controlled unit testing
         client.pipeline = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         client.scan_iter = AsyncMock(return_value=async_iter([]))
         
         # Mock pipeline
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_pipeline = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         mock_pipeline.execute = AsyncMock(return_value=[1, True, 1, True])
 
         client.pipeline.return_value = mock_pipeline
@@ -981,6 +993,7 @@ async def test_basic_rate_limiting_enforcement(rate_limit_manager):
 
     client_id = "test_client_basic"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Send messages within limits
@@ -1018,6 +1031,7 @@ async def test_rate_limit_exceeded_handling(rate_limit_manager):
 
     client_id = "test_client_exceeded"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Flood with messages to exceed rate limit
@@ -1065,6 +1079,7 @@ async def test_tier_based_rate_limits(rate_limit_manager):
 
     """Test different rate limits for different user tiers."""
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Test different tiers
@@ -1122,6 +1137,7 @@ async def test_message_throttling_and_queuing(rate_limit_manager):
 
     client_id = "test_client_throttle"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Send burst of messages to trigger throttling
@@ -1169,6 +1185,7 @@ async def test_priority_message_handling(rate_limit_manager):
 
     client_id = "test_client_priority"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Fill up regular queue first
@@ -1214,6 +1231,7 @@ async def test_backpressure_detection(rate_limit_manager):
 
     client_id = "test_client_backpressure"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Send messages to trigger backpressure
@@ -1261,6 +1279,7 @@ async def test_concurrent_client_rate_limiting(rate_limit_manager):
 
         client_id = f"concurrent_client_{client_index}"
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket_mock = AsyncMock()
         
         results = {"handled": 0, "rate_limited": 0}
@@ -1356,6 +1375,7 @@ async def test_rate_limit_recovery(rate_limit_manager):
 
     client_id = "test_client_recovery"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Exceed rate limit
@@ -1449,6 +1469,7 @@ async def test_comprehensive_metrics_tracking(rate_limit_manager):
 
     client_id = "test_client_metrics"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Send regular messages

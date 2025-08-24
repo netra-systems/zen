@@ -148,6 +148,7 @@ class MockDatabasePool:
             self.pool_exhausted = True
             raise Exception("Connection pool exhausted")
         self.active_connections += 1
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     async def release_connection(self, connection: Any) -> None:

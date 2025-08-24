@@ -21,8 +21,11 @@ async def test_oauth_callback_token_exchange():
     app = FastAPI()
     app.include_router(router)
     
+    # Mock: Component isolation for testing without external dependencies
     with patch('auth_service.auth_core.config.AuthConfig.get_google_client_id', return_value='test-client-id'), \
+         # Mock: Component isolation for testing without external dependencies
          patch('auth_service.auth_core.config.AuthConfig.get_google_client_secret', return_value='test-secret'), \
+         # Mock: Component isolation for testing without external dependencies
          patch('auth_service.auth_core.routes.auth_routes._determine_urls', return_value=('http://auth.test', 'http://app.test')):
         
         # Mock Google token exchange
@@ -39,16 +42,20 @@ async def test_oauth_callback_token_exchange():
             'name': 'Test User'
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Mock token exchange response
+            # Mock: Generic component isolation for controlled unit testing
             token_response = AsyncMock()
             token_response.status_code = 200
             token_response.json.return_value = mock_token_response
             
             # Mock user info response
+            # Mock: Generic component isolation for controlled unit testing
             user_response = AsyncMock()
             user_response.status_code = 200
             user_response.json.return_value = mock_user_info
@@ -57,16 +64,22 @@ async def test_oauth_callback_token_exchange():
             mock_instance.get.return_value = user_response
             
             # Mock database operations
+            # Mock: Component isolation for testing without external dependencies
             with patch('auth_service.auth_core.routes.auth_routes.auth_db') as mock_db, \
+                 # Mock: Component isolation for testing without external dependencies
                  patch('auth_service.auth_core.routes.auth_routes.AuthUserRepository') as mock_repo, \
+                 # Mock: Authentication service isolation for testing without real auth flows
                  patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth_service:
                 
                 # Setup mocks
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session = AsyncMock()
                 mock_db.get_session.return_value.__aenter__.return_value = mock_session
                 
+                # Mock: Authentication service isolation for testing without real auth flows
                 mock_auth_user = MagicMock()
                 mock_auth_user.id = 'user-123'
+                # Mock: Generic component isolation for controlled unit testing
                 mock_repo_instance = AsyncMock()
                 mock_repo_instance.create_oauth_user.return_value = mock_auth_user
                 mock_repo.return_value = mock_repo_instance
@@ -124,8 +137,10 @@ async def test_token_validation_after_storage():
     
     test_token = 'jwt-access-token'
     
+    # Mock: Authentication service isolation for testing without real auth flows
     with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock_auth_service:
         # Mock successful token validation
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = MagicMock()
         mock_response.valid = True
         mock_response.user_id = 'user-123'
@@ -151,15 +166,21 @@ async def test_oauth_error_handling():
     app = FastAPI()
     app.include_router(router)
     
+    # Mock: Component isolation for testing without external dependencies
     with patch('auth_service.auth_core.config.AuthConfig.get_google_client_id', return_value='test-client-id'), \
+         # Mock: Component isolation for testing without external dependencies
          patch('auth_service.auth_core.config.AuthConfig.get_google_client_secret', return_value='test-secret'), \
+         # Mock: Component isolation for testing without external dependencies
          patch('auth_service.auth_core.routes.auth_routes._determine_urls', return_value=('http://auth.test', 'http://app.test')):
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Mock failed token exchange
+            # Mock: Generic component isolation for controlled unit testing
             token_response = AsyncMock()
             token_response.status_code = 400
             token_response.text = 'Invalid authorization code'

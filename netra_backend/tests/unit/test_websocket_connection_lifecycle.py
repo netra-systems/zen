@@ -51,12 +51,18 @@ class TestWebSocketConnectionLifecycle:
     @pytest.fixture
     def mock_websocket(self):
         """Create mock WebSocket connection."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.client_state = Mock()
         mock_ws.client_state.name = "CONNECTED"
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.application_state = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.accept = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.close = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.send_json = AsyncMock()
         return mock_ws
     
@@ -80,6 +86,7 @@ class TestWebSocketConnectionLifecycle:
     async def test_connect_failure(self, manager, mock_websocket):
         """Test failed WebSocket connection establishment with mocked websocket."""
         # Simulate a WebSocket connection failure by making websocket.accept fail
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.accept = AsyncMock(side_effect=Exception("Connection failed"))
         
         # Since the real manager doesn't raise on connection establishment,
@@ -97,12 +104,18 @@ class TestWebSocketConnectionLifecycle:
         manager.max_connections_per_user = 2
         
         # Create multiple websocket mocks for testing
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws1 = Mock(spec=WebSocket)
+        # Mock: Component isolation for controlled unit testing
         mock_ws1.client_state = Mock(name="CONNECTED")
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws1.application_state = Mock()
         
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws2 = Mock(spec=WebSocket) 
+        # Mock: Component isolation for controlled unit testing
         mock_ws2.client_state = Mock(name="CONNECTED")
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws2.application_state = Mock()
         
         # Connect up to the limit
@@ -159,9 +172,13 @@ class TestWebSocketConnectionLifecycle:
     async def test_cleanup_dead_connections(self, manager):
         """Test cleanup of dead WebSocket connections."""
         # Create mock websockets with different states
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws1 = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws1.application_state = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws2 = Mock(spec=WebSocket) 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws2.application_state = Mock()
         
         # Connect users
@@ -179,7 +196,9 @@ class TestWebSocketConnectionLifecycle:
     async def test_shutdown_graceful(self, manager):
         """Test graceful shutdown of connection manager."""
         # Connect a user first
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock(spec=WebSocket)
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = Mock()
         connection_id = await manager.connect_user("test-user", mock_websocket)
         
@@ -199,8 +218,11 @@ class TestWebSocketConnectionLifecycle:
     async def test_shutdown_with_connection_errors(self, manager):
         """Test shutdown handles connection close errors gracefully."""
         # Connect a user with a websocket that will fail on close
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock(spec=WebSocket)
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.close = AsyncMock(side_effect=Exception("Close failed"))
         
         connection_id = await manager.connect_user("test-user", mock_websocket)
@@ -215,7 +237,9 @@ class TestWebSocketConnectionLifecycle:
     async def test_connection_lifecycle_state_management(self, manager):
         """Test connection state is properly managed through lifecycle."""
         # Test with the real manager methods
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock(spec=WebSocket)
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = Mock()
         
         # Connect user
@@ -236,8 +260,10 @@ class TestWebSocketConnectionLifecycle:
     async def test_concurrent_connection_operations(self, manager, mock_websocket):
         """Test handling of concurrent connection operations."""
         # Create separate websocket mocks for each connection
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websockets = [Mock(spec=WebSocket) for _ in range(5)]
         for ws in websockets:
+            # Mock: Generic component isolation for controlled unit testing
             ws.application_state = Mock()
         
         # Simulate concurrent connections
@@ -260,9 +286,13 @@ class TestWebSocketConnectionLifecycle:
         # This tests the actual behavior of the manager
         
         # Create separate websocket mocks
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws1 = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws1.application_state = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws2 = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws2.application_state = Mock()
         
         # Connect multiple times for same user
@@ -290,7 +320,9 @@ class TestWebSocketConnectionLifecycle:
         """Helper to setup manager with specified connections per user."""
         for user_id, count in user_conn_counts.items():
             for i in range(count):
+                # Mock: WebSocket infrastructure isolation for unit tests without real connections
                 mock_ws = Mock(spec=WebSocket)
+                # Mock: Generic component isolation for controlled unit testing
                 mock_ws.application_state = Mock()
                 await manager.connect_user(user_id, mock_ws)
     

@@ -22,6 +22,7 @@ class TestSupplyRoute:
             "filters": {"region": "US", "tier": 1}
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.supply.research_suppliers') as mock_research:
             mock_research.return_value = {
                 "suppliers": [
@@ -39,6 +40,7 @@ class TestSupplyRoute:
     
     def test_supply_data_enrichment(self, base_client):
         """Test supply data enrichment."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.supply.enrich_supplier') as mock_enrich:
             mock_enrich.return_value = {
                 "supplier_id": "sup123",
@@ -68,6 +70,7 @@ class TestSupplyRoute:
             "constraints": {"delivery_time": 30}
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.supply.validate_supply_chain') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,

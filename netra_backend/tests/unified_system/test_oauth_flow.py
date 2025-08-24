@@ -43,6 +43,7 @@ try:
 
 except ImportError:
 
+    # Mock: Generic component isolation for controlled unit testing
     auth_client = Mock()
 
 try:
@@ -62,6 +63,7 @@ try:
 
 except ImportError:
 
+    # Mock: Generic component isolation for controlled unit testing
     get_current_user = Mock()
 
 @pytest.fixture
@@ -78,6 +80,7 @@ def mock_auth_client():
 
     """Mock auth client for OAuth testing"""
 
+    # Mock: Component isolation for testing without external dependencies
     with patch('app.clients.auth_client.auth_client') as mock:
 
         mock.get_oauth_config.return_value = {
@@ -90,6 +93,7 @@ def mock_auth_client():
 
         }
 
+        # Mock: Component isolation for controlled unit testing
         mock.detect_environment.return_value = Mock(value="development")
 
         yield mock
@@ -100,14 +104,19 @@ def mock_security_service():
 
     """Mock security service for authentication testing"""
 
+    # Mock: Security service isolation for auth testing without real token validation
     mock = Mock(spec=SecurityService)
 
+    # Mock: Authentication service isolation for testing without real auth flows
     mock.authenticate_user = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     mock.create_access_token = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     mock.create_refresh_token = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     mock.validate_token = AsyncMock()
 
     return mock
@@ -118,14 +127,19 @@ def mock_websocket_manager():
 
     """Mock WebSocket manager for connection testing"""
 
+    # Mock: WebSocket connection isolation for testing without network overhead
     with patch('app.websocket.connection_manager.WebSocketManager') as mock:
 
+        # Mock: Generic component isolation for controlled unit testing
         manager = Mock()
 
+        # Mock: Generic component isolation for controlled unit testing
         manager.connect = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         manager.disconnect = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         manager.authenticate_connection = AsyncMock(return_value=True)
 
         mock.return_value = manager
@@ -148,6 +162,7 @@ class TestOAuthCompleteFlow:
         """
         # Step 1: User initiates OAuth login
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.auth_routes.login_flow.handle_login_request') as mock_login:
 
             mock_login.return_value = {
@@ -162,6 +177,7 @@ class TestOAuthCompleteFlow:
         
         # Step 2: Simulate OAuth callback with authorization code
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.auth_routes.callback_processor.handle_callback_request') as mock_callback:
 
             mock_callback.return_value = {
@@ -192,6 +208,7 @@ class TestOAuthCompleteFlow:
         
         # Step 3: Verify user session created
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.auth_integration.auth.get_current_user') as mock_user:
 
             mock_user.return_value = {
@@ -388,6 +405,7 @@ class TestTokenRefreshFlow:
         """
         # Mock refresh token validation and new token generation
 
+        # Mock: Security service isolation for auth testing without real token validation
         mock_security_service.validate_refresh_token = AsyncMock(return_value={
 
             "valid": True,
@@ -444,6 +462,7 @@ class TestOAuthErrorScenarios:
         """Test OAuth provider error handling"""
         # Mock OAuth provider error
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.auth_routes.login_flow.handle_login_request') as mock_login:
 
             mock_login.side_effect = Exception("OAuth provider unavailable")
@@ -458,6 +477,7 @@ class TestOAuthErrorScenarios:
 
         """Test invalid authorization code handling"""
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.auth_routes.callback_processor.handle_callback_request') as mock_callback:
 
             mock_callback.side_effect = Exception("Invalid authorization code")
@@ -492,6 +512,7 @@ class TestCrossServiceTokenValidation:
         """Test token validation through auth service"""
         # Mock auth service token validation
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
 
             mock_validate.return_value = {
@@ -519,6 +540,7 @@ class TestCrossServiceTokenValidation:
 
         """Test backend service accepts valid tokens from auth service"""
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.auth_integration.auth.get_current_user') as mock_user:
 
             mock_user.return_value = {
@@ -557,6 +579,7 @@ class TestDevLoginFlow:
         """Test development mode login flow"""
         # Mock development environment
 
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_client.detect_environment.return_value = Mock(value="development")
         
         dev_request = DevLoginRequest(
@@ -567,6 +590,7 @@ class TestDevLoginFlow:
 
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.auth_routes.dev_login.handle_dev_login') as mock_dev_login:
 
             mock_dev_login.return_value = {
@@ -630,6 +654,7 @@ class TestOAuthIntegrationFlow:
 
         with patch('httpx.AsyncClient') as mock_client:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_response = Mock()
 
             mock_response.status_code = 200

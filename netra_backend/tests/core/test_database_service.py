@@ -26,6 +26,7 @@ class TestDatabaseService:
     def test_set_session_factory(self):
         """Test setting session factory."""
         service = DatabaseService("db-service")
+        # Mock: Generic component isolation for controlled unit testing
         mock_factory = Mock()
         
         service.set_session_factory(mock_factory)
@@ -49,7 +50,9 @@ class TestDatabaseService:
 
     def _create_mock_session(self):
         """Helper: Create mock session with close method."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.close = AsyncMock()
         return mock_session
 
@@ -93,13 +96,17 @@ class TestDatabaseService:
 
     def _create_error_handling_session(self):
         """Helper: Create session with error handling methods."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.rollback = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.close = AsyncMock()
         return mock_session
 
     def _setup_error_context_mock(self):
         """Helper: Setup error context mock."""
+        # Mock: Component isolation for testing without external dependencies
         return patch('app.schemas.shared_types.ErrorContext.get_all_context', return_value={})
 
     def _verify_error_handling(self, mock_session):

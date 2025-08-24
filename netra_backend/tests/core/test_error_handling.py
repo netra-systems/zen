@@ -243,6 +243,7 @@ class TestApiErrorHandler:
             {"loc": ("field1",), "msg": "field required", "type": "value_error.missing"},
             {"loc": ("field2",), "msg": "invalid format", "type": "value_error.format"}
         ]
+        # Mock: Generic component isolation for controlled unit testing
         exc = Mock()
         exc.errors.return_value = errors
         exc.__class__ = PydanticValidationError
@@ -401,6 +402,7 @@ class TestApiErrorHandlerFunctions:
     @pytest.mark.asyncio
     async def test_netra_exception_handler(self):
         """Test FastAPI NetraException handler."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.state.request_id = "test-request-123"
         request.state.trace_id = "test-trace-123"
@@ -413,9 +415,11 @@ class TestApiErrorHandlerFunctions:
     @pytest.mark.asyncio
     async def test_validation_exception_handler(self):
         """Test FastAPI validation exception handler."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.state.request_id = "test-request-123"
         request.state.trace_id = "test-trace-123"
+        # Mock: Generic component isolation for controlled unit testing
         exc = Mock()
         exc.errors.return_value = [{"loc": ("field",), "msg": "required", "type": "value_error"}]
         exc.__class__ = PydanticValidationError
@@ -427,6 +431,7 @@ class TestApiErrorHandlerFunctions:
     @pytest.mark.asyncio
     async def test_http_exception_handler(self):
         """Test FastAPI HTTP exception handler."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.state.request_id = "test-request-123"
         request.state.trace_id = "test-trace-123"
@@ -439,6 +444,7 @@ class TestApiErrorHandlerFunctions:
     @pytest.mark.asyncio
     async def test_general_exception_handler(self):
         """Test FastAPI general exception handler."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.state.request_id = "test-request-123"
         request.state.trace_id = "test-trace-123"

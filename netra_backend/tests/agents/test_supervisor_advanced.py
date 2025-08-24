@@ -43,13 +43,20 @@ class TestSupervisorAdvancedFeatures:
     async def test_supervisor_error_handling(self):
         """Test supervisor handles agent initialization errors gracefully"""
         # Mock dependencies with proper async context managers
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.begin = AsyncMock(return_value=AsyncMock())
+        # Mock: Async component isolation for testing without real async operations
         mock_db.begin.return_value.__aenter__ = AsyncMock(return_value=mock_db)
+        # Mock: Async component isolation for testing without real async operations
         mock_db.begin.return_value.__aexit__ = AsyncMock(return_value=None)
         
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock() 
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = AsyncMock()
         
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
@@ -66,7 +73,9 @@ class TestSupervisorAdvancedFeatures:
         
         # Mock triage agent to fail
         from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_triage = AsyncMock(spec=TriageSubAgent)
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_triage.execute = AsyncMock(side_effect=Exception("Agent failed"))
         supervisor.agents["triage"] = mock_triage
         
@@ -85,9 +94,13 @@ class TestSupervisorAdvancedFeatures:
     async def test_supervisor_state_management(self):
         """Test supervisor properly manages agent states"""
         # Mock dependencies
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = AsyncMock()
         
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
@@ -109,13 +122,20 @@ class TestSupervisorAdvancedFeatures:
     async def test_supervisor_concurrent_requests(self):
         """Test supervisor handles multiple concurrent requests"""
         # Mock dependencies with proper async context managers
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.begin = AsyncMock(return_value=AsyncMock())
+        # Mock: Async component isolation for testing without real async operations
         mock_db.begin.return_value.__aenter__ = AsyncMock(return_value=mock_db)
+        # Mock: Async component isolation for testing without real async operations
         mock_db.begin.return_value.__aexit__ = AsyncMock(return_value=None)
         
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = AsyncMock()
         
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
@@ -128,6 +148,7 @@ class TestSupervisorAdvancedFeatures:
         
         # Mock triage agent for concurrent test
         from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = mock_execute
         supervisor.agents["triage"] = mock_triage
@@ -169,9 +190,13 @@ class TestSupervisorAdvancedFeatures:
     @pytest.mark.asyncio
     async def test_supervisor_resource_cleanup(self):
         """Test supervisor properly cleans up resources"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = AsyncMock()
         
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
@@ -191,9 +216,13 @@ class TestSupervisorAdvancedFeatures:
     @pytest.mark.asyncio
     async def test_supervisor_metrics_tracking(self):
         """Test supervisor tracks execution metrics"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = AsyncMock()
         
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
@@ -210,6 +239,7 @@ class TestSupervisorAdvancedFeatures:
         
         # Mock triage agent for metrics test
         from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = mock_execute
         supervisor.agents["triage"] = mock_triage
@@ -238,9 +268,13 @@ class TestSupervisorAdvancedFeatures:
         assert supervisor.metrics["failures"] == 0
     def _setup_circuit_breaker_supervisor(self):
         """Setup supervisor with circuit breaker tracking"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = AsyncMock()
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
         supervisor.circuit_breaker = {"failures": 0, "state": "closed", "last_failure": None}
@@ -272,6 +306,7 @@ class TestSupervisorAdvancedFeatures:
     def _setup_circuit_breaker_agent(self, supervisor):
         """Setup mock triage agent for circuit breaker test"""
         from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_triage = AsyncMock(spec=TriageSubAgent)
         mock_triage.execute = lambda state, run_id, stream_updates=True: self._mock_circuit_breaker_execute(supervisor, state, run_id, stream_updates)
         supervisor.agents["triage"] = mock_triage

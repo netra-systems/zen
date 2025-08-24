@@ -268,7 +268,9 @@ class TestSystemResilience:
                     metrics.error_count += 1
                     error = httpx.HTTPStatusError(
                         "Rate limited",
+                        # Mock: Generic component isolation for controlled unit testing
                         request=Mock(),
+                        # Mock: Component isolation for controlled unit testing
                         response=Mock(status_code=429, headers={"retry-after": "1"})
                     )
                     raise error
@@ -351,6 +353,7 @@ class TestSystemResilience:
                 degradation_start = time.time()
                 
                 # Register database with degradation manager
+                # Mock: Generic component isolation for controlled unit testing
                 mock_db_manager = Mock()
                 mock_db_manager.is_available.return_value = False
                 degradation_manager.register_database_manager("postgres", mock_db_manager)

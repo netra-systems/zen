@@ -50,8 +50,11 @@ def admin_corpus_setup(real_llm_manager, real_websocket_manager, real_tool_dispa
         }
     else:
         # Fall back to mocks for regular testing
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm = AsyncMock(spec=LLMManager)
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_dispatcher = AsyncMock(spec=ToolDispatcher)
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         agent = CorpusAdminSubAgent(mock_llm, mock_dispatcher)
         agent.websocket_manager = mock_websocket

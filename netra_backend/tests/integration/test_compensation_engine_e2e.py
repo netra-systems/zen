@@ -95,9 +95,13 @@ class TestCompensationEngineE2E:
 
     def _create_mock_billing_engine(self):
         """Create mock billing engine for testing fee capture"""
+        # Mock: Generic component isolation for controlled unit testing
         billing_engine = Mock()
+        # Mock: Async component isolation for testing without real async operations
         billing_engine.calculate_performance_fee = AsyncMock(return_value=Decimal('2000.00'))
+        # Mock: Async component isolation for testing without real async operations
         billing_engine.capture_fee = AsyncMock(return_value={"success": True, "fee_captured": "2000.00"})
+        # Mock: Async component isolation for testing without real async operations
         billing_engine.get_customer_savings = AsyncMock(return_value=Decimal('10000.00'))
         return billing_engine
 

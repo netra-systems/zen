@@ -85,12 +85,16 @@ def _create_mock_db_session():
 
     """Create mock database session for testing"""
 
+    # Mock: Database session isolation for transaction testing without real database dependency
     db_session = AsyncMock(spec=AsyncSession)
 
+    # Mock: Session isolation for controlled testing without external state
     db_session.commit = AsyncMock()
 
+    # Mock: Session isolation for controlled testing without external state
     db_session.rollback = AsyncMock()
 
+    # Mock: Session isolation for controlled testing without external state
     db_session.close = AsyncMock()
 
     return db_session
@@ -99,6 +103,7 @@ def _create_mock_llm_manager():
 
     """Create mock LLM Manager with proper async functions"""
 
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
 
     llm_manager.call_llm = _get_mock_call_llm()
@@ -107,6 +112,7 @@ def _create_mock_llm_manager():
 
     llm_manager.ask_structured_llm = _get_mock_ask_structured_llm()
 
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.get = Mock(return_value=Mock())  # Add get method for config access
 
     return llm_manager
@@ -170,8 +176,10 @@ def _create_mock_services():
 
     """Create mock services for testing infrastructure"""
 
+    # Mock: Component isolation for controlled unit testing
     synthetic_data_service = Mock(spec=SyntheticDataService)
 
+    # Mock: Async component isolation for testing without real async operations
     synthetic_data_service.generate_workload = AsyncMock(return_value={
 
         "workload_id": str(uuid.uuid4()), "category": WorkloadCategory.RAG_PIPELINE.value,
@@ -180,14 +188,19 @@ def _create_mock_services():
 
     })
     
+    # Mock: Component isolation for controlled unit testing
     quality_gate_service = Mock(spec=QualityGateService)
 
+    # Mock: Async component isolation for testing without real async operations
     quality_gate_service.validate_content = AsyncMock(return_value=(True, 95.0, ["Content meets quality standards"]))
     
+    # Mock: Component isolation for controlled unit testing
     corpus_service = Mock(spec=CorpusService)
 
+    # Mock: Async component isolation for testing without real async operations
     corpus_service.search = AsyncMock(return_value=[])
 
+    # Mock: Async component isolation for testing without real async operations
     corpus_service.ingest = AsyncMock(return_value={"success": True})
     
     return synthetic_data_service, quality_gate_service, corpus_service
@@ -196,22 +209,31 @@ def _create_additional_mocks():
 
     """Create additional mock components"""
 
+    # Mock: Agent service isolation for testing without LLM agent execution
     agent_service = Mock(spec=AgentService)
 
+    # Mock: Async component isolation for testing without real async operations
     agent_service.process_message = AsyncMock(return_value={"response": "Test response", "tool_calls": []})
     
+    # Mock: Component isolation for controlled unit testing
     apex_tool_selector = Mock(spec=ApexToolSelector)
 
+    # Mock: Async component isolation for testing without real async operations
     apex_tool_selector.select_best_tool = AsyncMock(return_value="cost_analyzer")
     
+    # Mock: Component isolation for controlled unit testing
     state_persistence_service_mock = Mock(spec=state_persistence_service)
 
+    # Mock: Generic component isolation for controlled unit testing
     state_persistence_service_mock.save_state = AsyncMock()
 
+    # Mock: Async component isolation for testing without real async operations
     state_persistence_service_mock.load_state = AsyncMock(return_value=None)
     
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     tool_dispatcher = Mock(spec=ToolDispatcher)
 
+    # Mock: Tool execution isolation for predictable agent testing
     tool_dispatcher.dispatch = AsyncMock(return_value={"response": "Tool executed successfully", "success": True})
     
     return agent_service, apex_tool_selector, state_persistence_service_mock, tool_dispatcher

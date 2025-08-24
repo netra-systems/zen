@@ -152,16 +152,19 @@ class TestConfigDecisionEngine:
 class TestUtilityFunctions:
     """Test utility functions."""
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('os.environ', {'CI': '1', 'GITHUB_ACTIONS': 'true'})
     def test_detect_ci_environment_true(self) -> None:
         """Test CI environment detection when in CI."""
         assert _detect_ci_environment() is True
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('os.environ', {})
     def test_detect_ci_environment_false(self) -> None:
         """Test CI environment detection when not in CI."""
         assert _detect_ci_environment() is False
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('os.environ', {'REDIS_HOST': 'localhost', 'CLICKHOUSE_PORT': '8123', 'OTHER_VAR': 'value'})
     def test_extract_env_overrides(self) -> None:
         """Test environment override extraction."""
@@ -184,7 +187,9 @@ class TestUtilityFunctions:
         """Test fallback action handling for prompt_user."""
         result = ConfigValidationResult(status=ConfigStatus.STALE)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_config.load_or_create_config') as mock_load:
+            # Mock: Component isolation for controlled unit testing
             mock_config = Mock(spec=ServicesConfiguration)
             mock_config.db_pool_size = 10
             mock_config.db_max_overflow = 20
@@ -206,14 +211,20 @@ class TestMainValidationFunction:
     @pytest.mark.asyncio
     async def test_validate_service_config_defaults(self) -> None:
         """Test service config validation with defaults."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.config_validator.ServiceConfigValidator') as mock_validator_class:
+            # Mock: Component isolation for testing without external dependencies
             with patch('dev_launcher.config_validator.ConfigDecisionEngine') as mock_engine_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_validator = Mock()
                 # Make validate_config return an awaitable
+                # Mock: Async component isolation for testing without real async operations
                 mock_validator.validate_config = AsyncMock(return_value=ConfigValidationResult(status=ConfigStatus.VALID))
+                # Mock: Component isolation for controlled unit testing
                 mock_validator._load_config.return_value = Mock(spec=ServicesConfiguration)
                 mock_validator_class.return_value = mock_validator
                 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_engine = Mock()
                 mock_engine.should_use_existing_config.return_value = True
                 mock_engine_class.return_value = mock_engine
@@ -226,14 +237,20 @@ class TestMainValidationFunction:
         """Test service config validation with CLI overrides."""
         cli_overrides = {"REDIS_HOST": "custom"}
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.config_validator.ServiceConfigValidator') as mock_validator_class:
+            # Mock: Component isolation for testing without external dependencies
             with patch('dev_launcher.config_validator.ConfigDecisionEngine') as mock_engine_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_validator = Mock()
                 # Make validate_config return an awaitable
+                # Mock: Async component isolation for testing without real async operations
                 mock_validator.validate_config = AsyncMock(return_value=ConfigValidationResult(status=ConfigStatus.VALID))
+                # Mock: Component isolation for controlled unit testing
                 mock_validator._load_config.return_value = Mock(spec=ServicesConfiguration)
                 mock_validator_class.return_value = mock_validator
                 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_engine = Mock()
                 mock_engine.should_use_existing_config.return_value = True
                 mock_engine_class.return_value = mock_engine

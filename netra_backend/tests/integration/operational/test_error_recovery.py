@@ -53,6 +53,7 @@ class TestErrorRecovery:
             "cascade_prevented": True
         }
         
+        # Mock: Async component isolation for testing without real async operations
         infra["error_handler"].prevent_cascade = AsyncMock(return_value=prevention_actions)
         return await infra["error_handler"].prevent_cascade(detection)
 
@@ -66,6 +67,7 @@ class TestErrorRecovery:
             "total_recovery_time_minutes": 12
         }
         
+        # Mock: Async component isolation for testing without real async operations
         infra["error_handler"].coordinate_recovery = AsyncMock(return_value=recovery_result)
         return await infra["error_handler"].coordinate_recovery(prevention)
 

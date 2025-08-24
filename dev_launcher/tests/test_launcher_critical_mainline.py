@@ -63,23 +63,35 @@ class TestDockerServiceDiscoveryIntegration(unittest.TestCase):
         
     def _create_mock_services_config(self):
         """Create mock services configuration."""
+        # Mock: Component isolation for controlled unit testing
         mock_config = Mock(spec=ServicesConfiguration)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_config.redis = Mock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_config.redis.mode = Mock()
         mock_config.redis.mode.value = "local"
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_config.clickhouse = Mock()
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_config.clickhouse.mode = Mock() 
         mock_config.clickhouse.mode.value = "local"
+        # Mock: PostgreSQL database isolation for testing without real database connections
         mock_config.postgres = Mock()
+        # Mock: PostgreSQL database isolation for testing without real database connections
         mock_config.postgres.mode = Mock()
         mock_config.postgres.mode.value = "local"
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_config.llm = Mock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_config.llm.mode = Mock()
         mock_config.llm.mode.value = "shared"
+        # Mock: Component isolation for controlled unit testing
         mock_config.get_all_env_vars = Mock(return_value={})
         return mock_config
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.docker_services.DockerServiceManager')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_availability_checker.ServiceAvailabilityChecker')
     def test_docker_discovery_reuses_healthy_containers(self, mock_checker, mock_docker):
         """Test that existing healthy Docker containers are properly discovered and reused."""
@@ -115,6 +127,7 @@ class TestDockerServiceDiscoveryIntegration(unittest.TestCase):
         # Should fail if startup doesn't optimize based on discovery
         mock_docker_instance.discover_running_services.assert_called_once()
         
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.docker_services.DockerServiceManager')
     def test_docker_discovery_handles_unhealthy_containers(self, mock_docker):
         """Test handling of unhealthy containers during discovery."""
@@ -129,6 +142,7 @@ class TestDockerServiceDiscoveryIntegration(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Capture print outputs to verify warnings
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.print') as mock_print:
             launcher._perform_docker_service_discovery()
             
@@ -140,6 +154,7 @@ class TestDockerServiceDiscoveryIntegration(unittest.TestCase):
         # ASSERTION THAT SHOULD FAIL: Should handle empty reusable services
         self.assertEqual(len(launcher._docker_discovery_report.get('reusable_services', [])), 0)
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.docker_services.DockerServiceManager')
     def test_docker_discovery_fallback_when_docker_unavailable(self, mock_docker):
         """Test graceful fallback when Docker is unavailable."""
@@ -180,7 +195,9 @@ class TestPortConflictResolution(unittest.TestCase):
         sock.listen(1)
         return sock
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.port_utils.find_available_port')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.port_utils.is_port_available')
     def test_port_conflict_auto_reallocation(self, mock_is_available, mock_find_port):
         """Test automatic port reallocation when preferred ports are in use."""
@@ -230,6 +247,7 @@ class TestPortConflictResolution(unittest.TestCase):
                 
             return sock
             
+        # Mock: Component isolation for testing without external dependencies
         with patch('socket.socket', side_effect=mock_socket):
             # ASSERTION THAT SHOULD FAIL: Should handle race conditions
             # This test exposes race condition handling gaps
@@ -237,6 +255,7 @@ class TestPortConflictResolution(unittest.TestCase):
                 # This should fail if race condition handling is inadequate
                 launcher._check_critical_env_vars()
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.config.socket.socket')
     def test_port_cleanup_verification_failure(self, mock_port_manager):
         """Test port cleanup verification when processes don't release ports properly."""
@@ -277,19 +296,23 @@ class TestServiceAvailabilityAutoAdjustment(unittest.TestCase):
         import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_availability_checker.ServiceAvailabilityChecker')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.docker_services.DockerServiceManager')
     def test_auto_switch_to_docker_mode(self, mock_docker, mock_checker):
         """Test automatic switching to Docker mode when local services unavailable."""
         # Configure availability checker to recommend Docker mode
         mock_checker_instance = mock_checker.return_value
         mock_results = {
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             'redis': Mock(
                 available=False,
                 recommended_mode=ResourceMode.LOCAL,
                 docker_available=True,
                 reason="Local Redis not installed, but Docker available"
             ),
+            # Mock: Component isolation for controlled unit testing
             'postgres': Mock(
                 available=False,
                 recommended_mode=ResourceMode.LOCAL,
@@ -317,17 +340,20 @@ class TestServiceAvailabilityAutoAdjustment(unittest.TestCase):
         self.assertIn('REDIS_URL', os.environ)
         self.assertIn('DATABASE_URL', os.environ)
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_availability_checker.ServiceAvailabilityChecker')
     def test_auto_switch_to_shared_mode_when_docker_unavailable(self, mock_checker):
         """Test fallback to shared mode when both local and Docker are unavailable."""
         mock_checker_instance = mock_checker.return_value
         mock_results = {
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             'redis': Mock(
                 available=False,
                 recommended_mode=ResourceMode.SHARED,
                 docker_available=False,
                 reason="Local Redis not available, falling back to shared Redis"
             ),
+            # Mock: ClickHouse external database isolation for unit testing performance
             'clickhouse': Mock(
                 available=False,
                 recommended_mode=ResourceMode.SHARED,
@@ -355,6 +381,7 @@ class TestServiceAvailabilityAutoAdjustment(unittest.TestCase):
         self.config.services_config = self._create_services_config_local_mode()
         
         # Simulate ImportError when availability checker is not available
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.launcher.ServiceAvailabilityChecker', 
                   side_effect=ImportError("Module not found")):
             
@@ -366,11 +393,15 @@ class TestServiceAvailabilityAutoAdjustment(unittest.TestCase):
 
     def _create_services_config_local_mode(self):
         """Create services configuration in local mode."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_config.redis = Mock()
         mock_config.redis.mode = ResourceMode.LOCAL
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_config.clickhouse = Mock()
         mock_config.clickhouse.mode = ResourceMode.LOCAL
+        # Mock: PostgreSQL database isolation for testing without real database connections
         mock_config.postgres = Mock()
         mock_config.postgres.mode = ResourceMode.LOCAL
         mock_config.get_all_env_vars.return_value = {
@@ -397,7 +428,9 @@ class TestStartupSequenceOrdering(unittest.TestCase):
         """Track execution order for validation."""
         self.execution_order.append(step_name)
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.docker_services.DockerServiceManager')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_availability_checker.ServiceAvailabilityChecker')
     async def test_thirteen_step_startup_sequence_order(self, mock_checker, mock_docker):
         """Test that the 13-step startup sequence executes in correct order."""
@@ -446,9 +479,13 @@ class TestStartupSequenceOrdering(unittest.TestCase):
                 setattr(launcher, method_name, create_tracker(method_name))
         
         # Mock service startup methods
+        # Mock: Generic component isolation for controlled unit testing
         mock_service_startup = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_service_startup.start_backend.return_value = (Mock(), {})
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_service_startup.start_auth_service.return_value = (Mock(), {})
+        # Mock: Generic component isolation for controlled unit testing
         mock_service_startup.start_frontend.return_value = (Mock(), {})
         launcher.service_startup = mock_service_startup
         
@@ -555,8 +592,11 @@ class TestHealthMonitoringDelayedStart(unittest.TestCase):
             
         launcher.health_monitor.start = mock_start_monitoring
         launcher.health_monitor.enable_monitoring = mock_enable_monitoring
+        # Mock: Component isolation for controlled unit testing
         launcher.health_monitor.all_services_ready = Mock(return_value=True)
+        # Mock: Component isolation for controlled unit testing
         launcher.health_monitor.verify_cross_service_connectivity = Mock(return_value=True)
+        # Mock: Component isolation for controlled unit testing
         launcher.health_monitor.get_cross_service_health_status = Mock(return_value={
             'cross_service_integration': {
                 'cors_enabled': True,
@@ -590,12 +630,17 @@ class TestHealthMonitoringDelayedStart(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock health monitor to report services not ready
+        # Mock: Component isolation for controlled unit testing
         launcher.health_monitor.all_services_ready = Mock(return_value=False)
+        # Mock: Component isolation for controlled unit testing
         launcher.health_monitor.verify_cross_service_connectivity = Mock(return_value=True)
+        # Mock: Generic component isolation for controlled unit testing
         launcher.health_monitor.start = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         launcher.health_monitor.enable_monitoring = Mock()
         
         # Capture warning output
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.print') as mock_print:
             launcher._start_health_monitoring_after_readiness()
             
@@ -612,12 +657,17 @@ class TestHealthMonitoringDelayedStart(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock connectivity check to fail
+        # Mock: Component isolation for controlled unit testing
         launcher.health_monitor.all_services_ready = Mock(return_value=True)
+        # Mock: Component isolation for controlled unit testing
         launcher.health_monitor.verify_cross_service_connectivity = Mock(return_value=False)
+        # Mock: Generic component isolation for controlled unit testing
         launcher.health_monitor.start = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         launcher.health_monitor.enable_monitoring = Mock()
         
         # Capture warning output
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.print') as mock_print:
             launcher._start_health_monitoring_after_readiness()
             
@@ -645,6 +695,7 @@ class TestDatabaseValidationMockMode(unittest.TestCase):
     def test_database_validation_skipped_when_all_mock_mode(self):
         """Test that database validation is skipped when all databases in mock mode."""
         # Create services config with all mock mode
+        # Mock: Generic component isolation for controlled unit testing
         mock_services_config = Mock()
         mock_services_config.redis.mode.value = "mock"
         mock_services_config.clickhouse.mode.value = "mock"
@@ -655,6 +706,7 @@ class TestDatabaseValidationMockMode(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock database connector
+        # Mock: Database access isolation for fast, reliable unit testing
         launcher.database_connector.validate_all_connections = Mock()
         
         async def run_test():
@@ -671,6 +723,7 @@ class TestDatabaseValidationMockMode(unittest.TestCase):
     def test_database_validation_runs_when_mixed_mode(self):
         """Test that database validation runs when some databases are not in mock mode."""
         # Create services config with mixed modes
+        # Mock: Generic component isolation for controlled unit testing
         mock_services_config = Mock()
         mock_services_config.redis.mode.value = "mock"
         mock_services_config.clickhouse.mode.value = "local"  # Not mock
@@ -681,6 +734,7 @@ class TestDatabaseValidationMockMode(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock database connector to return success
+        # Mock: Database access isolation for fast, reliable unit testing
         launcher.database_connector.validate_all_connections = Mock(return_value=True)
         
         async def run_test():
@@ -694,6 +748,7 @@ class TestDatabaseValidationMockMode(unittest.TestCase):
 
     def test_database_validation_failure_handling(self):
         """Test proper error handling when database validation fails."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_services_config = Mock()
         mock_services_config.redis.mode.value = "local"
         mock_services_config.clickhouse.mode.value = "local"
@@ -704,6 +759,7 @@ class TestDatabaseValidationMockMode(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock database connector to fail
+        # Mock: Database access isolation for fast, reliable unit testing
         launcher.database_connector.validate_all_connections = Mock(
             side_effect=Exception("Connection failed")
         )
@@ -722,6 +778,7 @@ class TestDatabaseValidationMockMode(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock database connector
+        # Mock: Database access isolation for fast, reliable unit testing
         launcher.database_connector.validate_all_connections = Mock(return_value=True)
         
         async def run_test():
@@ -757,7 +814,9 @@ class TestCrossServiceAuthentication(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock service discovery
+        # Mock: Component isolation for controlled unit testing
         launcher.service_discovery.get_cross_service_auth_token = Mock(return_value=None)
+        # Mock: Generic component isolation for controlled unit testing
         launcher.service_discovery.set_cross_service_auth_token = Mock()
         
         # Call token generation
@@ -780,7 +839,9 @@ class TestCrossServiceAuthentication(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock service discovery to return existing token
+        # Mock: Component isolation for controlled unit testing
         launcher.service_discovery.get_cross_service_auth_token = Mock(return_value=existing_token)
+        # Mock: Generic component isolation for controlled unit testing
         launcher.service_discovery.set_cross_service_auth_token = Mock()
         
         # Call token generation
@@ -798,12 +859,17 @@ class TestCrossServiceAuthentication(unittest.TestCase):
         
         # Setup mock token
         test_token = "test_token_for_services"
+        # Mock: Component isolation for controlled unit testing
         launcher.service_discovery.get_cross_service_auth_token = Mock(return_value=test_token)
         
         # Mock service starters
+        # Mock: Generic component isolation for controlled unit testing
         launcher.service_startup = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         launcher.service_startup.start_backend = Mock(return_value=(Mock(), {}))
+        # Mock: Generic component isolation for controlled unit testing
         launcher.service_startup.start_auth_service = Mock(return_value=(Mock(), {}))
+        # Mock: Generic component isolation for controlled unit testing
         launcher.service_startup.start_frontend = Mock(return_value=(Mock(), {}))
         
         # Ensure token is set
@@ -821,7 +887,9 @@ class TestCrossServiceAuthentication(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock service discovery for new token generation
+        # Mock: Component isolation for controlled unit testing
         launcher.service_discovery.get_cross_service_auth_token = Mock(return_value=None)
+        # Mock: Generic component isolation for controlled unit testing
         launcher.service_discovery.set_cross_service_auth_token = Mock()
         
         # Generate multiple tokens to test randomness
@@ -950,7 +1018,9 @@ class TestParallelPreCheckExecution(unittest.TestCase):
         self.assertIsNone(launcher.parallel_executor, "Parallel executor should be None when disabled")
         
         # Mock the checks
+        # Mock: Component isolation for controlled unit testing
         launcher.check_environment = Mock(return_value=True)
+        # Mock: Component isolation for controlled unit testing
         launcher.load_secrets = Mock(return_value=True)
         
         # Run pre-checks
@@ -991,7 +1061,9 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         
         launcher.process_manager.terminate_process = mock_terminate
         launcher.process_manager.is_running = mock_is_running
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager.cleanup_all = Mock()
+        # Mock: Authentication service isolation for testing without real auth flows
         launcher.process_manager.processes = {"Frontend": Mock(), "Backend": Mock(), "Auth": Mock()}
         
         # Trigger shutdown
@@ -1010,10 +1082,15 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock health monitor
+        # Mock: Generic component isolation for controlled unit testing
         launcher.health_monitor.stop = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager.processes = {"Frontend": Mock()}
+        # Mock: Component isolation for controlled unit testing
         launcher.process_manager.terminate_process = Mock(return_value=True)
+        # Mock: Component isolation for controlled unit testing
         launcher.process_manager.is_running = Mock(return_value=True)
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager.cleanup_all = Mock()
         
         # Trigger graceful shutdown
@@ -1027,7 +1104,9 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock port verification
+        # Mock: Component isolation for controlled unit testing
         launcher._is_port_in_use = Mock(side_effect=[True, True, False])  # Two ports in use, one free
+        # Mock: Generic component isolation for controlled unit testing
         launcher._force_free_port_with_retry = Mock()
         
         # Mock other components
@@ -1053,6 +1132,7 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock database connector
+        # Mock: Generic component isolation for controlled unit testing
         mock_stop_monitoring = Mock()
         launcher.database_connector.stop_health_monitoring = mock_stop_monitoring
         launcher.database_connector._shutdown_requested = False
@@ -1061,7 +1141,9 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         launcher.process_manager.processes = {}
         
         # Simulate no running event loop (normal shutdown scenario)
+        # Mock: Component isolation for testing without external dependencies
         with patch('asyncio.get_running_loop', side_effect=RuntimeError("No running event loop")):
+            # Mock: Component isolation for testing without external dependencies
             with patch('asyncio.run') as mock_asyncio_run:
                 launcher._graceful_shutdown()
                 
@@ -1073,6 +1155,7 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock components
+        # Mock: Generic component isolation for controlled unit testing
         launcher.health_monitor.stop = Mock()
         launcher.process_manager.processes = {}
         
@@ -1090,7 +1173,9 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock parallel executor
+        # Mock: Generic component isolation for controlled unit testing
         launcher.parallel_executor = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         launcher.parallel_executor.cleanup = Mock()
         
         # Mock other components
@@ -1120,17 +1205,25 @@ class TestEmergencyRecovery(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock process manager with running services
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_processes = {"Frontend": Mock(), "Backend": Mock(), "Auth": Mock()}
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager = Mock()
         launcher.process_manager.processes = mock_processes
+        # Mock: Component isolation for controlled unit testing
         launcher.process_manager.is_running = Mock(side_effect=lambda x: x in mock_processes)
         # Emergency cleanup should use kill_process, not terminate_process
+        # Mock: Component isolation for controlled unit testing
         launcher.process_manager.kill_process = Mock(return_value=True)
+        # Mock: Component isolation for controlled unit testing
         launcher.process_manager.terminate_process = Mock(return_value=True)
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager.cleanup_all = Mock()
         
         # Mock port operations
+        # Mock: Component isolation for controlled unit testing
         launcher._is_port_in_use = Mock(return_value=True)
+        # Mock: Component isolation for controlled unit testing
         launcher._force_free_port_with_retry = Mock(return_value=True)
         
         # Trigger emergency cleanup
@@ -1156,7 +1249,9 @@ class TestEmergencyRecovery(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock process manager
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager.terminate_process = Mock()
         
         # Set shutdown flag
@@ -1173,8 +1268,11 @@ class TestEmergencyRecovery(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock process manager to raise exception
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager.processes = {"Backend": Mock()}
+        # Mock: Component isolation for controlled unit testing
         launcher.process_manager.is_running = Mock(side_effect=Exception("Process manager error"))
         
         # Should not raise exception during emergency cleanup
@@ -1191,12 +1289,14 @@ class TestEmergencyRecovery(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock emergency cleanup
+        # Mock: Generic component isolation for controlled unit testing
         launcher.emergency_cleanup = Mock()
         
         # Simulate critical error during startup
         critical_error = CriticalError(CriticalErrorType.STARTUP_FAILURE, "Critical startup failure")
         
         async def run_test():
+            # Mock: Component isolation for testing without external dependencies
             with patch('dev_launcher.launcher.critical_handler') as mock_handler:
                 mock_handler.exit_on_critical.side_effect = SystemExit(1)
                 
@@ -1215,6 +1315,7 @@ class TestEmergencyRecovery(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Mock graceful shutdown
+        # Mock: Generic component isolation for controlled unit testing
         launcher._graceful_shutdown = Mock()
         
         # Simulate signal reception
@@ -1235,11 +1336,15 @@ class TestEmergencyRecovery(unittest.TestCase):
         original_platform = launcher._force_free_port_with_retry.__func__.__globals__['sys'].platform
         
         # Test Windows platform
+        # Mock: Component isolation for testing without external dependencies
         with patch('sys.platform', 'win32'):
+            # Mock: Component isolation for testing without external dependencies
             with patch('subprocess.run') as mock_run:
                 # Mock netstat output
                 mock_run.side_effect = [
+                    # Mock: Component isolation for controlled unit testing
                     Mock(returncode=0, stdout="  TCP    0.0.0.0:8000    0.0.0.0:0    LISTENING    1234"),
+                    # Mock: Component isolation for controlled unit testing
                     Mock(returncode=0)  # taskkill success
                 ]
                 
@@ -1258,10 +1363,15 @@ class TestEmergencyRecovery(unittest.TestCase):
         launcher = DevLauncher(self.config)
         
         # Setup mocks for all resource types
+        # Mock: Generic component isolation for controlled unit testing
         launcher.health_monitor = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         launcher.log_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         launcher.parallel_executor = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         launcher.process_manager.processes = {"Backend": Mock()}
         
         # Track cleanup calls

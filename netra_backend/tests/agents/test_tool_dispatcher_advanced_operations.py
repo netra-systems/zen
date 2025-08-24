@@ -125,6 +125,7 @@ class TestToolDispatcherAdvancedOperations:
         """Setup production tool test."""
         dispatcher = ToolDispatcher()
         production_tool = dispatcher.tools["create_corpus"]
+        # Mock: Async component isolation for testing without real async operations
         production_tool.execute = AsyncMock(return_value={"success": True})
         state = create_test_state()
         return dispatcher, production_tool, state
@@ -150,6 +151,7 @@ class TestToolDispatcherAdvancedOperations:
     def _setup_sync_tool_test(self) -> tuple:
         """Setup sync tool test."""
         dispatcher = ToolDispatcher()
+        # Mock: Generic component isolation for controlled unit testing
         sync_tool = Mock()
         sync_tool.return_value = {"sync": "result"}
         # Ensure it doesn't have arun method to be treated as sync tool

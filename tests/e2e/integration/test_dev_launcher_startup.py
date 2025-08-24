@@ -134,6 +134,7 @@ async def test_startup_sequence_ordering(dev_launcher_fixture):
     logs = []
     
     # Mock log capture
+    # Mock: Component isolation for testing without external dependencies
     with patch('dev_launcher.log_streamer.LogManager') as mock_log:
         mock_log.return_value.log_message.side_effect = \
             lambda msg: logs.append(msg)
@@ -168,6 +169,7 @@ async def test_graceful_shutdown(dev_launcher_fixture):
 async def test_error_recovery(dev_launcher_fixture):
     """Test launcher recovers from service failures."""
     # Simulate service failure during startup
+    # Mock: Component isolation for testing without external dependencies
     with patch('dev_launcher.service_startup.ServiceStartupCoordinator') as mock:
         mock.return_value.start_service.side_effect = \
             [Exception("Simulated failure"), None, None]
@@ -265,6 +267,7 @@ def _verify_env_loaded(launcher: DevLauncher, expected: Dict[str, str]) -> bool:
 async def test_process_cleanup_on_failure(dev_launcher_fixture):
     """Test processes are cleaned up if startup fails."""
     # Force startup failure
+    # Mock: Component isolation for testing without external dependencies
     with patch('dev_launcher.environment_checker.EnvironmentChecker') as mock:
         mock.return_value.check_environment.side_effect = Exception("Test failure")
         

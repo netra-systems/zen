@@ -100,6 +100,7 @@ class TestStagingAuthServiceSync:
         }
         
         with patch.object(auth_manager, '_session') as mock_session:
+            # Mock: Generic component isolation for controlled unit testing
             mock_response = AsyncMock()
             mock_response.status = 200
             mock_response.json.return_value = auth_service_response

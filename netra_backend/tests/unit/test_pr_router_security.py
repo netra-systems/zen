@@ -107,10 +107,13 @@ class TestGitHubValidation:
     @pytest.mark.asyncio
     async def test_validate_pr_with_github_success(self):
         """Test successful GitHub PR validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"state": "open"}
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value=mock_response)
         
         # Should not raise exception
@@ -119,9 +122,12 @@ class TestGitHubValidation:
     @pytest.mark.asyncio
     async def test_validate_pr_with_github_not_found(self):
         """Test GitHub PR validation when PR not found."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status_code = 404
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value=mock_response)
         
         with pytest.raises(AuthenticationError, match="PR #123 not found"):
@@ -130,10 +136,13 @@ class TestGitHubValidation:
     @pytest.mark.asyncio
     async def test_validate_pr_with_github_closed(self):
         """Test GitHub PR validation when PR is closed."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"state": "closed"}
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value=mock_response)
         
         with pytest.raises(AuthenticationError, match="PR #123 is not open"):
@@ -143,7 +152,9 @@ class TestGitHubValidation:
     async def test_validate_pr_with_github_network_error(self):
         """Test GitHub PR validation with network error."""
         import httpx
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = Mock()
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(side_effect=httpx.RequestError("Network error"))
         
         # Should not raise exception but log warning

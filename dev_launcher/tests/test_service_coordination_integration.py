@@ -290,6 +290,7 @@ class TestServiceCoordinationIntegration:
         mock_processes = {}
         
         async def start_database():
+            # Mock: Database isolation for unit testing without external database connections
             mock_processes["database"] = MagicMock()
             mock_processes["database"].pid = 1001
             return {"process": mock_processes["database"], "port": 5432}
@@ -299,6 +300,7 @@ class TestServiceCoordinationIntegration:
             result = await port_allocator.reserve_port("backend", preferred_port=8000)
             assert result.success
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_processes["backend"] = MagicMock()
             mock_processes["backend"].pid = 1002
             
@@ -312,6 +314,7 @@ class TestServiceCoordinationIntegration:
             result = await port_allocator.reserve_port("frontend", preferred_port=3000)
             assert result.success
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_processes["frontend"] = MagicMock()
             mock_processes["frontend"].pid = 1003
             
@@ -321,8 +324,11 @@ class TestServiceCoordinationIntegration:
             return {"process": mock_processes["frontend"], "port": result.port}
         
         # Register readiness checkers
+        # Mock: Database access isolation for fast, reliable unit testing
         readiness_manager.register_checker("database", AsyncMock(return_value=True))
+        # Mock: Async component isolation for testing without real async operations
         readiness_manager.register_checker("backend", AsyncMock(return_value=True))
+        # Mock: Async component isolation for testing without real async operations
         readiness_manager.register_checker("frontend", AsyncMock(return_value=True))
         
         # Register services with coordinator

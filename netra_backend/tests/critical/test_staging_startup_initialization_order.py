@@ -35,10 +35,13 @@ class TestStagingStartupInitializationOrder:
             # Try to access config during uvicorn startup
             from netra_backend.app.core.configuration.base import get_unified_config
             config = get_unified_config()  # This should fail if config isn't ready
+            # Mock: Generic component isolation for controlled unit testing
             return Mock()
         
         # Mock configuration to not be ready during uvicorn startup
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.UnifiedConfigManager._initialized', False):
+            # Mock: Component isolation for testing without external dependencies
             with patch('uvicorn.run', side_effect=mock_uvicorn_run):
                 
                 # This should fail because uvicorn tries to start before config is ready
@@ -68,7 +71,9 @@ class TestStagingStartupInitializationOrder:
             # Logger tries to load config which isn't ready
             self._load_config()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.UnifiedConfigManager.__init__', side_effect=track_config_init):
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.core.unified_logging.UnifiedLogger._setup_logging', side_effect=track_logger_init):
                 
                 # This should fail because logger initializes before config manager
@@ -97,6 +102,7 @@ class TestStagingStartupInitializationOrder:
             db_url = config.database_url  # Should fail if config not ready
         
         # Mock config to not have database_url ready
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
             mock_config.side_effect = AttributeError("Configuration not loaded - database_url unavailable")
             
@@ -126,9 +132,11 @@ class TestStagingStartupInitializationOrder:
             central_logger.info("WebSocket manager starting")  # Should fail if logger not ready
         
         # Mock dependencies to not be ready
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
             mock_config.side_effect = RuntimeError("Configuration system not initialized")
             
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             with patch('netra_backend.app.websocket_core.WebSocketManager.__init__', side_effect=mock_websocket_init):
                 
                 # This should fail because WebSocket manager starts before dependencies
@@ -165,6 +173,7 @@ class TestApplicationLifecycleInitializationOrder:
             await mock_startup_event()
         
         # Mock config manager to not be ready
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.UnifiedConfigManager.get_config') as mock_get_config:
             mock_get_config.side_effect = RuntimeError("Config manager not ready during lifespan startup")
             
@@ -192,9 +201,11 @@ class TestApplicationLifecycleInitializationOrder:
             
             # Try to setup middleware based on config
             cors_enabled = config.cors_enabled  # Should fail if config not ready
+            # Mock: Generic component isolation for controlled unit testing
             return Mock()
         
         # Mock config to not be available during app creation
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
             mock_config.side_effect = ImportError("Configuration module not available during app creation")
             
@@ -227,9 +238,11 @@ class TestApplicationLifecycleInitializationOrder:
             return get_websocket_manager()  # Should fail if not ready
         
         # Mock services to not be ready during dependency injection
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('netra_backend.app.db.database_manager.get_database_manager') as mock_db:
             mock_db.side_effect = RuntimeError("Database manager not initialized for dependency injection")
             
+            # Mock: WebSocket connection isolation for testing without network overhead
             with patch('netra_backend.app.websocket_core.get_websocket_manager') as mock_ws:
                 mock_ws.side_effect = RuntimeError("WebSocket manager not initialized for dependency injection")
                 
@@ -298,7 +311,9 @@ class TestEnvironmentSpecificInitializationOrder:
             return secret_path
         
         # Mock config to not have secret configuration ready
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
+            # Mock: Generic component isolation for controlled unit testing
             mock_config_obj = Mock()
             del mock_config_obj.secret_path  # Remove secret_path attribute
             mock_config.return_value = mock_config_obj

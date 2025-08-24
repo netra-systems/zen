@@ -21,8 +21,11 @@ def ws_service():
 
 @pytest.fixture
 def mock_websocket():
+    # Mock: Generic component isolation for controlled unit testing
     ws = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     ws.send_json = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     ws.receive_json = AsyncMock()
     return ws
 
@@ -71,6 +74,7 @@ class TestWebSocketUpdates:
             notifications.append(data)
         
         from starlette.websockets import WebSocketState
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = MagicMock()
         mock_ws.send_json = mock_send
         mock_ws.client_state = WebSocketState.CONNECTED
@@ -112,6 +116,7 @@ class TestWebSocketUpdates:
         job_id = str(uuid.uuid4())
         
         # Initial connection
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = AsyncMock()
         await ws_service.connect(ws1, job_id)
         
@@ -122,6 +127,7 @@ class TestWebSocketUpdates:
         await ws_service.disconnect(job_id)
         
         # Reconnect with new socket
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = AsyncMock()
         await ws_service.connect(ws2, job_id)
         
@@ -133,6 +139,7 @@ class TestWebSocketUpdates:
         """Test multiple clients subscribing to same job"""
         job_id = str(uuid.uuid4())
         
+        # Mock: Generic component isolation for controlled unit testing
         clients = [AsyncMock() for _ in range(5)]
         
         for client in clients:
@@ -149,7 +156,9 @@ class TestWebSocketUpdates:
         """Test message queuing for slow clients"""
         job_id = str(uuid.uuid4())
         
+        # Mock: Generic component isolation for controlled unit testing
         slow_client = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         slow_client.send_json = AsyncMock(side_effect=lambda x: asyncio.sleep(0.1))
         
         await ws_service.connect(slow_client, job_id)
@@ -208,6 +217,7 @@ class TestWebSocketUpdates:
         """Test WebSocket message rate limiting"""
         job_id = str(uuid.uuid4())
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = AsyncMock()
         await ws_service.connect(mock_ws, job_id)
         

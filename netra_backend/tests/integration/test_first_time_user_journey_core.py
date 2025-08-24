@@ -69,27 +69,41 @@ class TestFirstTimeUserJourneyCore:
 
     def _init_payment_system(self):
         """Initialize mock payment system"""
+        # Mock: Generic component isolation for controlled unit testing
         payment_service = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         payment_service.create_customer = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         payment_service.process_payment = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         payment_service.setup_subscription = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         payment_service.verify_payment_method = AsyncMock()
         return payment_service
 
     def _init_email_system(self):
         """Initialize mock email system"""
+        # Mock: Generic component isolation for controlled unit testing
         email_service = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         email_service.send_verification = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         email_service.send_welcome = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         email_service.send_onboarding = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         email_service.verify_email_token = AsyncMock()
         return email_service
 
     def _init_llm_system(self):
         """Initialize mock LLM system"""
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.generate_response = AsyncMock()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.optimize_query = AsyncMock()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.route_model = AsyncMock()
         return llm_manager
 

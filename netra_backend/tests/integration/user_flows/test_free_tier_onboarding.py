@@ -55,7 +55,9 @@ assert_successful_registration = Mock
 assert_plan_compliance = Mock
 
 # Mock the user journey data as well since it's likely missing
+# Mock: Generic component isolation for controlled unit testing
 UserTestData = Mock()
+# Mock: Generic component isolation for controlled unit testing
 UserJourneyScenarios = Mock()
 
 @pytest.mark.integration

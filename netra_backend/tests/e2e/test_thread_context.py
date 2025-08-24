@@ -121,6 +121,7 @@ class MessageHistoryTests:
         
         created_messages = []
         for role, content, timestamp in messages_data:
+            # Mock: Component isolation for testing without external dependencies
             with patch('time.time', return_value=timestamp):
                 msg = await service.create_message(thread.id, role, content, db=db_session)
                 created_messages.append(msg)
@@ -348,9 +349,13 @@ class ContextLimitsTests:
 @pytest.fixture
 async def db_session():
     """Mock database session for testing."""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
+    # Mock: Session isolation for controlled testing without external state
     session.begin = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
     try:
         yield session
@@ -361,18 +366,27 @@ async def db_session():
 @pytest.fixture
 def mock_agent_service():
     """Mock agent service for testing."""
+    # Mock: Agent service isolation for testing without LLM agent execution
     service = Mock(spec=AgentService)
+    # Mock: Generic component isolation for controlled unit testing
     service.handle_websocket_message = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.create_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.switch_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.delete_thread = AsyncMock()
     return service
 
 @pytest.fixture
 def mock_state_persistence():
     """Mock state persistence service."""
+    # Mock: Generic component isolation for controlled unit testing
     service = Mock()
+    # Mock: Async component isolation for testing without real async operations
     service.save_agent_state = AsyncMock(return_value=(True, "snapshot_id"))
+    # Mock: Generic component isolation for controlled unit testing
     service.load_agent_state = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     service.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     return service

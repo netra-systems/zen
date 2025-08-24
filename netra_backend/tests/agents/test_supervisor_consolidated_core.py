@@ -23,11 +23,15 @@ class TestSupervisorAgentInitialization:
     def test_init_base(self):
         """Test _init_base method."""
         # Mock LLM manager
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
         
         # Create supervisor instance
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
@@ -39,9 +43,13 @@ class TestSupervisorAgentInitialization:
     
     def test_init_services(self):
         """Test _init_services method."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
@@ -54,9 +62,13 @@ class TestSupervisorAgentInitialization:
     
     def test_init_components(self):
         """Test _init_components method."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
@@ -70,9 +82,13 @@ class TestSupervisorAgentInitialization:
     
     def test_init_hooks(self):
         """Test _init_hooks method."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
@@ -84,9 +100,13 @@ class TestSupervisorAgentInitialization:
     
     def test_initialization_with_none_values(self):
         """Test initialization handles None values gracefully."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         # Should not crash with valid mocks
@@ -103,14 +123,19 @@ class TestSupervisorAgentRegistration:
     
     def test_register_agent(self):
         """Test register_agent method."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Create mock agent
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_agent = Mock(spec=BaseSubAgent)
         mock_agent.name = "test_agent"
         
@@ -123,14 +148,19 @@ class TestSupervisorAgentRegistration:
     
     def test_register_hook(self):
         """Test register_hook method."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Create mock handler
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = Mock()
         
         # Register hook
@@ -141,13 +171,18 @@ class TestSupervisorAgentRegistration:
     
     def test_register_hook_invalid_event(self):
         """Test register_hook with invalid event."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = Mock()
         
         # Register invalid hook - should not crash
@@ -161,9 +196,13 @@ class TestSupervisorAgentProperties:
     
     def test_agents_property(self):
         """Test agents property getter."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
@@ -174,14 +213,19 @@ class TestSupervisorAgentProperties:
     
     def test_sub_agents_property_getter(self):
         """Test sub_agents property getter (backward compatibility)."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Mock registry method
+        # Mock: Agent service isolation for testing without LLM agent execution
         supervisor.registry.get_all_agents = Mock(return_value=["agent1", "agent2"])
         
         # Test property
@@ -190,15 +234,21 @@ class TestSupervisorAgentProperties:
     
     def test_sub_agents_property_setter(self):
         """Test sub_agents property setter (backward compatibility)."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = Mock(spec=AsyncSession)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec=ToolDispatcher)
         
         supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
         
         # Create mock agents
+        # Mock: Agent service isolation for testing without LLM agent execution
         agent1 = Mock(spec=BaseSubAgent)
+        # Mock: Agent service isolation for testing without LLM agent execution
         agent2 = Mock(spec=BaseSubAgent)
         agents_list = [agent1, agent2]
         

@@ -176,6 +176,7 @@ class GracefulDegradationTester:
     async def _test_degradation_level(self, load_type: str, 
                                     user_count: int) -> Dict[str, Any]:
         """Test degradation at specific load level"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.config.FEATURE_FLAGS') as mock_flags:
             mock_flags.GRACEFUL_DEGRADATION = True
             

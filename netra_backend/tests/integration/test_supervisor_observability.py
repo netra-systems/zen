@@ -68,6 +68,7 @@ class TestSupervisorObservabilityIntegration:
     @pytest.fixture
     def mock_websocket_manager(self):
         """Create mock WebSocket manager."""
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
 
     @pytest.fixture
@@ -94,6 +95,7 @@ class TestSupervisorObservabilityIntegration:
         """Create test agent state."""
         return DeepAgentState(user_request="Test request")
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_end_to_end_flow_logging(self, mock_logger, mock_registry, mock_websocket_manager):
@@ -113,6 +115,7 @@ class TestSupervisorObservabilityIntegration:
         # Verify all flow stages were logged
         assert mock_logger.info.call_count >= 5  # start + 2*(agent_start+completion) + completion
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_inter_agent_communication_logging(self, mock_logger, mock_registry):
@@ -130,6 +133,7 @@ class TestSupervisorObservabilityIntegration:
             call_data = call[0][0]
             assert "supervisor_inter_agent_comm" in call_data
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_pipeline_execution_logging_with_metrics(self, mock_logger):
@@ -149,6 +153,7 @@ class TestSupervisorObservabilityIntegration:
         # Verify all pipeline steps were logged with metrics
         assert mock_logger.info.call_count == 3
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_todo_lifecycle_during_execution(self, mock_logger):
@@ -175,6 +180,7 @@ class TestSupervisorObservabilityIntegration:
         # Verify TODO lifecycle was properly logged
         assert mock_logger.info.call_count >= 7  # 3 creates + 4 state changes
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_observability_with_agent_failures(self, mock_logger, mock_registry):
@@ -208,6 +214,7 @@ class TestSupervisorObservabilityIntegration:
         assert completion_log["success"] is False
         assert completion_log["failed_steps"] == 1
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_correlation_tracking_across_agents(self, mock_logger):
@@ -229,6 +236,7 @@ class TestSupervisorObservabilityIntegration:
             call_data = call[0][0]
             assert correlation_id in call_data
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.agents.supervisor.flow_logger.logger')
     @pytest.mark.asyncio
     async def test_performance_metrics_collection(self, mock_logger):

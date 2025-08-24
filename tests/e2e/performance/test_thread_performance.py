@@ -30,12 +30,14 @@ except ImportError:
     # Fallback for missing thread service
     class ThreadService:
         async def get_or_create_thread(self, user_id: str, db: AsyncSession):
+            # Mock: Generic component isolation for controlled unit testing
             mock_thread = Mock()
             mock_thread.id = f"thread-{user_id}"
             mock_thread.user_id = user_id
             return mock_thread
         
         async def create_message(self, thread_id: str, role: str, content: str, db: AsyncSession):
+            # Mock: Generic component isolation for controlled unit testing
             mock_message = Mock()
             mock_message.id = f"msg-{thread_id}-{int(time.time())}"
             mock_message.thread_id = thread_id
@@ -518,9 +520,13 @@ def thread_service():
 @pytest.fixture
 async def mock_db_session():
     """Mock database session fixture."""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
+    # Mock: Session isolation for controlled testing without external state
     session.begin = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
     return session
 

@@ -159,7 +159,9 @@ class TestCircularImportRegression:
         from netra_backend.app.services.agent_service_core import AgentService
         
         # Create mock supervisor
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(return_value="Test response")
         
         # Create agent service
@@ -172,6 +174,7 @@ class TestCircularImportRegression:
         }
         
         # Process message
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.ws_manager.manager'):
             await service.handle_websocket_message(
                 user_id="test_user",

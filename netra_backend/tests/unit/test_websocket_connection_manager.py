@@ -25,15 +25,19 @@ class TestWebSocketConnectionManager:
     @pytest.fixture
     def manager(self):
         """Create connection manager with mocked dependencies."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.websocket.connection.ConnectionExecutionOrchestrator'):
             manager = ConnectionManager()
+            # Mock: Generic component isolation for controlled unit testing
             manager.orchestrator = Mock()
             return manager
     
     @pytest.fixture
     def mock_websocket(self):
         """Create mock WebSocket connection."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.client_state = Mock()
         mock_ws.client_state.name = "CONNECTED"
         return mock_ws
@@ -90,6 +94,7 @@ class TestWebSocketConnectionManager:
     
     def test_is_connection_alive(self, manager, connection_info):
         """Test checking if connection is alive."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.websocket.connection_info.ConnectionValidator') as mock_validator:
             mock_validator.is_websocket_connected.return_value = True
             
@@ -117,11 +122,14 @@ class TestWebSocketConnectionManager:
     @pytest.mark.asyncio
     async def test_get_stats_with_orchestrator(self, manager):
         """Test getting comprehensive connection statistics."""
+        # Mock: Generic component isolation for controlled unit testing
         manager.active_connections = {"user1": [Mock(), Mock()], "user2": [Mock()]}
         manager._stats = {"total_connections": 10, "connection_failures": 2}
         
+        # Mock: Component isolation for controlled unit testing
         orchestrator_result = Mock(success=True)
         orchestrator_result.result = {"connection_stats": {"modern_metric": 42}}
+        # Mock: Async component isolation for testing without real async operations
         manager.orchestrator.get_connection_stats = AsyncMock(return_value=orchestrator_result)
         
         stats = await manager.get_stats()
@@ -134,7 +142,9 @@ class TestWebSocketConnectionManager:
     @pytest.mark.asyncio
     async def test_get_stats_orchestrator_failure(self, manager):
         """Test getting stats when orchestrator fails."""
+        # Mock: Component isolation for controlled unit testing
         orchestrator_result = Mock(success=False)
+        # Mock: Async component isolation for testing without real async operations
         manager.orchestrator.get_connection_stats = AsyncMock(return_value=orchestrator_result)
         
         stats = await manager.get_stats()
@@ -144,6 +154,7 @@ class TestWebSocketConnectionManager:
     
     def test_get_health_status(self, manager):
         """Test getting comprehensive health status."""
+        # Mock: Generic component isolation for controlled unit testing
         manager.active_connections = {"user1": [Mock()], "user2": [Mock(), Mock()]}
         orchestrator_health = {"status": "healthy"}
         manager.orchestrator.get_health_status.return_value = orchestrator_health
@@ -174,16 +185,21 @@ class TestWebSocketConnectionManager:
         """Test statistics accuracy with multiple users and connections."""
         # Setup complex connection scenario
         user_connections = {
+            # Mock: Generic component isolation for controlled unit testing
             "user1": [Mock(), Mock(), Mock()],  # 3 connections
+            # Mock: Generic component isolation for controlled unit testing
             "user2": [Mock()],                  # 1 connection
+            # Mock: Generic component isolation for controlled unit testing
             "user3": [Mock(), Mock()]           # 2 connections
         }
         
         manager.active_connections = user_connections
         manager._stats = {"total_connections": 15, "connection_failures": 3}
         
+        # Mock: Component isolation for controlled unit testing
         orchestrator_result = Mock(success=True)
         orchestrator_result.result = {"connection_stats": {}}
+        # Mock: Async component isolation for testing without real async operations
         manager.orchestrator.get_connection_stats = AsyncMock(return_value=orchestrator_result)
         
         # Test synchronous stats calculation
@@ -240,6 +256,7 @@ class TestWebSocketConnectionManager:
     # Helper methods (each ≤8 lines)
     def _create_mock_connection_info(self, user_id="test-user", conn_id="test-conn"):
         """Helper to create mock connection info."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws = Mock(spec=WebSocket)
         mock_ws.client_state.name = "CONNECTED"
         return ConnectionInfo(
@@ -264,8 +281,11 @@ class TestWebSocketConnectionManager:
     def _create_test_connection_scenario(self, manager):
         """Helper to create realistic connection test scenario."""
         scenarios = {
+            # Mock: Generic component isolation for controlled unit testing
             "active_user": [Mock(), Mock()],
+            # Mock: Generic component isolation for controlled unit testing
             "single_user": [Mock()],
+            # Mock: Generic component isolation for controlled unit testing
             "heavy_user": [Mock(), Mock(), Mock(), Mock()]
         }
         manager.active_connections = scenarios

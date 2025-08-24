@@ -13,15 +13,20 @@ client = TestClient(app)
 
 @pytest.fixture
 def mock_supervisor():
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock = MagicMock(spec=SupervisorAgent)
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock.get_agent_state = AsyncMock(return_value={"status": "completed"})
+    # Mock: Generic component isolation for controlled unit testing
     mock.run = AsyncMock()
     return mock
 
 
 @pytest.fixture
 def mock_agent_service():
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock = MagicMock(spec=AgentService)
+    # Mock: Async component isolation for testing without real async operations
     mock.process_message = AsyncMock(return_value={"response": "mocked response"})
     return mock
 

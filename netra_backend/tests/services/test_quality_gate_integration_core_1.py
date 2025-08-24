@@ -18,9 +18,13 @@ class TestSyntaxFix:
     """Test class for orphaned methods"""
 
     def service(self):
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = AsyncMock(spec=RedisManager)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.get_list = AsyncMock(return_value=[])
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.add_to_list = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.store_metrics = AsyncMock()
         return QualityGateService(redis_manager=mock_redis)
 

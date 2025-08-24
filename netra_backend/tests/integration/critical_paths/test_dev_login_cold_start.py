@@ -43,19 +43,27 @@ class TestDevLoginColdStart:
     @pytest.fixture
     def mock_db_session(self):
         """Create mock database session."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
         # Mock the database query for finding users
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.execute = AsyncMock(return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=None)))
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.commit = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.add = MagicMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.rollback = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.close = AsyncMock()
         return mock_session
     
     @pytest.fixture
     def mock_security_service(self):
         """Create mock security service."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_service.log_event = AsyncMock()
         return mock_service
     

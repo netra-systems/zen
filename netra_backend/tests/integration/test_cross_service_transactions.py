@@ -62,17 +62,27 @@ class CrossServiceTransactionManager:
     
     def _mock_session_with_transaction_support(self) -> AsyncMock:
         """Create mock session with full transaction support"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.add = MagicMock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.flush = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.close = AsyncMock()
         
         # Create proper async context manager for begin()
+        # Mock: Generic component isolation for controlled unit testing
         async_context_manager = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         async_context_manager.__aenter__ = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         async_context_manager.__aexit__ = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.begin = MagicMock(return_value=async_context_manager)
         return session
     

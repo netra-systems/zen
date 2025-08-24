@@ -202,6 +202,7 @@ class TestStagingDeploymentValidation:
             mock_db_manager.get_application_url_async.return_value = "postgresql+asyncpg://test:test@localhost/test"
             
             with patch.object(postgres_core, 'create_async_engine') as mock_create_engine:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_engine = AsyncMock()
                 mock_create_engine.return_value = mock_engine
                 

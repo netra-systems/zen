@@ -31,8 +31,10 @@ class TestRedisCacheBootstrap:
         """Test Redis connection pool initializes correctly."""
         from netra_backend.app.services.redis_manager import RedisManager
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         redis_manager = Mock(spec=RedisManager)
 
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_manager.initialize = AsyncMock(return_value={
 
             "connected": True,
@@ -91,10 +93,13 @@ class TestRedisCacheBootstrap:
 
         """Test session storage initializes in Redis."""
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         redis_manager = Mock(spec=RedisManager)
 
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_manager.set = AsyncMock(return_value=True)
 
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_manager.get = AsyncMock(return_value=json.dumps({
 
             "session_id": "sess_123",
@@ -131,10 +136,13 @@ class TestRateLimitingProtection:
         """Test first-time users get generous rate limits."""
         from netra_backend.app.services.rate_limiter import RateLimiter
         
+        # Mock: Component isolation for controlled unit testing
         rate_limiter = Mock(spec=RateLimiter)
 
+        # Mock: Component isolation for controlled unit testing
         rate_limiter.get_user_tier = Mock(return_value="free")
 
+        # Mock: Component isolation for controlled unit testing
         rate_limiter.get_limit = Mock(return_value={
 
             "requests_per_minute": 20,
@@ -189,8 +197,10 @@ class TestRateLimitingProtection:
 
         """Test rate limit counters reset after window."""
         
+        # Mock: Component isolation for controlled unit testing
         rate_limiter = Mock(spec=RateLimiter)
 
+        # Mock: Async component isolation for testing without real async operations
         rate_limiter.reset_window = AsyncMock(return_value=True)
         
         # Simulate window reset
@@ -213,8 +223,10 @@ class TestErrorPropagation:
         """Test backend errors propagate to WebSocket."""
         from netra_backend.app.websocket_core.manager import WebSocketManager
         
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         ws_manager = Mock(spec=WebSocketManager)
 
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.send_error = AsyncMock()
         
         error = {

@@ -29,6 +29,7 @@ class TestWebSocketConnectionResilience:
         """Test connection survives rapid message sending."""
         user_id = "rapid_test_user"
         connection_id = "conn_rapid"
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         
         # Add connection
@@ -57,6 +58,7 @@ class TestWebSocketConnectionResilience:
     async def test_connection_handles_malformed_messages(self):
         """Test connection handles malformed messages gracefully."""
         user_id = "malform_test_user"
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         session_info = {"user_id": user_id}
@@ -95,6 +97,7 @@ class TestWebSocketConnectionResilience:
     async def test_connection_recovery_after_errors(self):
         """Test connection can recover after errors."""
         user_id = "recovery_test_user"
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         
         session_info = {"user_id": user_id}
@@ -128,6 +131,7 @@ class TestWebSocketNetworkInstability:
     async def test_connection_timeout_handling(self):
         """Test connection timeout handling."""
         user_id = "timeout_user"
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         
         session_info = {"user_id": user_id, "last_activity": time.time() - 3600}  # 1 hour ago
@@ -154,6 +158,7 @@ class TestWebSocketNetworkInstability:
     async def test_graceful_disconnection_handling(self):
         """Test graceful disconnection handling."""
         user_id = "disconnect_user"
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         
         session_info = {"user_id": user_id}
@@ -174,6 +179,7 @@ class TestWebSocketNetworkInstability:
     async def test_abnormal_disconnection_cleanup(self):
         """Test cleanup after abnormal disconnection."""
         user_id = "abnormal_disconnect_user"
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         
         session_info = {"user_id": user_id}
@@ -203,6 +209,7 @@ class TestWebSocketErrorRecovery:
     async def test_json_parse_error_recovery(self):
         """Test recovery from JSON parse errors."""
         user_id = "json_error_user"
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         session_info = {"user_id": user_id}
@@ -232,6 +239,7 @@ class TestWebSocketErrorRecovery:
     async def test_validation_error_recovery(self):
         """Test recovery from message validation errors."""
         user_id = "validation_error_user"
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         session_info = {"user_id": user_id}
@@ -268,6 +276,7 @@ class TestWebSocketErrorRecovery:
     async def test_rate_limiting_recovery(self):
         """Test recovery from rate limiting."""
         user_id = "rate_limit_user"
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         session_info = {"user_id": user_id}
@@ -295,8 +304,10 @@ class TestWebSocketErrorRecovery:
     async def test_database_error_recovery(self):
         """Test recovery from database errors."""
         user_id = "db_error_user"
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.websocket_enhanced.get_async_db') as mock_db:
             # Mock database failure
             mock_db.side_effect = Exception("Database connection failed")
@@ -334,6 +345,7 @@ class TestWebSocketConcurrencyResilience:
             tasks = []
             for i in range(10):
                 user_id = f"{base_user_id}_{i}"
+                # Mock: WebSocket infrastructure isolation for unit tests without real connections
                 mock_websocket = Mock()
                 session_info = {"user_id": user_id}
                 
@@ -358,6 +370,7 @@ class TestWebSocketConcurrencyResilience:
     async def test_concurrent_message_processing(self):
         """Test concurrent message processing."""
         user_id = "concurrent_msg_user"
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         session_info = {"user_id": user_id}
@@ -395,7 +408,9 @@ class TestWebSocketConcurrencyResilience:
         try:
             # Create connections up to the limit (5 by default)
             for i in range(7):  # Try to create more than limit
+                # Mock: WebSocket infrastructure isolation for unit tests without real connections
                 mock_websocket = Mock()
+                # Mock: WebSocket infrastructure isolation for unit tests without real connections
                 mock_websocket.close = AsyncMock()  # Mock close method
                 conn_id = await connection_manager.add_connection(user_id, mock_websocket, session_info)
                 connections.append((conn_id, mock_websocket))
@@ -461,6 +476,7 @@ class TestWebSocketCORSResilience:
         cors_handler = WebSocketCORSHandler(["http://localhost:3000"])
         
         # Mock WebSocket with valid origin
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         mock_websocket.headers = {"origin": "http://localhost:3000"}
         

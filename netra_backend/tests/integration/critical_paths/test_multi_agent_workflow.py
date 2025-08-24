@@ -108,8 +108,10 @@ class AgentCoordinator:
         """Initialize an agent of the specified type."""
         if agent_type not in self.agents:
             # Mock agent creation for testing
+            # Mock: Agent service isolation for testing without LLM agent execution
             mock_agent = AsyncMock(spec=BaseSubAgent)
             mock_agent.agent_type = agent_type
+            # Mock: Agent service isolation for testing without LLM agent execution
             mock_agent.execute = AsyncMock(return_value={"success": True, "result": f"Executed {agent_type}"})
             self.agents[agent_type] = mock_agent
         return self.agents[agent_type]
@@ -446,7 +448,9 @@ async def test_workflow_error_handling(workflow_manager):
     manager = workflow_manager
     
     # Mock agent to fail
+    # Mock: Agent service isolation for testing without LLM agent execution
     failing_agent = AsyncMock(spec=BaseSubAgent)
+    # Mock: Agent service isolation for testing without LLM agent execution
     failing_agent.execute = AsyncMock(side_effect=Exception("Agent execution failed"))
     manager.workflow_engine.coordinator.agents["failing_agent"] = failing_agent
     

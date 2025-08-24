@@ -23,11 +23,13 @@ from netra_backend.tests.helpers.thread_test_helpers import (
 @pytest.fixture
 def mock_db():
     """Mock database session"""
+    # Mock: Generic component isolation for controlled unit testing
     return AsyncMock(commit=AsyncMock())
 
 @pytest.fixture
 def mock_user():
     """Mock authenticated user"""
+    # Mock: Generic component isolation for controlled unit testing
     user = Mock()
     user.id = "test_user_123"
     user.email = "test@example.com"
@@ -35,6 +37,7 @@ def mock_user():
 
 class TestUpdateThread:
     """Test cases for PUT /{thread_id} endpoint"""
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.utils.thread_helpers.time.time')
     @pytest.mark.asyncio
     async def test_update_thread_success(self, mock_time, mock_db, mock_user):
@@ -54,6 +57,7 @@ class TestUpdateThread:
         assert mock_thread.metadata_["new_field"] == "value"
         assert mock_thread.metadata_["updated_at"] == 1234567900
         mock_db.commit.assert_called_once()
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.utils.thread_helpers.time.time')
     @pytest.mark.asyncio
     async def test_update_thread_empty_metadata(self, mock_time, mock_db, mock_user):
@@ -61,7 +65,9 @@ class TestUpdateThread:
         create_thread_update_scenario(mock_time)
         mock_thread = setup_thread_with_special_metadata()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.utils.thread_helpers.MessageRepository') as MockMessageRepo:
             
             thread_repo = MockThreadRepo.return_value
@@ -69,8 +75,10 @@ class TestUpdateThread:
                 if hasattr(mock_thread.metadata_, 'call_count') and mock_thread.metadata_.call_count > 0:
                     mock_thread.metadata_ = None
                 return mock_thread
+            # Mock: Async component isolation for testing without real async operations
             thread_repo.get_by_id = AsyncMock(side_effect=get_thread)
             message_repo = MockMessageRepo.return_value
+            # Mock: Async component isolation for testing without real async operations
             message_repo.count_by_thread = AsyncMock(return_value=0)
             thread_update = ThreadUpdate(title="New Title")
             
@@ -82,8 +90,10 @@ class TestUpdateThread:
     @pytest.mark.asyncio
     async def test_update_thread_not_found(self, mock_db, mock_user):
         """Test updating non-existent thread"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
+            # Mock: Async component isolation for testing without real async operations
             thread_repo.get_by_id = AsyncMock(return_value=None)
             thread_update = ThreadUpdate(title="Update")
             
@@ -96,8 +106,10 @@ class TestUpdateThread:
         """Test updating thread owned by another user"""
         mock_thread = create_access_denied_thread()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
+            # Mock: Async component isolation for testing without real async operations
             thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
             thread_update = ThreadUpdate(title="Update")
             
@@ -108,10 +120,13 @@ class TestUpdateThread:
     @pytest.mark.asyncio
     async def test_update_thread_exception(self, mock_db, mock_user):
         """Test general exception in update_thread"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             thread_repo = MockThreadRepo.return_value
+            # Mock: Database isolation for unit testing without external database connections
             thread_repo.get_by_id = AsyncMock(side_effect=Exception("Database error"))
             thread_update = ThreadUpdate(title="Update")
             

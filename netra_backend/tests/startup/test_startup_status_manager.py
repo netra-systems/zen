@@ -246,7 +246,9 @@ class TestFileLocking:
     @pytest.mark.asyncio
     async def test_file_lock_context_manager(self, status_manager: StartupStatusManager) -> None:
         """Test file lock context manager."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('pathlib.Path.touch') as mock_touch:
+            # Mock: Component isolation for testing without external dependencies
             with patch('pathlib.Path.unlink') as mock_unlink:
                 async with status_manager._file_lock():
                     pass
@@ -255,7 +257,9 @@ class TestFileLocking:
     @pytest.mark.asyncio
     async def test_file_lock_timeout(self, status_manager: StartupStatusManager) -> None:
         """Test file lock timeout handling."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('pathlib.Path.touch', side_effect=FileExistsError):
+            # Mock: Async component isolation for testing without real async operations
             with patch('asyncio.sleep', new_callable=AsyncMock):
                 with pytest.raises(NetraException, match="Could not acquire file lock"):
                     async with status_manager._file_lock():
@@ -274,7 +278,9 @@ class TestAtomicWrite:
             yield
         
         with patch.object(status_manager, '_file_lock', side_effect=mock_file_lock):
+            # Mock: Component isolation for testing without external dependencies
             with patch('pathlib.Path.write_text') as mock_write:
+                # Mock: Component isolation for testing without external dependencies
                 with patch('pathlib.Path.replace') as mock_replace:
                     await status_manager._atomic_write(test_data)
                     mock_write.assert_called_once()
@@ -290,7 +296,9 @@ class TestAtomicWrite:
             yield
             
         with patch.object(status_manager, '_file_lock', side_effect=mock_file_lock):
+            # Mock: Component isolation for testing without external dependencies
             with patch('pathlib.Path.write_text', side_effect=Exception("write error")):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('pathlib.Path.unlink') as mock_cleanup:
                     with pytest.raises(FileError):
                         await status_manager._atomic_write(test_data)

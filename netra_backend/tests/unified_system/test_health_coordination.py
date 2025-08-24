@@ -242,7 +242,9 @@ async def test_health_check_with_dependencies(health_coordinator):
     - Dependencies are properly validated
     """
     # Test backend database dependency health
+    # Mock: Component isolation for testing without external dependencies
     with patch('app.db.postgres.async_engine') as mock_engine:
+        # Mock: Generic component isolation for controlled unit testing
         mock_connection = AsyncMock()
         mock_engine.connect.return_value.__aenter__.return_value = mock_connection
         mock_connection.execute.return_value.scalar_one_or_none.return_value = 1
@@ -352,6 +354,7 @@ async def test_health_check_error_scenarios():
         "Error details should be included for failed health checks"
     
     # Test timeout scenario
+    # Mock: Component isolation for testing without external dependencies
     with patch('httpx.AsyncClient.get') as mock_get:
         # Simulate timeout
         mock_get.side_effect = asyncio.TimeoutError("Request timeout")

@@ -258,6 +258,7 @@ class TestLLMComplianceValidation:
     async def test_audit_logging_compliance(self):
         """Test audit logging for compliance."""
         # Ensure all LLM calls are logged for audit
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.logging_config.central_logger') as mock_logger:
             try:
                 # Simulate LLM call

@@ -21,9 +21,13 @@ class TestMessageQueueIntegration:
     @pytest.fixture
     def mock_message_queue(self):
         """Create mock message queue for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         queue = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         queue.enqueue = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         queue.dequeue = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         queue.get_queue_stats = MagicMock()
         return queue
 

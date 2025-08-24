@@ -35,6 +35,7 @@ class TestResponseHandling:
         prompt = "Analyze GPU workload optimization opportunities"
         
         # Mock the agent's LLM call
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_test_agent.llm_manager.generate_response = AsyncMock(return_value={
             "content": "GPU optimization analysis: Current usage shows 24GB peak allocation.",
             "usage": {"total_tokens": 150},
@@ -113,6 +114,7 @@ class TestResponseHandling:
     async def test_response_error_handling(self, llm_test_agent):
         """BVJ: Validates response error handling for malformed responses."""
         # Mock a malformed response
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_test_agent.llm_manager.generate_response = AsyncMock(side_effect=Exception("Malformed response"))
         
         with pytest.raises(Exception):

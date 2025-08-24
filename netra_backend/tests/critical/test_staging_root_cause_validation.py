@@ -396,6 +396,7 @@ class TestConfigurationHierarchyIssues:
             "ENVIRONMENT": "staging"
         }):
             # Mock Secret Manager returning different value
+            # Mock: Component isolation for testing without external dependencies
             with patch('os.environ.get') as mock_get:
                 def mock_env_get(key, default=None):
                     if key == "DATABASE_URL":

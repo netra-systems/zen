@@ -110,12 +110,16 @@ async def mock_db_session():
 
     """Mock database session."""
 
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
 
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
 
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
 
+    # Mock: Session isolation for controlled testing without external state
     session.close = AsyncMock()
 
     return session
@@ -123,6 +127,7 @@ async def mock_db_session():
 @pytest.fixture
 def mock_cors_handler():
     """Mock CORS handler."""
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     handler = MagicMock(spec=WebSocketCORSHandler)
     handler.is_origin_allowed.return_value = True
     handler.get_security_stats.return_value = {"violations": 0}
@@ -289,16 +294,19 @@ class TestUnifiedWebSocketManager:
     # manager = UnifiedWebSocketManager(mock_db_session)
         
 
+    # Mock: Generic component isolation for controlled unit testing
     # mock_user = MagicMock()
 
     # mock_user.is_active = True
         
     # # Mock justification: Database security service not available in test environment - testing user validation flow
 
+    # Mock: Security component isolation for controlled auth testing
     # with patch('app.routes.websocket_secure.SecurityService') as mock_service:
 
     # mock_service_instance = mock_service.return_value
 
+    # Mock: Async component isolation for testing without real async operations
     # mock_service_instance.get_user_by_id = AsyncMock(return_value=mock_user)
             
 
@@ -318,14 +326,17 @@ class TestUnifiedWebSocketManager:
         
     # # Mock justification: Database security service not available in test environment - testing user validation flow
 
+    # Mock: Security component isolation for controlled auth testing
     # with patch('app.routes.websocket_secure.SecurityService') as mock_service:
 
     # mock_service_instance = mock_service.return_value
 
+    # Mock: Async component isolation for testing without real async operations
     # mock_service_instance.get_user_by_id = AsyncMock(return_value=None)
             
     # # Mock justification: Environment variable not available in test environment - testing dev mode behavior
 
+    # Mock: Component isolation for testing without external dependencies
     # with patch('os.getenv', return_value="development"):
 
     # result = await manager.validate_user_exists("test_user_123")
@@ -342,14 +353,17 @@ class TestUnifiedWebSocketManager:
         
     # # Mock justification: Database security service not available in test environment - testing user validation flow
 
+    # Mock: Security component isolation for controlled auth testing
     # with patch('app.routes.websocket_secure.SecurityService') as mock_service:
 
     # mock_service_instance = mock_service.return_value
 
+    # Mock: Async component isolation for testing without real async operations
     # mock_service_instance.get_user_by_id = AsyncMock(return_value=None)
             
     # # Mock justification: Environment variable not available in test environment - testing production mode behavior
 
+    # Mock: Component isolation for testing without external dependencies
     # with patch('os.getenv', return_value="production"):
 
     # result = await manager.validate_user_exists("test_user_123")
@@ -713,6 +727,7 @@ class TestSecureWebSocketEndpoint:
 
     @mock_justified("WebSocket CORS validation service not available in test environment - testing CORS flow")
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.websocket_secure.check_websocket_cors')
 
     @mock_justified("External auth service API not available in test environment - testing CORS + auth integration")
@@ -748,6 +763,7 @@ class TestSecureWebSocketEndpoint:
 
     @mock_justified("WebSocket CORS validation service not available in test environment - testing CORS failure flow")
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.routes.websocket_secure.check_websocket_cors')
 
     async def test_cors_validation_failure(self, mock_cors, mock_websocket, mock_db_session):
@@ -864,6 +880,7 @@ class TestErrorHandling:
     # # Simulate database error
     # # Mock justification: Database security service not available in test environment - testing user validation flow
 
+    # Mock: Security component isolation for controlled auth testing
     # with patch('app.routes.websocket_secure.SecurityService') as mock_service:
 
     # mock_service_instance = mock_service.return_value

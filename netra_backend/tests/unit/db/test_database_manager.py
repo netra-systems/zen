@@ -195,6 +195,7 @@ class TestDatabaseManagerEnvironmentDetection:
             assert result is False
     
     @mock_justified("L1 Unit Test: Mocking environment detection to test environment-specific logic. Real environment testing in L3 integration tests.", "L1")
+    # Mock: Component isolation for testing without external dependencies
     @patch("netra_backend.app.db.database_manager.get_current_environment")
     def test_is_local_development_true(self, mock_get_env):
         """Test local development detection - positive case."""
@@ -203,6 +204,7 @@ class TestDatabaseManagerEnvironmentDetection:
         assert result is True
     
     @mock_justified("L1 Unit Test: Mocking environment detection to test environment-specific logic. Real environment testing in L3 integration tests.", "L1")
+    # Mock: Component isolation for testing without external dependencies
     @patch("netra_backend.app.db.database_manager.get_current_environment") 
     def test_is_local_development_false(self, mock_get_env):
         """Test local development detection - negative case."""
@@ -218,6 +220,7 @@ class TestDatabaseManagerEnvironmentDetection:
     ])
     def test_is_remote_environment(self, environment, expected):
         """Test remote environment detection."""
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
             mock_env.return_value = environment
             result = DatabaseManager.is_remote_environment()
@@ -396,10 +399,13 @@ class TestDatabaseManagerErrorHandling:
     def test_default_environment_handling(self):
         """Test handling of unknown environment values."""
         with patch.dict(os.environ, {}, clear=True):
+            # Mock: Database access isolation for fast, reliable unit testing
             with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
                 mock_env.return_value = "unknown_environment"
                 # Mock sys.modules to not contain pytest so we don't get test URL
+                # Mock: Component isolation for testing without external dependencies
                 with patch("sys.modules", {}):
+                    # Mock: Component isolation for testing without external dependencies
                     with patch("sys.argv", ["python"]):
                         result = DatabaseManager._get_default_database_url()
                         # Should default to development settings
@@ -533,6 +539,7 @@ class TestDatabaseManagerEdgeCases:
     ])
     def test_default_database_url_by_environment(self, environment, expected_db):
         """Test default database URL generation for different environments."""
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch("netra_backend.app.db.database_manager.get_current_environment") as mock_env:
             mock_env.return_value = environment
             result = DatabaseManager._get_default_database_url()

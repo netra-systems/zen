@@ -42,6 +42,7 @@ class TestDatabaseRepositoryCritical:
     @pytest.mark.asyncio
     async def test_user_repository_crud(self):
         """Test user repository CRUD operations"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_user_repo = AsyncMock()
         
         # Create user
@@ -53,28 +54,33 @@ class TestDatabaseRepositoryCritical:
             created_at=datetime.now(timezone.utc)
         )
         
+        # Mock: Async component isolation for testing without real async operations
         mock_user_repo.create = AsyncMock(return_value=new_user)
         created_user = await mock_user_repo.create(email="test@example.com", username="testuser")
         assert created_user.email == "test@example.com"
         
         # Read user
+        # Mock: Async component isolation for testing without real async operations
         mock_user_repo.get_by_id = AsyncMock(return_value=new_user)
         fetched_user = await mock_user_repo.get_by_id(1)
         assert fetched_user.id == 1
         
         # Update user
         new_user.username = "updateduser"
+        # Mock: Async component isolation for testing without real async operations
         mock_user_repo.update = AsyncMock(return_value=new_user)
         updated_user = await mock_user_repo.update(1, username="updateduser")
         assert updated_user.username == "updateduser"
         
         # Delete user
+        # Mock: Async component isolation for testing without real async operations
         mock_user_repo.delete = AsyncMock(return_value=True)
         deleted = await mock_user_repo.delete(1)
         assert deleted == True
     @pytest.mark.asyncio
     async def test_thread_repository_operations(self):
         """Test thread repository operations"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_thread_repo = AsyncMock()
         
         # Create thread
@@ -87,11 +93,13 @@ class TestDatabaseRepositoryCritical:
             updated_at=datetime.now(timezone.utc)
         )
         
+        # Mock: Async component isolation for testing without real async operations
         mock_thread_repo.create = AsyncMock(return_value=new_thread)
         created_thread = await mock_thread_repo.create(user_id=1, title="Test Thread")
         assert created_thread.title == "Test Thread"
         
         # Get user threads
+        # Mock: Async component isolation for testing without real async operations
         mock_thread_repo.get_user_threads = AsyncMock(return_value=[new_thread])
         user_threads = await mock_thread_repo.get_user_threads(user_id=1)
         assert len(user_threads) == 1
@@ -99,12 +107,14 @@ class TestDatabaseRepositoryCritical:
         
         # Update thread
         new_thread.title = "Updated Thread"
+        # Mock: Async component isolation for testing without real async operations
         mock_thread_repo.update = AsyncMock(return_value=new_thread)
         updated_thread = await mock_thread_repo.update(thread_id, title="Updated Thread")
         assert updated_thread.title == "Updated Thread"
     @pytest.mark.asyncio
     async def test_message_repository_operations(self):
         """Test message repository operations"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_message_repo = AsyncMock()
         
         # Create message
@@ -118,6 +128,7 @@ class TestDatabaseRepositoryCritical:
             created_at=datetime.now(timezone.utc)
         )
         
+        # Mock: Async component isolation for testing without real async operations
         mock_message_repo.create = AsyncMock(return_value=new_message)
         created_message = await mock_message_repo.create(
             thread_id=thread_id,
@@ -127,23 +138,29 @@ class TestDatabaseRepositoryCritical:
         assert created_message.content == "Hello, AI!"
         
         # Get thread messages
+        # Mock: Async component isolation for testing without real async operations
         mock_message_repo.get_thread_messages = AsyncMock(return_value=[new_message])
         messages = await mock_message_repo.get_thread_messages(thread_id)
         assert len(messages) == 1
         assert messages[0].thread_id == thread_id
         
         # Get recent messages with pagination
+        # Mock: Async component isolation for testing without real async operations
         mock_message_repo.get_recent_messages = AsyncMock(return_value=[new_message])
         recent_messages = await mock_message_repo.get_recent_messages(thread_id, limit=10, offset=0)
         assert len(recent_messages) == 1
     @pytest.mark.asyncio
     async def test_transaction_management(self):
         """Test database transaction management"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session = AsyncMock()
         
         # Test successful transaction
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.add = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.commit = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.rollback = AsyncMock()
         
         # Simulate successful transaction
@@ -177,6 +194,7 @@ class TestDatabaseRepositoryCritical:
     @pytest.mark.asyncio
     async def test_connection_pool_management(self):
         """Test database connection pool management"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_pool = AsyncMock()
         
         # Configure pool settings
@@ -187,12 +205,15 @@ class TestDatabaseRepositoryCritical:
             "command_timeout": 60
         }
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_pool.configure = AsyncMock()
         await mock_pool.configure(**pool_config)
         mock_pool.configure.assert_called_once_with(**pool_config)
         
         # Test connection acquisition
+        # Mock: Generic component isolation for controlled unit testing
         mock_connection = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_pool.acquire = AsyncMock(return_value=mock_connection)
         
         # Simulate acquiring a connection
@@ -201,6 +222,7 @@ class TestDatabaseRepositoryCritical:
         mock_pool.acquire.assert_called_once()
         
         # Test pool statistics
+        # Mock: Async component isolation for testing without real async operations
         mock_pool.get_stats = AsyncMock(return_value={
             "size": 10,
             "free": 7,
@@ -215,9 +237,11 @@ class TestDatabaseRepositoryCritical:
     @pytest.mark.asyncio
     async def test_query_optimization(self):
         """Test query optimization strategies"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_query_optimizer = AsyncMock()
         
         # Test query with index
+        # Mock: Async component isolation for testing without real async operations
         mock_query_optimizer.execute_with_index = AsyncMock(return_value={
             "results": [],
             "execution_time": 0.05,
@@ -232,6 +256,7 @@ class TestDatabaseRepositoryCritical:
         assert result["execution_time"] < 0.1
         
         # Test batch insert
+        # Mock: Async component isolation for testing without real async operations
         mock_query_optimizer.batch_insert = AsyncMock(return_value={
             "inserted": 100,
             "execution_time": 0.5
@@ -245,9 +270,11 @@ class TestDatabaseRepositoryCritical:
     @pytest.mark.asyncio
     async def test_migration_execution(self):
         """Test database migration execution"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_migrator = AsyncMock()
         
         # Test migration up
+        # Mock: Async component isolation for testing without real async operations
         mock_migrator.upgrade = AsyncMock(return_value={
             "version": "v2.0.0",
             "migrations_applied": 3,
@@ -259,6 +286,7 @@ class TestDatabaseRepositoryCritical:
         assert upgrade_result["migrations_applied"] == 3
         
         # Test migration down
+        # Mock: Async component isolation for testing without real async operations
         mock_migrator.downgrade = AsyncMock(return_value={
             "version": "v1.0.0",
             "migrations_reverted": 2,
@@ -270,9 +298,11 @@ class TestDatabaseRepositoryCritical:
     @pytest.mark.asyncio
     async def test_data_integrity_constraints(self):
         """Test data integrity constraints"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         
         # Test unique constraint
+        # Mock: Async component isolation for testing without real async operations
         mock_db.insert = AsyncMock(side_effect=Exception("UNIQUE constraint failed"))
         
         with pytest.raises(Exception) as exc_info:
@@ -280,6 +310,7 @@ class TestDatabaseRepositoryCritical:
         assert "UNIQUE constraint" in str(exc_info.value)
         
         # Test foreign key constraint
+        # Mock: Async component isolation for testing without real async operations
         mock_db.insert = AsyncMock(side_effect=Exception("FOREIGN KEY constraint failed"))
         
         with pytest.raises(Exception) as exc_info:
@@ -288,20 +319,26 @@ class TestDatabaseRepositoryCritical:
     @pytest.mark.asyncio
     async def test_caching_layer(self):
         """Test database caching layer"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_cache = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         
         # Test cache hit
         cache_key = "user:1"
         cached_user = {"id": 1, "email": "cached@example.com"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_cache.get = AsyncMock(return_value=cached_user)
         result = await mock_cache.get(cache_key)
         assert result["email"] == "cached@example.com"
         
         # Test cache miss and fetch from DB
+        # Mock: Async component isolation for testing without real async operations
         mock_cache.get = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         mock_db.fetch_one = AsyncMock(return_value={"id": 1, "email": "db@example.com"})
+        # Mock: Generic component isolation for controlled unit testing
         mock_cache.set = AsyncMock()
         
         # Simulate cache miss
@@ -314,11 +351,13 @@ class TestDatabaseRepositoryCritical:
     @pytest.mark.asyncio
     async def test_bulk_operations(self):
         """Test bulk database operations"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_bulk_ops = AsyncMock()
         
         # Test bulk insert
         data = [{"name": f"Item {i}", "value": i} for i in range(1000)]
         
+        # Mock: Async component isolation for testing without real async operations
         mock_bulk_ops.bulk_insert = AsyncMock(return_value={
             "inserted": 1000,
             "failed": 0,
@@ -332,6 +371,7 @@ class TestDatabaseRepositoryCritical:
         # Test bulk update
         updates = [{"id": i, "value": i * 2} for i in range(100)]
         
+        # Mock: Async component isolation for testing without real async operations
         mock_bulk_ops.bulk_update = AsyncMock(return_value={
             "updated": 100,
             "failed": 0

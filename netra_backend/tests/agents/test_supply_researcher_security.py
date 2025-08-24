@@ -83,6 +83,7 @@ class TestSupplyResearcherSecurity:
     async def _test_rate_limiting_behavior(self, agent, state, mock_api):
         """Test rate limiting backoff behavior (≤8 lines)"""
         with patch.object(agent, '_call_deep_research_api', side_effect=mock_api):
+            # Mock: Async component isolation for testing without real async operations
             with patch('asyncio.sleep', new_callable=AsyncMock) as mock_sleep:
                 await _execute_rate_limit_test(agent, state)
                 _verify_backoff_delays(mock_sleep)

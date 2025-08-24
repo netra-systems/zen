@@ -101,10 +101,15 @@ def _create_mock_sessions(count: int) -> List[AsyncMock]:
 
 def _create_single_mock_session() -> AsyncMock:
     """Create single mock session"""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
+    # Mock: Session isolation for controlled testing without external state
     session.add = MagicMock()
+    # Mock: Session isolation for controlled testing without external state
     session.flush = AsyncMock()  # BaseRepository uses flush, not commit
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.refresh = AsyncMock()
     return session
 
@@ -142,8 +147,11 @@ def _assert_performance_results(execution_time: float, results: List, num_concur
 
 def _create_performance_session() -> AsyncMock:
     """Create session for performance testing"""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
+    # Mock: Session isolation for controlled testing without external state
     session.add = MagicMock()
+    # Mock: Session isolation for controlled testing without external state
     session.flush = AsyncMock()
     return session
 

@@ -134,7 +134,9 @@ class TestComplexScenarios:
     async def test_high_volume_event_processing(self):
         """Test processing high volume of events"""
         service = QualityMonitoringService()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         service.redis_manager = AsyncMock()
+        # Mock: ClickHouse external database isolation for unit testing performance
         service.clickhouse_manager = AsyncMock()
         
         metrics = QualityMetrics(
@@ -190,10 +192,12 @@ class TestComplexScenarios:
         service = QualityMonitoringService()
         
         # Mock Redis failure
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         service.redis_manager = AsyncMock()
         service.redis_manager.store_quality_event.side_effect = Exception("Redis connection failed")
         
         # Mock ClickHouse success
+        # Mock: ClickHouse external database isolation for unit testing performance
         service.clickhouse_manager = AsyncMock()
         
         metrics = QualityMetrics(
@@ -220,7 +224,9 @@ class TestServiceShutdownAndCleanup:
     async def test_graceful_shutdown_with_active_monitoring(self):
         """Test graceful shutdown while monitoring is active"""
         service = QualityMonitoringService()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         service.redis_manager = AsyncMock()
+        # Mock: ClickHouse external database isolation for unit testing performance
         service.clickhouse_manager = AsyncMock()
         
         # Start monitoring

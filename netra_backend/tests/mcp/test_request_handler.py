@@ -25,7 +25,9 @@ class TestRequestHandler:
     @pytest.fixture
     def mock_server(self):
         """Create mock server"""
+        # Mock: Generic component isolation for controlled unit testing
         server = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         server.handle_request = AsyncMock()
         return server
         

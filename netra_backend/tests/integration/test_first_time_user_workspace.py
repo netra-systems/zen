@@ -57,6 +57,7 @@ async def test_user_profile_setup_and_update(
         "phone": "+1-555-0123"
     }
     
+    # Mock: Component isolation for testing without external dependencies
     response = await async_client.patch("/api/v1/user/profile", json=profile_update, headers=headers)
     assert response.status_code == status.HTTP_200_OK
     updated_profile = response.json()

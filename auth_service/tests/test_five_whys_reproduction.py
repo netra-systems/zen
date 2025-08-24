@@ -197,6 +197,7 @@ class TestFiveWhysReproduction:
             'OAUTH_REDIRECT_URI': 'https://staging.netra.ai/auth/callback'
         }):
             # Simulate OAuth callback
+            # Mock: OAuth external provider isolation for network-independent testing
             mock_oauth_provider = Mock()
             mock_oauth_provider.validate_client.return_value = False  # Mismatch
             

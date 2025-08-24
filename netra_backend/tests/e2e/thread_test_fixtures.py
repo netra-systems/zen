@@ -261,33 +261,51 @@ class ThreadTestMocks:
     @staticmethod
     def create_mock_thread_service() -> Mock:
         """Create mock thread service."""
+        # Mock: Component isolation for controlled unit testing
         service = Mock(spec=ThreadService)
+        # Mock: Generic component isolation for controlled unit testing
         service.get_or_create_thread = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.create_message = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.create_run = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.update_run_status = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_thread_messages = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_thread = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.switch_thread = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.delete_thread = AsyncMock()
         return service
     
     @staticmethod
     def create_mock_websocket_manager() -> Mock:
         """Create mock WebSocket manager."""
+        # Mock: Generic component isolation for controlled unit testing
         manager_mock = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         manager_mock.send_message = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager_mock.broadcast_to_thread = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager_mock.connect_user_to_thread = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager_mock.disconnect_user_from_thread = AsyncMock()
         return manager_mock
     
     @staticmethod
     def create_mock_state_persistence() -> Mock:
         """Create mock state persistence service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = Mock()
+        # Mock: Async component isolation for testing without real async operations
         service.save_agent_state = AsyncMock(return_value=(True, "snapshot_123"))
+        # Mock: Generic component isolation for controlled unit testing
         service.load_agent_state = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         service.recover_agent_state = AsyncMock(return_value=(True, "recovery_123"))
         return service
 
@@ -377,11 +395,17 @@ def performance_utils():
 @pytest.fixture
 async def mock_db_session():
     """Mock database session fixture."""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
+    # Mock: Session isolation for controlled testing without external state
     session.begin = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.flush = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.refresh = AsyncMock()
     try:
         yield session
@@ -399,6 +423,7 @@ def mock_websocket_manager():
     """Mock WebSocket manager fixture."""
     manager_mock = ThreadTestMocks.create_mock_websocket_manager()
     
+    # Mock: Component isolation for testing without external dependencies
     with patch('app.ws_manager.manager', manager_mock):
         yield manager_mock
 
@@ -407,5 +432,6 @@ def mock_state_persistence():
     """Mock state persistence service fixture."""
     service_mock = ThreadTestMocks.create_mock_state_persistence()
     
+    # Mock: Component isolation for testing without external dependencies
     with patch('app.services.state_persistence_service.state_persistence_service', service_mock):
         yield service_mock

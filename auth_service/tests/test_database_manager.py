@@ -214,7 +214,9 @@ class TestAuthDatabaseManager:
     def test_pool_status_monitoring(self):
         """Test pool status retrieval for monitoring."""
         # Create a mock engine with pool
+        # Mock: Generic component isolation for controlled unit testing
         mock_engine = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_pool = MagicMock()
         mock_pool.size.return_value = 10
         mock_pool.checkedin.return_value = 8

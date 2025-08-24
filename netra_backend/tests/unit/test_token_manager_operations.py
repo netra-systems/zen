@@ -19,6 +19,7 @@ from netra_backend.app.core.exceptions_auth import AuthenticationError
 @pytest.fixture
 def mock_config():
     """Mock configuration with JWT secret."""
+    # Mock: Generic component isolation for controlled unit testing
     config = Mock()
     config.jwt_secret_key = "test_secret_key_12345"
     return config
@@ -26,9 +27,12 @@ def mock_config():
 @pytest.fixture
 def mock_redis_manager():
     """Mock Redis manager with enabled state."""
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis = AsyncMock()
     redis.enabled = True
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.get = AsyncMock(return_value=None)
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.set = AsyncMock()
     return redis
 
@@ -127,6 +131,7 @@ class TestJWTTokenOperations:
         jwt_manager.redis_manager.enabled = False
         
         with patch.object(jwt_manager, 'get_jwt_claims') as mock_claims:
+            # Mock: Component isolation for controlled unit testing
             mock_claims.return_value = Mock(jti="test_jti")
             await jwt_manager.revoke_jwt("test_token")
             jwt_manager.redis_manager.set.assert_not_called()
@@ -144,6 +149,7 @@ class TestJWTTokenOperations:
     @pytest.mark.asyncio
     async def test_is_token_revoked_true(self, jwt_manager, sample_token_claims):
         """Test token revocation check returns True for revoked token."""
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         jwt_manager.redis_manager.get = AsyncMock(return_value="revoked")
         
         with patch.object(jwt_manager, 'get_jwt_claims') as mock_claims:
@@ -154,6 +160,7 @@ class TestJWTTokenOperations:
     @pytest.mark.asyncio
     async def test_is_token_revoked_false(self, jwt_manager, sample_token_claims):
         """Test token revocation check returns False for valid token."""
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         jwt_manager.redis_manager.get = AsyncMock(return_value=None)
         
         with patch.object(jwt_manager, 'get_jwt_claims') as mock_claims:
@@ -182,10 +189,12 @@ class TestJWTTokenOperations:
 class TestConvenienceFunctions:
     """Test cases for module-level convenience functions."""
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.auth.token_manager.token_manager')
     @pytest.mark.asyncio
     async def test_generate_jwt_convenience(self, mock_manager, sample_user_data):
         """Test convenience function for JWT generation."""
+        # Mock: JWT token handling isolation to avoid real crypto dependencies
         mock_manager.generate_jwt = AsyncMock(return_value="test_token")
         
         # Deprecated test - auth logic moved to auth service
@@ -194,6 +203,7 @@ class TestConvenienceFunctions:
         result = await generate_jwt(sample_user_data, "test")
         assert result == "test_token"
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.auth.token_manager.token_manager')
     @pytest.mark.asyncio
     async def test_validate_jwt_convenience(self, mock_manager):
@@ -202,6 +212,7 @@ class TestConvenienceFunctions:
             user_id="test", email="test@test.com", environment="test",
             iat=123, exp=456, jti="test_jti"
         )
+        # Mock: JWT token handling isolation to avoid real crypto dependencies
         mock_manager.validate_jwt = AsyncMock(return_value=expected_claims)
         
         # Deprecated test - auth logic moved to auth service
@@ -210,10 +221,12 @@ class TestConvenienceFunctions:
         result = await validate_jwt("test_token")
         assert result == expected_claims
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.auth.token_manager.token_manager')
     @pytest.mark.asyncio
     async def test_refresh_jwt_convenience(self, mock_manager):
         """Test convenience function for JWT refresh."""
+        # Mock: JWT token handling isolation to avoid real crypto dependencies
         mock_manager.refresh_jwt = AsyncMock(return_value="new_token")
         
         # Deprecated test - auth logic moved to auth service
@@ -222,10 +235,12 @@ class TestConvenienceFunctions:
         result = await refresh_jwt("old_token")
         assert result == "new_token"
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.auth.token_manager.token_manager')  
     @pytest.mark.asyncio
     async def test_revoke_jwt_convenience(self, mock_manager):
         """Test convenience function for JWT revocation."""
+        # Mock: JWT token handling isolation to avoid real crypto dependencies
         mock_manager.revoke_jwt = AsyncMock()
         
         # Deprecated test - auth logic moved to auth service
@@ -234,6 +249,7 @@ class TestConvenienceFunctions:
         await revoke_jwt("test_token")
         mock_manager.revoke_jwt.assert_called_once_with("test_token")
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.auth.token_manager.token_manager')
     @pytest.mark.asyncio
     async def test_get_jwt_claims_convenience(self, mock_manager):
@@ -242,6 +258,7 @@ class TestConvenienceFunctions:
             user_id="test", email="test@test.com", environment="test", 
             iat=123, exp=456, jti="test_jti"
         )
+        # Mock: JWT token handling isolation to avoid real crypto dependencies
         mock_manager.get_jwt_claims = AsyncMock(return_value=expected_claims)
         
         # Deprecated test - auth logic moved to auth service
@@ -250,10 +267,12 @@ class TestConvenienceFunctions:
         result = await get_jwt_claims("test_token")
         assert result == expected_claims
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.auth.token_manager.token_manager')
     @pytest.mark.asyncio
     async def test_is_token_revoked_convenience(self, mock_manager):
         """Test convenience function for token revocation check."""
+        # Mock: Async component isolation for testing without real async operations
         mock_manager.is_token_revoked = AsyncMock(return_value=True)
         
         # Deprecated test - auth logic moved to auth service
@@ -284,6 +303,7 @@ class TestPrivateHelperMethods:
     @pytest.mark.asyncio
     async def test_check_revocation_in_redis_true(self, jwt_manager):
         """Test Redis revocation check returns True for revoked token."""
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         jwt_manager.redis_manager.get = AsyncMock(return_value="revoked")
         
         result = await jwt_manager._check_revocation_in_redis("test_jti")
@@ -292,6 +312,7 @@ class TestPrivateHelperMethods:
     @pytest.mark.asyncio
     async def test_check_revocation_in_redis_false(self, jwt_manager):
         """Test Redis revocation check returns False for valid token."""
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         jwt_manager.redis_manager.get = AsyncMock(return_value=None)
         
         result = await jwt_manager._check_revocation_in_redis("test_jti")

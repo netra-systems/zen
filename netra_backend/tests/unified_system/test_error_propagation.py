@@ -216,9 +216,12 @@ async def test_user():
 @pytest.fixture
 async def websocket_connection():
     """Mock WebSocket connection for testing."""
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket = AsyncMock()
     mock_websocket.client_state = "OPEN"
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket.send = AsyncMock()
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket.receive = AsyncMock()
     yield mock_websocket
 

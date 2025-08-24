@@ -225,6 +225,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         )
         
         # Mock DNS resolution delay
+        # Mock: Component isolation for testing without external dependencies
         with patch('socket.getaddrinfo') as mock_dns:
             original_getaddrinfo = socket.getaddrinfo
             
@@ -684,6 +685,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         
         async with websockets.connect(ws_url, extra_headers=headers) as websocket:
             # Simulate tier upgrade in backend
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.clients.auth_client.auth_client.get_user_tier') as mock_tier:
                 mock_tier.return_value = "enterprise"
                 
@@ -725,6 +727,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         
         async with websockets.connect(ws_url, extra_headers=headers) as websocket:
             # Simulate maintenance mode
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.core.config.MAINTENANCE_MODE', True):
                 await websocket.send(json.dumps({
                     "type": "token_refresh",
@@ -1089,6 +1092,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         ws_url = f"ws://localhost:8000/websocket"
         
         # Simulate auth service failures
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             failure_count = 0
             
@@ -1155,6 +1159,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             initial_data = json.loads(response)
         
         # Simulate database unavailability
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database connection failed")
             
@@ -1202,6 +1207,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         ws_url = f"ws://localhost:8000/websocket"
         
         # Simulate partial database failure (read works, write fails)
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.execute') as mock_execute:
             async def partial_failure(query, *args, **kwargs):
                 if "SELECT" in query:
@@ -1259,6 +1265,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         headers = {"Authorization": f"Bearer {token}"}
         
         # Simulate database unavailability
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database unavailable")
             
@@ -1306,6 +1313,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         queued_operations = []
         
         # Phase 1: Database is down
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database down")
             
@@ -1363,10 +1371,12 @@ class TestWebSocketAuthColdStartExtendedL3:
             await ws.recv()
         
         # Simulate extended database outage
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
             mock_db.side_effect = Exception("Database down")
             
             # Simulate cache expiry
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             with patch('netra_backend.app.cache.redis_cache.get') as mock_cache_get:
                 mock_cache_get.return_value = None  # Cache miss
                 
@@ -1401,8 +1411,11 @@ class TestWebSocketAuthColdStartExtendedL3:
         failover_sequence = []
         
         # Mock all data sources
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_primary_db') as mock_primary:
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.db.postgres.get_replica_db') as mock_replica:
+                # Mock: Redis caching isolation to prevent test interference and external dependencies
                 with patch('netra_backend.app.cache.redis_cache.get') as mock_cache:
                     
                     async def track_primary(*args, **kwargs):
@@ -1584,6 +1597,7 @@ class TestWebSocketAuthColdStartExtendedL3:
             assert data["type"] == "error"  # Should be denied
             
             # Simulate role upgrade in backend
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.clients.auth_client.auth_client.get_user_roles') as mock_roles:
                 mock_roles.return_value = ["user", "admin"]
                 
@@ -1756,6 +1770,7 @@ class TestWebSocketAuthColdStartExtendedL3:
         audit_logs = []
         
         # Mock audit logging
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.audit.log_privileged_operation') as mock_audit:
             async def capture_audit(*args, **kwargs):
                 audit_logs.append(kwargs)

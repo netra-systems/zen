@@ -43,7 +43,9 @@ class TestLargeDatasetPerformance:
             for i in range(10000)
         ]
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
@@ -74,7 +76,9 @@ class TestLargeDatasetPerformance:
         """Test 3: Verify statistics queries use efficient aggregations"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
@@ -84,7 +88,9 @@ class TestLargeDatasetPerformance:
                 [("type1", 600000), ("type2", 400000)]
             ]
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
+            # Mock: Generic component isolation for controlled unit testing
             corpus = MagicMock()
             corpus.status = "available"
             corpus.table_name = "large_corpus"
@@ -117,12 +123,16 @@ class TestEdgeCaseHandling:
         """Test 5: Verify handling of empty corpus tables"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             mock_instance.execute.return_value = []
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
+            # Mock: Generic component isolation for controlled unit testing
             corpus = MagicMock()
             corpus.status = "available"
             corpus.table_name = "empty_corpus"
@@ -179,7 +189,9 @@ class TestEdgeCaseHandling:
         """Test 9: Verify proper escaping of special characters"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
@@ -216,14 +228,18 @@ class TestConcurrencyAndAsync:
         """Test 11: Verify concurrent corpus operations don't conflict"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
             # Simulate concurrent operations
             tasks = []
             for i in range(10):
+                # Mock: Generic component isolation for controlled unit testing
                 db = MagicMock()
+                # Mock: Generic component isolation for controlled unit testing
                 corpus_data = MagicMock()
                 corpus_data.name = f"corpus_{i}"
                 corpus_data.description = "test"
@@ -242,7 +258,9 @@ class TestConcurrencyAndAsync:
         """Test 12: Verify async table creation handles timeouts"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
@@ -252,6 +270,7 @@ class TestConcurrencyAndAsync:
             
             mock_instance.execute = slow_execute
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             
             # Should not block main operation
@@ -357,11 +376,14 @@ class TestConnectionHandling:
             get_corpus_from_clickhouse,
         )
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = MagicMock()
             mock_db.return_value = mock_instance
             
             # Simulate query error
+            # Mock: Async component isolation for testing without real async operations
             mock_instance.execute_query = AsyncMock(side_effect=Exception("Query failed"))
             
             with pytest.raises(Exception):

@@ -87,6 +87,7 @@ class TestStagingDeploymentErrors:
         require complete SSL parameter removal for asyncpg.
         """
         # Mock the auth service database manager
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
         
         # Test various URL formats

@@ -50,6 +50,7 @@ class TestSyntaxFix:
 
         """Setup supervisor agent with database and infrastructure"""
 
+        # Mock: Session state isolation for predictable testing
         supervisor = Supervisor(db_setup["session"], infra["llm_manager"], infra["websocket_manager"], Mock())
 
         supervisor.thread_id = test_entities["thread"].id

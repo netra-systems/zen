@@ -29,6 +29,7 @@ try:
 except ImportError:
     # Mock OpenTelemetry components if not available
     from unittest.mock import MagicMock
+    # Mock: Generic component isolation for controlled unit testing
     trace = MagicMock()
     JaegerExporter = MagicMock
     AioHttpClientInstrumentor = MagicMock

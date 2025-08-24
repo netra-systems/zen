@@ -149,6 +149,7 @@ class TestEnvironmentVariableLoading:
     def test_load_env_var_success_with_valid_config(self):
         """Test environment variable successfully loaded into config"""
         # Arrange - Mock config with field
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
 
         mock_config.db_pool_size = 10
@@ -189,6 +190,7 @@ class TestEnvironmentVariableLoading:
     def test_load_env_var_failure_missing_env_var(self):
         """Test environment variable loading fails when env var missing"""
         # Arrange - Mock config with field but no env var
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         mock_config.test_field = None
         
@@ -203,6 +205,7 @@ class TestEnvironmentVariableLoading:
     def test_load_env_var_success_with_existing_field(self):
         """Test environment variable loading succeeds with existing field"""
         # Arrange - Mock config with existing field
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         mock_config.test_field = None
         
@@ -221,8 +224,11 @@ class TestClickHouseConfiguration:
     def test_set_clickhouse_host_updates_both_configs(self):
         """Test ClickHouse host updated in both native and HTTPS configs"""
         # Arrange - Mock config with ClickHouse configs
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_config.clickhouse_native = Mock()
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_config.clickhouse_https = Mock()
         
         # Act - Set ClickHouse host
@@ -235,8 +241,11 @@ class TestClickHouseConfiguration:
     def test_set_clickhouse_port_validates_integer(self):
         """Test ClickHouse port validation ensures integer values"""
         # Arrange - Mock config with ClickHouse configs
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_config.clickhouse_native = Mock()
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_config.clickhouse_https = Mock()
         
         # Act - Set valid ClickHouse port
@@ -249,6 +258,7 @@ class TestClickHouseConfiguration:
     def test_set_clickhouse_port_invalid_value_raises_exception(self):
         """Test invalid ClickHouse port raises appropriate exception"""
         # Arrange - Mock config
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         
         # Act & Assert - Invalid port raises ValueError
@@ -258,11 +268,15 @@ class TestClickHouseConfiguration:
     def test_set_clickhouse_password_security_logging(self):
         """Test ClickHouse password setting logs without exposing password"""
         # Arrange - Mock config and logger
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_config.clickhouse_native = Mock()
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_config.clickhouse_https = Mock()
         
         # Act - Set password with logging
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.logging_config.central_logger') as mock_logger:
             set_clickhouse_password(mock_config, "secret_password")
             
@@ -276,11 +290,15 @@ class TestClickHouseConfiguration:
     def test_set_clickhouse_user_logs_username(self):
         """Test ClickHouse user setting includes username in logs"""
         # Arrange - Mock config and logger
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_config.clickhouse_native = Mock()
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_config.clickhouse_https = Mock()
         
         # Act - Set username with logging
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.logging_config.central_logger') as mock_logger:
             set_clickhouse_user(mock_config, "admin_user")
             
@@ -297,15 +315,18 @@ class TestLLMConfigurationLoading:
     def test_set_gemini_api_key_updates_all_llm_configs(self):
         """Test Gemini API key updated across all LLM configurations"""
         # Arrange - Mock config with LLM configs
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         mock_config.llm_configs = {}
         llm_names = ['default', 'analysis', 'triage', 'data']
         
         for name in llm_names:
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             mock_config.llm_configs[name] = Mock()
             mock_config.llm_configs[name].api_key = None
             
         # Act - Set Gemini API key
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.tests.critical.test_config_loader_core.set_llm_api_key') as mock_set_llm:
             set_gemini_api_key(mock_config, "gemini_api_key_123")
             
@@ -315,8 +336,10 @@ class TestLLMConfigurationLoading:
     def test_set_llm_api_key_individual_config(self):
         """Test individual LLM config API key setting"""
         # Arrange - Mock config with specific LLM config
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         mock_config.llm_configs = {
+            # Mock: Generic component isolation for controlled unit testing
             'analysis': Mock()
         }
         mock_config.llm_configs['analysis'].api_key = None
@@ -397,7 +420,9 @@ class TestSecretApplicationLogic:
     def test_apply_single_secret_to_nested_config(self):
         """Test secret application to nested configuration path"""
         # Arrange - Mock nested config structure
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
+        # Mock: Database isolation for unit testing without external database connections
         mock_config.database = Mock()
         mock_config.database.password = None
         
@@ -410,8 +435,11 @@ class TestSecretApplicationLogic:
     def test_navigate_to_parent_object_success(self):
         """Test navigation to parent object in config hierarchy"""
         # Arrange - Mock nested config structure
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_config.level1 = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_config.level1.level2 = Mock()
         
         # Act - Navigate to parent object
@@ -437,6 +465,7 @@ class TestSecretApplicationLogic:
     def test_get_attribute_or_none_success(self):
         """Test getting attribute returns correct value when exists"""
         # Arrange - Mock object with attribute
+        # Mock: Generic component isolation for controlled unit testing
         mock_obj = Mock()
         mock_obj.test_attr = "test_value"
         
@@ -514,7 +543,9 @@ class TestCloudRunEnvironmentDetection:
             "PR_NUMBER": "123"
         }):
             # Mock the config dependency
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.cloud_environment_detector.get_config') as mock_get_config:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_config = Mock()
                 mock_config.k_service = "netra-backend-staging"
                 mock_get_config.return_value = mock_config
@@ -533,7 +564,9 @@ class TestCloudRunEnvironmentDetection:
             "PR_NUMBER": "456"
         }):
             # Mock the config dependency
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.cloud_environment_detector.get_config') as mock_get_config:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_config = Mock()
                 mock_config.k_service = "netra-backend-production"
                 mock_config.pr_number = "456"

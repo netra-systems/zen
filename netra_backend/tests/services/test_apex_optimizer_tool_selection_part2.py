@@ -48,6 +48,7 @@ class TestApexOptimizerAdvancedToolSelection:
         """Create mock app configuration"""
         config = AppConfig()
         config.llm_configs = {
+            # Mock: Service component isolation for predictable testing behavior
             'analysis': MagicMock(model_name='gpt-4-analysis')
         }
         return config

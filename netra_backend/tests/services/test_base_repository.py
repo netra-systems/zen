@@ -46,6 +46,7 @@ class TestBaseRepository:
                 )
                 mock_threads.append(thread)
             
+            # Mock: Async component isolation for testing without real async operations
             uow.threads.bulk_create = AsyncMock(return_value=mock_threads)
             
             threads_data = [
@@ -71,7 +72,9 @@ class TestBaseRepository:
                 title="Test Thread"
             )
             
+            # Mock: Async component isolation for testing without real async operations
             uow.threads.create = AsyncMock(return_value=mock_thread)
+            # Mock: Async component isolation for testing without real async operations
             uow.threads.get = AsyncMock(return_value=mock_thread)
             
             thread = await create_test_thread(uow, "test_user", "Test Thread")
@@ -96,7 +99,9 @@ class TestBaseRepository:
                 mock_threads.append(thread)
                 thread_ids.append(thread.id)
             
+            # Mock: Async component isolation for testing without real async operations
             uow.threads.create = AsyncMock(side_effect=mock_threads)
+            # Mock: Async component isolation for testing without real async operations
             uow.threads.get_many = AsyncMock(return_value=mock_threads[:3])
             
             created_ids = []

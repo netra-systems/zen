@@ -70,7 +70,9 @@ class TestMetricsValueTypeMismatch:
     async def test_query_interceptor_fixes_queries(self):
         """Test that the ClickHouseQueryInterceptor properly fixes queries"""
         # Mock client
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_client.execute_query = AsyncMock(return_value=[])
         
         # Create interceptor
@@ -123,7 +125,9 @@ class TestMetricsValueTypeMismatch:
     @pytest.mark.asyncio
     async def test_interceptor_statistics(self):
         """Test that interceptor tracks statistics correctly"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_client.execute_query = AsyncMock(return_value=[])
         
         interceptor = ClickHouseQueryInterceptor(mock_client)

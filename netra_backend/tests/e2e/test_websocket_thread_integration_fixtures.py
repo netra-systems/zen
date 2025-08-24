@@ -23,22 +23,34 @@ from netra_backend.app.services.thread_service import ThreadService
 
 def mock_websocket_manager():
     """Mock WebSocket manager for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     manager_mock = Mock()
+    # Mock: Generic component isolation for controlled unit testing
     manager_mock.send_message = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     manager_mock.broadcast_to_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     manager_mock.connect_user_to_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     manager_mock.disconnect_user_from_thread = AsyncMock()
     
+    # Mock: Component isolation for testing without external dependencies
     with patch('app.ws_manager.manager', manager_mock):
         yield manager_mock
 
 def mock_thread_service():
     """Mock thread service for testing."""
+    # Mock: Component isolation for controlled unit testing
     service = Mock(spec=ThreadService)
+    # Mock: Generic component isolation for controlled unit testing
     service.create_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.switch_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.delete_thread = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.create_run = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.get_or_create_thread = AsyncMock()
     return service
 # )  # Orphaned closing parenthesis

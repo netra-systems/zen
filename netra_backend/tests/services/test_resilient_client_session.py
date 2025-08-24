@@ -28,12 +28,14 @@ class TestResilientHTTPClientSession:
         """Test getting new session."""
         mock_session = create_mock_session()
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         with patch('app.services.external_api_client.ClientSession', return_value=mock_session) as mock_session_class:
             session = await client._get_session()
             verify_new_session_creation(session, mock_session, mock_session_class, client)
     @pytest.mark.asyncio
     async def test_get_session_reuse(self, client):
         """Test reusing existing session."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_session.closed = False
         client._session = mock_session
@@ -46,6 +48,7 @@ class TestResilientHTTPClientSession:
         old_session = create_mock_session(closed=True)
         client._session = old_session
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         with patch('app.services.external_api_client.ClientSession') as mock_session_class:
             new_session = create_mock_session()
             mock_session_class.return_value = new_session
@@ -64,8 +67,10 @@ class TestResilientHTTPClientSession:
     def _setup_mock_session_for_close(self):
         """Setup mock session for close test."""
         from unittest.mock import AsyncMock, MagicMock
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_session.closed = False
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.close = AsyncMock()
         return mock_session
     @pytest.mark.asyncio
@@ -84,7 +89,9 @@ class TestResilientHTTPClientSession:
     def _setup_closed_session_mock(self):
         """Setup mock closed session."""
         from unittest.mock import AsyncMock, MagicMock
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_session.closed = True
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.close = AsyncMock()
         return mock_session

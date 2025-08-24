@@ -40,6 +40,7 @@ class TestSyntheticDataManagement:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.export_data') as mock_export:
             mock_export.return_value = {
                 "export_id": "export_456",
@@ -80,6 +81,7 @@ class TestSyntheticDataManagement:
             ]
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.analyze_quality') as mock_analyze:
             mock_analyze.return_value = {
                 "overall_quality_score": 0.87,
@@ -140,6 +142,7 @@ class TestSyntheticDataManagement:
             "confirm_deletion": True
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.cleanup_jobs') as mock_cleanup:
             mock_cleanup.return_value = {
                 "cleaned_jobs": 3,
@@ -183,6 +186,7 @@ class TestSyntheticDataManagement:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.convert_format') as mock_convert:
             mock_convert.return_value = {
                 "conversion_id": "conv_789",
@@ -244,6 +248,7 @@ class TestSyntheticDataManagement:
             "significance_level": 0.05
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.compare_with_real_data') as mock_compare:
             mock_compare.return_value = {
                 "overall_similarity_score": 0.89,
@@ -309,6 +314,7 @@ class TestSyntheticDataManagement:
             "create_new_version": True
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.create_version') as mock_version:
             mock_version.return_value = {
                 "new_version_id": "job_456_v2.1",
@@ -369,6 +375,7 @@ class TestSyntheticDataManagement:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.setup_auto_refresh') as mock_refresh:
             mock_refresh.return_value = {
                 "refresh_config_id": "refresh_789",

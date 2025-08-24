@@ -75,9 +75,13 @@ def verify_orchestration_metrics(orchestrator, expected_agents=None, expected_ta
 def agent_service():
     """Create a mock agent service for testing."""
     from netra_backend.app.services.agent_service import AgentService
+    # Mock: Agent service isolation for testing without LLM agent execution
     service = MagicMock(spec=AgentService)
+    # Mock: Generic component isolation for controlled unit testing
     service.initialize = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     service.shutdown = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     service.execute = AsyncMock(return_value={"status": "completed", "result": "test result"})
     return service
 
@@ -85,9 +89,13 @@ def agent_service():
 @pytest.fixture  
 def mock_supervisor():
     """Create a mock supervisor for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     supervisor = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     supervisor.run = AsyncMock(return_value={"status": "completed", "result": "supervised result"})
+    # Mock: Generic component isolation for controlled unit testing
     supervisor.initialize = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     supervisor.shutdown = AsyncMock()
     return supervisor
 
@@ -95,8 +103,11 @@ def mock_supervisor():
 @pytest.fixture
 def mock_thread_service():
     """Create a mock thread service for testing.""" 
+    # Mock: Generic component isolation for controlled unit testing
     thread_service = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     thread_service.get_thread = AsyncMock(return_value={"id": "thread1", "name": "test thread"})
+    # Mock: Async component isolation for testing without real async operations
     thread_service.create_thread = AsyncMock(return_value={"id": "thread1", "name": "new thread"})
     return thread_service
 
@@ -104,8 +115,11 @@ def mock_thread_service():
 @pytest.fixture
 def mock_message_handler():
     """Create a mock message handler for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     handler = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     handler.handle_message = AsyncMock(return_value={"status": "handled"})
+    # Mock: Generic component isolation for controlled unit testing
     handler.send_message = AsyncMock()
     return handler
 
@@ -113,6 +127,7 @@ def mock_message_handler():
 def create_mock_request_model():
     """Create a mock request model for testing."""
     from netra_backend.app.schemas import RequestModel
+    # Mock: Service component isolation for predictable testing behavior
     request = MagicMock(spec=RequestModel)
     request.message = "test message" 
     request.thread_id = "thread123"

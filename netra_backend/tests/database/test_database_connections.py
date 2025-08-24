@@ -25,11 +25,14 @@ class TestClickHouseConnectionPool:
     @pytest.mark.asyncio
     async def test_connection_pooling(self):
         """Test connection pooling functionality"""
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('clickhouse_connect.get_client') as mock_get_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client = Mock()
             mock_get_client.return_value = mock_client
             mock_client.ping.return_value = True
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.db.clickhouse_base.ClickHouseDatabase._establish_connection'):
                 db = _create_test_db()
             
@@ -55,7 +58,9 @@ class TestClickHouseConnectionPool:
     @pytest.mark.asyncio
     async def test_query_timeout(self):
         """Test query timeout handling"""
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('clickhouse_connect.get_client') as mock_get_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client = AsyncMock()
             mock_get_client.return_value = mock_client
             mock_client.ping.return_value = True
@@ -67,6 +72,7 @@ class TestClickHouseConnectionPool:
             
             mock_client.execute_query = slow_query
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.db.clickhouse_base.ClickHouseDatabase._establish_connection'):
                 db = ClickHouseDatabase(
                     host="localhost",
@@ -88,6 +94,7 @@ class TestMigrationRunnerSafety:
     @pytest.mark.asyncio
     async def test_migration_rollback(self):
         """Test migration rollback on failure"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         runner = MigrationRunner(mock_session)
         
@@ -101,6 +108,7 @@ class TestMigrationRunnerSafety:
     @pytest.mark.asyncio
     async def test_migration_transaction_safety(self):
         """Test migration transaction safety"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         runner = MigrationRunner(mock_session)
         
@@ -119,6 +127,7 @@ class TestDatabaseHealthChecks:
     @pytest.mark.asyncio
     async def test_health_monitoring(self):
         """Test database health monitoring"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         checker = DatabaseHealthChecker()
         
@@ -142,6 +151,7 @@ class TestDatabaseHealthChecks:
     @pytest.mark.asyncio
     async def test_alert_thresholds(self):
         """Test alert threshold monitoring"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         checker = DatabaseHealthChecker()
         

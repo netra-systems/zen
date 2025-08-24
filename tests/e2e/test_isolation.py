@@ -56,6 +56,7 @@ except ImportError:
     class ErrorCode:
         AGENT_ERROR = "AGENT_ERROR"
     
+    # Mock: Generic component isolation for controlled unit testing
     logger = Mock()
     IMPORTS_AVAILABLE = False
 
@@ -240,6 +241,7 @@ async def test_resource_isolation():
     validator = TenantIsolationValidator()
     
     # Use direct mocking instead of patching non-existent module
+    # Mock: Generic component isolation for controlled unit testing
     mock_resource_manager = Mock()
     await _test_connection_limits(mock_resource_manager, validator)
     await _test_memory_limits(mock_resource_manager, validator)  
@@ -253,7 +255,9 @@ async def test_resource_isolation():
 async def _test_connection_limits(mock_manager, validator: TenantIsolationValidator):
     """Test connection limit enforcement per tenant."""
     # Configure mock to enforce limits
+    # Mock: Async component isolation for testing without real async operations
     mock_manager.check_connection_limit = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     mock_manager.get_user_connection_count = AsyncMock(return_value=3)
     
     # Test connection limit enforcement
@@ -265,6 +269,7 @@ async def _test_connection_limits(mock_manager, validator: TenantIsolationValida
 
 async def _test_memory_limits(mock_manager, validator: TenantIsolationValidator):
     """Test memory limit enforcement per tenant."""
+    # Mock: Async component isolation for testing without real async operations
     mock_manager.check_memory_usage = AsyncMock(return_value=50.0)  # 50MB
     mock_manager.memory_limit_mb = 100
     
@@ -277,6 +282,7 @@ async def _test_memory_limits(mock_manager, validator: TenantIsolationValidator)
 
 async def _test_compute_limits(mock_manager, validator: TenantIsolationValidator):
     """Test compute resource limits per tenant."""
+    # Mock: Async component isolation for testing without real async operations
     mock_manager.get_cpu_usage = AsyncMock(return_value=0.6)  # 60% CPU
     mock_manager.cpu_limit_percentage = 0.8  # 80% limit
     

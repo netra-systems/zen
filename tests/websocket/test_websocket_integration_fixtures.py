@@ -51,6 +51,7 @@ async def mock_async_db_session():
 
     """Mock async database session."""
 
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session = AsyncMock(spec=AsyncSession)
 
     return mock_session

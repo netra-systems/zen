@@ -27,9 +27,13 @@ class TestSecretManagerAccess:
     @pytest.fixture
     def secret_manager(self):
         """Create secret manager with mocked dependencies."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager_core.SecretEncryption'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretLoader'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretManagerAuth'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.central_logger'):
             
             manager = EnhancedSecretManager(EnvironmentType.DEVELOPMENT)
@@ -41,9 +45,13 @@ class TestSecretManagerAccess:
     @pytest.fixture
     def prod_secret_manager(self):
         """Create production secret manager."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager_core.SecretEncryption'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretLoader'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretManagerAuth'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.central_logger'):
             
             manager = EnhancedSecretManager(EnvironmentType.PRODUCTION)

@@ -194,7 +194,9 @@ class AgentActivationTestHelper:
 def mock_agent_registry():
     """Fixture providing mock agent registry with test agents."""
     # Create mock dependencies for registry
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock_llm_manager = Mock()
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     mock_tool_dispatcher = Mock()
     
     registry = AgentRegistry(mock_llm_manager, mock_tool_dispatcher)
@@ -207,6 +209,7 @@ def mock_agent_registry():
     registry.register("analysis", analysis_agent)
     registry.register("debug", debug_agent) 
     registry.register("optimization", optimization_agent)
+    # Mock: Generic component isolation for controlled unit testing
     registry.register("triage", Mock())  # Simple mock for triage
     
     return registry, analysis_agent, debug_agent, optimization_agent
@@ -222,17 +225,23 @@ async def supervisor_with_registry(mock_agent_registry):
     registry, analysis_agent, debug_agent, optimization_agent = mock_agent_registry
     
     # Create LLM manager mock for routing decisions
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager = Mock()
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.ask_llm = AsyncMock()
     
     # Create tool dispatcher mock
+    # Mock: Tool execution isolation for predictable agent testing
     tool_dispatcher = Mock()
     
     # Create WebSocket manager mock  
+    # Mock: WebSocket connection isolation for testing without network overhead
     websocket_manager = Mock()
+    # Mock: WebSocket connection isolation for testing without network overhead
     websocket_manager.send_message = AsyncMock()
     
     # Create database session mock
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_db_session = AsyncMock()
     
     supervisor = SupervisorAgent(

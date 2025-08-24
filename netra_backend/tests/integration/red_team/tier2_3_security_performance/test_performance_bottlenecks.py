@@ -580,8 +580,11 @@ class TestPerformanceBottlenecks:
                 cache_service = CacheService()
             except Exception:
                 # Mock cache service for testing if not available
+                # Mock: Generic component isolation for controlled unit testing
                 cache_service = Mock()
+                # Mock: Component isolation for controlled unit testing
                 cache_service.get = Mock(return_value=None)
+                # Mock: Generic component isolation for controlled unit testing
                 cache_service.set = Mock()
                 cache_service.delete = Mock()
                 cache_service.clear = Mock()

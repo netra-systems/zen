@@ -112,7 +112,9 @@ class TestWebSocketAuthHandshake:
     def mock_agent_service(self):
         """Mock agent service for message handling."""
         # Mock justification: Agent service subsystem is not part of WebSocket auth handshake SUT
+        # Mock: Generic component isolation for controlled unit testing
         service = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         service.handle_websocket_message = Mock()
         return service
 

@@ -31,8 +31,10 @@ class TestLLMManagerInit:
         """Test LLM connection pool initializes properly."""
         from netra_backend.app.services.llm_manager import LLMManager
         
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
 
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.initialize_pool = AsyncMock(return_value={
 
             "pool_size": 10,
@@ -86,12 +88,14 @@ class TestLLMManagerInit:
 
         """Test connection pool warmup reduces first-call latency."""
         
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
         
         # Cold call
 
         cold_start = time.time()
 
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.ask_llm = AsyncMock(return_value="response")
 
         await asyncio.sleep(0.1)  # Simulate cold start delay
@@ -122,6 +126,7 @@ class TestWebSocketRecovery:
         """Test state is preserved when WebSocket disconnects."""
         from netra_backend.app.websocket_core.manager import WebSocketManager
         
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         ws_manager = Mock(spec=WebSocketManager)
         
         # Active state before disconnect
@@ -138,6 +143,7 @@ class TestWebSocketRecovery:
 
         }
         
+        # Mock: Async component isolation for testing without real async operations
         ws_manager.preserve_state = AsyncMock(return_value=True)
         
         # Preserve state on disconnect

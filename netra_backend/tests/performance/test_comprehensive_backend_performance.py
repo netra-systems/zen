@@ -109,11 +109,15 @@ class DatabasePerformanceTester:
         test_corpus = self._generate_test_corpus(record_count)
         table_name = f'perf_test_{uuid.uuid4().hex[:8]}'
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_db.return_value = mock_instance
             
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_interceptor_instance = AsyncMock()
                 mock_interceptor.return_value = mock_interceptor_instance
                 
@@ -129,7 +133,9 @@ class DatabasePerformanceTester:
         """Test concurrent database query performance."""
         tasks = []
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.db.clickhouse.ClickHouseDatabase') as mock_db:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_instance.execute_query.return_value = [
                 {'id': i, 'data': f'test_data_{i}'} for i in range(1000)
@@ -187,6 +193,7 @@ class WebSocketPerformanceTester:
     @pytest.mark.asyncio
     async def test_broadcast_performance(self, connection_count: int = 100, message_count: int = 1000) -> float:
         """Test WebSocket broadcast performance."""
+        # Mock: Generic component isolation for controlled unit testing
         connections = [AsyncMock() for _ in range(connection_count)]
         
         async def broadcast_message(message, connections_list):

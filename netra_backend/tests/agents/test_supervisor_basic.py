@@ -162,6 +162,7 @@ class TestSupervisorOrchestration:
         
         # Mock specialized optimization agent
         spec_opt_agent = supervisor.agents.get("optimization")
+        # Mock: Generic component isolation for controlled unit testing
         spec_opt_agent.execute = AsyncMock()
         spec_opt_agent.execute.return_value = create_agent_state("Branch test",
                                                                optimizations_result={

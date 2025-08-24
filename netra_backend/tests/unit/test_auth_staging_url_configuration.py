@@ -87,9 +87,11 @@ class TestAuthStagingURLConfiguration:
         # This test should FAIL if the endpoint returns localhost:3000 URLs
         
         # Mock request object
+        # Mock: Generic component isolation for controlled unit testing
         mock_request = MagicMock()
         
         # Call the auth config endpoint
+        # Mock: Component isolation for testing without external dependencies
         with patch("auth_service.auth_core.config.AuthConfig.get_google_client_id") as mock_client_id:
             mock_client_id.return_value = "test-client-id"
             
@@ -218,6 +220,7 @@ class TestSocketLifecycleManagement:
     def test_socket_close_error_on_sigterm(self):
         """Reproduce: Error while closing socket [Errno 9] Bad file descriptor"""
         # Simulate Cloud Run sending SIGTERM
+        # Mock: Generic component isolation for controlled unit testing
         mock_socket = Mock()
         mock_socket.fileno.return_value = -1  # Invalid file descriptor
         
@@ -421,6 +424,7 @@ class TestComprehensiveStaging:
         }):
             try:
                 # Mock the connection attempt
+                # Mock: Component isolation for testing without external dependencies
                 with patch('asyncpg.connect', side_effect=asyncpg.InvalidPasswordError("password authentication failed")):
                     await asyncpg.connect(os.environ['DATABASE_URL'])
             except Exception as e:

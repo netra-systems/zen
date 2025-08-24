@@ -93,11 +93,17 @@ class TestAgentReliabilityMixinInitialization:
     @pytest.fixture
     def mock_agent(self):
         """Create a mock agent with reliability mixin."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.reliability.get_reliability_wrapper') as mock_wrapper:
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.execute_safely = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.circuit_breaker = Mock()
+            # Mock: Component isolation for controlled unit testing
             mock_reliability.circuit_breaker.get_status = Mock(return_value={"state": "closed"})
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.circuit_breaker.reset = Mock()
             mock_wrapper.return_value = mock_reliability
             

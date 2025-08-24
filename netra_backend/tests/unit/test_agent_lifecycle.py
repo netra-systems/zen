@@ -28,12 +28,15 @@ class TestAgent(AgentLifecycleMixin):
     
     def __init__(self, name="test_agent"):
         self.name = name
+        # Mock: Generic component isolation for controlled unit testing
         self.logger = Mock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         self.websocket_manager = Mock()
         self.user_id = "test_user"
         self.start_time = time.time()
         self.end_time = None
         self.state = SubAgentLifecycle.PENDING
+        # Mock: Generic component isolation for controlled unit testing
         self.context = Mock()
         self.should_fail_execute = False
         self.should_fail_entry = False
@@ -73,6 +76,7 @@ def test_agent():
 @pytest.fixture
 def deep_agent_state():
     """Mock DeepAgentState."""
+    # Mock: Agent service isolation for testing without LLM agent execution
     state = Mock(spec=DeepAgentState)
     state.step_count = 0
     return state
@@ -80,8 +84,11 @@ def deep_agent_state():
 @pytest.fixture
 def mock_websocket_manager():
     """Mock WebSocket manager."""
+    # Mock: Generic component isolation for controlled unit testing
     manager = Mock()
+    # Mock: Generic component isolation for controlled unit testing
     manager.send_agent_log = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     manager.send_error = AsyncMock()
     return manager
 
@@ -133,7 +140,9 @@ class TestLifecycleBasics:
     @pytest.mark.asyncio
     async def test_pre_run_with_streaming(self, test_agent, deep_agent_state):
         """_pre_run handles streaming updates."""
+        # Mock: WebSocket connection isolation for testing without network overhead
         test_agent.websocket_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._send_update = AsyncMock()
         result = await test_agent._pre_run(deep_agent_state, "test_run", True)
         assert result is True
@@ -190,7 +199,9 @@ class TestEntryConditions:
     async def test_entry_failure_handling(self, test_agent, deep_agent_state):
         """Entry failure is handled correctly."""
         setup_agent_for_entry_failure(test_agent)
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._send_entry_condition_warning = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._post_run = AsyncMock()
         
         await test_agent._handle_entry_failure("test_run", False, deep_agent_state)
@@ -199,7 +210,9 @@ class TestEntryConditions:
     @pytest.mark.asyncio
     async def test_entry_condition_warning_sent(self, test_agent):
         """Entry condition warning is sent when streaming."""
+        # Mock: WebSocket connection isolation for testing without network overhead
         test_agent.websocket_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._send_websocket_warning = AsyncMock()
         
         await test_agent._send_entry_condition_warning("test_run", True)
@@ -225,6 +238,7 @@ class TestExecutionFlow:
     @pytest.mark.asyncio
     async def test_failed_execution_flow(self, test_agent, deep_agent_state):
         """Failed execution flow handles errors correctly."""
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._handle_execution_error = AsyncMock()
         await run_agent_with_failure(test_agent, deep_agent_state)
         test_agent._handle_execution_error.assert_called_once()
@@ -259,6 +273,7 @@ class TestWebSocketIntegration:
     async def test_websocket_disconnect_handling(self, test_agent, deep_agent_state):
         """WebSocket disconnect is handled gracefully."""
         disconnect_error = WebSocketDisconnect(code=1000, reason="Normal closure")
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._post_run = AsyncMock()
         
         await test_agent._handle_websocket_disconnect(disconnect_error, deep_agent_state, "test_run", True)
@@ -267,7 +282,9 @@ class TestWebSocketIntegration:
     @pytest.mark.asyncio
     async def test_websocket_error_notification(self, test_agent):
         """WebSocket error notification is sent."""
+        # Mock: WebSocket connection isolation for testing without network overhead
         test_agent.websocket_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._send_websocket_error = AsyncMock()
         error = RuntimeError("Test error")
         
@@ -286,7 +303,9 @@ class TestWebSocketIntegration:
     @pytest.mark.asyncio
     async def test_websocket_warning_sent(self, test_agent):
         """WebSocket warning is sent correctly."""
+        # Mock: WebSocket connection isolation for testing without network overhead
         test_agent.websocket_manager = Mock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         test_agent.websocket_manager.send_agent_log = AsyncMock()
         
         await test_agent._send_websocket_warning("test_run")
@@ -295,7 +314,9 @@ class TestWebSocketIntegration:
     @pytest.mark.asyncio
     async def test_websocket_error_sent(self, test_agent):
         """WebSocket error is sent correctly."""
+        # Mock: WebSocket connection isolation for testing without network overhead
         test_agent.websocket_manager = Mock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         test_agent.websocket_manager.send_error = AsyncMock()
         error = RuntimeError("Test error")
         
@@ -320,7 +341,9 @@ class TestErrorHandling:
     async def test_execution_error_handling(self, test_agent, deep_agent_state):
         """Execution error is handled correctly."""
         error = RuntimeError("Execution failed")
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._send_error_notification = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._post_run = AsyncMock()
         
         await test_agent._handle_execution_error(error, deep_agent_state, "test_run", True)
@@ -331,6 +354,7 @@ class TestErrorHandling:
     async def test_handle_and_reraise_error(self, test_agent, deep_agent_state):
         """Error is handled and reraised."""
         error = RuntimeError("Test error")
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._handle_execution_error = AsyncMock()
         
         # Test the method within a proper exception context as it would be used in production
@@ -344,6 +368,7 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_websocket_disconnect_in_run(self, test_agent, deep_agent_state):
         """WebSocket disconnect during run is handled."""
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._handle_websocket_disconnect = AsyncMock()
         
         # Mock execution to raise WebSocketDisconnect
@@ -357,7 +382,9 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_websocket_error_connection_handling(self, test_agent):
         """WebSocket connection errors are handled."""
+        # Mock: WebSocket connection isolation for testing without network overhead
         test_agent.websocket_manager = Mock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         test_agent.websocket_manager.send_agent_log = AsyncMock(side_effect=ConnectionError())
         
         # Should not raise exception
@@ -375,8 +402,11 @@ class TestCleanupAndFinalization:
     @pytest.mark.asyncio
     async def test_complete_agent_run(self, test_agent, deep_agent_state):
         """Complete agent run performs all finalization."""
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._log_execution_completion = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._send_completion_update = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         test_agent.cleanup = AsyncMock()
         
         await test_agent._complete_agent_run("test_run", False, "completed", 1.5, deep_agent_state)
@@ -393,7 +423,9 @@ class TestCleanupAndFinalization:
     @pytest.mark.asyncio
     async def test_send_completion_update(self, test_agent):
         """Completion update is sent via WebSocket."""
+        # Mock: WebSocket connection isolation for testing without network overhead
         test_agent.websocket_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._send_update = AsyncMock()
         
         await test_agent._send_completion_update("test_run", True, "completed", 1.5)
@@ -402,6 +434,7 @@ class TestCleanupAndFinalization:
     @pytest.mark.asyncio
     async def test_send_completion_update_without_streaming(self, test_agent):
         """Completion update is skipped without streaming."""
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._send_update = AsyncMock()
         
         await test_agent._send_completion_update("test_run", False, "completed", 1.5)
@@ -413,7 +446,9 @@ class TestIntegrationScenarios:
     @pytest.mark.asyncio
     async def test_full_successful_lifecycle(self, test_agent, deep_agent_state):
         """Full successful lifecycle works end-to-end."""
+        # Mock: WebSocket connection isolation for testing without network overhead
         test_agent.websocket_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         test_agent._send_update = AsyncMock()
         
         await test_agent.run(deep_agent_state, "test_run", True)

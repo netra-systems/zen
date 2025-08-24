@@ -155,11 +155,13 @@ class TestPostgresCompliance:
     async def test_pool_monitoring(self):
         """Test pool monitoring and warning patterns."""
         # Mock pool with high usage
+        # Mock: Generic component isolation for controlled unit testing
         mock_pool = MagicMock()
         mock_pool.size.return_value = 10
         mock_pool.checkedin.return_value = 2
         mock_pool.overflow.return_value = 5
         
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('auth_service.auth_core.database.connection_events.logger') as mock_logger:
             _monitor_auth_pool_usage(mock_pool)
             
@@ -178,7 +180,9 @@ class TestPostgresCompliance:
         
         # Mock environment for testing
         with patch.dict(os.environ, {'ENVIRONMENT': 'test', 'AUTH_FAST_TEST_MODE': 'true'}):
+            # Mock: Database access isolation for fast, reliable unit testing
             with patch('auth_service.auth_core.database.connection.create_async_engine') as mock_create_engine:
+                # Mock: Service component isolation for predictable testing behavior
                 mock_engine = MagicMock(spec=AsyncEngine)
                 mock_create_engine.return_value = mock_engine
                 

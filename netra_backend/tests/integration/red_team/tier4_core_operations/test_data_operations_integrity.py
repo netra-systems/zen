@@ -36,19 +36,28 @@ class TestDataExportImportPipeline:
     @pytest.fixture
     def mock_data_pipeline(self):
         """Mock data pipeline for export/import testing."""
+        # Mock: Generic component isolation for controlled unit testing
         pipeline = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         pipeline.export_user_data = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         pipeline.import_user_data = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         pipeline.validate_export_format = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         pipeline.verify_data_integrity = AsyncMock()
         return pipeline
     
     @pytest.fixture
     def mock_storage_service(self):
         """Mock storage service for data pipeline."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.store_export_file = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.retrieve_import_file = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.verify_file_integrity = AsyncMock()
         return service
     
@@ -203,10 +212,15 @@ class TestSearchAndFilteringPerformance:
     @pytest.fixture
     def mock_search_service(self):
         """Mock search service for performance testing."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.search_messages = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.filter_threads = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_search_analytics = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.optimize_search_index = AsyncMock()
         return service
     
@@ -354,10 +368,15 @@ class TestDataBackupRecoveryProcedures:
     @pytest.fixture
     def mock_backup_service(self):
         """Mock backup service for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.create_backup = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.restore_from_backup = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.verify_backup_integrity = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.schedule_backup = AsyncMock()
         return service
     
@@ -483,10 +502,15 @@ class TestApiVersioningDeprecationManagement:
     @pytest.fixture
     def mock_version_manager(self):
         """Mock API version manager."""
+        # Mock: Generic component isolation for controlled unit testing
         manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.get_supported_versions = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.validate_version_compatibility = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.handle_deprecated_endpoint = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.track_version_usage = AsyncMock()
         return manager
     
@@ -624,10 +648,15 @@ class TestDataValidationSanitization:
     @pytest.fixture
     def mock_validator(self):
         """Mock data validator for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         validator = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         validator.validate_input_data = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         validator.sanitize_user_input = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         validator.check_data_integrity = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         validator.detect_malicious_content = AsyncMock()
         return validator
     

@@ -15,6 +15,7 @@ def create_mock_thread(
     updated_at: int = 1234567900
 ) -> Mock:
     """Create a mock thread object"""
+    # Mock: Generic component isolation for controlled unit testing
     thread = Mock()
     thread.id = thread_id
     thread.object = "thread"
@@ -32,6 +33,7 @@ def create_mock_message(
     content: str = "Test message content"
 ) -> Mock:
     """Create a mock message object"""
+    # Mock: Generic component isolation for controlled unit testing
     message = Mock()
     message.id = msg_id
     message.role = role
@@ -47,10 +49,15 @@ def setup_thread_repo_mock(mock_thread: Mock = None, find_result: List = None) -
     if find_result is None:
         find_result = [mock_thread]
     
+    # Mock: Generic component isolation for controlled unit testing
     thread_repo = Mock()
+    # Mock: Async component isolation for testing without real async operations
     thread_repo.find_by_user = AsyncMock(return_value=find_result)
+    # Mock: Async component isolation for testing without real async operations
     thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
+    # Mock: Async component isolation for testing without real async operations
     thread_repo.create = AsyncMock(return_value=mock_thread)
+    # Mock: Async component isolation for testing without real async operations
     thread_repo.archive_thread = AsyncMock(return_value=True)
     return thread_repo
 
@@ -59,14 +66,19 @@ def setup_message_repo_mock(message_count: int = 5, messages: List = None) -> Mo
     if messages is None:
         messages = [create_mock_message()]
     
+    # Mock: Generic component isolation for controlled unit testing
     message_repo = Mock()
+    # Mock: Async component isolation for testing without real async operations
     message_repo.count_by_thread = AsyncMock(return_value=message_count)
+    # Mock: Async component isolation for testing without real async operations
     message_repo.find_by_thread = AsyncMock(return_value=messages)
     return message_repo
 
 def setup_llm_manager_mock(response: str = "Generated Title") -> Mock:
     """Setup LLM manager mock"""
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager = Mock()
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.ask_llm = AsyncMock(return_value=response)
     return llm_manager
 
@@ -77,10 +89,13 @@ def setup_repos_with_patches(
 ) -> list:
     """Setup repository patches for tests"""
     patches = [
+        # Mock: Component isolation for testing without external dependencies
         patch('app.routes.utils.thread_helpers.ThreadRepository', return_value=thread_repo),
+        # Mock: Component isolation for testing without external dependencies
         patch('app.routes.utils.thread_helpers.MessageRepository', return_value=message_repo)
     ]
     if llm_manager:
+        # Mock: Component isolation for testing without external dependencies
         patches.append(patch('app.routes.utils.thread_helpers.LLMManager', return_value=llm_manager))
     return patches
 
@@ -103,6 +118,7 @@ def create_multiple_threads(count: int, prefix: str = "thread_") -> List[Mock]:
     """Create multiple mock threads for pagination tests"""
     threads = []
     for i in range(count):
+        # Mock: Component isolation for controlled unit testing
         thread = Mock(
             id=f"{prefix}{i}",
             object="thread",
@@ -114,6 +130,7 @@ def create_multiple_threads(count: int, prefix: str = "thread_") -> List[Mock]:
 
 def create_empty_metadata_thread() -> Mock:
     """Create thread with None metadata for testing"""
+    # Mock: Component isolation for controlled unit testing
     thread = Mock(id="thread_1", object="thread", created_at=123456789, metadata_=None)
     return thread
 
@@ -134,6 +151,7 @@ def create_special_metadata_dict(user_id: str = "test_user_123") -> dict:
 
 def setup_thread_with_special_metadata(user_id: str = "test_user_123") -> Mock:
     """Setup thread that changes metadata during test"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_thread = Mock()
     mock_thread.id = "thread_abc123"
     mock_thread.object = "thread"
@@ -147,13 +165,16 @@ def create_thread_update_scenario(mock_time: Mock, return_value: int = 123456790
 
 def create_uuid_scenario(mock_uuid: Mock, hex_value: str = "abcdef1234567890") -> None:
     """Setup UUID mock for creation scenarios"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_uuid_obj = Mock()
     mock_uuid_obj.hex = hex_value
     mock_uuid.return_value = mock_uuid_obj
 
 def setup_ws_manager_mock() -> Mock:
     """Setup WebSocket manager mock"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws = Mock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws.send_to_user = AsyncMock()
     return mock_ws
 

@@ -1147,8 +1147,10 @@ class TestWebSocketAuthHandshake:
 
         """Create mock WebSocket for testing."""
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send = AsyncMock()
 
         websocket.messages_sent = []

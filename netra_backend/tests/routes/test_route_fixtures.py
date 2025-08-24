@@ -23,6 +23,7 @@ class MockDBSession:
     """Mock database session for testing."""
     
     def __init__(self):
+        # Mock: Database session isolation for transaction testing without real database dependency
         self.mock_session = MagicMock()
     
     @asynccontextmanager
@@ -58,10 +59,15 @@ class MockDependencyManager:
             from contextlib import asynccontextmanager
             @asynccontextmanager  
             async def mock_manager_get_session():
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session = AsyncMock(spec=AsyncSession)
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session.execute = AsyncMock()
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session.commit = AsyncMock()
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session.rollback = AsyncMock()
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session.close = AsyncMock()
                 yield mock_session
             
@@ -69,6 +75,7 @@ class MockDependencyManager:
         
         # Mock database session that behaves like AsyncSession
         async def mock_get_db_dependency():
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = MagicMock(spec=AsyncSession)
             yield mock_session
         
@@ -77,20 +84,27 @@ class MockDependencyManager:
         @asynccontextmanager
         async def mock_get_db_session():
             from unittest.mock import AsyncMock, MagicMock
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock(spec=AsyncSession)
             # Mock methods commonly used in auth
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session.execute = AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session.commit = AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session.rollback = AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session.close = AsyncMock()
             yield mock_session
         
         # Mock database dependency (for backward compatibility)
         def mock_get_async_db():
+            # Mock: Generic component isolation for controlled unit testing
             return Mock()
         
         # Mock LLM manager dependency  
         def mock_get_llm_manager():
+            # Mock: Generic component isolation for controlled unit testing
             return Mock()
         
         app.dependency_overrides[get_db_dependency] = mock_get_db_dependency
@@ -109,6 +123,7 @@ class MockDependencyManager:
         
         async def mock_get_current_user():
             # Create a mock user for testing - bypass all auth logic
+            # Mock: Component isolation for controlled unit testing
             mock_user = Mock(spec=User)
             mock_user.id = "test_user_123"
             mock_user.email = "test@example.com"
@@ -118,6 +133,7 @@ class MockDependencyManager:
         
         async def mock_get_current_active_user():
             # Create a mock active user for testing - bypass all auth logic
+            # Mock: Component isolation for controlled unit testing
             mock_user = Mock(spec=User)
             mock_user.id = "test_user_123"
             mock_user.email = "test@example.com"
@@ -136,7 +152,9 @@ class MockDependencyManager:
         
         def mock_get_agent_service(db_session=None, llm_manager=None):
             # Return a properly mocked AgentService
+            # Mock: Agent service isolation for testing without LLM agent execution
             mock_service = Mock(spec=AgentService)
+            # Mock: Async component isolation for testing without real async operations
             mock_service.process_message = AsyncMock(return_value={
                 "response": "Test response",
                 "status": "success"
@@ -159,6 +177,7 @@ class MockAppStateManager:
         # Set up database session factory
         @asynccontextmanager
         async def mock_db_session():
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = MagicMock()
             yield mock_session
         
@@ -173,19 +192,24 @@ class MockAppStateManager:
         
         # Set up LLM manager for dependency injection
         if not hasattr(app.state, 'llm_manager'):
+            # Mock: LLM provider isolation to prevent external API usage and costs
             app.state.llm_manager = Mock()
         
         # Set up other required services for dependency injection
         if not hasattr(app.state, 'agent_supervisor'):
+            # Mock: Agent supervisor isolation for testing without spawning real agents
             app.state.agent_supervisor = Mock()
         
         if not hasattr(app.state, 'agent_service'):
+            # Mock: Generic component isolation for controlled unit testing
             app.state.agent_service = Mock()
         
         if not hasattr(app.state, 'thread_service'):
+            # Mock: Generic component isolation for controlled unit testing
             app.state.thread_service = Mock()
         
         if not hasattr(app.state, 'corpus_service'):
+            # Mock: Generic component isolation for controlled unit testing
             app.state.corpus_service = Mock()
 
 @pytest.fixture
@@ -290,7 +314,9 @@ class MockServiceFactory:
     @staticmethod
     def create_mock_agent_service():
         """Create mock agent service with common methods."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_service = Mock()
+        # Mock: Async component isolation for testing without real async operations
         mock_service.process_message = AsyncMock(return_value={
             "response": "Processed successfully",
             "agent": "supervisor", 
@@ -301,7 +327,9 @@ class MockServiceFactory:
     @staticmethod
     def create_mock_quality_service():
         """Create mock quality service with metrics."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_service = Mock()
+        # Mock: Component isolation for controlled unit testing
         mock_service.get_quality_stats = Mock(return_value={
             "accuracy": 0.96,
             "latency_p50": 120,
@@ -314,7 +342,9 @@ class MockServiceFactory:
     @staticmethod
     def create_mock_cache_service():
         """Create mock cache service with metrics."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_service = Mock()
+        # Mock: Component isolation for controlled unit testing
         mock_service.get_cache_metrics = Mock(return_value={
             "hits": 150,
             "misses": 50,
@@ -322,6 +352,7 @@ class MockServiceFactory:
             "size_mb": 24.5,
             "entries": 200
         })
+        # Mock: Component isolation for controlled unit testing
         mock_service.clear_cache = Mock(return_value=50)
         return mock_service
 

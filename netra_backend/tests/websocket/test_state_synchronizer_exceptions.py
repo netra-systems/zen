@@ -23,6 +23,7 @@ class TestStateSynchronizerExceptionHandling:
     @pytest.mark.asyncio
     async def test_critical_callback_failure_propagation(self):
         """Test that critical callback failures are properly propagated."""
+        # Mock: Generic component isolation for controlled unit testing
         connection_manager = MagicMock()
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
@@ -43,6 +44,7 @@ class TestStateSynchronizerExceptionHandling:
     @pytest.mark.asyncio
     async def test_non_critical_callback_failure_handling(self):
         """Test that non-critical callback failures are handled gracefully."""
+        # Mock: Generic component isolation for controlled unit testing
         connection_manager = MagicMock()
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
@@ -62,6 +64,7 @@ class TestStateSynchronizerExceptionHandling:
     @pytest.mark.asyncio
     async def test_mixed_callback_failures(self):
         """Test mixed critical and non-critical callback failures."""
+        # Mock: Generic component isolation for controlled unit testing
         connection_manager = MagicMock()
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
@@ -87,6 +90,7 @@ class TestStateSynchronizerExceptionHandling:
     @pytest.mark.asyncio
     async def test_callback_timeout_handling(self):
         """Test callback timeout handling."""
+        # Mock: Generic component isolation for controlled unit testing
         connection_manager = MagicMock()
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
@@ -105,6 +109,7 @@ class TestStateSynchronizerExceptionHandling:
     @pytest.mark.asyncio
     async def test_callback_exception_classification(self):
         """Test that exception types are correctly classified."""
+        # Mock: Generic component isolation for controlled unit testing
         connection_manager = MagicMock()
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
@@ -123,6 +128,7 @@ class TestStateSynchronizerExceptionHandling:
     @pytest.mark.asyncio
     async def test_successful_callback_execution(self):
         """Test that successful callbacks execute without issues."""
+        # Mock: Generic component isolation for controlled unit testing
         connection_manager = MagicMock()
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
@@ -141,6 +147,7 @@ class TestStateSynchronizerExceptionHandling:
     @pytest.mark.asyncio
     async def test_no_callbacks_registered(self):
         """Test behavior when no callbacks are registered."""
+        # Mock: Generic component isolation for controlled unit testing
         connection_manager = MagicMock()
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
@@ -150,6 +157,7 @@ class TestStateSynchronizerExceptionHandling:
     @pytest.mark.asyncio
     async def test_sync_callback_task_creation_failure(self):
         """Test handling of task creation failures."""
+        # Mock: Generic component isolation for controlled unit testing
         connection_manager = MagicMock()
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         

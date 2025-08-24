@@ -30,9 +30,13 @@ class TestSecretManagerCore:
     @pytest.fixture
     def secret_manager(self):
         """Create secret manager with mocked dependencies."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager_core.SecretEncryption'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretLoader'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretManagerAuth'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.central_logger'):
             
             manager = EnhancedSecretManager(EnvironmentType.DEVELOPMENT)
@@ -162,9 +166,13 @@ class TestSecretManagerCore:
     
     def test_initialization_with_environment(self):
         """Test secret manager initialization with different environments."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager_core.SecretEncryption'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretLoader'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.SecretManagerAuth'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.secret_manager_core.central_logger'):
             
             manager = EnhancedSecretManager(EnvironmentType.PRODUCTION)

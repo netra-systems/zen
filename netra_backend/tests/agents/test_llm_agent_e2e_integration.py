@@ -71,6 +71,7 @@ async def test_websocket_message_streaming(supervisor_agent, mock_websocket_mana
     async def capture_message(run_id, message):
         messages_sent.append((run_id, message))
     
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket_manager.send_message = AsyncMock(side_effect=capture_message)
     
     # Run supervisor
@@ -95,6 +96,7 @@ async def test_tool_dispatcher_integration(mock_tool_dispatcher):
     assert "result" in result
     
     # Test tool error handling
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     mock_tool_dispatcher.dispatch_tool = AsyncMock(side_effect=Exception("Tool error"))
     
     with pytest.raises(Exception) as exc_info:
@@ -138,6 +140,7 @@ async def test_multi_agent_coordination(supervisor_agent):
 
 async def test_real_llm_interaction():
     """Test real LLM interaction with proper error handling"""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
     
     # Setup retry logic test
@@ -153,6 +156,7 @@ async def test_real_llm_interaction():
             "tool_calls": []
         }
     
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager.call_llm = AsyncMock(side_effect=mock_llm_call)
     
     # Test retry mechanism
@@ -171,14 +175,17 @@ async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response"""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     dispatcher = Mock(spec=ToolDispatcher)
     tool_results = []
     
+    # Mock: Component isolation for testing without external dependencies
     async def mock_dispatch(tool_name, params):
         result = _create_tool_result(tool_name, params)
         tool_results.append(result)
         return result
     
+    # Mock: Async component isolation for testing without real async operations
     dispatcher.dispatch_tool = AsyncMock(side_effect=mock_dispatch)
     
     # Simulate LLM response with tool calls
@@ -226,7 +233,9 @@ async def test_state_recovery_scenarios():
 async def test_integration_error_boundaries():
     """Test error boundaries in integration scenarios"""
     # Test database connection failure
+    # Mock: Database session isolation for transaction testing without real database dependency
     db_session = AsyncMock(spec=AsyncSession)
+    # Mock: Session isolation for controlled testing without external state
     db_session.execute = AsyncMock(side_effect=Exception("DB connection lost"))
     
     # Should handle gracefully
@@ -278,9 +287,13 @@ def _setup_persistence_mock(supervisor_agent):
         else:
             return (True, "test_id")
     
+    # Mock: Agent service isolation for testing without LLM agent execution
     supervisor_agent.state_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
+    # Mock: Async component isolation for testing without real async operations
     supervisor_agent.state_persistence.load_agent_state = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     supervisor_agent.state_persistence.get_thread_context = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     supervisor_agent.state_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
 
 def _create_tool_result(tool_name, params):

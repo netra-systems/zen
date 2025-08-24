@@ -58,8 +58,11 @@ class TestFreeToPaidConversionRevenuePipeline:
     def service_mocks(self):
         """Setup service mocks for external dependencies"""
         return {
+            # Mock: Generic component isolation for controlled unit testing
             "payment_service": Mock(),
+            # Mock: Generic component isolation for controlled unit testing
             "analytics_service": Mock(), 
+            # Mock: Generic component isolation for controlled unit testing
             "billing_service": Mock()
         }
 
@@ -76,12 +79,14 @@ class TestFreeToPaidConversionRevenuePipeline:
         await test_infra["session"].commit()
         
         # Mock upgrade offer generation
+        # Mock: Async component isolation for testing without real async operations
         service_mocks["billing_service"].generate_upgrade_offer = AsyncMock(return_value={
             "user_id": user.id, "to_plan": PlanTier.PRO, "discounted_price": Decimal("23.20")
         })
         offer = await service_mocks["billing_service"].generate_upgrade_offer(user.id)
         
         # Mock payment processing
+        # Mock: Async component isolation for testing without real async operations
         service_mocks["payment_service"].process_payment = AsyncMock(return_value={
             "status": "succeeded", "transaction_id": str(uuid.uuid4()), "amount_received": 2320
         })
@@ -107,6 +112,7 @@ class TestFreeToPaidConversionRevenuePipeline:
         await test_infra["session"].commit()
         
         # Mock payment failure then success
+        # Mock: Async component isolation for testing without real async operations
         service_mocks["payment_service"].process_payment_with_retry = AsyncMock(return_value={
             "initial_status": "failed", "retry_status": "succeeded", "final_amount": 2320
         })
@@ -129,12 +135,14 @@ class TestFreeToPaidConversionRevenuePipeline:
         await test_infra["session"].commit()
         
         # Mock feature access denial
+        # Mock: Async component isolation for testing without real async operations
         service_mocks["billing_service"].check_feature_access = AsyncMock(return_value={
             "access_granted": False, "required_plan": "pro", "upgrade_prompt": True
         })
         access = await service_mocks["billing_service"].check_feature_access(user.id, "advanced_analytics")
         
         # User converts after feature block
+        # Mock: Async component isolation for testing without real async operations
         service_mocks["billing_service"].process_feature_driven_conversion = AsyncMock(return_value={
             "conversion_source": "feature_block", "plan_upgrade": PlanTier.PRO
         })

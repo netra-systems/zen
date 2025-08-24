@@ -102,6 +102,7 @@ class TestMetricsCollectorCore:
 
         assert initial_task_count == 5
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.monitoring.metrics_collector.psutil')
 
     def test_gather_system_metrics_success(self, mock_psutil, collector):
@@ -120,6 +121,7 @@ class TestMetricsCollectorCore:
 
         assert metrics.active_connections == 10
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.monitoring.metrics_collector.psutil')
 
     def test_gather_system_metrics_with_none_values(self, mock_psutil, collector):
@@ -152,8 +154,10 @@ class TestMetricsCollectorCore:
 
         assert collector._metrics_buffer["system.cpu_percent"][0].value == 45.2
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.db.postgres.get_pool_status')
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.monitoring.metrics_collector.performance_manager')
 
     def test_gather_database_metrics_success(self, mock_perf_manager, mock_pool_status, collector):
@@ -188,6 +192,7 @@ class TestMetricsCollectorCore:
 
         assert collector._metrics_buffer["database.cache_hit_ratio"][0].value == 0.92
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.websocket_core.utils.get_connection_monitor')
 
     @pytest.mark.asyncio
@@ -223,6 +228,7 @@ class TestMetricsCollectorCore:
 
         assert efficiency_metric.value == 0.15  # 15/100
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.monitoring.metrics_collector.gc')
 
     def test_gather_memory_metrics(self, mock_gc, collector):
@@ -241,8 +247,10 @@ class TestMetricsCollectorCore:
 
         assert collector._metrics_buffer["memory.gc_generation_0"][0].value == 100
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.monitoring.metrics_collector.time.time')
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.monitoring.metrics_collector.gc.collect')
 
     def test_periodic_gc_triggered(self, mock_collect, mock_time, collector):
@@ -303,12 +311,16 @@ class TestMetricsCollectorCore:
 
         mock_psutil.cpu_percent.return_value = 25.5
 
+        # Mock: Component isolation for controlled unit testing
         mock_psutil.virtual_memory.return_value = Mock(percent=60.0, available=4096 * 1024 * 1024)
 
+        # Mock: Component isolation for controlled unit testing
         mock_psutil.disk_io_counters.return_value = Mock(read_bytes=1024 * 1024, write_bytes=512 * 1024)
 
+        # Mock: Component isolation for controlled unit testing
         mock_psutil.net_io_counters.return_value = Mock(bytes_sent=2048, bytes_recv=4096)
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_psutil.net_connections.return_value = [Mock()] * 10
     
     def _setup_mock_psutil_none_values(self, mock_psutil):
@@ -317,6 +329,7 @@ class TestMetricsCollectorCore:
 
         mock_psutil.cpu_percent.return_value = 15.0
 
+        # Mock: Component isolation for controlled unit testing
         mock_psutil.virtual_memory.return_value = Mock(percent=30.0, available=8192 * 1024 * 1024)
 
         mock_psutil.disk_io_counters.return_value = None
@@ -365,8 +378,10 @@ class TestMetricsCollectorCore:
 
         """Helper to create mock WebSocket manager."""
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
 
+        # Mock: Async component isolation for testing without real async operations
         mock_manager.get_stats = AsyncMock(return_value={
 
             "active_connections": 25, "total_connections": 150

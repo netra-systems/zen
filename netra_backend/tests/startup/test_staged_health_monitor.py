@@ -45,6 +45,7 @@ def mock_service_config() -> ServiceConfig:
 @pytest.fixture
 def mock_process() -> Mock:
     """Create mock process for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     process = Mock()
     process.poll.return_value = None  # Running process
     return process
@@ -172,6 +173,7 @@ class TestServiceRegistration:
         health_monitor.register_service(mock_service_config)
         
         # Create mock monitoring task
+        # Mock: Generic component isolation for controlled unit testing
         mock_task = Mock()
         health_monitor._monitoring_tasks["test_service"] = mock_task
         
@@ -201,7 +203,9 @@ class TestMonitoringLifecycle:
         """Test starting monitoring for registered service."""
         health_monitor.register_service(mock_service_config)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('asyncio.create_task') as mock_create_task:
+            # Mock: Generic component isolation for controlled unit testing
             mock_task = Mock()
             mock_create_task.return_value = mock_task
             
@@ -213,7 +217,9 @@ class TestMonitoringLifecycle:
     @pytest.mark.asyncio
     async def test_stop_monitoring(self, health_monitor: StagedHealthMonitor) -> None:
         """Test stopping all monitoring tasks."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_task1 = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_task2 = Mock()
         health_monitor._monitoring_tasks = {"service1": mock_task1, "service2": mock_task2}
         health_monitor._running = True
@@ -221,6 +227,7 @@ class TestMonitoringLifecycle:
         async def mock_gather_func(*args, **kwargs):
             return []
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('asyncio.gather', side_effect=mock_gather_func):
             await health_monitor.stop_monitoring()
             
@@ -480,9 +487,11 @@ class TestHealthCheckFactories:
         check = create_process_health_check(mock_process)
         assert check() is False
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('requests.get')
     def test_create_url_health_check_success(self, mock_get: Mock) -> None:
         """Test URL health check for successful response."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status_code = 200
         mock_get.return_value = mock_response
@@ -491,9 +500,11 @@ class TestHealthCheckFactories:
         assert check() is True
         mock_get.assert_called_once_with("http://api.example.com", timeout=5)
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('requests.get')
     def test_create_url_health_check_failure(self, mock_get: Mock) -> None:
         """Test URL health check for failed response."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status_code = 500
         mock_get.return_value = mock_response
@@ -501,6 +512,7 @@ class TestHealthCheckFactories:
         check = create_url_health_check("http://api.example.com")
         assert check() is False
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('requests.get')
     def test_create_url_health_check_exception(self, mock_get: Mock) -> None:
         """Test URL health check with connection exception."""
@@ -509,9 +521,11 @@ class TestHealthCheckFactories:
         check = create_url_health_check("http://api.example.com")
         assert check() is False
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('requests.get')
     def test_create_url_health_check_custom_timeout(self, mock_get: Mock) -> None:
         """Test URL health check with custom timeout."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status_code = 200
         mock_get.return_value = mock_response

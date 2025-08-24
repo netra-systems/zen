@@ -13,8 +13,10 @@ class NetworkTestHelpers:
     @staticmethod
     def mock_successful_response():
         """Mock successful HTTP response."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = AsyncMock()
         mock_response.status = 200
+        # Mock: Async component isolation for testing without real async operations
         mock_response.json = AsyncMock(return_value={"success": True})
         return mock_response
     

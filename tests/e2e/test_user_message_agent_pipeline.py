@@ -47,8 +47,11 @@ class UserMessagePipelineTester:
 
     async def create_test_supervisor(self) -> SupervisorAgent:
         """Create supervisor agent for pipeline testing."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = MagicMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = MagicMock()
         
         supervisor = SupervisorAgent(

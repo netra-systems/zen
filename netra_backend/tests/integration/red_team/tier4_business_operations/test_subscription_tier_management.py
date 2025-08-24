@@ -32,21 +32,32 @@ class TestSubscriptionTierManagement:
     @pytest.fixture
     def mock_subscription_service(self):
         """Mock subscription service for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_subscription = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.update_subscription = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_tier_change = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.calculate_prorated_charges = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.process_payment = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_billing_service(self):
         """Mock billing service for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.calculate_usage_charges = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.generate_invoice = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.process_refund = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.update_payment_method = AsyncMock()
         return service
     

@@ -1456,6 +1456,7 @@ class TestWebSocketLoadBalancing:
             
             # Simulate connection establishment
 
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_websocket = AsyncMock()
 
             connection_sessions.append({

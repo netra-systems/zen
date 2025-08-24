@@ -175,6 +175,7 @@ class TestAsyncDependencyChecker:
         assert checker.cache_dir.exists()
         assert isinstance(checker.dependency_hashes, dict)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('subprocess.run')
     def test_pip_check_performance(self, mock_subprocess, temp_project):
         """Test pip check performance for caching."""
@@ -228,6 +229,7 @@ class TestServiceStartupCoordinator:
     @pytest.fixture
     def mock_config(self):
         """Create mock launcher config."""
+        # Mock: Generic component isolation for controlled unit testing
         config = Mock()
         config.backend_port = 8000
         config.frontend_port = 3000
@@ -237,7 +239,9 @@ class TestServiceStartupCoordinator:
     def mock_coordinator(self, mock_config):
         """Create mock service startup coordinator."""
         services_config = {}
+        # Mock: Generic component isolation for controlled unit testing
         log_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         service_discovery = Mock()
         
         coordinator = ServiceStartupCoordinator(
@@ -247,8 +251,11 @@ class TestServiceStartupCoordinator:
         )
         
         # Mock the starter methods
+        # Mock: Generic component isolation for controlled unit testing
         coordinator.auth_starter.start_auth_service = Mock(return_value=(Mock(), Mock()))
+        # Mock: Generic component isolation for controlled unit testing
         coordinator.backend_starter.start_backend = Mock(return_value=(Mock(), Mock()))
+        # Mock: Generic component isolation for controlled unit testing
         coordinator.frontend_starter.start_frontend = Mock(return_value=(Mock(), Mock()))
         
         return coordinator
@@ -277,10 +284,12 @@ class TestServiceStartupCoordinator:
         
         mock_coordinator.cleanup()
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('requests.get')
     def test_async_health_checks(self, mock_requests, mock_coordinator):
         """Test asynchronous health checks."""
         # Mock successful health check responses
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status_code = 200
         mock_requests.return_value = mock_response

@@ -46,13 +46,17 @@ class TestWebSocketInitialization:
         This should fail due to the missing large_message_handler import.
         """
         # Mock the app
+        # Mock: Generic component isolation for controlled unit testing
         mock_app = MagicMock()
         
         # Mock logger
+        # Mock: Generic component isolation for controlled unit testing
         mock_logger = MagicMock()
         
         # Mock config to enable graceful startup
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.startup_module.get_config') as mock_get_config:
+            # Mock: Generic component isolation for controlled unit testing
             mock_config = MagicMock()
             mock_config.graceful_startup_mode = 'true'
             mock_get_config.return_value = mock_config
@@ -197,7 +201,9 @@ class TestStartupModuleFix:
         This simulates the corrected startup_module behavior.
         """
         # Mock the app and logger
+        # Mock: Generic component isolation for controlled unit testing
         mock_app = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_logger = MagicMock()
         
         # The fixed initialization should use consolidated imports
@@ -233,15 +239,20 @@ class TestStartupModuleFix:
         from netra_backend.app.config import get_config
         
         # Mock config with graceful mode
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.startup_module.get_config') as mock_get_config:
+            # Mock: Generic component isolation for controlled unit testing
             mock_config = MagicMock()
             mock_config.graceful_startup_mode = 'true'
             mock_get_config.return_value = mock_config
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_app = MagicMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_logger = MagicMock()
             
             # Even with a missing import, graceful mode should handle it
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.startup_module.initialize_websocket_components') as mock_init:
                 # Simulate the import error
                 mock_init.side_effect = ModuleNotFoundError("No module named 'large_message_handler'")

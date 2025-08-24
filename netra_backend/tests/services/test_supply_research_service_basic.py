@@ -21,12 +21,14 @@ from netra_backend.app.services.supply_research_service import SupplyResearchSer
 def service():
     """Create SupplyResearchService instance with mock database"""
     from unittest.mock import MagicMock
+    # Mock: Generic component isolation for controlled unit testing
     mock_db = MagicMock()
     return SupplyResearchService(mock_db)
 
 @pytest.fixture
 def sample_supply_item() -> AISupplyItem:
     """Create compact sample AISupplyItem fixture"""
+    # Mock: Service component isolation for predictable testing behavior
     item = MagicMock(spec=AISupplyItem)
     item.id = "supply-item-1"
     item.provider = "openai"
@@ -43,8 +45,11 @@ class TestServiceInitialization:
     
     def test_initialization_with_redis(self):
         """Test initialization with Redis available"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = MagicMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.services.supply_research_service.RedisManager') as mock_redis:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = MagicMock()
             mock_redis.return_value = mock_instance
             
@@ -55,7 +60,9 @@ class TestServiceInitialization:
     
     def test_initialization_without_redis(self):
         """Test initialization when Redis unavailable"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = MagicMock()
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_research_service.RedisManager', 
                    side_effect=Exception("Redis not available")):
             service = SupplyResearchService(mock_db)
@@ -182,6 +189,7 @@ class TestResearchSessionRetrieval:
     
     def _create_sample_session(self, session_id: str, status: str) -> ResearchSession:
         """Helper to create sample research session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = MagicMock(spec=ResearchSession)
         session.id = session_id
         session.status = status

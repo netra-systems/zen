@@ -30,6 +30,7 @@ class TestQualityRoute:
         """Test retrieving quality metrics."""
         mock_quality_service = MockServiceFactory.create_mock_quality_service()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.quality_gate.quality_gate_core.QualityGateService', return_value=mock_quality_service):
             response = basic_test_client.get("/api/quality/metrics")
             
@@ -52,6 +53,7 @@ class TestQualityRoute:
     
     def test_quality_aggregation(self, basic_test_client):
         """Test quality metrics aggregation."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.quality_monitoring.service.QualityMonitoringService.get_dashboard_data') as mock_agg:
             mock_agg.return_value = {
                 "period": "daily",
@@ -96,6 +98,7 @@ class TestQualityRoute:
             acknowledged=False
         )
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_service = Mock()
         mock_service.alert_history = [test_alert]
         
@@ -145,6 +148,7 @@ class TestQualityRoute:
             "granularity": "hourly"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.quality_analytics.analyze_trends') as mock_trends:
             mock_trends.return_value = {
                 "timeframe": "7d",
@@ -186,6 +190,7 @@ class TestQualityRoute:
             "metrics": ["accuracy", "response_time", "user_satisfaction"]
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.quality_analytics.compare_periods') as mock_compare:
             mock_compare.return_value = {
                 "baseline": {
@@ -230,6 +235,7 @@ class TestQualityRoute:
         }
         
         # Start monitoring
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.quality_monitor.start_real_time_monitoring') as mock_start:
             mock_start.return_value = {
                 "monitoring_id": "monitor_123",
@@ -242,6 +248,7 @@ class TestQualityRoute:
             monitoring_id = result["monitoring_id"]
         
         # Stop monitoring
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.quality_monitor.stop_monitoring') as mock_stop:
             mock_stop.return_value = {
                 "monitoring_id": monitoring_id,
@@ -255,6 +262,7 @@ class TestQualityRoute:
     def test_quality_report_generation(self, basic_test_client):
         """Test quality report generation."""
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.quality_handlers.handle_report_generation') as mock_report:
             from netra_backend.app.schemas.quality_types import (
                 QualityReport,

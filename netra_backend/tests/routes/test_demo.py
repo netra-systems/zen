@@ -25,6 +25,7 @@ class TestDemoRoutes:
     @pytest.fixture
     def mock_demo_service(self):
         """Create a mock demo service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = AsyncMock()
         return service
     
@@ -56,6 +57,7 @@ class TestDemoRoutes:
         )
         
         # Execute
+        # Mock: Background processing isolation for controlled test environments
         background_tasks = MagicMock()
         response = await demo_chat(
             request=request,
@@ -97,6 +99,7 @@ class TestDemoRoutes:
             industry="technology"
         )
         
+        # Mock: Background processing isolation for controlled test environments
         background_tasks = MagicMock()
         response = await demo_chat(
             request=request,
@@ -183,6 +186,7 @@ class TestDemoRoutes:
         )
         
         # Execute
+        # Mock: Background processing isolation for controlled test environments
         background_tasks = MagicMock()
         response = await calculate_roi(
             request=request,
@@ -253,6 +257,7 @@ class TestDemoRoutes:
         )
         
         # Execute
+        # Mock: Background processing isolation for controlled test environments
         background_tasks = MagicMock()
         response = await export_demo_report(
             request=request,
@@ -290,6 +295,7 @@ class TestDemoRoutes:
         with pytest.raises(HTTPException) as exc_info:
             await export_demo_report(
                 request=request,
+                # Mock: Background processing isolation for controlled test environments
                 background_tasks=MagicMock(),
                 demo_service=mock_demo_service,
                 current_user=None
@@ -418,6 +424,7 @@ class TestDemoRoutes:
         with pytest.raises(HTTPException) as exc_info:
             await demo_chat(
                 request=request,
+                # Mock: Background processing isolation for controlled test environments
                 background_tasks=MagicMock(),
                 demo_service=mock_demo_service,
                 current_user=None

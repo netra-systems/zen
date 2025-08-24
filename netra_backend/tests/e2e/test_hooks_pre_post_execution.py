@@ -79,8 +79,11 @@ class TestPreExecutionHooks:
     
     def _create_mock_hook_manager(self):
         """Create mock hook manager for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         quality_gate = Mock()
+        # Mock: Async component isolation for testing without real async operations
         quality_gate.validate_content = AsyncMock(return_value=self._create_validation_result())
+        # Mock: Generic component isolation for controlled unit testing
         monitoring = Mock()
         return QualityHooksManager(quality_gate, monitoring)
     
@@ -147,8 +150,11 @@ class TestPostExecutionHooks:
     
     def _create_mock_hook_manager(self):
         """Create mock hook manager for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         quality_gate = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         monitoring = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         monitoring.record_quality_event = AsyncMock()
         return QualityHooksManager(quality_gate, monitoring)
     
@@ -225,7 +231,9 @@ class TestHookExecutionSequence:
     
     def _create_hook_manager(self) -> QualityHooksManager:
         """Create quality hook manager for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         quality_gate = Mock()
+        # Mock: Async component isolation for testing without real async operations
         quality_gate.validate_content = AsyncMock(
             return_value=ValidationResult(
                 passed=True, 
@@ -233,7 +241,9 @@ class TestHookExecutionSequence:
                 retry_suggested=False
             )
         )
+        # Mock: Generic component isolation for controlled unit testing
         monitoring = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         monitoring.record_quality_event = AsyncMock()
         return QualityHooksManager(quality_gate, monitoring)
     

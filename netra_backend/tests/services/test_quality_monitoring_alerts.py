@@ -161,7 +161,9 @@ class TestMonitoringWithMocks:
     async def test_monitoring_with_no_data(self):
         """Test monitoring loop with no data"""
         service = QualityMonitoringService()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         service.redis_manager = AsyncMock()
+        # Mock: ClickHouse external database isolation for unit testing performance
         service.clickhouse_manager = AsyncMock()
         
         # Start and quickly stop monitoring

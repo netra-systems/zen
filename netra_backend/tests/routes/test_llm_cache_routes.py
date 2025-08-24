@@ -17,6 +17,7 @@ class TestLLMCacheRoute:
     
     def test_cache_metrics(self, base_client):
         """Test cache metrics retrieval."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.llm_cache_service.llm_cache_service.get_cache_metrics') as mock_metrics:
             mock_metrics.return_value = {
                 "hits": 150,
@@ -35,6 +36,7 @@ class TestLLMCacheRoute:
     
     def test_cache_invalidation(self, base_client):
         """Test cache invalidation endpoint."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.llm_cache_service.llm_cache_service.clear_cache') as mock_clear:
             mock_clear.return_value = 50
             
@@ -49,6 +51,7 @@ class TestLLMCacheRoute:
         """Test selective cache invalidation."""
         from netra_backend.app.routes.llm_cache import clear_cache_pattern
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.llm_cache_service.llm_cache_service.clear_cache_pattern') as mock_clear:
             mock_clear.return_value = 10
             

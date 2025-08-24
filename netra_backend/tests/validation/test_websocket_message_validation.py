@@ -27,6 +27,7 @@ class TestWebSocketMessageValidation:
     
     def test_validate_user_message_structure(self):
         """Test validation of user_message structure."""
+        # Mock: Generic component isolation for controlled unit testing
         handler = MessageHandler(Mock())
         
         # Valid message
@@ -205,6 +206,7 @@ class TestWebSocketMessageValidation:
     
     def test_message_type_variations(self):
         """Test different message type variations."""
+        # Mock: Generic component isolation for controlled unit testing
         handler = MessageHandler(Mock())
         
         # Standard types
@@ -226,6 +228,7 @@ class TestWebSocketMessageValidation:
     
     def test_malformed_json_handling(self):
         """Test handling of malformed JSON strings."""
+        # Mock: Generic component isolation for controlled unit testing
         processor = MessageProcessor(Mock(), Mock())
         
         # This would normally come as a string from WebSocket

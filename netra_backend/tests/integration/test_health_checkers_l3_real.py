@@ -63,6 +63,7 @@ class TestHealthCheckersL3Integration:
         db_url = postgres_container.get_connection_url()
         
         # Mock the database manager to use our container URL
+        # Mock: Component isolation for testing without external dependencies
         with pytest.mock.patch('netra_backend.app.core.unified.db_connection_manager.db_manager') as mock_db_manager:
             # Create real async engine
             async_url = db_url.replace("postgresql://", "postgresql+asyncpg://")
@@ -70,8 +71,11 @@ class TestHealthCheckersL3Integration:
             async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
             
             # Mock the session context manager to return real session
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm = pytest.mock.AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm.__aenter__ = pytest.mock.AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm.__aexit__ = pytest.mock.AsyncMock(return_value=None)
             mock_db_manager.get_async_session.return_value = mock_session_cm
             
@@ -93,6 +97,7 @@ class TestHealthCheckersL3Integration:
     async def test_postgres_health_real_connection_failure(self):
         """Test PostgreSQL health check with real connection failure."""
         # Use invalid connection parameters to test real failure
+        # Mock: Component isolation for testing without external dependencies
         with pytest.mock.patch('netra_backend.app.core.unified.db_connection_manager.db_manager') as mock_db_manager:
             # Simulate real connection failure by using invalid host
             mock_db_manager.get_async_session.side_effect = Exception("connection to server at \"invalid_host\" (127.0.0.1), port 5432 failed")
@@ -116,8 +121,10 @@ class TestHealthCheckersL3Integration:
         real_redis_client = aioredis.Redis(host=redis_host, port=redis_port, decode_responses=True)
         
         # Mock the redis manager to use our real client
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with pytest.mock.patch('netra_backend.app.redis_manager.redis_manager') as mock_manager:
             mock_manager.enabled = True
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_manager.get_client = pytest.mock.AsyncMock(return_value=real_redis_client)
             
             result = await check_redis_health()
@@ -138,8 +145,10 @@ class TestHealthCheckersL3Integration:
         # Create Redis client with invalid connection details
         invalid_redis_client = aioredis.Redis(host="invalid_redis_host", port=6379, decode_responses=True)
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with pytest.mock.patch('netra_backend.app.redis_manager.redis_manager') as mock_manager:
             mock_manager.enabled = True
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_manager.get_client = pytest.mock.AsyncMock(return_value=invalid_redis_client)
             
             result = await check_redis_health()
@@ -166,17 +175,23 @@ class TestHealthCheckersL3Integration:
         real_redis_client = aioredis.Redis(host=redis_host, port=redis_port, decode_responses=True)
         
         # Mock managers to use real services
+        # Mock: Component isolation for testing without external dependencies
         with pytest.mock.patch('netra_backend.app.core.unified.db_connection_manager.db_manager') as mock_db_manager, \
+             # Mock: Redis external service isolation for fast, reliable tests without network dependency
              pytest.mock.patch('netra_backend.app.redis_manager.redis_manager') as mock_redis_manager:
             
             # Setup real database session mock
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm = pytest.mock.AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm.__aenter__ = pytest.mock.AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm.__aexit__ = pytest.mock.AsyncMock(return_value=None)
             mock_db_manager.get_async_session.return_value = mock_session_cm
             
             # Setup real Redis client mock
             mock_redis_manager.enabled = True
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis_manager.get_client = pytest.mock.AsyncMock(return_value=real_redis_client)
             
             async def run_health_check_with_real_session():
@@ -216,15 +231,21 @@ class TestHealthCheckersL3Integration:
         import redis.asyncio as aioredis
         real_redis_client = aioredis.Redis(host=redis_host, port=redis_port, decode_responses=True)
         
+        # Mock: Component isolation for testing without external dependencies
         with pytest.mock.patch('netra_backend.app.core.unified.db_connection_manager.db_manager') as mock_db_manager, \
+             # Mock: Redis external service isolation for fast, reliable tests without network dependency
              pytest.mock.patch('netra_backend.app.redis_manager.redis_manager') as mock_redis_manager:
             
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm = pytest.mock.AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm.__aenter__ = pytest.mock.AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session_cm.__aexit__ = pytest.mock.AsyncMock(return_value=None)
             mock_db_manager.get_async_session.return_value = mock_session_cm
             
             mock_redis_manager.enabled = True
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis_manager.get_client = pytest.mock.AsyncMock(return_value=real_redis_client)
             
             async with postgres_session() as session:

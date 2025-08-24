@@ -21,8 +21,11 @@ def create_benchmark_supervisor(infrastructure, index):
     db_session, llm_manager, ws_manager = infrastructure
     setup_llm_responses(llm_manager)
     
+    # Mock: Generic component isolation for controlled unit testing
     mock_persistence = AsyncMock()
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, f"test_id_{index}"))
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
     
     return create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
@@ -59,11 +62,14 @@ def setup_e2e_responses(llm_manager):
         response_index += 1
         return result
     
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_structured_llm)
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.call_llm = AsyncMock(return_value={"content": "Optimization complete"})
 
 def create_e2e_persistence_mock():
     """Create persistence mock for e2e testing"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_persistence = AsyncMock()
     
     async def mock_save_agent_state(*args, **kwargs):
@@ -74,19 +80,28 @@ def create_e2e_persistence_mock():
         else:
             return (True, "test_id")
     
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock_persistence.get_thread_context = AsyncMock(return_value=None)
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     
     return mock_persistence
 
 def create_flow_persistence_mock():
     """Create persistence mock for flow testing"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_persistence = AsyncMock()
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_id"))
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock_persistence.get_thread_context = AsyncMock(return_value=None)
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
     return mock_persistence
 
@@ -105,8 +120,11 @@ async def run_concurrency_benchmark(concurrency_level):
         db_session, llm_manager, ws_manager = create_mock_infrastructure()
         setup_llm_responses(llm_manager)
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_persistence = AsyncMock()
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_persistence.save_agent_state = AsyncMock(return_value=(True, f"test_id_{i}"))
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_persistence.load_agent_state = AsyncMock(return_value=None)
         
         supervisor = create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)

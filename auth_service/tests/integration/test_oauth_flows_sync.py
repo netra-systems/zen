@@ -141,12 +141,14 @@ class TestOAuthProviderSupport:
             assert endpoint in endpoints
             assert endpoints[endpoint] is not None
 
+# Mock: Component isolation for testing without external dependencies
 @patch('httpx.AsyncClient')
 def test_oauth_token_exchange_mocked(mock_client):
     """Test OAuth token exchange with mocked HTTP client"""
     from unittest.mock import AsyncMock
     
     # Mock HTTP client responses
+    # Mock: Generic component isolation for controlled unit testing
     mock_async_client = AsyncMock()
     mock_client.return_value.__aenter__.return_value = mock_async_client
     
@@ -158,6 +160,7 @@ def test_oauth_token_exchange_mocked(mock_client):
         "expires_in": 3600
     }
     
+    # Mock: Generic component isolation for controlled unit testing
     token_response = Mock()
     token_response.status_code = 200
     token_response.json.return_value = mock_google_tokens
@@ -171,6 +174,7 @@ def test_oauth_token_exchange_mocked(mock_client):
         "verified_email": True
     }
     
+    # Mock: Generic component isolation for controlled unit testing
     user_response = Mock()
     user_response.status_code = 200
     user_response.json.return_value = mock_user_info

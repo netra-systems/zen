@@ -17,7 +17,9 @@ from netra_backend.app.services.message_handlers import MessageHandlerService
 
 @pytest.mark.asyncio
 async def test_message_handler_service_initialization():
+    # Mock: Generic component isolation for controlled unit testing
     mock_supervisor = Mock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_thread_service = Mock()
     
     handler_service = MessageHandlerService(mock_supervisor, mock_thread_service)
@@ -25,19 +27,27 @@ async def test_message_handler_service_initialization():
     assert handler_service.thread_service != None
 @pytest.mark.asyncio
 async def test_handle_start_agent():
+    # Mock: Generic component isolation for controlled unit testing
     mock_supervisor = Mock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_thread_service = Mock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session = Mock(spec=AsyncSession)
     
     # Mock supervisor.run to return a response
+    # Mock: Async component isolation for testing without real async operations
     mock_supervisor.run = AsyncMock(return_value={"response": "Test response"})
     
     handler_service = MessageHandlerService(mock_supervisor, mock_thread_service)
     
     # Mock thread service to return a thread
+    # Mock: Async component isolation for testing without real async operations
     mock_thread_service.get_or_create_thread = AsyncMock(return_value=Mock(id="thread_123"))
+    # Mock: Generic component isolation for controlled unit testing
     mock_thread_service.create_message = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     mock_thread_service.create_run = AsyncMock(return_value=Mock(id="run_123"))
+    # Mock: Generic component isolation for controlled unit testing
     mock_thread_service.update_run_status = AsyncMock()
     
     payload = {
@@ -47,8 +57,11 @@ async def test_handle_start_agent():
     }
     
     # Test that the handler properly processes the request
+    # Mock: Component isolation for testing without external dependencies
     with patch('app.services.message_handlers.manager') as mock_manager:
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.send_error = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.send_message = AsyncMock()
         
         # Verify the handler accepts valid payload structure

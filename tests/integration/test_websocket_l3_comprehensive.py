@@ -318,8 +318,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -343,8 +345,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -380,8 +384,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -417,8 +423,10 @@ class TestWebSocketL3Integration:
         ws_client.auto_reconnect = True
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -450,8 +458,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -484,8 +494,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -520,6 +532,7 @@ class TestWebSocketL3Integration:
 
         for i in range(3):
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             client_id = f"client_{i}"
@@ -561,6 +574,7 @@ class TestWebSocketL3Integration:
 
         for i in range(2):
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             result = await ws_manager.add_user_connection(user_id, f"conn_{i}", mock_ws)
@@ -569,6 +583,7 @@ class TestWebSocketL3Integration:
         
         # Should reject additional connection
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = AsyncMock()
 
         result = await ws_manager.add_user_connection(user_id, "conn_3", mock_ws)
@@ -586,8 +601,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -615,8 +632,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -649,8 +668,10 @@ class TestWebSocketL3Integration:
         ws_client.rate_limit = 5  # 5 messages per second
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -685,8 +706,10 @@ class TestWebSocketL3Integration:
         assert ws_client.state == ConnectionState.DISCONNECTED
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -723,8 +746,10 @@ class TestWebSocketL3Integration:
         assert len(ws_client.message_queue) == 2
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -751,6 +776,7 @@ class TestWebSocketL3Integration:
 
         user_id = "user_123"
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = AsyncMock()
         
         # User comes online
@@ -818,8 +844,10 @@ class TestWebSocketL3Integration:
         ws_client.enable_compression = True
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -851,8 +879,10 @@ class TestWebSocketL3Integration:
         
         # Add clients for different tenants
 
+        # Mock: Generic component isolation for controlled unit testing
         tenant1_ws = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         tenant2_ws = AsyncMock()
         
 
@@ -891,6 +921,7 @@ class TestWebSocketL3Integration:
         }
         
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = AsyncMock()
 
         conn_id = await ws_manager.add_connection_with_metadata(mock_ws, metadata)
@@ -918,6 +949,7 @@ class TestWebSocketL3Integration:
 
         for i in range(5):
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             conn_id = f"conn_{i}"
@@ -955,8 +987,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -1027,8 +1061,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_connect.return_value.__aenter__.return_value = AsyncMock()
             
             # Should include proper upgrade headers
@@ -1059,8 +1095,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_ws.subprotocol = "chat.v2"
@@ -1086,6 +1124,7 @@ class TestWebSocketL3Integration:
         ws_client.connect_timeout = 1  # 1 second
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
             mock_connect.side_effect = asyncio.TimeoutError()
@@ -1109,8 +1148,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -1147,8 +1188,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -1197,6 +1240,7 @@ class TestWebSocketL3Integration:
         ws_manager.enable_metrics = True
         
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = AsyncMock()
         
         # Track various metrics
@@ -1234,6 +1278,7 @@ class TestWebSocketL3Integration:
 
         for i in range(3):
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             conn_id = f"conn_{i}"
@@ -1248,6 +1293,7 @@ class TestWebSocketL3Integration:
         
         # Should reject new connections
 
+        # Mock: Generic component isolation for controlled unit testing
         new_ws = AsyncMock()
 
         result = await ws_manager.add_client_if_not_draining("new_conn", new_ws)
@@ -1271,8 +1317,10 @@ class TestWebSocketL3Integration:
         ws_client = WebSocketClient("ws://localhost:8000/websocket")
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -1304,8 +1352,10 @@ class TestWebSocketL3Integration:
         ws_client.set_state({"user_id": "123", "subscriptions": ["room1", "room2"]})
         
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect') as mock_connect:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
 
             mock_connect.return_value.__aenter__.return_value = mock_ws
@@ -1348,6 +1398,7 @@ class WebSocketConnectionPool:
 
         if len(self.connections) < self.max_size:
 
+            # Mock: Generic component isolation for controlled unit testing
             conn = AsyncMock()
 
             self.connections[url] = conn

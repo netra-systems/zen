@@ -69,24 +69,30 @@ class TestOAuthStagingRedirectFlow:
         from auth_service.auth_core.routes.auth_routes import oauth_callback
         
         # Mock request with OAuth callback data
+        # Mock: Generic component isolation for controlled unit testing
         mock_request = MagicMock()
         mock_request.client.host = "192.168.1.1"
         mock_request.headers = {"user-agent": "test-browser"}
         mock_request.cookies = {}
         
         # Mock successful OAuth token exchange
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient.post") as mock_post:
+            # Mock: Generic component isolation for controlled unit testing
             mock_response = MagicMock()
             mock_response.json.return_value = {
                 "access_token": "test-access-token",
                 "id_token": "test-id-token",
                 "token_type": "Bearer"
             }
+            # Mock: Generic component isolation for controlled unit testing
             mock_response.raise_for_status = MagicMock()
             mock_post.return_value = mock_response
             
             # Mock user info retrieval
+            # Mock: Component isolation for testing without external dependencies
             with patch("httpx.AsyncClient.get") as mock_get:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_user_response = MagicMock()
                 mock_user_response.json.return_value = {
                     "id": "test-user-id",
@@ -148,6 +154,7 @@ class TestOAuthStagingRedirectFlow:
         auth_service = AuthService()
         
         # Mock the token exchange request
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient.post") as mock_post:
             # Capture the request data
             actual_data = {}
@@ -155,11 +162,13 @@ class TestOAuthStagingRedirectFlow:
             async def capture_request(*args, **kwargs):
                 if "data" in kwargs:
                     actual_data.update(kwargs["data"])
+                # Mock: Generic component isolation for controlled unit testing
                 mock_response = MagicMock()
                 mock_response.json.return_value = {
                     "access_token": "test-token",
                     "id_token": "test-id"
                 }
+                # Mock: Generic component isolation for controlled unit testing
                 mock_response.raise_for_status = MagicMock()
                 return mock_response
             

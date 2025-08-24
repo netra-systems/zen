@@ -59,6 +59,7 @@ def test_backend_config_create_base_config_missing_vars():
         }
     }
     
+    # Mock: Component isolation for testing without external dependencies
     with patch('builtins.open', mock_open(read_data=str(mock_config_data))):
         from netra_backend.app.core.configuration.base import ConfigurationManager
         

@@ -26,9 +26,11 @@ async def test_initialization_manager():
         )
         
         # Create mock dependencies
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
         mock_llm_manager.enabled = True
         
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         
         # Create a simple mock agent class
@@ -61,6 +63,7 @@ async def test_initialization_manager():
                 self.llm_manager = llm_manager
                 self.name = "FailingAgent"
                 
+        # Mock: Generic component isolation for controlled unit testing
         failing_llm = Mock()
         failing_llm.enabled = True
         
@@ -88,9 +91,11 @@ async def test_data_agent_modular():
         from netra_backend.app.agents.data_sub_agent.agent_core import DataSubAgent
         
         # Create mock dependencies
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
         mock_llm_manager.enabled = False  # Force fallback mode
         
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         
         # Test initialization
@@ -106,6 +111,7 @@ async def test_data_agent_modular():
         # Test execution context creation
         from netra_backend.app.agents.state import DeepAgentState
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_state = Mock()
         mock_state.user_request = "test request"
         
@@ -131,9 +137,11 @@ async def test_enhanced_registry():
         )
         
         # Create mock dependencies
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
         mock_llm_manager.enabled = True
         
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         
         # Create registry

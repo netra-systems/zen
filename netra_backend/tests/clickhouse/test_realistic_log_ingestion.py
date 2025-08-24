@@ -27,6 +27,7 @@ class TestRealisticLogIngestion:
         logs = generate_realistic_logs(1000)
         mock_clickhouse_client = create_mock_clickhouse_client()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('netra_backend.app.db.clickhouse.get_clickhouse_client') as mock_client:
             mock_client.return_value.__aenter__.return_value = mock_clickhouse_client
             

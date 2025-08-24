@@ -75,16 +75,21 @@ class TestAuthToWebSocketFlow:
         
         # Setup mocks
 
+        # Mock: Authentication service isolation for testing without real auth flows
         auth_service = Mock(spec=AuthService)
 
+        # Mock: Async component isolation for testing without real async operations
         auth_service.validate_token = AsyncMock(return_value=mock_user)
         
         ws_manager = WebSocketManager()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.accept = AsyncMock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
         
         # Execute auth validation
@@ -122,12 +127,15 @@ class TestAuthToWebSocketFlow:
 
         """Test invalid token prevents WS connection."""
         
+        # Mock: Authentication service isolation for testing without real auth flows
         auth_service = Mock(spec=AuthService)
 
+        # Mock: Async component isolation for testing without real async operations
         auth_service.validate_token = AsyncMock(side_effect=ValueError("Invalid token"))
         
         ws_manager = WebSocketManager()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         
         # Attempt connection with invalid token
@@ -163,8 +171,10 @@ class TestAuthToWebSocketFlow:
 
         )
         
+        # Mock: Authentication service isolation for testing without real auth flows
         auth_service = Mock(spec=AuthService)
 
+        # Mock: Async component isolation for testing without real async operations
         auth_service.validate_token = AsyncMock(
 
             side_effect=jwt.ExpiredSignatureError("Token expired")
@@ -189,8 +199,10 @@ class TestAuthToWebSocketFlow:
 
         )
         
+        # Mock: Authentication service isolation for testing without real auth flows
         auth_service = Mock(spec=AuthService)
 
+        # Mock: Async component isolation for testing without real async operations
         auth_service.validate_token = AsyncMock(
 
             side_effect=ConnectionError("Auth service unavailable")
@@ -222,8 +234,10 @@ class TestAuthToWebSocketFlow:
 
         """Test system handles concurrent auth requests."""
         
+        # Mock: Authentication service isolation for testing without real auth flows
         auth_service = Mock(spec=AuthService)
 
+        # Mock: Async component isolation for testing without real async operations
         auth_service.validate_token = AsyncMock(return_value=mock_user)
 
         ws_manager = WebSocketManager()
@@ -234,8 +248,10 @@ class TestAuthToWebSocketFlow:
 
         for i in range(10):
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = Mock()
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws.accept = AsyncMock()
 
             user_id = f"user_{i}"
@@ -258,10 +274,13 @@ class TestAuthToWebSocketFlow:
         """Test auth flow with Redis session storage."""
         from netra_backend.app.services.redis_manager import RedisManager
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         redis_manager = Mock(spec=RedisManager)
 
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_manager.set = AsyncMock(return_value=True)
 
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_manager.get = AsyncMock(return_value=json.dumps({
 
             "user_id": mock_user.id,
@@ -299,10 +318,12 @@ class TestAuthToWebSocketFlow:
         
         ws_manager = WebSocketManager()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
 
         mock_websocket.headers = {"Authorization": f"Bearer {auth_token}"}
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.accept = AsyncMock()
         
         # Extract and validate token from headers

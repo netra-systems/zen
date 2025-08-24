@@ -58,6 +58,7 @@ async def test_startup_manager_initialization(startup_manager, app):
 async def test_startup_manager_register_component(startup_manager):
     """Test component registration in StartupManager."""
     # Create a mock component
+    # Mock: Async component isolation for testing without real async operations
     mock_component = AsyncMock(return_value=True)
     
     # Register the component
@@ -81,6 +82,7 @@ async def test_startup_manager_dependency_resolution(startup_manager):
     # Register components with dependencies
     startup_manager.register_component(
         name="database",
+        # Mock: Async component isolation for testing without real async operations
         init_func=AsyncMock(return_value=True),
         priority="CRITICAL",
         dependencies=[]
@@ -88,6 +90,7 @@ async def test_startup_manager_dependency_resolution(startup_manager):
     
     startup_manager.register_component(
         name="cache",
+        # Mock: Async component isolation for testing without real async operations
         init_func=AsyncMock(return_value=True),
         priority="HIGH",
         dependencies=["database"]
@@ -95,6 +98,7 @@ async def test_startup_manager_dependency_resolution(startup_manager):
     
     startup_manager.register_component(
         name="api",
+        # Mock: Async component isolation for testing without real async operations
         init_func=AsyncMock(return_value=True),
         priority="MEDIUM",
         dependencies=["database", "cache"]
@@ -115,12 +119,14 @@ async def test_startup_manager_graceful_degradation(startup_manager, app):
     # Register a critical component that succeeds
     startup_manager.register_component(
         name="database",
+        # Mock: Async component isolation for testing without real async operations
         init_func=AsyncMock(return_value=True),
         priority="CRITICAL",
         dependencies=[]
     )
     
     # Register a non-critical component that fails
+    # Mock: Async component isolation for testing without real async operations
     failing_func = AsyncMock(side_effect=Exception("Component failed"))
     startup_manager.register_component(
         name="monitoring",
@@ -147,11 +153,14 @@ def test_database_initializer_creation(database_initializer):
     assert hasattr(database_initializer, 'check_database_exists')
 
 
+# Mock: Component isolation for testing without external dependencies
 @patch('netra_backend.app.db.database_initializer.psycopg2.connect')
 def test_database_initializer_check_exists(mock_connect, database_initializer):
     """Test database existence checking."""
     # Mock successful connection
+    # Mock: Generic component isolation for controlled unit testing
     mock_conn = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_cursor = MagicMock()
     mock_conn.cursor.return_value = mock_cursor
     mock_connect.return_value = mock_conn
@@ -164,11 +173,14 @@ def test_database_initializer_check_exists(mock_connect, database_initializer):
     mock_cursor.execute.assert_called()
 
 
+# Mock: Component isolation for testing without external dependencies
 @patch('netra_backend.app.db.database_initializer.psycopg2.connect')
 def test_database_initializer_create_database(mock_connect, database_initializer):
     """Test database creation."""
     # Mock connection
+    # Mock: Generic component isolation for controlled unit testing
     mock_conn = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_cursor = MagicMock()
     mock_conn.cursor.return_value = mock_cursor
     mock_connect.return_value = mock_conn
@@ -200,6 +212,7 @@ async def test_full_startup_integration(app):
     for name, (priority, deps) in components.items():
         startup_manager.register_component(
             name=name,
+            # Mock: Async component isolation for testing without real async operations
             init_func=AsyncMock(return_value=True),
             priority=priority,
             dependencies=deps
@@ -255,6 +268,7 @@ async def test_startup_metrics_collection(startup_manager, app):
     # Register components
     startup_manager.register_component(
         name="fast_component",
+        # Mock: Async component isolation for testing without real async operations
         init_func=AsyncMock(return_value=True),
         priority="HIGH",
         dependencies=[]

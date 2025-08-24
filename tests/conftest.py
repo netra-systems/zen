@@ -156,11 +156,17 @@ def mock_redis_client():
     mock = MagicMock()
     mock.connect = AsyncMock(return_value=None)
     mock.disconnect = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.get = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.set = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.delete = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.exists = AsyncMock(return_value=False)
+    # Mock: Async component isolation for testing without real async operations
     mock.ping = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     mock.aclose = AsyncMock(return_value=None)
     return mock
 
@@ -172,8 +178,11 @@ def mock_redis_manager():
     mock = MagicMock()
     mock.enabled = True
     mock.get = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.set = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     mock.delete = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.exists = AsyncMock(return_value=False)
     return mock
 
@@ -185,10 +194,15 @@ def mock_clickhouse_client():
     mock = MagicMock()
     mock.connect = AsyncMock(return_value=None)
     mock.disconnect = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.execute = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.fetch = AsyncMock(return_value=[])
+    # Mock: Async component isolation for testing without real async operations
     mock.insert_data = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.command = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.ping = AsyncMock(return_value=True)
     return mock
 
@@ -210,9 +224,13 @@ def mock_websocket_manager():
     mock = MagicMock()
     mock.active_connections = {}
     mock.connect = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.disconnect = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.send_message = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.broadcast = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.shutdown = AsyncMock(return_value=None)
     return mock
 

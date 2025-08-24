@@ -30,21 +30,28 @@ from netra_backend.app.redis_manager import RedisManager
 @pytest.fixture
 def mock_llm_manager():
     """Create a mock LLM manager."""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock = Mock(spec=LLMManager)
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock.ask_llm = AsyncMock()
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock.ask_structured_llm = AsyncMock(side_effect=Exception("Structured generation not available in test"))
     return mock
 
 @pytest.fixture
 def mock_tool_dispatcher():
     """Create a mock tool dispatcher."""
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     return Mock(spec=ToolDispatcher)
 
 @pytest.fixture
 def mock_redis_manager():
     """Create a mock Redis manager."""
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock = Mock(spec=RedisManager)
+    # Mock: Async component isolation for testing without real async operations
     mock.get = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock.set = AsyncMock(return_value=True)
     return mock
 

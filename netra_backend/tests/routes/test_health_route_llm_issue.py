@@ -137,6 +137,7 @@ def test_llm_manager_instantiation_without_settings():
     # And it doesn't have is_healthy() method
     assert not hasattr(llm_no_settings, 'is_healthy')
 
+# Mock: Component isolation for testing without external dependencies
 @patch('netra_backend.app.core.health.checks.llm_manager')
 def test_health_check_with_mocked_llm_manager(mock_llm_manager):
     """

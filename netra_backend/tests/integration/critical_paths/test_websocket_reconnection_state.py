@@ -729,24 +729,34 @@ async def redis_client():
     except Exception:
         # Use mock for CI environments
 
+        # Mock: Generic component isolation for controlled unit testing
         client = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         client.hset = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         client.hgetall = AsyncMock(return_value={})
 
+        # Mock: Generic component isolation for controlled unit testing
         client.expire = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         client.llen = AsyncMock(return_value=0)
 
+        # Mock: Generic component isolation for controlled unit testing
         client.rpush = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         client.lrange = AsyncMock(return_value=[])
 
+        # Mock: Async component isolation for testing without real async operations
         client.delete = AsyncMock(return_value=1)
 
+        # Mock: Async component isolation for testing without real async operations
         client.keys = AsyncMock(return_value=[])
 
+        # Mock: Async component isolation for testing without real async operations
         client.ttl = AsyncMock(return_value=600)
 
         yield client
@@ -786,6 +796,7 @@ async def test_connection_state_preservation(reconnection_manager):
     
     # Register session
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
 
     await reconnection_manager.register_session(session_id, websocket_mock, initial_state)
@@ -819,6 +830,7 @@ async def test_message_buffering_during_disconnect(reconnection_manager):
 
     session_id = "test_message_buffering"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Register and disconnect session
@@ -870,6 +882,7 @@ async def test_successful_reconnection_with_state_restoration(reconnection_manag
     
     # Register, disconnect, and buffer messages
 
+    # Mock: Generic component isolation for controlled unit testing
     original_websocket = AsyncMock()
 
     await reconnection_manager.register_session(session_id, original_websocket, initial_state)
@@ -884,6 +897,7 @@ async def test_successful_reconnection_with_state_restoration(reconnection_manag
     
     # Attempt reconnection
 
+    # Mock: Generic component isolation for controlled unit testing
     new_websocket = AsyncMock()
 
     reconnection_result = await reconnection_manager.simulate_reconnection(session_id, new_websocket)
@@ -917,6 +931,7 @@ async def test_reconnection_attempt_limits(reconnection_manager):
 
     session_id = "test_attempt_limits"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Register and disconnect session
@@ -935,6 +950,7 @@ async def test_reconnection_attempt_limits(reconnection_manager):
 
     for attempt in range(6):  # More than max attempts
 
+        # Mock: Generic component isolation for controlled unit testing
         new_websocket = AsyncMock()
 
         result = await reconnection_manager.simulate_reconnection(session_id, new_websocket)
@@ -968,6 +984,7 @@ async def test_message_buffer_size_limits(reconnection_manager):
 
     session_id = "test_buffer_limits"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Register and disconnect session
@@ -1013,6 +1030,7 @@ async def test_concurrent_reconnection_attempts(reconnection_manager):
 
         session_id = f"concurrent_session_{i}"
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket_mock = AsyncMock()
 
         await reconnection_manager.register_session(session_id, websocket_mock, {"user_id": f"user_{i}"})
@@ -1025,6 +1043,7 @@ async def test_concurrent_reconnection_attempts(reconnection_manager):
 
     async def attempt_reconnection(session_id: str):
 
+        # Mock: Generic component isolation for controlled unit testing
         new_websocket = AsyncMock()
 
         return await reconnection_manager.simulate_reconnection(session_id, new_websocket)
@@ -1058,6 +1077,7 @@ async def test_state_expiration_handling(reconnection_manager):
 
     session_id = "test_state_expiration"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Register and disconnect session
@@ -1076,6 +1096,7 @@ async def test_state_expiration_handling(reconnection_manager):
     
     # Attempt reconnection with expired state
 
+    # Mock: Generic component isolation for controlled unit testing
     new_websocket = AsyncMock()
 
     result = await reconnection_manager.simulate_reconnection(session_id, new_websocket)
@@ -1097,6 +1118,7 @@ async def test_message_replay_ordering(reconnection_manager):
 
     session_id = "test_message_ordering"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Register and disconnect session
@@ -1129,6 +1151,7 @@ async def test_message_replay_ordering(reconnection_manager):
     
     # Reconnect and verify order
 
+    # Mock: Generic component isolation for controlled unit testing
     new_websocket = AsyncMock()
 
     result = await reconnection_manager.simulate_reconnection(session_id, new_websocket)
@@ -1163,6 +1186,7 @@ async def test_cleanup_stale_sessions(reconnection_manager):
 
         session_id = f"stale_session_{i}"
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket_mock = AsyncMock()
 
         await reconnection_manager.register_session(session_id, websocket_mock)
@@ -1208,6 +1232,7 @@ async def test_comprehensive_metrics_tracking(reconnection_manager):
 
     session_id = "metrics_test_session"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Register, disconnect, buffer message, reconnect
@@ -1218,6 +1243,7 @@ async def test_comprehensive_metrics_tracking(reconnection_manager):
 
     await reconnection_manager.simulate_message_during_disconnect(session_id, {"type": "test", "content": "metrics"})
     
+    # Mock: Generic component isolation for controlled unit testing
     new_websocket = AsyncMock()
 
     await reconnection_manager.simulate_reconnection(session_id, new_websocket)

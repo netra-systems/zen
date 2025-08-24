@@ -604,10 +604,13 @@ async def redis_client():
     except Exception:
         # Use mock for CI environments
 
+        # Mock: Generic component isolation for controlled unit testing
         client = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         client.publish = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         client.pubsub = AsyncMock()
 
         yield client
@@ -642,6 +645,7 @@ async def test_broadcast_to_all_clients(broadcast_manager):
 
         client_id = f"client_{i}"
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket_mock = AsyncMock()
 
         await broadcast_manager.broadcaster.register_client(client_id, websocket_mock)
@@ -684,10 +688,13 @@ async def test_subscription_based_broadcast(broadcast_manager):
     """Test broadcasting to clients subscribed to specific channels."""
     # Register clients with different subscriptions
 
+    # Mock: Generic component isolation for controlled unit testing
     client1_websocket = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     client2_websocket = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     client3_websocket = AsyncMock()
     
     await broadcast_manager.broadcaster.register_client(
@@ -730,8 +737,10 @@ async def test_user_targeted_messaging(broadcast_manager):
     """Test sending messages to specific users."""
     # Register clients for different users
 
+    # Mock: Generic component isolation for controlled unit testing
     user1_websocket = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     user2_websocket = AsyncMock()
     
     # Simulate user-specific clients
@@ -802,6 +811,7 @@ async def test_redis_pubsub_message_routing(broadcast_manager):
     
     # Register a client
 
+    # Mock: Generic component isolation for controlled unit testing
     client_websocket = AsyncMock()
 
     await broadcast_manager.broadcaster.register_client(
@@ -840,10 +850,12 @@ async def test_message_delivery_failure_handling(broadcast_manager):
     """Test handling of WebSocket delivery failures."""
     # Register client with failing websocket
 
+    # Mock: Generic component isolation for controlled unit testing
     failing_websocket = AsyncMock()
 
     failing_websocket.send_json.side_effect = Exception("Connection lost")
     
+    # Mock: Generic component isolation for controlled unit testing
     working_websocket = AsyncMock()
     
     await broadcast_manager.broadcaster.register_client("failing_client", failing_websocket)
@@ -886,6 +898,7 @@ async def test_concurrent_broadcasting_performance(broadcast_manager):
 
         client_id = f"perf_client_{i}"
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket_mock = AsyncMock()
 
         await broadcast_manager.broadcaster.register_client(client_id, websocket_mock)
@@ -929,6 +942,7 @@ async def test_client_connection_lifecycle(broadcast_manager):
 
     client_id = "lifecycle_test_client"
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
     
     # Register client
@@ -1005,6 +1019,7 @@ async def test_broadcast_metrics_tracking(broadcast_manager):
 
     for i in range(3):
 
+        # Mock: Generic component isolation for controlled unit testing
         client_websocket = AsyncMock()
 
         await broadcast_manager.broadcaster.register_client(f"metrics_client_{i}", client_websocket)
@@ -1047,6 +1062,7 @@ async def test_fan_out_message_distribution(broadcast_manager):
 
             client_id = f"{group}_client_{i}"
 
+            # Mock: Generic component isolation for controlled unit testing
             websocket_mock = AsyncMock()
 
             await broadcast_manager.broadcaster.register_client(client_id, websocket_mock, [group])

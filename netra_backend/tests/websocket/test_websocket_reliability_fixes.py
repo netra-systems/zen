@@ -65,8 +65,10 @@ class TestDatabaseConnectionPooling:
 
         pool = DatabaseConnectionPool(max_pool_size=3)
         
+        # Mock: Session isolation for controlled testing without external state
         with patch('netra_backend.app.routes.websocket_enhanced.async_session_factory') as mock_factory:
 
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
 
             mock_factory.return_value = mock_session
@@ -87,8 +89,10 @@ class TestDatabaseConnectionPooling:
 
         pool = DatabaseConnectionPool(max_pool_size=2)
         
+        # Mock: Session isolation for controlled testing without external state
         with patch('netra_backend.app.routes.websocket_enhanced.async_session_factory') as mock_factory:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_factory.return_value = AsyncMock()
             
             # Fill the pool
@@ -111,6 +115,7 @@ class TestDatabaseConnectionPooling:
 
         pool = DatabaseConnectionPool(max_pool_size=3)
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_factory = AsyncMock()
         
         await pool.return_session_to_pool(mock_factory)
@@ -130,6 +135,7 @@ class TestJWTTokenRefresh:
 
         manager = WebSocketConnectionManager()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock()
         
         # Token expires in 10 minutes (600 seconds)
@@ -162,6 +168,7 @@ class TestJWTTokenRefresh:
 
         manager = WebSocketConnectionManager()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock()
         
         # Token expires in 10 minutes
@@ -178,6 +185,7 @@ class TestJWTTokenRefresh:
 
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('asyncio.sleep') as mock_sleep:
 
             with patch.object(manager, '_refresh_connection_token', return_value=True):
@@ -203,10 +211,13 @@ class TestJWTTokenRefresh:
 
         manager = WebSocketConnectionManager()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.close = AsyncMock()
         
         # Token already expired
@@ -243,14 +254,17 @@ class TestJWTTokenRefresh:
 
         manager = WebSocketConnectionManager()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
 
         mock_websocket.query_params = {"token": "old_token"}
         
         session_info = {"current_token": "old_token"}
         
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.websocket_enhanced.auth_client') as mock_auth:
 
             mock_auth.refresh_token.return_value = {
@@ -774,14 +788,18 @@ class TestIntegrationScenarios:
 
         manager = WebSocketConnectionManager()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.close = AsyncMock()
         
         session_info = {"current_token": "expiring_token"}
         
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.websocket_enhanced.auth_client') as mock_auth:
             # Simulate network failure during refresh
 
@@ -804,8 +822,10 @@ class TestIntegrationScenarios:
 
         pool = DatabaseConnectionPool(max_pool_size=1)
         
+        # Mock: Session isolation for controlled testing without external state
         with patch('netra_backend.app.routes.websocket_enhanced.async_session_factory') as mock_factory:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_factory.return_value = AsyncMock()
             
             # Exhaust the pool

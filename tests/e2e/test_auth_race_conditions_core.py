@@ -58,17 +58,24 @@ CONCURRENCY_TEST_CONFIG = {
 async def isolated_auth_environment():
     """Create an isolated auth environment for testing"""
     # Mock auth service components
+    # Mock: Authentication service isolation for testing without real auth flows
     auth_service = AsyncMock(spec=AuthService)
+    # Mock: JWT token handling isolation to avoid real crypto dependencies
     jwt_handler = MagicMock(spec=JWTHandler)
+    # Mock: Session management isolation for stateless unit testing
     session_manager = AsyncMock(spec=SessionManager)
     
     # Configure JWT handler
+    # Mock: JWT processing isolation for fast authentication testing
     jwt_handler.create_refresh_token = MagicMock(return_value="test_refresh_token")
+    # Mock: JWT processing isolation for fast authentication testing
     jwt_handler.create_access_token = MagicMock(return_value="test_access_token")
+    # Mock: JWT processing isolation for fast authentication testing
     jwt_handler.verify_token = MagicMock(return_value={"user_id": "test_user_id"})
     
     auth_service.jwt_handler = jwt_handler
     auth_service.session_manager = session_manager
+    # Mock: Async component isolation for testing without real async operations
     auth_service.refresh_tokens = AsyncMock(return_value={
         "access_token": "new_access_token",
         "refresh_token": "new_refresh_token"

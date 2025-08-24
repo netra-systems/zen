@@ -32,7 +32,9 @@ class TestHealthMonitor(unittest.TestCase):
     
     def test_register_service(self):
         """Test registering a service for monitoring."""
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=True)
+        # Mock: Generic component isolation for controlled unit testing
         recovery = Mock()
         self.monitor.register_service(
             "TestService", health_check, recovery, max_failures=3
@@ -46,6 +48,7 @@ class TestHealthMonitor(unittest.TestCase):
     
     def test_health_check_success(self):
         """Test successful health checks."""
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=True)
         self.monitor.register_service("TestService", health_check)
         self.monitor._check_all_services()
@@ -59,7 +62,9 @@ class TestHealthMonitor(unittest.TestCase):
     
     def test_health_check_failure_and_recovery(self):
         """Test health check failures triggering recovery."""
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=False)
+        # Mock: Generic component isolation for controlled unit testing
         recovery = Mock()
         self._register_service_with_recovery(health_check, recovery)
         self._test_failure_threshold(recovery)
@@ -87,6 +92,7 @@ class TestHealthMonitor(unittest.TestCase):
     
     def test_monitoring_thread(self):
         """Test the monitoring thread operation."""
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=True)
         self.monitor.register_service("TestService", health_check, grace_period_seconds=0)
         self._test_thread_execution(health_check)
@@ -218,6 +224,7 @@ class TestAdvancedHealthMonitor(unittest.TestCase):
 class TestErrorRecovery(unittest.TestCase):
     """Test error recovery mechanisms."""
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_config.load_or_create_config')
     def test_port_conflict_recovery(self, mock_config):
         """Test recovery from port conflicts."""
@@ -232,9 +239,11 @@ class TestErrorRecovery(unittest.TestCase):
     
     def _test_port_allocation_retry(self, launcher):
         """Test port allocation retry logic."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.launcher.get_free_port') as mock_port:
             mock_port.side_effect = [None, None, 8001, 3001]
             if hasattr(launcher, '_allocate_dynamic_ports'):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('dev_launcher.launcher.create_subprocess'):
                     launcher._allocate_dynamic_ports()
                 self._assert_ports_allocated(launcher)
@@ -257,12 +266,15 @@ class TestErrorRecovery(unittest.TestCase):
             attempt_count += 1
             if attempt_count < 3:
                 raise ConnectionError("Network error")
+            # Mock: Component isolation for controlled unit testing
             return Mock(status_code=200)
+        # Mock: Component isolation for testing without external dependencies
         with patch('requests.get', side_effect=mock_request):
             result = wait_for_service("http://localhost:8000", timeout=5)
             self.assertTrue(result)
         return attempt_count
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_config.load_or_create_config')
     def test_resource_cleanup_on_error(self, mock_config):
         """Test proper resource cleanup on errors."""

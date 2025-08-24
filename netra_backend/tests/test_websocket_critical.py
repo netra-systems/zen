@@ -18,9 +18,13 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_connection_establishment(self):
         """Test WebSocket connection establishment"""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.accept = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_text = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.receive_text = AsyncMock()
         
         # Simulate connection
@@ -35,6 +39,7 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_message_handling(self):
         """Test WebSocket message sending and receiving"""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Test sending different message types
@@ -52,7 +57,9 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_connection_closure(self):
         """Test WebSocket connection closure handling"""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.close = AsyncMock()
         
         # Close connection with different codes
@@ -70,6 +77,7 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_heartbeat(self):
         """Test WebSocket heartbeat/ping-pong mechanism"""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Simulate heartbeat
@@ -101,6 +109,7 @@ class TestWebSocketCritical:
             if attempt_num < max_retries - 1:
                 raise ConnectionError("Connection failed")
             
+            # Mock: Generic component isolation for controlled unit testing
             return AsyncMock()  # Successful connection
         
         # Try reconnection with exponential backoff
@@ -139,6 +148,7 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_broadcast(self):
         """Test broadcasting messages to multiple WebSocket connections"""
+        # Mock: Generic component isolation for controlled unit testing
         connections = [AsyncMock() for _ in range(5)]
         
         broadcast_message = {
@@ -157,6 +167,7 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_authentication(self):
         """Test WebSocket authentication flow"""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Test authentication message
@@ -181,6 +192,7 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_rate_limiting(self):
         """Test WebSocket rate limiting"""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Track message timestamps
@@ -206,6 +218,7 @@ class TestWebSocketCritical:
     @pytest.mark.asyncio
     async def test_websocket_error_handling(self):
         """Test WebSocket error handling"""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Test various error scenarios

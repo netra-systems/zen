@@ -18,34 +18,58 @@ class TestLandingPageAuthFlows:
     @pytest.fixture
     async def auth_service(self):
         """Create mock auth service instance for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         service = Mock()
+        # Mock: OAuth external provider isolation for network-independent testing
         service.get_google_oauth_url = Mock(return_value="https://accounts.google.com/o/oauth2/v2/auth?client_id=test&redirect_uri=test&response_type=code")
+        # Mock: Generic component isolation for controlled unit testing
         service.exchange_code_for_token = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.handle_oauth_callback = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.create_jwt_token = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_jwt_token = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         service.check_authentication = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         service.validate_session_token = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_oauth_url = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         service.create_refresh_token = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         service.refresh_access_token = Mock()
+        # Mock: Session isolation for controlled testing without external state
         service.create_session = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.handle_new_user_oauth = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.authenticate_user = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_jwt_token_safe = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         service.create_jwt_token_async = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         service.validate_session_with_context = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_user_by_email_safe = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_user_by_email = AsyncMock()
         return service
     
     @pytest.fixture
     async def user_service(self):
         """Create mock user service instance for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         service = Mock()
+        # Mock: Session isolation for controlled testing without external state
         service.create_user_session = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.logout_user = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_user_by_email = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.create_user = AsyncMock()
         return service
     

@@ -147,6 +147,7 @@ class IntegrationTestFixer:
         mock_config.environment = 'testing'
 """
                 # Insert after the first mock_config line
+                # Mock: Component isolation for testing without external dependencies
                 if 'with patch(' in content and 'mock_config' in content:
                     lines = content.split('\n')
                     for i, line in enumerate(lines):

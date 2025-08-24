@@ -25,6 +25,7 @@ class TestToolRegistryValidation:
     @pytest.fixture
     def mock_db_session(self):
         """Mock database session"""
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     @pytest.fixture
@@ -41,6 +42,7 @@ class TestToolRegistryValidation:
         assert validator_registry.validate_tool_interface(valid_tool) == True
         
         # Invalid tool - missing required methods
+        # Mock: Generic component isolation for controlled unit testing
         invalid_tool = MagicMock()
         invalid_tool.name = "invalid_tool"
         invalid_tool.description = "Invalid tool"
@@ -166,6 +168,7 @@ class TestToolRegistryValidation:
         }
         
         # Mock system version
+        # Mock: Component isolation for testing without external dependencies
         with patch('sys.version_info', (3, 9, 0)):
             with patch.object(validator_registry, 'get_package_version') as mock_version:
                 mock_version.return_value = "0.5.0"  # langchain version
@@ -173,6 +176,7 @@ class TestToolRegistryValidation:
                 assert validator_registry.validate_version_compatibility(version_requirements) == True
         
         # Incompatible Python version
+        # Mock: Component isolation for testing without external dependencies
         with patch('sys.version_info', (3, 12, 0)):  # Too new
             assert validator_registry.validate_version_compatibility(version_requirements) == False
     
@@ -225,6 +229,7 @@ class TestToolRegistryValidation:
     def test_validation_error_reporting(self, validator_registry):
         """Test detailed validation error reporting"""
         # Create invalid tool
+        # Mock: Generic component isolation for controlled unit testing
         invalid_tool = MagicMock()
         invalid_tool.name = ""  # Invalid name
         invalid_tool.description = "Valid description"

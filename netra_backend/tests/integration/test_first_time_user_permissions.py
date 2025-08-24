@@ -133,6 +133,7 @@ async def test_provider_settings_update(
         "temperature": 0.7,
         "max_tokens": 2000
     }
+    # Mock: Component isolation for testing without external dependencies
     response = await async_client.patch(
         "/api/v1/providers/openai/settings",
         json=settings_update,
@@ -214,6 +215,7 @@ async def test_google_oauth_provider_flow(
     assert "google.com/o/oauth2" in oauth_data["authorization_url"]
     
     # Simulate OAuth callback
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.oauth_service.exchange_code_for_token") as mock_exchange:
         mock_exchange.return_value = {
             "access_token": "google-access-token",
@@ -314,6 +316,7 @@ async def test_optimization_results_validation(
         "follow_up_questions": ["What are your peak usage hours?"]
     }
     
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.optimization_service.get_results") as mock_get:
         mock_get.return_value = mock_results
         

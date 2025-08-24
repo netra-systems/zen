@@ -30,13 +30,17 @@ async def create_connection(user_id: str, conn_idx: int, connection_metrics: Dic
         return _handle_connection_failure(e, connection_metrics)
 
 def _create_mock_websocket(user_id: str, conn_idx: int) -> AsyncMock:
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws = AsyncMock()
     mock_ws.user_id = user_id
     mock_ws.connection_id = f"{user_id}_conn_{conn_idx}"
     mock_ws.connected_at = datetime.now(UTC)
     mock_ws.state = websockets.State.OPEN
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws.send = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws.recv = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws.close = AsyncMock()
     return mock_ws
 
@@ -129,6 +133,7 @@ async def test_rapid_connect_disconnect_cycles():
         try:
             # Connect
             start_connect = time.time()
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
             mock_ws.state = websockets.State.OPEN
             await asyncio.sleep(0.001)  # Simulate connection time

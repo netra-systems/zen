@@ -31,10 +31,15 @@ from netra_backend.app.services.thread_service import ThreadService
 @pytest.fixture
 def mock_supervisor_agent():
     """Mock supervisor agent for testing."""
+    # Mock: Agent service isolation for testing without LLM agent execution
     agent = Mock(spec=SupervisorAgent)
+    # Mock: Async component isolation for testing without real async operations
     agent.process_request = AsyncMock(return_value={"status": "success", "result": "processed"})
+    # Mock: Async component isolation for testing without real async operations
     agent.delegate_to_subagent = AsyncMock(return_value={"delegated": True})
+    # Mock: Async component isolation for testing without real async operations
     agent.finalize_response = AsyncMock(return_value={"finalized": True})
+    # Mock: Generic component isolation for controlled unit testing
     agent.state = Mock()
     agent.user_id = "test_user_123"
     return agent
@@ -42,10 +47,15 @@ def mock_supervisor_agent():
 @pytest.fixture
 def mock_data_sub_agent():
     """Mock data sub-agent for testing."""
+    # Mock: Agent service isolation for testing without LLM agent execution
     agent = Mock(spec=DataSubAgent)
+    # Mock: Async component isolation for testing without real async operations
     agent.analyze_data = AsyncMock(return_value={"analysis": "complete"})
+    # Mock: Async component isolation for testing without real async operations
     agent.generate_insights = AsyncMock(return_value={"insights": ["insight1", "insight2"]})
+    # Mock: Async component isolation for testing without real async operations
     agent.create_recommendations = AsyncMock(return_value={"recommendations": ["rec1", "rec2"]})
+    # Mock: Generic component isolation for controlled unit testing
     agent.state = Mock()
     agent.user_id = "test_user_123"
     return agent
@@ -53,36 +63,48 @@ def mock_data_sub_agent():
 @pytest.fixture
 def thread_service():
     """Create thread service for testing."""
+    # Mock: Async component isolation for testing without real async operations
     service = AsyncMock(spec=ThreadService)
+    # Mock: Async component isolation for testing without real async operations
     service.create_thread = AsyncMock(return_value={
         "id": str(uuid.uuid4()),
         "title": "Test Thread",
         "created_at": "2025-01-20T10:00:00Z",
         "status": "active"
     })
+    # Mock: Async component isolation for testing without real async operations
     service.send_message = AsyncMock(return_value={
         "id": str(uuid.uuid4()),
         "content": "Test message",
         "timestamp": "2025-01-20T10:01:00Z"
     })
+    # Mock: Async component isolation for testing without real async operations
     service.get_thread_history = AsyncMock(return_value=[])
+    # Mock: Async component isolation for testing without real async operations
     service.update_thread = AsyncMock(return_value=True)
+    # Mock: Async component isolation for testing without real async operations
     service.delete_thread = AsyncMock(return_value=True)
     return service
 
 @pytest.fixture
 def agent_service():
     """Create agent service for testing."""
+    # Mock: Agent service isolation for testing without LLM agent execution
     service = AsyncMock(spec=AgentService)
+    # Mock: Agent service isolation for testing without LLM agent execution
     service.create_agent = AsyncMock(return_value={"agent_id": "test_agent_123"})
+    # Mock: Async component isolation for testing without real async operations
     service.execute_agent = AsyncMock(return_value={"status": "completed", "result": "success"})
+    # Mock: Async component isolation for testing without real async operations
     service.get_agent_status = AsyncMock(return_value={"status": "idle", "last_activity": "2025-01-20T10:00:00Z"})
+    # Mock: Async component isolation for testing without real async operations
     service.terminate_agent = AsyncMock(return_value=True)
     return service
 
 @pytest.fixture
 def mock_thread():
     """Mock thread object for testing."""
+    # Mock: Component isolation for controlled unit testing
     thread = Mock(spec=Thread)
     thread.id = str(uuid.uuid4())
     thread.title = "Test Thread"
@@ -95,6 +117,7 @@ def mock_thread():
 @pytest.fixture
 def mock_message():
     """Mock message object for testing."""
+    # Mock: Component isolation for controlled unit testing
     message = Mock(spec=Message)
     message.id = str(uuid.uuid4())
     message.thread_id = "test_thread_123"
@@ -106,6 +129,7 @@ def mock_message():
 @pytest.fixture
 def mock_run():
     """Mock run object for testing."""
+    # Mock: Component isolation for controlled unit testing
     run = Mock(spec=Run)
     run.id = str(uuid.uuid4())
     run.thread_id = "test_thread_123"
@@ -118,16 +142,27 @@ def mock_run():
 @pytest.mark.asyncio
 async def test_session():
     """Create test database session."""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
+    # Mock: Session isolation for controlled testing without external state
     session.begin = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.flush = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.refresh = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.close = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.execute = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.scalar = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.add = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.delete = AsyncMock()
     return session
 

@@ -41,6 +41,7 @@ class TestCorpusAuditRepository:
 
     @pytest.fixture
     def mock_db(self):
+        # Mock: Database session isolation for transaction testing without real database dependency
         return AsyncMock(spec=AsyncSession)
 
     @pytest.fixture
@@ -58,6 +59,7 @@ class TestCorpusAuditRepository:
     @pytest.mark.asyncio
     async def test_find_by_user_success(self, repository, mock_db, sample_audit_log):
         """Test finding audit records by user ID."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalars.return_value.all.return_value = [sample_audit_log]
         mock_db.execute.return_value = mock_result
@@ -85,6 +87,7 @@ class TestCorpusAuditRepository:
             limit=50
         )
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalars.return_value.all.return_value = [sample_audit_log]
         mock_db.execute.return_value = mock_result
@@ -99,6 +102,7 @@ class TestCorpusAuditRepository:
         """Test counting audit records with filters."""
         filters = CorpusAuditSearchFilter(user_id="user-123")
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar.return_value = 42
         mock_db.execute.return_value = mock_result
@@ -111,6 +115,7 @@ class TestCorpusAuditRepository:
     async def test_get_summary_stats_success(self, repository, mock_db):
         """Test getting summary statistics."""
         mock_results = [("create", "success", 10), ("update", "failure", 2)]
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.fetchall.return_value = mock_results
         mock_db.execute.return_value = mock_result
@@ -125,6 +130,7 @@ class TestCorpusAuditLogger:
 
     @pytest.fixture
     def mock_repository(self):
+        # Mock: Async component isolation for testing without real async operations
         return AsyncMock(spec=CorpusAuditRepository)
 
     @pytest.fixture
@@ -133,6 +139,7 @@ class TestCorpusAuditLogger:
 
     @pytest.fixture
     def mock_db(self):
+        # Mock: Database session isolation for transaction testing without real database dependency
         return AsyncMock(spec=AsyncSession)
 
     @pytest.fixture
@@ -258,6 +265,7 @@ class TestAuditIntegration:
 
     @pytest.fixture
     def mock_db(self):
+        # Mock: Database session isolation for transaction testing without real database dependency
         return AsyncMock(spec=AsyncSession)
 
     @pytest.mark.asyncio
@@ -273,6 +281,7 @@ class TestAuditIntegration:
         """Test complete audit workflow from logging to reporting."""
         # Setup
         logger = await create_audit_logger(mock_db)
+        # Mock: Async component isolation for testing without real async operations
         logger.repository = AsyncMock(spec=CorpusAuditRepository)
         
         # Mock audit log creation
@@ -317,11 +326,13 @@ class TestAuditPerformance:
 
     @pytest.fixture
     def audit_logger(self):
+        # Mock: Async component isolation for testing without real async operations
         repository = AsyncMock(spec=CorpusAuditRepository)
         return CorpusAuditLogger(repository)
 
     @pytest.fixture
     def mock_db(self):
+        # Mock: Database session isolation for transaction testing without real database dependency
         return AsyncMock(spec=AsyncSession)
 
     @pytest.mark.asyncio

@@ -20,6 +20,7 @@ from netra_backend.tests.services.security_service_test_mocks import (
 @pytest.fixture
 def oauth_security_service():
     """Create security service for OAuth testing"""
+    # Mock: Key management isolation for secure testing environments
     key_manager = MagicMock()
     key_manager.jwt_secret_key = "oauth_test_key"
     key_manager.fernet_key = Fernet.generate_key()
@@ -41,6 +42,7 @@ class TestSecurityServiceOAuth:
     
     def _setup_new_oauth_user_test(self):
         """Setup test data for new OAuth user creation"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session = AsyncMock()
         oauth_user_info = _get_oauth_user_info()
         created_user = _create_oauth_user()
@@ -50,6 +52,7 @@ class TestSecurityServiceOAuth:
     async def _execute_oauth_user_creation(self, oauth_security_service, mock_db_session, oauth_user_info, created_user):
         """Execute OAuth user creation with patches"""
         with patch.object(oauth_security_service, 'get_user', return_value=None), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.db.models_postgres.User', return_value=created_user):
             return await oauth_security_service.get_or_create_user_from_oauth(
                 mock_db_session, oauth_user_info
@@ -68,6 +71,7 @@ class TestSecurityServiceOAuth:
     
     def _setup_existing_oauth_user_test(self):
         """Setup test data for existing OAuth user"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session = AsyncMock()
         existing_user = MockUser("existing_456", "existing@example.com", "Existing User")
         _setup_oauth_existing_user_mocks(mock_db_session, existing_user)
@@ -103,6 +107,7 @@ class TestSecurityServiceOAuth:
     
     def _setup_profile_update_test(self):
         """Setup test data for profile update"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session = AsyncMock()
         existing_user = MockUser("update_789", "update@example.com", "Old Name")
         updated_oauth_info = {
@@ -115,6 +120,7 @@ class TestSecurityServiceOAuth:
     @pytest.mark.asyncio
     async def test_oauth_error_handling(self, oauth_security_service):
         """Test OAuth error handling scenarios"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session = AsyncMock()
         
         # Test with invalid OAuth data
@@ -263,6 +269,7 @@ def _setup_oauth_new_user_mocks(mock_db_session: AsyncMock) -> None:
 
 def _setup_oauth_existing_user_mocks(mock_db_session: AsyncMock, existing_user: MockUser) -> None:
     """Setup mocks for existing OAuth user"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_result = MagicMock()
     mock_result.scalars.return_value.first.return_value = existing_user
     mock_db_session.execute.return_value = mock_result

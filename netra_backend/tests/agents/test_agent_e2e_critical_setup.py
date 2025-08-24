@@ -43,22 +43,34 @@ class AgentE2ETestBase:
 
     def _create_mock_db_session(self):
         """Create mock database session with async context manager support"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db_session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         db_session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         db_session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         db_session.close = AsyncMock()
         
+        # Mock: Generic component isolation for controlled unit testing
         async_context_manager = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         async_context_manager.__aenter__ = AsyncMock(return_value=db_session)
+        # Mock: Async component isolation for testing without real async operations
         async_context_manager.__aexit__ = AsyncMock(return_value=None)
+        # Mock: Session isolation for controlled testing without external state
         db_session.begin = AsyncMock(return_value=async_context_manager)
         return db_session
 
     def _create_mock_llm_manager(self):
         """Create mock LLM Manager with proper response structures"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.call_llm = AsyncMock(return_value={"content": "Test response", "tool_calls": []})
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager.ask_llm = AsyncMock(return_value=self._get_mock_llm_json_response())
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.ask_structured_llm = AsyncMock(return_value=self._get_mock_triage_result())
         return llm_manager
 
@@ -97,19 +109,28 @@ class AgentE2ETestBase:
 
     def _create_mock_websocket_manager(self):
         """Create mock WebSocket Manager with all required methods"""
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_message = AsyncMock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_to_thread = AsyncMock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.broadcast = AsyncMock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_agent_log = AsyncMock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_error = AsyncMock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_sub_agent_update = AsyncMock()
         websocket_manager.active_connections = {}
         return websocket_manager
 
     def _create_mock_tool_dispatcher(self):
         """Create mock Tool Dispatcher with success response"""
+        # Mock: Tool execution isolation for predictable agent testing
         tool_dispatcher = Mock(spec=ApexToolSelector)
+        # Mock: Tool execution isolation for predictable agent testing
         tool_dispatcher.dispatch_tool = AsyncMock(return_value={
             "status": "success", "result": "Tool executed successfully"
         })
@@ -117,8 +138,11 @@ class AgentE2ETestBase:
 
     def _create_supervisor_with_patches(self, db_session, llm_manager, websocket_manager, tool_dispatcher):
         """Create supervisor with state persistence patches"""
+        # Mock: Async component isolation for testing without real async operations
         mock_save_state = AsyncMock(return_value=(True, "state_saved"))
+        # Mock: Async component isolation for testing without real async operations
         mock_load_state = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         mock_get_context = AsyncMock(return_value={})
         
         with patch.object(state_persistence_service, 'save_agent_state', mock_save_state):

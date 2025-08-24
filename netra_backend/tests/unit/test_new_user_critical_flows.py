@@ -45,10 +45,15 @@ class TestNewUserCriticalFlows:
     @pytest.fixture
     def mock_db_session(self):
         """Create mock async database session."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.add = Mock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.refresh = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.execute = AsyncMock()
         return session
     

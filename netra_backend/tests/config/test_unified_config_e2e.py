@@ -100,7 +100,9 @@ class TestDatabaseE2E:
         """Test database pool behavior with config settings."""
         from netra_backend.app.db.postgres_core import AsyncDatabase
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
+            # Mock: Component isolation for controlled unit testing
             mock_config.return_value = Mock(
                 db_pool_size=5,
                 db_max_overflow=10,
@@ -110,7 +112,9 @@ class TestDatabaseE2E:
                 db_echo_pool=False
             )
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.db.postgres_core.create_async_engine') as mock_engine:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_engine.return_value = AsyncMock()
                 
                 db = AsyncDatabase('postgresql+asyncpg://localhost/test')
@@ -150,11 +154,14 @@ class TestRedisE2E:
         from netra_backend.app.redis_manager import RedisManager
         
         # Test local mode
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
+            # Mock: Component isolation for controlled unit testing
             mock_config.return_value = Mock(
                 redis_mode='local',
                 environment='development',
                 dev_mode_redis_enabled=True,
+                # Mock: Redis caching isolation to prevent test interference and external dependencies
                 redis=Mock(host='localhost', port=6379, username='default', password=None)
             )
             
@@ -176,11 +183,14 @@ class TestRedisE2E:
         """Test Redis failover from shared to local."""
         from netra_backend.app.redis_manager import RedisManager
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
+            # Mock: Component isolation for controlled unit testing
             config_obj = Mock(
                 redis_mode='shared',
                 environment='development',
                 dev_mode_redis_enabled=True,
+                # Mock: Redis caching isolation to prevent test interference and external dependencies
                 redis=Mock(
                     host='failing.redis.com',
                     port=6379,
@@ -193,6 +203,7 @@ class TestRedisE2E:
             manager = RedisManager()
             
             with patch.object(manager, '_create_redis_client') as mock_create:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_client = AsyncMock()
                 mock_client.ping.side_effect = [
                     Exception("Connection failed"),  # First attempt fails
@@ -215,7 +226,9 @@ class TestCacheE2E:
         from netra_backend.app.db.cache_core import QueryCache
         from netra_backend.app.db.cache_config import AdaptiveTTLCalculator
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
+            # Mock: Component isolation for controlled unit testing
             mock_config.return_value = Mock(
                 cache_enabled=True,
                 cache_default_ttl=300,
@@ -249,7 +262,9 @@ class TestCacheE2E:
         """Test cache behavior when disabled via config."""
         from netra_backend.app.db.cache_core import QueryCache
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
+            # Mock: Component isolation for controlled unit testing
             mock_config.return_value = Mock(
                 cache_enabled=False,
                 cache_default_ttl=300,
@@ -336,6 +351,7 @@ class TestConfigValidationE2E:
     
     def test_validation_with_missing_secrets(self):
         """Test validation identifies missing secrets."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.config_manager._secrets_manager') as mock_secrets:
             mock_secrets.validate_secrets_consistency.return_value = [
                 'Missing secret: JWT_SECRET_KEY',
@@ -350,6 +366,7 @@ class TestConfigValidationE2E:
     
     def test_validation_with_database_issues(self):
         """Test validation identifies database configuration issues."""
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('netra_backend.app.core.configuration.base.config_manager._database_manager') as mock_db:
             mock_db.validate_database_consistency.return_value = [
                 'Database URL not configured',
@@ -405,6 +422,7 @@ class TestConfigRecoveryE2E:
         with patch.object(config_manager, '_create_base_config') as mock_create:
             mock_create.side_effect = [
                 Exception("Config corrupted"),
+                # Mock: Component isolation for controlled unit testing
                 Mock(environment='development')  # Recovery succeeds
             ]
             
@@ -417,6 +435,7 @@ class TestConfigRecoveryE2E:
             
             # Recovery attempt
             mock_create.side_effect = None
+            # Mock: Component isolation for controlled unit testing
             mock_create.return_value = Mock(
                 environment='development',
                 database_url='postgresql://localhost/recovery'
@@ -428,6 +447,7 @@ class TestConfigRecoveryE2E:
     def test_fallback_chain_for_critical_services(self):
         """Test fallback chain for critical service configuration."""
         # Test database fallback chain
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
             mock_config.side_effect = Exception("Config unavailable")
             
@@ -438,10 +458,12 @@ class TestConfigRecoveryE2E:
                 assert 'postgresql://fallback/db' in url
         
         # Test Redis fallback chain
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.get_unified_config') as mock_config:
             # First call fails, second returns config
             mock_config.side_effect = [
                 Exception("Config error"),
+                # Mock: Redis external service isolation for fast, reliable tests without network dependency
                 Mock(redis_mode='local', environment='development', dev_mode_redis_enabled=True)
             ]
             

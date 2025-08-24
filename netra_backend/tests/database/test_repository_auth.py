@@ -79,6 +79,7 @@ class TestUserRepositoryAuth:
     @pytest.mark.asyncio
     async def test_password_hashing(self):
         """Test password hashing on user creation"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         
         # Create a mock repository that implements the expected interface
@@ -98,6 +99,7 @@ class TestUserRepositoryAuth:
         user_data = _create_user_data()
         
         # Mock argon2 hasher
+        # Mock: Password hashing isolation to avoid expensive crypto operations in tests
         with patch('argon2.PasswordHasher.hash') as mock_hash:
             mock_hash.return_value = 'hashed_password'
             
@@ -108,6 +110,7 @@ class TestUserRepositoryAuth:
     @pytest.mark.asyncio
     async def test_authentication_flow(self):
         """Test user authentication flow"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         
         # Create a mock repository that implements the expected interface
@@ -146,6 +149,7 @@ class TestOptimizationRepositoryStorage:
     @pytest.mark.asyncio
     async def test_optimization_versioning(self):
         """Test optimization versioning system"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
         
@@ -172,6 +176,7 @@ class TestOptimizationRepositoryStorage:
     @pytest.mark.asyncio
     async def test_optimization_history(self):
         """Test optimization version history"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
         
@@ -189,6 +194,7 @@ class TestMetricRepositoryAggregation:
     @pytest.mark.asyncio
     async def test_metric_aggregation(self):
         """Test metric aggregation functions"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()
         
@@ -214,6 +220,7 @@ class TestMetricRepositoryAggregation:
     @pytest.mark.asyncio
     async def test_time_series_queries(self):
         """Test time series data queries"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()
         

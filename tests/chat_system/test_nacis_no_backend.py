@@ -118,12 +118,17 @@ class NACISTestHarness:
             self.output_validators = OutputValidators()
             
             # Create mock dependencies for agents
+            # Mock: Database session isolation for transaction testing without real database dependency
             self.mock_session = Mock()
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             self.mock_websocket = Mock()
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             self.mock_websocket.send_update = AsyncMock()
+            # Mock: Tool dispatcher isolation for agent testing without real tool execution
             self.mock_tool_dispatcher = Mock()
             
             # Initialize agents with mock database
+            # Mock: Generic component isolation for controlled unit testing
             mock_db = Mock()
             
             self.researcher = ResearcherAgent(
@@ -157,7 +162,9 @@ class NACISTestHarness:
         print(f"\n📝 Classifying intent: '{query}'")
         
         # Create mock context
+        # Mock: Generic component isolation for controlled unit testing
         context = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         context.state = Mock()
         context.state.user_request = query
         

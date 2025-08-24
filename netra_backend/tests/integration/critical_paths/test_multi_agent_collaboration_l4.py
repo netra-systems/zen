@@ -54,21 +54,33 @@ class MultiAgentL4TestSuite:
         # Note: Skip actual initialization for testing
         
         # Create mock components with proper async behavior
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         self.redis_session = MagicMock()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         self.redis_session.initialize = AsyncMock()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         self.redis_session.delete_session = AsyncMock()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         self.redis_session.close = AsyncMock()
         
+        # Mock: LLM provider isolation to prevent external API usage and costs
         self.llm_manager = MagicMock()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         self.llm_manager.initialize = AsyncMock()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         self.llm_manager.shutdown = AsyncMock()
         
+        # Mock: WebSocket connection isolation for testing without network overhead
         self.websocket_manager = MagicMock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         self.websocket_manager.initialize = AsyncMock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         self.websocket_manager.shutdown = AsyncMock()
         
         # Initialize supervisor with mock dependencies
+        # Mock: Generic component isolation for controlled unit testing
         self.supervisor_agent = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         self.supervisor_agent.run = AsyncMock(return_value={"status": "completed", "result": "test_result"})
     
     async def create_enterprise_optimization_request(self, scenario: str) -> Dict[str, Any]:
@@ -197,11 +209,15 @@ class MultiAgentL4TestSuite:
         """Test real sub-agent delegation with LLM calls in staging."""
         try:
             # Mock sub-agent creation and execution
+            # Mock: Generic component isolation for controlled unit testing
             optimization_agent = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             analysis_agent = AsyncMock()
             
             # Mock execution results
+            # Mock: Async component isolation for testing without real async operations
             optimization_agent.execute_optimization = AsyncMock(return_value={"optimized": True, "cost_savings": 1500})
+            # Mock: Async component isolation for testing without real async operations
             analysis_agent.execute_analysis = AsyncMock(return_value={"impact": "positive", "confidence": 0.9})
             
             # Execute optimization sub-agent

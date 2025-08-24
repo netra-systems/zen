@@ -37,9 +37,13 @@ logger = central_logger.get_logger(__name__)
 def mock_websocket():
     """Create a mock WebSocket for testing."""
     websocket = MockWebSocket()
+    # Mock: Generic component isolation for controlled unit testing
     websocket.accept = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     websocket.send_json = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     websocket.send_text = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     websocket.close = AsyncMock()
     return websocket
 
@@ -47,7 +51,9 @@ def mock_websocket():
 @pytest.fixture
 def mock_supervisor():
     """Create a mock supervisor agent."""
+    # Mock: Generic component isolation for controlled unit testing
     supervisor = AsyncMock()
+    # Mock: Agent service isolation for testing without LLM agent execution
     supervisor.run = AsyncMock(return_value="Agent response successful")
     supervisor.thread_id = None
     supervisor.user_id = None
@@ -58,21 +64,29 @@ def mock_supervisor():
 @pytest.fixture
 def mock_thread_service():
     """Create a mock thread service."""
+    # Mock: Generic component isolation for controlled unit testing
     thread_service = AsyncMock()
     
     # Mock thread object
+    # Mock: Generic component isolation for controlled unit testing
     mock_thread = Mock()
     mock_thread.id = "test_thread_123"
     mock_thread.metadata_ = {"user_id": "test_user"}
     
     # Mock run object
+    # Mock: Generic component isolation for controlled unit testing
     mock_run = Mock()
     mock_run.id = "test_run_456"
     
+    # Mock: Async component isolation for testing without real async operations
     thread_service.get_or_create_thread = AsyncMock(return_value=mock_thread)
+    # Mock: Async component isolation for testing without real async operations
     thread_service.get_thread = AsyncMock(return_value=mock_thread)
+    # Mock: Generic component isolation for controlled unit testing
     thread_service.create_message = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     thread_service.create_run = AsyncMock(return_value=mock_run)
+    # Mock: Generic component isolation for controlled unit testing
     thread_service.mark_run_completed = AsyncMock()
     
     return thread_service
@@ -81,7 +95,9 @@ def mock_thread_service():
 @pytest.fixture
 def mock_db_session():
     """Create a mock database session."""
+    # Mock: Session isolation for controlled testing without external state
     db_session = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     db_session.close = AsyncMock()
     return db_session
 
@@ -168,15 +184,22 @@ class TestWebSocketAgentFlow:
         )
         
         # Mock the WebSocket manager with proper attributes
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.broadcasting = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.broadcasting.join_room = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.send_error = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.send_message = AsyncMock()
         
         # Mock database session creation and websocket manager
         with patch.object(agent_handler, '_get_database_session', return_value=mock_db_session):
+            # Mock: WebSocket connection isolation for testing without network overhead
             with patch('netra_backend.app.websocket_core.get_websocket_manager', return_value=mock_manager):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('netra_backend.app.services.message_handlers.manager', mock_manager):
                     # Execute the message handling
                     result = await agent_handler.handle_message(
@@ -364,9 +387,11 @@ class TestWebSocketAgentFlow:
         }
         
         # Mock thread service to return existing thread
+        # Mock: Generic component isolation for controlled unit testing
         mock_thread = Mock()
         mock_thread.id = "existing_thread_123"
         mock_thread.metadata_ = {"user_id": "test_user"}
+        # Mock: Async component isolation for testing without real async operations
         mock_thread_service.get_thread = AsyncMock(return_value=mock_thread)
         
         await message_handler_service.handle_start_agent(
@@ -400,6 +425,7 @@ class TestWebSocketAgentFlow:
         
         # Mock database session creation
         with patch.object(agent_handler, '_get_database_session', return_value=mock_db_session):
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.websocket_core.get_websocket_manager'):
                 # Execute all messages concurrently
                 tasks = [
@@ -441,6 +467,7 @@ class TestWebSocketAgentFlow:
         )
         
         with patch.object(agent_handler, '_get_database_session', return_value=mock_db_session):
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.websocket_core.get_websocket_manager'):
                 # Process start_agent message
                 await agent_handler.handle_message("test_user", mock_websocket, start_agent_msg)
@@ -462,7 +489,9 @@ class TestWebSocketAgentFlow:
         """Test database session dependency injection pattern."""
         
         # Test the _get_database_session method
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.dependencies.get_db_dependency') as mock_dep:
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
             
             # Mock the async generator
@@ -493,13 +522,17 @@ class TestWebSocketAgentFlow:
         }
         
         # Mock thread creation
+        # Mock: Generic component isolation for controlled unit testing
         mock_thread = Mock()
         mock_thread.id = "new_thread_123"
+        # Mock: Async component isolation for testing without real async operations
         mock_thread_service.get_or_create_thread = AsyncMock(return_value=mock_thread)
         
         # Mock run creation
+        # Mock: Generic component isolation for controlled unit testing
         mock_run = Mock()
         mock_run.id = "run_456"
+        # Mock: Async component isolation for testing without real async operations
         mock_thread_service.create_run = AsyncMock(return_value=mock_run)
         
         # Execute
@@ -574,6 +607,7 @@ class TestWebSocketAgentFlow:
         )
         
         with patch.object(agent_handler, '_get_database_session', return_value=mock_db_session):
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.websocket_core.get_websocket_manager'):
                 result = await agent_handler.handle_message(
                     user_id="test_user",

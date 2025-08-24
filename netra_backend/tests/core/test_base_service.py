@@ -39,6 +39,7 @@ class TestBaseService:
 
     def _setup_error_context_mock(self):
         """Helper: Setup error context mock."""
+        # Mock: Component isolation for testing without external dependencies
         return patch('app.core.error_context.ErrorContext.get_all_context', return_value={})
 
     @pytest.mark.asyncio

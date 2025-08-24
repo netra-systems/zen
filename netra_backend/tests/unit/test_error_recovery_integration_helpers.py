@@ -20,7 +20,10 @@ class ErrorRecoveryTestHelper:
     def get_breaker_side_effect(self, name):
         """Get circuit breaker side effect for testing."""
         if name.startswith('db_'):
+            # Mock: Component isolation for controlled unit testing
             return Mock(name=f"db_breaker_{name}")
         elif name.startswith('api_'):
+            # Mock: Component isolation for controlled unit testing
             return Mock(name=f"api_breaker_{name}")
+        # Mock: Generic component isolation for controlled unit testing
         return Mock()

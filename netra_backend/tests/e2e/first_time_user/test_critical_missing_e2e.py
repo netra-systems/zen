@@ -160,14 +160,18 @@ class TestCriticalMissingE2E:
 
     async def _test_api_key_encryption(self, env, validation_result):
         """Test API key encryption and secure storage"""
+        # Mock: Generic component isolation for controlled unit testing
         encryption_mock = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         encryption_mock.encrypt_api_key = AsyncMock(return_value={"encrypted": True, "key_id": "enc_123"})
         encrypted_result = await encryption_mock.encrypt_api_key(validation_result["api_data"])
         return {"validation": validation_result, "encryption": encrypted_result}
 
     async def _test_provider_connection(self, env, encryption_result):
         """Test actual connection to AI provider"""
+        # Mock: Generic component isolation for controlled unit testing
         connection_mock = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         connection_mock.test_connection = AsyncMock(return_value={"connected": True, "latency": 120})
         connection_result = await connection_mock.test_connection()
         return {"encryption": encryption_result, "connection": connection_result}
@@ -216,7 +220,9 @@ class TestCriticalMissingE2E:
     async def _send_team_invitations(self, env, team_result):
         """Send team member invitations via email"""
         invitations = [{"email": "teammate1@test.com", "role": "analyst"}, {"email": "teammate2@test.com", "role": "viewer"}]
+        # Mock: Generic component isolation for controlled unit testing
         invitation_mock = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         invitation_mock.send_invitations = AsyncMock(return_value={"sent": 2, "pending": 2})
         invitation_result = await invitation_mock.send_invitations(invitations)
         return {"team": team_result, "invitations": invitation_result}
@@ -246,14 +252,18 @@ class TestCriticalMissingE2E:
     async def _collect_payment_information(self, env, plan_result):
         """Collect and validate payment method information"""
         payment_data = {"card_number": "4242424242424242", "exp_month": 12, "exp_year": 2025, "cvc": "123"}
+        # Mock: Generic component isolation for controlled unit testing
         payment_mock = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         payment_mock.validate_payment_method = AsyncMock(return_value={"valid": True, "payment_method_id": "pm_123"})
         validation_result = await payment_mock.validate_payment_method(payment_data)
         return {"plan": plan_result, "payment": validation_result}
 
     async def _process_purchase_transaction(self, env, payment_result):
         """Process the actual purchase transaction"""
+        # Mock: Generic component isolation for controlled unit testing
         transaction_mock = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         transaction_mock.process_payment = AsyncMock(return_value={"success": True, "transaction_id": "txn_123", "amount": 299})
         transaction_result = await transaction_mock.process_payment(payment_result["payment"])
         env["metrics_tracker"].purchase_time = datetime.now(timezone.utc)
@@ -289,7 +299,9 @@ class TestCriticalMissingE2E:
     async def _export_executive_report(self, env, analysis_result):
         """Export report in multiple formats for sharing"""
         export_options = {"formats": ["pdf", "powerpoint", "excel"], "branding": "custom", "interactive": True}
+        # Mock: Generic component isolation for controlled unit testing
         export_mock = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         export_mock.generate_exports = AsyncMock(return_value={"pdf_url": "/reports/exec_123.pdf", "pptx_url": "/reports/exec_123.pptx"})
         export_result = await export_mock.generate_exports(export_options)
         return {"analysis": analysis_result, "exports": export_result}

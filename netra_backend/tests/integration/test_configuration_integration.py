@@ -211,7 +211,9 @@ class TestConfigurationIntegration:
         
         mock_file_content = json.dumps(config_file_content)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("builtins.open", mock_open(read_data=mock_file_content)):
+            # Mock: Component isolation for testing without external dependencies
             with patch("os.path.exists", return_value=True):
                 with patch.dict(os.environ, base_environment_config):
                     config = get_config()

@@ -53,7 +53,9 @@ class TestSyntaxFix:
 
     def test_mcp_service_creation(self, mock_services):
         """Test basic service creation"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.mcp_service.MCPClientRepository'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.mcp_service.MCPToolExecutionRepository'):
             service = MCPService(**mock_services)
             assert service is not None
@@ -83,7 +85,9 @@ class TestSyntaxFix:
 
     def test_mcp_service_creation(self, mock_services):
         """Test basic service creation"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.mcp_service.MCPClientRepository'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.mcp_service.MCPToolExecutionRepository'):
             service = MCPService(**mock_services)
             assert service is not None

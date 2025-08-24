@@ -19,22 +19,35 @@ class TestFallbackCoordinatorExecution:
     @pytest.fixture
     def coordinator(self):
         """Create a fresh FallbackCoordinator instance for testing."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
             # Create mock instances
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance = Mock()
+            # Mock: Async component isolation for testing without real async operations
             mock_health_instance.is_emergency_mode_active = AsyncMock(return_value=False)
+            # Mock: Async component isolation for testing without real async operations
             mock_health_instance.should_prevent_cascade = AsyncMock(return_value=False)
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.record_success = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.record_failure = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.update_circuit_breaker_status = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_health_instance.update_system_health = AsyncMock()
+            # Mock: Component isolation for controlled unit testing
             mock_health_instance.get_system_status = Mock(return_value={"status": "healthy"})
             mock_health_instance.system_health_history = []
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_emergency_instance = Mock()
+            # Mock: Async component isolation for testing without real async operations
             mock_emergency_instance.execute_emergency_fallback = AsyncMock(return_value={"emergency": True})
+            # Mock: Async component isolation for testing without real async operations
             mock_emergency_instance.execute_limited_fallback = AsyncMock(return_value={"limited": True})
             
             mock_health_monitor.return_value = mock_health_instance
@@ -57,6 +70,7 @@ class TestFallbackCoordinatorExecution:
             return {"success": True}
         
         # Setup agent handler
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         mock_handler.execute_with_fallback.return_value = {"success": True}
         coordinator.agent_handlers[agent_name] = mock_handler
@@ -150,6 +164,7 @@ class TestFallbackCoordinatorExecution:
             raise test_error
         
         # Setup agent handler to raise error
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         mock_handler.execute_with_fallback.side_effect = test_error
         coordinator.agent_handlers[agent_name] = mock_handler
@@ -176,6 +191,7 @@ class TestFallbackCoordinatorExecution:
             return {"success": True}
         
         # Setup agent handler
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         mock_handler.execute_with_fallback.return_value = {"success": True}
         coordinator.agent_handlers[agent_name] = mock_handler
@@ -198,6 +214,7 @@ class TestFallbackCoordinatorExecution:
         handlers = {}
         
         for agent in agents:
+            # Mock: Generic component isolation for controlled unit testing
             mock_handler = AsyncMock()
             mock_handler.execute_with_fallback.return_value = f"result_{agent}"
             coordinator.agent_handlers[agent] = mock_handler
@@ -229,6 +246,7 @@ class TestFallbackCoordinatorExecution:
         test_error = ValueError("Test error")
         
         # Setup handler to succeed but health monitoring to fail
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         mock_handler.execute_with_fallback.return_value = {"success": True}
         coordinator.agent_handlers[agent_name] = mock_handler
@@ -254,9 +272,13 @@ class TestFallbackCoordinatorIntegration:
     @pytest.fixture
     def full_coordinator(self):
         """Create coordinator with full mock setup."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.CircuitBreaker') as mock_cb_class, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_class, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_class:
             
             coordinator = FallbackCoordinator()
@@ -268,6 +290,7 @@ class TestFallbackCoordinatorIntegration:
         coordinator, mock_handler_class, mock_cb_class, mock_health_class, mock_emergency_class = full_coordinator
         
         # Setup mocks
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         mock_handler.execute_with_fallback.return_value = {"success": True, "data": "test_result"}
         mock_handler_class.return_value = mock_handler
@@ -305,11 +328,13 @@ class TestFallbackCoordinatorIntegration:
         coordinator, mock_handler_class, mock_cb_class, mock_health_class, mock_emergency_class = full_coordinator
         
         # Setup mocks
+        # Mock: Generic component isolation for controlled unit testing
         mock_handler = AsyncMock()
         test_error = RuntimeError("Execution failed")
         mock_handler.execute_with_fallback.side_effect = test_error
         mock_handler_class.return_value = mock_handler
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_cb = Mock()
         mock_cb_class.return_value = mock_cb
         

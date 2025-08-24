@@ -223,15 +223,19 @@ class TestMessageBatcherTransactional:
     def setup_method(self):
         """Setup test fixtures."""
         from unittest.mock import MagicMock
+        # Mock: Generic component isolation for controlled unit testing
         self.connection_manager = MagicMock()
         self.config = BatchConfig(max_batch_size=2, max_wait_time=0.1)
         self.batcher = MessageBatcher(self.config, self.connection_manager)
         
         # Mock connection info
+        # Mock: Generic component isolation for controlled unit testing
         self.mock_connection = MagicMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         self.mock_connection.websocket = AsyncMock()
         self.connection_manager.get_connection_by_id.return_value = self.mock_connection
         self.connection_manager.get_user_connections.return_value = [
+            # Mock: Component isolation for controlled unit testing
             Mock(connection_id="conn1")
         ]
     

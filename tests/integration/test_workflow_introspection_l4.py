@@ -127,6 +127,7 @@ class TestWorkflowIntrospector:
     @pytest.fixture
     def mock_subprocess_run(self):
         """Mock subprocess.run for gh commands."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('workflow_introspection.subprocess.run') as mock_run:
             yield mock_run
     
@@ -142,6 +143,7 @@ class TestWorkflowIntrospector:
     
     def test_run_gh_command_success(self, introspector, mock_subprocess_run):
         """Test successful gh command execution."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.stdout = '{"test": "data"}'
         mock_subprocess_run.return_value = mock_result
@@ -165,6 +167,7 @@ class TestWorkflowIntrospector:
     
     def test_run_gh_command_invalid_json(self, introspector, mock_subprocess_run):
         """Test gh command with invalid JSON response."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.stdout = "Invalid JSON"
         mock_subprocess_run.return_value = mock_result
@@ -175,6 +178,7 @@ class TestWorkflowIntrospector:
     
     def test_list_workflows(self, introspector, mock_subprocess_run):
         """Test listing available workflows."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.stdout = (
             "CI Pipeline\tactive\t123456\n"
@@ -196,6 +200,7 @@ class TestWorkflowIntrospector:
     
     def test_list_workflows_empty(self, introspector, mock_subprocess_run):
         """Test listing workflows with no results."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.stdout = ""
         mock_subprocess_run.return_value = mock_result
@@ -235,6 +240,7 @@ class TestWorkflowIntrospector:
             }
         ]
         
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(return_value=mock_data)
         runs = introspector.get_recent_runs(limit=5, workflow="CI")
         
@@ -314,6 +320,7 @@ class TestWorkflowIntrospector:
             ]
         }
         
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(333)
         
@@ -335,6 +342,7 @@ class TestWorkflowIntrospector:
     
     def test_get_run_details_not_found(self, introspector):
         """Test getting details for non-existent run."""
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(return_value={})
         
         run = introspector.get_run_details(999999)
@@ -343,6 +351,7 @@ class TestWorkflowIntrospector:
     
     def test_get_run_logs(self, introspector, mock_subprocess_run):
         """Test getting workflow run logs."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.stdout = "Log line 1\nLog line 2\nLog line 3"
         mock_subprocess_run.return_value = mock_result
@@ -356,6 +365,7 @@ class TestWorkflowIntrospector:
     
     def test_get_run_logs_for_job(self, introspector, mock_subprocess_run):
         """Test getting logs for specific job."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.stdout = "Job specific logs"
         mock_subprocess_run.return_value = mock_result
@@ -376,6 +386,7 @@ class TestWorkflowIntrospector:
             "check_suite_url": "https://api.github.com/repos/test/repo/check-suites/789"
         }
         
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(return_value=mock_data)
         outputs = introspector.get_workflow_outputs(666)
         
@@ -598,6 +609,7 @@ class TestComplexWorkflowScenarios:
             ]
         }
         
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(1000)
         
@@ -665,6 +677,7 @@ class TestComplexWorkflowScenarios:
             ]
         }
         
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(2000)
         
@@ -711,6 +724,7 @@ class TestComplexWorkflowScenarios:
             ]
         }
         
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(3000)
         
@@ -759,6 +773,7 @@ class TestComplexWorkflowScenarios:
             ]
         }
         
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(4000)
         
@@ -787,6 +802,7 @@ class TestErrorHandlingAndEdgeCases:
             }
         ]
         
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(return_value=mock_data)
         
         # Should handle gracefully with KeyError
@@ -810,6 +826,7 @@ class TestErrorHandlingAndEdgeCases:
             "jobs": []
         }
         
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(return_value=mock_data)
         run = introspector.get_run_details(6000)
         
@@ -818,6 +835,7 @@ class TestErrorHandlingAndEdgeCases:
     
     def test_handle_network_timeout(self, introspector):
         """Test handling network timeout."""
+        # Mock: Component isolation for controlled unit testing
         introspector._run_gh_command = Mock(side_effect=subprocess.TimeoutExpired(
             ["gh", "api"], timeout=30
         ))
@@ -833,6 +851,7 @@ class TestErrorHandlingAndEdgeCases:
             stderr="API rate limit exceeded"
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('workflow_introspection.subprocess.run', side_effect=mock_error):
             result = introspector._run_gh_command(["api", "test"])
             assert result == {}
@@ -845,6 +864,7 @@ class TestErrorHandlingAndEdgeCases:
             stderr="Authentication required"
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('workflow_introspection.subprocess.run', side_effect=mock_error):
             result = introspector._run_gh_command(["api", "test"])
             assert result == {}

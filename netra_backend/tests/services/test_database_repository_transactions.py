@@ -138,6 +138,7 @@ class TestDatabaseRepositoryTransactions:
 def _setup_successful_creation(mock_session: AsyncMock, create_data: Dict[str, Any]) -> None:
     """Setup mock session for successful creation"""
     created_entity = MockDatabaseModel(**create_data)
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.refresh = AsyncMock(
         side_effect=lambda entity: setattr(entity, 'id', 'test_123')
     )

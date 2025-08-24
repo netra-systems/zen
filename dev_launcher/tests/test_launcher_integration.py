@@ -33,7 +33,9 @@ class TestDevLauncher(unittest.TestCase):
                 load_secrets=False
             )
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.check_dependencies')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.check_project_structure')
     def test_check_environment_success(self, mock_structure, mock_deps):
         """Test successful environment check."""
@@ -57,11 +59,13 @@ class TestDevLauncher(unittest.TestCase):
         """Create launcher with mocked config."""
         return DevLauncher(self.config)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.check_dependencies')
     def test_check_environment_missing_deps(self, mock_deps):
         """Test environment check with missing dependencies."""
         self._setup_missing_dependencies(mock_deps)
         launcher = self._create_launcher()
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.print'):
             result = launcher.check_environment()
         self.assertFalse(result)
@@ -73,6 +77,7 @@ class TestDevLauncher(unittest.TestCase):
             'node': False, 'npm': True
         }
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
     def test_start_backend_success(self, mock_start_backend):
         """Test successful backend startup."""
@@ -83,6 +88,7 @@ class TestDevLauncher(unittest.TestCase):
     
     def _create_mock_backend_process(self):
         """Create mock backend process."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.poll.return_value = None
         mock_process.pid = 12345
@@ -96,6 +102,7 @@ class TestDevLauncher(unittest.TestCase):
         self.assertIsNotNone(process)
         self.assertEqual(process, expected_process)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
     def test_start_backend_failure(self, mock_start_backend):
         """Test backend startup failure."""
@@ -105,14 +112,17 @@ class TestDevLauncher(unittest.TestCase):
     
     def _create_failed_backend_process(self):
         """Create mock process that fails immediately."""
+        # Mock: Component isolation for controlled unit testing
         mock_process = Mock(spec=subprocess.Popen)
         mock_process.poll.return_value = 1
+        # Mock: Generic component isolation for controlled unit testing
         mock_process.stderr = Mock()
         mock_process.stderr.read.return_value = b"Error: Port in use"
         return mock_process
     
     def _test_backend_failure(self, launcher):
         """Test backend failure returns None."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.print'):
             process, streamer = launcher.service_startup.start_backend()
         self.assertIsNone(process)
@@ -122,11 +132,17 @@ class TestDevLauncher(unittest.TestCase):
 class TestFullIntegration(unittest.TestCase):
     """Integration tests for complete launch cycles."""
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.check_dependencies')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.check_project_structure')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_frontend')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.wait_for_service')
+    # Mock: Component isolation for testing without external dependencies
     @patch('webbrowser.open')
     def test_full_launch_cycle(self, mock_browser, mock_wait, mock_start_frontend, mock_start_backend,
                                mock_structure, mock_deps):
@@ -152,9 +168,11 @@ class TestFullIntegration(unittest.TestCase):
     
     def _create_mock_processes(self):
         """Create mock backend and frontend processes."""
+        # Mock: Component isolation for controlled unit testing
         backend = Mock(spec=subprocess.Popen)
         backend.poll.return_value = None
         backend.pid = 12345
+        # Mock: Component isolation for controlled unit testing
         frontend = Mock(spec=subprocess.Popen)
         frontend.poll.return_value = None
         frontend.pid = 12346
@@ -164,6 +182,7 @@ class TestFullIntegration(unittest.TestCase):
         """Run the full launch cycle."""
         with patch.object(LauncherConfig, '_validate'):
             config = LauncherConfig(load_secrets=False, no_browser=False)
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_config.load_or_create_config'):
             launcher = DevLauncher(config)
         return self._execute_launch(launcher)
@@ -191,10 +210,15 @@ class TestFullIntegration(unittest.TestCase):
 class TestRollingRestart(unittest.TestCase):
     """Test rolling restart scenarios."""
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.check_dependencies')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.check_project_structure')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_backend')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_frontend')
+    # Mock: Component isolation for testing without external dependencies
     @patch('dev_launcher.utils.wait_for_service')
     def test_rolling_restart(self, mock_wait, mock_start_frontend, mock_start_backend,
                             mock_structure, mock_deps):
@@ -222,6 +246,7 @@ class TestRollingRestart(unittest.TestCase):
         """Create processes for restart test."""
         processes = []
         for pid in [12345, 12346, 12347, 12348]:
+            # Mock: Component isolation for controlled unit testing
             process = Mock(spec=subprocess.Popen, pid=pid)
             process.poll.return_value = None
             processes.append(process)
@@ -231,6 +256,7 @@ class TestRollingRestart(unittest.TestCase):
         """Create launcher with configuration."""
         with patch.object(LauncherConfig, '_validate'):
             config = LauncherConfig(load_secrets=False)
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_config.load_or_create_config'):
             return DevLauncher(config)
     

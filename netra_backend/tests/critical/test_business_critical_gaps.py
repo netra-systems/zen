@@ -40,12 +40,16 @@ class TestWebSocketConnectionResilience:
     async def test_websocket_reconnection_after_network_failure(self):
         """Test WebSocket automatically reconnects after network failures"""
         # Arrange - Mock WebSocket manager
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock(spec=WebSocket)
         mock_websocket.client_state = WebSocketState.CONNECTED
         
         # Act - Simulate network failure and recovery
+        # Mock: Async component isolation for testing without real async operations
         mock_manager.connect = AsyncMock(return_value=True)
+        # Mock: Component isolation for controlled unit testing
         mock_manager.get_connection_count = Mock(return_value=1)
         
         await mock_manager.connect(mock_websocket, "test_user")
@@ -68,11 +72,14 @@ class TestAgentTaskDelegation:
     async def test_supervisor_delegates_to_subagents_correctly(self):
         """Test supervisor properly delegates tasks to appropriate sub-agents"""
         # Arrange - Mock supervisor and result
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.agent_type = "data"
         mock_result.status = "completed"
         mock_result.confidence = 0.9
+        # Mock: Async component isolation for testing without real async operations
         mock_supervisor.process_message = AsyncMock(return_value=mock_result)
         
         test_message = {"type": "data_analysis", "content": "Analyze user behavior"}
@@ -94,10 +101,14 @@ class TestLLMFallbackChain:
     async def test_llm_fallback_primary_to_secondary_to_tertiary(self):
         """Test LLM fallback chain: primary → secondary → tertiary model"""
         # Arrange - Mock LLM providers with fallback chain
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.open', mock_open(read_data=json.dumps({"content": "Tertiary response"}))):
             # Mock primary failure, secondary failure, tertiary success
+            # Mock: Async component isolation for testing without real async operations
             mock_primary = AsyncMock(side_effect=Exception("Primary API down"))
+            # Mock: Async component isolation for testing without real async operations
             mock_secondary = AsyncMock(side_effect=Exception("Secondary API down"))
+            # Mock: Async component isolation for testing without real async operations
             mock_tertiary = AsyncMock(return_value={"content": "Tertiary response"})
             
             # Act - Simulate fallback chain
@@ -159,7 +170,9 @@ class TestAuthTokenRefresh:
         }
         
         # Act - Mock token refresh mechanism
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('app.auth_integration.auth.auth_client') as mock_auth_client:
+            # Mock: Authentication service isolation for testing without real auth flows
             mock_auth_client.refresh_token = AsyncMock(
                 return_value={"token": "new_token", "exp": "future_date"}
             )
@@ -182,15 +195,21 @@ class TestDatabaseTransactionRollback:
     async def test_database_transaction_rollback_on_failures(self):
         """Test database transactions rollback properly on failures"""
         # Arrange - Mock database session with transaction
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.add = Mock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.commit = AsyncMock(side_effect=Exception("DB Error"))
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.rollback = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.in_transaction = Mock(return_value=False)
         mock_session.new = set()
         
         # Act - Simulate transaction failure and rollback
         try:
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session.add(Mock())  # Add some data
             await mock_session.commit()  # This will fail
         except Exception:
@@ -243,8 +262,11 @@ class TestCorpusDataValidation:
         }
         
         # Act - Mock CRUD operations
+        # Mock: Generic component isolation for controlled unit testing
         mock_service = Mock()
+        # Mock: Async component isolation for testing without real async operations
         mock_service.create_corpus = AsyncMock(return_value={"id": "test_id", **test_corpus})
+        # Mock: Async component isolation for testing without real async operations
         mock_service.get_corpus = AsyncMock(return_value={"id": "test_id", **test_corpus})
         
         created = await mock_service.create_corpus(test_corpus)
@@ -287,12 +309,15 @@ class TestErrorRecoveryPipeline:
     async def test_error_handling_across_agent_pipeline(self):
         """Test error recovery mechanisms across the agent pipeline"""
         # Arrange - Mock pipeline with error recovery
+        # Mock: Generic component isolation for controlled unit testing
         mock_pipeline = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.status = "recovered"
         mock_result.error_handled = True
         
         # Act - Mock error recovery
+        # Mock: Async component isolation for testing without real async operations
         mock_pipeline.process_message_with_recovery = AsyncMock(return_value=mock_result)
         result = await mock_pipeline.process_message_with_recovery({
             "type": "test", "content": "test message"
@@ -318,7 +343,9 @@ class TestSystemHealthMonitoring:
         }
         
         # Act - Mock health monitoring
+        # Mock: Generic component isolation for controlled unit testing
         mock_health_monitor = Mock()
+        # Mock: Async component isolation for testing without real async operations
         mock_health_monitor.run_health_checks = AsyncMock(return_value=health_checks)
         
         health_status = await mock_health_monitor.run_health_checks()
@@ -440,11 +467,13 @@ class TestAdditionalCriticalScenarios:
     async def test_resource_cleanup_on_shutdown(self):
         """Test proper resource cleanup"""
         # Arrange - Mock resources
+        # Mock: Generic component isolation for controlled unit testing
         resources = {"db_conn": Mock(), "ws_conn": Mock(), "cache": Mock()}
         
         # Act - Cleanup resources
         cleanup_count = 0
         for resource in resources.values():
+            # Mock: Generic component isolation for controlled unit testing
             resource.close = Mock()
             resource.close()
             cleanup_count += 1

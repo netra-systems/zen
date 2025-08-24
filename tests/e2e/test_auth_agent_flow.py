@@ -51,6 +51,7 @@ class AuthAgentFlowHarness:
     
     async def setup_mock_agent(self):
         """Setup mock agent for testing."""
+        # Mock: Agent service isolation for testing without LLM agent execution
         self.mock_agent = MagicMock()
         self.mock_agent.name = "TestAgent"
 

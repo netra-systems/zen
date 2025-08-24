@@ -65,12 +65,17 @@ class TestAuthServiceInitializationHealth:
         deps = AuthServiceDependencies()
         
         # Mock database
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.execute = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_db.commit = AsyncMock()
         
         # Mock Redis
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.get = AsyncMock(return_value=None)
         mock_redis.set = AsyncMock(return_value=True)
         mock_redis.ping = AsyncMock(return_value=True)

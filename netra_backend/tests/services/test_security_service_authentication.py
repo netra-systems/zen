@@ -27,6 +27,7 @@ from netra_backend.tests.services.security_service_test_mocks import (
 @pytest.fixture
 def key_manager():
     """Create key manager for testing"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_settings = MagicMock()
     mock_settings.jwt_secret_key = "test_jwt_secret_key_that_is_long_enough_for_testing_purposes_and_security"
     mock_settings.fernet_key = Fernet.generate_key()
@@ -40,10 +41,15 @@ def enhanced_security_service(key_manager):
 @pytest.fixture
 def mock_db_session():
     """Create mock database session"""
+    # Mock: Session isolation for controlled testing without external state
     session = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.add = MagicMock()
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.refresh = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.execute = AsyncMock()
     return session
 

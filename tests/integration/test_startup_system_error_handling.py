@@ -54,6 +54,7 @@ class TestSyntaxFix:
 
     def test_error_handling(self):
         """Test error handling in startup system."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('signal.signal'):
             launcher = DevLauncher(self.config)
             

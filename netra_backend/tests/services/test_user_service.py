@@ -24,10 +24,15 @@ class TestUserService:
     @pytest.fixture
     def mock_db_session(self):
         """Create mock database session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.add = Mock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.refresh = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.execute = AsyncMock()
         return session
     
@@ -60,6 +65,7 @@ class TestUserService:
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the get_by_email to return None (no existing user)
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalars.return_value.first.return_value = None
         mock_db_session.execute.return_value = mock_result
@@ -102,6 +108,7 @@ class TestUserService:
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the database query result
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalars.return_value.first.return_value = sample_user
         mock_db_session.execute.return_value = mock_result
@@ -129,6 +136,7 @@ class TestUserService:
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the database query result to return None
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalars.return_value.first.return_value = None
         mock_db_session.execute.return_value = mock_result
@@ -152,6 +160,7 @@ class TestUserService:
         )
         
         # Mock get method to return the sample user
+        # Mock: Async component isolation for testing without real async operations
         with patch.object(crud_user, 'get', AsyncMock(return_value=sample_user)):
             # Mock the database refresh
             async def mock_refresh(obj):
@@ -182,8 +191,10 @@ class TestUserService:
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the get method to return the sample user
+        # Mock: Async component isolation for testing without real async operations
         with patch.object(crud_user, 'get', AsyncMock(return_value=sample_user)):
             # Mock the database delete operation
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_db_session.delete = Mock()
             
             # Act
@@ -202,7 +213,9 @@ class TestUserService:
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the database query - need to mock scalars().first() not scalar_one_or_none()
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_scalars = Mock()
         mock_scalars.first.return_value = sample_user
         mock_result.scalars.return_value = mock_scalars
@@ -238,6 +251,7 @@ class TestUserService:
         ]
         
         # Mock the database query
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalars.return_value.all.return_value = users[:2]  # Return first 2 users
         mock_db_session.execute.return_value = mock_result
@@ -300,6 +314,7 @@ class TestUserService:
         crud_user = CRUDUser("test_user_service", User)
         
         # Mock the get_by_email to return None (no existing user)
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalars.return_value.first.return_value = None
         mock_db_session.execute.return_value = mock_result

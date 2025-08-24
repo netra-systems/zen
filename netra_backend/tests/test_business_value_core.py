@@ -28,8 +28,11 @@ class TestBusinessValueCore(BusinessValueFixtures):
 
     async def _execute_with_mocked_state(self, supervisor, user_request: str, run_id: str):
         """Execute supervisor with mocked state persistence"""
+        # Mock: Generic component isolation for controlled unit testing
         save_mock = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         load_mock = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         context_mock = AsyncMock(return_value=None)
         return await self._execute_with_patches(supervisor, user_request, run_id, 
                                                save_mock, load_mock, context_mock)
@@ -37,8 +40,11 @@ class TestBusinessValueCore(BusinessValueFixtures):
     async def _execute_with_patches(self, supervisor, user_request, run_id, 
                                    save_mock, load_mock, context_mock):
         """Execute with specific state persistence patches"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', save_mock):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', load_mock):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', context_mock):
                     return await supervisor.run(user_request, "test_thread", "test_user", run_id)
 
@@ -141,6 +147,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         """Setup streaming message capture"""
         streamed_messages = []
         capture_stream = self._create_capture_stream(streamed_messages)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_message = AsyncMock(side_effect=capture_stream)
         return streamed_messages
 

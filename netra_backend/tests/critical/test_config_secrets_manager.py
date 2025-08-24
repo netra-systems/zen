@@ -76,7 +76,9 @@ class TestSecretLoadingCore:
     def test_secrets_loaded_from_google_cloud_secret_manager(self):
         """Test secrets successfully loaded from Google Cloud Secret Manager"""
         # Arrange - Mock Google Cloud Secret Manager
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client_instance = MagicMock()
             mock_client.return_value = mock_client_instance
             
@@ -84,6 +86,7 @@ class TestSecretLoadingCore:
             manager._client = mock_client_instance
             
             # Mock secret retrieval
+            # Mock: Generic component isolation for controlled unit testing
             mock_response = MagicMock()
             mock_response.payload.data.decode.return_value = "secret_value_123"
             mock_client_instance.access_secret_version.return_value = mock_response
@@ -101,6 +104,7 @@ class TestSecretLoadingCore:
         """Test fallback to environment variables when GCP Secret Manager fails"""
         # Arrange - Mock GCP failure and env vars
         with patch.dict(os.environ, {"JWT_SECRET_KEY": "env_fallback_secret"}):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
                 mock_client.side_effect = Exception("GCP Connection Failed")
                 
@@ -117,7 +121,9 @@ class TestSecretLoadingCore:
     def test_empty_secrets_handled_gracefully(self):
         """Test empty secret response handled without failure"""
         # Arrange - Mock empty secret response
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client_instance = MagicMock()
             mock_client.return_value = mock_client_instance
             
@@ -135,7 +141,9 @@ class TestSecretLoadingCore:
     def test_secret_decoding_error_handling(self):
         """Test secret decoding errors handled without service failure"""
         # Arrange - Mock decoding failure
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client_instance = MagicMock()
             mock_client.return_value = mock_client_instance
             
@@ -143,6 +151,7 @@ class TestSecretLoadingCore:
             manager._client = mock_client_instance
             
             # Mock decode error
+            # Mock: Generic component isolation for controlled unit testing
             mock_response = MagicMock()
             mock_response.payload.data.decode.side_effect = UnicodeDecodeError('utf-8', b'', 0, 1, 'test error')
             mock_client_instance.access_secret_version.return_value = mock_response
@@ -161,6 +170,7 @@ class TestConfigSecretsManagerCore:
     def test_secrets_successfully_loaded_into_config(self):
         """Test secrets successfully loaded into application configuration"""
         # Arrange - Mock secrets and config
+        # Mock: Component isolation for controlled unit testing
         mock_config = Mock(spec=AppConfig)
         mock_secrets = {
             "gemini-api-key": "gcp_gemini_key_123",
@@ -205,6 +215,7 @@ class TestConfigSecretsManagerCore:
     def test_secret_mapping_application_direct_fields(self):
         """Test direct field secret mapping application"""
         # Arrange - Mock config and mapping
+        # Mock: Component isolation for controlled unit testing
         mock_config = Mock(spec=AppConfig)
         mapping = {"field": "test_field", "targets": []}
         secret_value = "test_secret_value"
@@ -220,7 +231,9 @@ class TestConfigSecretsManagerCore:
     def test_nested_field_mapping_application(self):
         """Test nested field secret mapping application"""
         # Arrange - Mock config with nested object
+        # Mock: Component isolation for controlled unit testing
         mock_config = Mock(spec=AppConfig)
+        # Mock: Generic component isolation for controlled unit testing
         mock_nested = Mock()
         mock_config.database = mock_nested
         
@@ -242,6 +255,7 @@ class TestSecretSecurityCompliance:
     def test_secrets_not_logged_in_plain_text(self):
         """Test secrets are not logged in plain text"""
         # Arrange - Mock logger to capture log calls
+        # Mock: Component isolation for controlled unit testing
         mock_config = Mock(spec=AppConfig)
         mock_secrets = {"sensitive-key": "sensitive_value_not_for_logs"}
         
@@ -279,6 +293,7 @@ class TestSecretSecurityCompliance:
         """Test secret loading errors don't expose sensitive information"""
         # Arrange - Mock secret loading failure
         manager = ConfigSecretsManager()
+        # Mock: Component isolation for controlled unit testing
         mock_config = Mock(spec=AppConfig)
         
         # Act - Load secrets with error
@@ -299,6 +314,7 @@ class TestSecretManagerResilience:
     def test_secret_manager_handles_network_timeouts(self):
         """Test secret manager resilience against network timeouts"""
         # Arrange - Mock network timeout
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
             mock_client.side_effect = TimeoutError("Network timeout")
             
@@ -316,6 +332,7 @@ class TestSecretManagerResilience:
     def test_secret_manager_handles_authentication_failures(self):
         """Test secret manager resilience against authentication failures"""
         # Arrange - Mock authentication failure
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
             mock_client.side_effect = Exception("Authentication failed")
             
@@ -330,7 +347,9 @@ class TestSecretManagerResilience:
     def test_partial_secret_loading_continues_operation(self):
         """Test partial secret loading doesn't halt entire operation"""
         # Arrange - Mock partial success scenario
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client_instance = MagicMock()
             mock_client.return_value = mock_client_instance
             
@@ -341,6 +360,7 @@ class TestSecretManagerResilience:
             def mock_access_secret(request):
                 if 'failing-secret' in str(request):
                     raise Exception("Access denied")
+                # Mock: Generic component isolation for controlled unit testing
                 mock_response = MagicMock()
                 mock_response.payload.data.decode.return_value = "success_value"
                 return mock_response
@@ -364,11 +384,14 @@ class TestSecretManagerResilience:
             call_count[0] += 1
             if call_count[0] == 1:
                 raise Exception("Transient failure")
+            # Mock: Generic component isolation for controlled unit testing
             mock_response = MagicMock()
             mock_response.payload.data.decode.return_value = "retry_success"
             return mock_response
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client_instance = MagicMock()
             mock_client.return_value = mock_client_instance
             mock_client_instance.access_secret_version.side_effect = mock_failing_then_success

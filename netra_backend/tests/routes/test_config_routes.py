@@ -143,6 +143,7 @@ class TestConfigRoute:
         from netra_backend.app.routes.config import backup_config, restore_config
         
         # Mock config backup
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.config_service.create_backup') as mock_backup:
             mock_backup.return_value = {
                 "backup_id": "backup_123",
@@ -154,6 +155,7 @@ class TestConfigRoute:
             assert "backup_id" in backup_result
         
         # Mock config restore
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.config_service.restore_from_backup') as mock_restore:
             mock_restore.return_value = {"success": True, "restored_config": {}}
             

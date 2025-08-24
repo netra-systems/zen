@@ -259,6 +259,7 @@ class TestDeploymentDecision:
     # Helper method
     def _create_mock_error(self, severity: ErrorSeverity) -> Mock:
         """Create mock error with specified severity."""
+        # Mock: Generic component isolation for controlled unit testing
         error = Mock()
         error.severity = severity
         return error

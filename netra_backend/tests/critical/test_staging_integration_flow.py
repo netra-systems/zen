@@ -51,11 +51,17 @@ def staging_environment():
 @pytest.fixture
 async def mock_external_services():
     """Mock external services for staging tests."""
+    # Mock: Component isolation for testing without external dependencies
     with patch("psycopg2.connect") as mock_pg:
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch("redis.Redis") as mock_redis:
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch("clickhouse_connect.get_client") as mock_ch:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_pg.return_value = MagicMock()
+                # Mock: Redis external service isolation for fast, reliable tests without network dependency
                 mock_redis.return_value = MagicMock()
+                # Mock: Generic component isolation for controlled unit testing
                 mock_ch.return_value = MagicMock()
                 yield {
                     "postgres": mock_pg,

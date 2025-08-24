@@ -39,11 +39,13 @@ class TestConcurrentUpdates:
 
         async with httpx.AsyncClient() as client:
             tasks = [
+                # Mock: Component isolation for testing without external dependencies
                 client.patch(
                     f"{BACKEND_URL}/api/v1/users/{user_id}",
                     json=payload1,
                     headers=headers,
                 ),
+                # Mock: Component isolation for testing without external dependencies
                 client.patch(
                     f"{BACKEND_URL}/api/v1/users/{user_id}",
                     json=payload2,

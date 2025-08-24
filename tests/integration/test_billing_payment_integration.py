@@ -12,26 +12,33 @@ from netra_backend.app.services.billing.payment_processor import PaymentProcesso
 
 @pytest.fixture
 def mock_db_session():
+    # Mock: Generic component isolation for controlled unit testing
     return AsyncMock()
 
 
 @pytest.fixture
 def mock_usage_tracker():
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     mock.get_usage_for_period = AsyncMock(return_value={"total_usage": 100})
     return mock
 
 
 @pytest.fixture
 def mock_cost_calculator():
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     mock.calculate_cost = AsyncMock(return_value=Decimal("10.00"))
     return mock
 
 
 @pytest.fixture
 def mock_payment_gateway():
+    # Mock: Generic component isolation for controlled unit testing
     mock = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     mock.charge = AsyncMock(return_value={"success": True, "transaction_id": "ch_123"})
     return mock
 

@@ -171,6 +171,7 @@ class TestWebSocketAuthHandshake:
         websocket = WebSocketBuilder().with_user_id(user_id).with_authentication(token).build()
         tester.active_connections.append(websocket)
         
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth:
             mock_auth.return_value = user_id
             await websocket.accept()
@@ -191,11 +192,13 @@ class TestWebSocketAuthHandshake:
         """Test invalid token rejection during handshake."""
         websocket = WebSocketBuilder().with_user_id(user_id).build()
         
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth:
             mock_auth.side_effect = ValueError("Invalid token")
             
             try:
                 await websocket.accept()
+                # Mock: Authentication service isolation for testing without real auth flows
                 await mock_auth(websocket, token, Mock())
                 return {"authenticated": True}
             except ValueError as e:
@@ -237,6 +240,7 @@ class TestReconnectionWithAuth:
         new_websocket = WebSocketBuilder().with_user_id(user_id).with_authentication(token).build()
         tester.active_connections.append(new_websocket)
         
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth:
             mock_auth.return_value = user_id
             await new_websocket.accept()

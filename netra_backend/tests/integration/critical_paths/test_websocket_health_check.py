@@ -568,6 +568,7 @@ class TestWebSocketHealthCheck:
 
         """Create WebSocket manager with mocked external services."""
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis:
 
             mock_redis.enabled = False  # Use in-memory storage
@@ -623,6 +624,7 @@ class TestWebSocketHealthCheck:
 
         user = test_users[0]
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Connect user
@@ -733,6 +735,7 @@ class TestWebSocketHealthCheck:
 
         user = test_users[0]
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Connect user
@@ -842,6 +845,7 @@ class TestWebSocketHealthCheck:
 
         user = test_users[0]
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Connect user
@@ -883,6 +887,7 @@ class TestWebSocketHealthCheck:
 
         for user in test_users:
 
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_websocket = AsyncMock()
 
             connection_info = await websocket_manager.connect_user(user.id, mock_websocket)
@@ -946,6 +951,7 @@ class TestWebSocketHealthCheck:
 
         user = test_users[0]
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
         
         # Connect user

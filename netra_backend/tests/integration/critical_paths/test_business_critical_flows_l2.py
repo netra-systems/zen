@@ -79,9 +79,13 @@ class BusinessCriticalFlowsTester:
     async def _setup_billing_services(self):
         """Setup billing and revenue services."""
         # Mock services for L2 testing with realistic behavior
+        # Mock: Generic component isolation for controlled unit testing
         self.usage_metering = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.payment_processor = MagicMock() 
+        # Mock: Generic component isolation for controlled unit testing
         self.subscription_manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.revenue_calculator = MagicMock()
         
         # Configure realistic mock behaviors

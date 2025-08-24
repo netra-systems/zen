@@ -37,6 +37,7 @@ class TestBenchmarkMetrics:
         
         start_time = time.perf_counter()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.generate_content_for_worker') as mock_gen:
             mock_gen.return_value = {'type': 'test', 'data': ('p', 'r')}
             
@@ -137,6 +138,7 @@ class TestBenchmarkMetrics:
             max_cores=2
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
             mock_pool.return_value = iter([
                 {'type': 'test', 'data': ('prompt', 'response')} 
@@ -174,6 +176,7 @@ class TestBenchmarkMetrics:
                 max_cores=4
             )
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
                 mock_pool.return_value = iter([
                     {'type': 'test', 'data': ('p', 'r')} 

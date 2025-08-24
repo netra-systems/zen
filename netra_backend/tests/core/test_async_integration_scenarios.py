@@ -32,6 +32,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     async def test_resource_manager_with_task_pool(self):
         """Test resource manager integrated with task pool"""
         resource_manager, task_pool = self._create_manager_and_pool()
+        # Mock: Generic component isolation for controlled unit testing
         cleanup_callback = AsyncMock()
         resource_manager.register_resource(task_pool, cleanup_callback)
         result = await task_pool.submit_task(self._sample_task())

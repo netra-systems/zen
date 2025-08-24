@@ -94,6 +94,7 @@ class TestMarketReportGeneration:
     
     def _create_research_session(self) -> ResearchSession:
         """Helper to create research session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         research_session = MagicMock(spec=ResearchSession)
         research_session.id = "session-1"
         research_session.query = "Research pricing updates"
@@ -104,6 +105,7 @@ class TestMarketReportGeneration:
     def _create_long_query_session(self) -> ResearchSession:
         """Helper to create session with long query"""
         long_query = "A" * 150  # Query longer than 100 characters
+        # Mock: Database session isolation for transaction testing without real database dependency
         research_session = MagicMock(spec=ResearchSession)
         research_session.id = "session-1"
         research_session.query = long_query
@@ -136,6 +138,7 @@ class TestMarketReportGeneration:
             calculate_price_changes=lambda: deps["price_changes"],
             detect_anomalies=lambda: deps["anomalies"],
             get_research_sessions=lambda **kwargs: [deps["research_session"]],
+            # Mock: Generic component isolation for controlled unit testing
             get_supply_items=lambda **kwargs: [MagicMock()]
         )
     
@@ -175,6 +178,7 @@ class TestMarketReportGeneration:
     def _patch_statistics_dependencies(self, service):
         """Helper to patch dependencies for statistics testing"""
         def mock_query_count():
+            # Mock: Generic component isolation for controlled unit testing
             mock_q = MagicMock()
             mock_q.filter.return_value.count.return_value = 25  # Available models
             mock_q.count.return_value = 50  # Total models
@@ -261,11 +265,13 @@ class TestReportSectionsIndividually:
     
     def _create_recent_sessions(self) -> List[ResearchSession]:
         """Helper to create recent research sessions"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session1 = MagicMock(spec=ResearchSession)
         session1.id = "session-1"
         session1.query = "Research OpenAI pricing"
         session1.status = "completed"
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         session2 = MagicMock(spec=ResearchSession)
         session2.id = "session-2"
         session2.query = "Research Claude pricing"

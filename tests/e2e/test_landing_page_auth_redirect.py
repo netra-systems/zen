@@ -55,6 +55,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         # Simulate landing page visit
         start_time = time.time()
         
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('frontend.auth.service.authService.useAuth') as mock_use_auth:
             mock_use_auth.return_value = mock_auth_state
             
@@ -93,6 +94,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         
         start_time = time.time()
         
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('frontend.auth.service.authService.useAuth') as mock_use_auth:
             mock_use_auth.return_value = mock_auth_state
             
@@ -129,6 +131,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         redirects_during_loading = []
         
         for i, auth_state in enumerate(auth_states):
+            # Mock: Authentication service isolation for testing without real auth flows
             with patch('frontend.auth.service.authService.useAuth') as mock_use_auth:
                 mock_use_auth.return_value = auth_state
                 
@@ -163,6 +166,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         redirect_history = []
         
         for auth_state in rapid_auth_states:
+            # Mock: Authentication service isolation for testing without real auth flows
             with patch('frontend.auth.service.authService.useAuth') as mock_use_auth:
                 mock_use_auth.return_value = auth_state
                 
@@ -200,6 +204,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         # Test 1: useAuth hook return values
         expected_auth_interface = {'user', 'loading', 'isAuthenticated', 'token'}
         
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('frontend.auth.service.authService.useAuth') as mock_use_auth:
             mock_return = {'user': None, 'loading': False}  # Incomplete interface
             mock_use_auth.return_value = mock_return
@@ -211,6 +216,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
                 inconsistencies.append(f"useAuth mock missing keys: {missing_keys}")
         
         # Test 2: Auth state timing consistency
+        # Mock: Component isolation for testing without external dependencies
         with patch('frontend.auth.service.authService') as mock_service:
             # Real service has async loading, mock returns immediately
             mock_service.checkAuthStatus.return_value = {'user': None, 'loading': False}
@@ -246,6 +252,7 @@ class TestLandingPageAuthRedirect(BaseIntegrationTest):
         logout_redirects = []
         
         for auth_state in logout_sequence:
+            # Mock: Authentication service isolation for testing without real auth flows
             with patch('frontend.auth.service.authService.useAuth') as mock_use_auth:
                 mock_use_auth.return_value = auth_state
                 

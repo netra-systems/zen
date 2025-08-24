@@ -31,6 +31,7 @@ def secured_client():
     # Mock db session factory
     @asynccontextmanager
     async def mock_db_session():
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = MagicMock()
         yield mock_session
     
@@ -60,12 +61,15 @@ def setup_agent_mocks(app):
     from netra_backend.app.services.agent_service import get_agent_service
     
     def mock_get_async_db():
+        # Mock: Generic component isolation for controlled unit testing
         return Mock()
         
     def mock_get_llm_manager():
+        # Mock: Generic component isolation for controlled unit testing
         return Mock()
         
     def mock_get_agent_service():
+        # Mock: Generic component isolation for controlled unit testing
         return Mock()
     
     # Override dependencies

@@ -15,6 +15,7 @@ def test_logging_filter_circular_dependency():
     os.environ['ENVIRONMENT'] = 'staging'
     
     # Mock the configuration manager to simulate the circular import
+    # Mock: Component isolation for testing without external dependencies
     with patch('netra_backend.app.core.configuration.unified_config_manager') as mock_config_manager:
         # Setup a side effect that simulates the circular dependency
         def circular_import_side_effect():
@@ -23,6 +24,7 @@ def test_logging_filter_circular_dependency():
             from netra_backend.app.core.logging_context import ContextFilter
             filter_instance = ContextFilter()
             # This should trigger the circular dependency
+            # Mock: Generic component isolation for controlled unit testing
             filter_instance.should_log(MagicMock())
             
         mock_config_manager.get_config.side_effect = circular_import_side_effect
@@ -31,6 +33,7 @@ def test_logging_filter_circular_dependency():
         from netra_backend.app.core.logging_context import ContextFilter
         
         filter_instance = ContextFilter()
+        # Mock: Generic component isolation for controlled unit testing
         mock_record = MagicMock()
         mock_record.getMessage.return_value = "Test message"
         
@@ -71,6 +74,7 @@ def test_logging_filter_handles_bootstrap_phase():
     
     # During bootstrap, the filter should work even if config is not available
     filter_instance = ContextFilter()
+    # Mock: Generic component isolation for controlled unit testing
     mock_record = MagicMock()
     mock_record.getMessage.return_value = "Bootstrap log message"
     

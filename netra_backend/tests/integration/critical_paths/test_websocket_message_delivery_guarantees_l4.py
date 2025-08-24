@@ -52,6 +52,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         # Connect client
         ws_connection = await ws_infrastructure['ws_service'].connect_client(
             client_id=client_id,
+            # Mock: Generic component isolation for controlled unit testing
             websocket=MagicMock()
         )
         
@@ -79,6 +80,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         async def receive_handler(message):
             received_messages.append(message)
         
+        # Mock: Async component isolation for testing without real async operations
         ws_connection.websocket.send = AsyncMock(side_effect=receive_handler)
         
         # Process all messages
@@ -100,6 +102,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         # Connect client with ack requirement
         ws_connection = await ws_infrastructure['ws_service'].connect_client(
             client_id=client_id,
+            # Mock: Generic component isolation for controlled unit testing
             websocket=MagicMock(),
             require_ack=True,
             ack_timeout=1  # 1 second timeout
@@ -113,6 +116,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         }
         
         # Mock send that doesn't acknowledge
+        # Mock: Generic component isolation for controlled unit testing
         ws_connection.websocket.send = AsyncMock()
         
         # Send message
@@ -147,6 +151,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         for client_id in client_ids:
             conn = await ws_infrastructure['ws_service'].connect_client(
                 client_id=client_id,
+                # Mock: Generic component isolation for controlled unit testing
                 websocket=MagicMock()
             )
             connections[client_id] = conn
@@ -160,6 +165,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         
         # Mock send for all clients
         for client_id, conn in connections.items():
+            # Mock: Async component isolation for testing without real async operations
             conn.websocket.send = AsyncMock(
                 side_effect=lambda msg, cid=client_id: delivery_tracker(cid, msg)
             )
@@ -189,6 +195,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         client_id = "client_reconnect"
         
         # Initial connection
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = MagicMock()
         conn1 = await ws_infrastructure['ws_service'].connect_client(
             client_id=client_id,
@@ -213,8 +220,10 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
             )
         
         # Reconnect with new websocket
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         received_messages = []
+        # Mock: Async component isolation for testing without real async operations
         ws2.send = AsyncMock(side_effect=lambda msg: received_messages.append(msg))
         
         conn2 = await ws_infrastructure['ws_service'].connect_client(
@@ -242,8 +251,10 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         client_id = "client_dedup"
         
         # Connect client
+        # Mock: Generic component isolation for controlled unit testing
         ws = MagicMock()
         received_messages = []
+        # Mock: Async component isolation for testing without real async operations
         ws.send = AsyncMock(side_effect=lambda msg: received_messages.append(msg))
         
         conn = await ws_infrastructure['ws_service'].connect_client(
@@ -277,8 +288,10 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         client_id = "client_priority"
         
         # Connect client
+        # Mock: Generic component isolation for controlled unit testing
         ws = MagicMock()
         received_order = []
+        # Mock: Async component isolation for testing without real async operations
         ws.send = AsyncMock(side_effect=lambda msg: received_order.append(json.loads(msg)['id']))
         
         conn = await ws_infrastructure['ws_service'].connect_client(
@@ -319,8 +332,10 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         client_id = "client_batch"
         
         # Connect client
+        # Mock: Generic component isolation for controlled unit testing
         ws = MagicMock()
         received_batches = []
+        # Mock: Async component isolation for testing without real async operations
         ws.send = AsyncMock(side_effect=lambda msg: received_batches.append(msg))
         
         conn = await ws_infrastructure['ws_service'].connect_client(
@@ -361,6 +376,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         client_id = "client_failure"
         
         # Connect client
+        # Mock: Generic component isolation for controlled unit testing
         ws = MagicMock()
         send_count = 0
         
@@ -371,6 +387,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
                 raise websockets.exceptions.ConnectionClosed(None, None)
             return True
         
+        # Mock: Async component isolation for testing without real async operations
         ws.send = AsyncMock(side_effect=failing_send)
         
         conn = await ws_infrastructure['ws_service'].connect_client(
@@ -407,8 +424,10 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         client_id = "client_compress"
         
         # Connect client with compression
+        # Mock: Generic component isolation for controlled unit testing
         ws = MagicMock()
         sent_sizes = []
+        # Mock: Async component isolation for testing without real async operations
         ws.send = AsyncMock(side_effect=lambda msg: sent_sizes.append(len(msg)))
         
         conn = await ws_infrastructure['ws_service'].connect_client(
@@ -447,12 +466,14 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
         
         for i in range(5):
             client_id = f"client_{i}"
+            # Mock: Generic component isolation for controlled unit testing
             ws = MagicMock()
             
             # Each client tracks its own messages
             async def track_messages(msg, cid=client_id):
                 client_messages[cid].append(json.loads(msg))
             
+            # Mock: Async component isolation for testing without real async operations
             ws.send = AsyncMock(side_effect=track_messages)
             
             conn = await ws_infrastructure['ws_service'].connect_client(

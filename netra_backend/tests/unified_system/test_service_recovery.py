@@ -148,12 +148,16 @@ class TestServiceRecoveryBase:
 
         """Create mock process manager."""
 
+        # Mock: Component isolation for controlled unit testing
         manager = Mock(spec=ProcessManager)
 
+        # Mock: Generic component isolation for controlled unit testing
         manager.get_process = Mock(return_value=Mock())
 
+        # Mock: Component isolation for controlled unit testing
         manager.is_running = Mock(return_value=True)
 
+        # Mock: Component isolation for controlled unit testing
         manager.terminate_process = Mock(return_value=True)
 
         return manager
@@ -675,8 +679,10 @@ class TestCrashDetectionAndRecovery(TestServiceRecoveryBase):
         """Test process-level crash detection"""
         # Arrange - Setup process monitoring
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_process = Mock()
 
+        # Mock: Component isolation for controlled unit testing
         mock_process.poll = Mock(return_value=1)  # Non-zero = crashed
 
         mock_process.pid = 12345

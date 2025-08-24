@@ -61,6 +61,7 @@ class TestEnterpriseResourceHealth:
                 "policy_status": "active"
             }
         
+        # Mock: Async component isolation for testing without real async operations
         infra["resource_scaler"].configure_autoscaling = AsyncMock(return_value={
             "scaling_config_id": str(uuid.uuid4()),
             "policies_applied": scaling_policies_applied,
@@ -179,6 +180,7 @@ class TestEnterpriseResourceHealth:
             "deployment_status": "completed"
         }
         
+        # Mock: Async component isolation for testing without real async operations
         infra["health_checker"].deploy_monitoring = AsyncMock(return_value=deployment_result)
         return await infra["health_checker"].deploy_monitoring(config)
 

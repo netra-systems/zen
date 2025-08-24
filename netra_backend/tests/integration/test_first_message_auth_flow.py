@@ -63,14 +63,19 @@ class TestFirstMessageAuthenticationFlow:
 
         """Create mock WebSocket with auth headers."""
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.accept = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send_json = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.close = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         websocket.receive_json = AsyncMock(return_value={
 
             "type": "user_message",
@@ -116,6 +121,7 @@ class TestFirstMessageAuthenticationFlow:
 
         no_auth_ws.headers = {}
 
+        # Mock: Generic component isolation for controlled unit testing
         no_auth_ws.close = AsyncMock()
         
         with pytest.raises(ValueError, match="No authorization header"):
@@ -248,6 +254,7 @@ class TestFirstMessageAuthenticationFlow:
         
         # Test middleware rejection
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         no_auth_ws = Mock(spec=WebSocket)
 
         no_auth_ws.headers = {}
@@ -272,8 +279,10 @@ class TestFirstMessageAuthenticationFlow:
         # Mock message handler
         # L2: Mocking message handler to test auth→message flow
 
+        # Mock: Component isolation for controlled unit testing
         message_handler = Mock(spec=MessageHandlerService)
 
+        # Mock: Generic component isolation for controlled unit testing
         message_handler.handle_user_message = AsyncMock()
         
         # Process first message
@@ -323,10 +332,12 @@ class TestFirstMessageAuthenticationFlow:
         
         # Scenario 1: Invalid token format
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         invalid_ws = Mock(spec=WebSocket)
 
         invalid_ws.headers = {"Authorization": "InvalidFormat"}
 
+        # Mock: Generic component isolation for controlled unit testing
         invalid_ws.close = AsyncMock()
         
         with pytest.raises(ValueError, match="Invalid authorization format"):
@@ -335,14 +346,17 @@ class TestFirstMessageAuthenticationFlow:
         
         # Scenario 2: Malformed JWT
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         malformed_ws = Mock(spec=WebSocket)
 
         malformed_ws.headers = {"Authorization": "Bearer not.a.jwt"}
 
+        # Mock: Generic component isolation for controlled unit testing
         malformed_ws.close = AsyncMock()
         
         # L2: Mocking JWT decode to test malformed token handling
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('jwt.decode') as mock_decode:
 
             mock_decode.side_effect = jwt.InvalidTokenError("Invalid token")
@@ -373,8 +387,10 @@ class TestFirstMessageAuthenticationFlow:
 
         for i in range(5):
 
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             ws = Mock(spec=WebSocket)
 
+            # Mock: Generic component isolation for controlled unit testing
             ws.accept = AsyncMock()
 
             ws.headers = {"Authorization": f"Bearer token_{i}"}

@@ -22,8 +22,11 @@ class TestResilientHTTPClientCircuit:
     @pytest.mark.asyncio
     async def test_get_circuit_new(self, client):
         """Test getting new circuit breaker."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.circuit_registry') as mock_registry:
+            # Mock: Generic component isolation for controlled unit testing
             mock_circuit = Mock()
+            # Mock: Component isolation for controlled unit testing
             mock_registry.get_breaker = Mock(return_value=mock_circuit)
             
             circuit = await client._get_circuit("test_api")
@@ -31,6 +34,7 @@ class TestResilientHTTPClientCircuit:
     @pytest.mark.asyncio
     async def test_get_circuit_existing(self, client):
         """Test getting existing circuit breaker."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_circuit = Mock()
         client._circuits["test_api"] = mock_circuit
         
@@ -55,6 +59,7 @@ class TestResilientHTTPClientCircuit:
     @pytest.mark.asyncio
     async def test_request_success(self, client):
         """Test successful request execution."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_circuit = AsyncMock()
         mock_circuit.call.return_value = {"success": True}
         
@@ -70,6 +75,7 @@ class TestResilientHTTPClientCircuit:
         mock_circuit = self._setup_open_circuit_mock()
         
         with patch.object(client, '_get_circuit', return_value=mock_circuit), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.external_api_client.logger') as mock_logger:
             result = await client._request("GET", "/test", "test_api")
             self._verify_circuit_open_result(result, mock_logger)
@@ -77,6 +83,7 @@ class TestResilientHTTPClientCircuit:
     def _setup_open_circuit_mock(self):
         """Setup mock circuit that is open."""
         from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
+        # Mock: Generic component isolation for controlled unit testing
         mock_circuit = AsyncMock()
         mock_circuit.call.side_effect = CircuitBreakerOpenError("Circuit open")
         return mock_circuit

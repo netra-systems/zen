@@ -98,10 +98,13 @@ def setup_integration_infrastructure():
         
         # Mock LLM Manager with realistic responses
 
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
 
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager.call_llm = AsyncMock(side_effect=self._mock_llm_response)
 
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager.ask_llm = AsyncMock(side_effect=self._mock_ask_llm_response)
         
         # Real state persistence service

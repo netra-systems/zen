@@ -34,6 +34,7 @@ class TestDynamicPortHealthChecks(unittest.TestCase):
     
     def test_verify_auth_ready_with_dynamic_port(self):
         """Test auth service health check with dynamic port."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.utils.wait_for_service_with_details') as mock_wait:
             mock_wait.return_value = (True, "Success")
             
@@ -48,6 +49,7 @@ class TestDynamicPortHealthChecks(unittest.TestCase):
     
     def test_verify_backend_ready_with_dynamic_port(self):
         """Test backend service health check with dynamic port."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.utils.wait_for_service_with_details') as mock_wait:
             mock_wait.return_value = (True, "Success")
             
@@ -62,6 +64,7 @@ class TestDynamicPortHealthChecks(unittest.TestCase):
     
     def test_verify_frontend_ready_with_dynamic_port(self):
         """Test frontend service health check with dynamic port."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.utils.wait_for_service_with_details') as mock_wait:
             mock_wait.return_value = (True, "Success")
             
@@ -74,6 +77,7 @@ class TestDynamicPortHealthChecks(unittest.TestCase):
             )
             self.assertTrue(result)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('pathlib.Path.cwd')
     def test_verify_all_services_ready_reads_discovery_files(self, mock_cwd):
         """Test that verify_all_services_ready reads port info from discovery files."""
@@ -89,6 +93,7 @@ class TestDynamicPortHealthChecks(unittest.TestCase):
         (self.discovery_dir / "backend.json").write_text(json.dumps(backend_info))
         (self.discovery_dir / "frontend.json").write_text(json.dumps(frontend_info))
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.utils.wait_for_service_with_details') as mock_wait:
             mock_wait.return_value = (True, "Success")
             
@@ -108,6 +113,7 @@ class TestDynamicPortHealthChecks(unittest.TestCase):
             
             self.assertTrue(result)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('pathlib.Path.cwd')
     def test_verify_all_services_ready_fallback_to_defaults(self, mock_cwd):
         """Test fallback to default ports when discovery files don't exist."""
@@ -130,6 +136,7 @@ class TestDynamicPortHealthChecks(unittest.TestCase):
             
             self.assertTrue(result)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('pathlib.Path.cwd')
     def test_verify_all_services_handles_malformed_discovery_files(self, mock_cwd):
         """Test graceful handling of malformed discovery files."""
@@ -139,6 +146,7 @@ class TestDynamicPortHealthChecks(unittest.TestCase):
         (self.discovery_dir / "auth.json").write_text("not valid json")
         (self.discovery_dir / "backend.json").write_text("{incomplete")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.utils.wait_for_service_with_details') as mock_wait:
             mock_wait.return_value = (True, "Success")
             
@@ -152,6 +160,7 @@ class TestDynamicPortHealthChecks(unittest.TestCase):
     
     def test_extended_timeouts_are_applied(self):
         """Test that extended timeouts are properly applied."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.utils.wait_for_service_with_details') as mock_wait:
             mock_wait.return_value = (False, "Timeout")
             

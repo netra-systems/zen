@@ -151,6 +151,7 @@ class MockServiceManager:
     def mock_service(self, service_name: str) -> MagicMock:
         """Get or create a mock service."""
         if service_name not in self._services:
+            # Mock: Generic component isolation for controlled unit testing
             self._services[service_name] = MagicMock()
         return self._services[service_name]
     
@@ -174,7 +175,9 @@ class DatabaseMockMixin:
     @pytest.fixture(autouse=True)
     async def mock_database(self):
         """Mock database operations."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_db') as mock_db:
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = MagicMock()
             mock_db.return_value = mock_session
             self.mock_db_session = mock_session
@@ -199,6 +202,7 @@ class AuthMockMixin:
     @pytest.fixture(autouse=True)
     def mock_auth(self):
         """Mock authentication services."""
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.services.user_auth_service.get_current_user') as mock_auth:
             mock_auth.return_value = self.mock_user
             self.mock_auth_service = mock_auth
@@ -219,7 +223,9 @@ class WebSocketMockMixin:
     @pytest.fixture(autouse=True)
     def mock_websocket(self):
         """Mock WebSocket services."""
+        # Mock: WebSocket connection isolation for testing without network overhead
         with patch('netra_backend.app.services.websocket_manager.WebSocketManager') as mock_ws:
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws_instance = MagicMock()
             mock_ws.return_value = mock_ws_instance
             self.mock_websocket_manager = mock_ws_instance

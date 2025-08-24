@@ -39,7 +39,9 @@ assert_successful_registration = Mock
 assert_plan_compliance = Mock
 # User journey data - creating mocks
 from unittest.mock import Mock, AsyncMock, MagicMock
+# Mock: Generic component isolation for controlled unit testing
 UserTestData = Mock()
+# Mock: Generic component isolation for controlled unit testing
 UserJourneyScenarios = Mock()
 
 @pytest.mark.integration

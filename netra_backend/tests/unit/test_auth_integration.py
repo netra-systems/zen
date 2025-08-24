@@ -47,6 +47,7 @@ class TestAuthIntegration:
     @pytest.fixture
     def mock_credentials(self):
         """Create mock HTTP authorization credentials."""
+        # Mock: Authentication service isolation for testing without real auth flows
         credentials = Mock(spec=HTTPAuthorizationCredentials)
         credentials.credentials = "valid-jwt-token-123"
         return credentials
@@ -60,8 +61,11 @@ class TestAuthIntegration:
     @pytest.fixture
     def mock_db_session(self):
         """Create mock async database session."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Database session isolation for transaction testing without real database dependency
         session.__aenter__ = AsyncMock(return_value=session)
+        # Mock: Session isolation for controlled testing without external state
         session.__aexit__ = AsyncMock(return_value=None)
         return session
     
@@ -132,6 +136,7 @@ class TestAuthIntegration:
     @pytest.mark.asyncio
     async def test_get_current_user_optional_valid_credentials_returns_user(self, mock_credentials, mock_auth_client, mock_db_session, sample_user):
         """Test optional auth returns user with valid credentials."""
+        # Mock: Async component isolation for testing without real async operations
         with patch('app.auth_integration.auth.get_current_user', new_callable=AsyncMock) as mock_get_user:
             mock_get_user.return_value = sample_user
             
@@ -149,6 +154,7 @@ class TestAuthIntegration:
     @pytest.mark.asyncio
     async def test_get_current_user_optional_invalid_credentials_returns_none(self, mock_credentials, mock_db_session):
         """Test optional auth returns None when authentication fails."""
+        # Mock: Async component isolation for testing without real async operations
         with patch('app.auth_integration.auth.get_current_user', new_callable=AsyncMock) as mock_get_user:
             mock_get_user.side_effect = HTTPException(status_code=401, detail="Invalid token")
             
@@ -274,6 +280,7 @@ class TestAuthIntegration:
         """Test JWT token validation with expired token."""
         data = {"user_id": "test-123"}
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.auth_integration.auth.datetime') as mock_datetime:
             past_time = datetime.utcnow() - timedelta(hours=1)
             mock_datetime.utcnow.return_value = past_time
@@ -298,12 +305,14 @@ class TestAuthIntegration:
 
     def _setup_db_session_with_user(self, mock_db_session, user):
         """Setup database session to return user."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db_session.execute.return_value = mock_result
 
     def _setup_db_session_no_user(self, mock_db_session):
         """Setup database session to return no user."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = None
         mock_db_session.execute.return_value = mock_result

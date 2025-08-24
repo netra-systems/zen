@@ -94,6 +94,7 @@ class AgentOrchestrationRevenuePathL4Manager:
             configure_dedicated_test_environment()
             
             # Initialize core agent services
+            # Mock: Generic component isolation for controlled unit testing
             mock_supervisor = AsyncMock()
 
             self.agent_service = AgentService(mock_supervisor)

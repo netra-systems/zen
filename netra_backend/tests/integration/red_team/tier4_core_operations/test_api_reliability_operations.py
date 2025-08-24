@@ -34,18 +34,26 @@ class TestApiRateLimitingPerSubscriptionTier:
     @pytest.fixture
     def mock_rate_limiter(self):
         """Mock rate limiter for subscription tier testing."""
+        # Mock: Generic component isolation for controlled unit testing
         limiter = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         limiter.get_tier_limits = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         limiter.check_tier_limit = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         limiter.increment_tier_counter = AsyncMock()
         return limiter
     
     @pytest.fixture
     def mock_subscription_service(self):
         """Mock subscription service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_user_tier = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_tier_quotas = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_tier_access = AsyncMock()
         return service
     
@@ -156,9 +164,13 @@ class TestApiResponseDataConsistency:
     @pytest.fixture
     def mock_api_service(self):
         """Mock API service for response consistency testing."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.get_endpoint_schema = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_response_format = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.check_data_consistency = AsyncMock()
         return service
     
@@ -277,9 +289,13 @@ class TestApiErrorHandlingAndClientRecovery:
     @pytest.fixture
     def mock_error_handler(self):
         """Mock error handler for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         handler = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         handler.handle_api_error = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         handler.generate_error_response = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         handler.track_error_metrics = AsyncMock()
         return handler
     
@@ -432,9 +448,13 @@ class TestMultiTenantDataSegregation:
     @pytest.fixture
     def mock_tenant_manager(self):
         """Mock tenant manager for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         manager = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.get_tenant_context = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.validate_data_access = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.enforce_data_isolation = AsyncMock()
         return manager
     
@@ -542,10 +562,15 @@ class TestDatabaseConnectionPoolManagement:
     @pytest.fixture
     def mock_connection_pool(self):
         """Mock database connection pool manager."""
+        # Mock: Generic component isolation for controlled unit testing
         pool = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         pool.get_connection = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         pool.return_connection = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         pool.get_pool_stats = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         pool.handle_connection_timeout = AsyncMock()
         return pool
     

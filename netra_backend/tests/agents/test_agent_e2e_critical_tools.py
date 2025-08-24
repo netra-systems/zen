@@ -33,6 +33,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         llm_manager = infra["llm_manager"]
         
         # Setup tool calls response
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.call_llm = AsyncMock(return_value={
             "content": "Let me analyze your data",
             "tool_calls": [
@@ -46,6 +47,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
             {"data": "workload_metrics", "status": "success"},
             {"analysis": "optimization_suggestions", "status": "success"}
         ]
+        # Mock: Tool execution isolation for predictable agent testing
         tool_dispatcher.dispatch_tool = AsyncMock(side_effect=tool_results)
         
         # Execute a sub-agent that uses tools
@@ -137,8 +139,11 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
             return None
             
         # Mock state persistence service methods
+        # Mock: Async component isolation for testing without real async operations
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock(side_effect=mock_save_state)):
+            # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(side_effect=mock_load_state)):
+                # Mock: Async component isolation for testing without real async operations
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     # First run - state should be saved
                     state1 = await supervisor.run("Initial request", thread_id, user_id, run_id)
@@ -149,6 +154,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
                 
                 # Simulate recovery - load previous state
                 with patch.object(state_persistence_service, 'get_thread_context', 
+                                # Mock: Async component isolation for testing without real async operations
                                 AsyncMock(return_value={"current_run_id": run_id})):
                     
                     # Second run should load previous state
@@ -169,6 +175,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
     def _setup_error_agent(self, supervisor):
         """Setup sub-agent to simulate error"""
         sub_agents = self._get_sub_agents(supervisor)
+        # Mock: Agent service isolation for testing without LLM agent execution
         sub_agents[2].execute = AsyncMock(side_effect=Exception("Sub-agent failure"))
 
     async def _capture_error_messages(self, websocket_manager):
@@ -177,6 +184,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         async def capture_error(rid, msg):
             if msg.get("type") == "error":
                 error_messages.append(msg)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_message = AsyncMock(side_effect=capture_error)
         return error_messages
 
@@ -206,8 +214,11 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
 
     async def _test_retry_execution(self, supervisor, run_id, max_retries):
         """Test retry execution mechanism"""
+        # Mock: Generic component isolation for controlled unit testing
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+            # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
+                # Mock: Async component isolation for testing without real async operations
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     for i in range(max_retries):
                         try:
@@ -228,8 +239,11 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         supervisor = infra["supervisor"]
         websocket_manager = infra["websocket_manager"]
         run_id = str(uuid.uuid4())
+        # Mock: Generic component isolation for controlled unit testing
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+            # Mock: Async component isolation for testing without real async operations
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
+                # Mock: Async component isolation for testing without real async operations
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
                     self._setup_error_agent(supervisor)
         error_messages = await self._capture_error_messages(websocket_manager)

@@ -34,6 +34,7 @@ class TestResilientHTTPClientHealth:
     async def test_health_check_error(self, client):
         """Test health check with error."""
         with patch.object(client, '_get_circuit', side_effect=Exception("Circuit error")), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.external_api_client.logger') as mock_logger:
             result = await client.health_check("test_api")
             verify_error_health_check(result, mock_logger)
@@ -63,6 +64,7 @@ class TestResilientHTTPClientHealth:
             def __init__(self, status):
                 self.status = status
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_response = MockResponse(200)
         mock_session.get.return_value = MockAsyncContextManager(mock_response)
@@ -75,6 +77,7 @@ class TestResilientHTTPClientHealth:
     @pytest.mark.asyncio
     async def test_test_connectivity_failure(self, client):
         """Test failed connectivity test."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_session.get.side_effect = Exception("Connection failed")
         

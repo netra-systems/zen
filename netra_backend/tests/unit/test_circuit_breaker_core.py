@@ -39,7 +39,9 @@ def circuit_config():
 @pytest.fixture
 def mock_health_checker():
     """Mock health checker returning healthy status."""
+    # Mock: Component isolation for controlled unit testing
     checker = Mock(spec=HealthChecker)
+    # Mock: Async component isolation for testing without real async operations
     checker.check_health = AsyncMock(return_value=create_health_result())
     return checker
 

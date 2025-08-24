@@ -48,8 +48,11 @@ class TestAgentServiceUnit:
             dict: All mocked dependencies ready for injection
         """
         return {
+            # Mock: Async component isolation for testing without real async operations
             'supervisor': AsyncMock(spec=['run', 'stop']),
+            # Mock: Database access isolation for fast, reliable unit testing
             'database': AsyncMock(spec=['save', 'load', 'delete']),
+            # Mock: Async component isolation for testing without real async operations
             'message_handler': AsyncMock(spec=['send', 'broadcast'])
         }
     
@@ -140,6 +143,7 @@ class TestAgentServiceIntegration:
         MOCKED COMPONENTS: LLM API, WebSocket delivery
         """
         # Arrange: Setup service with real DB, mocked LLM
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('app.llm.client.generate') as mock_llm:
             mock_llm.return_value = {'response': 'Generated content'}
             
@@ -268,16 +272,19 @@ class TestErrorHandling(SharedTestErrorHandling):
             expected_error: Expected error message
         """
         # Arrange: Configure service to fail in specific way
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = AsyncMock()
         service = AgentService(supervisor=mock_supervisor)
         
         if failure_type == "database_timeout":
             # Mock the supervisor to simulate database timeout
+            # Mock: Async component isolation for testing without real async operations
             service.supervisor.run = AsyncMock(
                 side_effect=asyncio.TimeoutError("Database operation timed out")
             )
         elif failure_type == "llm_rate_limit":
             # Mock the supervisor to simulate LLM rate limit
+            # Mock: Async component isolation for testing without real async operations
             service.supervisor.run = AsyncMock(
                 side_effect=Exception("LLM API rate limit exceeded")
             )
@@ -285,6 +292,7 @@ class TestErrorHandling(SharedTestErrorHandling):
             # Will test with None input to trigger validation error
             pass
         elif failure_type == "agent_crash":
+            # Mock: Async component isolation for testing without real async operations
             service.supervisor.run = AsyncMock(
                 side_effect=RuntimeError("Agent process terminated unexpectedly")
             )

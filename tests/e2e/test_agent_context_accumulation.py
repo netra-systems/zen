@@ -42,8 +42,11 @@ class AgentContextAccumulationTester:
 
     async def create_test_supervisor_with_context(self, thread_id: str) -> SupervisorAgent:
         """Create supervisor agent with context tracking enabled."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = MagicMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = MagicMock()
         
         supervisor = SupervisorAgent(

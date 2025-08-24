@@ -257,16 +257,27 @@ async def redis_client():
         await client.aclose()
     except Exception:
         # Use mock for CI environments
+        # Mock: Generic component isolation for controlled unit testing
         client = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         client.hset = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         client.hgetall = AsyncMock(return_value={})
+        # Mock: Generic component isolation for controlled unit testing
         client.expire = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         client.exists = AsyncMock(return_value=True)
+        # Mock: Async component isolation for testing without real async operations
         client.get = AsyncMock(return_value=None)
+        # Mock: Generic component isolation for controlled unit testing
         client.setex = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         client.incr = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         client.ttl = AsyncMock(return_value=600)
+        # Mock: Async component isolation for testing without real async operations
         client.keys = AsyncMock(return_value=[])
+        # Mock: Generic component isolation for controlled unit testing
         client.delete = AsyncMock()
         yield client
 

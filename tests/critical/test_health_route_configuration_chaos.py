@@ -134,6 +134,7 @@ class TestHealthRouteConfigurationChaos:
         # Test health endpoints across all environments
         for env_name, client in environments.items():
             try:
+                # Mock: Component isolation for testing without external dependencies
                 with patch('netra_backend.app.dependencies.get_db_dependency'):
                     health_resp = client.get('/health')
                     ready_resp = client.get('/ready')
@@ -753,6 +754,7 @@ class TestHealthRouteConfigurationChaos:
                     client = TestClient(test_app)
                     
                     # Test health endpoint with conflicting configuration
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('netra_backend.app.dependencies.get_db_dependency'):
                         response = client.get('/health')
                         

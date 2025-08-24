@@ -27,16 +27,25 @@ class TestDatabaseRepositoryTransactions:
     @pytest.fixture
     def mock_session(self):
         """Create mock database session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.add = MagicMock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.flush = AsyncMock()  # Add flush mock
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.refresh = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.execute = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.close = AsyncMock()
         
         # Mock query results
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = None
         mock_result.scalars.return_value.all.return_value = []
@@ -62,6 +71,7 @@ class TestDatabaseRepositoryTransactions:
         
         # Mock successful creation
         created_entity = MockDatabaseModel(**create_data)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.refresh = AsyncMock(side_effect=lambda entity: setattr(entity, 'id', 'test_123'))
         
         # Execute
@@ -118,15 +128,22 @@ class TestDatabaseRepositoryTransactions:
     async def test_concurrent_transaction_isolation(self, mock_repository):
         """Test transaction isolation under concurrent operations"""
         # Create separate mock sessions for concurrent operations
+        # Mock: Database session isolation for transaction testing without real database dependency
         session1 = AsyncMock(spec=AsyncSession)
+        # Mock: Database session isolation for transaction testing without real database dependency
         session2 = AsyncMock(spec=AsyncSession)
         
         # Setup mock responses
         for session in [session1, session2]:
+            # Mock: Session isolation for controlled testing without external state
             session.add = MagicMock()
+            # Mock: Session isolation for controlled testing without external state
             session.commit = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.flush = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.rollback = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.refresh = AsyncMock()
         
         # Simulate delay in first transaction
@@ -167,18 +184,26 @@ class TestDatabaseRepositoryTransactions:
     @pytest.mark.asyncio
     async def test_nested_transaction_handling(self, mock_repository):
         """Test nested transaction handling"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         outer_session = AsyncMock(spec=AsyncSession)
+        # Mock: Database session isolation for transaction testing without real database dependency
         inner_session = AsyncMock(spec=AsyncSession)
         
         # Setup sessions
         for session in [outer_session, inner_session]:
+            # Mock: Session isolation for controlled testing without external state
             session.add = MagicMock()
+            # Mock: Session isolation for controlled testing without external state
             session.flush = AsyncMock()  # BaseRepository uses flush, not commit
+            # Mock: Session isolation for controlled testing without external state
             session.rollback = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.refresh = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.execute = AsyncMock()
             
             # Mock query results
+            # Mock: Generic component isolation for controlled unit testing
             mock_result = MagicMock()
             mock_result.scalar_one_or_none.return_value = None
             session.execute.return_value = mock_result
@@ -290,26 +315,37 @@ class TestDatabaseRepositoryTransactions:
     async def test_connection_recovery_handling(self, mock_repository, transaction_manager):
         """Test connection recovery handling"""
         # Create session that loses connection
+        # Mock: Database session isolation for transaction testing without real database dependency
         disconnected_session = AsyncMock(spec=AsyncSession)
+        # Mock: Database session isolation for transaction testing without real database dependency
         reconnected_session = AsyncMock(spec=AsyncSession)
         
         # Setup disconnection simulation
+        # Mock: Session isolation for controlled testing without external state
         disconnected_session.add = MagicMock()
         disconnected_session.flush.side_effect = DisconnectionError(
             "connection lost", None, None
         )
+        # Mock: Session isolation for controlled testing without external state
         disconnected_session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         disconnected_session.refresh = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         disconnected_session.execute = AsyncMock()
         
         # Setup successful reconnection
+        # Mock: Session isolation for controlled testing without external state
         reconnected_session.add = MagicMock()
+        # Mock: Session isolation for controlled testing without external state
         reconnected_session.flush = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         reconnected_session.refresh = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         reconnected_session.execute = AsyncMock()
         
         # Mock query results
         for session in [disconnected_session, reconnected_session]:
+            # Mock: Generic component isolation for controlled unit testing
             mock_result = MagicMock()
             mock_result.scalar_one_or_none.return_value = None
             session.execute.return_value = mock_result

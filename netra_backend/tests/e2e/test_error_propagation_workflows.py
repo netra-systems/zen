@@ -167,7 +167,9 @@ class TestRecoveryCoordinationAcrossLayers:
     
     def _create_hook_manager(self) -> QualityHooksManager:
         """Create quality hook manager for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         quality_gate = Mock()
+        # Mock: Async component isolation for testing without real async operations
         quality_gate.validate_content = AsyncMock(
             return_value=ValidationResult(
                 passed=True, 
@@ -175,6 +177,7 @@ class TestRecoveryCoordinationAcrossLayers:
                 retry_suggested=False
             )
         )
+        # Mock: Generic component isolation for controlled unit testing
         monitoring = Mock()
         return QualityHooksManager(quality_gate, monitoring)
     
@@ -257,6 +260,7 @@ class TestRealWorkflowIntegration:
         await hook_manager.quality_validation_hook(context, "TestAgent", state)
         
         # Post-processing
+        # Mock: Component isolation for controlled unit testing
         response = Mock(spec=Response)
         response.headers = {}
         middleware._add_security_headers(response)
@@ -307,7 +311,9 @@ class TestRealWorkflowIntegration:
     
     def _create_hook_manager(self) -> QualityHooksManager:
         """Create quality hook manager for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         quality_gate = Mock()
+        # Mock: Async component isolation for testing without real async operations
         quality_gate.validate_content = AsyncMock(
             return_value=ValidationResult(
                 passed=True, 
@@ -315,7 +321,9 @@ class TestRealWorkflowIntegration:
                 retry_suggested=False
             )
         )
+        # Mock: Generic component isolation for controlled unit testing
         monitoring = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         monitoring.record_quality_event = AsyncMock()
         return QualityHooksManager(quality_gate, monitoring)
     
@@ -345,10 +353,13 @@ class TestRealWorkflowIntegration:
     
     def _create_mock_request(self) -> Mock:
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.headers = {}
         request.method = "GET"
+        # Mock: Generic component isolation for controlled unit testing
         request.url = Mock()
+        # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value="http://test.com")
         request.url.path = "/test"
         return request

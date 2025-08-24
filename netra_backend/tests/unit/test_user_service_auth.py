@@ -77,6 +77,7 @@ class TestUserServiceAuthentication:
     @pytest.fixture
     def mock_credentials(self):
         """Create mock HTTP authorization credentials."""
+        # Mock: Authentication service isolation for testing without real auth flows
         credentials = Mock(spec=HTTPAuthorizationCredentials)
         credentials.credentials = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test.token"
         return credentials
@@ -90,8 +91,11 @@ class TestUserServiceAuthentication:
     @pytest.fixture
     def mock_db_session(self):
         """Create mock async database session with isolation."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Database session isolation for transaction testing without real database dependency
         session.__aenter__ = AsyncMock(return_value=session)
+        # Mock: Session isolation for controlled testing without external state
         session.__aexit__ = AsyncMock(return_value=None)
         return session
 
@@ -149,6 +153,7 @@ class TestUserServiceAuthentication:
     @pytest.mark.asyncio
     async def test_malformed_token_handled_securely(self, mock_auth_client, mock_db_session):
         """Test security handling of malformed JWT token."""
+        # Mock: Authentication service isolation for testing without real auth flows
         malformed_credentials = Mock(spec=HTTPAuthorizationCredentials)
         malformed_credentials.credentials = "malformed.token.attack"
         mock_auth_client.return_value = None
@@ -461,12 +466,14 @@ class TestUserServiceAuthentication:
 
     def _setup_db_with_user(self, mock_db_session, user):
         """Setup database session to return specific user."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = user
         mock_db_session.execute.return_value = mock_result
 
     def _setup_db_no_user(self, mock_db_session):
         """Setup database session to return no user."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = Mock()
         mock_result.scalar_one_or_none.return_value = None
         mock_db_session.execute.return_value = mock_result

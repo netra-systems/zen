@@ -295,6 +295,7 @@ class TestRealEnvironmentVariableChecking:
 
 class TestMigrationChecking:
     """Test migration status checking."""
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.run_command_async')
     @pytest.mark.asyncio
     async def test_check_migrations_up_to_date(self, mock_run_cmd: AsyncMock) -> None:
@@ -303,7 +304,9 @@ class TestMigrationChecking:
         
         errors = await check_migrations()
         assert len(errors) == 0
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.run_command_async')
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.create_migration_error')
     @pytest.mark.asyncio
     async def test_check_migrations_pending(self, mock_create_error: Mock,
@@ -315,7 +318,9 @@ class TestMigrationChecking:
         
         errors = await check_migrations()
         assert len(errors) == 1
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.run_command_async')
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.create_migration_error')
     @pytest.mark.asyncio
     async def test_check_migrations_exception(self, mock_create_error: Mock,
@@ -342,6 +347,7 @@ class TestFixApplication:
         
         fixes = await apply_fixes([mock_diagnostic_error])
         assert len(fixes) == 0
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.apply_single_fix')
     @pytest.mark.asyncio
     async def test_apply_fixes_with_auto_fixable(self, mock_apply_single: AsyncMock,
@@ -357,6 +363,7 @@ class TestFixApplication:
 
 class TestSingleFixApplication:
     """Test individual fix application."""
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.fix_port_conflict')
     @pytest.mark.asyncio
     async def test_apply_single_fix_port_error(self, mock_fix_port: AsyncMock,
@@ -369,6 +376,7 @@ class TestSingleFixApplication:
         
         result = await apply_single_fix(mock_diagnostic_error)
         assert result.successful is True
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.fix_dependencies')
     @pytest.mark.asyncio
     async def test_apply_single_fix_dependency_error(self, mock_fix_deps: AsyncMock,
@@ -394,6 +402,7 @@ class TestSingleFixApplication:
         """Test fix application with exception."""
         mock_diagnostic_error.message = "Port conflict"
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('scripts.startup_diagnostics.fix_port_conflict', side_effect=Exception("Fix error")):
             result = await apply_single_fix(mock_diagnostic_error)
             assert result.attempted is True
@@ -409,6 +418,7 @@ class TestSpecificFixes:
         assert result.attempted is True
         assert result.successful is True
         assert "port conflict resolved" in result.message.lower()
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.run_command_async')
     @pytest.mark.asyncio
     async def test_fix_dependencies_python_success(self, mock_run_cmd: AsyncMock,
@@ -419,6 +429,7 @@ class TestSpecificFixes:
         
         result = await fix_dependencies(mock_diagnostic_error)
         assert result.successful is True
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.run_command_async')
     @pytest.mark.asyncio
     async def test_fix_dependencies_failure(self, mock_run_cmd: AsyncMock,
@@ -429,6 +440,7 @@ class TestSpecificFixes:
         
         result = await fix_dependencies(mock_diagnostic_error)
         assert result.successful is False
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.run_command_async')
     @pytest.mark.asyncio
     async def test_fix_migrations_success(self, mock_run_cmd: AsyncMock,
@@ -439,6 +451,7 @@ class TestSpecificFixes:
         
         result = await fix_migrations(mock_diagnostic_error)
         assert result.successful is True
+    # Mock: Component isolation for testing without external dependencies
     @patch('scripts.startup_diagnostics.run_command_async')
     @pytest.mark.asyncio
     async def test_fix_migrations_failure(self, mock_run_cmd: AsyncMock,

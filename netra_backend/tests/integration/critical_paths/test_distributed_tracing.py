@@ -30,6 +30,7 @@ try:
 except ImportError:
     # Mock OpenTelemetry components if not available
     from unittest.mock import MagicMock
+    # Mock: Generic component isolation for controlled unit testing
     trace = MagicMock()
     JaegerExporter = MagicMock
     TracerProvider = MagicMock
@@ -46,6 +47,7 @@ class OpenTelemetryService:
         return True
     
     async def get_tracer(self, name="test"):
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
 
 class SpanManager:
@@ -53,6 +55,7 @@ class SpanManager:
         pass
     
     async def create_span(self, name, **kwargs):
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
 
 logger = logging.getLogger(__name__)

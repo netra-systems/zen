@@ -37,16 +37,21 @@ class TestWebSocketValidatorFix:
         sent_messages = []
         
         # Mock websocket that captures sent messages
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send = AsyncMock(side_effect=lambda msg: sent_messages.append(msg))
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.recv = AsyncMock(return_value=json.dumps({
             "jsonrpc": "2.0",
             "result": {"status": "ok"},
             "id": 1
         }))
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("dev_launcher.websocket_validator.websockets.connect") as mock_connect:
             # Create async context manager mock
+            # Mock: Generic component isolation for controlled unit testing
             async_context_manager = AsyncMock()
             async_context_manager.__aenter__.return_value = mock_websocket
             async_context_manager.__aexit__.return_value = None
@@ -84,15 +89,20 @@ class TestWebSocketValidatorFix:
         sent_messages = []
         
         # Mock websocket that captures sent messages
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send = AsyncMock(side_effect=lambda msg: sent_messages.append(msg))
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.recv = AsyncMock(return_value=json.dumps({
             "type": "pong",
             "timestamp": time.time()
         }))
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("dev_launcher.websocket_validator.websockets.connect") as mock_connect:
             # Create async context manager mock
+            # Mock: Generic component isolation for controlled unit testing
             async_context_manager = AsyncMock()
             async_context_manager.__aenter__.return_value = mock_websocket
             async_context_manager.__aexit__.return_value = None
@@ -127,8 +137,11 @@ class TestWebSocketValidatorFix:
         )
         
         # Mock MCP error response
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.recv = AsyncMock(return_value=json.dumps({
             "jsonrpc": "2.0",
             "error": {
@@ -138,8 +151,10 @@ class TestWebSocketValidatorFix:
             "id": 1
         }))
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("dev_launcher.websocket_validator.websockets.connect") as mock_connect:
             # Create async context manager mock
+            # Mock: Generic component isolation for controlled unit testing
             async_context_manager = AsyncMock()
             async_context_manager.__aenter__.return_value = mock_websocket
             async_context_manager.__aexit__.return_value = None
@@ -165,12 +180,17 @@ class TestWebSocketValidatorFix:
         )
         
         # Mock timeout on recv
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.recv = AsyncMock(side_effect=asyncio.TimeoutError)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("dev_launcher.websocket_validator.websockets.connect") as mock_connect:
             # Create async context manager mock
+            # Mock: Generic component isolation for controlled unit testing
             async_context_manager = AsyncMock()
             async_context_manager.__aenter__.return_value = mock_websocket
             async_context_manager.__aexit__.return_value = None
@@ -195,12 +215,17 @@ class TestWebSocketValidatorFix:
         )
         
         # Mock timeout on recv
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send = AsyncMock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.recv = AsyncMock(side_effect=asyncio.TimeoutError)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("dev_launcher.websocket_validator.websockets.connect") as mock_connect:
             # Create async context manager mock
+            # Mock: Generic component isolation for controlled unit testing
             async_context_manager = AsyncMock()
             async_context_manager.__aenter__.return_value = mock_websocket
             async_context_manager.__aexit__.return_value = None
@@ -226,16 +251,22 @@ class TestWebSocketValidatorFix:
         with patch.object(validator, "_check_http_server", return_value=True):
             
             # Mock websocket connections more properly
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws.send = AsyncMock()
+            # Mock: Async component isolation for testing without real async operations
             mock_ws.recv = AsyncMock(return_value=json.dumps({
                 "jsonrpc": "2.0",
                 "result": {"status": "ok"},
                 "id": 1
             }))
             
+            # Mock: Component isolation for testing without external dependencies
             with patch("websockets.connect") as mock_connect:
+                # Mock: Async component isolation for testing without real async operations
                 mock_connect.return_value.__aenter__ = AsyncMock(return_value=mock_ws)
+                # Mock: Generic component isolation for controlled unit testing
                 mock_connect.return_value.__aexit__ = AsyncMock()
                 # Run validation
                 result = await validator.validate_all_endpoints()

@@ -47,6 +47,7 @@ class TestAdminRoute:
         """Test admin user management operations."""
         from netra_backend.app.routes.admin import get_all_users, update_user_role
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.get_all_users') as mock_get:
             mock_get.return_value = [
                 {"id": "1", "email": "user1@test.com"},
@@ -64,6 +65,7 @@ class TestAdminRoute:
         CommonResponseValidators.validate_error_response(response, [401, 404])
         
         # Test with mock authorization (if endpoint exists)  
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.auth_integration.get_current_user') as mock_verify:
             mock_verify.return_value = TEST_USER_DATA["admin"]
             
@@ -81,6 +83,7 @@ class TestAdminRoute:
             "new_role": "moderator"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.update_user_role') as mock_update:
             mock_update.return_value = {"success": True, "user_id": "user123"}
             
@@ -105,6 +108,7 @@ class TestAdminRoute:
             "user_ids": ["user1", "user2", "user3"]
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.bulk_update_users') as mock_bulk:
             mock_bulk.return_value = {
                 "processed": 3,
@@ -160,6 +164,7 @@ class TestAdminRoute:
         """Test admin access to audit logs."""
         from netra_backend.app.routes.admin import get_audit_logs
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.audit_service.get_recent_logs') as mock_logs:
             mock_logs.return_value = [
                 {

@@ -78,12 +78,15 @@ class TestSystemStartupIntegration:
         """Mock external services for startup testing."""
         return patch.multiple(
             'app.startup_checks.service_checks.ServiceChecker',
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             check_redis=AsyncMock(return_value=StartupCheckResult(
                 name="check_redis", success=True, message="Redis connected"
             )),
+            # Mock: ClickHouse external database isolation for unit testing performance
             check_clickhouse=AsyncMock(return_value=StartupCheckResult(
                 name="check_clickhouse", success=True, message="ClickHouse connected"
             )),
+            # Mock: Async component isolation for testing without real async operations
             check_llm_providers=AsyncMock(return_value=StartupCheckResult(
                 name="check_llm_providers", success=True, message="LLM providers available"
             ))
@@ -171,12 +174,15 @@ class TestSystemStartupIntegration:
         """Mock non-database services for database testing."""
         return patch.multiple(
             'app.startup_checks.service_checks.ServiceChecker',
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             check_redis=AsyncMock(return_value=StartupCheckResult(
                 name="check_redis", success=True, message="Redis connected"
             )),
+            # Mock: ClickHouse external database isolation for unit testing performance
             check_clickhouse=AsyncMock(return_value=StartupCheckResult(
                 name="check_clickhouse", success=True, message="ClickHouse connected"  
             )),
+            # Mock: Async component isolation for testing without real async operations
             check_llm_providers=AsyncMock(return_value=StartupCheckResult(
                 name="check_llm_providers", success=True, message="LLM providers available"
             ))
@@ -313,7 +319,9 @@ class TestSystemStartupIntegration:
             checker = StartupChecker(app)
             
             # Mock one service to fail
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.startup_checks.service_checks.ServiceChecker.check_redis', 
+                      # Mock: Async component isolation for testing without real async operations
                       AsyncMock(return_value=StartupCheckResult(
                           name="check_redis", success=False, message="Redis unavailable", critical=True
                       ))):

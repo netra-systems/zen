@@ -174,6 +174,7 @@ class TestNetworkUtilsRequests:
     
     async def _assert_port_checking(self, utils):
         """Assert port checking works."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('socket.socket') as mock_socket:
             mock_socket.return_value.connect_ex.return_value = 0
             assert await utils.is_port_open("localhost", 80) == True
@@ -184,6 +185,7 @@ class TestNetworkUtilsRequests:
     async def _assert_successful_request(self, utils):
         """Assert successful HTTP request."""
         mock_response = NetworkTestHelpers.mock_successful_response()
+        # Mock: Session isolation for controlled testing without external state
         with patch('aiohttp.ClientSession.get') as mock_get:
             mock_get.return_value.__aenter__.return_value = mock_response
             result = await utils.http_get_with_retry("https://api.example.com")
@@ -193,6 +195,7 @@ class TestNetworkUtilsRequests:
         """Assert retry logic on failure."""
         failing_get, get_call_count = NetworkTestHelpers.create_failing_request(3)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('aiohttp.ClientSession.get', side_effect=failing_get):
             result = await utils.http_get_with_retry(
                 "https://api.example.com", max_retries=3

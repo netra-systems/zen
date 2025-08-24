@@ -43,7 +43,9 @@ class TestWindowsPlatformPortAllocation:
         allocator = PlatformAwarePortAllocator()
         
         # Test that SO_EXCLUSIVEADDRUSE is used on Windows
+        # Mock: Component isolation for testing without external dependencies
         with patch('socket.socket') as mock_socket:
+            # Mock: Generic component isolation for controlled unit testing
             mock_sock = MagicMock()
             mock_socket.return_value = mock_sock
             mock_sock.bind.return_value = None
@@ -84,7 +86,9 @@ class TestLinuxPlatformPortAllocation:
         allocator = PlatformAwarePortAllocator()
         
         # Test that SO_REUSEADDR is used on Linux
+        # Mock: Component isolation for testing without external dependencies
         with patch('socket.socket') as mock_socket:
+            # Mock: Generic component isolation for controlled unit testing
             mock_sock = MagicMock()
             mock_socket.return_value = mock_sock
             mock_sock.bind.return_value = None
@@ -125,7 +129,9 @@ class TestMacOSPlatformPortAllocation:
         allocator = PlatformAwarePortAllocator()
         
         # Test that SO_REUSEADDR is used on macOS (Unix-like)
+        # Mock: Component isolation for testing without external dependencies
         with patch('socket.socket') as mock_socket:
+            # Mock: Generic component isolation for controlled unit testing
             mock_sock = MagicMock()
             mock_socket.return_value = mock_sock
             mock_sock.bind.return_value = None

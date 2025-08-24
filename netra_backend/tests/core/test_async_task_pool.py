@@ -51,6 +51,7 @@ class TestAsyncTaskPool:
     async def test_submit_task_during_shutdown(self, task_pool):
         """Test task submission during shutdown"""
         task_pool._shutting_down = True
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.async_utils.ErrorContext.get_all_context', return_value={}):
             with pytest.raises(ServiceError, match="Task pool is shutting down"):
                 await task_pool.submit_task(create_quick_operation())
@@ -73,6 +74,7 @@ class TestAsyncTaskPool:
     def test_active_task_count(self, task_pool):
         """Test active task count property"""
         assert task_pool.active_task_count == 0
+        # Mock: Generic component isolation for controlled unit testing
         task1, task2 = Mock(), Mock()
         task_pool._active_tasks.add(task1)
         task_pool._active_tasks.add(task2)

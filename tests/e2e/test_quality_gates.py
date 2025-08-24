@@ -180,6 +180,7 @@ class TestQualityThresholds:
     def quality_service(self):
         """Create quality service with feedback capabilities"""
         service = create_quality_service()
+        # Mock: Generic component isolation for controlled unit testing
         service.feedback_processor = Mock()
         return service
 

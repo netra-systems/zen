@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 
 # Mock ClickHouse before importing the service
+# Mock: ClickHouse external database isolation for unit testing performance
 sys.modules['netra_backend.app.db.clickhouse'] = MagicMock()
 sys.modules['netra_backend.app.db.clickhouse'].ClickHouseDatabase = MagicMock
 

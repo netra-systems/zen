@@ -298,6 +298,7 @@ class RedisSessionTester:
                     update_tasks = []
                     
                     async def update_session(i):
+                        # Mock: Component isolation for testing without external dependencies
                         async with self.session.patch(
                             f"{BACKEND_URL}/api/v1/sessions/{consistency_session_id}",
                             json={"increment_counter": 1, "append_value": i}

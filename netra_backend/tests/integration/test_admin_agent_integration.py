@@ -37,18 +37,25 @@ class TestAdminAgentIntegration:
 
         """Create mock supervisor with agents"""
 
+        # Mock: Async component isolation for testing without real async operations
         supervisor = AsyncMock(spec=Supervisor)
 
+        # Mock: Agent service isolation for testing without LLM agent execution
         supervisor.triage_agent = AsyncMock(spec=TriageSubAgent)
 
+        # Mock: Generic component isolation for controlled unit testing
         supervisor.triage_agent.process = AsyncMock()
 
+        # Mock: Agent service isolation for testing without LLM agent execution
         supervisor.corpus_admin = AsyncMock(spec=CorpusAdminSubAgent)
 
+        # Mock: Generic component isolation for controlled unit testing
         supervisor.corpus_admin.process = AsyncMock()
 
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         supervisor.tool_dispatcher = AsyncMock(spec=AdminToolDispatcher)
 
+        # Mock: Tool execution isolation for predictable agent testing
         supervisor.tool_dispatcher.dispatch_tool = AsyncMock()
 
         return supervisor
@@ -59,10 +66,13 @@ class TestAdminAgentIntegration:
 
         """Create mock WebSocket manager"""
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         ws_manager = AsyncMock(spec=WebSocketManager)
 
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.send_message = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.broadcast = AsyncMock()
 
         return ws_manager
@@ -103,12 +113,14 @@ class TestAdminAgentIntegration:
 
         }
 
+        # Mock: Component isolation for testing without external dependencies
         result = await self._execute_tool_dispatch(mock_supervisor)
 
         assert result["success"] is True
 
         assert result["result"]["corpus_id"] == "test_123"
     
+    # Mock: Component isolation for testing without external dependencies
     async def _execute_tool_dispatch(self, supervisor):
 
         """Execute tool dispatch operation"""

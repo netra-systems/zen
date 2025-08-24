@@ -38,14 +38,17 @@ class TestWebSocketConnectionParadoxPrevention:
 
         """Create mock WebSocket."""
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         ws = MagicMock(spec=WebSocket)
 
         ws.client_state = WebSocketState.CONNECTED
 
         ws.application_state = WebSocketState.CONNECTED
 
+        # Mock: Generic component isolation for controlled unit testing
         ws.send_json = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         ws.close = AsyncMock()
 
         return ws
@@ -149,6 +152,7 @@ class TestWebSocketConnectionParadoxPrevention:
 
         assert "websocket" in invalid_job_id.lower() or "mock" in invalid_job_id.lower()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.ws_manager.logger') as mock_logger:
 
             conn_info2 = await manager.connect_to_job(mock_websocket, invalid_job_id)
@@ -186,6 +190,7 @@ class TestWebSocketConnectionParadoxPrevention:
         
         # connect_to_job should handle this gracefully
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.ws_manager.logger') as mock_logger:
             # This should trigger the validation logic
 

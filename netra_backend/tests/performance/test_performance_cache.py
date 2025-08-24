@@ -122,6 +122,7 @@ class TestQueryOptimizer:
         
         # Mock executor
         mock_result = {"id": 123, "name": "Test User"}
+        # Mock: Async component isolation for testing without real async operations
         executor = AsyncMock(return_value=mock_result)
         
         # First execution should call executor

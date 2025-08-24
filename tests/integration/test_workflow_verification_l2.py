@@ -145,11 +145,13 @@ class TestWorkflowStatusVerifier:
     @pytest.fixture
     def verifier(self, mock_config):
         """Create WorkflowStatusVerifier instance."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('verify_workflow_status.httpx.Client'):
             return WorkflowStatusVerifier(mock_config)
     
     def test_create_client(self, mock_config):
         """Test HTTP client creation with proper headers."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('verify_workflow_status.httpx.Client') as mock_client:
             verifier = WorkflowStatusVerifier(mock_config)
             
@@ -163,6 +165,7 @@ class TestWorkflowStatusVerifier:
     
     def test_api_request_success(self, verifier):
         """Test successful API request."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.json.return_value = {"status": "success"}
         verifier.client.get.return_value = mock_response
@@ -174,6 +177,7 @@ class TestWorkflowStatusVerifier:
     
     def test_api_request_http_error(self, verifier):
         """Test API request with HTTP error."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status_code = 404
         mock_response.text = "Not Found"
@@ -220,6 +224,7 @@ class TestWorkflowStatusVerifier:
             ]
         }
         
+        # Mock: Component isolation for controlled unit testing
         verifier._api_request = Mock(return_value=mock_data)
         runs = verifier.get_workflow_runs("ci")
         
@@ -245,6 +250,7 @@ class TestWorkflowStatusVerifier:
             "html_url": "https://github.com/test/repo/actions/runs/99999"
         }
         
+        # Mock: Component isolation for controlled unit testing
         verifier._api_request = Mock(return_value=mock_data)
         run = verifier.get_workflow_run_by_id(99999)
         
@@ -280,6 +286,7 @@ class TestWorkflowStatusVerifier:
             html_url="https://test.url"
         )
         
+        # Mock: Component isolation for controlled unit testing
         verifier.get_workflow_run_by_id = Mock(
             side_effect=[initial_run, initial_run, completed_run]
         )
@@ -306,6 +313,7 @@ class TestWorkflowStatusVerifier:
             html_url="https://test.url"
         )
         
+        # Mock: Component isolation for controlled unit testing
         verifier.get_workflow_run_by_id = Mock(return_value=running_run)
         
         with pytest.raises(GitHubAPIError) as exc_info:
@@ -371,6 +379,7 @@ class TestCLIHandler:
             "--run-id", "123456"
         ]
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('sys.argv', ['verify_workflow_status.py'] + test_args):
             args = cli_handler.parse_args()
         
@@ -389,6 +398,7 @@ class TestCLIHandler:
             "--poll-interval", "10"
         ]
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('sys.argv', ['verify_workflow_status.py'] + test_args):
             args = cli_handler.parse_args()
         
@@ -400,6 +410,7 @@ class TestCLIHandler:
     
     def test_validate_args_valid(self, cli_handler):
         """Test validating valid arguments."""
+        # Mock: Generic component isolation for controlled unit testing
         args = Mock()
         args.run_id = 123
         args.workflow_name = None
@@ -410,6 +421,7 @@ class TestCLIHandler:
     
     def test_validate_args_missing_identifier(self, cli_handler):
         """Test validating arguments with missing identifier."""
+        # Mock: Generic component isolation for controlled unit testing
         args = Mock()
         args.run_id = None
         args.workflow_name = None
@@ -422,6 +434,7 @@ class TestCLIHandler:
     
     def test_validate_args_wait_without_workflow(self, cli_handler):
         """Test validating wait flag without workflow name."""
+        # Mock: Generic component isolation for controlled unit testing
         args = Mock()
         args.run_id = 123
         args.workflow_name = None
@@ -583,6 +596,7 @@ class TestConfigCreation:
     
     def test_create_config_from_args(self):
         """Test creating configuration from parsed arguments."""
+        # Mock: Generic component isolation for controlled unit testing
         args = Mock()
         args.repo = "test/repo"
         args.workflow_name = "ci.yml"
@@ -591,7 +605,9 @@ class TestConfigCreation:
         args.timeout = 900
         args.poll_interval = 15
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('verify_workflow_status.CLIHandler') as mock_cli:
+            # Mock: Generic component isolation for controlled unit testing
             mock_handler = Mock()
             mock_handler.get_github_token.return_value = "test_token"
             mock_cli.return_value = mock_handler

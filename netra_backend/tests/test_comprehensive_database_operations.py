@@ -28,11 +28,17 @@ class TestComprehensiveDatabaseOperations:
     @pytest.fixture
     async def mock_db_session(self):
         """Setup mock database session for tests."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.execute = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.add = MagicMock()
+        # Mock: Session isolation for controlled testing without external state
         session.close = AsyncMock()
         try:
             yield session
@@ -43,9 +49,13 @@ class TestComprehensiveDatabaseOperations:
     @pytest.fixture  
     async def mock_database_pool(self):
         """Setup mock database pool for connection tests."""
+        # Mock: Generic component isolation for controlled unit testing
         pool = MagicMock()
+        # Mock: Service component isolation for predictable testing behavior
         pool.size = MagicMock(return_value=10)
+        # Mock: Service component isolation for predictable testing behavior
         pool.checked_out = MagicMock(return_value=2)
+        # Mock: Service component isolation for predictable testing behavior
         pool.checked_in = MagicMock(return_value=8)
         yield pool
 
@@ -56,6 +66,7 @@ class TestComprehensiveDatabaseOperations:
         start_time = time.time()
         
         # Test pool acquisition simulation
+        # Mock: Database isolation for unit testing without external database connections
         mock_database_pool.acquire = AsyncMock()
         for _ in range(5):
             await mock_database_pool.acquire()
@@ -82,11 +93,13 @@ class TestComprehensiveDatabaseOperations:
     async def test_transaction_commit_rollback(self, mock_db_session):
         """Test transaction commit and rollback operations."""
         # Test successful commit
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar.return_value = "tx_user"
         mock_db_session.execute.return_value = mock_result
         
         # Simulate transaction operations
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = MagicMock()
         mock_db_session.add(mock_user)
         await mock_db_session.commit()
@@ -100,15 +113,19 @@ class TestComprehensiveDatabaseOperations:
     async def test_nested_transactions(self, mock_db_session):
         """Test nested transaction handling."""
         # Setup nested transaction mock
+        # Mock: Generic component isolation for controlled unit testing
         mock_savepoint = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_session.begin_nested = AsyncMock(return_value=mock_savepoint)
         
         # Outer transaction
+        # Mock: Generic component isolation for controlled unit testing
         mock_user1 = MagicMock()
         mock_db_session.add(mock_user1)
         
         # Inner transaction (rollback)
         savepoint = await mock_db_session.begin_nested()
+        # Mock: Generic component isolation for controlled unit testing
         mock_user2 = MagicMock()
         mock_db_session.add(mock_user2)
         await savepoint.rollback()
@@ -121,6 +138,7 @@ class TestComprehensiveDatabaseOperations:
     async def test_query_optimization_timing(self, mock_db_session):
         """Test query execution time optimization."""
         # Mock fast query response
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar.return_value = 100
         mock_db_session.execute.return_value = mock_result
@@ -165,6 +183,7 @@ class TestComprehensiveDatabaseOperations:
         await mock_db_session.commit()
         
         # Mock inspector for verification
+        # Mock: Generic component isolation for controlled unit testing
         mock_inspector = MagicMock()
         mock_inspector.get_columns.return_value = [
             {'name': 'id'}, {'name': 'username'}, {'name': 'test_migration_col'}
@@ -192,11 +211,13 @@ class TestComprehensiveDatabaseOperations:
     async def test_backup_simulation(self, mock_db_session):
         """Test backup operation simulation."""
         # Mock backup data counting
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar.return_value = 150
         mock_db_session.execute.return_value = mock_result
         
         # Create test data for backup
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = MagicMock()
         mock_db_session.add(mock_user)
         await mock_db_session.commit()
@@ -210,6 +231,7 @@ class TestComprehensiveDatabaseOperations:
     async def test_restore_verification(self, mock_db_session):
         """Test restore verification simulation."""
         # Mock restore verification
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar.return_value = "backup_test"
         mock_db_session.execute.return_value = mock_result
@@ -226,12 +248,14 @@ class TestComprehensiveDatabaseOperations:
     async def test_read_write_split_simulation(self, mock_db_session):
         """Test read/write split handling simulation."""
         # Mock write operation
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = MagicMock()
         mock_db_session.add(mock_user)
         await mock_db_session.commit()
         
         # Mock read operation with minimal delay
         await asyncio.sleep(0.1)
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar.return_value = "rw_test"
         mock_db_session.execute.return_value = mock_result
@@ -245,6 +269,7 @@ class TestComprehensiveDatabaseOperations:
     async def test_replication_lag_monitoring(self, mock_db_session):
         """Test replication lag monitoring simulation."""
         # Mock fast response
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar.return_value = 1
         mock_db_session.execute.return_value = mock_result
@@ -284,7 +309,9 @@ class TestComprehensiveDatabaseOperations:
         mock_db_session.execute.return_value = mock_result
         
         # Create test data that might cause conflicts
+        # Mock: Generic component isolation for controlled unit testing
         mock_user1 = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_user2 = MagicMock()
         
         mock_db_session.add(mock_user1)
@@ -322,6 +349,7 @@ class TestComprehensiveDatabaseOperations:
     async def test_index_usage_verification(self):
         """Test that indexes are being used correctly."""
         # Mock inspector for index verification
+        # Mock: Generic component isolation for controlled unit testing
         mock_inspector = MagicMock()
         mock_inspector.get_indexes.return_value = [
             {'name': 'idx_users_email', 'unique': True},
@@ -339,6 +367,7 @@ class TestComprehensiveDatabaseOperations:
         unique_email = f"unique_test_{uuid.uuid4()}@test.com"
         
         # First user should succeed
+        # Mock: Generic component isolation for controlled unit testing
         mock_user1 = MagicMock()
         mock_db_session.add(mock_user1)
         await mock_db_session.commit()
@@ -347,6 +376,7 @@ class TestComprehensiveDatabaseOperations:
         mock_db_session.commit.side_effect = IntegrityError("UNIQUE constraint failed", None, None)
         
         with pytest.raises(IntegrityError):
+            # Mock: Generic component isolation for controlled unit testing
             mock_user2 = MagicMock()
             mock_db_session.add(mock_user2)
             await mock_db_session.commit()
@@ -355,12 +385,14 @@ class TestComprehensiveDatabaseOperations:
     async def test_foreign_key_constraint(self, mock_db_session):
         """Test foreign key constraint enforcement."""
         # Mock user and thread creation
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = MagicMock()
         mock_user.id = 1
         mock_db_session.add(mock_user)
         await mock_db_session.commit()
         
         # Create thread referencing the user
+        # Mock: Generic component isolation for controlled unit testing
         mock_thread = MagicMock()
         mock_thread.id = 100
         mock_thread.user_id = 1
@@ -380,6 +412,7 @@ class TestComprehensiveDatabaseOperations:
         memory_before = process.memory_info().rss
         
         # Mock fast query execution
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar.return_value = 250
         mock_db_session.execute.return_value = mock_result
@@ -405,6 +438,7 @@ class TestComprehensiveDatabaseOperations:
         connections_before = mock_database_pool.checked_out()
         
         # Simulate database operation
+        # Mock: Database isolation for unit testing without external database connections
         mock_database_pool.acquire = AsyncMock()
         await mock_database_pool.acquire()
         
@@ -420,6 +454,7 @@ class TestComprehensiveDatabaseOperations:
     async def test_schema_validation(self):
         """Test database schema validation."""
         # Mock inspector for schema validation
+        # Mock: Generic component isolation for controlled unit testing
         mock_inspector = MagicMock()
         mock_inspector.get_table_names.return_value = [
             'users', 'threads', 'messages', 'alembic_version'
@@ -435,12 +470,14 @@ class TestComprehensiveDatabaseOperations:
     async def test_data_type_validation(self, mock_db_session):
         """Test data type validations."""
         # Mock successful user creation with correct types
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = MagicMock()
         mock_user.username = "type_test"
         mock_db_session.add(mock_user)
         await mock_db_session.commit()
         
         # Mock verification query
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar.return_value = "type_test"
         mock_db_session.execute.return_value = mock_result
@@ -456,6 +493,7 @@ class TestComprehensiveDatabaseOperations:
     async def test_audit_trail_logging(self, mock_db_session):
         """Test audit trail and logging functionality."""
         # Create user with timestamp tracking
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = MagicMock()
         mock_user.created_at = datetime.now(timezone.utc)
         mock_user.updated_at = datetime.now(timezone.utc)
@@ -475,6 +513,7 @@ class TestComprehensiveDatabaseOperations:
         # Create and update user
         original_time = datetime.now(timezone.utc)
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = MagicMock()
         mock_user.full_name = "Original Name"
         mock_user.updated_at = original_time

@@ -23,6 +23,7 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_agent_query_endpoint(self):
         """Test agent query endpoint."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -33,6 +34,7 @@ class TestAPIAgentGenerationCritical:
             "context": {"optimization_type": "cost"}
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -54,6 +56,7 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_agent_metadata_validation(self):
         """Test agent response metadata validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -63,6 +66,7 @@ class TestAPIAgentGenerationCritical:
             "context": {"type": "test"}
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -86,6 +90,7 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_synthetic_data_generation(self):
         """Test synthetic data generation endpoint."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -96,6 +101,7 @@ class TestAPIAgentGenerationCritical:
             "format": "json"
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -115,6 +121,7 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_generation_job_tracking(self):
         """Test generation job tracking."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -125,6 +132,7 @@ class TestAPIAgentGenerationCritical:
         }
         
         job_id = str(uuid.uuid4())
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -145,10 +153,12 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_configuration_get_endpoint(self):
         """Test configuration get endpoint."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test get configuration
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -170,9 +180,11 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_configuration_features_validation(self):
         """Test configuration features validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -195,6 +207,7 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_configuration_update_endpoint(self):
         """Test configuration update endpoint."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -205,11 +218,13 @@ class TestAPIAgentGenerationCritical:
             }
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.patch = AsyncMock(return_value={
             "status_code": 200,
             "json": {"message": "Configuration updated successfully"}
         })
         
+        # Mock: Component isolation for testing without external dependencies
         response = await mock_client.patch(
             "/api/config",
             json=config_update,
@@ -219,6 +234,7 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_agent_context_handling(self):
         """Test agent context handling."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -235,6 +251,7 @@ class TestAPIAgentGenerationCritical:
                 "context": context
             }
             
+            # Mock: Async component isolation for testing without real async operations
             mock_client.post = AsyncMock(return_value={
                 "status_code": 200,
                 "json": {
@@ -252,6 +269,7 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_generation_type_validation(self):
         """Test generation type validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -264,6 +282,7 @@ class TestAPIAgentGenerationCritical:
                 "format": "json"
             }
             
+            # Mock: Async component isolation for testing without real async operations
             mock_client.post = AsyncMock(return_value={
                 "status_code": 200,
                 "json": {
@@ -282,6 +301,7 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_agent_processing_time_tracking(self):
         """Test agent processing time tracking."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -291,6 +311,7 @@ class TestAPIAgentGenerationCritical:
             "context": {"track_performance": True}
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -315,9 +336,11 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_configuration_limits_validation(self):
         """Test configuration limits validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -337,6 +360,7 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_generation_format_options(self):
         """Test generation format options."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -349,6 +373,7 @@ class TestAPIAgentGenerationCritical:
                 "format": format_type
             }
             
+            # Mock: Async component isolation for testing without real async operations
             mock_client.post = AsyncMock(return_value={
                 "status_code": 200,
                 "json": {
@@ -367,6 +392,7 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_agent_multi_agent_orchestration(self):
         """Test multi-agent orchestration."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -376,6 +402,7 @@ class TestAPIAgentGenerationCritical:
             "context": {"complexity": "high"}
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -400,12 +427,14 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_configuration_environment_detection(self):
         """Test configuration environment detection."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         environments = ["development", "staging", "production"]
         
         for env in environments:
+            # Mock: Async component isolation for testing without real async operations
             mock_client.get = AsyncMock(return_value={
                 "status_code": 200,
                 "json": {
@@ -420,6 +449,7 @@ class TestAPIAgentGenerationCritical:
     @pytest.mark.asyncio
     async def test_generation_count_validation(self):
         """Test generation count validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
@@ -432,6 +462,7 @@ class TestAPIAgentGenerationCritical:
                 "format": "json"
             }
             
+            # Mock: Async component isolation for testing without real async operations
             mock_client.post = AsyncMock(return_value={
                 "status_code": 200,
                 "json": {

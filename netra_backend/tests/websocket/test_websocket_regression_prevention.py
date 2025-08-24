@@ -121,6 +121,7 @@ class TestAgentRegistration:
 
         llm_manager, tool_dispatcher, websocket_manager = real_components
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.agents.supervisor_consolidated.AsyncSession'):
 
             supervisor = SupervisorAgent(
@@ -154,8 +155,10 @@ class TestWebSocketMessageFlow:
         
         # Create mocks
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(return_value="Test response")
         
         # Create service
@@ -201,8 +204,10 @@ class TestWebSocketMessageFlow:
 
         """Test message handler routing for different message types."""
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = Mock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_thread_service = Mock()
         
         handler = MessageHandlerService(mock_supervisor, mock_thread_service)
@@ -227,16 +232,21 @@ class TestWebSocketMessageFlow:
 
         )
         
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_agent_service = AsyncMock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_agent_service.handle_websocket_message = AsyncMock()
         
         # Test process_agent_message
 
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_db.return_value.__aenter__ = AsyncMock(return_value=Mock())
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_db.return_value.__aexit__ = AsyncMock()
             
             await process_agent_message("user_123", "test_data", mock_agent_service)
@@ -258,8 +268,10 @@ class TestAgentExecutionPipeline:
 
         )
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_engine = Mock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws_manager = Mock()
 
         mock_db_session = None
@@ -273,8 +285,10 @@ class TestAgentExecutionPipeline:
         """Test execution engine can be initialized."""
         from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_registry = Mock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws_manager = Mock()
         
         engine = ExecutionEngine(mock_registry, mock_ws_manager)
@@ -292,12 +306,16 @@ class TestAgentExecutionPipeline:
 
         )
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_registry = Mock()
 
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_agent = AsyncMock()
 
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_agent.execute = AsyncMock(return_value={"result": "success"})
 
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_registry.get = Mock(return_value=mock_agent)
         
         executor = AgentExecutionCore(mock_registry)
@@ -308,6 +326,7 @@ class TestAgentExecutionPipeline:
 
             agent_name="test_agent",
 
+            # Mock: Generic component isolation for controlled unit testing
             state=Mock(),
 
             run_id="test_run",

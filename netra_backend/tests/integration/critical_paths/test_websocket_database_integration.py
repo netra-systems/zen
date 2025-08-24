@@ -262,6 +262,7 @@ class WebSocketDatabaseIntegrationTestManager:
 
         session_tasks = [
 
+            # Mock: Session isolation for controlled testing without external state
             self.create_websocket_session(f"user_{i}", AsyncMock()) 
 
             for i in range(session_count)
@@ -351,6 +352,7 @@ async def test_websocket_database_session_lifecycle(ws_db_manager):
 
     """Test WebSocket connection creates and manages database session."""
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
 
     user_id = "test_user_lifecycle"
@@ -382,6 +384,7 @@ async def test_websocket_message_persistence(ws_db_manager):
 
     """Test WebSocket message persists to PostgreSQL."""
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
 
     user_id = "test_user_persistence"
@@ -411,6 +414,7 @@ async def test_websocket_session_cleanup(ws_db_manager):
 
     """Test database session properly closed on WebSocket disconnect."""
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
 
     user_id = "test_user_cleanup"
@@ -461,6 +465,7 @@ async def test_websocket_transaction_rollback(ws_db_manager):
 
     """Test transaction rollback on WebSocket error."""
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock = AsyncMock()
 
     user_id = "test_user_rollback"

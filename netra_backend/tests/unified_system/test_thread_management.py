@@ -274,8 +274,10 @@ class TestThreadLifecycle:
 
         for i in range(3):
 
+            # Mock: Generic component isolation for controlled unit testing
             conn = AsyncMock()
 
+            # Mock: Generic component isolation for controlled unit testing
             conn.state = MagicMock()
 
             conn.state.value = 1

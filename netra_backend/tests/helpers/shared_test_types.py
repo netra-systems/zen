@@ -227,14 +227,21 @@ class BaseTestMixin:
     @pytest.fixture
     def mock_db(self):
         """Mock database session"""
+        # Mock: Generic component isolation for controlled unit testing
         db = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         db.commit = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         db.rollback = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         db.refresh = MagicMock()
         # Mock query chain
+        # Mock: Generic component isolation for controlled unit testing
         query_mock = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         filter_mock = MagicMock()
         query_mock.filter.return_value = filter_mock
+        # Mock: Generic component isolation for controlled unit testing
         filter_mock.first.return_value = MagicMock()
         db.query.return_value = query_mock
         return db
@@ -242,16 +249,22 @@ class BaseTestMixin:
     @pytest.fixture
     def mock_redis(self):
         """Mock Redis client"""
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock = MagicMock()
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock.get = MagicMock(return_value=None)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock.set = MagicMock(return_value=True)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock.delete = MagicMock(return_value=1)
         return redis_mock
     
     @pytest.fixture
     def mock_llm_manager(self):
         """Mock LLM manager"""
+        # Mock: Generic component isolation for controlled unit testing
         llm_mock = MagicMock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_mock.ask_llm = AsyncMock(return_value="Test response")
         return llm_mock
 

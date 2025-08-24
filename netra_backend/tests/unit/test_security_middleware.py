@@ -201,6 +201,7 @@ class TestSecurityMiddleware:
     @pytest.fixture
     def mock_app(self):
         """Create mock FastAPI application."""
+        # Mock: Generic component isolation for controlled unit testing
         return Mock()
     
     @pytest.fixture
@@ -211,11 +212,14 @@ class TestSecurityMiddleware:
     @pytest.fixture
     def mock_request(self):
         """Create mock FastAPI request."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.method = "GET"
+        # Mock: Component isolation for controlled unit testing
         request.url = Mock(spec=URL)
         request.url.path = "/api/test"
         request.headers = Headers({"user-agent": "test-browser"})
+        # Mock: Generic component isolation for controlled unit testing
         request.client = Mock()
         request.client.host = "127.0.0.1"
         return request
@@ -223,6 +227,7 @@ class TestSecurityMiddleware:
     @pytest.fixture
     def mock_response(self):
         """Create mock FastAPI response."""
+        # Mock: Component isolation for controlled unit testing
         response = Mock(spec=Response)
         response.headers = {}
         return response
@@ -251,6 +256,7 @@ class TestSecurityMiddleware:
         async def mock_call_next(request):
             return mock_response
         
+        # Mock: Component isolation for testing without external dependencies
         response = await middleware.dispatch(mock_request, mock_call_next)
         
         expected_headers = [
@@ -265,6 +271,7 @@ class TestSecurityMiddleware:
         async def mock_call_next(request):
             return mock_response
         
+        # Mock: Component isolation for testing without external dependencies
         response = await middleware.dispatch(mock_request, mock_call_next)
         
         assert "X-Security-Middleware" in response.headers
@@ -303,6 +310,7 @@ class TestSecurityMiddleware:
     def test_security_middleware_validate_request_size_within_limit(self, middleware, mock_request):
         """Test request size validation within limits."""
         # Mock small request
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.middleware.security_validation_helpers.RequestValidators.validate_request_size') as mock_validate:
             middleware._validate_request_size(mock_request)
             mock_validate.assert_called_once()
@@ -386,6 +394,7 @@ class TestSecurityMiddleware:
             raise Exception("Simulated internal error")
         
         with pytest.raises(HTTPException) as exc_info:
+            # Mock: Component isolation for testing without external dependencies
             await middleware.dispatch(mock_request, failing_call_next)
         
         assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR

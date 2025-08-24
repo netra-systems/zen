@@ -26,15 +26,19 @@ class TestGhostConnectionPrevention:
     @pytest.fixture
     def manager(self):
         """Create connection manager with mocked dependencies."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.websocket.connection_manager.ConnectionExecutionOrchestrator'):
             manager = WebSocketManager()
+            # Mock: Generic component isolation for controlled unit testing
             manager.orchestrator = Mock()
             return manager
     
     @pytest.fixture
     def mock_websocket(self):
         """Create mock WebSocket connection."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.client_state = Mock()
         mock_ws.client_state.name = "CONNECTED"
         return mock_ws
@@ -78,7 +82,9 @@ class TestGhostConnectionPrevention:
         await manager.registry.register_connection("test-user", active_connection)
         
         # Mock successful closure
+        # Mock: Component isolation for controlled unit testing
         orchestrator_result = Mock(success=True)
+        # Mock: Async component isolation for testing without real async operations
         manager.orchestrator.close_connection = AsyncMock(return_value=orchestrator_result)
         
         await manager._close_oldest_connection("test-user")
@@ -93,7 +99,9 @@ class TestGhostConnectionPrevention:
         await manager.registry.register_connection("test-user", active_connection)
         
         # Mock failed closure
+        # Mock: Component isolation for controlled unit testing
         orchestrator_result = Mock(success=False)
+        # Mock: Async component isolation for testing without real async operations
         manager.orchestrator.close_connection = AsyncMock(return_value=orchestrator_result)
         
         await manager._close_oldest_connection("test-user")
@@ -109,6 +117,7 @@ class TestGhostConnectionPrevention:
         await manager.registry.register_connection("test-user", active_connection)
         
         # Mock exception during closure
+        # Mock: Async component isolation for testing without real async operations
         manager.orchestrator.close_connection = AsyncMock(side_effect=Exception("Network error"))
         
         await manager._close_oldest_connection("test-user")
@@ -123,7 +132,9 @@ class TestGhostConnectionPrevention:
         await manager.registry.register_connection("test-user", active_connection)
         
         # Mock successful disconnect
+        # Mock: Component isolation for controlled unit testing
         orchestrator_result = Mock(success=True)
+        # Mock: Async component isolation for testing without real async operations
         manager.orchestrator.close_connection = AsyncMock(return_value=orchestrator_result)
         
         await manager.disconnect("test-user", mock_websocket)
@@ -138,7 +149,9 @@ class TestGhostConnectionPrevention:
         await manager.registry.register_connection("test-user", active_connection)
         
         # Mock failed disconnect
+        # Mock: Component isolation for controlled unit testing
         orchestrator_result = Mock(success=False)
+        # Mock: Async component isolation for testing without real async operations
         manager.orchestrator.close_connection = AsyncMock(return_value=orchestrator_result)
         
         await manager.disconnect("test-user", mock_websocket)
@@ -197,7 +210,9 @@ class TestGhostConnectionPrevention:
             await manager.registry.register_connection("test-user", conn)
         
         # Mock successful retry for failed connection
+        # Mock: Component isolation for controlled unit testing
         orchestrator_result = Mock(success=True)
+        # Mock: Async component isolation for testing without real async operations
         manager.orchestrator.close_connection = AsyncMock(return_value=orchestrator_result)
         
         await manager.ghost_manager.cleanup_ghost_connections(connections)
@@ -241,8 +256,10 @@ class TestGhostConnectionPrevention:
         await manager.registry.register_connection("test-user", failed_connection)
         
         # Mock orchestrator cleanup
+        # Mock: Component isolation for controlled unit testing
         orchestrator_result = Mock(success=True)
         orchestrator_result.result = {"cleaned_connections": 1}
+        # Mock: Async component isolation for testing without real async operations
         manager.orchestrator.cleanup_dead_connections = AsyncMock(return_value=orchestrator_result)
         
         await manager.cleanup_dead_connections()
@@ -278,16 +295,21 @@ class TestGhostConnectionPrevention:
             
             # Simulate failure every other time
             if i % 2 == 0:
+                # Mock: Component isolation for controlled unit testing
                 orchestrator_result = Mock(success=False)
             else:
+                # Mock: Component isolation for controlled unit testing
                 orchestrator_result = Mock(success=True)
             
+            # Mock: Async component isolation for testing without real async operations
             manager.orchestrator.close_connection = AsyncMock(return_value=orchestrator_result)
             
             await manager._close_oldest_connection("test-user")
             
             # Run cleanup after each failure
+            # Mock: Component isolation for controlled unit testing
             cleanup_result = Mock(success=True, result={"cleaned_connections": 0})
+            # Mock: Async component isolation for testing without real async operations
             manager._execute_connection_cleanup = AsyncMock(return_value=cleanup_result)
             await manager.cleanup_dead_connections()
         
@@ -313,6 +335,7 @@ class TestGhostConnectionPrevention:
     # Helper methods (each ≤8 lines)
     def _create_failed_connection(self, user_id="test-user", conn_id="failed-conn"):
         """Helper to create failed connection."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws = Mock(spec=WebSocket)
         conn = ConnectionInfo(websocket=mock_ws, user_id=user_id, connection_id=conn_id)
         conn.transition_to_failed()
@@ -320,6 +343,7 @@ class TestGhostConnectionPrevention:
     
     def _create_stale_connection(self, user_id="test-user", conn_id="stale-conn"):
         """Helper to create stale closing connection."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws = Mock(spec=WebSocket) 
         conn = ConnectionInfo(websocket=mock_ws, user_id=user_id, connection_id=conn_id)
         conn.transition_to_closing()
@@ -345,5 +369,6 @@ class TestGhostConnectionPrevention:
     
     def _create_active_connection(self, user_id="test-user", conn_id="active-conn"):
         """Helper to create active connection."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws = Mock(spec=WebSocket)
         return ConnectionInfo(websocket=mock_ws, user_id=user_id, connection_id=conn_id)

@@ -176,6 +176,7 @@ class TestFirstTimeUserRealCritical:
         
         # Create mock websocket for ConnectionInfo
         from unittest.mock import Mock, AsyncMock, MagicMock
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         mock_websocket.client_state = "connected"
         
@@ -212,6 +213,7 @@ class TestFirstTimeUserRealCritical:
         """
         # Create mock websocket for ConnectionInfo
         from unittest.mock import Mock, AsyncMock, MagicMock
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         mock_websocket.client_state = "connected"
         

@@ -119,6 +119,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 "metadata": {"updated": True}
             }
             
+            # Mock: Component isolation for testing without external dependencies
             async with session.patch(
                 f"{self.backend_url}/api/v1/threads/{thread_id}",
                 json=update_data,
@@ -344,6 +345,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 assert resp.status in [403, 404]  # Forbidden or Not Found
             
             # User2 tries to update the thread
+            # Mock: Component isolation for testing without external dependencies
             async with session.patch(
                 f"{self.backend_url}/api/v1/threads/{thread_id}",
                 json={"title": "Hacked Title"},

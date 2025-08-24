@@ -48,11 +48,16 @@ class TestFirstMessageErrorRecovery:
     async def message_handler(self):
         """Create message handler with error recovery."""
         # L2: Mocking supervisor for error recovery testing
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor.run = AsyncMock()
         
+        # Mock: Generic component isolation for controlled unit testing
         thread_service = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         thread_service.get_or_create_thread = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         thread_service.create_message = AsyncMock()
         
         handler = MessageHandlerService(mock_supervisor, thread_service)
@@ -254,7 +259,9 @@ class TestFirstMessageErrorRecovery:
         
         # Mock WebSocket manager for notifications
         # L2: Mocking WebSocket for notification testing
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.send_message = AsyncMock()
         
         # Simulate failure then recovery

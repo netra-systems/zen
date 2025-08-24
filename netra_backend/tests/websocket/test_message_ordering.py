@@ -136,8 +136,11 @@ async def test_binary_data_transmission():
         ("Mixed text/binary", lambda: b'TEXT:' + bytes([0, 1, 2, 3, 255]) + b':END', 14),
     ]
     
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws.send = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws.recv = AsyncMock()
     
     for description, data_generator, expected_size in test_cases:
@@ -192,6 +195,7 @@ async def test_protocol_version_mismatch():
     ]
     
     for name, version, should_succeed in protocol_versions:
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = AsyncMock()
         mock_ws.protocol_version = version
         
@@ -222,7 +226,9 @@ async def test_protocol_version_mismatch():
     
     # Test subprotocol negotiation
     subprotocols = ['chat', 'notifications', 'metrics']
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     mock_ws.subprotocol = AsyncMock(return_value='chat')
     
     selected = await mock_ws.subprotocol()

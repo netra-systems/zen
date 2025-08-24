@@ -25,6 +25,7 @@ class TestMessageRepositoryQueries:
     @pytest.mark.asyncio
     async def test_message_pagination(self):
         """Test message pagination"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
         
@@ -55,6 +56,7 @@ class TestMessageRepositoryQueries:
     @pytest.mark.asyncio
     async def test_complex_message_queries(self):
         """Test complex message queries"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
         

@@ -212,6 +212,7 @@ async def test_upgrade_to_pro_plan_flow(
     assert pro_plan["price"] > 0
     
     # Initiate upgrade with mocked payment
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.payment_service.process_payment") as mock_payment:
         mock_payment.return_value = {
             "success": True,
@@ -246,6 +247,7 @@ async def test_pro_plan_benefits_activation(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Mock successful upgrade first
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.billing_service.get_user_plan") as mock_plan:
         mock_plan.return_value = {"plan": "pro", "status": "active"}
         
@@ -277,6 +279,7 @@ async def test_billing_invoice_generation(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Mock pro plan user
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.billing_service.get_user_plan") as mock_plan:
         mock_plan.return_value = {"plan": "pro", "status": "active", "price": 99}
         
@@ -307,6 +310,7 @@ async def test_downgrade_prevention_during_billing(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Mock pro plan user
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.billing_service.get_user_plan") as mock_plan:
         mock_plan.return_value = {"plan": "pro", "status": "active"}
         

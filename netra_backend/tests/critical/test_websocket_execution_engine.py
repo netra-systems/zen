@@ -68,6 +68,7 @@ class TestWebSocketExecutionEngineInitialization:
     def test_broadcast_manager_initialization(self):
         """Test BroadcastManager is properly initialized."""
         # Mock WebSocketManager for BroadcastManager
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_ws_manager = Mock(spec=WebSocketManager)
         broadcast_manager = BroadcastManager()
         
@@ -92,8 +93,11 @@ class TestWebSocketMessageFlow:
         handler = UserMessageHandler()
         
         # Create mock WebSocket
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
         
         # Create test message
@@ -118,8 +122,11 @@ class TestWebSocketMessageFlow:
         router = get_message_router()
         
         # Create mock WebSocket
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
         
         # Create test message (heartbeat which has a handler)
@@ -137,9 +144,13 @@ class TestWebSocketMessageFlow:
         broadcast_manager = BroadcastManager()
         
         # Create mock connections
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn1 = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn1.send_json = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn2 = Mock() 
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn2.send_json = AsyncMock()
         
         connections = [mock_conn1, mock_conn2]
@@ -169,8 +180,11 @@ class TestWebSocketErrorHandling:
         handler = UserMessageHandler()
         
         # Create mock WebSocket that raises an error
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock(side_effect=Exception("Connection error"))
         
         # Create test message
@@ -195,8 +209,11 @@ class TestWebSocketErrorHandling:
         router = get_message_router()
         
         # Create mock WebSocket
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
         
         # Unknown message type
@@ -268,8 +285,11 @@ class TestMetricsCollectorResilience:
         router.handlers = []
         
         # Create mock WebSocket
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.application_state = Mock()
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.send_json = AsyncMock()
         
         # Try to route message

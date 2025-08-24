@@ -26,7 +26,9 @@ class TestResilientHTTPClientResponse:
     async def test_extract_error_data_json(self, client):
         """Test extracting JSON error data."""
         from unittest.mock import AsyncMock, MagicMock
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_response.json = AsyncMock(return_value={"error": "Bad Request"})
         
         error_data = await client._extract_error_data(mock_response)
@@ -41,8 +43,10 @@ class TestResilientHTTPClientResponse:
     async def test_process_response_success_json(self, client):
         """Test processing successful JSON response."""
         from unittest.mock import AsyncMock, MagicMock
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = AsyncMock()
         mock_response.status = 200
+        # Mock: Async component isolation for testing without real async operations
         mock_response.json = AsyncMock(return_value={"data": "success"})
         
         result = await client._process_response(mock_response, "test_api")
@@ -66,7 +70,9 @@ class TestResilientHTTPClientResponse:
     def _create_error_response_mock(self):
         """Create mock response for error processing test."""
         from unittest.mock import AsyncMock, MagicMock
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = AsyncMock()
         mock_response.status = 400
+        # Mock: Async component isolation for testing without real async operations
         mock_response.json = AsyncMock(return_value={"error": "Bad Request"})
         return mock_response

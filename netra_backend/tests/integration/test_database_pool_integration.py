@@ -42,9 +42,11 @@ class ConnectionManager:
         pass
         
     def get_engine(self):
+        # Mock: Generic component isolation for controlled unit testing
         return Mock()
         
     def get_session(self):
+        # Mock: Generic component isolation for controlled unit testing
         return AsyncMock()
         
     @pytest.mark.asyncio
@@ -61,6 +63,7 @@ class DatabaseConnectivityMaster:
         pass
         
     def get_session(self, name):
+        # Mock: Generic component isolation for controlled unit testing
         return AsyncMock()
         
     async def cleanup_all(self):
@@ -235,9 +238,13 @@ class TestDatabasePoolIntegration:
         failing_db_url = "postgresql+asyncpg://nonexistent:5432/nonexistent"
         db_manager = ConnectionManager(failing_db_url, **pool_config)
         
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('app.core.database_connection_manager.create_async_engine') as mock_create_engine:
+            # Mock: Generic component isolation for controlled unit testing
             mock_engine = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_engine.pool = Mock()
+            # Mock: Database isolation for unit testing without external database connections
             mock_engine.connect = AsyncMock(side_effect=Exception("Database unavailable"))
             mock_create_engine.return_value = mock_engine
             
@@ -247,7 +254,9 @@ class TestDatabasePoolIntegration:
                 pass  # Expected to fail
             
             # Test recovery scenario
+            # Mock: Generic component isolation for controlled unit testing
             mock_engine.connect = AsyncMock(return_value=Mock())
+            # Mock: Async component isolation for testing without real async operations
             with patch.object(db_manager, '_test_connection', AsyncMock(return_value=True)):
                 recovery_success = await db_manager.test_connectivity()
                 assert recovery_success is not None

@@ -128,7 +128,9 @@ class TestCrossServiceAuthentication:
     async def test_frontend_auth_flow_with_backend(self, service_endpoints, test_user_data):
         """Test complete auth flow from frontend through backend to auth service."""
         # Mock the complete auth chain
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.user_service.CRUDUser.get') as mock_get_user:
             
             mock_validate.return_value = test_user_data
@@ -146,6 +148,7 @@ class TestCrossServiceAuthentication:
                     user_service = CRUDUser("user_service", User)
                     # Mock a database session for the CRUDUser.get call
                     from unittest.mock import AsyncMock, MagicMock
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_db = AsyncMock()
                     user_details = await user_service.get(mock_db, user_data["user_id"])
                     
@@ -163,6 +166,7 @@ class TestCrossServiceAuthentication:
         token = "consistent_test_token"
         
         # Mock consistent validation across services
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = test_user_data
             
@@ -182,10 +186,13 @@ class TestDatabaseConsistency:
     async def test_postgres_clickhouse_data_consistency(self):
         """Test data consistency between PostgreSQL and ClickHouse."""
         # Mock database clients
+        # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.get_async_db') as mock_postgres, \
+             # Mock: ClickHouse database isolation for fast testing without external database dependency
              patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
             
             # Mock user data in PostgreSQL
+            # Mock: PostgreSQL database isolation for testing without real database connections
             mock_postgres_client = AsyncMock()
             mock_postgres_client.fetchrow.return_value = {
                 "user_id": "user_123",
@@ -195,6 +202,7 @@ class TestDatabaseConsistency:
             mock_postgres.return_value = mock_postgres_client
             
             # Mock corresponding analytics data in ClickHouse
+            # Mock: ClickHouse database isolation for fast testing without external database dependency
             mock_clickhouse_client = AsyncMock()
             mock_clickhouse_client.query.return_value = [
                 {"user_id": "user_123", "event_type": "login", "timestamp": "2025-01-20T10:00:00Z"}
@@ -220,10 +228,15 @@ class TestDatabaseConsistency:
         thread_service = ThreadService()
         
         # Mock transaction scenario: creating user and their first thread
+        # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.get_async_db') as mock_postgres:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_client.begin.return_value = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_client.commit = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_client.rollback = AsyncMock()
             mock_postgres.return_value = mock_client
             
@@ -243,6 +256,7 @@ class TestDatabaseConsistency:
                 # Simulate atomic operation across services
                 # Mock a database session for the CRUDUser.create call
                 from unittest.mock import AsyncMock, MagicMock
+                # Mock: Generic component isolation for controlled unit testing
                 mock_db = AsyncMock()
                 await user_service.create(mock_db, obj_in=user_data)
                 await thread_service.create_thread(user_data['user_id'], mock_db)
@@ -261,7 +275,9 @@ class TestDatabaseConsistency:
         write_time = time.time()
         
         # Mock database write
+        # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.get_async_db') as mock_postgres:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client = AsyncMock()
             mock_postgres.return_value = mock_client
             
@@ -270,7 +286,9 @@ class TestDatabaseConsistency:
                                     "sync_test_user", "sync@test.com")
             
             # Simulate read from analytics database (ClickHouse)
+            # Mock: ClickHouse database isolation for fast testing without external database dependency
             with patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_ch_client = AsyncMock()
                 mock_ch_client.query.return_value = [{"user_id": "sync_test_user", "synced_at": write_time}]
                 mock_clickhouse.return_value = mock_ch_client
@@ -296,7 +314,9 @@ class TestServiceDiscovery:
             "frontend": {"status": "healthy", "uptime": 3600}
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient.get') as mock_get:
+            # Mock: Generic component isolation for controlled unit testing
             mock_response = Mock()
             mock_response.status_code = 200
             mock_response.json.return_value = {"status": "healthy"}
@@ -325,6 +345,7 @@ class TestServiceDiscovery:
             dependency_order.append(service_name)
             await asyncio.sleep(0.1)  # Simulate startup time
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_service', 
                   side_effect=mock_start_service):
             
@@ -348,7 +369,9 @@ class TestServiceDiscovery:
         async with httpx.AsyncClient() as client:
             try:
                 # Mock inter-service HTTP call
+                # Mock: Component isolation for testing without external dependencies
                 with patch('httpx.AsyncClient.post') as mock_post:
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_response = Mock()
                     mock_response.status_code = 200
                     mock_response.json.return_value = {"result": "success"}
@@ -374,6 +397,7 @@ class TestErrorPropagation:
     async def test_cascade_failure_prevention(self):
         """Test system prevents cascade failures across services."""
         # Simulate auth service failure
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.side_effect = Exception("Auth service unavailable")
             
@@ -400,7 +424,9 @@ class TestErrorPropagation:
             user_service = CRUDUser("user_service", User)
             
             # Mock PostgreSQL still available
+            # Mock: PostgreSQL database isolation for testing without real database connections
             with patch('app.db.postgres.get_async_db') as mock_postgres:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_client = AsyncMock()
                 mock_client.fetchrow.return_value = {"user_id": "test", "email": "test@test.com"}
                 mock_postgres.return_value = mock_client
@@ -408,6 +434,7 @@ class TestErrorPropagation:
                 # Should still be able to get user data
                 # Mock a database session for the CRUDUser.get call
                 from unittest.mock import AsyncMock, MagicMock
+                # Mock: Generic component isolation for controlled unit testing
                 mock_db = AsyncMock()
                 user_data = await user_service.get(mock_db, "test")
                 assert user_data is not None
@@ -458,6 +485,7 @@ class TestMultiServiceIntegration:
     async def test_complete_user_journey(self):
         """Test complete user journey across all services."""
         # 1. User authentication (Frontend -> Auth Service)
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth:
             mock_auth.return_value = {"user_id": "journey_user", "email": "journey@test.com"}
             
@@ -466,17 +494,20 @@ class TestMultiServiceIntegration:
             assert auth_result is not None
             
             # 2. User data retrieval (Backend -> PostgreSQL)
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.user_service.CRUDUser.get') as mock_get_user:
                 mock_get_user.return_value = auth_result
                 
                 user_service = CRUDUser("user_service", User)
                 # Mock a database session for the CRUDUser.get call
                 from unittest.mock import AsyncMock, MagicMock
+                # Mock: Generic component isolation for controlled unit testing
                 mock_db = AsyncMock()
                 user_data = await user_service.get(mock_db, auth_result["user_id"])
                 assert user_data["user_id"] == "journey_user"
                 
                 # 3. Thread creation (Backend -> PostgreSQL)
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.thread_service.ThreadService.create_thread') as mock_create_thread:
                     mock_create_thread.return_value = {"thread_id": "new_thread", "user_id": "journey_user"}
                     
@@ -485,7 +516,9 @@ class TestMultiServiceIntegration:
                     assert thread["thread_id"] == "new_thread"
                     
                     # 4. Analytics logging (Backend -> ClickHouse)
+                    # Mock: ClickHouse database isolation for fast testing without external database dependency
                     with patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
+                        # Mock: Generic component isolation for controlled unit testing
                         mock_client = AsyncMock()
                         mock_clickhouse.return_value = mock_client
                         
@@ -503,6 +536,7 @@ class TestMultiServiceIntegration:
     async def test_high_availability_scenarios(self):
         """Test high availability scenarios with service failures."""
         # Scenario 1: Auth service temporary failure
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth:
             # First call fails, second succeeds (recovery)
             mock_auth.side_effect = [
@@ -522,10 +556,12 @@ class TestMultiServiceIntegration:
             assert result2["user_id"] == "ha_user"
         
         # Scenario 2: Database failover
+        # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.get_async_db') as mock_postgres:
             # Simulate primary DB failure, then failover to replica
             mock_postgres.side_effect = [
                 Exception("Primary database unavailable"),
+                # Mock: Database isolation for unit testing without external database connections
                 AsyncMock()  # Replica database available
             ]
             
@@ -546,7 +582,9 @@ class TestMultiServiceIntegration:
         
         async def simulate_request(request_id):
             # Mock service chain: Frontend -> Backend -> Auth -> Database
+            # Mock: Authentication service isolation for testing without real auth flows
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth, \
+                 # Mock: Component isolation for testing without external dependencies
                  patch('app.services.user_service.CRUDUser.get') as mock_user:
                 
                 mock_auth.return_value = {"user_id": f"user_{request_id}"}

@@ -279,6 +279,7 @@ class SupervisorSubAgentCommunicationTester:
 
         """Setup mock LLM manager with realistic responses."""
 
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         self.mock_llm_manager = MagicMock(spec=LLMManager)
         
         # Mock different response types for different agents
@@ -329,12 +330,14 @@ class SupervisorSubAgentCommunicationTester:
         
         self.mock_llm_manager.generate_response = mock_generate_response
 
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         self.mock_llm_manager.get_model_config = MagicMock(return_value={"model": "mock-model"})
         
     async def _setup_mock_database(self):
 
         """Setup mock database session."""
 
+        # Mock: Database session isolation for transaction testing without real database dependency
         self.mock_db_session = AsyncMock(spec=AsyncSession)
         
     async def _setup_supervisor_agent(self):

@@ -127,6 +127,7 @@ class TestLLMManagerStructuredGeneration:
         
         assert isinstance(structured_llm, MockStructuredLLM)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('langchain_openai.ChatOpenAI')
     def test_get_structured_llm_with_real(self, mock_openai, llm_manager):
         """Test getting structured LLM with real provider."""
@@ -134,8 +135,11 @@ class TestLLMManagerStructuredGeneration:
         llm_manager._core.enabled = True
         
         # Mock the get_llm method to return our mock LLM
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_instance = MagicMock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_instance.with_structured_output = MagicMock(return_value="structured_llm")
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager._core.get_llm = MagicMock(return_value=mock_llm_instance)
         
         structured_llm = llm_manager.get_structured_llm(
@@ -157,7 +161,9 @@ class TestLLMManagerStructuredGeneration:
         
         # Mock at the structured operations level
         with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get:
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             mock_structured_llm = AsyncMock()
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             mock_structured_llm.ainvoke = AsyncMock(return_value=mock_response)
             mock_get.return_value = mock_structured_llm
             
@@ -208,7 +214,9 @@ class TestLLMManagerStructuredGeneration:
         # Mock the structured operations to trigger fallback behavior
         with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get:
             # Make structured call fail
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             mock_structured_llm = AsyncMock()
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             mock_structured_llm.ainvoke = AsyncMock(
                 side_effect=Exception("Structured generation failed")
             )
@@ -233,7 +241,9 @@ class TestLLMManagerStructuredGeneration:
         """Test complete failure of structured generation."""
         with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get:
             # Make structured call fail
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             mock_structured_llm = AsyncMock()
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             mock_structured_llm.ainvoke = AsyncMock(
                 side_effect=Exception("Structured generation failed")
             )

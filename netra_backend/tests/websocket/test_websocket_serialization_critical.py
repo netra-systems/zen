@@ -54,8 +54,11 @@ class TestWebSocketSerializationCritical:
     @pytest.fixture
     def mock_websocket(self):
         """Mock WebSocket connection"""
+        # Mock: Generic component isolation for controlled unit testing
         ws = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         ws.send_json = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         ws.close = AsyncMock()
         return ws
 
@@ -134,12 +137,14 @@ class TestWebSocketSerializationCritical:
     @pytest.mark.asyncio
     async def test_broadcast_with_datetime_recovery(self, mock_websocket):
         """Test broadcast error recovery with datetime serialization"""
+        # Mock: Generic component isolation for controlled unit testing
         manager = BroadcastManager(Mock())
         message_with_datetime = {
             "type": "agent_log",
             "payload": {"timestamp": datetime.now(), "message": "test"}
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('json.dumps') as mock_dumps:
             mock_dumps.side_effect = [
                 TypeError("datetime not serializable"),
@@ -147,6 +152,7 @@ class TestWebSocketSerializationCritical:
             ]
             
             result = await manager._send_to_connection(
+                # Mock: WebSocket infrastructure isolation for unit tests without real connections
                 Mock(websocket=mock_websocket), message_with_datetime
             )
             assert mock_dumps.call_count >= 1

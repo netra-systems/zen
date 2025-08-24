@@ -39,30 +39,45 @@ from netra_backend.app.services.generation_service import (
 @pytest.fixture
 def mock_job_store():
     """Mock job store fixture"""
+    # Mock: Generic component isolation for controlled unit testing
     store = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     store.get = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     store.create = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     store.update = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     store.list = AsyncMock()
     return store
 
 @pytest.fixture
 def mock_clickhouse():
     """Mock ClickHouse client fixture"""
+    # Mock: Generic component isolation for controlled unit testing
     client = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.execute_query = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.insert_data = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.create_table = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.command = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.insert = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.disconnect = AsyncMock()
     return client
 
 @pytest.fixture
 def mock_websocket_manager():
     """Mock WebSocket manager fixture"""
+    # Mock: Generic component isolation for controlled unit testing
     manager = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     manager.broadcast = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     manager.send_to_connection = AsyncMock()
     return manager
 
@@ -91,9 +106,13 @@ class TestJobStatusManagement:
     @pytest.mark.asyncio
     async def test_update_job_status_running(self):
         """Test updating job status to running"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_job_manager.job_store') as mock_store:
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.generation_job_manager.manager') as mock_manager:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_store.update = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 mock_manager.broadcast_to_job = AsyncMock()
                 
                 await update_job_status("job123", "running", progress=50)
@@ -109,9 +128,13 @@ class TestJobStatusManagement:
     @pytest.mark.asyncio
     async def test_update_job_status_completed(self):
         """Test updating job status to completed"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_job_manager.job_store') as mock_store:
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.generation_job_manager.manager') as mock_manager:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_store.update = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 mock_manager.broadcast_to_job = AsyncMock()
                 
                 await update_job_status(
@@ -131,9 +154,13 @@ class TestJobStatusManagement:
     @pytest.mark.asyncio
     async def test_update_job_status_failed(self):
         """Test updating job status to failed"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_job_manager.job_store') as mock_store:
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.generation_job_manager.manager') as mock_manager:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_store.update = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 mock_manager.broadcast_to_job = AsyncMock()
                 
                 await update_job_status(
@@ -151,9 +178,13 @@ class TestJobStatusManagement:
     @pytest.mark.asyncio
     async def test_update_job_status_with_metadata(self):
         """Test updating job status with additional metadata"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_job_manager.job_store') as mock_store:
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.generation_job_manager.manager') as mock_manager:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_store.update = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 mock_manager.broadcast_to_job = AsyncMock()
                 
                 await update_job_status(
@@ -186,7 +217,9 @@ class TestClickHouseOperations:
             {"workload_type": "generation", "prompt": "G1", "response": "R1"}
         ]
         
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.generation_job_manager.ClickHouseDatabase', return_value=mock_clickhouse):
+            # Mock: ClickHouse database isolation for fast testing without external database dependency
             with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
                 result = await get_corpus_from_clickhouse("test_corpus")
                 
@@ -200,7 +233,9 @@ class TestClickHouseOperations:
         """Test retrieving corpus from empty table"""
         mock_clickhouse.execute_query.return_value = []
         
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.generation_job_manager.ClickHouseDatabase', return_value=mock_clickhouse):
+            # Mock: ClickHouse database isolation for fast testing without external database dependency
             with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
                 result = await get_corpus_from_clickhouse("empty_corpus")
                 
@@ -208,7 +243,9 @@ class TestClickHouseOperations:
     @pytest.mark.asyncio
     async def test_save_corpus_to_clickhouse(self, mock_clickhouse, sample_corpus):
         """Test saving corpus to ClickHouse"""
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.generation_job_manager.ClickHouseDatabase', return_value=mock_clickhouse):
+            # Mock: ClickHouse database isolation for fast testing without external database dependency
             with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
                 await save_corpus_to_clickhouse(sample_corpus, "new_corpus", "job123")
                 
@@ -230,7 +267,9 @@ class TestClickHouseOperations:
         """Test corpus save error handling"""
         mock_clickhouse.command.side_effect = Exception("Database error")
         
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.generation_job_manager.ClickHouseDatabase', return_value=mock_clickhouse):
+            # Mock: ClickHouse database isolation for fast testing without external database dependency
             with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
                 with pytest.raises(Exception) as exc:
                     await save_corpus_to_clickhouse(sample_corpus, "error_corpus", "job_error")
@@ -327,9 +366,13 @@ class TestExistingFunctions:
     @pytest.mark.asyncio
     async def test_update_job_status_broadcasts_update(self):
         """Test that job status updates are broadcast via WebSocket"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_job_manager.job_store') as mock_store:
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.generation_job_manager.manager') as mock_manager:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_store.update = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 mock_manager.broadcast_to_job = AsyncMock()
                 
                 await update_job_status("test_job", "running", progress=25)
@@ -353,7 +396,9 @@ class TestExistingFunctions:
             {"workload_type": "generation", "prompt": "Generate", "response": "Response"}
         ]
         
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.generation_job_manager.ClickHouseDatabase', return_value=mock_clickhouse):
+            # Mock: ClickHouse database isolation for fast testing without external database dependency
             with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
                 # Save corpus
                 await save_corpus_to_clickhouse(test_corpus, "integration_corpus", "int_job")

@@ -50,7 +50,9 @@ class TestDatabaseCoordinationL2:
         - Real rollback logic
         """
         # Setup mock database clients
+        # Mock: Generic component isolation for controlled unit testing
         mock_pg_client = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_ch_client = AsyncMock()
         
         transaction = DatabaseTransaction(
@@ -118,6 +120,7 @@ class TestDatabaseCoordinationL2:
                         raise TimeoutError("Pool exhausted")
                 
                 self.active += 1
+                # Mock: Generic component isolation for controlled unit testing
                 return MagicMock()
             
             async def release(self, conn):
@@ -306,6 +309,7 @@ class TestDatabaseCoordinationL2:
         """
         class ReadReplicaRouter:
             def __init__(self, max_lag_ms=1000):
+                # Mock: Generic component isolation for controlled unit testing
                 self.primary = AsyncMock()
                 self.replicas = []
                 self.max_lag_ms = max_lag_ms
@@ -326,7 +330,9 @@ class TestDatabaseCoordinationL2:
                 return self.primary
         
         router = ReadReplicaRouter(max_lag_ms=500)
+        # Mock: Generic component isolation for controlled unit testing
         replica1 = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         replica2 = AsyncMock()
         
         router.add_replica(replica1, lag_ms=200)  # Good
@@ -355,6 +361,7 @@ class TestDatabaseCoordinationL2:
         class DatabaseFailover:
             def __init__(self):
                 self.primary_healthy = True
+                # Mock: Generic component isolation for controlled unit testing
                 self.standby = AsyncMock()
             
             async def execute_query(self, query):

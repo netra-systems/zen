@@ -139,13 +139,16 @@ class TestMessagePipelineCore:
     async def _test_message_authentication(self, websocket: MockWebSocket,
                                          message: Dict[str, Any]) -> Dict[str, Any]:
         """Test message authentication."""
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth:
             mock_auth.return_value = "test_pipeline_user"
             return {"authenticated": True, "user_id": "test_pipeline_user"}
     
     async def _test_agent_processing(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """Test agent processing with deterministic mock."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
+            # Mock: Agent service isolation for testing without LLM agent execution
             mock_agent = AsyncMock()
             mock_agent.process_message.return_value = {
                 "response": f"Processed: {message['content']}",
@@ -194,7 +197,9 @@ class TestMessagePipelineTypes:
         message_id = f"test_{message_type}_{int(time.time())}"
         pipeline_tester.start_timing(message_id)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
+            # Mock: Agent service isolation for testing without LLM agent execution
             mock_agent = AsyncMock()
             mock_response = f"Mock {message_type} response for: {message['content']}"
             mock_agent.process_message.return_value = {"response": mock_response}
@@ -250,7 +255,9 @@ class TestPipelinePerformance:
         # Simulate processing delay based on index
         await asyncio.sleep(index * 0.01)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
+            # Mock: Agent service isolation for testing without LLM agent execution
             mock_agent = AsyncMock()
             mock_agent.process_message.return_value = {
                 "response": f"Processed concurrent message {index}"
@@ -280,7 +287,9 @@ class TestPipelineErrorHandling:
         await websocket.send_json(recovery_message)
         
         # Test agent error handling
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
+            # Mock: Agent service isolation for testing without LLM agent execution
             mock_agent = AsyncMock()
             mock_agent.process_message.side_effect = Exception("Mock agent error")
             mock_service.return_value = mock_agent

@@ -149,9 +149,11 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         for scenario in staging_scenarios:
             with patch.dict('os.environ', scenario['env']):
                 # Mock client-side window object
+                # Mock: Generic component isolation for controlled unit testing
                 mock_window = MagicMock()
                 mock_window.location.protocol = scenario['client_protocol']
                 
+                # Mock: Component isolation for testing without external dependencies
                 with patch('builtins.window', mock_window, create=True):
                     api_config = self._get_secure_api_config()
                     
@@ -257,10 +259,12 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
         
         for scenario in edge_case_scenarios:
             with patch.dict('os.environ', scenario['env'], clear=True):
+                # Mock: Generic component isolation for controlled unit testing
                 mock_window = MagicMock()
                 mock_window.location.protocol = 'https:'
                 mock_window.location.host = scenario['client_host']
                 
+                # Mock: Component isolation for testing without external dependencies
                 with patch('builtins.window', mock_window, create=True):
                     is_secure = self._simulate_client_side_environment_detection(
                         protocol='https:',
@@ -382,10 +386,12 @@ class TestMixedContentHTTPS(BaseIntegrationTest):
     def _simulate_client_side_config_generation(self, protocol: str, host: str) -> Dict[str, str]:
         """Simulate client-side API config generation (hydration)."""
         # Mock window object for client-side detection
+        # Mock: Generic component isolation for controlled unit testing
         mock_window = MagicMock()
         mock_window.location.protocol = protocol
         mock_window.location.host = host
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.window', mock_window, create=True):
             return self._get_secure_api_config()
     

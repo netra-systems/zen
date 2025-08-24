@@ -121,6 +121,7 @@ class TestHelperFunctions:
     
     def test_handle_json_error_logs_error(self):
         """Test _handle_json_error logs the error."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.json_parsing_utils.logger') as mock_logger:
             error = ValueError("Test error")
             result = _handle_json_error(error, "test data")
@@ -135,6 +136,7 @@ class TestLoggingBehavior:
         """Test that safe_json_parse logs parse errors."""
         from netra_backend.app.core.json_parsing_utils import safe_json_parse
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.json_parsing_utils.logger') as mock_logger:
             result = safe_json_parse('invalid json {')
             
@@ -145,6 +147,7 @@ class TestLoggingBehavior:
         """Test that parse_dict_field logs type errors."""
         from netra_backend.app.core.json_parsing_utils import parse_dict_field
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.json_parsing_utils.logger') as mock_logger:
             result = parse_dict_field([1, 2, 3])  # List instead of dict
             
@@ -155,6 +158,7 @@ class TestLoggingBehavior:
         """Test that parse_list_field logs type errors."""
         from netra_backend.app.core.json_parsing_utils import parse_list_field
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.json_parsing_utils.logger') as mock_logger:
             result = parse_list_field({"key": "value"})  # Dict instead of list
             
@@ -165,6 +169,7 @@ class TestLoggingBehavior:
         """Test that comprehensive_json_fix logs when fixes are applied."""
         from netra_backend.app.core.json_parsing_utils import comprehensive_json_fix
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.json_parsing_utils.logger') as mock_logger:
             data = {
                 "tool_parameters": "invalid json",

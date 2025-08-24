@@ -210,6 +210,7 @@ class TestAgentLifecycleManagement:
             'concurrent_peak': 3
         })
         orchestrator.active_agents = 2
+        # Mock: Generic component isolation for controlled unit testing
         orchestrator.agent_pool = [MagicMock(), MagicMock()]  # 2 in pool
     
     def _verify_calculated_metrics(self, metrics):

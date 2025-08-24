@@ -42,6 +42,7 @@ class MockToolDispatcher:
         self.tools = {}
         self.call_count = 0
     
+    # Mock: Component isolation for testing without external dependencies
     async def dispatch(self, tool_name: str, **kwargs) -> Dict[str, Any]:
         self.call_count += 1
         return {"tool": tool_name, "result": "success", "call_count": self.call_count}
@@ -67,6 +68,7 @@ class TestAgentInitializationIntegration:
     @pytest.fixture
     def mock_websocket_manager(self):
         """Create mock WebSocket manager."""
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     @pytest.mark.asyncio
@@ -144,6 +146,7 @@ class TestAgentInitializationIntegration:
             assert hasattr(agent, 'websocket_manager')
     
     @mock_justified("LLM service unavailable during agent initialization testing")
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.agents.triage_sub_agent.agent.TriageSubAgent.execute')
     @pytest.mark.asyncio
     async def test_supervisor_agent_initialization(self, mock_execute, agent_registry):
@@ -215,10 +218,12 @@ class TestAgentInitializationIntegration:
         assert triage_agent.llm_manager != data_agent.llm_manager or True  # Allow shared managers
     
     @mock_justified("External agent recovery service not available in test environment")
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.core.agent_recovery_supervisor.SupervisorRecoveryStrategy')
     @pytest.mark.asyncio
     async def test_agent_failure_and_recovery(self, mock_recovery_strategy, agent_registry):
         """Test agent failure detection and recovery mechanisms."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_recovery_instance = AsyncMock()
         mock_recovery_instance.assess_failure.return_value = {"failure_type": "coordination_failure", "priority": "critical"}
         mock_recovery_instance.execute_primary_recovery.return_value = {"status": "restarted", "recovery_method": "restart_coordination"}

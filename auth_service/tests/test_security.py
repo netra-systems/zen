@@ -70,6 +70,7 @@ def client(app):
 @pytest.fixture
 def mock_auth_service():
     """Mock auth service for testing"""
+    # Mock: Component isolation for testing without external dependencies
     with patch('auth_service.auth_core.routes.auth_routes.auth_service') as mock:
         yield mock
 
@@ -128,6 +129,7 @@ class TestSQLInjectionPrevention:
                     raise HTTPException(status_code=400, detail="Invalid input detected")
             
             # Return normal response for non-malicious input
+            # Mock: Service component isolation for predictable testing behavior
             return MagicMock(
                 access_token="test_token",
                 refresh_token="test_refresh", 
@@ -135,6 +137,7 @@ class TestSQLInjectionPrevention:
                 user={"email": "test@example.com", "id": "123"}
             )
             
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.login = AsyncMock(side_effect=mock_login_with_validation)
         
         for payload in security_test_payloads['sql_injection']:
@@ -181,6 +184,7 @@ class TestSQLInjectionPrevention:
             # Return normal response for non-malicious input
             return {"valid": True, "user_id": "123"}
             
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.validate_token = AsyncMock(side_effect=mock_validate_with_validation)
         
         for payload in security_test_payloads['sql_injection']:
@@ -208,12 +212,14 @@ class TestSQLInjectionPrevention:
                     raise HTTPException(status_code=400, detail="Invalid service ID")
             
             # Return normal response for non-malicious input
+            # Mock: Service component isolation for predictable testing behavior
             return MagicMock(
                 access_token="service_token", 
                 token_type="bearer",
                 expires_in=3600
             )
             
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.create_service_token = AsyncMock(side_effect=mock_create_service_token_with_validation)
         
         for payload in security_test_payloads['sql_injection']:
@@ -238,6 +244,7 @@ class TestXSSPrevention:
                                        mock_auth_service):
         """Test XSS prevention in login inputs"""
         # Mock successful login to test response handling
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.login = AsyncMock(return_value=MagicMock(
             access_token="safe_token",
             refresh_token="safe_refresh",
@@ -266,6 +273,7 @@ class TestXSSPrevention:
                                             mock_auth_service):
         """Test XSS prevention in User-Agent header"""
         # Mock successful login to test response handling
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.login = AsyncMock(return_value=MagicMock(
             access_token="safe_token",
             refresh_token="safe_refresh",
@@ -337,6 +345,7 @@ class TestCSRFProtection:
     async def test_csrf_token_validation(self, client, mock_auth_service):
         """Test CSRF protection for state-changing operations"""
         # Mock successful login response
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.login = AsyncMock(return_value=MagicMock(
             access_token="safe_token",
             refresh_token="safe_refresh",
@@ -417,6 +426,7 @@ class TestInputValidation:
                 raise HTTPException(status_code=400, detail="Password too long")
             
             # Return normal response for reasonable passwords
+            # Mock: Service component isolation for predictable testing behavior
             return MagicMock(
                 access_token="test_token",
                 refresh_token="test_refresh", 
@@ -424,6 +434,7 @@ class TestInputValidation:
                 user={"email": "test@example.com", "id": "123"}
             )
             
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.login = AsyncMock(side_effect=mock_login_with_length_validation)
         
         # Test extremely long password
@@ -464,6 +475,7 @@ class TestSecurityLogging:
     @pytest.mark.asyncio
     async def test_failed_login_logging(self, client, mock_auth_service):
         """Test failed login attempts are logged"""
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.login = AsyncMock(side_effect=Exception("Invalid credentials"))
         
         login_data = {
@@ -472,6 +484,7 @@ class TestSecurityLogging:
             "provider": "local" 
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('auth_service.auth_core.routes.auth_routes.logger') as mock_logger:
             response = client.post("/auth/login", json=login_data)
             
@@ -488,6 +501,7 @@ class TestSecurityLogging:
                                                 security_test_payloads):
         """Test SQL injection attempts are logged"""
         # Force the mock to fail so we get into the exception handler that does the SQL injection detection
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.login = AsyncMock(side_effect=Exception("Invalid credentials"))
         
         # Use a simple SQL injection payload that contains single quote
@@ -498,6 +512,7 @@ class TestSecurityLogging:
             "provider": "local"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('auth_service.auth_core.routes.auth_routes.logger') as mock_logger:
             response = client.post("/auth/login", json=login_data)
             
@@ -530,6 +545,7 @@ class TestSecurityLogging:
                 "session_id": "session123"
             }
         )
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.login = AsyncMock(return_value=mock_response)
         
         login_data = {
@@ -574,6 +590,7 @@ class TestTokenSecurity:
             "Bearer malformed-token"  # Wrong format
         ]
         
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.validate_token = AsyncMock(return_value=MagicMock(valid=False))
         
         for token in invalid_tokens:
@@ -605,6 +622,7 @@ class TestTokenSecurity:
             # Valid token response
             return {"valid": True, "user_id": "123"}
             
+        # Mock: Security service isolation for auth testing without real token validation
         mock_auth_service.validate_token = AsyncMock(side_effect=mock_validate_token_with_security)
         
         for payload in security_test_payloads['sql_injection']:
@@ -624,6 +642,7 @@ class TestRateLimiting:
     @pytest.mark.asyncio
     async def test_login_rate_limiting(self, client, mock_auth_service):
         """Test rate limiting on login attempts"""
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.login = AsyncMock(side_effect=Exception("Invalid credentials"))
         
         login_data = {
@@ -646,6 +665,7 @@ class TestRateLimiting:
     @pytest.mark.asyncio
     async def test_token_validation_rate_limiting(self, client, mock_auth_service):
         """Test rate limiting on token validation"""
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.validate_token = AsyncMock(return_value=MagicMock(valid=False))
         
         # Rapid token validation requests
@@ -661,6 +681,7 @@ async def test_comprehensive_security_scenario(client, mock_auth_service,
                                               security_test_payloads):
     """Test comprehensive attack scenario"""
     # Simulate sophisticated attack combining multiple vectors
+    # Mock: Authentication service isolation for testing without real auth flows
     mock_auth_service.login = AsyncMock()
     
     # Multi-vector attack payload

@@ -35,12 +35,17 @@ class TestWebSocketAgentIntegration:
         
         # Setup mocks
         config = AppConfig()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.ask_llm = AsyncMock(return_value="Agent response")
+        # Mock: Tool execution isolation for predictable agent testing
         tool_dispatcher = Mock()
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = Mock()
         
         # Create supervisor with mocked components
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.agents.supervisor_consolidated.AsyncSession'):
             supervisor = SupervisorAgent(
                 llm_manager=llm_manager,
@@ -67,7 +72,9 @@ class TestWebSocketAgentIntegration:
         async def mock_send_message(user_id: str, message: Dict[str, Any]):
             sent_messages.append(message)
         
+        # Mock: WebSocket connection isolation for testing without network overhead
         with patch('app.get_websocket_manager().send_message', new=mock_send_message):
+            # Mock: WebSocket connection isolation for testing without network overhead
             with patch('app.get_websocket_manager().send_error', new=AsyncMock()):
                 # Execute
                 await agent_service.handle_websocket_message(
@@ -88,11 +95,15 @@ class TestWebSocketAgentIntegration:
         from netra_backend.app.startup_module import _create_agent_supervisor
         
         app = FastAPI()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         app.state.llm_manager = Mock()
+        # Mock: Tool execution isolation for predictable agent testing
         app.state.tool_dispatcher = Mock()
         
         # Mock WebSocket manager
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.startup_module.manager') as mock_manager:
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.agents.supervisor_consolidated.AsyncSession'):
                 _create_agent_supervisor(app)
         
@@ -111,15 +122,21 @@ class TestWebSocketAgentIntegration:
         from netra_backend.app.services.thread_service import ThreadService
         
         # Setup mocks
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(return_value="Response")
+        # Mock: Component isolation for controlled unit testing
         mock_thread_service = Mock(spec=ThreadService)
         
         # Mock thread retrieval
+        # Mock: Generic component isolation for controlled unit testing
         mock_thread = Mock()
         mock_thread.id = "thread_123"
         mock_thread.metadata_ = {"user_id": "test_user"}
+        # Mock: Async component isolation for testing without real async operations
         mock_thread_service.get_thread = AsyncMock(return_value=mock_thread)
+        # Mock: Generic component isolation for controlled unit testing
         mock_thread_service.create_message = AsyncMock()
         
         handler = MessageHandlerService(mock_supervisor, mock_thread_service)
@@ -131,9 +148,11 @@ class TestWebSocketAgentIntegration:
             "references": []
         }
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = Mock()
         
         # Execute
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.get_websocket_manager()'):
             await handler.handle_user_message(
                 user_id="test_user",
@@ -155,7 +174,9 @@ class TestWebSocketAgentIntegration:
         from netra_backend.app.services.agent_service_core import AgentService
         
         # Setup mock that raises error
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = AsyncMock()
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_supervisor.run = AsyncMock(side_effect=Exception("Agent error"))
         
         agent_service = AgentService(mock_supervisor)
@@ -173,7 +194,9 @@ class TestWebSocketAgentIntegration:
             error_sent = True
         
         # Execute with error handling
+        # Mock: WebSocket connection isolation for testing without network overhead
         with patch('app.get_websocket_manager().send_error', new=mock_send_error):
+            # Mock: WebSocket connection isolation for testing without network overhead
             with patch('app.get_websocket_manager().send_message', new=AsyncMock()):
                 await agent_service.handle_websocket_message(
                     user_id="test_user",
@@ -190,6 +213,7 @@ class TestWebSocketAgentIntegration:
         from netra_backend.app.services.agent_service_core import AgentService
         
         # Setup mock with delay to simulate processing
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = AsyncMock()
         
         async def delayed_response(request, thread_id, user_id, run_id):
@@ -210,6 +234,7 @@ class TestWebSocketAgentIntegration:
         ]
         
         # Execute concurrently
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.get_websocket_manager()'):
             tasks = [
                 agent_service.handle_websocket_message(

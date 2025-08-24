@@ -328,7 +328,9 @@ class TestPresetManagement:
         Path(temp_repo, ".github").mkdir(parents=True, exist_ok=True)
         return WorkflowManager(temp_repo)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('manage_workflows.WorkflowPresets.get_presets')
+    # Mock: Component isolation for testing without external dependencies
     @patch('manage_workflows.WorkflowPresets.validate_preset')
     def test_apply_minimal_preset(self, mock_validate, mock_get_presets, manager):
         """Test applying minimal preset."""
@@ -356,7 +358,9 @@ class TestPresetManagement:
         assert manager.config["cost_control"]["daily_limit"] == 10.0
         assert manager.config["cost_control"]["monthly_budget"] == 300.0
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('manage_workflows.WorkflowPresets.get_presets')
+    # Mock: Component isolation for testing without external dependencies
     @patch('manage_workflows.WorkflowPresets.validate_preset')
     def test_apply_standard_preset(self, mock_validate, mock_get_presets, manager):
         """Test applying standard preset."""
@@ -384,7 +388,9 @@ class TestPresetManagement:
         assert manager.config["features"]["ai_features"] is True
         assert manager.config["features"]["monitoring"] is True
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('manage_workflows.WorkflowPresets.get_presets')
+    # Mock: Component isolation for testing without external dependencies
     @patch('manage_workflows.WorkflowPresets.validate_preset')
     def test_apply_invalid_preset(self, mock_validate, mock_get_presets, manager):
         """Test applying invalid preset."""
@@ -399,7 +405,9 @@ class TestPresetManagement:
         # Config should remain unchanged
         assert manager.config == original_config
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('manage_workflows.WorkflowPresets.get_presets')
+    # Mock: Component isolation for testing without external dependencies
     @patch('manage_workflows.WorkflowPresets.validate_preset')
     def test_preset_overwrites_existing(self, mock_validate, mock_get_presets, manager):
         """Test that preset overwrites existing configuration."""
@@ -445,6 +453,7 @@ class TestConfigValidation:
         Path(temp_repo, ".github").mkdir(parents=True, exist_ok=True)
         return WorkflowManager(temp_repo)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('manage_workflows.WorkflowConfigUtils.validate_config_issues')
     def test_validate_config_valid(self, mock_validate, manager):
         """Test validating valid configuration."""
@@ -455,6 +464,7 @@ class TestConfigValidation:
         assert result is True
         mock_validate.assert_called_once_with(manager.config)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('manage_workflows.WorkflowConfigUtils.validate_config_issues')
     def test_validate_config_invalid(self, mock_validate, manager):
         """Test validating invalid configuration."""
@@ -481,6 +491,7 @@ class TestConfigDisplay:
         Path(temp_repo, ".github").mkdir(parents=True, exist_ok=True)
         return WorkflowManager(temp_repo)
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('manage_workflows.WorkflowConfigUtils.show_config_display')
     def test_show_config(self, mock_show, manager):
         """Test showing configuration."""

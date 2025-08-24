@@ -194,6 +194,7 @@ class TestStartupCheckIntegration:
         from netra_backend.app.startup_checks.checker import StartupChecker
         
         # Create a mock app
+        # Mock: Generic component isolation for controlled unit testing
         app = MagicMock()
         
         # Create the checker
@@ -204,17 +205,21 @@ class TestStartupCheckIntegration:
             with patch('netra_backend.app.startup_checks.service_checks.ServiceChecker') as mock_service:
                 # Setup mocks to return valid results
                 mock_db_instance = mock_db.return_value
+                # Mock: PostgreSQL database isolation for testing without real database connections
                 mock_db_instance.check_postgres = AsyncMock(return_value=MagicMock(
                     success=True, critical=False
                 ))
+                # Mock: ClickHouse database isolation for fast testing without external database dependency
                 mock_db_instance.check_clickhouse = AsyncMock(return_value=MagicMock(
                     success=True, critical=False
                 ))
                 
                 mock_service_instance = mock_service.return_value
+                # Mock: Redis external service isolation for fast, reliable tests without network dependency
                 mock_service_instance.check_redis = AsyncMock(return_value=MagicMock(
                     success=True, critical=False
                 ))
+                # Mock: LLM service isolation for fast testing without API calls or rate limits
                 mock_service_instance.check_llm_providers = AsyncMock(return_value=MagicMock(
                     success=True, critical=False
                 ))

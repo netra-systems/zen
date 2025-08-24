@@ -58,6 +58,7 @@ class TestApexOptimizerPerformanceAndScaling:
     @pytest.fixture
     def mock_context(self):
         """Create mock context for performance testing"""
+        # Mock: Service component isolation for predictable testing behavior
         return MagicMock(spec=ToolContext)
     @pytest.mark.asyncio
     async def test_tool_selection_performance(self, performance_tools, mock_context):
@@ -145,6 +146,7 @@ class TestApexOptimizerPerformanceAndScaling:
         
         # Simulate multiple executions
         for _ in range(10):
+            # Mock: Service component isolation for predictable testing behavior
             asyncio.run(tool.run(MagicMock(spec=ToolContext)))
         
         # Get metrics

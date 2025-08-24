@@ -36,7 +36,9 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     def test_full_workflow_integration(self, service):
         """Test complete permission workflow integration"""
         # Override inherited test to work with PermissionService static methods
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@netrasystems.ai"
         user.role = "standard_user"
@@ -62,9 +64,11 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     
     def test_new_user_onboarding_flow(self):
         """Test complete new user onboarding flow"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
         
         # New user signs up
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "newdev@netrasystems.ai"
         user.role = "standard_user"
@@ -85,6 +89,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     def test_production_environment_security(self):
         """Test that production environment has proper restrictions"""
         with patch.dict(os.environ, {"ENVIRONMENT": "production"}, clear=True):
+            # Mock: Component isolation for controlled unit testing
             user = Mock(spec=User)
             user.email = "regular@example.com"
             user.role = "standard_user"
@@ -103,9 +108,11 @@ class TestRealWorldScenarios:
     
     def test_customer_support_workflow(self):
         """Test customer support representative workflow"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
         
         # Customer support rep
+        # Mock: Component isolation for controlled unit testing
         support_user = Mock(spec=User)
         support_user.email = "support@company.com"
         support_user.role = "power_user"
@@ -122,9 +129,11 @@ class TestRealWorldScenarios:
     
     def test_developer_debugging_workflow(self):
         """Test developer debugging and troubleshooting workflow"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
         
         # Developer user
+        # Mock: Component isolation for controlled unit testing
         dev_user = Mock(spec=User)
         dev_user.email = "dev@netrasystems.ai"
         dev_user.role = "developer"
@@ -145,9 +154,11 @@ class TestRealWorldScenarios:
     
     def test_admin_user_management_workflow(self):
         """Test admin user management workflow"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
         
         # Admin user
+        # Mock: Component isolation for controlled unit testing
         admin_user = Mock(spec=User)
         admin_user.email = "admin@netrasystems.ai"
         admin_user.role = "admin"
@@ -164,6 +175,7 @@ class TestRealWorldScenarios:
         assert PermissionService.has_permission(admin_user, "audit_logs") == True
         
         # Can manage other users
+        # Mock: Component isolation for controlled unit testing
         target_user = Mock(spec=User)
         target_user.email = "user@example.com"
         target_user.role = "standard_user"
@@ -175,6 +187,7 @@ class TestRealWorldScenarios:
     
     def test_environment_based_access_control(self):
         """Test that permissions work correctly across environments"""
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "test@example.com"
         user.role = "standard_user"
@@ -183,6 +196,7 @@ class TestRealWorldScenarios:
         
         # In development environment
         with patch.dict(os.environ, {"ENVIRONMENT": "development"}, clear=True):
+            # Mock: Database session isolation for transaction testing without real database dependency
             db = Mock(spec=Session)
             updated_user = PermissionService.update_user_role(db, user, check_developer=True)
             assert updated_user.role == "developer"
@@ -193,6 +207,7 @@ class TestRealWorldScenarios:
         user.is_developer = False
         user.permissions = None
         with patch.dict(os.environ, {"ENVIRONMENT": "production"}, clear=True):
+            # Mock: Database session isolation for transaction testing without real database dependency
             db = Mock(spec=Session)
             updated_user = PermissionService.update_user_role(db, user, check_developer=True)
             assert updated_user.role == "standard_user"  # Should not elevate
@@ -203,9 +218,11 @@ class TestSecurityIntegration:
     
     def test_privilege_escalation_prevention(self):
         """Test that privilege escalation is prevented"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
         
         # Malicious user attempts various escalation techniques
+        # Mock: Component isolation for controlled unit testing
         malicious_user = Mock(spec=User)
         malicious_user.email = "hacker@evil.com"
         malicious_user.role = "standard_user"
@@ -225,8 +242,10 @@ class TestSecurityIntegration:
     
     def test_role_transition_security(self):
         """Test security during role transitions"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
         
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "user@example.com"
         user.role = "standard_user"
@@ -250,8 +269,10 @@ class TestSecurityIntegration:
     
     def test_custom_permission_security(self):
         """Test security of custom permission system"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         db = Mock(spec=Session)
         
+        # Mock: Component isolation for controlled unit testing
         user = Mock(spec=User)
         user.email = "user@example.com"
         user.role = "standard_user"

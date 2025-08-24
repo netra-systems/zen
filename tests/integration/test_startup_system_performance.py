@@ -63,6 +63,7 @@ class TestSyntaxFix:
         }
         
         with patch.dict(os.environ, essential_env, clear=False):
+            # Mock: Component isolation for testing without external dependencies
             with patch('signal.signal'):
                 launcher = DevLauncher(self.config)
                 result = launcher.check_environment()

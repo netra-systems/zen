@@ -311,8 +311,12 @@ class TestThreadIsolation:
 @pytest.fixture
 async def db_session():
     """Mock database session for testing."""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
+    # Mock: Session isolation for controlled testing without external state
     session.begin = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
     yield session

@@ -22,8 +22,10 @@ class TestPostgresEventsDatabaseConfigMigration:
         # This test should FAIL initially, proving the issue exists
         try:
             # Temporarily remove DatabaseConfig from the module to simulate staging environment
+            # Mock: Generic component isolation for controlled unit testing
             with patch.dict('sys.modules', {'netra_backend.app.db.postgres_config': MagicMock()}):
                 # Mock the module but don't provide DatabaseConfig
+                # Mock: Generic component isolation for controlled unit testing
                 mock_module = MagicMock()
                 del mock_module.DatabaseConfig  # Ensure DatabaseConfig doesn't exist
                 sys.modules['netra_backend.app.db.postgres_config'] = mock_module
@@ -145,9 +147,12 @@ class TestDatabaseConfigMigrationEdgeCases:
         from unittest.mock import Mock, AsyncMock, MagicMock
         
         # Mock the resilience module
+        # Mock: Generic component isolation for controlled unit testing
         mock_resilience = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_resilience.set_connection_health = Mock()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres_resilience.postgres_resilience', mock_resilience):
             # Simulate setting degraded state
             mock_resilience.set_connection_health(False)

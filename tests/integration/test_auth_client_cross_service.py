@@ -42,8 +42,11 @@ class TestAuthClientCrossServiceIntegration:
     @pytest.fixture
     def mock_httpx_client(self):
         """Create mock httpx client."""
+        # Mock: Component isolation for controlled unit testing
         mock_client = Mock(spec=httpx.AsyncClient)
+        # Mock: Async component isolation for testing without real async operations
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        # Mock: Async component isolation for testing without real async operations
         mock_client.__aexit__ = AsyncMock(return_value=None)
         return mock_client
     
@@ -51,6 +54,7 @@ class TestAuthClientCrossServiceIntegration:
     async def test_auth_client_cross_service_token_validation(self, auth_client, service_discovery, mock_httpx_client):
         """Test auth client validates tokens with cross-service headers."""
         # Mock successful response
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
@@ -59,6 +63,7 @@ class TestAuthClientCrossServiceIntegration:
             'email': 'test@example.com',
             'permissions': ['read', 'write']
         }
+        # Mock: Async component isolation for testing without real async operations
         mock_httpx_client.post = AsyncMock(return_value=mock_response)
         
         with patch.object(auth_client, '_create_http_client', return_value=mock_httpx_client):
@@ -85,9 +90,11 @@ class TestAuthClientCrossServiceIntegration:
         assert auth_info['api_url'] == 'http://localhost:8081/auth'
         
         # Mock auth service is healthy
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {'status': 'healthy'}
+        # Mock: Async component isolation for testing without real async operations
         mock_httpx_client.get = AsyncMock(return_value=mock_response)
         
         # Simulate health check to auth service
@@ -114,6 +121,7 @@ class TestAuthClientCrossServiceIntegration:
     async def test_auth_client_circuit_breaker_with_cross_service(self, auth_client, mock_httpx_client):
         """Test auth client circuit breaker works with cross-service calls."""
         # Mock service failure
+        # Mock: Async component isolation for testing without real async operations
         mock_httpx_client.post = AsyncMock(side_effect=httpx.RequestError("Service unavailable"))
         
         with patch.object(auth_client, '_create_http_client', return_value=mock_httpx_client):

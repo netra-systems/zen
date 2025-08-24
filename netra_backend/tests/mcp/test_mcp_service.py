@@ -87,11 +87,17 @@ class TestMCPService:
     def mock_services(self):
         """Create mock services"""
         return {
+            # Mock: Generic component isolation for controlled unit testing
             "agent_service": AsyncMock(),
+            # Mock: Generic component isolation for controlled unit testing
             "thread_service": AsyncMock(),
+            # Mock: Generic component isolation for controlled unit testing
             "corpus_service": AsyncMock(),
+            # Mock: Generic component isolation for controlled unit testing
             "synthetic_data_service": AsyncMock(),
+            # Mock: Security component isolation for controlled auth testing
             "security_service": Mock(),
+            # Mock: Generic component isolation for controlled unit testing
             "supply_catalog_service": AsyncMock()
         }
         
@@ -361,6 +367,7 @@ class TestMCPService:
         """Test client registration"""
         mock_services["security_service"].hash_password.return_value = "hashed_key"
         
+        # Mock: Session isolation for controlled testing without external state
         db_session = AsyncMock()
         client = await mcp_service.register_client(
             db_session=db_session,
@@ -383,6 +390,7 @@ class TestMCPService:
         """Test client registration error"""
         mock_services["security_service"].hash_password.side_effect = Exception("Hash error")
         
+        # Mock: Session isolation for controlled testing without external state
         db_session = AsyncMock()
         with pytest.raises(NetraException) as exc_info:
             await mcp_service.register_client(
@@ -396,6 +404,7 @@ class TestMCPService:
     @pytest.mark.asyncio
     async def test_validate_client_access(self, mcp_service):
         """Test client access validation"""
+        # Mock: Session isolation for controlled testing without external state
         db_session = AsyncMock()
         
         # Currently returns True (placeholder)
@@ -409,6 +418,7 @@ class TestMCPService:
     @pytest.mark.asyncio
     async def test_record_tool_execution(self, mcp_service):
         """Test recording tool execution"""
+        # Mock: Session isolation for controlled testing without external state
         db_session = AsyncMock()
         execution = MCPToolExecution(
             session_id="session123",

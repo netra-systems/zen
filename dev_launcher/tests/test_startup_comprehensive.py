@@ -43,6 +43,7 @@ class TestProcessManagerWindows:
     @pytest.fixture
     def mock_process(self):
         """Create a mock subprocess.Popen for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         process = Mock()
         process.pid = 12345
         process.poll.return_value = None  # Process is running
@@ -51,6 +52,7 @@ class TestProcessManagerWindows:
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
     def test_windows_process_tree_termination(self, process_manager, mock_process):
         """Test Windows process tree termination with taskkill /F /T."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('subprocess.run') as mock_run:
             # Mock successful taskkill response for tree kill, then verification shows terminated
             mock_run.return_value.returncode = 0
@@ -74,6 +76,7 @@ class TestProcessManagerWindows:
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
     def test_windows_process_verification_with_tasklist(self, process_manager, mock_process):
         """Test Windows process verification using tasklist."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('subprocess.run') as mock_run:
             # Mock tasklist showing no tasks (process terminated)
             mock_run.return_value.returncode = 0
@@ -93,6 +96,7 @@ class TestProcessManagerWindows:
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
     def test_windows_force_kill_enhanced(self, process_manager, mock_process):
         """Test enhanced force kill on Windows with multiple attempts."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('subprocess.run') as mock_run:
             # First attempt (direct PID kill) succeeds
             mock_run.return_value.returncode = 0
@@ -119,6 +123,7 @@ class TestProcessManagerWindows:
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
     def test_port_cleanup_verification(self, process_manager):
         """Test Windows port cleanup verification using netstat."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('subprocess.run') as mock_run:
             # Mock netstat output showing port 8000 is free
             mock_run.return_value.returncode = 0
@@ -148,6 +153,7 @@ class TestPortManagerWindows:
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
     def test_windows_netstat_port_check(self, port_manager):
         """Test Windows netstat-based port availability checking."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('subprocess.run') as mock_run:
             # Mock netstat output showing port 8000 is in use
             mock_run.return_value.returncode = 0
@@ -164,14 +170,17 @@ Active Connections
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
     def test_windows_find_process_using_port(self, port_manager):
         """Test finding which process is using a port on Windows."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('subprocess.run') as mock_run:
             # Mock netstat output
             mock_run.side_effect = [
                 # First call: netstat
+                # Mock: Component isolation for controlled unit testing
                 Mock(returncode=0, stdout="""
   TCP    127.0.0.1:8000         0.0.0.0:0              LISTENING       1234
 """, stderr=""),
                 # Second call: tasklist
+                # Mock: Component isolation for controlled unit testing
                 Mock(returncode=0, stdout="""
 "Image Name","PID","Session Name","Session#","Mem Usage"
 "python.exe","1234","Console","1","50,000 K"
@@ -221,6 +230,7 @@ class TestHealthMonitorGracePeriod:
     def test_spec_health_001_no_immediate_monitoring(self, health_monitor):
         """Test HEALTH-001: Health monitoring MUST NOT start immediately after service launch."""
         # Register a service
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=True)
         health_monitor.register_service("test_service", health_check)
         
@@ -236,10 +246,12 @@ class TestHealthMonitorGracePeriod:
     def test_spec_health_002_grace_periods(self, health_monitor):
         """Test HEALTH-002: Grace period implementation (Backend: 30s, Frontend: 90s)."""
         # Register backend service
+        # Mock: Component isolation for controlled unit testing
         backend_check = Mock(return_value=True)
         health_monitor.register_service("backend", backend_check)
         
         # Register frontend service  
+        # Mock: Component isolation for controlled unit testing
         frontend_check = Mock(return_value=True)
         health_monitor.register_service("frontend", frontend_check)
         
@@ -252,6 +264,7 @@ class TestHealthMonitorGracePeriod:
     
     def test_spec_health_003_readiness_confirmation_required(self, health_monitor):
         """Test HEALTH-003: Health checks begin AFTER grace period AND readiness confirmation."""
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=True)
         health_monitor.register_service("test_service", health_check, grace_period_seconds=1)
         
@@ -270,6 +283,7 @@ class TestHealthMonitorGracePeriod:
     
     def test_grace_period_status_tracking(self, health_monitor):
         """Test detailed grace period status tracking."""
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=True)
         health_monitor.register_service("test_service", health_check, grace_period_seconds=30)
         
@@ -288,6 +302,7 @@ class TestHealthMonitorGracePeriod:
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
     def test_windows_process_verification_in_readiness(self, health_monitor):
         """Test Windows process verification during readiness marking."""
+        # Mock: Component isolation for controlled unit testing
         health_check = Mock(return_value=True)
         health_monitor.register_service("test_service", health_check)
         
@@ -451,6 +466,7 @@ class TestAsyncOperations:
         # Create multiple mock processes
         processes = []
         for i in range(3):
+            # Mock: Generic component isolation for controlled unit testing
             process = Mock()
             process.pid = 1000 + i
             process.poll.return_value = None
@@ -466,6 +482,7 @@ class TestAsyncOperations:
         health_monitor = HealthMonitor(check_interval=1)
         
         def register_service(i):
+            # Mock: Component isolation for controlled unit testing
             health_check = Mock(return_value=True)
             health_monitor.register_service(f"service_{i}", health_check)
         

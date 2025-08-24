@@ -259,6 +259,7 @@ class TestStagingSecretsLoading:
         # Mock config with Cloud SQL Unix socket URL
         test_url = "postgresql://user:pass@/db?host=/cloudsql/project:region:instance"
         
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('netra_backend.app.core.configuration.database.logger') as mock_logger:
             # Act: Call validation multiple times (simulating multiple config loads)
             for _ in range(3):

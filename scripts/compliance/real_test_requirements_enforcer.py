@@ -352,7 +352,9 @@ class RealTestRequirementsEnforcer:
         
         for i, line in enumerate(lines, 1):
             if any(pattern in line for pattern in [
+                # Mock: Generic component isolation for controlled unit testing
                 'Mock()', 'AsyncMock()', 'MagicMock()',
+                # Mock: Component isolation for testing without external dependencies
                 'patch(', 'mock_', '.return_value =', 
                 'side_effect =', '@patch'
             ]):

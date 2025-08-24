@@ -18,8 +18,11 @@ from netra_backend.app.llm.llm_manager import LLMManager
 
 def create_mock_infrastructure():
     """Create mock infrastructure for e2e testing"""
+    # Mock: Database session isolation for transaction testing without real database dependency
     db_session = AsyncMock(spec=AsyncSession)
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
+    # Mock: Generic component isolation for controlled unit testing
     ws_manager = Mock()
     return db_session, llm_manager, ws_manager
 
@@ -39,21 +42,26 @@ def _setup_structured_llm_responses(llm_manager, responses):
         result = responses[response_index]
         response_index += 1
         return result
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_structured_llm)
 
 def setup_llm_responses(llm_manager):
     """Setup LLM responses for full optimization flow"""
     responses = _create_optimization_responses()
     _setup_structured_llm_responses(llm_manager, responses)
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.call_llm = AsyncMock(return_value={"content": "Optimization complete"})
 
 def setup_websocket_manager(ws_manager):
     """Setup websocket manager for testing"""
+    # Mock: Generic component isolation for controlled unit testing
     ws_manager.send_message = AsyncMock()
 
 def create_mock_persistence():
     """Create mock persistence service"""
+    # Mock: Generic component isolation for controlled unit testing
     mock_persistence = AsyncMock()
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.save_agent_state = AsyncMock(side_effect=_mock_save_agent_state)
     _setup_persistence_methods(mock_persistence)
     return mock_persistence
@@ -69,14 +77,19 @@ async def _mock_save_agent_state(*args, **kwargs):
 
 def _setup_persistence_methods(mock_persistence):
     """Setup persistence service methods"""
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.load_agent_state = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock_persistence.get_thread_context = AsyncMock(return_value=None)
+    # Mock: Agent service isolation for testing without LLM agent execution
     mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
 
 def _create_tool_dispatcher():
     """Create mock tool dispatcher"""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     dispatcher = Mock(spec=ToolDispatcher)
+    # Mock: Async component isolation for testing without real async operations
     dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
     return dispatcher
 
@@ -91,6 +104,7 @@ def _setup_supervisor_mocks(supervisor, mock_persistence):
     from netra_backend.app.agents.base.execution_context import (
         AgentExecutionResult,
     )
+    # Mock: Async component isolation for testing without real async operations
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[
         AgentExecutionResult(success=True, state=None),
         AgentExecutionResult(success=True, state=None),
@@ -150,6 +164,7 @@ def verify_concurrent_results(results, expected_count):
 
 def setup_mock_llm_with_retry():
     """Setup mock LLM with retry behavior"""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager = Mock(spec=LLMManager)
     call_counter = {"count": 0}
     async def mock_llm_call(*args, **kwargs):
@@ -157,15 +172,18 @@ def setup_mock_llm_with_retry():
         if call_counter["count"] == 1:
             raise Exception("LLM call timed out")
         return {"content": "Successful response after retry", "tool_calls": []}
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     llm_manager.call_llm = AsyncMock(side_effect=mock_llm_call)
     return llm_manager, call_counter
 
 def create_tool_execution_mocks():
     """Create mocks for tool execution testing"""
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     dispatcher = Mock(spec=ToolDispatcher)
     tool_results = []
     
+    # Mock: Component isolation for testing without external dependencies
     async def mock_dispatch(tool_name, params):
         result = {
             "tool": tool_name, "params": params,
@@ -174,6 +192,7 @@ def create_tool_execution_mocks():
         tool_results.append(result)
         return result
     
+    # Mock: Async component isolation for testing without real async operations
     dispatcher.dispatch_tool = AsyncMock(side_effect=mock_dispatch)
     return dispatcher, tool_results
 

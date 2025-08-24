@@ -148,12 +148,15 @@ class TestFileOperations:
 class TestAlembicOperations:
     """Test Alembic configuration and operations."""
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.create_alembic_config')
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.get_sync_database_url')
     def test_get_alembic_config(self, mock_sync_url: Mock, mock_create_config: Mock,
                                migration_tracker: MigrationTracker) -> None:
         """Test Alembic configuration creation."""
         mock_sync_url.return_value = "sync_url"
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         mock_create_config.return_value = mock_config
         
@@ -162,21 +165,25 @@ class TestAlembicOperations:
         mock_create_config.assert_called_once_with("sync_url")
         assert config == mock_config
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.get_current_revision')
     def test_get_current_safely_success(self, mock_get_current: Mock,
                                        migration_tracker: MigrationTracker) -> None:
         """Test successful current revision retrieval."""
         mock_get_current.return_value = "abc123"
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         
         result = migration_tracker._get_current_safely(mock_config)
         assert result == "abc123"
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.get_current_revision')
     def test_get_current_safely_error(self, mock_get_current: Mock,
                                      migration_tracker: MigrationTracker) -> None:
         """Test current revision retrieval with error."""
         mock_get_current.side_effect = Exception("DB error")
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         
         result = migration_tracker._get_current_safely(mock_config)
@@ -184,7 +191,9 @@ class TestAlembicOperations:
 
 class TestMigrationChecking:
     """Test migration checking functionality."""
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.get_head_revision')
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.needs_migration')
     @pytest.mark.asyncio
     async def test_check_migrations_pending(self, mock_needs: Mock, mock_head: Mock,
@@ -199,7 +208,9 @@ class TestMigrationChecking:
                     state = await migration_tracker.check_migrations()
                     assert len(state.pending_migrations) == 1
                     assert state.pending_migrations[0] == "def456"
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.get_head_revision')
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.startup.migration_tracker.needs_migration')
     @pytest.mark.asyncio
     async def test_check_migrations_none_pending(self, mock_needs: Mock, mock_head: Mock,
@@ -297,9 +308,11 @@ class TestMigrationRollback:
             result = await migration_tracker.rollback_migration()
             assert result is False
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('alembic.command.downgrade')
     def test_run_alembic_downgrade(self, mock_downgrade: Mock, migration_tracker: MigrationTracker) -> None:
         """Test Alembic downgrade command execution."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_config = Mock()
         
         with patch.object(migration_tracker, '_get_alembic_config', return_value=mock_config):

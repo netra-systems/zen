@@ -44,6 +44,7 @@ class WebSocketTestClient:
             
             if "mock" in self.uri or not hasattr(self, '_real_connection'):
                 # Mock connection for unit testing
+                # Mock: Generic component isolation for controlled unit testing
                 self.websocket = AsyncMock()
                 self.is_connected = True
                 logger.info(f"WebSocket mock connected successfully with token: {self.session_token[:8]}...")
@@ -251,6 +252,7 @@ async def websocket_test_client(session_token):
     client = WebSocketTestClient(uri, session_token)
     
     # Mock the WebSocket connection for testing
+    # Mock: Generic component isolation for controlled unit testing
     client.websocket = AsyncMock()
     client.is_connected = True
     
@@ -709,13 +711,16 @@ async def test_websocket_client_error_handling(session_token):
     client._real_connection = True
     
     # Test connection failure handling
+    # Mock: Component isolation for testing without external dependencies
     with patch('websockets.connect', side_effect=ConnectionRefusedError()):
         success = await client.connect()
         assert not success
         assert not client.is_connected
     
     # Test message send failure handling
+    # Mock: Generic component isolation for controlled unit testing
     client.websocket = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     client.websocket.send = AsyncMock(side_effect=ConnectionClosed(None, None))
     client.is_connected = True
     
@@ -723,6 +728,7 @@ async def test_websocket_client_error_handling(session_token):
     assert not success
     
     # Test receive timeout handling
+    # Mock: Async component isolation for testing without real async operations
     client.websocket.recv = AsyncMock(side_effect=asyncio.TimeoutError())
     message = await client.receive_message(timeout=1.0)
     assert message is None

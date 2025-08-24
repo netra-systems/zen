@@ -139,6 +139,7 @@ class MockToolDispatcher(ToolDispatcher):
         self.load_time = time.time() - start_time
         return self.tools
     
+    # Mock: Component isolation for testing without external dependencies
     async def dispatch(self, tool_name: str, **kwargs) -> Dict[str, Any]:
         """Dispatch tool execution."""
         if tool_name not in self.tools:
@@ -192,7 +193,9 @@ class TestAgentToolLoadingValidation:
     @mock_justified("LLM service external dependency for agent testing")
     def llm_manager_mock(self):
         """Mock LLM manager for tool testing."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_mock = Mock(spec=LLMManager)
+        # Mock: Async component isolation for testing without real async operations
         llm_mock.generate_response = AsyncMock(return_value={
             "content": "Tool validation response",
             "usage": {"prompt_tokens": 25, "completion_tokens": 8}
@@ -353,6 +356,7 @@ class TestAgentToolLoadingValidation:
             
             try:
                 # Execute tool with test parameters
+                # Mock: Tool execution isolation for predictable agent testing
                 result = await tool_dispatcher_mock.dispatch(tool_name, **test_params)
                 execution_time = time.time() - start_time
                 
@@ -419,6 +423,7 @@ class TestAgentToolLoadingValidation:
             for attempt in range(10):
                 try:
                     start_time = time.time()
+                    # Mock: Tool execution isolation for predictable agent testing
                     result = await tool_dispatcher_mock.dispatch(tool_name, test_attempt=attempt)
                     execution_time = time.time() - start_time
                     
@@ -517,6 +522,7 @@ class TestAgentToolLoadingValidation:
                 
                 # Test tool execution through dispatcher
                 try:
+                    # Mock: Tool execution isolation for predictable agent testing
                     tool_result = await tool_dispatcher_mock.dispatch(
                         required_tool, 
                         agent=test_scenario["agent"],

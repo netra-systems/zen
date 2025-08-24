@@ -22,6 +22,7 @@ manager = get_unified_manager()
 async def test_user_joins_thread_room_on_message():
     """Test that users join thread room when sending message with thread_id."""
     # Setup
+    # Mock: Generic component isolation for controlled unit testing
     supervisor_mock = MagicMock()
     thread_service = ThreadService()
     handler = MessageHandlerService(supervisor_mock, thread_service)
@@ -35,7 +36,9 @@ async def test_user_joins_thread_room_on_message():
     }
     
     # Mock database session and thread
+    # Mock: Session isolation for controlled testing without external state
     db_session = AsyncMock()
+    # Mock: Service component isolation for predictable testing behavior
     thread_mock = MagicMock(id=thread_id)
     
     # Mock the thread service methods
@@ -51,6 +54,7 @@ async def test_user_joins_thread_room_on_message():
 async def test_switch_thread_manages_room_membership():
     """Test that switch_thread properly manages room membership."""
     # Setup
+    # Mock: Generic component isolation for controlled unit testing
     supervisor_mock = MagicMock()
     thread_service = ThreadService()
     handler = MessageHandlerService(supervisor_mock, thread_service)
@@ -72,6 +76,7 @@ async def test_switch_thread_manages_room_membership():
 async def test_switch_thread_requires_thread_id():
     """Test that switch_thread validates thread_id is provided."""
     # Setup
+    # Mock: Generic component isolation for controlled unit testing
     supervisor_mock = MagicMock()
     thread_service = ThreadService()
     handler = MessageHandlerService(supervisor_mock, thread_service)

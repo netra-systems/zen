@@ -373,6 +373,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_jwt_token_generation_missing_required_claims(self):
         """Test 5.2: Generated tokens lack required 'iss' claim."""
         # Patch JWT generation to skip issuer
+        # Mock: Session state isolation for predictable testing
         with patch('auth_service.auth_core.core.session_manager.SessionManager.create_session') as mock_create:
             mock_create.return_value = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMTIzIn0.test"
             
@@ -647,6 +648,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_health_check_database_query_timeout(self):
         """Test 9.2: Health checks hang on database queries without timeout."""
         # Simulate slow database
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('netra_backend.app.db.postgres.Database.execute') as mock_execute:
             async def slow_query(*args, **kwargs):
                 await asyncio.sleep(30)  # 30 second delay

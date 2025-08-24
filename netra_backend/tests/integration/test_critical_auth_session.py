@@ -58,6 +58,7 @@ class TestAuthSessionIntegration:
 
     async def _test_token_refresh_cycle(self, tokens, user):
         """Test automatic token refresh before expiration"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.clients.auth_client.refresh_token') as mock_refresh:
             mock_refresh.return_value = {"access_token": f"new_{tokens['access']}"}
             expired_token = tokens.copy()
@@ -86,8 +87,10 @@ class TestAuthSessionIntegration:
 
     async def _establish_websocket_with_state(self, ws_manager, user):
         """Establish WebSocket with active state"""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         mock_websocket.client_state = WebSocketState.CONNECTED
+        # Mock: Generic component isolation for controlled unit testing
         connection_info = Mock()
         connection_info.user_id = user.id
         connection_info.connection_id = str(uuid.uuid4())
@@ -107,6 +110,7 @@ class TestAuthSessionIntegration:
 
     async def _test_automatic_reconnection(self, ws_manager, user, original_state):
         """Test automatic reconnection with state recovery"""
+        # Mock: Generic component isolation for controlled unit testing
         new_websocket = Mock()
         new_websocket.client_state = WebSocketState.CONNECTED
         

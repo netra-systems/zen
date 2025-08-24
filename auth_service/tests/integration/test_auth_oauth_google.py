@@ -82,6 +82,7 @@ def oauth_code():
 class TestGoogleOAuthFlow:
     """Test complete Google OAuth flow"""
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient')
     def test_google_oauth_initiate(self, mock_client):
         """
@@ -106,6 +107,7 @@ class TestGoogleOAuthFlow:
         assert "scope" in location
         assert "state" in location
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient')
     def test_google_oauth_callback_success(
         self, mock_client, mock_google_tokens, oauth_state, oauth_code
@@ -119,16 +121,19 @@ class TestGoogleOAuthFlow:
         - Ensures user creation/update in auth service
         """
         # Mock HTTP responses for Google
+        # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
         
         # Mock token exchange
+        # Mock: Generic component isolation for controlled unit testing
         token_response = Mock()
         token_response.status_code = 200
         token_response.json.return_value = mock_google_tokens
         mock_async_client.post.return_value = token_response
         
         # Mock user info
+        # Mock: Generic component isolation for controlled unit testing
         user_response = Mock()
         user_response.status_code = 200
         user_response.json.return_value = GOOGLE_USER_INFO
@@ -151,6 +156,7 @@ class TestGoogleOAuthFlow:
         # Verify user info was fetched
         mock_async_client.get.assert_called_once()
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient')
     def test_google_oauth_token_validation(
         self, mock_client, mock_google_tokens, oauth_state, oauth_code
@@ -164,6 +170,7 @@ class TestGoogleOAuthFlow:
         - Ensures secure token storage and usage
         """
         # Mock HTTP responses for Google
+        # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
         
@@ -190,6 +197,7 @@ class TestGoogleOAuthFlow:
         ]
         
         for scenario in test_scenarios:
+            # Mock: Generic component isolation for controlled unit testing
             token_response = Mock()
             token_response.status_code = scenario["status_code"]
             token_response.json.return_value = scenario["response_data"]
@@ -197,6 +205,7 @@ class TestGoogleOAuthFlow:
             
             # Mock user info for valid tokens
             if scenario["expected_valid"]:
+                # Mock: Generic component isolation for controlled unit testing
                 user_response = Mock()
                 user_response.status_code = 200
                 user_response.json.return_value = GOOGLE_USER_INFO
@@ -213,6 +222,7 @@ class TestGoogleOAuthFlow:
             else:
                 assert response.status_code in [400, 401, 500]
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient')
     def test_google_user_profile_mapping(
         self, mock_client, mock_google_tokens, oauth_state, oauth_code
@@ -226,6 +236,7 @@ class TestGoogleOAuthFlow:
         - Ensures consistent user data across Google logins
         """
         # Mock HTTP responses for Google
+        # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
         
@@ -257,12 +268,14 @@ class TestGoogleOAuthFlow:
         
         for profile in google_profiles:
             # Mock token exchange
+            # Mock: Generic component isolation for controlled unit testing
             token_response = Mock()
             token_response.status_code = 200
             token_response.json.return_value = mock_google_tokens
             mock_async_client.post.return_value = token_response
             
             # Mock user info with test profile
+            # Mock: Generic component isolation for controlled unit testing
             user_response = Mock()
             user_response.status_code = 200
             user_response.json.return_value = profile
@@ -280,6 +293,7 @@ class TestGoogleOAuthFlow:
             else:
                 assert response.status_code in [200, 302, 400, 500]
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient')
     def test_google_oauth_scope_validation(
         self, mock_client, oauth_state
@@ -318,6 +332,7 @@ class TestGoogleOAuthFlow:
                 if "profile" in scope:
                     assert "profile" in location
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient')
     def test_google_oauth_state_security(
         self, mock_client, mock_google_tokens, oauth_code
@@ -334,15 +349,18 @@ class TestGoogleOAuthFlow:
         valid_state = secrets.token_urlsafe(32)
         
         # Mock HTTP responses
+        # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
         
         # Mock successful responses
+        # Mock: Generic component isolation for controlled unit testing
         token_response = Mock()
         token_response.status_code = 200
         token_response.json.return_value = mock_google_tokens
         mock_async_client.post.return_value = token_response
         
+        # Mock: Generic component isolation for controlled unit testing
         user_response = Mock()
         user_response.status_code = 200
         user_response.json.return_value = GOOGLE_USER_INFO
@@ -385,6 +403,7 @@ class TestGoogleOAuthFlow:
         google_provider = AuthProvider.GOOGLE
         assert google_provider.value == "google"
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient')
     def test_google_oauth_concurrent_requests(
         self, mock_client, mock_google_tokens, oauth_state, oauth_code
@@ -401,14 +420,17 @@ class TestGoogleOAuthFlow:
         import threading
         
         # Mock HTTP responses
+        # Mock: Generic component isolation for controlled unit testing
         mock_async_client = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_async_client
         
+        # Mock: Generic component isolation for controlled unit testing
         token_response = Mock()
         token_response.status_code = 200
         token_response.json.return_value = mock_google_tokens
         mock_async_client.post.return_value = token_response
         
+        # Mock: Generic component isolation for controlled unit testing
         user_response = Mock()
         user_response.status_code = 200
         user_response.json.return_value = GOOGLE_USER_INFO

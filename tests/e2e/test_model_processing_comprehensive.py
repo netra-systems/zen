@@ -121,9 +121,13 @@ class MockLLMResponse:
 @pytest.fixture
 async def mock_db_session():
     """Mock database session"""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.close = AsyncMock()
     return session
 
@@ -131,6 +135,7 @@ async def mock_db_session():
 @pytest.fixture
 async def failing_llm_manager():
     """LLM manager configured to expose failures"""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     manager = AsyncMock(spec=LLMManager)
     
     # Simulate various failure modes
@@ -160,6 +165,7 @@ async def failing_llm_manager():
 @pytest.fixture
 async def failing_websocket_manager():
     """WebSocket manager configured to expose failures"""
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     manager = AsyncMock(spec=WebSocketManager)
     
     async def mock_send_message(user_id: str, message: Any):
@@ -168,7 +174,9 @@ async def failing_websocket_manager():
         return True
     
     manager.send_message = mock_send_message
+    # Mock: Generic component isolation for controlled unit testing
     manager.broadcast = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     manager.is_connected = AsyncMock(return_value=True)
     
     return manager
@@ -177,6 +185,7 @@ async def failing_websocket_manager():
 @pytest.fixture
 async def failing_tool_dispatcher():
     """Tool dispatcher configured to expose failures"""
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     dispatcher = AsyncMock(spec=ToolDispatcher)
     
     async def mock_dispatch_tool(tool_name: str, *args, **kwargs):
@@ -197,6 +206,7 @@ async def chat_orchestrator_with_failures(
 ):
     """Chat orchestrator configured to expose various failure modes"""
     # Mock orchestrator instead of using real one due to circular import
+    # Mock: Generic component isolation for controlled unit testing
     orchestrator = AsyncMock()
     orchestrator.db_session = mock_db_session
     orchestrator.llm_manager = failing_llm_manager
@@ -760,6 +770,7 @@ class TestMultiTurnConversationFlow:
             )
             
             # Simulate interruption (recreate orchestrator)
+            # Mock: Generic component isolation for controlled unit testing
             new_orchestrator = AsyncMock()
             new_orchestrator.db_session = mock_db_session
             new_orchestrator.llm_manager = failing_llm_manager

@@ -113,8 +113,10 @@ class TestServiceDiscoveryFailureCascades:
         initial_auth_status = await health_checker.check_service_health("auth_service")
         
         # Simulate auth service going down by patching HTTP calls to fail
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
             # Configure mock to simulate auth service down
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
@@ -207,16 +209,20 @@ class TestServiceDiscoveryFailureCascades:
         
         for failed_service in critical_services:
             # Simulate the service failure
+            # Mock: Database access isolation for fast, reliable unit testing
             with patch(f'netra_backend.app.core.database.DatabaseManager') as mock_db:
                 if failed_service == "postgres":
                     mock_db.side_effect = Exception("Database connection failed")
                 
+                # Mock: Redis external service isolation for fast, reliable tests without network dependency
                 with patch('redis.asyncio.Redis') as mock_redis:
                     if failed_service == "redis":
                         mock_redis.side_effect = Exception("Redis connection failed")
                     
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('httpx.AsyncClient') as mock_http:
                         if failed_service == "auth_service":
+                            # Mock: Generic component isolation for controlled unit testing
                             mock_async_client = AsyncMock()
                             mock_http.return_value.__aenter__.return_value = mock_async_client
                             mock_async_client.get.side_effect = httpx.ConnectError("Auth service down")
@@ -280,7 +286,9 @@ class TestServiceDiscoveryFailureCascades:
             scenario_name = scenario["name"]
             
             # Mock different service health states
+            # Mock: Component isolation for testing without external dependencies
             with patch('httpx.AsyncClient') as mock_http_client:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_async_client = AsyncMock()
                 mock_http_client.return_value.__aenter__.return_value = mock_async_client
                 
@@ -289,17 +297,20 @@ class TestServiceDiscoveryFailureCascades:
                     # Slow response times
                     async def slow_auth_response(*args, **kwargs):
                         await asyncio.sleep(2)  # Slow response
+                        # Mock: Generic component isolation for controlled unit testing
                         response = AsyncMock()
                         response.status_code = 200
                         response.json.return_value = {"status": "ok"}
                         return response
                     mock_async_client.get.side_effect = slow_auth_response
                 elif scenario["auth_service"] == "healthy":
+                    # Mock: Generic component isolation for controlled unit testing
                     response = AsyncMock()
                     response.status_code = 200
                     response.json.return_value = {"status": "ok"}
                     mock_async_client.get.return_value = response
                 
+                # Mock: Component isolation for testing without external dependencies
                 with patch('asyncpg.connect') as mock_pg:
                     if scenario["postgres"] == "intermittent":
                         # Randomly fail connections
@@ -307,13 +318,17 @@ class TestServiceDiscoveryFailureCascades:
                         async def intermittent_db(*args, **kwargs):
                             if random.random() < 0.5:  # 50% failure rate
                                 raise Exception("Database connection timeout")
+                            # Mock: Generic component isolation for controlled unit testing
                             return AsyncMock()
                         mock_pg.side_effect = intermittent_db
                     elif scenario["postgres"] == "healthy":
+                        # Mock: Generic component isolation for controlled unit testing
                         mock_pg.return_value = AsyncMock()
                 
+                    # Mock: Redis external service isolation for fast, reliable tests without network dependency
                     with patch('redis.asyncio.Redis') as mock_redis:
                         if scenario["redis"] == "degraded":
+                            # Mock: Redis caching isolation to prevent test interference and external dependencies
                             redis_mock = AsyncMock()
                             # Simulate high memory usage
                             redis_mock.info.return_value = {
@@ -322,6 +337,7 @@ class TestServiceDiscoveryFailureCascades:
                             }
                             mock_redis.return_value = redis_mock
                         elif scenario["redis"] == "healthy":
+                            # Mock: Redis caching isolation to prevent test interference and external dependencies
                             redis_mock = AsyncMock()
                             redis_mock.info.return_value = {
                                 "used_memory": 100000000,  # 100MB
@@ -384,7 +400,9 @@ class TestServiceDiscoveryFailureCascades:
             f"Not all services registered: {len(registered_services)} < {len(test_services)}"
         
         # Simulate services going down (no health check responses)
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
@@ -440,7 +458,9 @@ class TestServiceDiscoveryFailureCascades:
             failure_count += 1
             raise httpx.ConnectError("Service unavailable")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             mock_async_client.get.side_effect = track_calls
@@ -469,6 +489,7 @@ class TestServiceDiscoveryFailureCascades:
             
             # Configure one successful response
             mock_async_client.get.side_effect = None
+            # Mock: Generic component isolation for controlled unit testing
             response = AsyncMock()
             response.status_code = 200
             response.json.return_value = {"valid": True}

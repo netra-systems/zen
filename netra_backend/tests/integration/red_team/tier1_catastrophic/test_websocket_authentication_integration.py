@@ -53,6 +53,7 @@ except ImportError:
 # Mock websocket test helpers
 def create_test_websocket_client():
     from unittest.mock import Mock, AsyncMock, MagicMock
+    # Mock: Generic component isolation for controlled unit testing
     return Mock()
 
 def generate_test_jwt_token():

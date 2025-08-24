@@ -46,8 +46,10 @@ class TestErrorRecovery:
             failure_count += 1
             if failure_count <= 3:
                 raise Exception("Connection failed")
+            # Mock: Generic component isolation for controlled unit testing
             return AsyncMock()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.get_clickhouse_client', side_effect=flaky_connection):
             result = await recovery_service.ingest_with_retry(
                 [{"id": 1}],
@@ -85,6 +87,7 @@ class TestErrorRecovery:
     @pytest.mark.asyncio
     async def test_websocket_disconnect_recovery(self, recovery_service):
         """Test recovery from WebSocket disconnections"""
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager = MagicMock()
         disconnect_count = 0
         

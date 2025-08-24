@@ -33,19 +33,26 @@ class TestSupplyResearchSchedulerJobs:
     def mock_dependencies(self):
         """Mock all dependencies"""
         return {
+            # Mock: Background task isolation to prevent real tasks during testing
             'background_manager': MagicMock(spec=BackgroundTaskManager),
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             'llm_manager': MagicMock(spec=LLMManager),
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             'redis_manager': MagicMock(spec=RedisManager),
+            # Mock: Database access isolation for fast, reliable unit testing
             'database': MagicMock()
         }
     
     @pytest.fixture
     def scheduler(self, mock_dependencies):
         """Create scheduler with mocked dependencies"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_research_scheduler.BackgroundTaskManager', 
                   return_value=mock_dependencies['background_manager']):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.supply_research_scheduler.LLMManager', 
                       return_value=mock_dependencies['llm_manager']):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.supply_research_scheduler.RedisManager', 
                           return_value=mock_dependencies['redis_manager']):
                     scheduler = SupplyResearchScheduler(
@@ -64,7 +71,9 @@ class TestSupplyResearchSchedulerJobs:
             research_type=ResearchType.MODEL_UPDATES
         )
         
+        # Mock: Background task isolation to prevent real tasks during testing
         mock_dependencies['background_manager'].add_task = MagicMock(return_value="task_123")
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(return_value=True)
         
         # Execute
@@ -84,15 +93,19 @@ class TestSupplyResearchSchedulerJobs:
         )
         
         # Mock initial failure then success
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(side_effect=[
             NetraException("Temporary failure"),
             True
         ])
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_dependencies['redis_manager'].get = AsyncMock(return_value="1")  # retry count
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_dependencies['redis_manager'].set = AsyncMock()
         
         # Execute with retry
+        # Mock: Async component isolation for testing without real async operations
         with patch('asyncio.sleep', new_callable=AsyncMock):
             result = await scheduler._execute_with_retry(schedule, max_retries=3)
         
@@ -110,11 +123,15 @@ class TestSupplyResearchSchedulerJobs:
         )
         
         # Mock consistent failures
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(side_effect=NetraException("Persistent failure"))
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_dependencies['redis_manager'].get = AsyncMock(return_value="3")  # max retries
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_dependencies['redis_manager'].set = AsyncMock()
         
         # Execute
+        # Mock: Async component isolation for testing without real async operations
         with patch('asyncio.sleep', new_callable=AsyncMock):
             result = await scheduler._execute_with_retry(schedule, max_retries=3)
         
@@ -133,7 +150,9 @@ class TestSupplyResearchSchedulerJobs:
             ) for i in range(5)
         ]
         
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(return_value=True)
+        # Mock: Background task isolation to prevent real tasks during testing
         mock_dependencies['background_manager'].add_task = MagicMock(
             side_effect=[f"task_{i}" for i in range(5)]
         )
@@ -161,7 +180,9 @@ class TestSupplyResearchSchedulerJobs:
             nonlocal cleanup_called
             cleanup_called = True
         
+        # Mock: Async component isolation for testing without real async operations
         scheduler._cleanup_job_resources = AsyncMock(side_effect=mock_cleanup)
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(return_value=True)
         
         # Execute
@@ -185,6 +206,7 @@ class TestSupplyResearchSchedulerJobs:
             await asyncio.sleep(10)  # Longer than timeout
             return True
         
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(side_effect=long_running_job)
         
         # Execute with timeout
@@ -204,9 +226,11 @@ class TestSupplyResearchSchedulerJobs:
         )
         
         test_error = NetraException("Test error message")
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(side_effect=test_error)
         
         # Execute
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_research_scheduler.logger') as mock_logger:
             result = await scheduler._execute_with_retry(schedule, max_retries=1)
         
@@ -227,7 +251,9 @@ class TestSupplyResearchSchedulerJobs:
             research_type=ResearchType.COST_ANALYSIS
         )
         
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(return_value=True)
+        # Mock: Generic component isolation for controlled unit testing
         scheduler._record_job_metrics = AsyncMock()
         
         # Execute
@@ -248,10 +274,14 @@ class TestSupplyResearchSchedulerRetryLogic:
     @pytest.fixture
     def scheduler_with_redis(self):
         """Create scheduler with Redis for retry logic"""
+        # Mock: Background task isolation to prevent real tasks during testing
         mock_background_manager = MagicMock(spec=BackgroundTaskManager)
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = MagicMock(spec=LLMManager)
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.services.supply_research_scheduler.RedisManager') as mock_redis_class:
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis = MagicMock()
             mock_redis_class.return_value = mock_redis
             
@@ -272,8 +302,11 @@ class TestSupplyResearchSchedulerRetryLogic:
             research_type=ResearchType.MODEL_UPDATES
         )
         
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(side_effect=NetraException("Retry needed"))
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.get = AsyncMock(side_effect=["0", "1", "2"])  # retry counts
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.set = AsyncMock()
         
         sleep_times = []
@@ -282,6 +315,7 @@ class TestSupplyResearchSchedulerRetryLogic:
             sleep_times.append(duration)
         
         # Execute with mocked sleep
+        # Mock: Component isolation for testing without external dependencies
         with patch('asyncio.sleep', side_effect=mock_sleep):
             result = await scheduler._execute_with_retry(schedule, max_retries=3)
         
@@ -302,13 +336,18 @@ class TestSupplyResearchSchedulerRetryLogic:
         )
         
         # Mock Redis operations
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.get = AsyncMock(return_value="1")  # existing retry count
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.set = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.expire = AsyncMock()
         
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(side_effect=NetraException("Failed"))
         
         # Execute
+        # Mock: Async component isolation for testing without real async operations
         with patch('asyncio.sleep', new_callable=AsyncMock):
             await scheduler._execute_with_retry(schedule, max_retries=3)
         
@@ -328,12 +367,15 @@ class TestSupplyResearchSchedulerRetryLogic:
         )
         
         # Mock circuit breaker state
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.get = AsyncMock(side_effect=[
             "5",  # failure count exceeds threshold
             None  # circuit breaker key
         ])
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.set = AsyncMock()
         
+        # Mock: Async component isolation for testing without real async operations
         scheduler._is_circuit_open = AsyncMock(return_value=True)
         
         # Execute
@@ -353,8 +395,11 @@ class TestSupplyResearchSchedulerRetryLogic:
             research_type=ResearchType.COST_ANALYSIS
         )
         
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(side_effect=NetraException("Jitter test"))
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.get = AsyncMock(return_value="0")
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis.set = AsyncMock()
         
         sleep_times = []
@@ -363,7 +408,9 @@ class TestSupplyResearchSchedulerRetryLogic:
             sleep_times.append(duration)
         
         # Execute multiple times to check jitter variation
+        # Mock: Component isolation for testing without external dependencies
         with patch('asyncio.sleep', side_effect=mock_sleep):
+            # Mock: Component isolation for testing without external dependencies
             with patch('random.uniform', return_value=0.5):  # 50% jitter
                 await scheduler._execute_with_retry(schedule, max_retries=1, jitter=True)
         
@@ -472,6 +519,7 @@ class TestSupplyResearchSchedulerConcurrency:
             execution_order.append(job_name)
             return True
         
+        # Mock: Async component isolation for testing without real async operations
         concurrent_scheduler._wait_for_dependency = AsyncMock(
             side_effect=asyncio.TimeoutError()
         )
@@ -496,6 +544,7 @@ class TestSupplyResearchSchedulerPerformance:
         import tracemalloc
         
         scheduler = SupplyResearchScheduler()
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(return_value=True)
         
         # Start memory tracing

@@ -23,7 +23,9 @@ from netra_backend.tests.agents.helpers.shared_test_types import (
 @pytest.fixture
 def service():
     """Service fixture for shared integration tests."""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock_llm_manager = Mock()
+    # Mock: Tool dispatcher isolation for agent testing without real tool execution
     mock_tool_dispatcher = Mock()
     agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
     return agent
@@ -31,7 +33,9 @@ def service():
 @pytest.fixture
 def db_session():
     """Database session fixture for shared error handling tests."""
+    # Mock: Generic component isolation for controlled unit testing
     db_mock = Mock()
+    # Mock: Generic component isolation for controlled unit testing
     db_mock.query = Mock()
     return db_mock
 
@@ -41,8 +45,10 @@ class TestErrorHandling(SharedTestErrorHandling):
     def test_database_connection_failure(self, service):
         """Test graceful handling of database connection failures"""
         # DataSubAgent-specific implementation
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_clickhouse = Mock()
         service.clickhouse_ops = mock_clickhouse
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_clickhouse.fetch_data = Mock(side_effect=Exception("Database unavailable"))
         
         with pytest.raises(Exception) as exc_info:
@@ -55,7 +61,9 @@ class TestErrorHandling(SharedTestErrorHandling):
 
     async def test_retry_on_failure(self):
         """Test retry mechanism on processing failure"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         agent.config = {"max_retries": 3}  # Initialize config dict
@@ -77,7 +85,9 @@ class TestErrorHandling(SharedTestErrorHandling):
 
     async def test_max_retries_exceeded(self):
         """Test behavior when max retries exceeded"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         agent.config = {"max_retries": 2}  # Initialize config dict
@@ -95,7 +105,9 @@ class TestErrorHandling(SharedTestErrorHandling):
 
     async def test_graceful_degradation(self):
         """Test graceful degradation on partial failure"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
@@ -125,7 +137,9 @@ class TestCaching:
     @pytest.mark.asyncio
     async def test_cache_hit(self):
         """Test cache hit for repeated data"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
@@ -145,7 +159,9 @@ class TestCaching:
 
     async def test_cache_expiration(self):
         """Test cache expiration with real TTL"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         agent.cache_ttl = 0.1  # 100ms TTL

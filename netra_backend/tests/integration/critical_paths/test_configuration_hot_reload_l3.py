@@ -277,6 +277,7 @@ class ConfigurationHotReloader:
         """Initialize mock service coordinators for testing."""
         services = ["web_service", "worker_service", "cache_service", "database_service"]
         for service in services:
+            # Mock: Generic component isolation for controlled unit testing
             self.service_coordinators[service] = AsyncMock()
     
     async def hot_reload_configuration(self, config_type: ConfigurationType,

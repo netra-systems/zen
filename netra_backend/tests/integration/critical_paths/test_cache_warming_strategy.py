@@ -139,16 +139,27 @@ class CacheWarmingStrategyL3Manager:
                 from unittest.mock import AsyncMock, MagicMock
                 client = AsyncMock()
                 client.ping = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.get = AsyncMock(return_value=None)
+                # Mock: Generic component isolation for controlled unit testing
                 client.set = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 client.setex = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.delete = AsyncMock(return_value=0)
+                # Mock: Async component isolation for testing without real async operations
                 client.exists = AsyncMock(return_value=False)
+                # Mock: Async component isolation for testing without real async operations
                 client.mget = AsyncMock(return_value=[])
+                # Mock: Generic component isolation for controlled unit testing
                 client.mset = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.info = AsyncMock(return_value={"role": "master"})
+                # Mock: Async component isolation for testing without real async operations
                 client.scan_iter = AsyncMock(return_value=iter([]))
+                # Mock: Async component isolation for testing without real async operations
                 client.ttl = AsyncMock(return_value=-1)
+                # Mock: Generic component isolation for controlled unit testing
                 client.expire = AsyncMock()
                 self.redis_clients[name] = client
                 

@@ -57,6 +57,7 @@ class TestAgentServiceOrchestrationCore:
         """Test basic agent run execution."""
         request_model = create_mock_request_model()
         run_id = "test_run_123"
+        # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(return_value={'status': 'completed'})
         
         result = await agent_service.run(request_model, run_id, stream_updates=True)
@@ -73,6 +74,7 @@ class TestAgentServiceOrchestrationCore:
         """Test agent run with model dump fallback when user_request not available."""
         request_model = self._create_model_without_user_request()
         run_id = "test_run_456"
+        # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(return_value={'status': 'completed'})
         
         result = await agent_service.run(request_model, run_id)
@@ -82,6 +84,7 @@ class TestAgentServiceOrchestrationCore:
     
     def _create_model_without_user_request(self):
         """Create request model without user_request attribute."""
+        # Mock: Generic component isolation for controlled unit testing
         request_model = MagicMock()
         del request_model.user_request
         request_model.model_dump.return_value = {'query': 'test query'}
@@ -185,6 +188,7 @@ class TestAgentServiceOrchestrationCore:
         user_id = "user_json_error"
         invalid_message = "invalid json {broken"
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.ws_manager.manager.send_error') as mock_send_error:
             mock_send_error.return_value = None
             
@@ -197,6 +201,7 @@ class TestAgentServiceOrchestrationCore:
         user_id = "user_disconnect"
         message = create_websocket_message("start_agent", {})
         
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         agent_service.message_handler.handle_start_agent = AsyncMock(side_effect=WebSocketDisconnect())
         
         await agent_service.handle_websocket_message(user_id, message)
@@ -206,6 +211,7 @@ class TestAgentServiceOrchestrationCore:
     async def test_concurrent_agent_execution(self, agent_service, mock_supervisor):
         """Test concurrent agent execution without race conditions."""
         num_concurrent = 5
+        # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(return_value={'status': 'completed'})
         
         request_models = create_concurrent_request_models(num_concurrent)
@@ -247,7 +253,9 @@ class TestAgentServiceBasic:
     @pytest.mark.asyncio
     async def test_run_agent_with_request_model(self):
         """Test basic run method with full RequestModel."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_supervisor = MagicMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(return_value={"status": "started"})
         agent_service = AgentService(mock_supervisor)
         

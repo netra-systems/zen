@@ -84,8 +84,11 @@ class TestBasicSystemColdStartup:
             mock_state.startup_complete = True
             
             # Mock database connections as healthy
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.core.health_checkers.HealthChecker.check_postgres', return_value={"healthy": True}):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.core.health_checkers.HealthChecker.check_clickhouse', return_value={"healthy": True}):
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.core.health_checkers.HealthChecker.check_redis', return_value={"healthy": True}):
                         
                         response = await async_client.get("/health")
@@ -120,9 +123,13 @@ class TestBasicSystemColdStartup:
             return True
         
         # Simulate startup sequence
+        # Mock: PostgreSQL database isolation for testing without real database connections
         with patch('app.db.postgres.init_db', mock_postgres_init):
+            # Mock: ClickHouse database isolation for fast testing without external database dependency
             with patch('app.db.client_clickhouse.ClickHouseClient.initialize', mock_clickhouse_init):
+                # Mock: Redis external service isolation for fast, reliable tests without network dependency
                 with patch('app.cache.redis_manager.RedisManager.initialize', mock_redis_init):
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.cache.cache_manager.CacheManager.initialize', mock_cache_init):
                         
                         # Run initialization
@@ -181,6 +188,7 @@ class TestBasicSystemColdStartup:
             for endpoint, expected_status in endpoints_to_test:
                 # Mock dependencies as needed
                 if endpoint == "/health":
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.core.health_checkers.HealthChecker.check_health', 
                               return_value={"status": "healthy", "components": {}}):
                         response = await async_client.get(endpoint)
@@ -218,6 +226,7 @@ class TestBasicSystemColdStartup:
     async def test_startup_failure_handling(self):
         """Test 7: System should handle startup failures gracefully."""
         # Simulate database connection failure
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.db.postgres.init_db', side_effect=Exception("Database connection failed")):
             
             # Startup should catch and log the error
@@ -259,6 +268,7 @@ class TestBasicSystemColdStartup:
             return True
         
         # Mock initialization that tracks calls
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.cache.cache_manager.CacheManager.initialize', mock_init):
             # First initialization
             await mock_init()
@@ -277,8 +287,10 @@ class TestBasicSystemColdStartup:
     async def test_graceful_degradation_missing_optional_services(self, async_client):
         """Test 10: System should start even if optional services are unavailable."""
         # Mock optional service failures
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.notification_service.NotificationService.initialize', 
                   side_effect=Exception("Notification service unavailable")):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.analytics_service.AnalyticsService.initialize',
                       side_effect=Exception("Analytics service unavailable")):
                 
@@ -287,6 +299,7 @@ class TestBasicSystemColdStartup:
                     mock_state.startup_complete = True
                     
                     # Core services mocked as healthy
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.core.health_checkers.HealthChecker.check_health',
                               return_value={
                                   "status": "degraded",

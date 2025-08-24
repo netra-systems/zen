@@ -119,11 +119,13 @@ class TestValidationCompliant:
 @pytest.fixture
 def auth_service():
     """Fixture providing auth service instance"""
+    # Mock: Generic component isolation for controlled unit testing
     return Mock()
 
 @pytest.fixture  
 def valid_user():
     """Fixture providing valid user data"""
+    # Mock: Generic component isolation for controlled unit testing
     user = Mock()
     user.id = 123
     user.email = "test@example.com"
@@ -133,6 +135,7 @@ def valid_user():
 @pytest.fixture
 def locked_user():
     """Fixture providing locked user data"""
+    # Mock: Generic component isolation for controlled unit testing
     user = Mock()
     user.email = "locked@example.com" 
     user.password = "validpass"
@@ -142,11 +145,13 @@ def locked_user():
 @pytest.fixture
 def processor():
     """Fixture providing data processor"""
+    # Mock: Generic component isolation for controlled unit testing
     return Mock()
 
 @pytest.fixture
 def validator():
     """Fixture providing validator instance"""
+    # Mock: Generic component isolation for controlled unit testing
     return Mock()
 
 # ===== EXAMPLE 5: INTEGRATION TEST PATTERNS =====

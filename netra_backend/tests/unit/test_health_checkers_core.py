@@ -32,41 +32,58 @@ class TestHealthCheckersCore:
     @pytest.fixture
     def mock_postgres_engine(self):
         """Create mock PostgreSQL async engine."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_engine = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_engine.begin = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_engine.begin.return_value.__aenter__ = AsyncMock(return_value=mock_conn)
+        # Mock: Async component isolation for testing without real async operations
         mock_engine.begin.return_value.__aexit__ = AsyncMock(return_value=None)
         return mock_engine
     
     @pytest.fixture
     def mock_clickhouse_client(self):
         """Create mock ClickHouse client."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_client.execute = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        # Mock: Async component isolation for testing without real async operations
         mock_client.__aexit__ = AsyncMock(return_value=None)
         return mock_client
     
     @pytest.fixture
     def mock_redis_manager(self):
         """Create mock Redis manager."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
         mock_manager.enabled = True
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_manager.get_client = AsyncMock(return_value=mock_client)
         return mock_manager, mock_client
     
     @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking database manager to isolate health check logic. Real database connectivity tested in L3 integration tests.", "L1")
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
     @pytest.mark.asyncio
     async def test_check_postgres_health_success(self, mock_db_manager, mock_postgres_engine):
         """Test successful PostgreSQL health check."""
         # Mock db_manager.get_async_session to return a working session
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_manager.get_async_session.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_db_manager.get_async_session.return_value.__aexit__ = AsyncMock(return_value=None)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.execute = AsyncMock()
         
         result = await check_postgres_health()
@@ -79,6 +96,7 @@ class TestHealthCheckersCore:
     
     @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking database manager to test error handling paths. Real database testing in L3 integration tests.", "L1")
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
     @pytest.mark.asyncio
     async def test_check_postgres_health_no_engine(self, mock_db_manager):
@@ -87,7 +105,9 @@ class TestHealthCheckersCore:
         mock_db_manager.get_async_session.side_effect = ValueError("Connection failed")
         
         # Mock the engine to be None to trigger the engine initialization path
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres_core.async_engine', None), \
+             # Mock: Component isolation for testing without external dependencies
              patch('netra_backend.app.db.postgres.initialize_postgres') as mock_init:
             mock_init.return_value = None  # Ensure engine remains None after init
             result = await check_postgres_health()
@@ -99,6 +119,7 @@ class TestHealthCheckersCore:
     
     @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking database manager to test connection failure scenarios. Real connectivity tested in L3 integration tests.", "L1")
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
     @pytest.mark.asyncio
     async def test_check_postgres_health_connection_error(self, mock_db_manager):
@@ -117,8 +138,11 @@ class TestHealthCheckersCore:
     
     @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking ClickHouse client and environment detection to isolate health check logic. Real ClickHouse tested in L3 integration tests.", "L1")
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.db.clickhouse.get_clickhouse_client')
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.health_checkers._is_clickhouse_disabled')
     @pytest.mark.asyncio
     async def test_check_clickhouse_health_success(self, mock_disabled, mock_dev_mode, mock_get_client, mock_clickhouse_client):
@@ -136,7 +160,9 @@ class TestHealthCheckersCore:
     
     @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking environment detection to test disabled ClickHouse scenario. Real environment testing in L3 integration tests.", "L1")
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.health_checkers._is_clickhouse_disabled')
     @pytest.mark.asyncio
     async def test_check_clickhouse_health_disabled_in_dev(self, mock_disabled, mock_dev_mode):
@@ -151,8 +177,11 @@ class TestHealthCheckersCore:
         assert "ClickHouse disabled in development" in result.details["reason"]
     
     @mock_justified("L1 Unit Test: Mocking ClickHouse client to test connection error handling. Real connection failures tested in L3 integration tests.", "L1")
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.db.clickhouse.get_clickhouse_client')
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.core.health_checkers._is_clickhouse_disabled')
     @pytest.mark.asyncio
     async def test_check_clickhouse_health_connection_error(self, mock_disabled, mock_dev_mode, mock_get_client):
@@ -168,12 +197,14 @@ class TestHealthCheckersCore:
         assert "ClickHouse connection failed" in result.details["error_message"]
     
     @mock_justified("L1 Unit Test: Mocking Redis manager to isolate health check logic. Real Redis connectivity tested in L3 integration tests.", "L1")
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.redis_manager.redis_manager')
     @pytest.mark.asyncio
     async def test_check_redis_health_success(self, mock_manager, mock_redis_manager):
         """Test successful Redis health check."""
         redis_manager, redis_client = mock_redis_manager
         mock_manager.enabled = True
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_manager.get_client = AsyncMock(return_value=redis_client)
         
         result = await check_redis_health()
@@ -183,6 +214,7 @@ class TestHealthCheckersCore:
         assert result.details["success"] is True
         redis_client.ping.assert_called_once()
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.redis_manager.redis_manager')
     @pytest.mark.asyncio
     async def test_check_redis_health_disabled(self, mock_manager):
@@ -195,11 +227,13 @@ class TestHealthCheckersCore:
         assert result.details["success"] is False
         assert "Redis disabled in development" in result.details["error_message"]
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.redis_manager.redis_manager')
     @pytest.mark.asyncio
     async def test_check_redis_health_no_client(self, mock_manager):
         """Test Redis health check when client unavailable."""
         mock_manager.enabled = True
+        # Mock: Async component isolation for testing without real async operations
         mock_manager.get_client = AsyncMock(return_value=None)
         
         result = await check_redis_health()
@@ -208,6 +242,7 @@ class TestHealthCheckersCore:
         assert result.details["success"] is False
         assert "Redis client not available" in result.details["error_message"]
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.websocket_core.utils.get_connection_monitor')
     @pytest.mark.asyncio
     async def test_check_websocket_health_success(self, mock_get_manager):
@@ -222,6 +257,7 @@ class TestHealthCheckersCore:
         assert result.details["success"] is True
         assert "metadata" in result.details
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.websocket_core.utils.get_connection_monitor')
     @pytest.mark.asyncio
     async def test_check_websocket_health_manager_error(self, mock_get_manager):
@@ -236,6 +272,7 @@ class TestHealthCheckersCore:
     
     def test_create_success_result_structure(self):
         """Test successful health result structure."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.health_checkers._create_success_result') as mock_create:
             expected_result = self._create_expected_success_result()
             mock_create.return_value = expected_result
@@ -248,6 +285,7 @@ class TestHealthCheckersCore:
     
     def test_create_failed_result_structure(self):
         """Test failed health result structure."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.health_checkers._create_failed_result') as mock_create:
             expected_result = self._create_expected_failed_result()
             mock_create.return_value = expected_result
@@ -260,7 +298,9 @@ class TestHealthCheckersCore:
     # Helper methods (each ≤8 lines)
     def _create_mock_websocket_manager(self):
         """Helper to create mock WebSocket manager."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = Mock()
+        # Mock: Async component isolation for testing without real async operations
         mock_manager.get_stats = AsyncMock(return_value={
             "active_connections": 10, "total_connections": 50
         })

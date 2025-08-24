@@ -107,6 +107,7 @@ class TestIntegrationRealComponents:
     """
     
     @pytest.mark.asyncio
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.services.external_api.make_request')
     @pytest.mark.asyncio
     async def test_thread_service_integration(self, mock_api):
@@ -126,11 +127,13 @@ class TestIntegrationRealComponents:
         assert thread.title == "Test Thread"
     
     @pytest.mark.asyncio
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.database.database_manager.get_session')
     @pytest.mark.asyncio
     async def test_websocket_message_flow_integration(self, mock_db):
         """Test WebSocket message handling with real components."""
         # Mock database only
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
         mock_db.return_value = mock_session
         
@@ -163,6 +166,7 @@ class TestE2ERealBackend:
     
     @pytest.mark.asyncio
     @pytest.mark.integration
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.agents.external.openai_client.make_request')
     @pytest.mark.asyncio
     async def test_complete_agent_workflow_e2e(self, mock_openai):
@@ -225,6 +229,7 @@ class TestExternalAPIMocking:
     """
     
     @pytest.mark.asyncio
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.services.openai_service.OpenAIClient.chat_completion')
     @pytest.mark.asyncio
     async def test_llm_response_handling(self, mock_openai):
@@ -247,6 +252,7 @@ class TestExternalAPIMocking:
         assert result.confidence > 0.8
     
     @pytest.mark.asyncio
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.database.clickhouse.ClickHouseClient.execute')
     @pytest.mark.asyncio
     async def test_analytics_query_with_mocked_db(self, mock_clickhouse):
@@ -266,6 +272,7 @@ class TestExternalAPIMocking:
         assert report.avg_cost_per_request == 0.1036
     
     @pytest.mark.asyncio
+    # Mock: Component isolation for testing without external dependencies
     @patch('httpx.AsyncClient.post')
     @pytest.mark.asyncio
     async def test_webhook_delivery_with_error_handling(self, mock_http):
@@ -318,11 +325,17 @@ class TestAntiPatternsWhatNotToDo:
         # This is an ANTI-PATTERN example - don't do this!
         
         # BAD: Mocking internal components (>30% of imports)
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.models.user.User'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.models.thread.Thread'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.user_service.UserService'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.thread_service.ThreadService'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.utils.validation.validate_email'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.utils.formatting.format_name'):
             
             # With everything mocked, this test tells us nothing
@@ -334,9 +347,13 @@ class TestAntiPatternsWhatNotToDo:
         # This is an ANTI-PATTERN example - don't do this!
         
         # BAD: Integration test with all components mocked
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.thread_service.ThreadService'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.models.user.User'), \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.models.thread.Thread'):
             
             # This isn't testing integration at all!

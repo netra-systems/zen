@@ -61,16 +61,21 @@ def mock_infrastructure():
 
     """Setup mock infrastructure components"""
 
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager = Mock()
 
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.call_llm = AsyncMock(return_value={"content": "test response"})
 
     ws_manager = WebSocketManager()
 
+    # Mock: Generic component isolation for controlled unit testing
     cache_service = Mock()
 
+    # Mock: Async component isolation for testing without real async operations
     cache_service.get = AsyncMock(return_value=None)
 
+    # Mock: Async component isolation for testing without real async operations
     cache_service.set = AsyncMock(return_value=True)
     
     return {
@@ -129,14 +134,19 @@ async def setup_clickhouse_mock():
 
     """Setup ClickHouse mock for transaction testing"""
 
+    # Mock: Generic component isolation for controlled unit testing
     ch_mock = Mock()
 
+    # Mock: Generic component isolation for controlled unit testing
     ch_mock.execute = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     ch_mock.begin_transaction = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     ch_mock.commit = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     ch_mock.rollback = AsyncMock()
 
     return ch_mock

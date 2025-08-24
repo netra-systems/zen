@@ -27,7 +27,9 @@ class TestAgentHealthMonitoring:
         """Test periodic health checks for all agents."""
         from netra_backend.app.agents.registry import AgentRegistry
         
+        # Mock: Agent service isolation for testing without LLM agent execution
         registry = Mock(spec=AgentRegistry)
+        # Mock: Async component isolation for testing without real async operations
         registry.health_check_all = AsyncMock(return_value={
             "triage_agent": {"status": "healthy", "latency": 50},
             "cost_optimizer": {"status": "healthy", "latency": 75},
@@ -66,7 +68,9 @@ class TestAgentHealthMonitoring:
         """Test automatic agent replacement when unhealthy."""
         from netra_backend.app.agents.registry import AgentRegistry
         
+        # Mock: Agent service isolation for testing without LLM agent execution
         registry = Mock(spec=AgentRegistry)
+        # Mock: Async component isolation for testing without real async operations
         registry.replace_agent = AsyncMock(return_value={
             "old_agent": "performance_agent_v1",
             "new_agent": "performance_agent_v2",
@@ -88,7 +92,9 @@ class TestToolDispatcherInit:
         """Test tool dispatcher registers all required tools."""
         from netra_backend.app.services.tool_dispatcher import ToolDispatcher
         
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         dispatcher = Mock(spec=ToolDispatcher)
+        # Mock: Async component isolation for testing without real async operations
         dispatcher.initialize = AsyncMock(return_value={
             "tools": [
                 "gpu_analyzer",
@@ -126,7 +132,9 @@ class TestToolDispatcherInit:
         """Test proper routing of tool execution requests."""
         from netra_backend.app.services.tool_dispatcher import ToolDispatcher
         
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         dispatcher = Mock(spec=ToolDispatcher)
+        # Mock: Async component isolation for testing without real async operations
         dispatcher.dispatch = AsyncMock(return_value={
             "tool": "gpu_analyzer",
             "result": {"gpu_utilization": 0.85},
@@ -134,6 +142,7 @@ class TestToolDispatcherInit:
         })
         
         # Dispatch tool request
+        # Mock: Component isolation for testing without external dependencies
         result = await dispatcher.dispatch("gpu_analyzer", {"instance": "p3.2xlarge"})
         
         assert result["tool"] == "gpu_analyzer"
@@ -149,7 +158,9 @@ class TestQualityGateValidation:
         """Test quality scoring for agent responses."""
         from netra_backend.app.services.quality_gate import QualityGate
         
+        # Mock: Component isolation for controlled unit testing
         quality_gate = Mock(spec=QualityGate)
+        # Mock: Async component isolation for testing without real async operations
         quality_gate.score_response = AsyncMock(return_value={
             "coherence": 0.85,
             "relevance": 0.90,
@@ -189,6 +200,7 @@ class TestQualityGateValidation:
         """Test retry mechanism for quality improvement."""
         from netra_backend.app.services.quality_gate import QualityGate
         
+        # Mock: Component isolation for controlled unit testing
         quality_gate = Mock(spec=QualityGate)
         
         attempts = []

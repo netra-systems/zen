@@ -202,6 +202,7 @@ class TestRealAgentCollaboration:
     async def _execute_collaboration_with_mocks(self, session_data: Dict[str, Any], 
                                              request: Dict[str, Any]) -> Dict[str, Any]:
         """Execute collaboration request with mocked multi-agent responses."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
             mock_llm.return_value = {
                 "content": "Multi-agent collaboration analysis completed with agent handoff",
@@ -221,6 +222,7 @@ class TestRealAgentCollaboration:
     async def _execute_collaboration_with_quality_gate(self, session_data: Dict[str, Any], 
                                                      request: Dict[str, Any]) -> Dict[str, Any]:
         """Execute collaboration with quality gate validation."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.quality_gate_service.QualityGateService.validate_content') as mock_quality:
             mock_quality.return_value.quality_level.value = 0.8
             response = await self._execute_collaboration_with_mocks(session_data, request)
@@ -268,6 +270,7 @@ class TestAgentCollaborationPerformance:
                     "message": f"Concurrent multi-agent analysis {i}", 
                     "turn_id": f"concurrent_collab_{i}", "require_multi_agent": True
                 }
+                # Mock: LLM service isolation for fast testing without API calls or rate limits
                 with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
                     mock_llm.return_value = {"content": "Concurrent collaboration", "tokens_used": 200}
                     tasks.append(AgentCollaborationTestUtils.send_collaboration_request(

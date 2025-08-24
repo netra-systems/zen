@@ -946,8 +946,10 @@ class TestHeartbeatMechanism:
 
         """Create mock WebSocket for testing."""
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send = AsyncMock()
 
         websocket.messages_sent = []
@@ -1101,8 +1103,10 @@ class TestHeartbeatMechanism:
         
         # Create websocket that doesn't respond
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send = AsyncMock()
         
         # Register connection
@@ -1144,8 +1148,10 @@ class TestHeartbeatMechanism:
         
         # Create unresponsive websocket
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send = AsyncMock()
         
         # Register connection
@@ -1341,8 +1347,10 @@ class TestHeartbeatMechanism:
 
             connection_id = f"problematic_{i}"
 
+            # Mock: Generic component isolation for controlled unit testing
             websocket = AsyncMock()
 
+            # Mock: Generic component isolation for controlled unit testing
             websocket.send = AsyncMock()  # Doesn't respond
 
             await heartbeat_manager.register_connection(connection_id, test_users[1].id, websocket)

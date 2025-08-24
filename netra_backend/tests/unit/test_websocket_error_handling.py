@@ -30,6 +30,7 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 @pytest.fixture
 def mock_websocket():
     """Create a mock WebSocket with proper state attributes."""
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     ws = MagicMock(spec=WebSocket)
     ws.client_state = WebSocketState.CONNECTING
     ws.application_state = WebSocketState.CONNECTING
@@ -38,9 +39,11 @@ def mock_websocket():
 @pytest.fixture
 def mock_connected_websocket():
     """Create a mock WebSocket in connected state."""
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     ws = MagicMock(spec=WebSocket)
     ws.client_state = WebSocketState.CONNECTED
     ws.application_state = WebSocketState.CONNECTED
+    # Mock: Generic component isolation for controlled unit testing
     ws.close = AsyncMock()
     return ws
 
@@ -71,6 +74,7 @@ async def test_close_websocket_safely_with_connected_socket(connection_manager, 
 @pytest.mark.asyncio
 async def test_close_websocket_safely_with_no_state_attributes(connection_manager):
     """Test handling WebSocket without state attributes."""
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     ws = MagicMock(spec=WebSocket)
     # Remove state attributes to simulate edge case
     del ws.client_state
@@ -94,9 +98,11 @@ async def test_websocket_private_functions_disabled():
 async def test_connection_manager_disconnect_with_missing_websocket():
     """Test disconnect when WebSocket doesn't exist in connection manager."""
     manager = ConnectionManager()
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_ws = MagicMock(spec=WebSocket)
     mock_ws.client_state = WebSocketState.CONNECTED
     mock_ws.application_state = WebSocketState.CONNECTED
+    # Mock: Generic component isolation for controlled unit testing
     mock_ws.close = AsyncMock()
     
     # Try to disconnect a WebSocket that was never connected
@@ -108,11 +114,13 @@ async def test_connection_manager_disconnect_with_missing_websocket():
 @pytest.mark.asyncio
 async def test_websocket_state_transitions():
     """Test WebSocket state handling during connection lifecycle."""
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     ws = MagicMock(spec=WebSocket)
     
     # Test CONNECTING state
     ws.client_state = WebSocketState.CONNECTING
     ws.application_state = WebSocketState.CONNECTING
+    # Mock: WebSocket connection isolation for testing without network overhead
     with patch('netra_backend.app.routes.websockets.manager') as mock_manager:
         await _handle_websocket_error(Exception("Early error"), "user", ws)
         mock_manager.disconnect_user.assert_not_called()
@@ -120,7 +128,9 @@ async def test_websocket_state_transitions():
     # Test CONNECTED state
     ws.client_state = WebSocketState.CONNECTED
     ws.application_state = WebSocketState.CONNECTED
+    # Mock: WebSocket connection isolation for testing without network overhead
     with patch('netra_backend.app.routes.websockets.manager') as mock_manager:
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.disconnect_user = AsyncMock()
         await _handle_websocket_error(Exception("Connected error"), "user", ws)
         mock_manager.disconnect_user.assert_called_once()
@@ -128,7 +138,9 @@ async def test_websocket_state_transitions():
     # Test DISCONNECTED state
     ws.client_state = WebSocketState.DISCONNECTED
     ws.application_state = WebSocketState.DISCONNECTED
+    # Mock: WebSocket connection isolation for testing without network overhead
     with patch('netra_backend.app.routes.websockets.manager') as mock_manager:
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.disconnect_user = AsyncMock()
         await _handle_websocket_error(Exception("Post-disconnect error"), "user", ws)
         # Should not try to disconnect already disconnected WebSocket

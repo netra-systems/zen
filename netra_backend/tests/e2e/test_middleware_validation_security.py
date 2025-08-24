@@ -85,10 +85,14 @@ class TestRequestValidationMiddleware:
     
     def _create_mock_request(self, content_length: int = 1000, url: str = "http://test.com") -> Mock:
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.headers = {}
+        # Mock: Component isolation for controlled unit testing
         request.headers.get = Mock(return_value=str(content_length))
+        # Mock: Generic component isolation for controlled unit testing
         request.url = Mock()
+        # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value=url)
         request.method = "GET"
         return request
@@ -100,6 +104,7 @@ class TestResponseTransformationMiddleware:
     async def test_security_headers_addition(self):
         """Test automatic security headers addition."""
         middleware = self._create_security_middleware()
+        # Mock: Component isolation for controlled unit testing
         response = Mock(spec=Response)
         response.headers = {}
         
@@ -113,6 +118,7 @@ class TestResponseTransformationMiddleware:
     async def test_custom_header_injection(self):
         """Test custom header injection in responses."""
         middleware = self._create_security_middleware()
+        # Mock: Component isolation for controlled unit testing
         response = Mock(spec=Response)
         response.headers = {}
         
@@ -125,6 +131,7 @@ class TestResponseTransformationMiddleware:
     async def test_content_type_header_override(self):
         """Test content type header override prevention."""
         middleware = self._create_security_middleware()
+        # Mock: Component isolation for controlled unit testing
         response = Mock(spec=Response)
         response.headers = {"Content-Type": "text/html"}
         
@@ -201,9 +208,12 @@ class TestRateLimitingMiddleware:
     
     def _create_mock_request(self, path: str = "/test") -> Mock:
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
+        # Mock: Generic component isolation for controlled unit testing
         request.url = Mock()
         request.url.path = path
+        # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value=f"http://test.com{path}")
         return request
 
@@ -260,8 +270,10 @@ class TestAuthenticationMiddleware:
     
     def _create_mock_request(self, headers: Dict = None) -> Mock:
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.headers = headers or {}
+        # Mock: Component isolation for controlled unit testing
         request.headers.get = Mock(side_effect=lambda k, d=None: headers.get(k, d) if headers else d)
         return request
 
@@ -296,6 +308,7 @@ class TestErrorHandlingMiddleware:
         request = self._create_mock_request()
         
         with pytest.raises(ValueError):
+            # Mock: Component isolation for testing without external dependencies
             await middleware.dispatch(request, failing_call_next)
     
     @pytest.mark.asyncio
@@ -308,6 +321,7 @@ class TestErrorHandlingMiddleware:
         with patch.object(asyncio, 'wait_for') as mock_wait:
             mock_wait.side_effect = asyncio.TimeoutError()
             with pytest.raises(asyncio.TimeoutError):
+                # Mock: Component isolation for controlled unit testing
                 await middleware.dispatch(request, lambda r: Mock(spec=Response))
     
     def _create_security_middleware(self) -> SecurityMiddleware:
@@ -316,11 +330,15 @@ class TestErrorHandlingMiddleware:
     
     def _create_mock_request(self, headers: Dict = None) -> Mock:
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.headers = headers or {}
         request.method = "GET"
+        # Mock: Generic component isolation for controlled unit testing
         request.url = Mock()
+        # Mock: Component isolation for controlled unit testing
         request.url.__str__ = Mock(return_value="http://test.com")
         request.url.path = "/test"
+        # Mock: Async component isolation for testing without real async operations
         request.body = AsyncMock(return_value=b'')
         return request

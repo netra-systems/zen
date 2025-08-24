@@ -24,6 +24,7 @@ class TestSecurityHeaders:
     @pytest.fixture
     def mock_response(self):
         """Create mock response for testing."""
+        # Mock: Component isolation for controlled unit testing
         response = Mock(spec=Response)
         response.headers = {}
         return response
@@ -73,12 +74,14 @@ class TestSecurityHeaders:
         """Test different headers for development vs production."""
         # Production middleware
         prod_middleware = SecurityHeadersMiddleware(None, "production")
+        # Mock: Component isolation for controlled unit testing
         prod_response = Mock(spec=Response)
         prod_response.headers = {}
         prod_middleware._add_base_headers(prod_response)
         
         # Development middleware
         dev_middleware = SecurityHeadersMiddleware(None, "development")
+        # Mock: Component isolation for controlled unit testing
         dev_response = Mock(spec=Response)
         dev_response.headers = {}
         dev_middleware._add_base_headers(dev_response)

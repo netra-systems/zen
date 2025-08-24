@@ -340,8 +340,10 @@ class MessagePipelineTestManager:
             else:
                 # Create mock agent for other types
 
+                # Mock: Generic component isolation for controlled unit testing
                 agent = MagicMock()
 
+                # Mock: Async component isolation for testing without real async operations
                 agent.process_message = AsyncMock(return_value={
 
                     "response": f"Processed by {agent_type}",

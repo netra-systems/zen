@@ -74,15 +74,18 @@ def mock_validation_context(temp_config_path: Path) -> ValidationContext:
 @pytest.fixture
 def mock_services_config() -> ServicesConfiguration:
     """Create mock services configuration."""
+    # Mock: Component isolation for controlled unit testing
     config = Mock(spec=ServicesConfiguration)
     
     # Create mock redis service
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_redis = Mock()
     mock_redis.mode = ResourceMode.SHARED
     mock_redis.get_config.return_value = {"host": "redis.example.com", "port": 6379}
     config.redis = mock_redis
     
     # Create mock clickhouse service
+    # Mock: ClickHouse database isolation for fast testing without external database dependency
     mock_clickhouse = Mock()
     mock_clickhouse.mode = ResourceMode.LOCAL
     mock_clickhouse.get_config.return_value = {"host": "ch.example.com", "port": 8123, "secure": False}
@@ -140,7 +143,9 @@ class TestConfigFileChecking:
         
         # Mock old file modification time
         old_time = datetime.now() - timedelta(days=45)
+        # Mock: Component isolation for testing without external dependencies
         with patch('pathlib.Path.stat') as mock_stat:
+            # Mock: Generic component isolation for controlled unit testing
             mock_stat_result = Mock()
             mock_stat_result.st_mtime = old_time.timestamp()
             mock_stat.return_value = mock_stat_result
@@ -158,7 +163,9 @@ class TestConfigLoading:
         temp_config_path.write_text('{"test": "config"}')
         validator = ServiceConfigValidator(mock_validation_context)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_config.ServicesConfiguration.load_from_file') as mock_load:
+            # Mock: Component isolation for controlled unit testing
             mock_config = Mock(spec=ServicesConfiguration)
             mock_load.return_value = mock_config
             
@@ -171,6 +178,7 @@ class TestConfigLoading:
         """Test configuration loading failure."""
         validator = ServiceConfigValidator(mock_validation_context)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_config.ServicesConfiguration.load_from_file', 
                   side_effect=Exception("Load error")):
             config = validator._load_config()
@@ -190,14 +198,17 @@ class TestEndpointValidation:
     def test_get_service_endpoints_local_clickhouse(self, mock_validation_context: ValidationContext) -> None:
         """Test endpoint extraction skips local ClickHouse."""
         validator = ServiceConfigValidator(mock_validation_context)
+        # Mock: Component isolation for controlled unit testing
         config = Mock(spec=ServicesConfiguration)
         
         # Create mock redis service
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = Mock()
         mock_redis.mode = ResourceMode.LOCAL
         config.redis = mock_redis
         
         # Create mock clickhouse service
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_clickhouse = Mock()
         mock_clickhouse.mode = ResourceMode.LOCAL
         config.clickhouse = mock_clickhouse
@@ -208,14 +219,17 @@ class TestEndpointValidation:
     def test_get_service_endpoints_secure_clickhouse(self, mock_validation_context: ValidationContext) -> None:
         """Test endpoint extraction for secure ClickHouse."""
         validator = ServiceConfigValidator(mock_validation_context)
+        # Mock: Component isolation for controlled unit testing
         config = Mock(spec=ServicesConfiguration)
         
         # Create mock redis service
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = Mock()
         mock_redis.mode = ResourceMode.LOCAL
         config.redis = mock_redis
         
         # Create mock clickhouse service
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         mock_clickhouse = Mock()
         mock_clickhouse.mode = ResourceMode.SHARED
         mock_clickhouse.get_config.return_value = {"host": "ch.example.com", "port": 8443, "secure": True}
@@ -251,14 +265,17 @@ class TestEndpointValidation:
         """Test single HTTP endpoint check success."""
         validator = ServiceConfigValidator(mock_validation_context)
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status = 200
         
         # Create async context manager mock
+        # Mock: Generic component isolation for controlled unit testing
         mock_context = AsyncMock()
         mock_context.__aenter__.return_value = mock_response
         mock_context.__aexit__.return_value = None
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_session.head.return_value = mock_context
         
@@ -270,14 +287,17 @@ class TestEndpointValidation:
         """Test single HTTP endpoint check with server error."""
         validator = ServiceConfigValidator(mock_validation_context)
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = Mock()
         mock_response.status = 500
         
         # Create async context manager mock
+        # Mock: Generic component isolation for controlled unit testing
         mock_context = AsyncMock()
         mock_context.__aenter__.return_value = mock_response
         mock_context.__aexit__.return_value = None
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = Mock()
         mock_session.head.return_value = mock_context
         

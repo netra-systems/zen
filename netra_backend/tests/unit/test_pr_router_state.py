@@ -23,10 +23,14 @@ from netra_backend.app.core.exceptions_auth import NetraSecurityException
 @pytest.fixture
 def mock_redis_manager():
     """Mock Redis manager for testing."""
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis = Mock()
     redis.enabled = True
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.get = AsyncMock(return_value="active")
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.setex = AsyncMock()
+    # Mock: Redis caching isolation to prevent test interference and external dependencies
     redis.delete = AsyncMock()
     return redis
 
@@ -113,6 +117,7 @@ class TestCsrfTokenValidation:
     @pytest.mark.asyncio
     async def test_store_csrf_token_redis_disabled(self):
         """Test storing CSRF token when Redis is disabled."""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = Mock()
         mock_redis.enabled = False
         
@@ -122,6 +127,7 @@ class TestCsrfTokenValidation:
     @pytest.mark.asyncio
     async def test_validate_csrf_token_redis_disabled(self):
         """Test CSRF token validation when Redis is disabled."""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = Mock()
         mock_redis.enabled = False
         state_data = {"pr_number": "123", "csrf_token": "test-token"}

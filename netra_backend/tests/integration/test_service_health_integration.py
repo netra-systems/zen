@@ -73,7 +73,9 @@ class TestServiceHealthIntegration:
         - Response times are included
         - Dependency health is reported
         """
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.health_check_service.HealthCheckService._check_all_services',
+                  # Mock: Async component isolation for testing without real async operations
                   AsyncMock(return_value=mock_healthy_services)):
             
             health_service = HealthCheckService()
@@ -119,6 +121,7 @@ class TestServiceHealthIntegration:
         # Test database health check
         health_check = self._create_database_health_check()
         
+        # Mock: Database access isolation for fast, reliable unit testing
         with patch('app.services.health_check_service.database_client', health_check['healthy_mock']):
             health_service = HealthCheckService()
             result = await health_service._check_database()
@@ -129,9 +132,12 @@ class TestServiceHealthIntegration:
     @mock_justified("External database not available in test environment")
     def _create_database_health_check(self):
         """Create mocks for database health check testing."""
+        # Mock: Generic component isolation for controlled unit testing
         healthy_mock = AsyncMock()
+        # Mock: Component isolation for controlled unit testing
         healthy_mock.execute.return_value = Mock(fetchone=Mock(return_value=(1,)))
         
+        # Mock: Generic component isolation for controlled unit testing
         unhealthy_mock = AsyncMock()
         unhealthy_mock.execute.side_effect = Exception("Database connection failed")
         
@@ -140,9 +146,11 @@ class TestServiceHealthIntegration:
     @mock_justified("External Redis not available in test environment")  
     def _create_redis_health_check(self):
         """Create mocks for Redis health check testing."""
+        # Mock: Generic component isolation for controlled unit testing
         healthy_mock = AsyncMock()
         healthy_mock.ping.return_value = True
         
+        # Mock: Generic component isolation for controlled unit testing
         unhealthy_mock = AsyncMock()
         unhealthy_mock.ping.side_effect = Exception("Redis connection failed")
         
@@ -151,9 +159,11 @@ class TestServiceHealthIntegration:
     @mock_justified("External ClickHouse not available in test environment")
     def _create_clickhouse_health_check(self):
         """Create mocks for ClickHouse health check testing.""" 
+        # Mock: Generic component isolation for controlled unit testing
         healthy_mock = AsyncMock()
         healthy_mock.query.return_value = [{'result': 1}]
         
+        # Mock: Generic component isolation for controlled unit testing
         unhealthy_mock = AsyncMock()
         unhealthy_mock.query.side_effect = Exception("ClickHouse connection failed")
         
@@ -162,9 +172,11 @@ class TestServiceHealthIntegration:
     @mock_justified("External LLM providers not available in test environment")
     def _create_llm_providers_health_check(self):
         """Create mocks for LLM providers health check testing."""
+        # Mock: Generic component isolation for controlled unit testing
         healthy_mock = AsyncMock()
         healthy_mock.health_check.return_value = {'status': 'healthy'}
         
+        # Mock: Generic component isolation for controlled unit testing
         unhealthy_mock = AsyncMock() 
         unhealthy_mock.health_check.side_effect = Exception("LLM provider unavailable")
         
@@ -182,7 +194,9 @@ class TestServiceHealthIntegration:
         - Circuit closes after successful requests
         - Health status reflects circuit breaker state
         """
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.circuit_breaker.CircuitBreaker') as mock_cb_class:
+            # Mock: Generic component isolation for controlled unit testing
             circuit_breaker = Mock()
             mock_cb_class.return_value = circuit_breaker
             
@@ -194,10 +208,12 @@ class TestServiceHealthIntegration:
     async def _test_circuit_closed_state(self, circuit_breaker: Mock):
         """Test circuit breaker in closed (normal) state."""
         circuit_breaker.get_status.return_value = {'state': 'closed', 'failure_count': 0}
+        # Mock: Async component isolation for testing without real async operations
         circuit_breaker.call = AsyncMock(side_effect=lambda func: func())
         
         health_service = HealthCheckService()
         with patch.object(health_service, '_check_database', 
+                         # Mock: Async component isolation for testing without real async operations
                          AsyncMock(return_value={'status': 'healthy', 'response_time_ms': 10})):
             
             result = await health_service._check_database_with_circuit_breaker()
@@ -218,10 +234,12 @@ class TestServiceHealthIntegration:
     async def _test_circuit_half_open_state(self, circuit_breaker: Mock):
         """Test circuit breaker in half-open (testing) state."""
         circuit_breaker.get_status.return_value = {'state': 'half-open', 'failure_count': 3}
+        # Mock: Async component isolation for testing without real async operations
         circuit_breaker.call = AsyncMock(side_effect=lambda func: func())
         
         health_service = HealthCheckService()
         with patch.object(health_service, '_check_database',
+                         # Mock: Async component isolation for testing without real async operations
                          AsyncMock(return_value={'status': 'healthy', 'response_time_ms': 8})):
             
             result = await health_service._check_database_with_circuit_breaker()
@@ -242,6 +260,7 @@ class TestServiceHealthIntegration:
         
         # Simulate service failure
         with patch.object(health_service, '_check_redis',
+                         # Mock: Async component isolation for testing without real async operations
                          AsyncMock(return_value={'status': 'unhealthy', 'error': 'Connection failed'})):
             
             failure_result = await health_service.get_health_status()
@@ -250,6 +269,7 @@ class TestServiceHealthIntegration:
             
         # Simulate service recovery
         with patch.object(health_service, '_check_redis', 
+                         # Mock: Async component isolation for testing without real async operations
                          AsyncMock(return_value={'status': 'healthy', 'response_time_ms': 5})):
             
             recovery_result = await health_service.get_health_status()
@@ -311,7 +331,9 @@ class TestServiceHealthIntegration:
                 'last_check': time.time()
             }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.health_check_service.HealthCheckService._check_all_services',
+                  # Mock: Async component isolation for testing without real async operations
                   AsyncMock(return_value=mock_services)):
             
             health_service = HealthCheckService()
@@ -323,8 +345,10 @@ class TestServiceHealthIntegration:
     @pytest.mark.asyncio
     async def test_health_check_performance_and_timeouts(self):
         """Test health check performance and timeout handling."""
+        # Mock: Async component isolation for testing without real async operations
         timeout_mock = AsyncMock(side_effect=asyncio.TimeoutError("Health check timed out"))
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.health_check_service.HealthCheckService._check_clickhouse', timeout_mock):
             health_service = HealthCheckService()
             result = await health_service.get_health_status()
@@ -343,6 +367,7 @@ class TestServiceHealthIntegration:
         with patch.multiple(
             'app.startup_checks.service_checks.ServiceChecker',
             check_redis=AsyncMock(return_value=Mock(success=True, name="check_redis", message="Redis OK")),
+            # Mock: ClickHouse database isolation for fast testing without external database dependency
             check_clickhouse=AsyncMock(return_value=Mock(success=True, name="check_clickhouse", message="ClickHouse OK"))
         ):
             startup_result = await startup_checker.run_all_checks()
@@ -350,6 +375,7 @@ class TestServiceHealthIntegration:
             
             health_service = HealthCheckService()
             with patch.object(health_service, '_check_all_services',
+                             # Mock: Redis external service isolation for fast, reliable tests without network dependency
                              AsyncMock(return_value={'redis': {'status': 'healthy', 'response_time_ms': 5}})):
                 health_result = await health_service.get_health_status()
                 assert health_result['status'] == 'healthy'

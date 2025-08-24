@@ -29,6 +29,7 @@ class TestThreadRepositoryOperations:
             ThreadRepository,
         )
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = ThreadRepository()
         
@@ -42,6 +43,7 @@ class TestThreadRepositoryOperations:
         }
         
         # Mock the return from the database - set up proper async mock chain
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = AsyncMock()
         mock_result.scalar_one_or_none.return_value = None  # Create will return new thread
         mock_session.execute.return_value = mock_result
@@ -60,7 +62,9 @@ class TestThreadRepositoryOperations:
         )
         
         # Mock session.add and session.flush for create operation
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.add = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.flush = AsyncMock()
         
         # Mock ThreadRepository.create to return our test thread
@@ -97,10 +101,12 @@ class TestThreadRepositoryOperations:
             ThreadRepository,
         )
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = ThreadRepository()
         
         # Set up mock result for queries
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = AsyncMock()
         mock_session.execute.return_value = mock_result
         
@@ -151,6 +157,7 @@ class TestMessageRepositoryQueries:
             MessageRepository,
         )
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
         
@@ -188,6 +195,7 @@ class TestMessageRepositoryQueries:
             MessageRepository,
         )
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
         
@@ -229,6 +237,7 @@ class TestUserRepositoryAuth:
         from netra_backend.app.db.models_user import User
         from netra_backend.app.db.repositories.user_repository import UserRepository
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = UserRepository()
         
@@ -240,6 +249,7 @@ class TestUserRepositoryAuth:
         }
         
         # Mock argon2 hasher and user creation
+        # Mock: Password hashing isolation to avoid expensive crypto operations in tests
         with patch('argon2.PasswordHasher.hash') as mock_hash:
             mock_hash.return_value = 'hashed_password'
             
@@ -260,6 +270,7 @@ class TestUserRepositoryAuth:
         from netra_backend.app.db.models_user import User
         from netra_backend.app.db.repositories.user_repository import UserRepository
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = UserRepository()
         
@@ -311,6 +322,7 @@ class TestOptimizationRepositoryStorage:
             async def get_version_history(self, session, opt_id):
                 return []
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
         
@@ -363,6 +375,7 @@ class TestOptimizationRepositoryStorage:
             async def get_version_history(self, session, opt_id):
                 return []
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
         
@@ -386,6 +399,7 @@ class TestMetricRepositoryAggregation:
             MetricRepository,
         )
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()
         
@@ -426,6 +440,7 @@ class TestMetricRepositoryAggregation:
             MetricRepository,
         )
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()
         
@@ -539,6 +554,7 @@ class TestMigrationRunnerSafety:
                     await self.session.rollback()
                     raise
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         runner = MockMigrationRunner(mock_session)
         
@@ -565,8 +581,11 @@ class TestMigrationRunnerSafety:
             def __init__(self, session):
                 self.session = session
                 # Mock the async session methods properly
+                # Mock: Session isolation for controlled testing without external state
                 self.session.begin = AsyncMock()
+                # Mock: Session isolation for controlled testing without external state
                 self.session.commit = AsyncMock()
+                # Mock: Session isolation for controlled testing without external state
                 self.session.rollback = AsyncMock()
             
             async def run_migration(self, migration):
@@ -578,6 +597,7 @@ class TestMigrationRunnerSafety:
                     await self.session.rollback()
                     raise
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         runner = MockMigrationRunner(mock_session)
         
@@ -613,10 +633,12 @@ class TestDatabaseHealthChecks:
                 except Exception as e:
                     return {"status": "unhealthy", "error": str(e)}
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         checker = MockDatabaseHealthChecker(mock_session)
         
         # Test connection health
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = AsyncMock()
         mock_result.scalar.return_value = 1
         mock_session.execute.return_value = mock_result
@@ -640,6 +662,7 @@ class TestDatabaseHealthChecks:
                 self.session = session
             
             async def check_slow_queries(self, threshold_ms=1000):
+                # Mock: Generic component isolation for controlled unit testing
                 mock_result = AsyncMock()
                 mock_result.all.return_value = [
                     ("SELECT * FROM large_table", 5000)  # 5 second query
@@ -655,6 +678,7 @@ class TestDatabaseHealthChecks:
                 return alerts
             
             async def check_connection_pool(self, threshold_percent=80):
+                # Mock: Generic component isolation for controlled unit testing
                 mock_result = AsyncMock()
                 mock_result.scalar.return_value = 95  # 95% pool usage
                 self.session.execute.return_value = mock_result
@@ -666,6 +690,7 @@ class TestDatabaseHealthChecks:
                     "usage": usage
                 }
         
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         checker = MockDatabaseHealthChecker(mock_session)
         

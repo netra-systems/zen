@@ -44,8 +44,11 @@ class TestWebSocketConnectionEstablishment:
     @pytest.mark.asyncio
     async def test_connection_with_auth(self):
         """Test successful connection establishment with authentication."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.accept = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send_json = AsyncMock()
         
         conn_manager = ConnectionManager()
@@ -67,7 +70,9 @@ class TestWebSocketAuthValidation:
     @pytest.mark.asyncio
     async def test_auth_validation_handshake(self):
         """Test auth validation during handshake."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.accept = AsyncMock()
         
         conn_manager = ConnectionManager()
@@ -83,7 +88,9 @@ class TestWebSocketAuthValidation:
     @pytest.mark.asyncio
     async def test_auth_validation_failure(self):
         """Test auth validation failure handling."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.accept = AsyncMock()
         
         conn_manager = ConnectionManager()
@@ -106,8 +113,11 @@ class TestWebSocketMessageRouting:
     @pytest.mark.asyncio
     async def test_message_routing(self):
         """Test message routing to appropriate handlers."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.accept = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send_json = AsyncMock()
         
         conn_manager = ConnectionManager()
@@ -147,8 +157,11 @@ class TestWebSocketBroadcasting:
         
         # Create 3 test connections
         for i in range(3):
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             websocket = Mock(spec=WebSocket)
+            # Mock: Generic component isolation for controlled unit testing
             websocket.accept = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             websocket.send_json = AsyncMock()
             
             conn_info = await conn_manager.connect(f"broadcast_user_{i}", websocket)
@@ -179,8 +192,11 @@ class TestWebSocketErrorHandling:
     @pytest.mark.asyncio
     async def test_error_handling_recovery(self):
         """Test error handling and recovery mechanisms."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.accept = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send_json = AsyncMock()
         
         conn_manager = ConnectionManager()
@@ -197,6 +213,7 @@ class TestWebSocketErrorHandling:
             
         # Test error recovery - reset the mock
         websocket.send_json.side_effect = None
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send_json = AsyncMock()
         
         # Should work again after recovery
@@ -214,7 +231,9 @@ class TestWebSocketReconnection:
         conn_manager = ConnectionManager()
         
         # Initial connection
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket1 = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket1.accept = AsyncMock()
         
         conn_info1 = await conn_manager.connect("reconnect_user", websocket1)
@@ -224,7 +243,9 @@ class TestWebSocketReconnection:
         await conn_manager.disconnect("reconnect_user", websocket1)
         
         # Reconnection with new websocket
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket2 = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket2.accept = AsyncMock()
         
         conn_info2 = await conn_manager.connect("reconnect_user", websocket2)
@@ -243,8 +264,11 @@ class TestWebSocketRateLimiting:
     @pytest.mark.asyncio  
     async def test_rate_limiting(self):
         """Test rate limiting enforcement."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.accept = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send_json = AsyncMock()
         
         conn_manager = ConnectionManager()
@@ -274,8 +298,11 @@ class TestWebSocketMessageOrdering:
     @pytest.mark.asyncio
     async def test_message_ordering(self):
         """Test message ordering guarantees."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.accept = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send_json = AsyncMock()
         
         conn_manager = ConnectionManager()
@@ -305,8 +332,11 @@ class TestWebSocketBinaryMessages:
     @pytest.mark.asyncio
     async def test_binary_message_handling(self):
         """Test binary message handling."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.accept = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send_bytes = AsyncMock()
         
         conn_manager = ConnectionManager()
@@ -327,8 +357,11 @@ class TestWebSocketConnectionCleanup:
     @pytest.mark.asyncio
     async def test_connection_cleanup(self):
         """Test proper cleanup when connection disconnects."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.accept = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         websocket.close = AsyncMock()
         
         conn_manager = ConnectionManager()
@@ -364,14 +397,18 @@ class TestWebSocketMultiRoom:
         
         # Room A users
         for i in range(2):
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             websocket = Mock(spec=WebSocket)
+            # Mock: Generic component isolation for controlled unit testing
             websocket.accept = AsyncMock()
             conn_info = await conn_manager.connect(f"room_a_user_{i}", websocket)
             room_a_users.append(conn_info)
             
         # Room B users  
         for i in range(2):
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             websocket = Mock(spec=WebSocket)
+            # Mock: Generic component isolation for controlled unit testing
             websocket.accept = AsyncMock()
             conn_info = await conn_manager.connect(f"room_b_user_{i}", websocket)
             room_b_users.append(conn_info)
@@ -411,7 +448,9 @@ class TestWebSocketPerformance:
         start_time = time.time()
         
         for i in range(10):  # Moderate load test
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             websocket = Mock(spec=WebSocket)
+            # Mock: Generic component isolation for controlled unit testing
             websocket.accept = AsyncMock()
             
             conn_info = await conn_manager.connect(f"perf_user_{i}", websocket)

@@ -229,6 +229,7 @@ class TestSessionCleanupJob:
     @pytest.mark.asyncio
     async def test_cleanup_job_error_handling(self, cleanup_service):
         """Test cleanup job handles database errors gracefully"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
         mock_session.execute.side_effect = Exception("Database error")
         

@@ -44,12 +44,19 @@ class TestNewUserRegistrationFlow:
     @pytest.fixture
     async def mock_db_session(self):
         """Create mock database session."""
+        # Mock: Session isolation for controlled testing without external state
         session = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.execute = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.add = MagicMock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.refresh = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.close = AsyncMock()
         try:
             yield session
@@ -60,19 +67,28 @@ class TestNewUserRegistrationFlow:
     @pytest.fixture
     async def mock_auth_service(self):
         """Create mock auth service."""
+        # Mock: Authentication service isolation for testing without real auth flows
         service = AsyncMock(spec=AuthService)
+        # Mock: Generic component isolation for controlled unit testing
         service.create_user = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.verify_email = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         service.generate_token = AsyncMock(return_value="test_token_123")
+        # Mock: Async component isolation for testing without real async operations
         service.validate_token = AsyncMock(return_value=True)
         yield service
     
     @pytest.fixture
     async def mock_user_service(self):
         """Create mock user service."""
+        # Mock: Async component isolation for testing without real async operations
         service = AsyncMock(spec=UserService)
+        # Mock: Generic component isolation for controlled unit testing
         service.get_user_by_email = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.create_user = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.update_user = AsyncMock()
         yield service
     
@@ -108,12 +124,15 @@ class TestNewUserRegistrationFlow:
         }
         
         # Mock successful user creation
+        # Mock: Service component isolation for predictable testing behavior
         mock_user = MagicMock(spec=User)
         mock_user.id = str(uuid.uuid4())
         mock_user.email = registration_data["email"]
         mock_user.is_active = False  # Not active until email verified
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.create_user', return_value=mock_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.send_verification_email', return_value=True):
                 
                 response = await async_client.post("/api/auth/register", json=registration_data)
@@ -133,6 +152,7 @@ class TestNewUserRegistrationFlow:
         existing_email = "existing@example.com"
         
         # Mock existing user
+        # Mock: Service component isolation for predictable testing behavior
         mock_user_service.get_user_by_email.return_value = MagicMock(spec=User)
         
         registration_data = {
@@ -141,6 +161,7 @@ class TestNewUserRegistrationFlow:
             "full_name": "Duplicate User"
         }
         
+        # Mock: Generic component isolation for controlled unit testing
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=MagicMock()):
             response = await async_client.post("/api/auth/register", json=registration_data)
             
@@ -159,6 +180,7 @@ class TestNewUserRegistrationFlow:
         verification_token = "verify_token_123"
         
         # Mock unverified user
+        # Mock: Service component isolation for predictable testing behavior
         mock_user = MagicMock(spec=User)
         mock_user.id = user_id
         mock_user.is_active = False
@@ -167,7 +189,9 @@ class TestNewUserRegistrationFlow:
         # Mock verification success
         mock_auth_service.verify_email.return_value = True
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user', return_value=mock_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.verify_email_token', return_value=user_id):
                 
                 response = await async_client.get(f"/api/auth/verify-email?token={verification_token}")
@@ -186,6 +210,7 @@ class TestNewUserRegistrationFlow:
     async def test_login_before_email_verification(self, async_client, mock_user_service):
         """Test 4: Login should fail for unverified email accounts."""
         # Mock unverified user
+        # Mock: Service component isolation for predictable testing behavior
         mock_user = MagicMock(spec=User)
         mock_user.email = "unverified@example.com"
         mock_user.email_verified = False
@@ -198,6 +223,7 @@ class TestNewUserRegistrationFlow:
             "password": "password123"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_user):
             response = await async_client.post("/api/auth/login", json=login_data)
             
@@ -213,11 +239,13 @@ class TestNewUserRegistrationFlow:
     async def test_first_login_after_verification(self, async_client, mock_auth_service):
         """Test 5: First login after email verification should succeed."""
         # Mock verified user
+        # Mock: Service component isolation for predictable testing behavior
         mock_user = MagicMock(spec=User)
         mock_user.id = str(uuid.uuid4())
         mock_user.email = "verified@example.com"
         mock_user.email_verified = True
         mock_user.is_active = True
+        # Mock: Service component isolation for predictable testing behavior
         mock_user.check_password = MagicMock(return_value=True)
         
         # Mock token generation
@@ -228,7 +256,9 @@ class TestNewUserRegistrationFlow:
             "expires_in": 3600
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.generate_tokens', return_value=mock_token):
                 
                 login_data = {
@@ -321,6 +351,7 @@ class TestNewUserRegistrationFlow:
         }
         
         # Mock user creation with profile
+        # Mock: Service component isolation for predictable testing behavior
         mock_user = MagicMock(spec=User)
         mock_user.id = str(uuid.uuid4())
         mock_user.email = registration_data["email"]
@@ -329,6 +360,7 @@ class TestNewUserRegistrationFlow:
         mock_user.phone = registration_data.get("phone")
         mock_user.created_at = datetime.utcnow()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.create_user', return_value=mock_user):
             response = await async_client.post("/api/auth/register", json=registration_data)
             
@@ -353,9 +385,12 @@ class TestNewUserRegistrationFlow:
         
         # Track email sending
         mock_auth_service.send_verification_email.return_value = True
+        # Mock: Authentication service isolation for testing without real auth flows
         mock_auth_service.send_welcome_email = AsyncMock(return_value=True)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.auth_service.AuthService.send_verification_email', return_value=True) as mock_verify:
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.send_welcome_email', return_value=True) as mock_welcome:
                 
                 response = await async_client.post("/api/auth/register", json=registration_data)
@@ -377,6 +412,7 @@ class TestNewUserRegistrationFlow:
         }
         
         # Mock user with default permissions
+        # Mock: Service component isolation for predictable testing behavior
         mock_user = MagicMock(spec=User)
         mock_user.id = str(uuid.uuid4())
         mock_user.email = registration_data["email"]
@@ -385,7 +421,9 @@ class TestNewUserRegistrationFlow:
         mock_user.tier = "free"
         mock_user.api_calls_limit = 1000  # Free tier limit
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.create_user', return_value=mock_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.permission_service.PermissionService.assign_default_permissions', return_value=True):
                 
                 response = await async_client.post("/api/auth/register", json=registration_data)

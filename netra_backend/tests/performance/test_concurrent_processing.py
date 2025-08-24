@@ -38,6 +38,7 @@ class TestConcurrentProcessing:
         concurrent_jobs = 5
         job_ids = [str(uuid.uuid4()) for _ in range(concurrent_jobs)]
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
             mock_pool.return_value = iter([
                 {'type': 'test', 'data': ('p', 'r')} for _ in range(100)
@@ -66,8 +67,11 @@ class TestConcurrentProcessing:
             max_cores=4
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('multiprocessing.cpu_count', return_value=4):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.generation_service.Pool') as mock_pool_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_pool = MagicMock()
                 mock_pool_class.return_value.__enter__.return_value = mock_pool
                 mock_pool.imap_unordered.return_value = iter([
@@ -128,8 +132,10 @@ class TestConcurrentProcessing:
             max_cores=8
         )
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.generate_content_for_worker', 
                    side_effect=mock_worker_with_load_tracking):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:
                 mock_pool.side_effect = lambda tasks, num_proc: [
                     mock_worker_with_load_tracking(task) for task in tasks

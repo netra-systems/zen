@@ -236,7 +236,9 @@ class TestSystemStartup:
         """Test services start in correct dependency order."""
         start_times = {}
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_startup.ServiceStartupCoordinator') as mock_coordinator:
+            # Mock: Async component isolation for testing without real async operations
             mock_coordinator.return_value.start_service = AsyncMock(
                 side_effect=lambda name: start_times.update({name: time.time()})
             )
@@ -317,8 +319,10 @@ class TestStartupRecovery:
             retry_count += 1
             if retry_count < 3:  # Fail first 2 attempts
                 raise Exception("Simulated startup failure")
+            # Mock: Generic component isolation for controlled unit testing
             return AsyncMock()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.service_startup.ServiceStartupCoordinator.start_service', 
                   side_effect=mock_start_service):
             
@@ -336,6 +340,7 @@ class TestStartupRecovery:
     @pytest.mark.asyncio  
     async def test_partial_startup_handling(self, launcher_config):
         """Test handling when only some services start successfully."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.backend_starter.BackendStarter.start') as mock_backend:
             mock_backend.side_effect = Exception("Backend startup failed")
             

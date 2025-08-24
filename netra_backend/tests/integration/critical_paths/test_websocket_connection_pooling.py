@@ -86,6 +86,7 @@ class TestWebSocketConnectionPoolingL3:
 
         _, redis_url = redis_container
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.websocket_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()

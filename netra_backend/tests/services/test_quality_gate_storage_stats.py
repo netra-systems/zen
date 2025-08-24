@@ -28,6 +28,7 @@ class TestMetricsStorage:
     
     @pytest.fixture
     def mock_redis(self):
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         return AsyncMock(spec=RedisManager)
         
     @pytest.fixture

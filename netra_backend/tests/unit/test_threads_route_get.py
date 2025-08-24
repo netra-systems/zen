@@ -21,11 +21,13 @@ from netra_backend.tests.helpers.thread_test_helpers import (
 @pytest.fixture
 def mock_db():
     """Mock database session"""
+    # Mock: Generic component isolation for controlled unit testing
     return AsyncMock(commit=AsyncMock())
 
 @pytest.fixture
 def mock_user():
     """Mock authenticated user"""
+    # Mock: Generic component isolation for controlled unit testing
     user = Mock()
     user.id = "test_user_123"
     user.email = "test@example.com"
@@ -50,8 +52,10 @@ class TestGetThread:
     @pytest.mark.asyncio
     async def test_get_thread_not_found(self, mock_db, mock_user):
         """Test thread not found"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
+            # Mock: Async component isolation for testing without real async operations
             thread_repo.get_by_id = AsyncMock(return_value=None)
             
             with pytest.raises(HTTPException) as exc_info:
@@ -63,8 +67,10 @@ class TestGetThread:
         """Test access denied for thread owned by another user"""
         mock_thread = create_access_denied_thread()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
+            # Mock: Async component isolation for testing without real async operations
             thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
             
             with pytest.raises(HTTPException) as exc_info:
@@ -74,10 +80,13 @@ class TestGetThread:
     @pytest.mark.asyncio
     async def test_get_thread_general_exception(self, mock_db, mock_user):
         """Test general exception handling"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             thread_repo = MockThreadRepo.return_value
+            # Mock: Database isolation for unit testing without external database connections
             thread_repo.get_by_id = AsyncMock(side_effect=Exception("Database error"))
             
             with pytest.raises(HTTPException) as exc_info:

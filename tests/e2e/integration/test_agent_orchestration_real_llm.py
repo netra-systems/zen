@@ -382,6 +382,7 @@ class TestAgentOrchestrationRealLLMIntegration:
                 }
         else:
             # Mocked LLM execution
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
                 mock_llm.return_value = {
                     "content": f"Mock {agent_type} response for: {request['message']}",

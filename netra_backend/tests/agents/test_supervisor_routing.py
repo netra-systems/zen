@@ -131,6 +131,7 @@ class TestSupervisorConsolidatedAgentRouting:
         # Setup multiple agents with simple return values
         for agent_name in ["triage", "data", "optimization"]:
             agent = supervisor.agents.get(agent_name)
+            # Mock: Generic component isolation for controlled unit testing
             agent.execute = AsyncMock()
             agent.execute.return_value = create_agent_state("Complex query")
         

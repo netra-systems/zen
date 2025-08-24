@@ -31,16 +31,22 @@ class TestCorpusGenerationPerformance:
     @pytest.fixture(scope="function")
     def mock_corpus_service(self):
         """Create mock corpus service"""
+        # Mock: Async component isolation for testing without real async operations
         service = AsyncMock(spec=CorpusService)
+        # Mock: Async component isolation for testing without real async operations
         service.create_corpus = AsyncMock(return_value="corpus_perf_123")
+        # Mock: Generic component isolation for controlled unit testing
         service.generate_data = AsyncMock()
         return service
     
     @pytest.fixture(scope="function")
     def mock_synthetic_manager(self):
         """Create mock synthetic data manager"""
+        # Mock: Async component isolation for testing without real async operations
         manager = AsyncMock(spec=SyntheticDataService)
+        # Mock: Generic component isolation for controlled unit testing
         manager.generate_batch = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         manager.validate_data = AsyncMock(return_value=True)
         return manager
     

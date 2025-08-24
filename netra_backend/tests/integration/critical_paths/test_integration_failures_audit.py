@@ -173,6 +173,7 @@ class TestAgentOrchestrationIntegration:
         
         agent = BaseSubAgent()
 
+        # Mock: Async component isolation for testing without real async operations
         agent.llm_client = AsyncMock(side_effect=Exception("Rate limited"))
         
         start_time = datetime.now()

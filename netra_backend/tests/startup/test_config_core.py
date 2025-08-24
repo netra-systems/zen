@@ -76,15 +76,18 @@ def mock_validation_context(temp_config_path: Path) -> ValidationContext:
 @pytest.fixture
 def mock_services_config() -> ServicesConfiguration:
     """Create mock services configuration."""
+    # Mock: Component isolation for controlled unit testing
     config = Mock(spec=ServicesConfiguration)
     
     # Create mock redis service
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_redis = Mock()
     mock_redis.mode = ResourceMode.SHARED
     mock_redis.get_config.return_value = {"host": "redis.example.com", "port": 6379}
     config.redis = mock_redis
     
     # Create mock clickhouse service
+    # Mock: ClickHouse database isolation for fast testing without external database dependency
     mock_clickhouse = Mock()
     mock_clickhouse.mode = ResourceMode.LOCAL
     mock_clickhouse.get_config.return_value = {"host": "ch.example.com", "port": 8123, "secure": False}

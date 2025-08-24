@@ -70,12 +70,19 @@ class TestDateTimeSerialization:
         )
         
         # Mock database session
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
+        # Mock: Generic component isolation for controlled unit testing
         mock_begin = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_begin.__aenter__ = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         mock_begin.__aexit__ = AsyncMock(return_value=None)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.begin = MagicMock(return_value=mock_begin)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.add = MagicMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.flush = AsyncMock()
         
         # Mock internal methods
@@ -133,12 +140,19 @@ class TestDateTimeSerialization:
         )
         
         # Mock session
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
+        # Mock: Generic component isolation for controlled unit testing
         mock_begin = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_begin.__aenter__ = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         mock_begin.__aexit__ = AsyncMock(return_value=None)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.begin = MagicMock(return_value=mock_begin)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.add = MagicMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.flush = AsyncMock()
         
         # Mock methods

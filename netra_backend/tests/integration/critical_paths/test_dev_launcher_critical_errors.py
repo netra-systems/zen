@@ -199,6 +199,7 @@ class TestClickHouseSSLConfigurationErrors:
     async def test_clickhouse_ssl_error_handling(self):
         """Test proper handling of SSL errors in ClickHouse connections."""
         # Mock a situation where SSL/HTTPS is incorrectly used for localhost
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('netra_backend.app.db.clickhouse._extract_clickhouse_config') as mock_extract:
             # Force HTTPS config for localhost (this should cause SSL error)
             mock_extract.return_value = "https://default:password@localhost:8443/database"

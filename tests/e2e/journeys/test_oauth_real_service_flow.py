@@ -159,6 +159,7 @@ class OAuthRealServiceFlowRunner:
     
     async def _process_oauth_callback_real(self, provider: str) -> Dict[str, Any]:
         """Process OAuth callback through real Auth service with mocked provider"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
             self._setup_oauth_provider_mocks(mock_client, provider)
             
@@ -200,14 +201,17 @@ class OAuthRealServiceFlowRunner:
     
     def _setup_oauth_provider_mocks(self, mock_client, provider: str) -> None:
         """Setup mocks for external OAuth provider API calls only"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_instance = AsyncMock()
         mock_client.return_value.__aenter__.return_value = mock_instance
         
         if provider == "google":
+            # Mock: Generic component isolation for controlled unit testing
             token_response = AsyncMock()
             token_response.json.return_value = GoogleOAuthProvider.get_oauth_response()
             token_response.raise_for_status.return_value = None
             
+            # Mock: Generic component isolation for controlled unit testing
             user_response = AsyncMock()
             user_response.json.return_value = GoogleOAuthProvider.get_user_info()
             user_response.raise_for_status.return_value = None
@@ -382,7 +386,9 @@ class TestOAuthRealServiceFlow:
         runner = oauth_real_service_runner
         
         # Test invalid OAuth code scenario
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             

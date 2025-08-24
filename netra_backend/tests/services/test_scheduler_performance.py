@@ -29,6 +29,7 @@ class TestSupplyResearchSchedulerPerformance:
     async def test_memory_usage_under_load(self):
         """Test memory usage doesn't grow excessively under load."""
         scheduler = SupplyResearchScheduler()
+        # Mock: Async component isolation for testing without real async operations
         scheduler._execute_research_job = AsyncMock(return_value=True)
         
         # Start memory tracing

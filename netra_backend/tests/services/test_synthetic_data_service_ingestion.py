@@ -22,8 +22,11 @@ def ingestion_service():
 
 @pytest.fixture
 def mock_clickhouse():
+    # Mock: Generic component isolation for controlled unit testing
     client = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.execute = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.query = AsyncMock()
     return client
 
@@ -36,6 +39,7 @@ class TestRealTimeIngestion:
         """Test batch ingestion of generated data to ClickHouse"""
         records = [{"id": i, "data": f"record_{i}"} for i in range(1000)]
         
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.synthetic_data_service.get_clickhouse_client', return_value=mock_clickhouse):
             result = await ingestion_service.ingest_batch(
                 records,
@@ -80,6 +84,7 @@ class TestRealTimeIngestion:
         
         records = [{"id": i} for i in range(100)]
         
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.synthetic_data_service.get_clickhouse_client', return_value=mock_clickhouse):
             result = await ingestion_service.ingest_with_retry(
                 records,
@@ -115,6 +120,7 @@ class TestRealTimeIngestion:
         
         mock_clickhouse.query.return_value = []  # Table doesn't exist
         
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.synthetic_data_service.get_clickhouse_client', return_value=mock_clickhouse):
             await ingestion_service.ensure_table_exists(table_name)
         

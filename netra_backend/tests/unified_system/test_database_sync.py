@@ -68,8 +68,10 @@ class TestDatabaseSynchronization:
         
         # Mock WebSocket connection for user
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_connection.state = MagicMock()
 
         mock_connection.state.value = 1  # CONNECTED state
@@ -262,14 +264,18 @@ class TestDatabaseSynchronization:
         
         # Mock WebSocket connections for multiple users
 
+        # Mock: Generic component isolation for controlled unit testing
         user1_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         user1_connection.state = MagicMock()
 
         user1_connection.state.value = 1
         
+        # Mock: Generic component isolation for controlled unit testing
         user2_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         user2_connection.state = MagicMock()
 
         user2_connection.state.value = 1
@@ -367,20 +373,26 @@ class TestDatabaseSynchronization:
         
         # Mock multiple tabs for same user
 
+        # Mock: Generic component isolation for controlled unit testing
         tab1_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         tab1_connection.state = MagicMock()
 
         tab1_connection.state.value = 1
         
+        # Mock: Generic component isolation for controlled unit testing
         tab2_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         tab2_connection.state = MagicMock()
 
         tab2_connection.state.value = 1
         
+        # Mock: Generic component isolation for controlled unit testing
         tab3_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         tab3_connection.state = MagicMock()
 
         tab3_connection.state.value = 1
@@ -504,8 +516,10 @@ class TestDatabaseSynchronization:
 
         for i in range(3):
 
+            # Mock: Generic component isolation for controlled unit testing
             conn = AsyncMock()
 
+            # Mock: Generic component isolation for controlled unit testing
             conn.state = MagicMock()
 
             conn.state.value = 1
@@ -708,8 +722,10 @@ class TestDatabaseSynchronization:
         
         # Mock connection
 
+        # Mock: Generic component isolation for controlled unit testing
         connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         connection.state = MagicMock()
 
         connection.state.value = 1
@@ -726,8 +742,10 @@ class TestDatabaseSynchronization:
         
         # Create new connection (recovery)
 
+        # Mock: Generic component isolation for controlled unit testing
         new_connection = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         new_connection.state = MagicMock()
 
         new_connection.state.value = 1

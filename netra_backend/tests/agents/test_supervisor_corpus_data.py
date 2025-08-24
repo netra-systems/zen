@@ -150,14 +150,18 @@ class TestCorpusAdminDocumentManagement:
         self._assert_indexing_results(result, corpus_admin)
     def _setup_retrieval_test(self):
         """Setup document retrieval test"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = AsyncMock(spec=LLMManager)
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = AsyncMock(spec=ToolDispatcher)
         corpus_admin = CorpusAdminSubAgent(llm_manager, tool_dispatcher)
         return corpus_admin
     
     def _mock_similarity_search(self, corpus_admin):
         """Mock similarity search functionality"""
+        # Mock: Generic component isolation for controlled unit testing
         corpus_admin.vector_store = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         corpus_admin.vector_store.similarity_search = AsyncMock()
         corpus_admin.vector_store.similarity_search.return_value = [
             {"id": "doc1", "content": "AI optimization guide", "score": 0.95},
@@ -181,14 +185,18 @@ class TestCorpusAdminDocumentManagement:
         self._assert_retrieval_results(results)
     def _setup_update_test(self):
         """Setup corpus update test"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = AsyncMock(spec=LLMManager)
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = AsyncMock(spec=ToolDispatcher)
         corpus_admin = CorpusAdminSubAgent(llm_manager, tool_dispatcher)
         return corpus_admin
     
     def _mock_update_operations(self, corpus_admin):
         """Mock update operations"""
+        # Mock: Generic component isolation for controlled unit testing
         corpus_admin.vector_store = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         corpus_admin.vector_store.update_document = AsyncMock()
         corpus_admin.vector_store.update_document.return_value = {"success": True}
     
@@ -219,14 +227,18 @@ class TestSupplyResearcherDataCollection:
     """Test 6: Test supply chain data research capabilities"""
     def _setup_supply_collection_test(self):
         """Setup supply chain data collection test"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = AsyncMock(spec=LLMManager)
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = AsyncMock(spec=ToolDispatcher)
         supply_researcher = SupplyResearcherSubAgent(llm_manager, tool_dispatcher)
         return supply_researcher
     
     def _mock_supply_data_sources(self, supply_researcher):
         """Mock external supply data sources"""
+        # Mock: Generic component isolation for controlled unit testing
         supply_researcher.data_sources = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         supply_researcher.data_sources.fetch_supply_data = AsyncMock()
         supply_researcher.data_sources.fetch_supply_data.return_value = {
             "suppliers": [
@@ -251,7 +263,9 @@ class TestSupplyResearcherDataCollection:
         self._assert_supply_collection_results(result)
     def _setup_validation_test(self):
         """Setup data validation and enrichment test"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = AsyncMock(spec=LLMManager)
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = AsyncMock(spec=ToolDispatcher)
         supply_researcher = SupplyResearcherSubAgent(llm_manager, tool_dispatcher)
         return supply_researcher
@@ -266,7 +280,9 @@ class TestSupplyResearcherDataCollection:
     
     def _mock_enrichment_service(self, supply_researcher):
         """Mock enrichment service"""
+        # Mock: Generic component isolation for controlled unit testing
         supply_researcher.enrichment_service = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         supply_researcher.enrichment_service.enrich = AsyncMock()
         supply_researcher.enrichment_service.enrich.return_value = {
             "supplier": "Supplier A",
@@ -295,13 +311,16 @@ class TestDemoServiceWorkflow:
     """Test 7: Test demo service scenario execution"""
     def _setup_demo_scenario_test(self):
         """Setup demo scenario execution test"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = AsyncMock(spec=LLMManager)
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = AsyncMock(spec=ToolDispatcher)
         demo_service = DemoService(llm_manager, tool_dispatcher)
         return demo_service
     
     def _mock_demo_data_generation(self, demo_service):
         """Mock demo data generation"""
+        # Mock: Generic component isolation for controlled unit testing
         demo_service.generate_demo_data = AsyncMock()
         demo_service.generate_demo_data.return_value = {
             "metrics": {"accuracy": 0.95, "latency": 100},
@@ -324,7 +343,9 @@ class TestDemoServiceWorkflow:
         self._assert_demo_scenario_results(result)
     def _setup_demo_variety_test(self):
         """Setup demo data variety test"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = AsyncMock(spec=LLMManager)
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = AsyncMock(spec=ToolDispatcher)
         demo_service = DemoService(llm_manager, tool_dispatcher)
         return demo_service

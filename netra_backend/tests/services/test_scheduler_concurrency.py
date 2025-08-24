@@ -116,6 +116,7 @@ class TestSupplyResearchSchedulerConcurrency:
             execution_order.append(job_name)
             return True
         
+        # Mock: Async component isolation for testing without real async operations
         concurrent_scheduler._wait_for_dependency = AsyncMock(
             side_effect=asyncio.TimeoutError()
         )

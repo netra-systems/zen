@@ -54,6 +54,7 @@ class TestValidationAndSafety:
         """Test 15: Verify corpus access control"""
         service = CorpusService()
         
+        # Mock: Generic component isolation for controlled unit testing
         db = MagicMock()
         
         # Test filtering by user_id
@@ -72,10 +73,13 @@ class TestCorpusCloning:
         """Test 11: Verify corpus cloning creates new corpus with data"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             
             # Mock source corpus
@@ -97,10 +101,13 @@ class TestCorpusCloning:
         """Test 12: Verify corpus content is copied correctly"""
         service = CorpusService()
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.corpus_service.get_clickhouse_client') as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_instance = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_instance
             
+            # Mock: Generic component isolation for controlled unit testing
             db = MagicMock()
             
             await service._copy_corpus_content(
@@ -127,6 +134,7 @@ def _get_validation_test_cases():
 
 def _create_source_corpus():
     """Create source corpus for cloning."""
+    # Mock: Generic component isolation for controlled unit testing
     source = MagicMock()
     source.id = "source_id"
     source.name = "Original Corpus"

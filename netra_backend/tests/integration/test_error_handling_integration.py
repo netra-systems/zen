@@ -32,8 +32,11 @@ if CRITICAL_HELPERS_AVAILABLE:
 else:
     # Create mock helpers if critical helpers are not available
     from unittest.mock import MagicMock
+    # Mock: Generic component isolation for controlled unit testing
     AgentTestHelpers = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     AuthenticationTestHelpers = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     WebSocketTestHelpers = MagicMock()
 from test_framework.mock_utils import mock_justified
 

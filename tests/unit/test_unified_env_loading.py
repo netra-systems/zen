@@ -64,8 +64,11 @@ class TestUnifiedEnvLoading:
             os.environ['ENVIRONMENT'] = 'development'
             
             # Mock the .env file path
+            # Mock: Component isolation for testing without external dependencies
             with patch('pathlib.Path.exists', return_value=True):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('builtins.open', open(env_file)):
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('netra_backend.app.core.configuration.base.Path') as mock_path:
                         mock_path.return_value.parent.parent.parent = Path(os.path.dirname(env_file))
                         mock_path.return_value.parent.parent.parent.joinpath.return_value = Path(env_file)
@@ -109,8 +112,11 @@ class TestUnifiedEnvLoading:
             os.environ['GEMINI_API_KEY'] = 'env_gemini_key'
             
             # Mock the .env file path
+            # Mock: Component isolation for testing without external dependencies
             with patch('pathlib.Path.exists', return_value=True):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('builtins.open', open(env_file)):
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('netra_backend.app.core.configuration.base.Path') as mock_path:
                         mock_path.return_value.parent.parent.parent = Path(os.path.dirname(env_file))
                         mock_path.return_value.parent.parent.parent.joinpath.return_value = Path(env_file)
@@ -145,8 +151,11 @@ class TestUnifiedEnvLoading:
             os.environ['ENVIRONMENT'] = 'production'
             
             # Mock the .env file path
+            # Mock: Component isolation for testing without external dependencies
             with patch('pathlib.Path.exists', return_value=True):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('builtins.open', open(env_file)):
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('netra_backend.app.core.configuration.base.Path') as mock_path:
                         mock_path.return_value.parent.parent.parent = Path(os.path.dirname(env_file))
                         mock_path.return_value.parent.parent.parent.joinpath.return_value = Path(env_file)

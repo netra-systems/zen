@@ -397,6 +397,7 @@ class AgentCostTracker:
         self.cost_entries: List[CostEntry] = []
         
         # Initialize alert system
+        # Mock: Generic component isolation for controlled unit testing
         self.budget_enforcer.alert_callbacks.append(AsyncMock())
     
     async def track_cost(self, cost_type: CostType, quantity: int,

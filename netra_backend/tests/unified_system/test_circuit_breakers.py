@@ -368,7 +368,9 @@ async def test_circuit_breaker_recovery_patterns():
     )
     
     # Mock health checker
+    # Mock: Generic component isolation for controlled unit testing
     mock_health_checker = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     mock_health_checker.check_health = AsyncMock(return_value=True)
     
     cb = AdaptiveCircuitBreaker("recovery_test", config, mock_health_checker)

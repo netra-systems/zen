@@ -98,6 +98,7 @@ class TestAgentStatePersistenceRecovery:
     @mock_justified("Redis service external dependency for state persistence")
     def redis_manager_mock(self):
         """Mock Redis manager for state persistence testing."""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         redis_mock = Mock(spec=RedisManager)
         redis_mock.enabled = True
         
@@ -126,9 +127,13 @@ class TestAgentStatePersistenceRecovery:
         async def mock_exists(key: str):
             return key in state_store
         
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock.set = AsyncMock(side_effect=mock_set)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock.get = AsyncMock(side_effect=mock_get)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock.delete = AsyncMock(side_effect=mock_delete)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis_mock.exists = AsyncMock(side_effect=mock_exists)
         redis_mock._state_store = state_store  # For test inspection
         
@@ -138,7 +143,9 @@ class TestAgentStatePersistenceRecovery:
     @mock_justified("LLM service external dependency for agent testing")
     def llm_manager_mock(self):
         """Mock LLM manager for state testing."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_mock = Mock(spec=LLMManager)
+        # Mock: Async component isolation for testing without real async operations
         llm_mock.generate_response = AsyncMock(return_value={
             "content": "State persistence response",
             "usage": {"prompt_tokens": 30, "completion_tokens": 10}
@@ -149,7 +156,9 @@ class TestAgentStatePersistenceRecovery:
     @mock_justified("Tool dispatcher external dependency for state operations")
     def tool_dispatcher_mock(self):
         """Mock tool dispatcher for state testing."""
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         dispatcher_mock = Mock(spec=ToolDispatcher)
+        # Mock: Async component isolation for testing without real async operations
         dispatcher_mock.dispatch = AsyncMock(return_value={"status": "success"})
         return dispatcher_mock
 

@@ -25,11 +25,15 @@ class TestIntegration(SharedTestIntegration):
     @pytest.mark.asyncio
     async def test_integration_with_websocket(self):
         """Test integration with WebSocket for real-time updates"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.send = AsyncMock()
         
         data = {"content": "realtime data"}
@@ -41,7 +45,9 @@ class TestIntegration(SharedTestIntegration):
 
     async def test_integration_with_database(self):
         """Test integration with database persistence"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
@@ -70,13 +76,16 @@ class TestIntegration(SharedTestIntegration):
 
     async def test_integration_with_supervisor(self):
         """Test integration with supervisor agent"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         supervisor_request = {
             "action": "process_data",
             "data": {"content": "from supervisor"},
+            # Mock: Generic component isolation for controlled unit testing
             "callback": AsyncMock()
         }
         
@@ -90,7 +99,9 @@ class TestPerformance:
     @pytest.mark.asyncio
     async def test_concurrent_processing(self):
         """Test concurrent data processing"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
@@ -108,7 +119,9 @@ class TestPerformance:
 
     async def test_memory_efficiency(self):
         """Test memory efficiency with large datasets"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
@@ -131,7 +144,9 @@ class TestStateManagement:
     @pytest.mark.asyncio
     async def test_state_persistence(self):
         """Test agent state persistence"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
@@ -144,10 +159,14 @@ class TestStateManagement:
         agent.context["last_processed"] = "item_123"
         
         # Mock Redis for state persistence
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis = Mock()
             MockRedis.return_value = mock_redis
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis.set = AsyncMock()
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis.get = AsyncMock(return_value=None)  # Simulate no existing state
             
             # Save state
@@ -160,7 +179,9 @@ class TestStateManagement:
         saved_context = agent.context.copy()
         
         # Create new agent and manually set loaded context
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager2 = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher2 = Mock()
         new_agent = DataSubAgent(mock_llm_manager2, mock_tool_dispatcher2)
         new_agent.context = saved_context
@@ -172,7 +193,9 @@ class TestStateManagement:
     @pytest.mark.asyncio
     async def test_state_recovery(self):
         """Test state recovery after failure"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
@@ -185,9 +208,12 @@ class TestStateManagement:
         agent.context["pending_items"] = list(range(51, 100))
         
         # Mock Redis for state persistence
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis = Mock()
             MockRedis.return_value = mock_redis
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis.set = AsyncMock()
             
             # Simulate failure and recovery
@@ -197,7 +223,9 @@ class TestStateManagement:
         saved_context = agent.context.copy()
         
         # Recovery
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager_recovered = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher_recovered = Mock()
         recovered_agent = DataSubAgent(mock_llm_manager_recovered, mock_tool_dispatcher_recovered)
         

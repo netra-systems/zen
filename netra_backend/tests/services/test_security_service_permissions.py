@@ -19,6 +19,7 @@ from netra_backend.tests.services.security_service_test_mocks import (
 @pytest.fixture
 def security_service_with_permissions():
     """Create security service with permission features"""
+    # Mock: Key management isolation for secure testing environments
     key_manager = MagicMock()
     key_manager.jwt_secret_key = "test_key_for_permissions"
     key_manager.fernet_key = Fernet.generate_key()

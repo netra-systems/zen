@@ -47,6 +47,7 @@ class TestUnifiedConfigManager:
     def test_hot_reload_capability(self):
         """Test hot reload clears cache and reloads config."""
         manager = UnifiedConfigManager()
+        # Mock: Generic component isolation for controlled unit testing
         manager._config_cache = Mock()
         manager._hot_reload_enabled = True
         
@@ -58,6 +59,7 @@ class TestUnifiedConfigManager:
         """Test configuration summary includes all key metrics."""
         manager = UnifiedConfigManager()
         with patch.object(manager, 'get_config') as mock_get_config:
+            # Mock: Generic component isolation for controlled unit testing
             mock_config = Mock()
             mock_config.db_pool_size = 10
             mock_config.db_max_overflow = 20
@@ -79,6 +81,7 @@ class TestUnifiedConfigManager:
         """Test configuration integrity validation."""
         manager = UnifiedConfigManager()
         with patch.object(manager, 'get_config') as mock_config:
+            # Mock: Generic component isolation for controlled unit testing
             mock_config.return_value = Mock()
             with patch.object(manager, '_check_configuration_consistency') as mock_check:
                 mock_check.return_value = []
@@ -91,6 +94,7 @@ class TestUnifiedConfigManager:
         manager = UnifiedConfigManager()
         with patch.object(manager, '_get_logger', return_value=None):
             # Should use print fallback when logger unavailable
+            # Mock: Component isolation for testing without external dependencies
             with patch('builtins.print') as mock_print:
                 manager._safe_log_error("Test error")
                 mock_print.assert_called_once()
@@ -125,6 +129,7 @@ class TestUnifiedConfigManager:
     def test_configuration_population_order(self):
         """Test configuration data is populated in correct order."""
         manager = UnifiedConfigManager()
+        # Mock: Component isolation for controlled unit testing
         config = Mock(spec=AppConfig)
         
         with patch.object(manager._database_manager, 'populate_database_config') as mock_db:
@@ -225,6 +230,7 @@ class TestConfigHelperFunctions:
     
     def test_reload_unified_config_delegates_to_manager(self):
         """Test reload function delegates to manager."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.configuration.base.config_manager.reload_config') as mock_reload:
             reload_unified_config(force=True)
             mock_reload.assert_called_once_with(force=True)

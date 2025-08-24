@@ -50,9 +50,11 @@ class TestSecretManager:
         assert 'jwt-secret-key' in secrets
         assert secrets['jwt-secret-key'] == 'test-jwt-secret'
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient')
     def test_secret_manager_client_creation_success(self, mock_client_class):
         """Test successful Secret Manager client creation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = MagicMock()
         mock_client_class.return_value = mock_client
         
@@ -62,6 +64,7 @@ class TestSecretManager:
         assert client == mock_client
         mock_client_class.assert_called_once()
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.core.secret_manager.secretmanager.SecretManagerServiceClient')
     def test_secret_manager_client_creation_failure(self, mock_client_class):
         """Test Secret Manager client creation failure."""
@@ -78,6 +81,7 @@ class TestSecretManager:
     @patch.object(SecretManager, '_fetch_secret')
     def test_load_from_secret_manager_success(self, mock_fetch, mock_client):
         """Test successful loading from Secret Manager."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client.return_value = MagicMock()
         mock_fetch.side_effect = lambda client, name: f"secret-{name}"
         
@@ -310,6 +314,7 @@ class TestUnifiedConfigManager:
 class TestConfigurationFunctions:
     """Test global configuration functions."""
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.config.config_manager')
     def test_get_config(self, mock_manager):
         """Test global get_config function."""
@@ -321,6 +326,7 @@ class TestConfigurationFunctions:
         assert config == mock_config
         mock_manager.get_config.assert_called_once()
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.config.config_manager')
     def test_reload_config(self, mock_manager):
         """Test global reload_config function."""

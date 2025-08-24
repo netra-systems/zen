@@ -446,6 +446,7 @@ class TestDevEnvironmentInitialization:
         - Resource usage stays reasonable
         """
         with patch.dict(os.environ, self.test_env, clear=False):
+            # Mock: Component isolation for testing without external dependencies
             with patch('signal.signal'):
                 config = LauncherConfig(
                     backend_port=8002,
@@ -518,6 +519,7 @@ class TestDevEnvironmentInitialization:
         }
         
         with patch.dict(os.environ, minimal_env, clear=True):
+            # Mock: Component isolation for testing without external dependencies
             with patch('signal.signal'):
                 config = LauncherConfig(
                     backend_port=8003,
@@ -749,6 +751,7 @@ class TestDevEnvironmentRealServices:
             temp_dir = tempfile.mkdtemp()
             project_root = Path(temp_dir)
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('signal.signal'):
                 config = LauncherConfig(
                     backend_port=8004,

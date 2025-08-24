@@ -56,8 +56,10 @@ class TestAgentCollaborationIntegration:
 
     async def _create_agent_cluster(self, db_setup, infra):
         """Create cluster of collaborating agents"""
+        # Mock: Session state isolation for predictable testing
         supervisor = SupervisorAgent(db_setup["session"], infra["llm_manager"], infra["ws_manager"], Mock())
         triage_agent = TriageSubAgent()
+        # Mock: Generic component isolation for controlled unit testing
         data_agent = Mock()
         return {"supervisor": supervisor, "triage": triage_agent, "data": data_agent}
 

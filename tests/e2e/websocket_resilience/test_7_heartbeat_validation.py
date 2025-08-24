@@ -170,6 +170,7 @@ class HeartbeatTestClient:
         """Connect to WebSocket server."""
         try:
             # Mock connection for testing
+            # Mock: Generic component isolation for controlled unit testing
             self.websocket = AsyncMock()
             self.is_connected = True
             

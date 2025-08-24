@@ -50,10 +50,12 @@ class TestDatabaseHealthCheckerSSLMode:
     async def test_health_checker_with_unconverted_url_fails(self):
         """Test that health checker fails when engine has unconverted URL."""
         # Mock the engine with an unconverted URL
+        # Mock: Generic component isolation for controlled unit testing
         mock_engine = AsyncMock()
         mock_engine.url = "postgresql+asyncpg://user:pass@host:5432/dbname?sslmode=require"
         
         # Create a mock that simulates the exact error we see in staging
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn_context = AsyncMock()
         mock_conn_context.__aenter__.side_effect = TypeError("connect() got an unexpected keyword argument 'sslmode'")
         mock_conn_context.__aexit__.return_value = None
@@ -110,11 +112,14 @@ class TestDatabaseHealthCheckerSSLMode:
         converted_url = "postgresql+asyncpg://user:pass@host:5432/dbname?ssl=require"
         
         # Create a mock engine that simulates successful connection
+        # Mock: Generic component isolation for controlled unit testing
         mock_engine = AsyncMock()
         mock_engine.url = converted_url
         
         # Mock successful connection and query
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = AsyncMock()
         mock_result.fetchone.return_value = (1,)
         mock_conn.execute.return_value = mock_result
@@ -159,6 +164,7 @@ class TestDatabaseHealthCheckerSSLMode:
                 # The validation should catch this
                 with pytest.raises(RuntimeError) as exc_info:
                     # Mock the create_async_engine to not actually create engine
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('netra_backend.app.db.postgres_core.create_async_engine'):
                         postgres_core._create_and_setup_engine(bad_url, {})
                 

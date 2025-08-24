@@ -18,13 +18,20 @@ class TestKeyParametersAccess:
     def execution_engine(self):
         """Create execution engine instance."""
         engine = ExecutionEngine(
+            # Mock: ClickHouse external database isolation for unit testing performance
             clickhouse_ops=MagicMock(),
+            # Mock: Generic component isolation for controlled unit testing
             query_builder=MagicMock(),
+            # Mock: Generic component isolation for controlled unit testing
             analysis_engine=MagicMock(),
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             redis_manager=MagicMock(),
+            # Mock: LLM provider isolation to prevent external API usage and costs
             llm_manager=MagicMock()
         )
+        # Mock: Generic component isolation for controlled unit testing
         engine.metrics_service = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         engine.analysis_service = AsyncMock()
         return engine
 

@@ -95,6 +95,7 @@ class OAuthProviderFailoverL4Test(L4StagingCriticalPathTestBase):
             if not test_user["success"]:
                 return {"success": False, "error": "Failed to create test user"}
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('httpx.AsyncClient.get') as mock_get:
                 mock_get.side_effect = httpx.ConnectTimeout("Provider unavailable")
                 oauth_result = await self._attempt_oauth_login(test_user["email"])
@@ -119,7 +120,9 @@ class OAuthProviderFailoverL4Test(L4StagingCriticalPathTestBase):
             if not test_user["success"]:
                 return {"success": False, "error": "Failed to create test user"}
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('httpx.AsyncClient.get') as mock_get:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_response = AsyncMock()
                 mock_response.status_code = 429
                 mock_response.json.return_value = {"error": "rate_limit_exceeded"}
@@ -150,6 +153,7 @@ class OAuthProviderFailoverL4Test(L4StagingCriticalPathTestBase):
             session_id = await self._create_user_session(test_user["user_id"])
             self.active_sessions[session_id] = {"user_id": test_user["user_id"], "state": "active"}
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('httpx.AsyncClient.get') as mock_get:
                 mock_get.side_effect = [httpx.ConnectTimeout("Provider down")]
                 failure_result = await self._attempt_oauth_login(test_user["email"])

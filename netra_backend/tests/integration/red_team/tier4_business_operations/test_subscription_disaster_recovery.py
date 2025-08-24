@@ -27,28 +27,41 @@ class TestSubscriptionDisasterRecovery:
     @pytest.fixture
     def mock_disaster_recovery_service(self):
         """Mock disaster recovery service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.detect_system_failure = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.initiate_recovery_sequence = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_data_integrity = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.restore_service_state = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_backup_service(self):
         """Mock backup and restore service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.create_point_in_time_backup = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.restore_from_backup = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.validate_backup_integrity = AsyncMock()
         return service
     
     @pytest.fixture
     def mock_state_reconciliation_service(self):
         """Mock state reconciliation service."""
+        # Mock: Generic component isolation for controlled unit testing
         service = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.reconcile_subscription_states = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.resolve_billing_conflicts = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.sync_payment_states = AsyncMock()
         return service
     

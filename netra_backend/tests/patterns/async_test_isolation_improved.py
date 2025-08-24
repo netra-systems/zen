@@ -99,6 +99,7 @@ class AsyncResourceTracker:
     
     async def create_async_mock(self, test_name: str, spec=None) -> AsyncMock:
         """Create tracked async mock"""
+        # Mock: Async component isolation for testing without real async operations
         mock = AsyncMock(spec=spec)
         return self.track_resource(test_name, f"mock_{len(self.tracked_resources)}", mock)
     
@@ -200,6 +201,7 @@ async def test_isolated_async_operations(isolated_async_test):
     
     # Create tracked async mock
     mock_service = await _resource_tracker.create_async_mock(test_name)
+    # Mock: Async component isolation for testing without real async operations
     mock_service.process_data = AsyncMock(return_value={"result": "success"})
     
     # Test operation
@@ -231,13 +233,16 @@ async def test_isolated_dependency_injection(isolated_async_test):
     
     # Mock dependencies
     deps = {
+        # Mock: LLM provider isolation to prevent external API usage and costs
         "llm_manager": AsyncMock(),
+        # Mock: Database access isolation for fast, reliable unit testing
         "database": AsyncMock()
     }
     
     async with _dependency_injector.inject_dependencies(test_name, deps):
         # Test with injected dependencies
         llm_manager = deps["llm_manager"]
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.generate = AsyncMock(return_value="mock response")
         
         result = await llm_manager.generate("test prompt")

@@ -71,6 +71,7 @@ class TestEnterpriseEnvironmentConfig:
             else:
                 validation_results[var_name] = {"valid": True, "note": "custom_variable"}
         
+        # Mock: Async component isolation for testing without real async operations
         infra["config_validator"].validate_environment = AsyncMock(return_value={
             "validation_id": str(uuid.uuid4()),
             "config_valid": all(result.get("valid", True) for result in validation_results.values()),
@@ -94,6 +95,7 @@ class TestEnterpriseEnvironmentConfig:
         
         env_file_content = self._build_env_file_content(validation["validation_results"])
         
+        # Mock: Async component isolation for testing without real async operations
         infra["environment_loader"].inject_variables = AsyncMock(return_value={
             "injection_id": str(uuid.uuid4()),
             "injection_strategy": injection_strategy,
@@ -169,6 +171,7 @@ class TestEnterpriseEnvironmentConfig:
         """Validate configuration against enterprise requirements"""
         validation_results = self._build_validation_results(requirements["mandatory_configurations"])
         
+        # Mock: Async component isolation for testing without real async operations
         infra["config_validator"].validate_enterprise_requirements = AsyncMock(return_value={
             "validation_id": str(uuid.uuid4()),
             "validation_results": validation_results,

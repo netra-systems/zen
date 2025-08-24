@@ -42,6 +42,7 @@ class TestConfigSecretsManager:
     @pytest.fixture
     def mock_config(self):
         """Mock AppConfig instance"""
+        # Mock: Component isolation for controlled unit testing
         return Mock(spec=AppConfig)
 
     @pytest.fixture
@@ -63,6 +64,7 @@ class TestConfigSecretsManager:
         assert manager._secret_manager is not None
         assert manager._logger is not None
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.config_secrets_manager.SecretManager')
     def test_load_secrets_into_config_success(self, mock_secret_manager_class, secrets_manager, mock_config, mock_secrets):
         """Test successful secret loading into config"""
@@ -84,6 +86,7 @@ class TestConfigSecretsManager:
             mock_secret_manager.load_secrets.assert_called_once()
             assert mock_mappings.call_count == 1
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.config_secrets_manager.SecretManager')
     def test_load_secrets_into_config_no_secrets(self, mock_secret_manager_class, secrets_manager, mock_config):
         """Test handling when no secrets are loaded"""
@@ -98,6 +101,7 @@ class TestConfigSecretsManager:
         # Assert
         mock_secret_manager.load_secrets.assert_called_once()
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.config_secrets_manager.SecretManager')
     def test_load_secrets_into_config_error_handling(self, mock_secret_manager_class, secrets_manager, mock_config):
         """Test error handling during secret loading"""
@@ -129,6 +133,7 @@ class TestConfigSecretsManager:
         # Arrange
         secrets = {'database-password': 'test_password'}
         mappings = {'database-password': {'field': 'password', 'targets': ['database']}}
+        # Mock: Database isolation for unit testing without external database connections
         mock_database = Mock()
         mock_config.database = mock_database
         
@@ -174,6 +179,7 @@ class TestConfigSecretsManager:
     def test_set_nested_field_success(self, secrets_manager, mock_config):
         """Test successful nested field setting"""
         # Arrange
+        # Mock: Generic component isolation for controlled unit testing
         mock_target = Mock()
         mock_config.database = mock_target
         
@@ -192,6 +198,7 @@ class TestConfigSecretsManager:
         
         # Assert - Test passes if no exception is raised
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.config_secrets_manager.get_all_secret_mappings')
     def test_get_secret_mappings(self, mock_get_mappings, secrets_manager):
         """Test getting secret mappings"""

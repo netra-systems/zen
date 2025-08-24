@@ -31,6 +31,7 @@ class TestCorpusManagement:
             domain="e-commerce"
         )
         
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.corpus_service.get_clickhouse_client', return_value=mock_clickhouse_client):
             result = await corpus_service.create_corpus(
                 mock_db, corpus_data, "user123"
@@ -69,6 +70,7 @@ class TestCorpusManagement:
             for i in range(100)
         ]
         
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.corpus_service.get_clickhouse_client', return_value=mock_clickhouse_client):
             result = await corpus_service.upload_corpus_content(
                 corpus_id, records, batch_size=50
@@ -103,6 +105,7 @@ class TestCorpusManagement:
         
         mock_clickhouse_client.query.return_value = [(table_name, 1000)]
         
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.corpus_service.get_clickhouse_client', return_value=mock_clickhouse_client):
             is_available, record_count = await corpus_service.check_corpus_availability(
                 corpus_id
@@ -113,6 +116,7 @@ class TestCorpusManagement:
     @pytest.mark.asyncio
     async def test_corpus_fallback_to_default(self, corpus_service):
         """Test fallback to default corpus when primary unavailable"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus_service.get_default_corpus') as mock_default:
             mock_default.return_value = {"default": "corpus"}
             
@@ -143,6 +147,7 @@ class TestCorpusManagement:
         """Test corpus deletion with ClickHouse table cleanup"""
         corpus_id = str(uuid.uuid4())
         
+        # Mock: ClickHouse database isolation for fast testing without external database dependency
         with patch('app.services.corpus_service.get_clickhouse_client', return_value=mock_clickhouse_client):
             await corpus_service.delete_corpus(mock_db, corpus_id)
         

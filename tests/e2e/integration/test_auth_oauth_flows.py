@@ -208,16 +208,20 @@ class OAuthFlowTestRunner:
             mock_user_info = OAuthUserFactory.create_generic_user()
         
         # Patch the OAuth provider calls
+        # Mock: Component isolation for testing without external dependencies
         with patch('httpx.AsyncClient.post') as mock_post, \
+             # Mock: Component isolation for testing without external dependencies
              patch('httpx.AsyncClient.get') as mock_get:
             
             # Mock token exchange response
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = AsyncMock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = mock_provider_response
             mock_post.return_value = mock_token_response
             
             # Mock user info response
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = AsyncMock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = mock_user_info

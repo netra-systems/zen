@@ -90,16 +90,25 @@ class TestDatabaseRepositoryTransactions:
     @pytest.fixture
     def mock_session(self):
         """Create mock database session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.add = MagicMock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.flush = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.refresh = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.execute = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.close = AsyncMock()
         
         # Mock query results
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = None
         mock_result.scalars.return_value.all.return_value = []
@@ -120,6 +129,7 @@ class TestDatabaseRepositoryTransactions:
     def _setup_successful_transaction_mocks(self, mock_session, create_data):
         """Setup mocks for successful transaction"""
         created_entity = MockDatabaseModel(**create_data)
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session.refresh = AsyncMock(side_effect=lambda entity: setattr(entity, 'id', 'test_123'))
         return created_entity
 
@@ -187,17 +197,24 @@ class TestDatabaseRepositoryTransactions:
 
     def _create_concurrent_sessions(self):
         """Create mock sessions for concurrent operations"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session1 = AsyncMock(spec=AsyncSession)
+        # Mock: Database session isolation for transaction testing without real database dependency
         session2 = AsyncMock(spec=AsyncSession)
         return session1, session2
 
     def _setup_concurrent_session_mocks(self, session1, session2):
         """Setup mocks for concurrent sessions"""
         for session in [session1, session2]:
+            # Mock: Session isolation for controlled testing without external state
             session.add = MagicMock()
+            # Mock: Session isolation for controlled testing without external state
             session.commit = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.flush = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.rollback = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             session.refresh = AsyncMock()
 
     async def _create_delayed_flush(self):

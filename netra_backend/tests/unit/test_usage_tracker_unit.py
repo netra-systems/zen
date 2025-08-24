@@ -124,11 +124,13 @@ class MockUsageTracker:
 @pytest.fixture
 def mock_db_session():
     """Mock database session."""
+    # Mock: Generic component isolation for controlled unit testing
     return Mock()
 
 @pytest.fixture
 def mock_redis():
     """Mock Redis client."""
+    # Mock: Generic component isolation for controlled unit testing
     return AsyncMock()
 
 @pytest.fixture
@@ -139,6 +141,7 @@ def usage_tracker(mock_db_session, mock_redis):
 @pytest.fixture
 def free_tier_user():
     """Free tier user fixture."""
+    # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "free_user_123"
     user.email = "free@example.com"
@@ -151,6 +154,7 @@ def free_tier_user():
 @pytest.fixture
 def pro_tier_user():
     """Pro tier user fixture."""
+    # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "pro_user_456"
     user.email = "pro@example.com"
@@ -163,6 +167,7 @@ def pro_tier_user():
 @pytest.fixture
 def enterprise_user():
     """Enterprise tier user fixture."""
+    # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "enterprise_user_789"
     user.email = "enterprise@company.com"
@@ -175,6 +180,7 @@ def enterprise_user():
 @pytest.fixture
 def heavy_usage_free_user():
     """Free tier user with heavy usage pattern."""
+    # Mock: Component isolation for controlled unit testing
     user = Mock(spec=User)
     user.id = "heavy_free_user"
     user.email = "heavy@example.com"
@@ -212,6 +218,7 @@ def assert_upgrade_prompt_should_not_show(result):
 
 def create_mock_tool_usage_log(user_id, tool_name, status="success", cost_cents=10):
     """Create mock tool usage log entry."""
+    # Mock: Component isolation for controlled unit testing
     log = Mock(spec=ToolUsageLog)
     log.user_id = user_id
     log.tool_name = tool_name

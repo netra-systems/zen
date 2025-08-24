@@ -41,12 +41,16 @@ class AgentLoadTestFixtures:
 
         return {
 
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             'llm_manager': AsyncMock(spec=LLMManager),
 
+            # Mock: Tool dispatcher isolation for agent testing without real tool execution
             'tool_dispatcher': AsyncMock(spec=ToolDispatcher),
 
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             'websocket_manager': AsyncMock(spec=WebSocketManager),
 
+            # Mock: Session isolation for controlled testing without external state
             'db_session': AsyncMock()
 
         }
@@ -400,6 +404,7 @@ class TestAgentLoadScenarios:
 
             agent = SupervisorAgent(
 
+                # Mock: Generic component isolation for controlled unit testing
                 AsyncMock(), AsyncMock(), AsyncMock(), AsyncMock()
 
             )

@@ -20,11 +20,14 @@ class TestWebSocketConnection:
         """Test successful WebSocket authentication flow"""
         
         # Mock WebSocket
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         mock_websocket.query_params = {"token": "valid-token"}
         
         # Mock security service
+        # Mock: Security service isolation for auth testing without real token validation
         mock_security_service = MagicMock()
+        # Mock: Security service isolation for auth testing without real token validation
         mock_security_service.get_user_by_id = AsyncMock(return_value=MagicMock(
             id="test-user-123",
             email="test@example.com", 
@@ -32,7 +35,9 @@ class TestWebSocketConnection:
         ))
         
         # Mock auth client (now used for token validation)
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "test-user-123",
@@ -41,9 +46,13 @@ class TestWebSocketConnection:
             })
             
             # Mock database session
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_db_session = MagicMock()
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_db.__aenter__ = AsyncMock(return_value=mock_db_session)
+                # Mock: Async component isolation for testing without real async operations
                 mock_db.__aexit__ = AsyncMock(return_value=None)
                 
                 # Test authentication
@@ -60,15 +69,20 @@ class TestWebSocketConnection:
         """Test WebSocket authentication with invalid token"""
         
         # Mock WebSocket
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         mock_websocket.query_params = {"token": "invalid-token"}
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.close = AsyncMock()
         
         # Mock security service
+        # Mock: Security service isolation for auth testing without real token validation
         mock_security_service = MagicMock()
         
         # Mock auth client to return invalid token response
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": False,
                 "error": "Invalid token"
@@ -88,12 +102,16 @@ class TestWebSocketConnection:
         """Test successful WebSocket connection acceptance"""
         
         # Mock WebSocket
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         mock_websocket.query_params = {"token": "valid-token"}
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.accept = AsyncMock()
         
         # Mock auth client (now used for token validation)
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "test-user"
@@ -126,9 +144,13 @@ class TestWebSocketConnection:
         """Test extraction of app services from WebSocket"""
         
         # Mock WebSocket with app services
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         mock_app = MagicMock()
+        # Mock: Security service isolation for auth testing without real token validation
         mock_security_service = MagicMock()
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_agent_service = MagicMock()
         
         mock_app.state.security_service = mock_security_service
@@ -146,16 +168,22 @@ class TestWebSocketConnection:
         """Test WebSocket authentication when user not found"""
         
         # Mock WebSocket
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         mock_websocket.query_params = {"token": "valid-token"}
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.close = AsyncMock()
         
         # Mock security service
+        # Mock: Security service isolation for auth testing without real token validation
         mock_security_service = MagicMock()
+        # Mock: Security service isolation for auth testing without real token validation
         mock_security_service.get_user_by_id = AsyncMock(return_value=None)
         
         # Mock auth client to return valid token for nonexistent user
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "nonexistent-user",
@@ -164,17 +192,25 @@ class TestWebSocketConnection:
             })
             
             # Mock database session
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_db_session = MagicMock()
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_db.__aenter__ = AsyncMock(return_value=mock_db_session)
+                # Mock: Async component isolation for testing without real async operations
                 mock_db.__aexit__ = AsyncMock(return_value=None)
                 
                 # Mock user count query
+                # Mock: Component isolation for testing without external dependencies
                 with patch('netra_backend.app.routes.utils.websocket_helpers.select') as mock_select, \
+                     # Mock: Component isolation for testing without external dependencies
                      patch('netra_backend.app.routes.utils.websocket_helpers.func') as mock_func:
                     
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_result = MagicMock()
                     mock_result.scalar.return_value = 1  # Database has users
+                    # Mock: Database session isolation for transaction testing without real database dependency
                     mock_db_session.execute = AsyncMock(return_value=mock_result)
                     
                     # Test authentication failure - "User not found" is caught as ValueError and re-raised
@@ -191,21 +227,28 @@ class TestWebSocketConnection:
         """Test WebSocket authentication with inactive user"""
         
         # Mock WebSocket
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock(spec=WebSocket)
         mock_websocket.query_params = {"token": "valid-token"}
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.close = AsyncMock()
         
         # Mock security service
+        # Mock: Security service isolation for auth testing without real token validation
         mock_security_service = MagicMock()
         
         # Mock inactive user
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = MagicMock()
         mock_user.id = "test-user-123"
         mock_user.is_active = False
+        # Mock: Security service isolation for auth testing without real token validation
         mock_security_service.get_user_by_id = AsyncMock(return_value=mock_user)
         
         # Mock auth client to return valid token for inactive user
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": "test-user-123",
@@ -214,9 +257,13 @@ class TestWebSocketConnection:
             })
             
             # Mock database session
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_db_session = MagicMock()
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_db.__aenter__ = AsyncMock(return_value=mock_db_session)
+                # Mock: Async component isolation for testing without real async operations
                 mock_db.__aexit__ = AsyncMock(return_value=None)
                 
                 # Test authentication failure - "User not active" is caught as ValueError and re-raised

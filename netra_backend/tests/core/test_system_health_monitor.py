@@ -40,6 +40,7 @@ class TestSystemHealthMonitor:
     
     def test_register_component_checker(self):
         """Test registering component checker."""
+        # Mock: Generic component isolation for controlled unit testing
         test_checker = Mock()
         self.monitor.register_component_checker("test_component", test_checker)
         
@@ -48,6 +49,7 @@ class TestSystemHealthMonitor:
     
     def test_register_alert_callback(self):
         """Test registering alert callback."""
+        # Mock: Generic component isolation for controlled unit testing
         callback = Mock()
         self.monitor.register_alert_callback(callback)
         
@@ -171,7 +173,9 @@ class TestSystemHealthMonitor:
         await self.monitor._update_component_from_result(initial_result)
         
         # Mock alert manager
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.create_status_change_alert = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.emit_alert = AsyncMock()
         
         # Update with degraded health
@@ -220,7 +224,9 @@ class TestSystemHealthMonitor:
         )
         self.monitor.component_health["slow_component"] = health
         
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.create_threshold_alert = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.emit_alert = AsyncMock()
         
         await self.monitor._check_thresholds()
@@ -241,7 +247,9 @@ class TestSystemHealthMonitor:
         )
         self.monitor.component_health["error_component"] = health
         
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.create_threshold_alert = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor.alert_manager.emit_alert = AsyncMock()
         
         await self.monitor._check_thresholds()
@@ -258,6 +266,7 @@ class TestSystemHealthMonitor:
             name="critical", status=HealthStatus.CRITICAL, health_score=0.1, last_check=datetime.now(UTC)
         )
         
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor._trigger_system_wide_alert = AsyncMock()
         
         await self.monitor._evaluate_system_health()
@@ -281,6 +290,7 @@ class TestSystemHealthMonitor:
             name="healthy", status=HealthStatus.HEALTHY, health_score=0.9, last_check=datetime.now(UTC)
         )
         
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor._trigger_system_wide_alert = AsyncMock()
         
         await self.monitor._evaluate_system_health()
@@ -291,6 +301,7 @@ class TestSystemHealthMonitor:
     @pytest.mark.asyncio
     async def test_evaluate_system_health_no_components(self):
         """Test system health evaluation with no components."""
+        # Mock: Generic component isolation for controlled unit testing
         self.monitor._trigger_system_wide_alert = AsyncMock()
         
         await self.monitor._evaluate_system_health()
@@ -337,6 +348,7 @@ class TestSystemHealthMonitor:
     async def test_perform_health_checks_integration(self):
         """Test performing health checks integration."""
         # Register mock checker
+        # Mock: Async component isolation for testing without real async operations
         mock_checker = AsyncMock(return_value=HealthCheckResult(
             component_name="test", success=True, health_score=0.8, response_time_ms=50.0
         ))

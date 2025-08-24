@@ -236,6 +236,7 @@ class TestStagingDatabaseConnectionResilience:
         except DisconnectionError:
             # Simulate recovery after reconnection
             async_session_mock.execute.side_effect = None
+            # Mock: Session isolation for controlled testing without external state
             async_session_mock.execute.return_value = Mock()
             
             # Verify connection works after recovery
@@ -255,6 +256,7 @@ class TestStagingDatabaseConnectionResilience:
         await transaction_session_mock.begin()
         
         # Simulate operations before connection loss
+        # Mock: Component isolation for controlled unit testing
         mock_user = Mock(id="test_user_123", email="test@staging.com")
         transaction_session_mock.add(mock_user)
         await transaction_session_mock.flush()
@@ -337,6 +339,7 @@ class TestStagingDatabaseConnectionResilience:
         
         # Test successful retry after timeout resolution
         async_session_mock.execute.side_effect = None
+        # Mock: Session isolation for controlled testing without external state
         async_session_mock.execute.return_value = Mock()
         
         result = await async_session_mock.execute("SELECT 1")

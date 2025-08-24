@@ -18,13 +18,21 @@ from netra_backend.app.services.database.thread_repository import ThreadReposito
 @pytest.fixture
 def mock_db():
     """Create a mock database session"""
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock = AsyncMock(spec=AsyncSession)
+    # Mock: Generic component isolation for controlled unit testing
     mock.execute = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.add = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.commit = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.rollback = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.refresh = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.flush = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock.delete = AsyncMock()
     return mock
 
@@ -70,6 +78,7 @@ async def test_get_by_id_with_correct_parameter_order(mock_db, thread_repo):
         metadata_={'user_id': 'test_user'}
     )
     
+    # Mock: Generic component isolation for controlled unit testing
     mock_result = MagicMock()
     mock_result.scalar_one_or_none.return_value = mock_thread
     mock_db.execute.return_value = mock_result
@@ -92,7 +101,9 @@ async def test_find_by_user(mock_db, thread_repo):
                metadata_={'user_id': 'user123'})
     ]
     
+    # Mock: Generic component isolation for controlled unit testing
     mock_result = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_scalars = MagicMock()
     mock_scalars.all.return_value = mock_threads
     mock_result.scalars.return_value = mock_scalars
@@ -118,6 +129,7 @@ async def test_archive_thread(mock_db, thread_repo):
     )
     
     # Mock get_by_id to return the thread
+    # Mock: Generic component isolation for controlled unit testing
     mock_result = MagicMock()
     mock_result.scalar_one_or_none.return_value = mock_thread
     mock_db.execute.return_value = mock_result

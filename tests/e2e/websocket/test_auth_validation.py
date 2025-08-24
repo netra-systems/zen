@@ -173,6 +173,7 @@ class TestWebSocketAuthValidation:
         token = auth_tester.create_valid_token(user_id)
         
         # Mock auth service to return valid response for testing
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
@@ -197,6 +198,7 @@ class TestWebSocketAuthValidation:
         token = auth_tester.create_valid_token(user_id)
         
         # Mock auth service to return invalid response
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": False,
@@ -220,6 +222,7 @@ class TestWebSocketAuthValidation:
         expired_token = auth_tester.create_expired_token(user_id)
         
         # Mock auth service to return expired token response
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": False,
@@ -268,6 +271,7 @@ class TestWebSocketAuthValidation:
         # Step 1: Test initial valid token
         initial_token = auth_tester.create_valid_token(user_id, exp_minutes=60)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
@@ -280,6 +284,7 @@ class TestWebSocketAuthValidation:
         # Step 2: Test refreshed token
         refreshed_token = auth_tester.create_valid_token(user_id, exp_minutes=120)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
@@ -300,6 +305,7 @@ class TestWebSocketAuthValidation:
         tokens = [auth_tester.create_valid_token(uid) for uid in user_ids]
         
         # Mock successful validation for all
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {"valid": True, "user_id": "test"}
             
@@ -336,6 +342,7 @@ class TestWebSocketAuthValidation:
                 else:
                     token = auth_tester.create_valid_token("test_user")
                 
+                # Mock: Component isolation for testing without external dependencies
                 with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
                     if scenario == "valid":
                         mock_validate.return_value = {"valid": True, "user_id": "test_user"}
@@ -364,6 +371,7 @@ class TestWebSocketAuthCompliance:
         user_id = "perf_test_user"
         token = tester.create_valid_token(user_id)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {"valid": True, "user_id": user_id}
             
@@ -389,6 +397,7 @@ class TestWebSocketAuthCompliance:
         
         results = {}
         for token, scenario_name in scenarios:
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
                 if scenario_name == "valid_token":
                     mock_validate.return_value = {"valid": True, "user_id": "test"}
@@ -417,6 +426,7 @@ class TestWebSocketAuthCompliance:
         # Test integration with auth service
         token = tester.create_valid_token("integration_test")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True, 

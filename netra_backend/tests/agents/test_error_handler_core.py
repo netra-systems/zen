@@ -144,6 +144,7 @@ class TestErrorHandler:
     def test_log_error_different_severities(self, error_handler):
         """Test log_error with different severity levels."""
         errors = self._create_errors_for_logging_test()
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.agents.error_handler.central_logger') as mock_logger:
             for error in errors:
                 error_handler._log_error(error)

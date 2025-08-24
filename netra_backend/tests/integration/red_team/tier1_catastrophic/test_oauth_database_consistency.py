@@ -49,7 +49,9 @@ try:
 except ImportError:
     # Create mock models if not available
     from unittest.mock import Mock, AsyncMock, MagicMock
+    # Mock: Generic component isolation for controlled unit testing
     User = Mock()
+    # Mock: Generic component isolation for controlled unit testing
     Organization = Mock()
 
 try:
@@ -186,11 +188,14 @@ class TestOAuthDatabaseConsistency:
         }
         
         # Mock OAuth provider responses
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_client:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_client.return_value.__aenter__.return_value = mock_async_client
             
             # Mock token exchange
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = AsyncMock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {
@@ -200,6 +205,7 @@ class TestOAuthDatabaseConsistency:
             mock_async_client.post.return_value = mock_token_response
             
             # Mock user info
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = AsyncMock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = oauth_user_data
@@ -258,21 +264,26 @@ class TestOAuthDatabaseConsistency:
         }
         
         # Simulate OAuth success up to database operations
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_http:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_http.return_value.__aenter__.return_value = mock_async_client
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = AsyncMock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {"access_token": "mock_token"}
             mock_async_client.post.return_value = mock_token_response
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = AsyncMock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = oauth_user_data
             mock_async_client.get.return_value = mock_user_response
             
             # Mock main DB to fail during user creation
+            # Mock: Session isolation for controlled testing without external state
             with patch("netra_backend.app.db.session.get_db_session") as mock_db:
                 async def failing_db_session():
                     # First call succeeds (auth DB), second call fails (main DB)
@@ -342,15 +353,19 @@ class TestOAuthDatabaseConsistency:
         
         async def simulate_oauth_callback(attempt_number: int) -> dict:
             """Simulate a single OAuth callback attempt."""
+            # Mock: Component isolation for testing without external dependencies
             with patch("httpx.AsyncClient") as mock_http:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_async_client = AsyncMock()
                 mock_http.return_value.__aenter__.return_value = mock_async_client
                 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_token_response = AsyncMock()
                 mock_token_response.status_code = 200
                 mock_token_response.json.return_value = {"access_token": f"token_{attempt_number}"}
                 mock_async_client.post.return_value = mock_token_response
                 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_user_response = AsyncMock()
                 mock_user_response.status_code = 200
                 mock_user_response.json.return_value = oauth_user_data
@@ -436,15 +451,19 @@ class TestOAuthDatabaseConsistency:
             # Don't commit yet - this should block OAuth user creation
             
             # Try OAuth callback while transaction is open
+            # Mock: Component isolation for testing without external dependencies
             with patch("httpx.AsyncClient") as mock_http:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_async_client = AsyncMock()
                 mock_http.return_value.__aenter__.return_value = mock_async_client
                 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_token_response = AsyncMock()
                 mock_token_response.status_code = 200
                 mock_token_response.json.return_value = {"access_token": "isolation_token"}
                 mock_async_client.post.return_value = mock_token_response
                 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_user_response = AsyncMock()
                 mock_user_response.status_code = 200
                 mock_user_response.json.return_value = oauth_user_data
@@ -534,15 +553,19 @@ class TestOAuthDatabaseConsistency:
                 "verified_email": True
             }
             
+            # Mock: Component isolation for testing without external dependencies
             with patch("httpx.AsyncClient") as mock_http:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_async_client = AsyncMock()
                 mock_http.return_value.__aenter__.return_value = mock_async_client
                 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_token_response = AsyncMock()
                 mock_token_response.status_code = 200
                 mock_token_response.json.return_value = {"access_token": "validation_token"}
                 mock_async_client.post.return_value = mock_token_response
                 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_user_response = AsyncMock()
                 mock_user_response.status_code = 200
                 mock_user_response.json.return_value = oauth_user_data
@@ -607,15 +630,19 @@ class TestOAuthDatabaseConsistency:
             "organization_id": test_org_id  # This should create FK relationship
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_http:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_http.return_value.__aenter__.return_value = mock_async_client
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = AsyncMock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {"access_token": "fk_token"}
             mock_async_client.post.return_value = mock_token_response
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = AsyncMock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = oauth_user_data
@@ -680,15 +707,19 @@ class TestOAuthDatabaseConsistency:
         # Record start time for audit verification
         start_time = datetime.now(timezone.utc)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch("httpx.AsyncClient") as mock_http:
+            # Mock: Generic component isolation for controlled unit testing
             mock_async_client = AsyncMock()
             mock_http.return_value.__aenter__.return_value = mock_async_client
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_token_response = AsyncMock()
             mock_token_response.status_code = 200
             mock_token_response.json.return_value = {"access_token": "audit_token"}
             mock_async_client.post.return_value = mock_token_response
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_user_response = AsyncMock()
             mock_user_response.status_code = 200
             mock_user_response.json.return_value = oauth_user_data
@@ -773,15 +804,19 @@ class TestOAuthDatabaseConsistency:
             start_time = time.time()
             
             try:
+                # Mock: Component isolation for testing without external dependencies
                 with patch("httpx.AsyncClient") as mock_http:
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_async_client = AsyncMock()
                     mock_http.return_value.__aenter__.return_value = mock_async_client
                     
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_token_response = AsyncMock()
                     mock_token_response.status_code = 200
                     mock_token_response.json.return_value = {"access_token": f"perf_token_{hash(email)}"}
                     mock_async_client.post.return_value = mock_token_response
                     
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_user_response = AsyncMock()
                     mock_user_response.status_code = 200
                     mock_user_response.json.return_value = user_data

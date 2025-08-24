@@ -23,9 +23,11 @@ class TestSyntaxFix:
 
     def create_test_request_with_origin(origin: str, method: str = "GET") -> Mock:
         """Create mock request with specified origin."""
+        # Mock: Generic component isolation for controlled unit testing
         request = Mock()
         request.method = method
         request.headers = {"origin": origin}
+        # Mock: Generic component isolation for controlled unit testing
         request.url = Mock()
         request.url.path = "/api/test"
         return request

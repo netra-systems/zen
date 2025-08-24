@@ -68,6 +68,7 @@ class TestMetricsPipelineIntegration:
     @pytest.fixture
     def mock_database(self):
         """Create mock database for metrics storage."""
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     @pytest.fixture
@@ -147,15 +148,20 @@ class TestMetricsPipelineIntegration:
         assert len(quality_metrics) > 0, "Quality metrics not found"
     
     @mock_justified("OpenTelemetry tracer not available in test environment")
+    # Mock: Component isolation for testing without external dependencies
     @patch('opentelemetry.trace.get_tracer')
     @pytest.mark.asyncio
     async def test_opentelemetry_trace_propagation(self, mock_tracer):
         """Test OpenTelemetry trace propagation across metrics collection."""
         # Setup mock tracer
+        # Mock: Generic component isolation for controlled unit testing
         mock_span = MagicMock()
+        # Mock: Service component isolation for predictable testing behavior
         mock_span.__enter__ = MagicMock(return_value=mock_span)
+        # Mock: Service component isolation for predictable testing behavior
         mock_span.__exit__ = MagicMock(return_value=False)
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_tracer_instance = MagicMock()
         mock_tracer_instance.start_span.return_value = mock_span
         mock_tracer.return_value = mock_tracer_instance
@@ -256,11 +262,13 @@ class TestMetricsPipelineIntegration:
                 assert value < 10000, f"Response time {metric_name} suspiciously high"
     
     @mock_justified("Alert manager service not available in test environment")
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.services.alerting.AlertManager')
     @pytest.mark.asyncio
     async def test_alert_rule_evaluation(self, mock_alert_manager):
         """Test alert rule evaluation based on metrics."""
         # Setup mock alert manager
+        # Mock: Generic component isolation for controlled unit testing
         mock_alert_instance = AsyncMock()
         mock_alert_instance.evaluate_rules.return_value = [
             {"rule": "high_cpu_usage", "triggered": True, "value": 85.5},

@@ -285,12 +285,14 @@ class TestAuthSessionLifecycleCompleteL4:
         )
         
         # Mock time to be 30 seconds in the past (clock skew)
+        # Mock: Component isolation for testing without external dependencies
         with patch('time.time', return_value=time.time() - 30):
             # Should still validate with reasonable clock skew
             result = await auth_stack['token_service'].validate_token_jwt(token)
             assert result['valid']
         
         # Mock time to be 5 minutes in the future  
+        # Mock: Component isolation for testing without external dependencies
         with patch('time.time', return_value=time.time() + 360):
             # Token should be expired
             result = await auth_stack['token_service'].validate_token_jwt(token)

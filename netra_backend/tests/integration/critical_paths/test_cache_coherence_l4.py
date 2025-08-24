@@ -149,10 +149,15 @@ class CacheCoherenceL4Manager:
                 from unittest.mock import AsyncMock, MagicMock
                 client = AsyncMock()
                 client.ping = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.get = AsyncMock(return_value=None)
+                # Mock: Generic component isolation for controlled unit testing
                 client.set = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 client.setex = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.delete = AsyncMock(return_value=0)
+                # Mock: Async component isolation for testing without real async operations
                 client.exists = AsyncMock(return_value=False)
                 self.redis_clients[f"cluster_{i}"] = client
             except Exception as e:

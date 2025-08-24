@@ -17,9 +17,12 @@ async def test_llm_cache_service_initialization():
     assert cache_service.cache_core.cache_prefix == "llm_cache:"
 @pytest.mark.asyncio
 async def test_cache_set_and_get():
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     with patch('app.services.llm_cache_core.redis_manager') as mock_redis_manager:
         # Create mock Redis client
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_client = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_manager.get_client = AsyncMock(return_value=mock_redis_client)
         
         # Mock the Redis get to return cached data
@@ -30,7 +33,9 @@ async def test_cache_set_and_get():
             "response_length": 17,
             "llm_config_name": "test_llm"
         }
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_client.get = AsyncMock(return_value=json.dumps(cache_data))
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_client.set = AsyncMock(return_value=True)
         
         cache_service = LLMCacheService()
@@ -59,9 +64,12 @@ async def test_cache_expiration():
     # May be None if Redis clears it
 @pytest.mark.asyncio
 async def test_cache_size_limit():
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     with patch('app.services.llm_cache_core.redis_manager') as mock_redis_manager:
         # Create mock Redis client
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_client = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_manager.get_client = AsyncMock(return_value=mock_redis_client)
         
         # Mock the Redis get to return cached data
@@ -72,7 +80,9 @@ async def test_cache_size_limit():
             "response_length": 9,
             "llm_config_name": "llm1"
         }
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_client.get = AsyncMock(return_value=json.dumps(cache_data))
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_client.set = AsyncMock(return_value=True)
         
         cache_service = LLMCacheService()
@@ -86,15 +96,21 @@ async def test_cache_size_limit():
         assert await cache_service.get_cached_response("prompt3", "llm1", {}) != None
 @pytest.mark.asyncio
 async def test_cache_stats():
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     with patch('app.services.llm_cache_core.redis_manager') as mock_redis_manager:
         # Create mock Redis client
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_client = AsyncMock()
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_manager.get_client = AsyncMock(return_value=mock_redis_client)
         
         # Mock stats data
         stats_data = {"hits": 1, "misses": 1, "total": 2, "hit_rate": 0.5}
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_client.get = AsyncMock(return_value=json.dumps(stats_data))
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_client.set = AsyncMock(return_value=True)
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis_client.keys = AsyncMock(return_value=["llm_stats:llm1"])
         
         cache_service = LLMCacheService()

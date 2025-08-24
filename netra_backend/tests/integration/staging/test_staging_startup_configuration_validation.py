@@ -133,7 +133,9 @@ class TestStagingStartupConfigurationValidation:
             config_manager.refresh_environment()
             
             # Mock config objects for ClickHouse
+            # Mock: ClickHouse external database isolation for unit testing performance
             app_config.clickhouse_native = MagicMock()
+            # Mock: ClickHouse external database isolation for unit testing performance
             app_config.clickhouse_https = MagicMock()
             
             config_manager.populate_database_config(app_config)

@@ -34,7 +34,9 @@ class TestSupervisorAgentInitializationChain:
         deps = {
             "llm_manager": Mock(generate_response=AsyncMock(return_value="Response")),
             "tool_dispatcher": Mock(dispatch=AsyncMock(return_value={"status": "ok"})),
+            # Mock: Session isolation for controlled testing without external state
             "db_session": Mock(),
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             "redis_manager": Mock(get=AsyncMock(), set=AsyncMock())
         }
         yield deps

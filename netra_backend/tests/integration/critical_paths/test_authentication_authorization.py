@@ -75,9 +75,13 @@ class AuthenticationManager:
     
     def __init__(self):
         # Use mock services for testing
+        # Mock: Generic component isolation for controlled unit testing
         self.oauth_service = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.jwt_service = AsyncMock()
+        # Mock: Session state isolation for predictable testing
         self.session_manager = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         self.permissions_service = AsyncMock()
         self.user_service = UserService
         self.auth_sessions = {}
@@ -88,12 +92,17 @@ class AuthenticationManager:
         """Initialize authentication services with mocks."""
         try:
             # Configure mock services with basic functionality
+            # Mock: Async component isolation for testing without real async operations
             self.oauth_service.initialize = AsyncMock(return_value=True)
+            # Mock: Async component isolation for testing without real async operations
             self.jwt_service.initialize = AsyncMock(return_value=True)
+            # Mock: Session state isolation for predictable testing
             self.session_manager.initialize = AsyncMock(return_value=True)
+            # Mock: Async component isolation for testing without real async operations
             self.permissions_service.initialize = AsyncMock(return_value=True)
             
             # Configure mock service methods
+            # Mock: Async component isolation for testing without real async operations
             self.jwt_service.generate_token = AsyncMock(return_value={
                 "success": True,
                 "token": "mock_jwt_token_12345",
@@ -101,14 +110,19 @@ class AuthenticationManager:
                 "expires_at": time.time() + 3600  # 1 hour from now
             })
             
+            # Mock: Session state isolation for predictable testing
             self.session_manager.create_session = AsyncMock(return_value={
                 "success": True,
                 "session_id": str(uuid.uuid4())
             })
             
+            # Mock: Async component isolation for testing without real async operations
             self.oauth_service.shutdown = AsyncMock(return_value=True)
+            # Mock: Async component isolation for testing without real async operations
             self.jwt_service.shutdown = AsyncMock(return_value=True)
+            # Mock: Session state isolation for predictable testing
             self.session_manager.shutdown = AsyncMock(return_value=True)
+            # Mock: Async component isolation for testing without real async operations
             self.permissions_service.shutdown = AsyncMock(return_value=True)
             
             # Initialize mock services

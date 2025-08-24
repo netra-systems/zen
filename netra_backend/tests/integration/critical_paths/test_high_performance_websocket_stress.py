@@ -435,10 +435,12 @@ class TestHighPerformanceWebSocketStress:
 
         """Mock Redis manager for testing."""
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         manager = AsyncMock(spec=RedisManager)
 
         manager.enabled = True
 
+        # Mock: Generic component isolation for controlled unit testing
         manager.get_client.return_value = AsyncMock()
 
         return manager

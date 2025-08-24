@@ -29,7 +29,9 @@ class TestAgentServiceCritical:
     @pytest.fixture
     def mock_supervisor(self):
         """Create mock supervisor."""
+        # Mock: Generic component isolation for controlled unit testing
         supervisor = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         supervisor.run = AsyncMock(return_value={'status': 'completed'})
         return supervisor
     
@@ -41,10 +43,12 @@ class TestAgentServiceCritical:
     @pytest.fixture
     def mock_request_model(self):
         """Create mock request model."""
+        # Mock: Generic component isolation for controlled unit testing
         model = MagicMock()
         model.user_request = "Test message"
         model.run_id = "test_run_123"
         model.user_id = "test_user"
+        # Mock: Service component isolation for predictable testing behavior
         model.model_dump = MagicMock(return_value={
             "user_request": "Test message",
             "run_id": "test_run_123", 
@@ -70,6 +74,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_run_with_model_dump_fallback(self, agent_service, mock_supervisor):
         """Test run with model dump fallback."""
+        # Mock: Generic component isolation for controlled unit testing
         model = MagicMock()
         model.user_request = "Test message"
         model.run_id = "test_run"
@@ -105,6 +110,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_error_handling_supervisor_failure(self, agent_service, mock_request_model):
         """Test error handling when supervisor fails."""
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         agent_service.supervisor.run = AsyncMock(side_effect=NetraException("Supervisor error"))
         
         with pytest.raises(NetraException):
@@ -129,6 +135,7 @@ class TestAgentServiceCritical:
     async def test_supervisor_integration(self, agent_service, mock_request_model):
         """Test supervisor integration."""
         expected_response = {"status": "completed", "result": "success"}
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         agent_service.supervisor.run = AsyncMock(return_value=expected_response)
         
         result = await agent_service.run(mock_request_model, "test_run", stream_updates=False)
@@ -190,6 +197,7 @@ class TestAgentServiceCritical:
     async def test_request_model_compatibility(self, agent_service):
         """Test compatibility with different request model formats."""
         # Test with dict-like model
+        # Mock: Generic component isolation for controlled unit testing
         dict_model = MagicMock()
         dict_model.user_request = "Dict message"
         dict_model.run_id = "dict_run"
@@ -201,6 +209,7 @@ class TestAgentServiceCritical:
     async def test_timeout_handling(self, agent_service, mock_request_model):
         """Test timeout handling."""
         # Mock a slow supervisor response
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         agent_service.supervisor.run = AsyncMock(side_effect=asyncio.TimeoutError())
         
         with pytest.raises(asyncio.TimeoutError):
@@ -217,6 +226,7 @@ class TestAgentServiceCritical:
         ]
         
         for response in test_responses:
+            # Mock: Agent supervisor isolation for testing without spawning real agents
             agent_service.supervisor.run = AsyncMock(return_value=response)
             result = await agent_service.run(mock_request_model, "test_run", stream_updates=False)
             assert result == response
@@ -230,6 +240,7 @@ class TestAgentServiceCritical:
             "completion": True
         }
         
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         agent_service.supervisor.run = AsyncMock(return_value=expected_flow)
         result = await agent_service.run(mock_request_model, "critical_run", stream_updates=True)
         
@@ -249,6 +260,7 @@ class TestAgentServiceCritical:
     async def test_exception_propagation(self, agent_service, mock_request_model):
         """Test proper exception propagation."""
         custom_error = NetraException("Custom test error")
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         agent_service.supervisor.run = AsyncMock(side_effect=custom_error)
         
         with pytest.raises(NetraException) as exc_info:
@@ -266,6 +278,7 @@ class TestAgentServiceCritical:
     @pytest.mark.asyncio
     async def test_logging_integration(self, agent_service, mock_request_model):
         """Test logging integration."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.agent_service_core.logger') as mock_logger:
             # Test that logger is properly mocked
             assert mock_logger is not None

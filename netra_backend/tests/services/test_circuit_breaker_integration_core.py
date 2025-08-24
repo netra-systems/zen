@@ -73,6 +73,7 @@ class TestSyntaxFix:
         from netra_backend.app.core.circuit_breaker import circuit_registry
         circuit_registry.cleanup_all()
         
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         self.mock_llm_manager = MagicMock()
         self.llm_client = ResilientLLMClient(self.mock_llm_manager)
 

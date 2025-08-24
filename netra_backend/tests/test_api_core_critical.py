@@ -23,9 +23,11 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_health_endpoints(self):
         """Test health check endpoints."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         # Test /health/live endpoint
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {"status": "ok"}
@@ -37,9 +39,11 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_health_ready_endpoint(self):
         """Test health ready endpoint."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         # Test /health/ready endpoint
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {"status": "ready", "services": {"database": "ok", "redis": "ok"}}
@@ -51,6 +55,7 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_login_endpoint(self):
         """Test login authentication endpoint."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         # Test login endpoint
@@ -59,6 +64,7 @@ class TestAPICoreEndpointsCritical:
             "password": "SecurePassword123!"
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -74,6 +80,7 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_register_endpoint(self):
         """Test user registration endpoint."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         # Test register endpoint
@@ -83,6 +90,7 @@ class TestAPICoreEndpointsCritical:
             "username": "newuser"
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 201,
             "json": {"id": 2, "email": "newuser@example.com", "username": "newuser"}
@@ -94,10 +102,12 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_pagination_basic(self):
         """Test basic API pagination."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test paginated response
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -118,9 +128,11 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_pagination_metadata(self):
         """Test pagination metadata validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -141,10 +153,12 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_rate_limiting_exceeded(self):
         """Test rate limit exceeded response."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test rate limit exceeded
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 429,
             "json": {"detail": "Rate limit exceeded"},
@@ -164,9 +178,11 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_rate_limiting_headers(self):
         """Test rate limiting headers validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 429,
             "json": {"detail": "Rate limit exceeded"},
@@ -186,6 +202,7 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_authentication_token_validation(self):
         """Test authentication token validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         login_data = {
@@ -193,6 +210,7 @@ class TestAPICoreEndpointsCritical:
             "password": "SecurePassword123!"
         }
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -208,8 +226,10 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_health_service_status(self):
         """Test health endpoint service status."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -229,9 +249,11 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_authentication_error_handling(self):
         """Test authentication error handling."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         # Test invalid credentials
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 401,
             "json": {"detail": "Invalid credentials"}
@@ -246,9 +268,11 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_registration_validation(self):
         """Test registration input validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         
         # Test missing required fields
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 400,
             "json": {"detail": "Missing required fields"}
@@ -261,10 +285,12 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_pagination_edge_cases(self):
         """Test pagination edge cases."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test empty results
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value={
             "status_code": 200,
             "json": {
@@ -285,10 +311,12 @@ class TestAPICoreEndpointsCritical:
     @pytest.mark.asyncio
     async def test_rate_limiting_recovery(self):
         """Test rate limiting recovery."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
         auth_headers = {"Authorization": "Bearer token123"}
         
         # Test successful request after rate limit reset
+        # Mock: Async component isolation for testing without real async operations
         mock_client.post = AsyncMock(return_value={
             "status_code": 200,
             "json": {"result": "success"},

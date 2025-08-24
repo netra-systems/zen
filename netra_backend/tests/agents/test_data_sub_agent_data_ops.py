@@ -19,9 +19,12 @@ class TestDataTransformation:
     @pytest.mark.asyncio
     async def test_transform_text_data(self):
         """Test transformation of text data"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
@@ -40,9 +43,12 @@ class TestDataTransformation:
     @pytest.mark.asyncio
     async def test_transform_json_data(self):
         """Test transformation of JSON data"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
@@ -61,9 +67,12 @@ class TestDataTransformation:
     @pytest.mark.asyncio
     async def test_transform_with_pipeline(self):
         """Test transformation with processing pipeline"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
@@ -90,9 +99,12 @@ class TestDataEnrichment:
     @pytest.mark.asyncio
     async def test_enrich_with_metadata(self):
         """Test data enrichment with metadata"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
@@ -111,7 +123,9 @@ class TestDataEnrichment:
     @pytest.mark.asyncio
     async def test_enrich_with_external_source(self):
         """Test enrichment with external data source"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm_manager = Mock()
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = Mock()
         
         with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):

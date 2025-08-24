@@ -57,7 +57,9 @@ except ImportError:
         from netra_backend.app.db.models import Corpus, Document
     except ImportError:
         from unittest.mock import Mock, AsyncMock, MagicMock
+        # Mock: Generic component isolation for controlled unit testing
         Corpus = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         Document = Mock()
 
 try:

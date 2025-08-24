@@ -51,6 +51,7 @@ class TestWebSocketReconnectionResilienceL4:
         user_id = "user_123"
         
         # Initial connection
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = MagicMock()
         initial_state = {
             'user_id': user_id,
@@ -81,8 +82,10 @@ class TestWebSocketReconnectionResilienceL4:
             messages_sent.append(msg)
         
         # Reconnect with new websocket
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         received_messages = []
+        # Mock: Async component isolation for testing without real async operations
         ws2.send = AsyncMock(side_effect=lambda msg: received_messages.append(json.loads(msg)))
         
         conn2 = await ws_system['ws_service'].reconnect(
@@ -164,6 +167,7 @@ class TestWebSocketReconnectionResilienceL4:
         client_id = "client_replay"
         
         # Initial connection
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = MagicMock()
         conn1 = await ws_system['ws_service'].connect(
             websocket=ws1,
@@ -186,8 +190,10 @@ class TestWebSocketReconnectionResilienceL4:
         await ws_system['ws_service'].handle_disconnect(client_id)
         
         # Reconnect and request replay
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         replayed_messages = []
+        # Mock: Async component isolation for testing without real async operations
         ws2.send = AsyncMock(side_effect=lambda msg: replayed_messages.append(json.loads(msg)))
         
         conn2 = await ws_system['ws_service'].reconnect(
@@ -227,6 +233,7 @@ class TestWebSocketReconnectionResilienceL4:
         assert await ws_system['ws_service'].get_connection_state(client_id) == 'DISCONNECTED'
         
         # Connect: DISCONNECTED -> CONNECTING -> CONNECTED
+        # Mock: Generic component isolation for controlled unit testing
         ws = MagicMock()
         await ws_system['ws_service'].connect(websocket=ws, client_id=client_id)
         
@@ -234,6 +241,7 @@ class TestWebSocketReconnectionResilienceL4:
         await ws_system['ws_service'].handle_network_issue(client_id)
         
         # Reconnect attempt: RECONNECTING -> CONNECTED
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         await ws_system['ws_service'].reconnect(websocket=ws2, client_id=client_id)
         
@@ -258,6 +266,7 @@ class TestWebSocketReconnectionResilienceL4:
         client_id = "client_heartbeat"
         
         # Connect with heartbeat
+        # Mock: Generic component isolation for controlled unit testing
         ws = MagicMock()
         ping_count = 0
         
@@ -268,6 +277,7 @@ class TestWebSocketReconnectionResilienceL4:
                 raise websockets.exceptions.ConnectionClosed(None, None)
             return True
         
+        # Mock: Async component isolation for testing without real async operations
         ws.ping = AsyncMock(side_effect=mock_ping)
         
         conn = await ws_system['ws_service'].connect(
@@ -302,6 +312,7 @@ class TestWebSocketReconnectionResilienceL4:
         user_id = "user_456"
         
         # Initial connection with auth token
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = MagicMock()
         initial_token = "initial_token_expires_soon"
         
@@ -316,6 +327,7 @@ class TestWebSocketReconnectionResilienceL4:
         await asyncio.sleep(2.5)
         
         # Attempt reconnection with expired token
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         
         # Mock auth refresh
@@ -348,6 +360,7 @@ class TestWebSocketReconnectionResilienceL4:
         
         async def attempt_reconnect(attempt_id):
             try:
+                # Mock: Generic component isolation for controlled unit testing
                 ws = MagicMock()
                 result = await ws_system['ws_service'].reconnect(
                     websocket=ws,
@@ -386,6 +399,7 @@ class TestWebSocketReconnectionResilienceL4:
         client_id = "client_subscriptions"
         
         # Initial connection with subscriptions
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = MagicMock()
         subscriptions = {
             'market_data': {'symbols': ['AAPL', 'GOOGL']},
@@ -414,6 +428,7 @@ class TestWebSocketReconnectionResilienceL4:
         await ws_system['ws_service'].handle_disconnect(client_id)
         
         # Reconnect
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         conn2 = await ws_system['ws_service'].reconnect(
             websocket=ws2,
@@ -446,6 +461,7 @@ class TestWebSocketReconnectionResilienceL4:
         # Rapid reconnection attempts
         attempts = []
         for i in range(5):
+            # Mock: Generic component isolation for controlled unit testing
             ws = MagicMock()
             try:
                 result = await ws_system['ws_service'].reconnect(
@@ -483,6 +499,7 @@ class TestWebSocketReconnectionResilienceL4:
             'cache': {'data1': 'value1', 'data2': 'value2'}
         }
         
+        # Mock: Generic component isolation for controlled unit testing
         ws1 = MagicMock()
         conn1 = await ws_system['ws_service'].connect(
             websocket=ws1,
@@ -504,6 +521,7 @@ class TestWebSocketReconnectionResilienceL4:
         await ws_system['ws_service'].handle_disconnect(client_id)
         
         # Reconnect with partial state (client sends what it has)
+        # Mock: Generic component isolation for controlled unit testing
         ws2 = MagicMock()
         client_state = {
             'user_prefs': {'theme': 'dark', 'lang': 'en'},  # Outdated theme
@@ -512,6 +530,7 @@ class TestWebSocketReconnectionResilienceL4:
         }
         
         state_diff = []
+        # Mock: Async component isolation for testing without real async operations
         ws2.send = AsyncMock(side_effect=lambda msg: state_diff.append(json.loads(msg)))
         
         conn2 = await ws_system['ws_service'].reconnect(

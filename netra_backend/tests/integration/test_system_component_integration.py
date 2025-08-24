@@ -44,9 +44,13 @@ class TestSystemComponentIntegration:
     
     def _setup_json_error_agent(self, mock_wrapper, malformed_response):
         """Setup agent for JSON error handling test."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_reliability = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_reliability.execute_safely = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_reliability.circuit_breaker = Mock()
+        # Mock: Component isolation for controlled unit testing
         mock_reliability.circuit_breaker.get_status = Mock(return_value={"state": "closed"})
         mock_wrapper.return_value = mock_reliability
         
@@ -57,13 +61,19 @@ class TestSystemComponentIntegration:
     @pytest.mark.asyncio
     async def test_http_client_with_json_parsing_integration(self):
         """Test HTTP client integration with JSON parsing."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.services.external_api_client.circuit_registry') as mock_registry, \
+             # Mock: Database session isolation for transaction testing without real database dependency
              patch('app.services.external_api_client.ClientSession') as mock_session_class:
             
             # Setup mocks
+            # Mock: Generic component isolation for controlled unit testing
             mock_circuit = AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_response = AsyncMock()
             
             # Mock response with complex JSON that needs parsing
@@ -84,9 +94,11 @@ class TestSystemComponentIntegration:
             mock_response.status = 200
             mock_response.json.return_value = complex_api_response
             mock_session.request.return_value.__aenter__.return_value = mock_response
+            # Mock: Async component isolation for testing without real async operations
             mock_circuit.call = AsyncMock(side_effect=lambda func: func())
             
             mock_cb_class.return_value = mock_circuit
+            # Mock: Async component isolation for testing without real async operations
             mock_registry.get_circuit = AsyncMock(return_value=mock_circuit)
             mock_session_class.return_value = mock_session
             
@@ -112,12 +124,18 @@ class TestSystemComponentIntegration:
     @pytest.mark.asyncio
     async def test_http_client_with_reliability_integration(self):
         """Test HTTP client integration with reliability components."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
             # Setup reliability wrapper
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.execute_safely = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.circuit_breaker = Mock()
+            # Mock: Component isolation for controlled unit testing
             mock_reliability.circuit_breaker.get_status = Mock(return_value={"state": "closed"})
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.circuit_breaker.reset = Mock()
             mock_wrapper.return_value = mock_reliability
             
@@ -126,20 +144,28 @@ class TestSystemComponentIntegration:
             agent.reliability = mock_reliability
             
             # Mock HTTP client operations
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
+                 # Mock: Component isolation for testing without external dependencies
                  patch('app.services.external_api_client.circuit_registry') as mock_registry, \
+                 # Mock: Database session isolation for transaction testing without real database dependency
                  patch('app.services.external_api_client.ClientSession') as mock_session_class:
                 
+                # Mock: Generic component isolation for controlled unit testing
                 mock_circuit = AsyncMock()
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 mock_response = AsyncMock()
                 
                 mock_response.status = 200
                 mock_response.json.return_value = {"api_result": "success", "data": [1, 2, 3]}
                 mock_session.request.return_value.__aenter__.return_value = mock_response
+                # Mock: Async component isolation for testing without real async operations
                 mock_circuit.call = AsyncMock(side_effect=lambda func: func())
                 
                 mock_cb_class.return_value = mock_circuit
+                # Mock: Async component isolation for testing without real async operations
                 mock_registry.get_circuit = AsyncMock(return_value=mock_circuit)
                 mock_session_class.return_value = mock_session
                 
@@ -167,10 +193,15 @@ class TestSystemComponentIntegration:
     @pytest.mark.asyncio
     async def test_json_parsing_error_handling_integration(self):
         """Test JSON parsing error handling integration with reliability."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability = Mock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.execute_safely = AsyncMock()
+            # Mock: Generic component isolation for controlled unit testing
             mock_reliability.circuit_breaker = Mock()
+            # Mock: Component isolation for controlled unit testing
             mock_reliability.circuit_breaker.get_status = Mock(return_value={"state": "closed"})
             mock_wrapper.return_value = mock_reliability
             

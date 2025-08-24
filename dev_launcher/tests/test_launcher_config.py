@@ -50,6 +50,7 @@ class TestLauncherConfig(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             tmppath = Path(tmpdir)
             # LauncherConfig now doesn't validate missing dirs by default
+            # Mock: Component isolation for testing without external dependencies
             with patch('dev_launcher.config.find_project_root', return_value=tmppath):
                 with patch.object(LauncherConfig, '_validate') as mock_validate:
                     mock_validate.side_effect = ValueError("Backend directory not found")
@@ -62,6 +63,7 @@ class TestLauncherConfig(unittest.TestCase):
     def test_config_from_args(self):
         """Test creating config from command line arguments."""
         args = self._create_mock_args()
+        # Mock: Component isolation for testing without external dependencies
         with patch('dev_launcher.config.find_project_root') as mock_root:
             mock_root.return_value = Path.cwd()
             with patch.object(LauncherConfig, '_validate'):
@@ -70,6 +72,7 @@ class TestLauncherConfig(unittest.TestCase):
     
     def _create_mock_args(self):
         """Create mock command line arguments."""
+        # Mock: Component isolation for controlled unit testing
         return Mock(
             backend_port=8080, frontend_port=3001,
             static=False, verbose=True,

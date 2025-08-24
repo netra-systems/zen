@@ -184,18 +184,22 @@ def mock_httpx_responses():
     
     class MockResponses:
         def __init__(self):
+            # Mock: Generic component isolation for controlled unit testing
             self.backend_health = Mock()
             self.backend_health.status_code = 200
             self.backend_health.json.return_value = {"status": "healthy", "service": "backend"}
             
+            # Mock: Generic component isolation for controlled unit testing
             self.frontend_health = Mock()
             self.frontend_health.status_code = 200
             self.frontend_health.json.return_value = {"status": "healthy", "service": "frontend"}
             
+            # Mock: Generic component isolation for controlled unit testing
             self.auth_health = Mock()
             self.auth_health.status_code = 200
             self.auth_health.json.return_value = {"status": "healthy", "service": "auth"}
             
+            # Mock: Generic component isolation for controlled unit testing
             self.auth_config = Mock()
             self.auth_config.status_code = 200
             self.auth_config.json.return_value = {
@@ -204,6 +208,7 @@ def mock_httpx_responses():
                 "token_url": "http://localhost:8081/auth/token"
             }
             
+            # Mock: Generic component isolation for controlled unit testing
             self.token_validation = Mock()
             self.token_validation.status_code = 200
             self.token_validation.json.return_value = {

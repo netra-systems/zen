@@ -21,12 +21,17 @@ class TestSchemaValidationService:
     @pytest.mark.asyncio
     async def test_validate_schema(self):
         """Test schema validation against database."""
+        # Mock: Component isolation for controlled unit testing
         mock_engine = Mock(spec=AsyncEngine)
         
         # Mock connection context - properly set up async context manager
+        # Mock: Generic component isolation for controlled unit testing
         mock_conn = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_context = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_context.__aenter__ = AsyncMock(return_value=mock_conn)
+        # Mock: Async component isolation for testing without real async operations
         mock_context.__aexit__ = AsyncMock(return_value=None)
         mock_engine.connect.return_value = mock_context
         

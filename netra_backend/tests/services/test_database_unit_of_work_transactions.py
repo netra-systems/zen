@@ -29,6 +29,7 @@ class TestUnitOfWorkTransactions:
         """Test successful Unit of Work transaction"""
         factory, mock_session = mock_async_session_factory
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.database.unit_of_work.async_session_factory', factory):
             async with UnitOfWork() as uow:
                 _verify_repositories_initialized(uow)
@@ -42,6 +43,7 @@ class TestUnitOfWorkTransactions:
         """Test Unit of Work rollback on exception"""
         factory, mock_session = mock_async_session_factory
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.database.unit_of_work.async_session_factory', factory):
             await _execute_failing_uow_transaction()
         
@@ -51,6 +53,7 @@ class TestUnitOfWorkTransactions:
     @pytest.mark.asyncio
     async def test_unit_of_work_with_external_session(self):
         """Test Unit of Work with externally provided session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         external_session = AsyncMock(spec=AsyncSession)
         
         async with UnitOfWork(external_session) as uow:
@@ -64,6 +67,7 @@ class TestUnitOfWorkTransactions:
         """Test repository access through Unit of Work"""
         factory, mock_session = mock_async_session_factory
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.database.unit_of_work.async_session_factory', factory):
             async with UnitOfWork() as uow:
                 _test_repository_access(uow)
@@ -73,6 +77,7 @@ class TestUnitOfWorkTransactions:
         """Test Unit of Work session lifecycle management"""
         factory, mock_session = mock_async_session_factory
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.database.unit_of_work.async_session_factory', factory):
             async with UnitOfWork() as uow:
                 assert uow._session is mock_session
@@ -86,6 +91,7 @@ class TestUnitOfWorkTransactions:
         """Test nested transaction handling"""
         factory, mock_session = mock_async_session_factory
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.database.unit_of_work.async_session_factory', factory):
             await _execute_nested_transactions(UnitOfWork)
     
@@ -94,6 +100,7 @@ class TestUnitOfWorkTransactions:
         """Test error handling in Unit of Work"""
         factory, mock_session = mock_async_session_factory
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.database.unit_of_work.async_session_factory', factory):
             await _test_uow_error_scenarios(UnitOfWork, mock_session)
 

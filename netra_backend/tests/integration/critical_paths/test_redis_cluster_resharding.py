@@ -117,12 +117,19 @@ class ClusterReshardingL3Manager:
                 from unittest.mock import AsyncMock, MagicMock
                 client = AsyncMock()
                 client.ping = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 client.cluster = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.get = AsyncMock(return_value=None)
+                # Mock: Generic component isolation for controlled unit testing
                 client.set = AsyncMock()
+                # Mock: Generic component isolation for controlled unit testing
                 client.setex = AsyncMock()
+                # Mock: Async component isolation for testing without real async operations
                 client.delete = AsyncMock(return_value=0)
+                # Mock: Async component isolation for testing without real async operations
                 client.exists = AsyncMock(return_value=False)
+                # Mock: Async component isolation for testing without real async operations
                 client.info = AsyncMock(return_value={"role": "master"})
                 
                 # Enable cluster mode (simulated - in real Redis this would need cluster configuration)

@@ -33,12 +33,17 @@ class TestAuthenticationErrorPropagation:
     @pytest.mark.asyncio
     async def test_invalid_token_raises_and_closes_connection(self):
         """Test that invalid tokens cause loud failures with connection closure."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.close = AsyncMock()
+        # Mock: Security component isolation for controlled auth testing
         security_service = Mock()
         
         # Mock the auth_client.validate_token_jwt to return invalid token
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={"valid": False})
             
             with pytest.raises(ValueError) as exc_info:
@@ -52,12 +57,17 @@ class TestAuthenticationErrorPropagation:
     @pytest.mark.asyncio
     async def test_missing_user_id_in_token_raises_error(self):
         """Test that tokens without user_id fail loudly."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.close = AsyncMock()
+        # Mock: Security component isolation for controlled auth testing
         security_service = Mock()
         
         # Mock auth_client to return valid token but no user_id
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={"valid": True, "user_id": None})
             
             with pytest.raises(ValueError) as exc_info:
@@ -69,18 +79,24 @@ class TestAuthenticationErrorPropagation:
     @pytest.mark.asyncio
     async def test_database_connection_failure_propagates(self):
         """Test that database failures during auth are not silent."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.close = AsyncMock()
+        # Mock: Security component isolation for controlled auth testing
         security_service = Mock()
         
         # Mock auth_client to return valid token
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True, 
                 "user_id": "test-user", 
                 "email": "test@example.com"
             })
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
                 mock_db.side_effect = ConnectionError("Database unavailable")
                 
@@ -96,24 +112,34 @@ class TestUserLookupFailures:
     @pytest.mark.asyncio
     async def test_nonexistent_user_raises_with_details(self):
         """Test that missing users cause explicit errors with user ID."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.close = AsyncMock()
+        # Mock: Security component isolation for controlled auth testing
         security_service = Mock()
+        # Mock: Security component isolation for controlled auth testing
         security_service.get_user_by_id = AsyncMock(return_value=None)
         
         # Mock auth_client to return valid token
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True, 
                 "user_id": "nonexistent-user-123", 
                 "email": "test@example.com"
             })
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session = AsyncMock()
                 # Mock the database query result for log_empty_database_warning
+                # Mock: Generic component isolation for controlled unit testing
                 mock_result = Mock()
                 mock_result.scalar.return_value = 0  # Empty database
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session.execute = AsyncMock(return_value=mock_result)
                 mock_db.return_value.__aenter__.return_value = mock_session
                 
@@ -127,24 +153,33 @@ class TestUserLookupFailures:
     @pytest.mark.asyncio
     async def test_inactive_user_fails_explicitly(self):
         """Test that inactive users are rejected with clear error."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.close = AsyncMock()
+        # Mock: Security component isolation for controlled auth testing
         security_service = Mock()
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_user = Mock()
         mock_user.is_active = False
         mock_user.id = "inactive-user"
+        # Mock: Security component isolation for controlled auth testing
         security_service.get_user_by_id = AsyncMock(return_value=mock_user)
         
         # Mock auth_client to return valid token
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True, 
                 "user_id": "inactive-user", 
                 "email": "inactive@example.com"
             })
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session = AsyncMock()
                 mock_db.return_value.__aenter__.return_value = mock_session
                 
@@ -157,28 +192,38 @@ class TestUserLookupFailures:
     @pytest.mark.asyncio
     async def test_database_rollback_on_user_fetch_error(self):
         """Test that database errors trigger rollback and retry with logging."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         websocket = Mock(spec=WebSocket)
+        # Mock: Generic component isolation for controlled unit testing
         websocket.close = AsyncMock()
+        # Mock: Security component isolation for controlled auth testing
         security_service = Mock()
         
         # First call fails, second succeeds after rollback
+        # Mock: Security component isolation for controlled auth testing
         security_service.get_user_by_id = AsyncMock(
             side_effect=[
                 Exception("Database locked"),
+                # Mock: Component isolation for controlled unit testing
                 Mock(is_active=True, id="test-user")
             ]
         )
         
         # Mock auth_client to return valid token
+        # Mock: Authentication service isolation for testing without real auth flows
         with patch('netra_backend.app.routes.utils.websocket_helpers.auth_client') as mock_auth_client:
+            # Mock: JWT token handling isolation to avoid real crypto dependencies
             mock_auth_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True, 
                 "user_id": "test-user", 
                 "email": "test@example.com"
             })
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session = AsyncMock()
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session.rollback = AsyncMock()
                 mock_db.return_value.__aenter__.return_value = mock_session
                 
@@ -211,7 +256,9 @@ class TestWebSocketMessageHandling:
     @pytest.mark.asyncio
     async def test_malformed_json_logs_and_responds_error(self):
         """Test that malformed JSON is logged and error sent to client."""
+        # Mock: Generic component isolation for controlled unit testing
         manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         manager.send_message = AsyncMock()  # Updated to match actual implementation
         
         result = await parse_json_message("{invalid json", "user-123", manager)

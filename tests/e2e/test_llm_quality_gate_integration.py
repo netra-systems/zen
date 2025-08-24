@@ -36,6 +36,7 @@ class TestLLMQualityGateIntegration:
         """Setup quality gate testing environment."""
         config = get_config()
         llm_manager = LLMManager(config)
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager = AsyncMock()
         
         # Create quality validator

@@ -240,6 +240,7 @@ class RedisCacheWarmingStartupL3Manager:
         source_types = ["postgres", "clickhouse", "config_service", "user_service"]
         
         for source_type in source_types:
+            # Mock: Database access isolation for fast, reliable unit testing
             self.database_sources[source_type] = DatabaseSourceMock(source_type)
         
         logger.info(f"Database sources initialized: {list(self.database_sources.keys())}")

@@ -18,9 +18,12 @@ def test_postgres_events_settings_not_defined():
     from netra_backend.app.db import postgres_events
     
     # Create mock objects
+    # Mock: Component isolation for controlled unit testing
     mock_engine = Mock(spec=AsyncEngine)
+    # Mock: Generic component isolation for controlled unit testing
     mock_sync_engine = Mock()
     mock_engine.sync_engine = mock_sync_engine
+    # Mock: Generic component isolation for controlled unit testing
     mock_pool = Mock()
     mock_pool.size.return_value = 10
     mock_pool.checkedin.return_value = 5
@@ -31,9 +34,13 @@ def test_postgres_events_settings_not_defined():
     postgres_events.setup_async_engine_events(mock_engine)
     
     # But when the event is triggered, it will fail
+    # Mock: Generic component isolation for controlled unit testing
     mock_dbapi_conn = Mock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_dbapi_conn.cursor.return_value.__enter__ = Mock(return_value=Mock())
+    # Mock: Generic component isolation for controlled unit testing
     mock_dbapi_conn.cursor.return_value.__exit__ = Mock()
+    # Mock: Component isolation for controlled unit testing
     mock_connection_record = Mock(spec=ConnectionPoolEntry)
     mock_connection_record.info = {}
     
@@ -50,9 +57,12 @@ def test_postgres_events_checkout_handler_settings_error():
     """Test checkout handler fails with undefined settings."""
     from netra_backend.app.db import postgres_events
     
+    # Mock: Component isolation for controlled unit testing
     mock_engine = Mock(spec=AsyncEngine)
+    # Mock: Generic component isolation for controlled unit testing
     mock_sync_engine = Mock()
     mock_engine.sync_engine = mock_sync_engine
+    # Mock: Generic component isolation for controlled unit testing
     mock_pool = Mock()
     mock_pool.size.return_value = 10
     mock_pool.checkedin.return_value = 5
@@ -61,9 +71,12 @@ def test_postgres_events_checkout_handler_settings_error():
     
     postgres_events.setup_async_engine_events(mock_engine)
     
+    # Mock: Generic component isolation for controlled unit testing
     mock_dbapi_conn = Mock()
+    # Mock: Component isolation for controlled unit testing
     mock_connection_record = Mock(spec=ConnectionPoolEntry)
     mock_connection_record.info = {'pid': 123}
+    # Mock: Generic component isolation for controlled unit testing
     mock_connection_proxy = Mock()
     
     # Find checkout handlers
@@ -77,9 +90,13 @@ def test_postgres_events_checkout_handler_settings_error():
 async def test_postgres_session_integration_with_events():
     """Test that postgres_session fails when postgres_events has undefined settings."""
     # Import postgres_core to trigger event setup
+    # Mock: Session isolation for controlled testing without external state
     with patch('netra_backend.app.db.postgres_core.async_session_factory') as mock_factory:
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = MagicMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_factory.return_value.__aenter__ = MagicMock(return_value=mock_session)
+        # Mock: Generic component isolation for controlled unit testing
         mock_factory.return_value.__aexit__ = MagicMock()
         
         from netra_backend.app.db.postgres_session import get_async_db

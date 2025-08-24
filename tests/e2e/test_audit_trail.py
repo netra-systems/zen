@@ -45,24 +45,28 @@ class TestCompleteAuditTrail:
 
     async def _test_authentication_actions_logged(self):
         """Verify authentication events create audit entries."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.audit_service._persist_audit_entry') as mock_persist:
             await log_admin_action("user_login", "test-user", {"ip": "127.0.0.1"})
             mock_persist.assert_called_once()
 
     async def _test_data_access_actions_logged(self):
         """Verify data access events create audit entries.""" 
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.audit_service._persist_audit_entry') as mock_persist:
             await log_admin_action("data_export", "test-user", {"table": "users"})
             mock_persist.assert_called_once()
 
     async def _test_administrative_actions_logged(self):
         """Verify admin actions create audit entries."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.audit_service._persist_audit_entry') as mock_persist:
             await log_admin_action("user_role_change", "admin", {"target": "user123"})
             mock_persist.assert_called_once()
 
     async def _test_system_configuration_actions_logged(self):
         """Verify config changes create audit entries."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.audit_service._persist_audit_entry') as mock_persist:
             await log_admin_action("config_change", "admin", {"setting": "auth_timeout"})
             mock_persist.assert_called_once()
@@ -72,6 +76,7 @@ class TestCompleteAuditTrail:
         """Test audit logs contain all required compliance fields."""
         mock_logs = AuditTestDataFactory.create_sample_audit_logs()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.services.audit_service._fetch_audit_entries') as mock_fetch:
             mock_fetch.return_value = mock_logs
             logs = await get_recent_logs(10)

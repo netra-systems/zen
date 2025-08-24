@@ -45,7 +45,9 @@ class TestRedisManagerOperations:
         manager = RedisManager()
         manager.enabled = True
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('redis.asyncio.Redis', return_value=mock_redis_client):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.config.settings') as mock_settings:
                 setup_redis_settings_mock(mock_settings)
                 await manager.connect()
@@ -57,12 +59,14 @@ class TestRedisManagerOperations:
         manager = RedisManager()
         manager.enabled = True
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('redis.asyncio.Redis') as mock_redis_class:
             from netra_backend.tests.helpers.redis_test_fixtures import MockRedisClient
             mock_client = MockRedisClient()
             setup_failing_redis_client(mock_client, "connection")
             mock_redis_class.return_value = mock_client
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.config.settings') as mock_settings:
                 setup_redis_settings_mock(mock_settings)
                 await manager.connect()

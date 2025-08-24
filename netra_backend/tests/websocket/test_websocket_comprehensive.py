@@ -155,8 +155,10 @@ class TestWebSocketAuthentication:
     async def test_jwt_authentication_flow(self, authenticated_token):
         """Test JWT authentication flow."""
         # Mock WebSocket for testing
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         mock_websocket.query_params = {"token": authenticated_token}
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.accept = AsyncMock()
         
         # Test token validation
@@ -173,17 +175,20 @@ class TestWebSocketAuthentication:
     @pytest.mark.asyncio
     async def test_token_validation_expired_token(self):
         """Test validation fails with expired token."""
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         mock_websocket.query_params = {"token": "expired.token.here"}
         
         with pytest.raises(Exception):
             await validate_websocket_token_enhanced(mock_websocket)
             
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.routes.websocket_enhanced.get_async_db')
     @pytest.mark.asyncio
     async def test_manual_database_session_handling(self, mock_db):
         """Test manual database session handling (not using Depends())."""
         # Mock database session
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
         mock_db.return_value.__aenter__.return_value = mock_session
         
@@ -195,8 +200,11 @@ class TestWebSocketAuthentication:
         }
         
         # This should work with manual session handling
+        # Mock: Security service isolation for auth testing without real token validation
         with patch('netra_backend.app.services.security_service.SecurityService') as mock_security:
+            # Mock: Security service isolation for auth testing without real token validation
             mock_security_instance = AsyncMock()
+            # Mock: Security service isolation for auth testing without real token validation
             mock_security_instance.get_user_by_id.return_value = Mock(is_active=True)
             mock_security.return_value = mock_security_instance
             
@@ -286,6 +294,7 @@ class TestWebSocketReconnection:
         connection_id = "test_connection"
         
         # Simulate adding connection
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         session_info = {"user_id": user_id}
         
@@ -311,6 +320,7 @@ class TestWebSocketReconnection:
         
         # Mock multiple quick reconnection attempts
         for i in range(3):
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_websocket = Mock()
             session_info = {"user_id": f"user_{i}"}
             
@@ -461,6 +471,7 @@ class TestWebSocketConcurrency:
         
         # Create max connections + 1
         for i in range(6):
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             mock_websocket = Mock()
             conn_id = await connection_manager.add_connection(user_id, mock_websocket, session_info)
             connections.append((conn_id, mock_websocket))
@@ -518,6 +529,7 @@ class TestWebSocketCORS:
         cors_handler = WebSocketCORSHandler(["http://localhost:3000"])
         
         # Mock WebSocket with allowed origin
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         mock_websocket.headers = {"origin": "http://localhost:3000"}
         
@@ -556,6 +568,7 @@ class TestWebSocketHeartbeat:
         # This tests the connection manager's ability to detect timeouts
         user_id = "timeout_test_user"
         session_info = {"user_id": user_id}
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         
         conn_id = await connection_manager.add_connection(user_id, mock_websocket, session_info)
@@ -605,6 +618,7 @@ class TestWebSocketResilience:
         
         user_id = "queue_test_user" 
         session_info = {"user_id": user_id}
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = Mock()
         
         # Add connection

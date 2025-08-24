@@ -407,15 +407,25 @@ class SAMLSSOTestManager:
             from unittest.mock import AsyncMock, MagicMock
             
             self.redis_client = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.get = AsyncMock(return_value=None)
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.set = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.setex = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.delete = AsyncMock(return_value=0)
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.ping = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.publish = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.subscribe = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.incr = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.expire = AsyncMock()
+            # Mock: Redis caching isolation to prevent test interference and external dependencies
             self.redis_client.exists = AsyncMock(return_value=False)
             
             # In-memory storage for Redis operations

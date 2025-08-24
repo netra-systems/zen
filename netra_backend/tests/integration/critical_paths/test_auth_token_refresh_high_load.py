@@ -90,6 +90,7 @@ class TestAuthTokenRefreshHighLoad:
     @pytest.fixture
     async def auth_client_mock(self):
         """Mock auth client for high load testing"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client') as mock_client:
             # Configure mock to simulate successful refresh responses
             async def mock_refresh_token(refresh_token: str) -> Optional[Dict]:

@@ -33,11 +33,13 @@ class TestSecurityMiddleware:
     @pytest.fixture
     def mock_request(self):
         """Create mock request for testing."""
+        # Mock: Component isolation for controlled unit testing
         request = Mock(spec=Request)
         request.method = "POST"
         request.url.path = "/api/test"
         request.headers = {"content-length": "100", "user-agent": "test-agent"}
         request.client.host = "127.0.0.1"
+        # Mock: Async component isolation for testing without real async operations
         request.body = AsyncMock(return_value=b'{"test": "data"}')
         return request
 
@@ -65,12 +67,14 @@ class TestSecurityMiddleware:
     async def test_input_validation(self, security_middleware, mock_request):
         """Test input validation for malicious content."""
         # Test SQL injection
+        # Mock: Async component isolation for testing without real async operations
         mock_request.body = AsyncMock(return_value=b'{"query": "SELECT * FROM users WHERE id = 1 OR 1=1"}')
         
         with pytest.raises(NetraSecurityException):
             await security_middleware._validate_request_body(mock_request)
         
         # Test XSS
+        # Mock: Async component isolation for testing without real async operations
         mock_request.body = AsyncMock(return_value=b'{"content": "<script>alert(\'xss\')</script>"}')
         
         with pytest.raises(NetraSecurityException):
@@ -117,6 +121,7 @@ class TestSecurityMiddleware:
         ]
         
         for payload in malicious_payloads:
+            # Mock: Async component isolation for testing without real async operations
             mock_request.body = AsyncMock(return_value=payload)
             with pytest.raises(NetraSecurityException):
                 await security_middleware._validate_request_body(mock_request)

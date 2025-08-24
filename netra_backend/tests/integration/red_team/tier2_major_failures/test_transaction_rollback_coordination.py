@@ -69,6 +69,7 @@ except ImportError:
         from netra_backend.app.db.models import User
     except ImportError:
         from unittest.mock import Mock, AsyncMock, MagicMock
+        # Mock: Generic component isolation for controlled unit testing
         User = Mock()
 
 try:
@@ -78,6 +79,7 @@ except ImportError:
         from netra_backend.app.db.models import Session as UserSession
     except ImportError:
         from unittest.mock import Mock, AsyncMock, MagicMock
+        # Mock: Session isolation for controlled testing without external state
         UserSession = Mock()
 
 

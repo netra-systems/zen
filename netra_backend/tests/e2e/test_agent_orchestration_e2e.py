@@ -51,14 +51,19 @@ def _create_websocket_mock():
 
     """Create websocket mock with required methods."""
 
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     websocket_mock = AsyncMock(spec=WebSocketManager)
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock.send_message = AsyncMock()
 
+    # Mock: Agent service isolation for testing without LLM agent execution
     websocket_mock.send_agent_update = AsyncMock()
 
+    # Mock: Agent service isolation for testing without LLM agent execution
     websocket_mock.send_agent_log = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     websocket_mock.send_error = AsyncMock()
 
     return websocket_mock
@@ -69,8 +74,10 @@ def _build_mock_dependency_dict(websocket_mock):
 
     return {
 
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         'llm': AsyncMock(spec=LLMManager), 'websocket': websocket_mock,
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         'dispatcher': AsyncMock(), 'redis': AsyncMock()
 
     }

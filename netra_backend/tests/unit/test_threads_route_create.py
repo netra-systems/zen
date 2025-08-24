@@ -21,13 +21,16 @@ from netra_backend.tests.helpers.thread_test_helpers import (
 @pytest.fixture
 def mock_db():
     """Mock database session"""
+    # Mock: Generic component isolation for controlled unit testing
     db = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     db.commit = AsyncMock()
     return db
 
 @pytest.fixture
 def mock_user():
     """Mock authenticated user"""
+    # Mock: Generic component isolation for controlled unit testing
     user = Mock()
     user.id = "test_user_123"
     user.email = "test@example.com"
@@ -40,6 +43,7 @@ class TestCreateThread:
         """Test successful thread creation"""
         mock_thread = create_mock_thread(title="New Thread")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler:
             mock_handler.return_value = mock_thread
             thread_data = ThreadCreate(
@@ -58,6 +62,7 @@ class TestCreateThread:
         mock_thread = create_mock_thread()
         mock_thread.metadata_ = {"user_id": "test_user_123", "status": "active"}
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler:
             mock_handler.return_value = mock_thread
             thread_data = ThreadCreate()
@@ -69,7 +74,9 @@ class TestCreateThread:
     @pytest.mark.asyncio
     async def test_create_thread_exception(self, mock_db, mock_user):
         """Test error handling in create_thread"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler, \
+             # Mock: Component isolation for testing without external dependencies
              patch('netra_backend.app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             mock_handler.side_effect = Exception("Database error")

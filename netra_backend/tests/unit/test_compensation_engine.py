@@ -33,6 +33,7 @@ class TestCompensationEngine:
     @pytest.fixture
     def engine(self):
         """Create compensation engine with minimal dependencies."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.compensation_engine_core.central_logger'):
             engine = CompensationEngine()
             engine.handlers = []  # Clear default handlers for testing
@@ -41,8 +42,11 @@ class TestCompensationEngine:
     @pytest.fixture
     def mock_handler(self):
         """Create mock compensation handler."""
+        # Mock: Component isolation for controlled unit testing
         handler = Mock(spec=BaseCompensationHandler)
+        # Mock: Async component isolation for testing without real async operations
         handler.can_compensate = AsyncMock(return_value=True)
+        # Mock: Async component isolation for testing without real async operations
         handler.execute_compensation = AsyncMock(return_value=True)
         handler.get_priority.return_value = 1
         return handler
@@ -50,6 +54,7 @@ class TestCompensationEngine:
     @pytest.fixture
     def recovery_context(self):
         """Create mock recovery context."""
+        # Mock: Component isolation for controlled unit testing
         context = Mock(spec=RecoveryContext)
         context.operation_type = OperationType.DATABASE_WRITE
         context.operation_id = "test-op-123"
@@ -185,9 +190,13 @@ class TestCompensationEngine:
     @pytest.mark.asyncio
     async def test_find_compatible_handler_multiple_handlers(self, engine, recovery_context):
         """Test finding compatible handler with multiple available."""
+        # Mock: Component isolation for controlled unit testing
         handler1 = Mock(spec=BaseCompensationHandler)
+        # Mock: Async component isolation for testing without real async operations
         handler1.can_compensate = AsyncMock(return_value=False)
+        # Mock: Component isolation for controlled unit testing
         handler2 = Mock(spec=BaseCompensationHandler)  
+        # Mock: Async component isolation for testing without real async operations
         handler2.can_compensate = AsyncMock(return_value=True)
         
         engine.handlers = [handler1, handler2]
@@ -199,7 +208,9 @@ class TestCompensationEngine:
     @pytest.mark.asyncio
     async def test_find_compatible_handler_none_available(self, engine, recovery_context):
         """Test finding compatible handler when none available."""
+        # Mock: Component isolation for controlled unit testing
         handler1 = Mock(spec=BaseCompensationHandler)
+        # Mock: Async component isolation for testing without real async operations
         handler1.can_compensate = AsyncMock(return_value=False)
         
         engine.handlers = [handler1]
@@ -260,11 +271,13 @@ class TestCompensationEngine:
             operation_id="test-op",
             action_type="test",
             compensation_data={},
+            # Mock: Generic component isolation for controlled unit testing
             handler=AsyncMock()
         )
     
     def _create_mock_handler_with_priority(self, priority):
         """Helper to create mock handler with specific priority."""
+        # Mock: Component isolation for controlled unit testing
         handler = Mock(spec=BaseCompensationHandler)
         handler.get_priority.return_value = priority
         return handler

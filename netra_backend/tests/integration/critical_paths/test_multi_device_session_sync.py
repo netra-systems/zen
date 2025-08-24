@@ -179,6 +179,7 @@ class MultiDeviceSessionManager:
 
         websocket = MockWebSocketForRedis(f"{user_id}_{device_id}")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.ws_manager.verify_jwt_token') as mock_verify:
 
             mock_verify.return_value = {
@@ -547,6 +548,7 @@ class TestMultiDeviceSessionSyncL3:
 
         service = JWTService()
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -565,6 +567,7 @@ class TestMultiDeviceSessionSyncL3:
 
         manager = SessionManager()
         
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.redis_manager.RedisManager.get_client') as mock_redis:
 
             mock_redis.return_value = redis_client
@@ -581,6 +584,7 @@ class TestMultiDeviceSessionSyncL3:
 
         """Create WebSocket manager."""
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.ws_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()

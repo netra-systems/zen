@@ -32,15 +32,21 @@ async def test_update_job_status():
 async def test_get_corpus_from_clickhouse():
     # Arrange
     table_name = "test_corpus"
+    # Mock: Generic component isolation for controlled unit testing
     mock_db_instance = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_db_instance.connect = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     mock_db_instance.execute_query = AsyncMock(return_value=[
         {'workload_type': 'test_type', 'prompt': 'p1', 'response': 'r1'},
         {'workload_type': 'test_type', 'prompt': 'p2', 'response': 'r2'}
     ])
+    # Mock: Async component isolation for testing without real async operations
     mock_db_instance.is_connected = AsyncMock(return_value=True)
+    # Mock: Generic component isolation for controlled unit testing
     mock_db_instance.disconnect = AsyncMock()
 
+    # Mock: ClickHouse external database isolation for unit testing performance
     with patch('app.services.generation_job_manager.ClickHouseDatabase') as mock_db_class:
         mock_db_class.return_value = mock_db_instance
 
@@ -58,13 +64,20 @@ async def test_save_corpus_to_clickhouse():
     # Arrange
     table_name = "test_corpus"
     corpus = {"test_type": [("p1", "r1"), ("p2", "r2")]}
+    # Mock: Generic component isolation for controlled unit testing
     mock_db_instance = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_db_instance.connect = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_db_instance.command = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_db_instance.insert_data = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     mock_db_instance.is_connected = AsyncMock(return_value=True)
+    # Mock: Generic component isolation for controlled unit testing
     mock_db_instance.disconnect = AsyncMock()
 
+    # Mock: ClickHouse external database isolation for unit testing performance
     with patch('app.services.generation_job_manager.ClickHouseDatabase') as mock_db_class:
         mock_db_class.return_value = mock_db_instance
 

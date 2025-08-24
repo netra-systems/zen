@@ -27,19 +27,24 @@ class TestToolDispatcherCoreOperations:
     @pytest.mark.asyncio
     async def test_dispatch_success(self):
         """Test successful tool dispatch."""
+        # Mock: Component isolation for testing without external dependencies
         tool, dispatcher = self._setup_successful_dispatch()
+        # Mock: Component isolation for testing without external dependencies
         result = await dispatcher.dispatch("test_tool", param1="value1", param2="value2")
         self._verify_successful_dispatch_result(result)
     @pytest.mark.asyncio
     async def test_dispatch_tool_not_found(self):
         """Test dispatch with non-existent tool."""
         dispatcher = ToolDispatcher()
+        # Mock: Component isolation for testing without external dependencies
         result = await dispatcher.dispatch("nonexistent_tool", param="value")
         verify_tool_result_error(result, "Tool nonexistent_tool not found")
     @pytest.mark.asyncio
     async def test_dispatch_tool_failure(self):
         """Test dispatch with failing tool."""
+        # Mock: Component isolation for testing without external dependencies
         failing_tool, dispatcher = self._setup_failing_dispatch()
+        # Mock: Component isolation for testing without external dependencies
         result = await dispatcher.dispatch("failing_tool", param="value")
         verify_tool_result_error(result, "Tool failing_tool failed")
     
@@ -70,6 +75,7 @@ class TestToolDispatcherCoreOperations:
         """Verify non-existing tool is not found."""
         assert dispatcher.has_tool("nonexistent_tool") is False
     
+    # Mock: Component isolation for testing without external dependencies
     def _setup_successful_dispatch(self) -> tuple:
         """Setup successful dispatch test."""
         tool = create_mock_tool("test_tool")
@@ -81,6 +87,7 @@ class TestToolDispatcherCoreOperations:
         verify_tool_result_success(result, "test_tool")
         assert result.tool_input.kwargs == {"param1": "value1", "param2": "value2"}
     
+    # Mock: Component isolation for testing without external dependencies
     def _setup_failing_dispatch(self) -> tuple:
         """Setup failing dispatch test."""
         failing_tool = create_mock_tool("failing_tool", should_fail=True)

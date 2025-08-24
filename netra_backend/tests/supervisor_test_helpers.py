@@ -23,9 +23,13 @@ from netra_backend.app.llm.llm_manager import LLMManager
 def create_supervisor_mocks():
     """Create standard mocks for supervisor tests."""
     return {
+        # Mock: Session isolation for controlled testing without external state
         'db_session': AsyncMock(),
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         'llm_manager': AsyncMock(spec=LLMManager),
+        # Mock: WebSocket connection isolation for testing without network overhead
         'websocket_manager': AsyncMock(),
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         'tool_dispatcher': AsyncMock(spec=ToolDispatcher)
     }
 
@@ -84,12 +88,14 @@ def setup_data_agent_mock(supervisor: SupervisorAgent, return_data: Dict[str, An
 def setup_failing_agent_mock(supervisor: SupervisorAgent, agent_name: str, error_msg: str):
     """Setup agent mock to fail with specific error."""
     agent = supervisor.agents.get(agent_name)
+    # Mock: Async component isolation for testing without real async operations
     agent.execute = AsyncMock(side_effect=Exception(error_msg))
 
 def setup_retry_agent_mock(supervisor: SupervisorAgent, agent_name: str, failures: List[str], success_data: Dict[str, Any]):
     """Setup agent mock with retry behavior."""
     agent = supervisor.agents.get(agent_name)
     side_effects = _create_retry_side_effects(failures, agent_name, success_data)
+    # Mock: Async component isolation for testing without real async operations
     agent.execute = AsyncMock(side_effect=side_effects)
 
 def assert_agent_called(supervisor: SupervisorAgent, agent_name: str):
@@ -129,12 +135,15 @@ async def execute_pipeline(supervisor: SupervisorAgent, state: DeepAgentState, c
 def create_quality_supervisor_mocks():
     """Create mocks for quality supervisor tests."""
     return {
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         'llm_manager': AsyncMock(spec=LLMManager),
+        # Mock: WebSocket connection isolation for testing without network overhead
         'websocket_manager': AsyncMock()
     }
 
 def setup_quality_response_mock(llm_manager: AsyncMock, response_data: Dict[str, Any]):
     """Setup LLM manager mock for quality responses."""
+    # Mock: LLM provider isolation to prevent external API usage and costs
     llm_manager.ask_llm = AsyncMock()
     llm_manager.ask_llm.return_value = json.dumps(response_data)
 
@@ -150,7 +159,9 @@ def create_quality_response_data(quality_score: float, approved: bool, issues: L
 def create_admin_dispatcher_mocks():
     """Create mocks for admin tool dispatcher tests."""
     return {
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         'llm_manager': AsyncMock(spec=LLMManager),
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         'tool_dispatcher': AsyncMock(spec=ToolDispatcher)
     }
 
@@ -165,6 +176,7 @@ def create_admin_operation(op_type: str, params: Dict[str, Any], **kwargs) -> Di
 
 def setup_tool_dispatcher_mock(tool_dispatcher: AsyncMock, return_data: Dict[str, Any]):
     """Setup tool dispatcher mock with return data."""
+    # Mock: Tool execution isolation for predictable agent testing
     tool_dispatcher.execute_tool = AsyncMock()
     tool_dispatcher.execute_tool.return_value = return_data
 
@@ -172,8 +184,11 @@ def setup_tool_dispatcher_mock(tool_dispatcher: AsyncMock, return_data: Dict[str
 def create_corpus_admin_mocks():
     """Create mocks for corpus admin tests."""
     return {
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         'llm_manager': AsyncMock(spec=LLMManager),
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         'tool_dispatcher': AsyncMock(spec=ToolDispatcher),
+        # Mock: Generic component isolation for controlled unit testing
         'vector_store': AsyncMock()
     }
 
@@ -197,9 +212,13 @@ def setup_vector_store_mock(vector_store: AsyncMock, operation: str, return_data
 def create_supply_researcher_mocks():
     """Create mocks for supply researcher tests."""
     return {
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         'llm_manager': AsyncMock(spec=LLMManager),
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         'tool_dispatcher': AsyncMock(spec=ToolDispatcher),
+        # Mock: Generic component isolation for controlled unit testing
         'data_sources': AsyncMock(),
+        # Mock: Generic component isolation for controlled unit testing
         'enrichment_service': AsyncMock()
     }
 
@@ -222,7 +241,9 @@ def create_supplier_data(supplier_id: str, name: str, reliability: float) -> Dic
 def create_demo_service_mocks():
     """Create mocks for demo service tests."""
     return {
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         'llm_manager': AsyncMock(spec=LLMManager),
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         'tool_dispatcher': AsyncMock(spec=ToolDispatcher)
     }
 
@@ -382,16 +403,19 @@ def _should_execute_agent(strategy, state) -> bool:
 
 def _setup_add_documents_mock(vector_store: AsyncMock, return_data: Any):
     """Setup add documents mock."""
+    # Mock: Generic component isolation for controlled unit testing
     vector_store.add_documents = AsyncMock()
     vector_store.add_documents.return_value = return_data
 
 def _setup_similarity_search_mock(vector_store: AsyncMock, return_data: Any):
     """Setup similarity search mock."""
+    # Mock: Generic component isolation for controlled unit testing
     vector_store.similarity_search = AsyncMock()
     vector_store.similarity_search.return_value = return_data
 
 def _setup_update_document_mock(vector_store: AsyncMock, return_data: Any):
     """Setup update document mock."""
+    # Mock: Generic component isolation for controlled unit testing
     vector_store.update_document = AsyncMock()
     vector_store.update_document.return_value = return_data
 

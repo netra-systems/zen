@@ -640,6 +640,7 @@ class TestWebSocketSecurity:
                 "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
             }
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.core.websocket_cors.check_websocket_cors') as mock_cors:
                 mock_cors.return_value = False  # Simulate CORS failure
                 
@@ -998,6 +999,7 @@ class TestWebSocketErrorHandling:
             }
             
             # Mock database session failure during user validation
+            # Mock: Security component isolation for controlled auth testing
             with patch('netra_backend.app.services.security_service.SecurityService.get_user_by_id') as mock_get_user:
                 mock_get_user.side_effect = Exception("Database connection failed")
                 

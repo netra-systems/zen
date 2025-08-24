@@ -166,6 +166,7 @@ class TestAgentConversationFlow:
     async def _execute_agent_request_with_mock(self, session_data: Dict[str, Any], request: Dict[str, Any], 
                                              agent_type: str) -> Dict[str, Any]:
         """Execute agent request with mocked LLM response."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
             mock_llm.return_value = {"content": f"Agent {agent_type} processed", "tokens_used": 150, "execution_time": 0.8}
             response = await AgentConversationTestUtils.send_conversation_message(session_data["client"], request)
@@ -209,6 +210,7 @@ class TestAgentConversationPerformance:
             for i, session_data in enumerate(sessions):
                 request = {"type": "agent_request", "user_id": session_data["user_data"].id, 
                           "message": f"Concurrent analysis {i}", "turn_id": f"concurrent_turn_{i}"}
+                # Mock: LLM service isolation for fast testing without API calls or rate limits
                 with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
                     mock_llm.return_value = {"content": "Concurrent response", "tokens_used": 100}
                     tasks.append(AgentConversationTestUtils.send_conversation_message(session_data["client"], request))

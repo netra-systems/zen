@@ -34,6 +34,7 @@ class TestSupervisorFlowLogger:
         assert flow_logger.flow_state == FlowState.PENDING
         assert len(flow_logger.todos) == 0
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     def test_log_flow_start(self, mock_logger, flow_logger):
         """Test flow start logging."""
@@ -44,6 +45,7 @@ class TestSupervisorFlowLogger:
         mock_logger.info.assert_called_once()
         assert "supervisor_flow_start" in mock_logger.info.call_args[0][0]
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     def test_log_agent_start(self, mock_logger, flow_logger):
         """Test agent start logging."""
@@ -54,6 +56,7 @@ class TestSupervisorFlowLogger:
         call_data = mock_logger.info.call_args[0][0]
         assert "supervisor_agent_start" in call_data
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     def test_log_agent_completion(self, mock_logger, flow_logger):
         """Test agent completion logging."""
@@ -64,6 +67,7 @@ class TestSupervisorFlowLogger:
         call_data = mock_logger.info.call_args[0][0]
         assert "supervisor_agent_completion" in call_data
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     def test_log_inter_agent_communication(self, mock_logger, flow_logger):
         """Test inter-agent communication logging."""
@@ -74,6 +78,7 @@ class TestSupervisorFlowLogger:
         assert "supervisor_inter_agent_comm" in call_data
         assert "agent1" in call_data
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     def test_create_todo(self, mock_logger, flow_logger):
         """Test TODO creation logging."""
@@ -83,6 +88,7 @@ class TestSupervisorFlowLogger:
         assert flow_logger.todos["todo1"]["state"] == TodoState.CREATED.value
         mock_logger.info.assert_called_once()
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     def test_update_todo_state(self, mock_logger, flow_logger):
         """Test TODO state update logging."""
@@ -94,6 +100,7 @@ class TestSupervisorFlowLogger:
         assert flow_logger.todos["todo1"]["state"] == TodoState.IN_PROGRESS.value
         mock_logger.info.assert_called_once()
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     def test_update_todo_state_nonexistent(self, mock_logger, flow_logger):
         """Test TODO state update for non-existent TODO."""
@@ -101,6 +108,7 @@ class TestSupervisorFlowLogger:
         
         mock_logger.info.assert_not_called()
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     def test_log_pipeline_execution(self, mock_logger, flow_logger):
         """Test pipeline execution logging."""
@@ -111,6 +119,7 @@ class TestSupervisorFlowLogger:
         call_data = mock_logger.info.call_args[0][0]
         assert "supervisor_pipeline_execution" in call_data
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     def test_log_flow_completion_success(self, mock_logger, flow_logger):
         """Test successful flow completion logging."""
@@ -121,6 +130,7 @@ class TestSupervisorFlowLogger:
         call_data = mock_logger.info.call_args[0][0]
         assert "supervisor_flow_completion" in call_data
 
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.agents.supervisor.flow_logger.logger')
     def test_log_flow_completion_failure(self, mock_logger, flow_logger):
         """Test failed flow completion logging."""
@@ -142,6 +152,7 @@ class TestSupervisorFlowLogger:
 
     def test_json_log_format_compliance(self, flow_logger):
         """Test that logged data is valid JSON."""
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         with patch('netra_backend.app.agents.supervisor.flow_logger.logger') as mock_logger:
             flow_logger.log_flow_start("test_pipeline", ["agent1"])
             
@@ -154,6 +165,7 @@ class TestSupervisorFlowLogger:
 
     def test_correlation_id_tracking_consistency(self, flow_logger):
         """Test correlation ID is consistently tracked across logs."""
+        # Mock: Agent supervisor isolation for testing without spawning real agents
         with patch('netra_backend.app.agents.supervisor.flow_logger.logger') as mock_logger:
             flow_logger.log_flow_start("test_pipeline", ["agent1"])
             flow_logger.log_agent_start("agent1", 1)

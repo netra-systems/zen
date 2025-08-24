@@ -62,16 +62,23 @@ def corpus_service():
 
 @pytest.fixture
 def mock_db():
+    # Mock: Generic component isolation for controlled unit testing
     db = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     db.add = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     db.commit = MagicMock()
+    # Mock: Generic component isolation for controlled unit testing
     db.refresh = MagicMock()
     return db
 
 @pytest.fixture
 def mock_clickhouse_client():
+    # Mock: Generic component isolation for controlled unit testing
     client = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     client.execute = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     client.query = AsyncMock(return_value=[])
     return client
 
@@ -99,8 +106,11 @@ def ingestion_service():
 
 @pytest.fixture
 def mock_clickhouse():
+    # Mock: Generic component isolation for controlled unit testing
     client = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.execute = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     client.query = AsyncMock()
     return client
 
@@ -110,8 +120,11 @@ def ws_service():
 
 @pytest.fixture
 def mock_websocket():
+    # Mock: Generic component isolation for controlled unit testing
     ws = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     ws.send_json = AsyncMock()
+    # Mock: Generic component isolation for controlled unit testing
     ws.receive_json = AsyncMock()
     return ws
 

@@ -190,6 +190,7 @@ class AuthenticatedWebSocketStreamer:
     
     def __init__(self, auth_manager: StreamingAuthManager):
         self.auth_manager = auth_manager
+        # Mock: Generic component isolation for controlled unit testing
         self.websocket_mock = AsyncMock()
         self.sent_messages = []
         self.stream_errors = []

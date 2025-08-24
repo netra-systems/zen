@@ -26,7 +26,9 @@ def test_extract_json_with_trailing_comma():
 def test_triage_agent_extract_json():
     """Test TriageSubAgent's _extract_and_validate_json method"""
     # Create a triage agent instance
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock_llm = Mock()
+    # Mock: Generic component isolation for controlled unit testing
     mock_tool = Mock()
     agent = TriageSubAgent(mock_llm, mock_tool, None)
     

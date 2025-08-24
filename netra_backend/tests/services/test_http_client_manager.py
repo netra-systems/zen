@@ -76,8 +76,10 @@ class TestHTTPClientManager:
     
     def _setup_mock_clients(self, manager):
         """Setup mock clients for health check test."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client1 = AsyncMock()
         mock_client1.health_check.return_value = {"status": "healthy"}
+        # Mock: Generic component isolation for controlled unit testing
         mock_client2 = AsyncMock()
         mock_client2.health_check.return_value = {"status": "degraded"}
         
@@ -108,7 +110,9 @@ class TestHTTPClientManager:
     
     def _setup_mock_clients_for_close(self, manager):
         """Setup mock clients for close test."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_client1 = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_client2 = AsyncMock()
         
         manager._clients = {
@@ -129,7 +133,9 @@ class TestGetHTTPClient:
     async def test_get_http_client_context_manager(self):
         """Test get_http_client context manager."""
         from unittest.mock import Mock, patch, AsyncMock, MagicMock
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.external_api_client.http_client_manager') as mock_manager:
+            # Mock: Generic component isolation for controlled unit testing
             mock_client = Mock()
             mock_manager.get_client.return_value = mock_client
             

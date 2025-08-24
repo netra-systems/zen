@@ -37,15 +37,18 @@ class LLMAgentIntegrationCoreTests:
     @pytest.fixture
     def mock_llm_manager(self):
         """Create properly mocked LLM manager"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_manager = Mock(spec=LLMManager)
         
         # Mock standard LLM responses
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.call_llm = AsyncMock(return_value={
             "content": "I'll help you optimize your AI workload",
             "tool_calls": []
         })
         
         # Mock structured responses for triage
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.ask_llm = AsyncMock(return_value=json.dumps({
             "category": "optimization",
             "confidence": 0.95,
@@ -65,6 +68,7 @@ class LLMAgentIntegrationCoreTests:
             UserIntent,
         )
         
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.ask_structured_llm = AsyncMock(return_value=TriageResult(
             category="AI Optimization",
             confidence_score=0.95,
@@ -93,27 +97,40 @@ class LLMAgentIntegrationCoreTests:
 
     def mock_db_session(self):
         """Create mock database session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.close = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.execute = AsyncMock()
         return session
 
     def mock_websocket_manager(self):
         """Create mock WebSocket manager"""
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.send_message = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.broadcast = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.send_agent_log = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.send_error = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         ws_manager.send_sub_agent_update = AsyncMock()
         return ws_manager
 
     def mock_tool_dispatcher(self):
         """Create mock tool dispatcher"""
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         dispatcher = Mock(spec=ToolDispatcher)
+        # Mock: Async component isolation for testing without real async operations
         dispatcher.dispatch_tool = AsyncMock(return_value={
             "status": "success",
             "result": {"data": "Tool execution successful"}
@@ -127,6 +144,7 @@ class LLMAgentIntegrationCoreTests:
         with patch('app.agents.supervisor_consolidated.state_persistence_service') as mock_persistence:
             mock_persistence.save_agent_state = AsyncMock(return_value=True)
             mock_persistence.load_agent_state = AsyncMock(return_value=None)
+            # Mock: Async component isolation for testing without real async operations
             mock_persistence.get_thread_context = AsyncMock(return_value=None)
             
             supervisor = SupervisorAgent(

@@ -59,6 +59,7 @@ class MultiAgentOrchestrationTestManager:
         
     async def _setup_agent_registry(self) -> None:
         """Setup real agent registry with mock tool dispatcher."""
+        # Mock: Tool dispatcher isolation for agent testing without real tool execution
         mock_tool_dispatcher = AsyncMock()
         self.agent_registry = AgentRegistry(
             llm_manager=self._create_mock_llm_manager(),
@@ -68,7 +69,9 @@ class MultiAgentOrchestrationTestManager:
         
     def _create_mock_llm_manager(self) -> AsyncMock:
         """Create mock LLM manager for testing."""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm = AsyncMock()
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         mock_llm.generate_response = AsyncMock(return_value={
             "content": "Mock agent response",
             "metadata": {"cost": 0.001, "tokens": 50}

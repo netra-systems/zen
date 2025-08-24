@@ -241,6 +241,7 @@ class TestComprehensiveJsonFix:
             "list_recommendations": "invalid list"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.json_parsing_utils.logger') as mock_logger:
             result = comprehensive_json_fix(data)
             

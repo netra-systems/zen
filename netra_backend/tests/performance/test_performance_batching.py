@@ -101,12 +101,17 @@ class TestMessageBatcher:
     @pytest.fixture
     def mock_connection_manager(self):
         """Create mock connection manager."""
+        # Mock: Generic component isolation for controlled unit testing
         manager = Mock()
         manager.get_user_connections.return_value = [
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             Mock(connection_id="conn_1", websocket=AsyncMock()),
+            # Mock: WebSocket infrastructure isolation for unit tests without real connections
             Mock(connection_id="conn_2", websocket=AsyncMock())
         ]
+        # Mock: Component isolation for controlled unit testing
         manager.get_connection_by_id.return_value = Mock(
+            # Mock: Generic component isolation for controlled unit testing
             websocket=AsyncMock(),
             message_count=0
         )

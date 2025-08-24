@@ -37,9 +37,13 @@ class TestDatabaseFixtureExamples:
     async def test_simple_session_mock_usage(self, async_session_mock):
         """Example: Replace basic AsyncSession mock setup."""
         # OLD WAY (duplicated 70+ times):
+        # Mock: Database session isolation for transaction testing without real database dependency
         # session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         # session.add = Mock()
+        # Mock: Session isolation for controlled testing without external state
         # session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         # session.refresh = AsyncMock()
         
         # NEW WAY (one line):
@@ -57,6 +61,7 @@ class TestDatabaseFixtureExamples:
     async def test_query_result_building(self, async_session_mock, query_builder):
         """Example: Replace complex query result mocking."""
         # OLD WAY (complex mock setup):
+        # Mock: Generic component isolation for controlled unit testing
         # mock_result = Mock()
         # mock_result.scalars.return_value.first.return_value = user
         # session.execute.return_value = mock_result
@@ -116,6 +121,7 @@ class TestDatabaseFixtureExamples:
     def test_bulk_model_creation(self):
         """Example: Replace bulk model factory patterns."""
         # OLD WAY (manual bulk creation):
+        # Mock: Component isolation for controlled unit testing
         # users = [Mock(id=f"user_{i}", email=f"user{i}@test.com") for i in range(10)]
         
         # NEW WAY (factory functions):

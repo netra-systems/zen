@@ -76,6 +76,7 @@ def llm_manager(test_llm_config):
 
 def _create_mock_openai_llm():
     """Create mock OpenAI LLM with proper response format."""
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock_llm = AsyncMock()
     mock_response = _create_mock_openai_response()
     mock_llm.ainvoke.return_value = mock_response
@@ -84,6 +85,7 @@ def _create_mock_openai_llm():
 
 def _create_mock_openai_response(content: str = "Mock response"):
     """Create mock response matching OpenAI format."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_response = MagicMock()
     mock_response.content = content
     mock_response.prompt_tokens = 50
@@ -171,6 +173,7 @@ class TestRetryMechanisms:
         rate_limit_error = Exception("Rate limit exceeded. Retry after 60 seconds")
         
         with patch.object(llm_manager, 'get_llm') as mock_get_llm:
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             mock_llm = AsyncMock()
             mock_llm.ainvoke.side_effect = [rate_limit_error, rate_limit_error, "Success"]
             mock_get_llm.return_value = mock_llm
@@ -255,6 +258,7 @@ class TestStructuredGenerationEdgeCases:
         )
         
         with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get_structured:
+            # Mock: LLM service isolation for fast testing without API calls or rate limits
             mock_structured_llm = AsyncMock()
             # First call fails, triggers fallback to string parsing
             mock_structured_llm.ainvoke.side_effect = Exception("JSON schema not supported")
@@ -286,6 +290,7 @@ class TestTokenUsageMonitoring:
 
     def test_token_usage_calculation(self):
         """Test accurate token usage calculation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_response = MagicMock()
         mock_response.prompt_tokens = 100
         mock_response.completion_tokens = 50

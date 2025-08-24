@@ -44,6 +44,7 @@ class ThreadDatabaseErrorTests:
         """Test various database error scenarios."""
         # Test SQLAlchemy error
         db_session.execute.side_effect = SQLAlchemyError("Database connection failed")
+        # Mock: Session isolation for controlled testing without external state
         db_session.rollback = AsyncMock()
         
         result = await service.get_or_create_thread(user_id, db_session)
@@ -59,17 +60,21 @@ class ThreadDatabaseErrorTests:
     ) -> None:
         """Test integrity error handling during thread creation."""
         # Mock sequence: first call returns None, second returns existing thread
+        # Mock: Generic component isolation for controlled unit testing
         mock_thread = Mock()
         mock_thread.id = f"thread_{user_id}"
         mock_thread.metadata_ = {"user_id": user_id}
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_result_none = Mock()
         mock_result_none.scalar_one_or_none.return_value = None
+        # Mock: Generic component isolation for controlled unit testing
         mock_result_existing = Mock()
         mock_result_existing.scalar_one_or_none.return_value = mock_thread
         
         db_session.execute.side_effect = [mock_result_none, mock_result_existing]
         db_session.commit.side_effect = IntegrityError("statement", "params", "orig")
+        # Mock: Session isolation for controlled testing without external state
         db_session.rollback = AsyncMock()
         
         result = await service.get_or_create_thread(user_id, db_session)
@@ -90,6 +95,7 @@ class ThreadDatabaseErrorTests:
         """Test message creation error scenarios."""
         # Test database error during message creation
         db_session.add.side_effect = SQLAlchemyError("Message creation failed")
+        # Mock: Session isolation for controlled testing without external state
         db_session.rollback = AsyncMock()
         
         result = await service.create_message(
@@ -372,6 +378,7 @@ class ThreadRecoveryTests:
             if call_count <= 2:  # Fail first 2 attempts
                 raise SQLAlchemyError("Transient error")
             # Succeed on third attempt
+            # Mock: Generic component isolation for controlled unit testing
             mock_result = Mock()
             mock_result.scalar_one_or_none.return_value = None
             return mock_result
@@ -420,13 +427,21 @@ class ThreadRecoveryTests:
 @pytest.fixture
 def mock_db_session():
     """Mock database session with error simulation capabilities."""
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
+    # Mock: Session isolation for controlled testing without external state
     session.begin = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.add = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.flush = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.refresh = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.execute = AsyncMock()
     return session
 

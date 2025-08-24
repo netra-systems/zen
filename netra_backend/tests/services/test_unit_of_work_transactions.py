@@ -21,20 +21,32 @@ class TestUnitOfWorkTransactions:
     @pytest.fixture
     def mock_async_session_factory(self):
         """Mock async session factory"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         session = AsyncMock(spec=AsyncSession)
+        # Mock: Session isolation for controlled testing without external state
         session.add = MagicMock()
+        # Mock: Session isolation for controlled testing without external state
         session.begin = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.commit = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.close = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.refresh = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.execute = AsyncMock()
         
         # Create a context manager that returns the session
+        # Mock: Session isolation for controlled testing without external state
         session_context = AsyncMock()
+        # Mock: Database session isolation for transaction testing without real database dependency
         session_context.__aenter__ = AsyncMock(return_value=session)
+        # Mock: Session isolation for controlled testing without external state
         session_context.__aexit__ = AsyncMock(return_value=None)
         
+        # Mock: Generic component isolation for controlled unit testing
         factory = MagicMock()
         factory.return_value = session_context
         return factory, session
@@ -51,6 +63,7 @@ class TestUnitOfWorkTransactions:
     async def test_unit_of_work_successful_transaction(self, mock_async_session_factory):
         """Test successful Unit of Work transaction"""
         factory, mock_session = mock_async_session_factory
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.database.unit_of_work.async_session_factory', factory):
             async with UnitOfWork() as uow:
                 self._assert_uow_repositories_initialized(uow, mock_session)
@@ -59,6 +72,7 @@ class TestUnitOfWorkTransactions:
     async def test_unit_of_work_rollback_on_exception(self, mock_async_session_factory):
         """Test Unit of Work rollback on exception"""
         factory, mock_session = mock_async_session_factory
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.database.unit_of_work.async_session_factory', factory):
             try:
                 async with UnitOfWork() as uow:
@@ -76,6 +90,7 @@ class TestUnitOfWorkTransactions:
     @pytest.mark.asyncio
     async def test_unit_of_work_with_external_session(self):
         """Test Unit of Work with externally provided session"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         external_session = AsyncMock(spec=AsyncSession)
         async with UnitOfWork(external_session) as uow:
             self._assert_external_session_handling(external_session, uow)
@@ -83,6 +98,7 @@ class TestUnitOfWorkTransactions:
     async def test_unit_of_work_nested_transaction_handling(self, mock_async_session_factory):
         """Test nested Unit of Work transaction behavior"""
         factory, mock_session = mock_async_session_factory
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.database.unit_of_work.async_session_factory', factory):
             async with UnitOfWork() as outer_uow:
                 # Nested UoW should use same session
@@ -93,6 +109,7 @@ class TestUnitOfWorkTransactions:
     async def test_unit_of_work_repository_isolation(self, mock_async_session_factory):
         """Test repository isolation within Unit of Work"""
         factory, mock_session = mock_async_session_factory
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.database.unit_of_work.async_session_factory', factory):
             async with UnitOfWork() as uow:
                 # All repositories should share the same session
@@ -104,6 +121,7 @@ class TestUnitOfWorkTransactions:
     async def test_unit_of_work_transaction_state_consistency(self, mock_async_session_factory):
         """Test transaction state consistency across operations"""
         factory, mock_session = mock_async_session_factory
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.database.unit_of_work.async_session_factory', factory):
             async with UnitOfWork() as uow:
                 # Simulate multiple repository operations
@@ -117,6 +135,7 @@ class TestUnitOfWorkTransactions:
     async def test_unit_of_work_exception_propagation(self, mock_async_session_factory):
         """Test exception propagation from Unit of Work context"""
         factory, mock_session = mock_async_session_factory
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.database.unit_of_work.async_session_factory', factory):
             test_exception = RuntimeError("Test exception for propagation")
             with pytest.raises(RuntimeError, match="Test exception for propagation"):
@@ -128,6 +147,7 @@ class TestUnitOfWorkTransactions:
     async def test_unit_of_work_session_cleanup_on_success(self, mock_async_session_factory):
         """Test proper session cleanup on successful completion"""
         factory, mock_session = mock_async_session_factory
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.database.unit_of_work.async_session_factory', factory):
             async with UnitOfWork() as uow:
                 pass  # Successful completion

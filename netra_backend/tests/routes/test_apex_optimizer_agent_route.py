@@ -18,7 +18,9 @@ from netra_backend.app.main import app
 @pytest.mark.asyncio
 async def test_apex_optimizer_agent(prompt: str):
     # Create a mock supervisor
+    # Mock: Generic component isolation for controlled unit testing
     mock_supervisor = Mock()
+    # Mock: Async component isolation for testing without real async operations
     mock_supervisor.run = AsyncMock(return_value={"status": "completed"})
     
     # Override the dependency

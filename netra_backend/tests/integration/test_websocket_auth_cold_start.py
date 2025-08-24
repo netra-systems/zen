@@ -46,15 +46,20 @@ from netra_backend.app.core.exceptions_websocket import WebSocketAuthenticationE
 @pytest.fixture
 def mock_postgres():
     """Mock PostgreSQL for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_db = MagicMock()
+    # Mock: PostgreSQL database isolation for testing without real database connections
     mock_db.get_connection_url = MagicMock(return_value="postgresql://test_user:test_password@localhost/test_db")
     return mock_db
 
 @pytest.fixture
 def mock_redis():
     """Mock Redis for testing."""
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_redis = MagicMock()
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_redis.get_container_host_ip = MagicMock(return_value="localhost")
+    # Mock: Redis external service isolation for fast, reliable tests without network dependency
     mock_redis.get_exposed_port = MagicMock(return_value=6379)
     return mock_redis
 
@@ -569,6 +574,7 @@ class TestWebSocketAuthColdStartL3:
         headers = {"Authorization": f"Bearer {test_jwt_token}"}
         
         # Mock auth service degradation
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             # Simulate slow response from auth service
             async def slow_validation(*args, **kwargs):

@@ -299,7 +299,9 @@ class TestErrorHandlingAndLogging:
     @pytest.mark.asyncio
     async def test_connection_rejection_logged_clearly(self):
         """Test rejected connections are logged clearly."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.logging_config.central_logger') as mock_logger:
+            # Mock: Generic component isolation for controlled unit testing
             mock_log = Mock()
             mock_logger.get_logger.return_value = mock_log
             
@@ -403,7 +405,9 @@ class TestManualDatabaseSessions:
     @pytest.mark.asyncio
     async def test_websocket_manual_db_sessions(self, ws_client):
         """Test WebSocket endpoints use manual DB sessions."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__.return_value = mock_session
             
@@ -413,10 +417,12 @@ class TestManualDatabaseSessions:
             # Should have called manual session creation
             assert mock_db.called
             
+    # Mock: Component isolation for testing without external dependencies
     @patch('netra_backend.app.routes.websocket_enhanced.get_async_db')
     @pytest.mark.asyncio
     async def test_auth_validation_manual_session(self, mock_db):
         """Test auth validation uses manual database session."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock()
         mock_db.return_value.__aenter__.return_value = mock_session
         
@@ -426,8 +432,11 @@ class TestManualDatabaseSessions:
         
         session_info = {"user_id": "test_user", "email": "test@example.com"}
         
+        # Mock: Security service isolation for auth testing without real token validation
         with patch('netra_backend.app.services.security_service.SecurityService') as mock_security:
+            # Mock: Security service isolation for auth testing without real token validation
             mock_security_instance = AsyncMock()
+            # Mock: Security service isolation for auth testing without real token validation
             mock_security_instance.get_user_by_id.return_value = Mock(is_active=True)
             mock_security.return_value = mock_security_instance
             

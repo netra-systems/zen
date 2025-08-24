@@ -26,6 +26,7 @@ class TestThreadRepositoryOperations:
     @pytest.mark.asyncio
     async def test_thread_crud_operations(self):
         """Test thread CRUD operations"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = ThreadRepository()
         
@@ -75,10 +76,12 @@ class TestThreadRepositoryOperations:
     @pytest.mark.asyncio
     async def test_soft_delete_functionality(self):
         """Test soft delete functionality"""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = AsyncMock(spec=AsyncSession)
         repo = ThreadRepository()
         
         # Set up mock result for queries
+        # Mock: Generic component isolation for controlled unit testing
         mock_result = AsyncMock()
         mock_session.execute.return_value = mock_result
         

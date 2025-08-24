@@ -128,6 +128,7 @@ class TestRedisWebSocketStateSyncL3:
         
         # Patch the global redis_manager instance
 
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('netra_backend.app.redis_manager.redis_manager') as mock_redis_mgr:
 
             test_redis_mgr = RedisManager()
@@ -138,10 +139,13 @@ class TestRedisWebSocketStateSyncL3:
             
             # Configure mock to return our test redis manager
 
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis_mgr.get_client = AsyncMock(return_value=test_redis_mgr.redis_client)
 
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis_mgr.get = AsyncMock(side_effect=test_redis_mgr.get)
 
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis_mgr.set = AsyncMock(side_effect=test_redis_mgr.set)
             
             manager = WebSocketManager()

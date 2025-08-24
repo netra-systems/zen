@@ -62,14 +62,18 @@ class TestGCPErrorService:
     @pytest.fixture
     def mock_gcp_client(self):
         """Create mock GCP client with standard responses."""
+        # Mock: Generic component isolation for controlled unit testing
         client = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         client.list_group_stats = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         client.get_group = Mock()
         return client
     
     @pytest.fixture
     def sample_gcp_error_stats(self):
         """Create sample GCP error group stats for testing."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_stat = Mock()
         mock_stat.group.group_id = "error-group-123"
         mock_stat.group.name = "Test Error Group"
@@ -84,6 +88,7 @@ class TestGCPErrorService:
         """Create GCP Error Service instance with mocks."""
         service = GCPErrorService(mock_gcp_config)
         with patch.object(service, 'client_manager') as mock_manager:
+            # Mock: Generic component isolation for controlled unit testing
             mock_manager.initialize_client = AsyncMock(return_value=Mock())
             await service.initialize()
             yield service
@@ -92,6 +97,7 @@ class TestGCPErrorService:
     async def test_initialize_service_success(self, mock_gcp_config):
         """Test successful service initialization."""
         service = GCPErrorService(mock_gcp_config)
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = Mock()
         
         with patch.object(service.client_manager, 'initialize_client', new_callable=AsyncMock) as mock_init:
@@ -296,6 +302,7 @@ class TestGCPErrorService:
     @pytest.mark.asyncio
     async def test_get_service_status_complete_info(self, gcp_service):
         """Test service status reporting with complete information."""
+        # Mock: Generic component isolation for controlled unit testing
         gcp_service.client = Mock()  # Set initialized client
         
         with patch.object(gcp_service.rate_limiter, 'get_current_usage') as mock_usage:
@@ -332,6 +339,7 @@ class TestGCPErrorService:
 
     def _create_mock_error(self, severity: ErrorSeverity, error_id: str, status: ErrorStatus = ErrorStatus.OPEN):
         """Create mock error with specified properties."""
+        # Mock: Generic component isolation for controlled unit testing
         error = Mock()
         error.severity = severity
         error.id = error_id

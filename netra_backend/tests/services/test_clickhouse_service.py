@@ -99,12 +99,15 @@ class TestClickHouseConnection:
         result = await client.fetch("SELECT 1 as test")
         assert len(result) == 1
         assert result[0]['test'] == 1
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.services.clickhouse_service.get_clickhouse_client')
     @pytest.mark.asyncio
     async def test_list_corpus_tables(self, mock_get_client):
         """Test listing corpus tables with mocked ClickHouse."""
         # Create mock client
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_client_context = AsyncMock()
         mock_client_context.__aenter__.return_value = mock_client
         mock_client_context.__aexit__.return_value = None

@@ -198,6 +198,7 @@ class UnifiedE2ETestHarness:
     # Service Mocking Support
     def setup_auth_service_mock(self) -> MagicMock:
         """Setup comprehensive auth service mock"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_service = MagicMock()
         self._configure_auth_methods(mock_service)
         self.mock_services["auth"] = mock_service
@@ -205,13 +206,18 @@ class UnifiedE2ETestHarness:
     
     def _configure_auth_methods(self, mock_service):
         """Configure auth service methods - under 8 lines"""
+        # Mock: Async component isolation for testing without real async operations
         mock_service.validate_token = AsyncMock(return_value=True)
+        # Mock: Generic component isolation for controlled unit testing
         mock_service.refresh_tokens = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_service.logout = AsyncMock(return_value=True)
+        # Mock: Generic component isolation for controlled unit testing
         mock_service.get_user = AsyncMock()
     
     def setup_websocket_manager_mock(self) -> MagicMock:
         """Setup WebSocket manager mock"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager = MagicMock()
         self._configure_websocket_methods(mock_manager)
         self.mock_services["websocket"] = mock_manager
@@ -219,7 +225,9 @@ class UnifiedE2ETestHarness:
     
     def _configure_websocket_methods(self, mock_manager):
         """Configure WebSocket manager methods"""
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.connect_user = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_manager.disconnect_user = AsyncMock()
         mock_manager.send_message = AsyncMock()
         mock_manager.broadcast = AsyncMock()

@@ -38,6 +38,7 @@ class TestHealthAlertManager:
     
     def test_register_alert_callback(self):
         """Test registering alert callback."""
+        # Mock: Generic component isolation for controlled unit testing
         callback = Mock()
         self.alert_manager.register_alert_callback(callback)
         
@@ -45,6 +46,7 @@ class TestHealthAlertManager:
     
     def test_register_recovery_action(self):
         """Test registering recovery action."""
+        # Mock: Generic component isolation for controlled unit testing
         action_handler = AsyncMock()
         self.alert_manager.register_recovery_action(RecoveryAction.RESTART_SERVICE, action_handler)
         
@@ -52,6 +54,7 @@ class TestHealthAlertManager:
     @pytest.mark.asyncio
     async def test_emit_alert(self):
         """Test emitting an alert."""
+        # Mock: Generic component isolation for controlled unit testing
         callback = AsyncMock()
         self.alert_manager.register_alert_callback(callback)
         
@@ -70,6 +73,7 @@ class TestHealthAlertManager:
     @pytest.mark.asyncio
     async def test_emit_alert_with_sync_callback(self):
         """Test emitting alert with synchronous callback."""
+        # Mock: Generic component isolation for controlled unit testing
         callback = Mock()
         self.alert_manager.register_alert_callback(callback)
         
@@ -87,7 +91,9 @@ class TestHealthAlertManager:
     @pytest.mark.asyncio
     async def test_emit_alert_callback_error(self):
         """Test alert emission with callback error."""
+        # Mock: Component isolation for controlled unit testing
         failing_callback = Mock(side_effect=Exception("Callback failed"))
+        # Mock: Generic component isolation for controlled unit testing
         working_callback = Mock()
         
         self.alert_manager.register_alert_callback(failing_callback)
@@ -274,6 +280,7 @@ class TestHealthAlertManager:
     @pytest.mark.asyncio
     async def test_recovery_action_execution(self):
         """Test automatic recovery action execution."""
+        # Mock: Generic component isolation for controlled unit testing
         recovery_handler = AsyncMock()
         self.alert_manager.register_recovery_action(RecoveryAction.CLEAR_CACHE, recovery_handler)
         
@@ -293,6 +300,7 @@ class TestHealthAlertManager:
     @pytest.mark.asyncio
     async def test_recovery_action_error_handling(self):
         """Test recovery action error handling."""
+        # Mock: Async component isolation for testing without real async operations
         failing_handler = AsyncMock(side_effect=Exception("Recovery failed"))
         self.alert_manager.register_recovery_action(RecoveryAction.RESTART_SERVICE, failing_handler)
         

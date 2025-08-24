@@ -1112,10 +1112,13 @@ class TestGracefulWebSocketShutdown:
 
         """Create mock WebSocket for testing."""
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.send = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket.close = AsyncMock()
 
         websocket.closed = False

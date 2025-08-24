@@ -163,19 +163,23 @@ class RealOAuthFlowTester:
             import unittest.mock
             
             async def mock_google_token_exchange(*args, **kwargs):
+                # Mock: Generic component isolation for controlled unit testing
                 mock_response = unittest.mock.MagicMock()
                 mock_response.status_code = 200
                 mock_response.json.return_value = google_token_response
                 return mock_response
             
             async def mock_google_user_info(*args, **kwargs):
+                # Mock: Generic component isolation for controlled unit testing
                 mock_response = unittest.mock.MagicMock()
                 mock_response.status_code = 200
                 mock_response.json.return_value = google_user_info
                 return mock_response
             
             # Patch Google API calls only (not internal service calls)
+            # Mock: Component isolation for testing without external dependencies
             with unittest.mock.patch('httpx.AsyncClient.post', side_effect=mock_google_token_exchange), \
+                 # Mock: Component isolation for testing without external dependencies
                  unittest.mock.patch('httpx.AsyncClient.get', side_effect=mock_google_user_info):
                 
                 response = await real_client.get(

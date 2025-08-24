@@ -91,7 +91,9 @@ class TestMultiAgentCollaborationResponse:
     @mock_justified("LLM calls are external dependency - focus on agent coordination logic")
     async def llm_manager(self):
         """Create mocked LLM manager for testing"""
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_mock = AsyncMock(spec=LLMManager)
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         llm_mock.get_response = AsyncMock(return_value="Mocked LLM response for testing")
         return llm_mock
 
@@ -99,8 +101,11 @@ class TestMultiAgentCollaborationResponse:
     @mock_justified("WebSocket is external dependency - focus on agent orchestration")
     async def websocket_manager(self):
         """Create mocked WebSocket manager for testing"""
+        # Mock: Generic component isolation for controlled unit testing
         ws_mock = AsyncMock()
+        # Mock: Agent service isolation for testing without LLM agent execution
         ws_mock.send_agent_update = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         ws_mock.send_status_update = AsyncMock()
         return ws_mock
 

@@ -36,6 +36,7 @@ class TestSupplyResearch:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.supply.research_suppliers') as mock_research:
             mock_research.return_value = {
                 "suppliers": [
@@ -86,6 +87,7 @@ class TestSupplyResearch:
             ]
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.supply.enrich_supplier') as mock_enrich:
             mock_enrich.return_value = {
                 "supplier_id": "sup123",
@@ -147,6 +149,7 @@ class TestSupplyResearch:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_chain_service.validate_chain') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
@@ -176,6 +179,7 @@ class TestSupplyResearch:
             "include_trends": True
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_market_service.analyze_market') as mock_analyze:
             mock_analyze.return_value = {
                 "market_overview": {
@@ -238,6 +242,7 @@ class TestSupplyResearch:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supplier_comparison.compare_suppliers') as mock_compare:
             mock_compare.return_value = {
                 "comparison_matrix": {

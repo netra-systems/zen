@@ -70,6 +70,7 @@ class TestThreadCRUD:
         thread_id = "thread123"
         user_id = "user1"
         
+        # Mock: Generic component isolation for controlled unit testing
         with patch.object(ThreadService, 'delete_thread', new=AsyncMock()) as mock_delete:
             mock_delete.return_value = True
             
@@ -80,6 +81,7 @@ class TestThreadCRUD:
         
         # Test delete thread which acts as archive functionality
         # Since archive_thread doesn't exist, we simulate it with delete_thread
+        # Mock: Generic component isolation for controlled unit testing
         with patch.object(ThreadService, 'delete_thread', new=AsyncMock()) as mock_delete:
             # Simulate thread deletion response (archive behavior)
             mock_delete.return_value = {
@@ -101,6 +103,7 @@ class TestThreadCRUD:
         """Test individual thread retrieval."""
         thread_id = "thread123"
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.get_thread_by_id') as mock_get:
             mock_get.return_value = {
                 "id": thread_id,
@@ -144,6 +147,7 @@ class TestThreadCRUD:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.update_thread') as mock_update:
             mock_update.return_value = {
                 "id": thread_id,
@@ -168,6 +172,7 @@ class TestThreadCRUD:
         """Test thread deletion functionality."""
         thread_id = "thread123"
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.delete_thread') as mock_delete:
             mock_delete.return_value = {
                 "deleted": True,
@@ -194,6 +199,7 @@ class TestThreadCRUD:
         ]
         
         for transition in status_transitions:
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.thread_service.update_thread_status') as mock_status:
                 mock_status.return_value = {
                     "thread_id": thread_id,
@@ -202,6 +208,7 @@ class TestThreadCRUD:
                     "reason": transition["reason"]
                 }
                 
+                # Mock: Component isolation for testing without external dependencies
                 response = basic_test_client.patch(
                     f"/api/threads/{thread_id}/status",
                     json=transition
@@ -229,6 +236,7 @@ class TestThreadCRUD:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.update_thread_metadata') as mock_metadata:
             mock_metadata.return_value = {
                 "thread_id": thread_id,
@@ -260,6 +268,7 @@ class TestThreadCRUD:
             "preserve_timestamps": False
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.duplicate_thread') as mock_duplicate:
             mock_duplicate.return_value = {
                 "new_thread_id": "thread456",

@@ -167,6 +167,7 @@ class TestAsyncSchemaSync:
     @pytest.mark.asyncio
     async def test_async_schema_validation(self, schema_sync):
         """Test async schema validation against database."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         mock_db.execute.return_value.fetchall.return_value = [
             ("users", "id", "integer"),
@@ -183,6 +184,7 @@ class TestAsyncSchemaSync:
             "sql": "ALTER TABLE users ADD COLUMN age INTEGER;"
         }
         
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         result = await schema_sync.execute_migration(mock_db, migration)
         assert result is not None
@@ -214,6 +216,7 @@ class TestAsyncStartupChecks:
     @pytest.mark.asyncio
     async def test_async_database_connectivity(self, startup_checker):
         """Test async database connectivity validation."""
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         mock_db.execute.return_value.scalar.return_value = 1
         
@@ -227,6 +230,7 @@ class TestAsyncStartupChecks:
             "clickhouse": {"host": "localhost", "port": 9000}
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.startup_checks.check_service') as mock_check:
             mock_check.return_value = True
             

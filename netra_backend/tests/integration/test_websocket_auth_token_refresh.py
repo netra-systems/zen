@@ -101,6 +101,7 @@ class TestWebSocketAuthTokenRefresh:
         """Test seamless token refresh without disconnection."""
         # Establish WebSocket with initial token
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = Mock()
 
         mock_ws.client_state = "CONNECTED"
@@ -149,8 +150,10 @@ class TestWebSocketAuthTokenRefresh:
         """Test message flow continues during token refresh."""
         # Setup connection with message queue
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = Mock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.send_json = AsyncMock()
 
         mock_ws.client_state = "CONNECTED"
@@ -207,6 +210,7 @@ class TestWebSocketAuthTokenRefresh:
 
             users.append(user)
             
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = Mock()
 
             mock_ws.client_state = "CONNECTED"
@@ -249,10 +253,13 @@ class TestWebSocketAuthTokenRefresh:
         """Test handling of token refresh failures."""
         # Establish connection
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws = Mock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.close = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         mock_ws.send_json = AsyncMock()
 
         await ws_manager.connect(mock_ws, test_user.id)

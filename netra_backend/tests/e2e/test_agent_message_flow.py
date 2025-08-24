@@ -174,8 +174,11 @@ def real_websocket_manager():
     
     # Add broadcasting attribute if it doesn't exist
     if not hasattr(manager, 'broadcasting'):
+        # Mock: Generic component isolation for controlled unit testing
         mock_broadcasting = MagicMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_broadcasting.join_room = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         mock_broadcasting.leave_all_rooms = AsyncMock()
         manager.broadcasting = mock_broadcasting
     
@@ -185,7 +188,9 @@ def real_websocket_manager():
 def real_tool_dispatcher():
     """Fixture providing real tool dispatcher."""
     from unittest.mock import MagicMock
+    # Mock: Generic component isolation for controlled unit testing
     mock_dispatcher = MagicMock()
+    # Mock: Async component isolation for testing without real async operations
     mock_dispatcher.dispatch = AsyncMock(return_value="Tool executed successfully")
     return mock_dispatcher
 
@@ -200,11 +205,17 @@ async def real_thread_service():
     from unittest.mock import patch, AsyncMock, MagicMock
     
     # Create a mock session factory that returns a proper async session
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.commit = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.rollback = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.close = AsyncMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.add = MagicMock()
+    # Mock: Database session isolation for transaction testing without real database dependency
     mock_session.execute = AsyncMock()
     
     # Mock session factory that returns the session directly
@@ -232,7 +243,9 @@ async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mo
         llm_manager = LLMManager(config)
     except Exception:
         # Fallback to mock for testing
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager = Mock()
+        # Mock: LLM provider isolation to prevent external API usage and costs
         llm_manager.ask_llm = AsyncMock(return_value="Test agent response")
     
     # Create supervisor with real components including db_session
@@ -277,21 +290,32 @@ def mock_db_session():
     from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock
     from sqlalchemy.ext.asyncio import AsyncSession
     
+    # Mock: Database session isolation for transaction testing without real database dependency
     session = AsyncMock(spec=AsyncSession)
     
     # Create proper async context manager mock for db_session.begin()
+    # Mock: Generic component isolation for controlled unit testing
     mock_transaction = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     mock_transaction.__aenter__ = AsyncMock(return_value=mock_transaction)
+    # Mock: Async component isolation for testing without real async operations
     mock_transaction.__aexit__ = AsyncMock(return_value=None)
+    # Mock: Session isolation for controlled testing without external state
     session.begin = MagicMock(return_value=mock_transaction)
     
+    # Mock: Session isolation for controlled testing without external state
     session.commit = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.rollback = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.flush = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.refresh = AsyncMock()
+    # Mock: Session isolation for controlled testing without external state
     session.close = AsyncMock()
     
     # Mock thread retrieval
+    # Mock: Component isolation for controlled unit testing
     mock_thread = Mock(spec=Thread)
     mock_thread.id = "test_thread_123"
     mock_thread.user_id = "test_user"
@@ -299,6 +323,7 @@ def mock_db_session():
     mock_thread.metadata_ = {"user_id": "test_user_001", "test": True}
     
     # Mock message creation
+    # Mock: Component isolation for controlled unit testing
     mock_message = Mock(spec=Message)
     mock_message.id = "test_message_123"
     mock_message.thread_id = "test_thread_123"
@@ -306,6 +331,7 @@ def mock_db_session():
     mock_message.role = "user"
     
     # Mock run creation
+    # Mock: Generic component isolation for controlled unit testing
     mock_run = Mock()
     mock_run.id = "test_run_123"
     mock_run.thread_id = "test_thread_123"
@@ -324,9 +350,13 @@ def setup_database_and_mocks():
     # Create proper async session factory mock
     class MockAsyncSessionFactory:
         def __init__(self):
+            # Mock: Session isolation for controlled testing without external state
             self.session = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             self.session.commit = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             self.session.rollback = AsyncMock()
+            # Mock: Session isolation for controlled testing without external state
             self.session.close = AsyncMock()
             
         def __call__(self):
@@ -341,11 +371,13 @@ def setup_database_and_mocks():
     mock_factory = MockAsyncSessionFactory()
     
     # Create reusable mock objects
+    # Mock: Component isolation for controlled unit testing
     mock_thread = Mock(spec=Thread)
     mock_thread.id = "test_thread_123"
     mock_thread.user_id = "test_user"
     mock_thread.metadata_ = {"user_id": "test_user_001"}
     
+    # Mock: Component isolation for controlled unit testing
     mock_run = Mock(spec=Run)
     mock_run.id = "test_run_123"
     mock_run.thread_id = "test_thread_123"
@@ -354,10 +386,15 @@ def setup_database_and_mocks():
     # Patch all database and service methods
     with patch.object(postgres_module, 'async_session_factory', mock_factory):
         with patch.object(uow_module, 'async_session_factory', mock_factory):
+            # Mock: Async component isolation for testing without real async operations
             with patch('netra_backend.app.services.thread_service.ThreadService.get_thread', new_callable=AsyncMock) as mock_get_thread:
+                # Mock: Async component isolation for testing without real async operations
                 with patch('netra_backend.app.services.thread_service.ThreadService.get_or_create_thread', new_callable=AsyncMock) as mock_create_thread:
+                    # Mock: Async component isolation for testing without real async operations
                     with patch('netra_backend.app.services.thread_service.ThreadService.create_message', new_callable=AsyncMock) as mock_create_message:
+                        # Mock: Async component isolation for testing without real async operations
                         with patch('netra_backend.app.services.thread_service.ThreadService.create_run', new_callable=AsyncMock) as mock_create_run:
+                            # Mock: Async component isolation for testing without real async operations
                             with patch('netra_backend.app.services.thread_service.ThreadService.update_run_status', new_callable=AsyncMock) as mock_update_run:
                                 
                                 # Setup all mocks to return proper objects

@@ -203,6 +203,7 @@ class OAuthJWTWebSocketTestManager:
         """Fallback to mock Redis when real Redis unavailable."""
         from unittest.mock import AsyncMock
         
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         self.redis_client = AsyncMock()
         self._redis_storage = {}
         

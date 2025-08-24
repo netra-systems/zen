@@ -29,6 +29,7 @@ class TestMCPRoute:
         """Test MCP message handling."""
         mcp_request = TEST_MCP_REQUEST.copy()
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.mcp_request_handler.handle_request') as mock_handle:
             mock_handle.return_value = {
                 "jsonrpc": "2.0",
@@ -76,6 +77,7 @@ class TestMCPRoute:
         from netra_backend.app.routes.mcp.handlers import execute_tool
         
         # Mock tool execution
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.mcp.handlers.execute_tool') as mock_execute:
             mock_execute.return_value = {
                 "result": "success",
@@ -99,6 +101,7 @@ class TestMCPRoute:
             "id": 1
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.mcp_service.get_server_info') as mock_list:
             mock_list.return_value = {
                 "tools": [
@@ -142,6 +145,7 @@ class TestMCPRoute:
             "id": 2
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.mcp_service.execute_tool') as mock_execute:
             mock_execute.side_effect = Exception("Tool not found")
             
@@ -165,6 +169,7 @@ class TestMCPRoute:
         from netra_backend.app.routes.mcp.main import list_resources, read_resource
         
         # Test resource listing
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.mcp.handlers.MCPHandlers.list_resources') as mock_list:
             mock_list.return_value = {
                 "resources": [
@@ -181,6 +186,7 @@ class TestMCPRoute:
             assert len(resources["resources"]) > 0
         
         # Test resource reading
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.mcp.handlers.MCPHandlers.read_resource') as mock_read:
             mock_read.return_value = {
                 "contents": [
@@ -214,6 +220,7 @@ class TestMCPRoute:
             "id": 1
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.mcp.handlers.MCPHandlers.get_server_info') as mock_init:
             mock_init.return_value = {
                 "protocolVersion": "2024-11-05",

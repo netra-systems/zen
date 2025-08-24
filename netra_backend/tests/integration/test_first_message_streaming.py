@@ -56,10 +56,13 @@ class TestFirstMessageStreaming:
 
         """Create mock WebSocket for streaming."""
 
+        # Mock: Generic component isolation for controlled unit testing
         ws = Mock()
 
+        # Mock: Generic component isolation for controlled unit testing
         ws.send_json = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         ws.send_text = AsyncMock()
 
         ws.client_state = "CONNECTED"

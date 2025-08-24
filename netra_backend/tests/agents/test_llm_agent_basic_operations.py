@@ -69,6 +69,7 @@ async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
 async def test_llm_response_parsing(mock_llm_manager):
     """Test LLM response parsing and error handling"""
     # Test valid JSON response
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock_llm_manager.ask_llm = AsyncMock(return_value=json.dumps({
         "analysis": "Valid response",
         "recommendations": ["rec1", "rec2"]
@@ -80,6 +81,7 @@ async def test_llm_response_parsing(mock_llm_manager):
     assert len(parsed["recommendations"]) == 2
     
     # Test invalid JSON handling
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     mock_llm_manager.ask_llm = AsyncMock(return_value="Invalid JSON {")
     response = await mock_llm_manager.ask_llm("Test prompt")
     
@@ -136,6 +138,7 @@ async def test_websocket_message_streaming(supervisor_agent, mock_websocket_mana
     async def capture_message(run_id, message):
         messages_sent.append((run_id, message))
     
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket_manager.send_message = AsyncMock(side_effect=capture_message)
     
     # Run supervisor

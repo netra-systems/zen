@@ -69,10 +69,12 @@ class TestAlembicIniPath:
         assert Path(correct_path).exists(), \
             f"File should exist at correct path: {correct_path}"
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.db.migration_utils.Path')
     def test_startup_module_fails_with_wrong_path(self, mock_path):
         """Test that startup module fails when looking for alembic.ini in wrong location."""
         # Mock the path to simulate the incorrect behavior
+        # Mock: Generic component isolation for controlled unit testing
         mock_path_instance = MagicMock()
         mock_path_instance.exists.return_value = False
         mock_path.return_value = mock_path_instance

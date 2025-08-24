@@ -56,6 +56,7 @@ class TestAsyncRateLimiter:
     @pytest.mark.asyncio
     async def test_time_window_cleanup(self, rate_limiter):
         """Test that old calls are cleaned up"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('time.time', side_effect=[0, 0, 0, 2.0]):
             await rate_limiter.acquire()
             await rate_limiter.acquire()

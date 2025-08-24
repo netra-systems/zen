@@ -157,6 +157,7 @@ async def test_tool_execution_with_llm():
     # Mock tool dispatcher
     tool_results = []
     
+    # Mock: Component isolation for testing without external dependencies
     async def mock_dispatch(tool_name, params):
         result = {
             "tool": tool_name,
@@ -168,7 +169,9 @@ async def test_tool_execution_with_llm():
         return result
     
     # Create mock dispatcher
+    # Mock: Generic component isolation for controlled unit testing
     dispatcher = Mock()
+    # Mock: Async component isolation for testing without real async operations
     dispatcher.dispatch_tool = AsyncMock(side_effect=mock_dispatch)
     
     # Simulate LLM response with tool calls

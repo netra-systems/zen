@@ -32,11 +32,15 @@ class TestDatabasePerformance:
         large_corpus = self._generate_large_test_corpus(50000)
         table_name = 'perf_test_bulk_insert'
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+            # Mock: Generic component isolation for controlled unit testing
             mock_db = AsyncMock()
             mock_db_class.return_value = mock_db
             
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_interceptor = AsyncMock()
                 mock_interceptor_class.return_value = mock_interceptor
                 
@@ -63,11 +67,15 @@ class TestDatabasePerformance:
         """Test concurrent database read/write operations"""
         table_names = [f'perf_test_{i}' for i in range(5)]
         
+        # Mock: ClickHouse external database isolation for unit testing performance
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+            # Mock: Generic component isolation for controlled unit testing
             mock_db = AsyncMock()
             mock_db_class.return_value = mock_db
             
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_interceptor = AsyncMock()
                 mock_interceptor_class.return_value = mock_interceptor
                 mock_interceptor.execute_query.return_value = [
@@ -96,11 +104,15 @@ class TestDatabasePerformance:
         for batch_size in batch_sizes:
             test_corpus = self._generate_large_test_corpus(batch_size)
             
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_db = AsyncMock()
                 mock_db_class.return_value = mock_db
                 
+                # Mock: ClickHouse external database isolation for unit testing performance
                 with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor_class:
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_interceptor = AsyncMock()
                     mock_interceptor_class.return_value = mock_interceptor
                     
@@ -125,9 +137,11 @@ class TestDatabasePerformance:
             """Mock connection factory to track usage"""
             nonlocal connection_count
             connection_count += 1
+            # Mock: Generic component isolation for controlled unit testing
             mock_conn = AsyncMock()
             return mock_conn
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.generation_service.ClickHouseDatabase', 
                    side_effect=mock_connection_factory):
             
@@ -154,11 +168,15 @@ class TestDatabasePerformance:
         ]
         
         for scenario in query_scenarios:
+            # Mock: ClickHouse external database isolation for unit testing performance
             with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+                # Mock: Generic component isolation for controlled unit testing
                 mock_db = AsyncMock()
                 mock_db_class.return_value = mock_db
                 
+                # Mock: ClickHouse external database isolation for unit testing performance
                 with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor_class:
+                    # Mock: Generic component isolation for controlled unit testing
                     mock_interceptor = AsyncMock()
                     mock_interceptor_class.return_value = mock_interceptor
                     

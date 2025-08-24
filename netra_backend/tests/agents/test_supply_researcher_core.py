@@ -112,9 +112,13 @@ class TestSupplyResearcherCore:
 
     def _setup_redis_mock(self):
         """Setup Redis mock for testing (≤8 lines)"""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         with patch('app.redis_manager.RedisManager') as mock_redis_class:
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis = Mock()
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis.set = AsyncMock()
+            # Mock: Redis external service isolation for fast, reliable tests without network dependency
             mock_redis.get = AsyncMock(return_value=json.dumps({
                 "research_session_id": "cached_session",
                 "research_status": "in_progress"
@@ -139,6 +143,7 @@ class TestSupplyResearcherCore:
 
     def _verify_redis_integration(self, agent):
         """Verify Redis integration capability (≤8 lines)"""
+        # Mock: Redis external service isolation for fast, reliable tests without network dependency
         mock_redis = Mock()
         agent.redis_manager = mock_redis
         assert hasattr(agent, 'redis_manager')
@@ -161,6 +166,7 @@ class TestSupplyResearcherCore:
                 "provider": run_id.split("_")[1]
             }
         
+        # Mock: Async component isolation for testing without real async operations
         agent.execute = AsyncMock(side_effect=mock_research)
 
     async def _execute_parallel_research(self, agent, providers):

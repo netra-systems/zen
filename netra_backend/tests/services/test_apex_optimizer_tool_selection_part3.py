@@ -167,6 +167,7 @@ class TestApexOptimizerToolChaining:
     @pytest.fixture
     def mock_tool_context(self):
         """Create mock tool context"""
+        # Mock: Service component isolation for predictable testing behavior
         context = MagicMock(spec=ToolContext)
         context.user_id = "test_user"
         context.session_id = "test_session"

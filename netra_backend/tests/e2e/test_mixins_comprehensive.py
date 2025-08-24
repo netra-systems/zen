@@ -61,6 +61,7 @@ class TestStateMixins:
         
         # Fill error history beyond limit
         for i in range(55):
+            # Mock: Component isolation for controlled unit testing
             mixin.error_history.append(Mock(timestamp=datetime.now(UTC)))
         
         mixin._record_successful_operation("test", 1.0)
@@ -117,6 +118,7 @@ class TestLoggingMixins:
         
         with patch.object(logger, 'warning') as mock_log:
             error = ValueError("Test error")
+            # Mock: Generic component isolation for controlled unit testing
             error_record = Mock()
             error_record.agent_name = "TestAgent"
             error_record.operation = "test_op"
@@ -194,7 +196,9 @@ class TestCachingMixins:
         recent_time = datetime.now(UTC) - timedelta(seconds=30)
         
         mixin.error_history = [
+            # Mock: Component isolation for controlled unit testing
             Mock(timestamp=old_time),
+            # Mock: Component isolation for controlled unit testing
             Mock(timestamp=recent_time)
         ]
         
@@ -233,6 +237,7 @@ class TestCachingMixins:
         assert success_rate == 1.0  # All successful operations
         
         # Add error to history
+        # Mock: Generic component isolation for controlled unit testing
         mixin.error_history = [Mock()]
         success_rate_with_error = mixin._calculate_success_rate()
         assert success_rate_with_error < 1.0  # Mixed success/failure

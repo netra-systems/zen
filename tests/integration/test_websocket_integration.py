@@ -11,6 +11,7 @@ client = TestClient(app)
 
 @pytest.fixture
 def mock_auth_client():
+    # Mock: Component isolation for testing without external dependencies
     with patch(
         "netra_backend.app.clients.auth_client.auth_client.validate_token_jwt"
     ) as mock_validate:

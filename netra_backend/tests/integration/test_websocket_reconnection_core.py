@@ -381,8 +381,10 @@ class TestWebSocketReconnection:
         
         # Add initial connection
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket = MagicMock()
 
+        # Mock: WebSocket infrastructure isolation for unit tests without real connections
         mock_websocket.ping = AsyncMock()
 
         await connection_handler.add_connection("test_conn", mock_websocket)
@@ -431,6 +433,7 @@ class TestWebSocketReconnection:
 
             raise ConnectionError("Connection failed")
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('websockets.connect', side_effect=mock_connect):
 
             success = await reconnection_manager.attempt_reconnection(
@@ -469,8 +472,10 @@ class TestWebSocketReconnection:
 
         for i in range(5):
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws = MagicMock()
 
+            # Mock: Generic component isolation for controlled unit testing
             mock_ws.ping = AsyncMock()
 
             conn_id = f"conn_{i}"

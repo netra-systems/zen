@@ -45,6 +45,7 @@ class TestExistingUserLoginFlow:
     @pytest.fixture
     async def mock_existing_user(self):
         """Create mock existing user."""
+        # Mock: Service component isolation for predictable testing behavior
         user = MagicMock(spec=User)
         user.id = str(uuid.uuid4())
         user.email = "existing@example.com"
@@ -53,27 +54,39 @@ class TestExistingUserLoginFlow:
         user.email_verified = True
         user.last_login = datetime.utcnow() - timedelta(days=1)
         user.failed_login_attempts = 0
+        # Mock: Service component isolation for predictable testing behavior
         user.check_password = MagicMock(return_value=True)
         yield user
     
     @pytest.fixture
     async def mock_auth_service(self):
         """Create mock auth service."""
+        # Mock: Authentication service isolation for testing without real auth flows
         service = AsyncMock(spec=AuthService)
+        # Mock: Generic component isolation for controlled unit testing
         service.authenticate = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.generate_tokens = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         service.validate_token = AsyncMock(return_value=True)
+        # Mock: Generic component isolation for controlled unit testing
         service.refresh_tokens = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         service.revoke_token = AsyncMock()
         yield service
     
     @pytest.fixture
     async def mock_session_service(self):
         """Create mock session service."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         service = AsyncMock(spec=SessionService)
+        # Mock: Session isolation for controlled testing without external state
         service.create_session = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         service.get_session = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         service.update_session_activity = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         service.end_session = AsyncMock()
         yield service
     
@@ -102,8 +115,11 @@ class TestExistingUserLoginFlow:
             "expires_in": 3600
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.authenticate', return_value=mock_existing_user):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.auth_service.AuthService.generate_tokens', return_value=mock_tokens):
                     
                     response = await async_client.post("/api/auth/login", json=login_data)
@@ -129,6 +145,7 @@ class TestExistingUserLoginFlow:
             "password": "WrongPassword123!"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
             response = await async_client.post("/api/auth/login", json=login_data)
             
@@ -152,6 +169,7 @@ class TestExistingUserLoginFlow:
             "password": "AnyPassword123!"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
             response = await async_client.post("/api/auth/login", json=login_data)
             
@@ -166,6 +184,7 @@ class TestExistingUserLoginFlow:
     @pytest.mark.asyncio
     async def test_session_creation_on_successful_login(self, async_client, mock_existing_user, mock_session_service):
         """Test 4: Successful login should create a new session."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = MagicMock()
         mock_session.id = str(uuid.uuid4())
         mock_session.user_id = mock_existing_user.id
@@ -179,8 +198,11 @@ class TestExistingUserLoginFlow:
             "password": "ValidPassword123!"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.authenticate', return_value=mock_existing_user):
+                # Mock: Database session isolation for transaction testing without real database dependency
                 with patch('app.services.session_service.SessionService.create_session', return_value=mock_session) as mock_create:
                     
                     response = await async_client.post("/api/auth/login", json=login_data)
@@ -206,7 +228,9 @@ class TestExistingUserLoginFlow:
         
         mock_auth_service.refresh_tokens.return_value = new_tokens
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.auth_service.AuthService.validate_refresh_token', return_value=True):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.refresh_tokens', return_value=new_tokens):
                 
                 response = await async_client.post(
@@ -229,7 +253,9 @@ class TestExistingUserLoginFlow:
         access_token = "valid_access_token_123"
         
         # Mock token validation
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.auth_service.AuthService.validate_token', return_value=mock_existing_user.id):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.user_service.UserService.get_user', return_value=mock_existing_user):
                 
                 headers = {"Authorization": f"Bearer {access_token}"}
@@ -250,8 +276,11 @@ class TestExistingUserLoginFlow:
         mock_auth_service.revoke_token.return_value = True
         mock_session_service.end_session.return_value = True
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.auth_service.AuthService.validate_token', return_value=user_id):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.revoke_token', return_value=True) as mock_revoke:
+                # Mock: Session isolation for controlled testing without external state
                 with patch('app.services.session_service.SessionService.end_session', return_value=True) as mock_end:
                     
                     headers = {"Authorization": f"Bearer {access_token}"}
@@ -285,8 +314,11 @@ class TestExistingUserLoginFlow:
                 "expires_in": 3600
             }
             
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.auth_service.AuthService.authenticate', return_value=mock_existing_user):
+                    # Mock: Component isolation for testing without external dependencies
                     with patch('app.services.auth_service.AuthService.generate_tokens', return_value=mock_tokens):
                         
                         response = await async_client.post("/api/auth/login", json=login_data)
@@ -311,8 +343,11 @@ class TestExistingUserLoginFlow:
             "password": "ValidPassword123!"
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.authenticate', return_value=mock_existing_user):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.user_service.UserService.update_last_login', return_value=True) as mock_update:
                     
                     response = await async_client.post("/api/auth/login", json=login_data)
@@ -355,10 +390,13 @@ class TestExistingUserLoginFlow:
             "expires_in": 2592000  # 30 days
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.user_service.UserService.get_user_by_email', return_value=mock_existing_user):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.auth_service.AuthService.authenticate', return_value=mock_existing_user):
                 
                 # Test short expiry
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.auth_service.AuthService.generate_tokens', return_value=short_tokens):
                     response_short = await async_client.post("/api/auth/login", json=login_data_short)
                     
@@ -367,6 +405,7 @@ class TestExistingUserLoginFlow:
                         short_expiry = data_short.get("expires_in", 0)
                 
                 # Test long expiry
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.auth_service.AuthService.generate_tokens', return_value=long_tokens):
                     response_long = await async_client.post("/api/auth/login", json=login_data_long)
                     

@@ -18,6 +18,7 @@ class TestDemoService:
     @pytest.fixture
     def mock_agent_service(self):
         """Create a mock agent service."""
+        # Mock: Generic component isolation for controlled unit testing
         return AsyncMock()
     
     @pytest.fixture
@@ -26,6 +27,7 @@ class TestDemoService:
         # Create a storage dict to simulate Redis behavior
         storage = {}
         
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis = AsyncMock()
         
         async def mock_get(key):
@@ -48,10 +50,15 @@ class TestDemoService:
             return True
         
         # Wrap the functions with AsyncMock to preserve mock behavior
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.get = AsyncMock(side_effect=mock_get)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.setex = AsyncMock(side_effect=mock_setex)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.lrange = AsyncMock(side_effect=mock_lrange)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.lpush = AsyncMock(side_effect=mock_lpush)
+        # Mock: Redis caching isolation to prevent test interference and external dependencies
         redis.expire = AsyncMock(side_effect=mock_expire)
         return redis
     

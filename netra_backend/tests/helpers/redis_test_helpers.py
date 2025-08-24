@@ -240,13 +240,21 @@ async def create_test_redis_client(host="localhost", port=6379, db=1):
     except Exception:
         # Return mock client if Redis not available
         from unittest.mock import AsyncMock
+        # Mock: Generic component isolation for controlled unit testing
         mock_client = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         mock_client.ping = AsyncMock(return_value=True)
+        # Mock: Async component isolation for testing without real async operations
         mock_client.get = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         mock_client.set = AsyncMock(return_value=True)
+        # Mock: Async component isolation for testing without real async operations
         mock_client.delete = AsyncMock(return_value=1)
+        # Mock: Async component isolation for testing without real async operations
         mock_client.keys = AsyncMock(return_value=[])
+        # Mock: Async component isolation for testing without real async operations
         mock_client.ttl = AsyncMock(return_value=-1)
+        # Mock: Generic component isolation for controlled unit testing
         mock_client.close = AsyncMock()
         return mock_client
 

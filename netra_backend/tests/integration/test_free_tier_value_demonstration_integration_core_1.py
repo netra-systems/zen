@@ -34,9 +34,13 @@ class TestSyntaxFix:
 
     def savings_tracker(self):
         """Setup savings tracking analytics"""
+        # Mock: Generic component isolation for controlled unit testing
         tracker = Mock()
+        # Mock: Generic component isolation for controlled unit testing
         tracker.track_preview_shown = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         tracker.track_conversion_from_preview = AsyncMock()
+        # Mock: Generic component isolation for controlled unit testing
         tracker.calculate_conversion_lift = AsyncMock()
         return tracker
 

@@ -64,6 +64,7 @@ class TestAgentRoute:
         from netra_backend.app.services.agent_service import AgentService
         
         # Create a mock agent service with streaming capability
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_agent_service = Mock(spec=AgentService)
         
         async def mock_generate_stream(message: str, thread_id: Optional[str] = None):
@@ -75,6 +76,7 @@ class TestAgentRoute:
         mock_agent_service.generate_stream = mock_generate_stream
         
         # Mock the dependencies
+        # Mock: Agent service isolation for testing without LLM agent execution
         with patch('app.routes.agent_route.get_agent_service', return_value=mock_agent_service):
             chunks = await self._collect_stream_chunks("test message", mock_agent_service)
             
@@ -103,7 +105,9 @@ class TestAgentRoute:
         )
         
         # Create a mock AgentService that raises an exception
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_agent_service = Mock(spec=AgentService)
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_agent_service.process_message = AsyncMock(side_effect=Exception("Processing failed"))
         
         # Override the dependency
@@ -164,12 +168,15 @@ class TestAgentRoute:
         from netra_backend.app.routes.agent_route import process_with_context
         from netra_backend.app.services.agent_service import AgentService
         
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_agent_service = Mock(spec=AgentService)
+        # Mock: Agent service isolation for testing without LLM agent execution
         mock_agent_service.process_message = AsyncMock(return_value={
             "response": "Context-aware response",
             "context": {"thread_id": "thread123", "message_count": 5}
         })
         
+        # Mock: Agent service isolation for testing without LLM agent execution
         with patch('app.routes.agent_route.get_agent_service', return_value=mock_agent_service):
             result = await process_with_context(
                 message="Test with context",
@@ -227,6 +234,7 @@ class TestAgentRoute:
             ]
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.agent_service.process_multimodal') as mock_process:
             mock_process.return_value = {
                 "response": "Analysis complete",
@@ -276,18 +284,24 @@ class TestAgentRoute:
         from netra_backend.app.routes.agent_route import process_with_fallback
         
         # Mock primary agent failure
+        # Mock: Generic component isolation for controlled unit testing
         primary_agent = Mock()
+        # Mock: Async component isolation for testing without real async operations
         primary_agent.process_message = AsyncMock(side_effect=Exception("Primary failed"))
         
         # Mock fallback agent success
+        # Mock: Generic component isolation for controlled unit testing
         fallback_agent = Mock()
+        # Mock: Async component isolation for testing without real async operations
         fallback_agent.process_message = AsyncMock(return_value={
             "response": "Fallback response",
             "agent": "fallback",
             "status": "recovered"
         })
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.agent_service.get_primary_agent', return_value=primary_agent):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.agent_service.get_fallback_agent', return_value=fallback_agent):
                 result = await process_with_fallback("Test fallback")
                 

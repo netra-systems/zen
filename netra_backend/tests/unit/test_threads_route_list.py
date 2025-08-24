@@ -24,11 +24,13 @@ from netra_backend.tests.helpers.thread_test_helpers import (
 @pytest.fixture
 def mock_db():
     """Mock database session"""
+    # Mock: Generic component isolation for controlled unit testing
     return AsyncMock(commit=AsyncMock())
 
 @pytest.fixture
 def mock_user():
     """Mock authenticated user"""
+    # Mock: Generic component isolation for controlled unit testing
     user = Mock()
     user.id = "test_user_123"
     user.email = "test@example.com"
@@ -81,10 +83,13 @@ class TestListThreads:
     @pytest.mark.asyncio
     async def test_list_threads_exception(self, mock_db, mock_user):
         """Test error handling in list_threads"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             # Mock: Component isolation for testing without external dependencies
              patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             thread_repo = MockThreadRepo.return_value
+            # Mock: Database isolation for unit testing without external database connections
             thread_repo.find_by_user = AsyncMock(side_effect=Exception("Database error"))
             
             with pytest.raises(HTTPException) as exc_info:

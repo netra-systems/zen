@@ -39,6 +39,7 @@ class TestAdminRouteIntegration:
     def test_admin_endpoint_requires_admin_role(self, client):
         """Test admin endpoints require admin role."""
         user_token = "Bearer user_token_456"
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.auth.verify_token') as mock_verify:
             mock_verify.return_value = {"user_id": "123", "role": "user"}
             response = client.get("/api/admin/users", headers={"Authorization": user_token})
@@ -54,6 +55,7 @@ class TestAgentRouteIntegration:
     
     def test_agent_message_processing(self, client):
         """Test agent processes messages correctly."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.agent_service.process_message') as mock_process:
             mock_process.return_value = {"response": "Processed"}
             response = client.post("/api/agent/message", json={"message": "Test message"})
@@ -62,6 +64,7 @@ class TestAgentRouteIntegration:
     
     def test_agent_error_handling(self, client):
         """Test agent handles errors gracefully."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.agent_service.process_message') as mock_process:
             mock_process.side_effect = Exception("Processing error")
             response = client.post("/api/agent/message", json={"message": "Test message"})
@@ -84,6 +87,7 @@ class TestConfigRouteIntegration:
     
     def test_config_retrieval(self, client):
         """Test configuration can be retrieved."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.config_service.get_config') as mock_get:
             mock_get.return_value = {"log_level": "INFO"}
             response = client.get("/api/config")
@@ -101,6 +105,7 @@ class TestCorpusRouteIntegration:
     def test_corpus_create_operation(self, client):
         """Test creating corpus entries."""
         corpus_data = {"title": "Test Document", "content": "Test content"}
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus_service.create_document') as mock_create:
             mock_create.return_value = {"id": "123", **corpus_data}
             response = client.post("/api/corpus", json=corpus_data)
@@ -109,6 +114,7 @@ class TestCorpusRouteIntegration:
     
     def test_corpus_search_functionality(self, client):
         """Test corpus search."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.corpus_service.search') as mock_search:
             mock_search.return_value = [{"id": "1", "title": "Result 1", "score": 0.9}]
             response = client.get("/api/corpus/search?q=test")
@@ -126,6 +132,7 @@ class TestLLMCacheRouteIntegration:
     
     def test_cache_invalidation(self, client):
         """Test cache can be invalidated."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.llm_cache_service.invalidate') as mock_invalidate:
             mock_invalidate.return_value = {"cleared": 10}
             response = client.delete("/api/llm-cache")
@@ -143,6 +150,7 @@ class TestMCPRouteIntegration:
     def test_mcp_message_routing(self, client):
         """Test MCP message routing."""
         mcp_message = {"type": "request", "method": "test_method", "params": {"key": "value"}}
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.mcp_service.handle_message') as mock_handle:
             mock_handle.return_value = {"status": "success"}
             response = client.post("/api/mcp", json=mcp_message)
@@ -159,6 +167,7 @@ class TestQualityRouteIntegration:
     
     def test_quality_metrics_retrieval(self, client):
         """Test retrieving quality metrics."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.quality_service.get_metrics') as mock_metrics:
             mock_metrics.return_value = {"accuracy": 0.95, "error_rate": 0.01}
             response = client.get("/api/quality/metrics")
@@ -177,6 +186,7 @@ class TestSupplyRouteIntegration:
     def test_supply_research_endpoint(self, client):
         """Test supply chain research endpoint."""
         research_request = {"query": "GPU suppliers", "region": "US", "max_results": 10}
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.supply_service.research') as mock_research:
             mock_research.return_value = {"suppliers": [{"name": "Supplier A", "score": 0.9}]}
             response = client.post("/api/supply/research", json=research_request)
@@ -194,6 +204,7 @@ class TestSyntheticDataRouteIntegration:
     def test_synthetic_data_generation(self, client):
         """Test synthetic data generation endpoint."""
         generation_request = {"schema": {"user_id": "uuid", "name": "name"}, "count": 100}
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.generate') as mock_generate:
             mock_generate.return_value = {"data": [{"user_id": "123", "name": "John"}] * 100}
             response = client.post("/api/synthetic-data/generate", json=generation_request)
@@ -209,6 +220,7 @@ class TestThreadsRouteIntegration:
     
     def test_thread_pagination(self, client):
         """Test thread list pagination."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.thread_service.get_threads') as mock_get:
             mock_get.return_value = {"threads": [{"id": f"thread_{i}"} for i in range(10)]}
             response = client.get("/api/threads?page=1&per_page=10")
@@ -226,7 +238,9 @@ class TestCrossServiceIntegration:
     
     def test_agent_corpus_integration(self, client):
         """Test agent can access corpus data."""
+        # Mock: Agent service isolation for testing without LLM agent execution
         with patch('app.services.agent_service.process_message') as mock_agent:
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.corpus_service.search') as mock_corpus:
                 mock_corpus.return_value = [{"content": "Test result"}]
                 mock_agent.return_value = {"response": "Found results"}
@@ -235,6 +249,7 @@ class TestCrossServiceIntegration:
     
     def test_quality_metrics_from_multiple_services(self, client):
         """Test quality metrics aggregate from multiple services."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.quality_service.get_metrics') as mock_quality:
             mock_quality.return_value = {"agent_accuracy": 0.95, "corpus_coverage": 0.88}
             response = client.get("/api/quality/metrics")

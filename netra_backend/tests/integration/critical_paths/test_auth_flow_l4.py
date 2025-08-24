@@ -39,14 +39,18 @@ OAuthService = AsyncMock
 # # from app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock, MagicMock
 
+# Mock: Generic component isolation for controlled unit testing
 create_access_token = AsyncMock()
 # # from app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock, MagicMock
 
+# Mock: Generic component isolation for controlled unit testing
 validate_token_jwt = AsyncMock()
 from unittest.mock import AsyncMock, MagicMock
 
+# Mock: Generic component isolation for controlled unit testing
 create_access_token = AsyncMock()
+# Mock: Generic component isolation for controlled unit testing
 validate_token_jwt = AsyncMock()
 JWTService = AsyncMock
 # Session manager replaced with mock

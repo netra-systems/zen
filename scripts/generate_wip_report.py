@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 # Add project root to path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 
 
 class WIPReportGenerator:

@@ -28,6 +28,7 @@ class ReconnectionTestFixture:
     """Centralized fixture for reconnection testing scenarios."""
     
     def __init__(self):
+        # Mock: Generic component isolation for controlled unit testing
         self.connection_manager = MagicMock()  # Mock connection manager
         self.active_connections: List[MockWebSocket] = []
         self.reconnection_attempts: List[Dict[str, Any]] = []

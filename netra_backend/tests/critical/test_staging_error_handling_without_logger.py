@@ -194,6 +194,7 @@ class TestLoggerInitializationFailureScenarios:
         
         # Mock loguru import to fail
         with patch.dict('sys.modules', {'loguru': None}):
+            # Mock: Component isolation for testing without external dependencies
             with patch('builtins.__import__', side_effect=lambda name, *args, **kwargs: 
                        mock_loguru_import_failure() if name == 'loguru' else __import__(name, *args, **kwargs)):
                 
@@ -250,6 +251,7 @@ class TestLoggerInitializationFailureScenarios:
         logger = UnifiedLogger()
         
         # Mock context setup to fail
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.logging_context.LoggingContext.__init__', side_effect=mock_context_setup_failure):
             # This should fail because context setup fails
             with pytest.raises(RuntimeError) as exc_info:
@@ -274,6 +276,7 @@ class TestLoggerInitializationFailureScenarios:
         from netra_backend.app.core.unified_logging import UnifiedLogger
         
         # Mock filter initialization to fail
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.core.logging_formatters.SensitiveDataFilter.__init__', side_effect=mock_filter_init_failure):
             # This should fail because filter initialization fails
             with pytest.raises(RuntimeError) as exc_info:
@@ -440,6 +443,7 @@ class TestAlternativeErrorReportingWhenLoggerFails:
                 sys.stderr.write("CRITICAL: Logger unavailable, using stderr\n")
         
         # Mock stderr to fail
+        # Mock: Component isolation for testing without external dependencies
         with patch('sys.stderr') as mock_stderr:
             mock_stderr.write.side_effect = mock_stderr_output_failure
             
@@ -475,6 +479,7 @@ class TestAlternativeErrorReportingWhenLoggerFails:
                     f.write("CRITICAL: Logger unavailable\n")
         
         # Mock file operations to fail
+        # Mock: Component isolation for testing without external dependencies
         with patch('builtins.open', side_effect=mock_file_write_failure):
             with patch.dict('sys.modules', {'netra_backend.app.logging_config': None}):
                 # This should fail because file writing fails
@@ -527,8 +532,10 @@ class TestAlternativeErrorReportingWhenLoggerFails:
         
         # Mock all mechanisms to fail
         with patch.dict('sys.modules', {'netra_backend.app.logging_config': None, 'syslog': None}):
+            # Mock: Component isolation for testing without external dependencies
             with patch('sys.stderr') as mock_stderr:
                 mock_stderr.write.side_effect = OSError("stderr unavailable")
+                # Mock: Component isolation for testing without external dependencies
                 with patch('builtins.open', side_effect=PermissionError("filesystem read-only")):
                     
                     # This should fail because no reporting mechanism works

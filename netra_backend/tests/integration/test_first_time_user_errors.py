@@ -58,6 +58,7 @@ async def test_rate_limit_error_handling(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Mock rate limiter to trigger error
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.rate_limiter.check_rate_limit") as mock_limit:
         mock_limit.return_value = False
         
@@ -84,6 +85,7 @@ async def test_service_unavailable_error_handling(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Mock LLM service failure
+    # Mock: LLM service isolation for fast testing without API calls or rate limits
     with patch("app.services.llm_manager.generate_response") as mock_llm:
         mock_llm.side_effect = Exception("LLM service unavailable")
         
@@ -163,6 +165,7 @@ async def test_error_recovery_with_retry(
     
     # Simulate retry pattern
     while retry_count < max_retries:
+        # Mock: LLM service isolation for fast testing without API calls or rate limits
         with patch("app.services.llm_manager.generate_response") as mock_llm:
             if retry_count < 2:
                 mock_llm.side_effect = Exception("Temporary failure")
@@ -215,6 +218,7 @@ async def test_graceful_degradation_features(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Mock feature unavailability
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.feature_service.is_available") as mock_feature:
         mock_feature.return_value = False
         
@@ -240,6 +244,7 @@ async def test_timeout_error_handling(
     headers = {"Authorization": f"Bearer {access_token}"}
     
     # Mock timeout on optimization request
+    # Mock: Component isolation for testing without external dependencies
     with patch("app.services.optimization_service.analyze") as mock_optimize:
         mock_optimize.side_effect = asyncio.TimeoutError("Operation timed out")
         

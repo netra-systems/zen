@@ -205,6 +205,7 @@ class TestThreadAutoCreation:
         
         # Create new session and retrieve
         # L3: Creating new session to test persistence
+        # Mock: Database session isolation for transaction testing without real database dependency
         new_session = Mock(spec=AsyncSession)
         new_thread_service = ThreadService()
         new_thread_service.db_session = new_session

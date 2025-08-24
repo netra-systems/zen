@@ -23,15 +23,20 @@ class TestHealthCheckersSystem:
     @pytest.fixture
     def mock_psutil(self):
         """Create mock psutil with standard values."""
+        # Mock: Generic component isolation for controlled unit testing
         mock = Mock()
         mock.cpu_percent.return_value = 25.5
+        # Mock: Component isolation for controlled unit testing
         mock.virtual_memory.return_value = Mock(
             percent=45.0, available=4096 * 1024 * 1024
         )
+        # Mock: Component isolation for controlled unit testing
         mock.disk_usage.return_value = Mock(percent=60.0)
+        # Mock: Generic component isolation for controlled unit testing
         mock.net_connections.return_value = [Mock()] * 15
         return mock
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.core.health_checkers.psutil')
     def test_check_system_resources_success(self, mock_psutil_module, mock_psutil):
         """Test successful system resources health check."""
@@ -44,6 +49,7 @@ class TestHealthCheckersSystem:
         assert result.details["success"] is True
         assert result.details["health_score"] > 0
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.core.health_checkers.psutil')
     def test_check_system_resources_high_usage(self, mock_psutil_module):
         """Test system resources check with high resource usage."""
@@ -55,6 +61,7 @@ class TestHealthCheckersSystem:
         assert result.details["health_score"] < 0.5  # Low health score
         assert result.details["metadata"]["cpu_percent"] == 95.0
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.core.health_checkers.psutil')
     def test_check_system_resources_psutil_error(self, mock_psutil_module):
         """Test system resources check with psutil error."""
@@ -95,6 +102,7 @@ class TestHealthCheckersSystem:
             else:
                 assert calculated_score == expected_min_score
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.core.health_checkers.psutil')
     def test_system_metrics_extraction_accuracy(self, mock_psutil_module):
         """Test accurate extraction of system metrics."""
@@ -107,13 +115,16 @@ class TestHealthCheckersSystem:
         assert metadata["memory_percent"] == 72.3
         assert metadata["disk_percent"] == 45.8
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.core.health_checkers.psutil')
     def test_system_resources_edge_case_zero_values(self, mock_psutil_module):
         """Test system resources with zero/minimal values."""
         mock_psutil_module.cpu_percent.return_value = 0.0
+        # Mock: Component isolation for controlled unit testing
         mock_psutil_module.virtual_memory.return_value = Mock(
             percent=0.0, available=16 * 1024 * 1024 * 1024  # 16GB available
         )
+        # Mock: Component isolation for controlled unit testing
         mock_psutil_module.disk_usage.return_value = Mock(percent=0.0)
         mock_psutil_module.net_connections.return_value = []
         
@@ -125,14 +136,18 @@ class TestHealthCheckersSystem:
         assert metadata["cpu_percent"] == 0.0
         assert metadata["memory_percent"] == 0.0
     
+    # Mock: Component isolation for testing without external dependencies
     @patch('app.core.health_checkers.psutil')
     def test_system_resources_maximum_stress(self, mock_psutil_module):
         """Test system resources under maximum stress."""
         mock_psutil_module.cpu_percent.return_value = 100.0
+        # Mock: Component isolation for controlled unit testing
         mock_psutil_module.virtual_memory.return_value = Mock(
             percent=100.0, available=0
         )
+        # Mock: Component isolation for controlled unit testing
         mock_psutil_module.disk_usage.return_value = Mock(percent=100.0)
+        # Mock: Generic component isolation for controlled unit testing
         mock_psutil_module.net_connections.return_value = [Mock()] * 1000
         
         result = check_system_resources()
@@ -160,6 +175,7 @@ class TestHealthCheckersSystem:
     
     def test_system_resource_metadata_completeness(self):
         """Test that system resource metadata includes all required fields."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.health_checkers.psutil') as mock_psutil:
             self._setup_psutil_success_with_values(mock_psutil)
             
@@ -177,6 +193,7 @@ class TestHealthCheckersSystem:
     
     def test_response_time_measurement_accuracy(self):
         """Test that response time measurement is accurate."""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.core.health_checkers.psutil') as mock_psutil:
             self._setup_psutil_success_with_values(mock_psutil)
             
@@ -197,29 +214,40 @@ class TestHealthCheckersSystem:
     def _setup_psutil_high_usage(self, mock_psutil_module):
         """Helper to setup psutil mock with high resource usage."""
         mock_psutil_module.cpu_percent.return_value = 95.0
+        # Mock: Component isolation for controlled unit testing
         mock_psutil_module.virtual_memory.return_value = Mock(percent=90.0, available=1024 * 1024)
+        # Mock: Component isolation for controlled unit testing
         mock_psutil_module.disk_usage.return_value = Mock(percent=85.0)
+        # Mock: Generic component isolation for controlled unit testing
         mock_psutil_module.net_connections.return_value = [Mock()] * 100
     
     def _setup_psutil_specific_values(self, mock_psutil_module):
         """Helper to setup psutil mock with specific test values."""
         mock_psutil_module.cpu_percent.return_value = 35.7
+        # Mock: Component isolation for controlled unit testing
         mock_psutil_module.virtual_memory.return_value = Mock(percent=72.3, available=2 * 1024 * 1024 * 1024)
+        # Mock: Component isolation for controlled unit testing
         mock_psutil_module.disk_usage.return_value = Mock(percent=45.8)
+        # Mock: Generic component isolation for controlled unit testing
         mock_psutil_module.net_connections.return_value = [Mock()] * 25
     
     def _setup_psutil_success_with_values(self, mock_psutil):
         """Helper to setup psutil mock with standard success values."""
         mock_psutil.cpu_percent.return_value = 20.0
+        # Mock: Component isolation for controlled unit testing
         mock_psutil.virtual_memory.return_value = Mock(percent=40.0, available=8 * 1024 * 1024 * 1024)
+        # Mock: Component isolation for controlled unit testing
         mock_psutil.disk_usage.return_value = Mock(percent=30.0, free=500 * 1024 * 1024 * 1024)
+        # Mock: Generic component isolation for controlled unit testing
         mock_psutil.net_connections.return_value = [Mock()] * 10
     
     def _create_mock_system_stats(self, cpu=25.0, memory=50.0, disk=60.0):
         """Helper to create mock system statistics."""
         return {
             "cpu_percent": cpu,
+            # Mock: Component isolation for controlled unit testing
             "memory": Mock(percent=memory, available=4096 * 1024 * 1024),
+            # Mock: Component isolation for controlled unit testing
             "disk": Mock(percent=disk, free=1024 * 1024 * 1024),
             "connections": 15
         }

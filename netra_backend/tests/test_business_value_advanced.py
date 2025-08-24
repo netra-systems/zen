@@ -28,8 +28,11 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
 
     async def _execute_with_mocked_state(self, supervisor, user_request: str, run_id: str):
         """Execute supervisor with mocked state persistence"""
+        # Mock: Generic component isolation for controlled unit testing
         save_mock = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         load_mock = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         context_mock = AsyncMock(return_value=None)
         return await self._execute_with_patches(supervisor, user_request, run_id, 
                                                save_mock, load_mock, context_mock)
@@ -37,8 +40,11 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
     async def _execute_with_patches(self, supervisor, user_request, run_id, 
                                    save_mock, load_mock, context_mock):
         """Execute with specific state persistence patches"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', save_mock):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', load_mock):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', context_mock):
                     return await supervisor.run(user_request, "test_thread", "test_user", run_id)
 
@@ -109,15 +115,21 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
 
     async def _execute_resilience_test(self, supervisor, run_id: str):
         """Execute resilience test with error handling"""
+        # Mock: Generic component isolation for controlled unit testing
         save_mock = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         load_mock = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         context_mock = AsyncMock(return_value=None)
         await self._execute_resilience_with_patches(supervisor, run_id, save_mock, load_mock, context_mock)
 
     async def _execute_resilience_with_patches(self, supervisor, run_id, save_mock, load_mock, context_mock):
         """Execute resilience test with specific patches"""
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', save_mock):
+            # Mock: Component isolation for testing without external dependencies
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', load_mock):
+                # Mock: Component isolation for testing without external dependencies
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', context_mock):
                     try:
                         await supervisor.run("Test resilience", "test_thread", "test_user", run_id)
@@ -228,6 +240,7 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
         user_request = self._create_complex_user_request()
         track_workflow = self._create_workflow_tracker(workflow_stages)
         
+        # Mock: WebSocket connection isolation for testing without network overhead
         websocket_manager.send_sub_agent_update = AsyncMock(side_effect=track_workflow)
         result_state = await self._execute_e2e_workflow(supervisor, user_request)
         
@@ -253,8 +266,11 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
     async def _execute_e2e_workflow(self, supervisor, user_request):
         """Execute end-to-end workflow with state mocking"""
         run_id = str(uuid.uuid4())
+        # Mock: Generic component isolation for controlled unit testing
         save_mock = AsyncMock()
+        # Mock: Async component isolation for testing without real async operations
         load_mock = AsyncMock(return_value=None)
+        # Mock: Async component isolation for testing without real async operations
         context_mock = AsyncMock(return_value=None)
         return await self._execute_with_patches(supervisor, user_request, run_id, 
                                                save_mock, load_mock, context_mock)

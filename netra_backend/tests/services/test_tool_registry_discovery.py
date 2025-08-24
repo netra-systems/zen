@@ -21,6 +21,7 @@ class TestToolRegistryDiscovery:
     @pytest.fixture
     def mock_db_session(self):
         """Mock database session"""
+        # Mock: Generic component isolation for controlled unit testing
         return MagicMock()
     
     @pytest.fixture

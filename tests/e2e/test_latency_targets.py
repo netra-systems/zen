@@ -131,8 +131,11 @@ def test_config():
 @pytest.fixture
 def mock_http_client():
     """Create mock HTTP client for API latency tests."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_client = AsyncMock()
+    # Mock: Async component isolation for testing without real async operations
     mock_client.get = AsyncMock(return_value={"status": 200, "data": "response"})
+    # Mock: Async component isolation for testing without real async operations
     mock_client.post = AsyncMock(return_value={"status": 200, "data": "created"})
     return mock_client
 

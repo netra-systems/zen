@@ -53,7 +53,9 @@ class StreamingTestData:
 @pytest.fixture
 def streaming_websocket():
     """Create mock WebSocket connection for streaming tests."""
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket = AsyncMock()
+    # Mock: WebSocket infrastructure isolation for unit tests without real connections
     mock_websocket.application_state = MagicMock()
     mock_websocket.application_state.CONNECTED = True
     
@@ -80,12 +82,17 @@ def streaming_harness():
 @pytest.fixture
 def mock_unified_manager():
     """Create mock unified WebSocket manager for testing."""
+    # Mock: Generic component isolation for controlled unit testing
     mock_manager = MagicMock()
     
     # Mock connection methods
+    # Mock: Async component isolation for testing without real async operations
     mock_manager.connect_user = AsyncMock(return_value=MagicMock(connection_id="test_conn"))
+    # Mock: Async component isolation for testing without real async operations
     mock_manager.disconnect_user = AsyncMock(return_value=None)
+    # Mock: Async component isolation for testing without real async operations
     mock_manager.send_message_to_user = AsyncMock(return_value=True)
+    # Mock: Service component isolation for predictable testing behavior
     mock_manager.validate_message = MagicMock(return_value=True)
     
     return mock_manager
@@ -260,6 +267,7 @@ class TestStreamingReliability:
         
         # Simulate connection issue and recovery
         original_send = streaming_websocket.send_json
+        # Mock: Async component isolation for testing without real async operations
         streaming_websocket.send_json = AsyncMock(side_effect=ConnectionError("Connection lost"))
         
         # Attempt to send during connection issue

@@ -189,9 +189,13 @@ class TestRealAgentStartupWebSocketFlow:
             "references": []
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+            # Mock: Generic component isolation for controlled unit testing
             mock_db.return_value.__aexit__ = AsyncMock()
             
             await message_handler.handle_user_message("test_user", payload, mock_session)
@@ -234,14 +238,20 @@ class TestRealAgentStartupWebSocketFlow:
         }
         
         # Mock existing thread
+        # Mock: Component isolation for controlled unit testing
         existing_thread = Mock(spec=Thread)
         existing_thread.id = existing_thread_id
         existing_thread.metadata_ = {"user_id": "test_user"}
+        # Mock: Async component isolation for testing without real async operations
         mock_thread_service.get_thread = AsyncMock(return_value=existing_thread)
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_session = AsyncMock()
+            # Mock: Database session isolation for transaction testing without real database dependency
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+            # Mock: Generic component isolation for controlled unit testing
             mock_db.return_value.__aexit__ = AsyncMock()
             
             await message_handler.handle_user_message("test_user", payload, mock_session)
@@ -265,15 +275,22 @@ class TestRealAgentStartupWebSocketFlow:
         }
         
         # Mock thread belonging to different user
+        # Mock: Component isolation for controlled unit testing
         other_thread = Mock(spec=Thread)
         other_thread.id = other_users_thread_id
         other_thread.metadata_ = {"user_id": "different_user"}  # Different user
+        # Mock: Async component isolation for testing without real async operations
         mock_thread_service.get_thread = AsyncMock(return_value=other_thread)
         
+        # Mock: WebSocket connection isolation for testing without network overhead
         with patch('netra_backend.app.get_websocket_manager().send_error') as mock_send_error:
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session = AsyncMock()
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+                # Mock: Generic component isolation for controlled unit testing
                 mock_db.return_value.__aexit__ = AsyncMock()
                 
                 await message_handler.handle_user_message("test_user", payload, mock_session)
@@ -293,12 +310,18 @@ class TestRealAgentStartupWebSocketFlow:
         }
         
         # Make supervisor throw exception
+        # Mock: Async component isolation for testing without real async operations
         mock_supervisor.run = AsyncMock(side_effect=Exception("Supervisor failed"))
         
+        # Mock: WebSocket connection isolation for testing without network overhead
         with patch('netra_backend.app.get_websocket_manager().send_error') as mock_send_error:
+            # Mock: Component isolation for testing without external dependencies
             with patch('netra_backend.app.db.postgres.get_async_db') as mock_db:
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_session = AsyncMock()
+                # Mock: Database session isolation for transaction testing without real database dependency
                 mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+                # Mock: Generic component isolation for controlled unit testing
                 mock_db.return_value.__aexit__ = AsyncMock()
                 
                 # Should not raise exception to caller

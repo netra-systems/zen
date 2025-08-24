@@ -83,13 +83,19 @@ class ErrorRecoveryTestFixtures:
     @staticmethod
     def create_database_session_mock(fail_on_commit: bool = False):
         """Create database session mock with controlled failures"""
+        # Mock: Session isolation for controlled testing without external state
         session = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.add = Mock()
+        # Mock: Session isolation for controlled testing without external state
         session.rollback = AsyncMock()
+        # Mock: Session isolation for controlled testing without external state
         session.close = AsyncMock()
         if fail_on_commit:
+            # Mock: Session isolation for controlled testing without external state
             session.commit = AsyncMock(side_effect=Exception("DB_COMMIT_FAILED"))
         else:
+            # Mock: Session isolation for controlled testing without external state
             session.commit = AsyncMock()
         return session
 
@@ -267,6 +273,7 @@ class TestRollbackMechanisms:
         
         with patch.object(state_persistence_service, 'load_agent_state', mock_load_state):
             restored_state = await state_persistence_service.load_agent_state(
+                # Mock: Generic component isolation for controlled unit testing
                 "test_run", AsyncMock()
             )
         

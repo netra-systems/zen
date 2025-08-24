@@ -50,6 +50,7 @@ class TestSyntheticDataGeneration:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.synthetic_data_service.generate_synthetic_data') as mock_gen:
             mock_gen.return_value = {
                 "job_id": "test_job_123",
@@ -91,6 +92,7 @@ class TestSyntheticDataGeneration:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.validate_data') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
@@ -130,11 +132,14 @@ class TestSyntheticDataGeneration:
         from netra_backend.app.routes.synthetic_data import _fetch_templates
         
         # Mock the database dependency
+        # Mock: Generic component isolation for controlled unit testing
         mock_db = AsyncMock()
         
         # Create a mock for the entire SyntheticDataService class
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.synthetic_data.SyntheticDataService') as mock_service_class:
             # Mock the static method to return templates
+            # Mock: Async component isolation for testing without real async operations
             mock_service_class.get_available_templates = AsyncMock(return_value=[
                 {
                     "name": "user_profile",
@@ -183,6 +188,7 @@ class TestSyntheticDataGeneration:
         """Test synthetic data generation job status tracking."""
         job_id = "test_job_123"
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.get_job_status') as mock_status:
             mock_status.return_value = {
                 "job_id": job_id,
@@ -229,6 +235,7 @@ class TestSyntheticDataGeneration:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.validate_schema') as mock_validate_schema:
             mock_validate_schema.return_value = {
                 "valid": True,
@@ -315,6 +322,7 @@ class TestSyntheticDataGeneration:
             }
         }
         
+        # Mock: Component isolation for testing without external dependencies
         with patch('app.services.synthetic_data_service.optimize_parameters') as mock_optimize:
             mock_optimize.return_value = {
                 "optimized_parameters": {

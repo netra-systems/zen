@@ -44,10 +44,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.redis_manager import RedisManager
 
+# Mock: Generic component isolation for controlled unit testing
 create_access_token = AsyncMock()
 # from app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock, MagicMock
 
+# Mock: Generic component isolation for controlled unit testing
 validate_token_jwt = AsyncMock()
 from netra_backend.app.core.health_checkers import HealthChecker
 

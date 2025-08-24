@@ -224,6 +224,7 @@ class TestStagingSpecificValidation:
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
             # Mock the FastAPI app
             from unittest.mock import Mock
+            # Mock: Generic component isolation for controlled unit testing
             app = Mock()
             
             # Simulate health check

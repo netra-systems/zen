@@ -46,17 +46,21 @@ class AgentStartupE2EManager:
         """Configure auth service response patterns."""
         user_data = {"id": self.test_user.id, "email": self.test_user.email}
         token_data = {"access_token": "test-jwt-token", "user": user_data}
+        # Mock: Async component isolation for testing without real async operations
         self.auth_service.authenticate = AsyncMock(return_value=token_data)
     
     async def _setup_agent_mocks(self) -> None:
         """Setup agent system mocks."""
+        # Mock: Generic component isolation for controlled unit testing
         self.agent_system = MagicMock()
         self._configure_agent_responses()
     
     def _configure_agent_responses(self) -> None:
         """Configure agent system response patterns."""
         response_data = self._create_meaningful_agent_response()
+        # Mock: Async component isolation for testing without real async operations
         self.agent_system.process_message = AsyncMock(return_value=response_data)
+        # Mock: Async component isolation for testing without real async operations
         self.agent_system.initialize = AsyncMock(return_value=True)
     
     async def _setup_websocket_mocks(self) -> None:
@@ -206,6 +210,7 @@ class LLMProviderTestHelper:
     async def simulate_provider_failure(self) -> None:
         """Simulate primary provider failure."""
         # Fail immediately - no fallback
+        # Mock: Async component isolation for testing without real async operations
         self.manager.agent_system.process_message = AsyncMock(
             side_effect=RuntimeError("Primary provider unavailable - no fallback configured")
         )

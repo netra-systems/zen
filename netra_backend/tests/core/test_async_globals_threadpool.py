@@ -76,6 +76,7 @@ class TestShutdownAsyncUtils:
         """Test shutting down async utilities"""
         resource_manager = get_global_resource_manager()
         task_pool = get_global_task_pool()
+        # Mock: Generic component isolation for controlled unit testing
         resource_manager.register_resource(Mock())
         task_pool.submit_background_task(asyncio.sleep(0.01))
         await shutdown_async_utils()

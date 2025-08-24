@@ -902,18 +902,25 @@ async def redis_client():
     except Exception:
         # Use mock for CI environments
 
+        # Mock: Generic component isolation for controlled unit testing
         client = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         client.hset = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         client.expire = AsyncMock()
 
+        # Mock: Generic component isolation for controlled unit testing
         client.delete = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         client.get = AsyncMock(return_value=None)
 
+        # Mock: Generic component isolation for controlled unit testing
         client.setex = AsyncMock()
 
+        # Mock: Async component isolation for testing without real async operations
         client.hgetall = AsyncMock(return_value={})
 
         yield client
@@ -941,6 +948,7 @@ async def test_tab_registration_and_leader_election(multitab_manager):
     
     # Register first tab
 
+    # Mock: Generic component isolation for controlled unit testing
     tab1_websocket = AsyncMock()
 
     result1 = await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
@@ -953,6 +961,7 @@ async def test_tab_registration_and_leader_election(multitab_manager):
     
     # Register second tab
 
+    # Mock: Generic component isolation for controlled unit testing
     tab2_websocket = AsyncMock()
 
     result2 = await multitab_manager.connect_tab(user_id, "tab2", tab2_websocket)
@@ -984,10 +993,13 @@ async def test_leader_reelection_on_disconnect(multitab_manager):
     
     # Register multiple tabs
 
+    # Mock: Generic component isolation for controlled unit testing
     tab1_websocket = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     tab2_websocket = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     tab3_websocket = AsyncMock()
     
     await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
@@ -1031,8 +1043,10 @@ async def test_message_deduplication_across_tabs(multitab_manager):
     
     # Register tabs
 
+    # Mock: Generic component isolation for controlled unit testing
     tab1_websocket = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     tab2_websocket = AsyncMock()
     
     await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
@@ -1084,8 +1098,10 @@ async def test_shared_state_synchronization(multitab_manager):
     
     # Register tabs with initial state
 
+    # Mock: Generic component isolation for controlled unit testing
     tab1_websocket = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     tab2_websocket = AsyncMock()
     
     initial_state = {"theme": "light", "sidebar_open": True}
@@ -1131,8 +1147,10 @@ async def test_leader_only_actions(multitab_manager):
     
     # Register tabs
 
+    # Mock: Generic component isolation for controlled unit testing
     tab1_websocket = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     tab2_websocket = AsyncMock()
     
     await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
@@ -1184,6 +1202,7 @@ async def test_broadcast_to_user_tabs(multitab_manager):
 
         tab_id = f"tab{i+1}"
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket_mock = AsyncMock()
 
         await multitab_manager.connect_tab(user_id, tab_id, websocket_mock)
@@ -1241,6 +1260,7 @@ async def test_concurrent_tab_operations(multitab_manager):
 
         tab_id = f"concurrent_tab_{tab_index}"
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket_mock = AsyncMock()
 
         return await multitab_manager.connect_tab(user_id, tab_id, websocket_mock)
@@ -1282,8 +1302,10 @@ async def test_state_conflict_resolution(multitab_manager):
     
     # Register tabs
 
+    # Mock: Generic component isolation for controlled unit testing
     tab1_websocket = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     tab2_websocket = AsyncMock()
     
     await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
@@ -1363,6 +1385,7 @@ async def test_tab_lifecycle_performance(multitab_manager):
 
         tab_id = f"perf_tab_{i}"
 
+        # Mock: Generic component isolation for controlled unit testing
         websocket_mock = AsyncMock()
 
         await multitab_manager.connect_tab(user_id, tab_id, websocket_mock)
@@ -1410,8 +1433,10 @@ async def test_comprehensive_metrics_tracking(multitab_manager):
     
     # Perform various operations
 
+    # Mock: Generic component isolation for controlled unit testing
     tab1_websocket = AsyncMock()
 
+    # Mock: Generic component isolation for controlled unit testing
     tab2_websocket = AsyncMock()
     
     await multitab_manager.connect_tab(user_id, "tab1", tab1_websocket)
