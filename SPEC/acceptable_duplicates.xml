@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Acceptable.Duplicates.Master.List</name>
+        <version>1.0.0</version>
+        <priority>CRITICAL</priority>
+        <description>
+            Canonical master list of acceptable code duplicates across the Netra Apex platform.
+            This specification defines when duplication is strategically justified versus when it
+            violates the "Unique Concept = ONCE per service" principle.
+        </description>
+        <created>2025-08-24</created>
+        <last_edited>2025-08-24</last_edited>
+        <cross_references>
+            <spec>independent_services.xml</spec>
+            <spec>learnings/microservice_independence.xml</spec>
+            <spec>type_safety.xml</spec>
+            <spec>unified_environment_management.xml</spec>
+            <spec>database_connectivity_architecture.xml</spec>
+        </cross_references>
+    </metadata>
+
+    <core_principle id="ADP-001">
+        <title>Strategic Duplication vs Harmful Duplication</title>
+        <definition>
+            Duplication is acceptable when it preserves system boundaries, reduces coupling,
+            or maintains service independence. Duplication is harmful when it violates DRY
+            within a single service boundary or creates maintenance burden without architectural benefit.
+        </definition>
+        <decision_framework>
+            <question>Does this duplication preserve service independence?</question>
+            <question>Would sharing this code create unacceptable coupling?</question>
+            <question>Is this duplication within the same service boundary?</question>
+            <question>Does the duplication enable different evolution paths?</question>
+            <question>Would the shared abstraction be more complex than the duplication?</question>
+        </decision_framework>
+    </core_principle>
+
+    <category id="CAT-001" priority="CRITICAL">
+        <name>Cross-Service Independence Duplicates</name>
+        <justification>
+            Each microservice MUST be independently deployable, scalable, and maintainable.
+            This requires each service to own its infrastructure code, even if similar patterns exist.
+        </justification>
+        <cross_link>SPEC/independent_services.xml#MS-P1</cross_link>
+        <cross_link>SPEC/learnings/microservice_independence.xml#principles</cross_link>
+        
+        <acceptable_duplicate id="ADP-CS-001">
+            <pattern>Database Managers</pattern>
+            <description>Each service maintains its own database connection and management logic</description>
+            <examples>
+                <example>
+                    /netra_backend/app/db/database_manager.py
+                    /auth_service/auth_core/database/database_manager.py
+                </example>
+            </examples>
+            <why_acceptable>
+                - Services may use different databases or schemas
+                - Connection pooling requirements differ per service
+                - Allows independent scaling and tuning
+                - Prevents cascading failures from shared connections
+            </why_acceptable>
+            <when_not_acceptable>
+                Multiple database managers within the SAME service (e.g., two in netra_backend)
+            </when_not_acceptable>
+        </acceptable_duplicate>
+
+        <acceptable_duplicate id="ADP-CS-002">
+            <pattern>Configuration Classes</pattern>
+            <description>Each service has its own configuration management</description>
+            <examples>
+                <example>
+                    /netra_backend/app/core/configuration/base.py
+                    /auth_service/auth_core/config.py
+                </example>
+            </examples>
+            <why_acceptable>
+                - Services have different configuration needs
+                - Allows service-specific validation rules
+                - Enables independent deployment with different configs
+                - Maintains clear configuration boundaries
+            </why_acceptable>
+            <when_not_acceptable>
+                Duplicate configuration classes within the same service
+            </when_not_acceptable>
+        </acceptable_duplicate>
+
+        <acceptable_duplicate id="ADP-CS-003">
+            <pattern>Health Check Endpoints</pattern>
+            <description>Each service implements its own health check logic</description>
+            <examples>
+                <example>
+                    /netra_backend/app/routes/health.py
+                    /auth_service/auth_core/routes/health.py
+                </example>
+            </examples>
+            <why_acceptable>
+                - Services have different health criteria
+                - Enables service-specific health monitoring
+                - Required for independent load balancer configuration
+                - Different dependencies to check per service
+            </why_acceptable>
+        </acceptable_duplicate>
+
+        <acceptable_duplicate id="ADP-CS-004">
+            <pattern>Error Handling and Exception Classes</pattern>
+            <description>Service-specific error hierarchies and handlers</description>
+            <examples>
+                <example>
+                    /netra_backend/app/core/exceptions.py
+                    /auth_service/auth_core/exceptions.py
+                </example>
+            </examples>
+            <why_acceptable>
+                - Services have different error domains
+                - Enables service-specific error recovery strategies
+                - Allows independent error monitoring and alerting
+                - Prevents error handling coupling between services
+            </why_acceptable>
+        </acceptable_duplicate>
+
+        <acceptable_duplicate id="ADP-CS-005">
+            <pattern>Logging Configuration</pattern>
+            <description>Each service configures its own logging</description>
+            <examples>
+                <example>
+                    /netra_backend/app/core/unified_logging.py
+                    /auth_service/auth_core/logging.py
+                </example>
+            </examples>
+            <why_acceptable>
+                - Services have different logging requirements
+                - Enables service-specific log levels and formats
+                - Allows independent log routing and retention
+                - Maintains clear debugging boundaries
+            </why_acceptable>
+        </acceptable_duplicate>
+    </category>
+
+    <category id="CAT-002" priority="HIGH">
+        <name>Abstraction Complexity Avoidance</name>
+        <justification>
+            Sometimes creating a shared abstraction would introduce more complexity than
+            the duplication it eliminates. "The wrong abstraction is worse than duplication."
+        </justification>
+        
+        <acceptable_duplicate id="ADP-AC-001">
+            <pattern>Simple Utility Functions</pattern>
+            <description>Basic utility functions that would require complex packaging to share</description>
+            <examples>
+                <example>
+                    String manipulation helpers (capitalize, slugify)
+                    Date formatting utilities
+                    Simple validation functions
+                </example>
+            </examples>
+            <why_acceptable>
+                - Creating a shared package adds deployment complexity
+                - Version management overhead exceeds benefit
+                - Functions may evolve differently per service
+                - < 50 lines of simple, stable code
+            </why_acceptable>
+            <when_not_acceptable>
+                - Complex business logic
+                - Security-critical functions
+                - Functions > 50 lines or with complex logic
+            </when_not_acceptable>
+        </acceptable_duplicate>
+
+        <acceptable_duplicate id="ADP-AC-002">
+            <pattern>Test Fixtures and Helpers</pattern>
+            <description>Test-specific utilities and fixtures</description>
+            <examples>
+                <example>
+                    /netra_backend/tests/conftest.py
+                    /auth_service/tests/conftest.py
+                    /tests/e2e/conftest.py
+                </example>
+            </examples>
+            <why_acceptable>
+                - Tests have different setup requirements
+                - Fixtures are tightly coupled to service internals
+                - Allows independent test evolution
+                - Prevents test coupling between services
+            </why_acceptable>
+            <exception>
+                Shared test framework utilities in /test_framework/ for cross-service testing
+            </exception>
+        </acceptable_duplicate>
+    </category>
+
+    <category id="CAT-003" priority="HIGH">
+        <name>Environment-Specific Implementations</name>
+        <justification>
+            Different environments (development, staging, production) or platforms (frontend, backend)
+            may require different implementations of similar concepts.
+        </justification>
+        
+        <acceptable_duplicate id="ADP-ES-001">
+            <pattern>Environment Detection</pattern>
+            <description>Different services detect and handle environments differently</description>
+            <examples>
+                <example>
+                    Backend: Python-based environment detection
+                    Frontend: JavaScript-based environment detection
+                    Auth: Simplified environment detection
+                </example>
+            </examples>
+            <why_acceptable>
+                - Different languages require different implementations
+                - Services may have different environment needs
+                - Frontend vs backend environment handling differs
+                - Maintains deployment flexibility
+            </why_acceptable>
+        </acceptable_duplicate>
+
+        <acceptable_duplicate id="ADP-ES-002">
+            <pattern>API Clients</pattern>
+            <description>Different implementations for different consumers</description>
+            <examples>
+                <example>
+                    /netra_backend/app/clients/auth_client_core.py (Python async)
+                    /frontend/auth/unified-auth-service.ts (TypeScript/React)
+                    /test_framework/clients/auth_client.py (Synchronous for tests)
+                </example>
+            </examples>
+            <why_acceptable>
+                - Different languages and frameworks
+                - Async vs sync requirements
+                - Different error handling patterns
+                - Platform-specific optimizations
+            </why_acceptable>
+        </acceptable_duplicate>
+    </category>
+
+    <category id="CAT-004" priority="MEDIUM">
+        <name>Domain-Specific Variations</name>
+        <justification>
+            Similar patterns implemented differently based on domain requirements,
+            performance needs, or business rules.
+        </justification>
+        
+        <acceptable_duplicate id="ADP-DS-001">
+            <pattern>Caching Strategies</pattern>
+            <description>Different caching implementations for different data types</description>
+            <examples>
+                <example>
+                    Auth tokens: Redis with TTL
+                    LLM responses: Semantic cache with embeddings
+                    Static data: In-memory cache
+                </example>
+            </examples>
+            <why_acceptable>
+                - Different performance characteristics
+                - Different invalidation strategies
+                - Different storage requirements
+                - Domain-specific optimization needs
+            </why_acceptable>
+        </acceptable_duplicate>
+
+        <acceptable_duplicate id="ADP-DS-002">
+            <pattern>Retry Logic</pattern>
+            <description>Service-specific retry strategies</description>
+            <examples>
+                <example>
+                    LLM calls: Exponential backoff with jitter
+                    Database: Linear backoff with circuit breaker
+                    Auth service: No retry (fail fast)
+                </example>
+            </examples>
+            <why_acceptable>
+                - Different failure modes
+                - Different performance requirements
+                - Different user experience impacts
+                - Service-specific SLAs
+            </why_acceptable>
+        </acceptable_duplicate>
+    </category>
+
+    <category id="CAT-005" priority="LOW">
+        <name>Legacy Migration Duplicates</name>
+        <justification>
+            Temporary duplicates during migration or refactoring periods,
+            with clear deprecation timelines.
+        </justification>
+        
+        <acceptable_duplicate id="ADP-LM-001">
+            <pattern>Parallel Implementations During Migration</pattern>
+            <description>Old and new implementations coexist during migration</description>
+            <examples>
+                <example>
+                    WebSocket v1 and v2 implementations during migration
+                    Old and new authentication flows during OAuth migration
+                </example>
+            </examples>
+            <why_acceptable>
+                - Enables gradual migration
+                - Allows rollback if issues arise
+                - Maintains system stability during transition
+            </why_acceptable>
+            <requirements>
+                - MUST have deprecation date
+                - MUST have migration plan
+                - MUST be marked with @deprecated
+                - MUST be removed after migration complete
+            </requirements>
+        </acceptable_duplicate>
+    </category>
+
+    <anti_patterns>
+        <anti_pattern id="AP-001">
+            <name>Unacceptable Within-Service Duplication</name>
+            <description>
+                Multiple implementations of the same concept within a single service boundary
+            </description>
+            <examples>
+                <bad_example>
+                    /netra_backend/app/db/database_manager.py
+                    /netra_backend/app/services/db_handler.py (duplicate)
+                    /netra_backend/app/utils/database_utils.py (duplicate)
+                </bad_example>
+            </examples>
+            <fix>Consolidate to single implementation within the service</fix>
+        </anti_pattern>
+
+        <anti_pattern id="AP-002">
+            <name>Copy-Paste Business Logic</name>
+            <description>
+                Duplicating complex business logic instead of creating proper abstractions
+            </description>
+            <examples>
+                <bad_example>
+                    Pricing calculation logic duplicated across services
+                    User permission checks copied instead of using auth service
+                </bad_example>
+            </examples>
+            <fix>Extract to service API or shared library</fix>
+        </anti_pattern>
+
+        <anti_pattern id="AP-003">
+            <name>Divergent Security Implementations</name>
+            <description>
+                Security-critical code duplicated with variations
+            </description>
+            <examples>
+                <bad_example>
+                    JWT validation implemented differently in each service
+                    Encryption/decryption logic duplicated
+                </bad_example>
+            </examples>
+            <fix>Use centralized auth service or security library</fix>
+        </anti_pattern>
+    </anti_patterns>
+
+    <validation_checklist>
+        <step>Is this duplication across service boundaries? → May be acceptable</step>
+        <step>Is this duplication within the same service? → Not acceptable</step>
+        <step>Would sharing create tight coupling? → Duplication acceptable</step>
+        <step>Is this simple utility code (&lt;50 lines)? → Duplication acceptable</step>
+        <step>Is this security-critical code? → Duplication not acceptable</step>
+        <step>Is this complex business logic? → Duplication not acceptable</step>
+        <step>Does this enable independent deployment? → Duplication acceptable</step>
+        <step>Is there a deprecation plan (for migrations)? → Temporary duplication acceptable</step>
+    </validation_checklist>
+
+    <enforcement>
+        <tool>python scripts/check_architecture_compliance.py --check-duplicates</tool>
+        <ci_check>Automated detection of within-service duplicates</ci_check>
+        <review_process>Architecture review for new cross-service patterns</review_process>
+    </enforcement>
+
+    <references>
+        <reference>Martin Fowler - "Microservices" (Service Independence)</reference>
+        <reference>Sam Newman - "Building Microservices" (Bounded Contexts)</reference>
+        <reference>Sandi Metz - "The Wrong Abstraction" (Duplication vs Wrong Abstraction)</reference>
+        <reference>DRY Principle - "Don't Repeat Yourself" (Within boundaries)</reference>
+        <reference>SOLID Principles - Single Responsibility (Service boundaries)</reference>
+    </references>
+</specification>
