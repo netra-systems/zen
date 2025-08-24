@@ -57,6 +57,9 @@ from test_framework.helpers.auth_helpers import AuthTestHelpers, create_test_jwt
 from test_framework.helpers.database_helpers import DatabaseTestHelpers
 from test_framework.helpers.api_helpers import APITestHelpers
 
+# Import base test classes
+from test_framework.base_e2e_test import BaseE2ETest
+
 
 def setup_test_path():
     """Set up the project root in sys.path for test imports.
@@ -140,4 +143,7 @@ __all__ = [
     'DatabaseTestHelpers', 
     'APITestHelpers',
     'create_test_jwt_token',
+    
+    # Base test classes
+    'BaseE2ETest',
 ]
