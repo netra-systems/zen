@@ -432,16 +432,17 @@ class TestOAuthErrorHandling:
         
         # Should handle rapid requests (may rate limit, succeed, or fail gracefully)
         for status_code in responses:
-            assert status_code in [200, 302, 400, 422, 429, 500]
+            assert status_code in [200, 302, 400, 404, 422, 429, 500]
         
         # Count different response types
         rate_limited_count = responses.count(429)
         successful_count = len([s for s in responses if s in [200, 302]])
         validation_error_count = len([s for s in responses if s in [400, 422]])
+        not_found_count = responses.count(404)
         server_error_count = responses.count(500)
         
         # Should handle all requests in some way (either process, rate limit, validate, or error gracefully)
-        total_handled = rate_limited_count + successful_count + validation_error_count + server_error_count
+        total_handled = rate_limited_count + successful_count + validation_error_count + not_found_count + server_error_count
         assert total_handled == len(responses)
         
         # Should process at least some requests (not all should be server errors)

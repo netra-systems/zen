@@ -234,14 +234,27 @@ class TestAuthDatabaseManagerMissingMethods:
         Test that is_test_environment returns False for production.
         
         Should return False for production environment.
-        This test should FAIL until method is implemented.
+        Note: This test runs under pytest so it will always return True.
+        Testing the environment detection logic by patching pytest detection.
         """
-        result = AuthDatabaseManager.is_test_environment()
-        
-        assert isinstance(result, bool), \
-            f"is_test_environment should return boolean, got: {type(result)}"
-        assert result is False, \
-            "Should return False for production environment"
+        # Mock sys.modules to not contain pytest
+        import sys
+        original_modules = sys.modules.copy()
+        try:
+            # Remove pytest from sys.modules temporarily
+            if 'pytest' in sys.modules:
+                del sys.modules['pytest']
+            
+            result = AuthDatabaseManager.is_test_environment()
+            
+            assert isinstance(result, bool), \
+                f"is_test_environment should return boolean, got: {type(result)}"
+            assert result is False, \
+                "Should return False for production environment when pytest not detected"
+        finally:
+            # Restore original sys.modules
+            sys.modules.clear()
+            sys.modules.update(original_modules)
     
     def test_pytest_detection_in_is_test_environment(self):
         """
