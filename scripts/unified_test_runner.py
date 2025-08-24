@@ -33,9 +33,12 @@ from typing import Dict, List, Optional, Tuple
 from datetime import timedelta
 
 # Project root
-PROJECT_ROOT = Path(__file__).parent.absolute()
+PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 
-# Import test framework
+# Add parent directory to path for absolute imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Import test framework - using absolute imports from project root
 from test_framework.runner import UnifiedTestRunner as FrameworkRunner
 from test_framework.test_config import configure_dev_environment, configure_real_llm
 from test_framework.test_discovery import TestDiscovery

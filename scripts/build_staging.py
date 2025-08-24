@@ -48,7 +48,7 @@ class StagingBuilder:
     def build_backend(self, tag: str = "latest") -> bool:
         """Build backend Docker image"""
         print("\n🔨 Building backend Docker image...")
-        dockerfile = self.project_root / "Dockerfile.backend"
+        dockerfile = self.project_root / "deployment" / "docker" / "Dockerfile.backend"
         
         if not dockerfile.exists():
             print(f"❌ Backend Dockerfile not found at {dockerfile}")
@@ -83,6 +83,7 @@ class StagingBuilder:
         
         # Check which Dockerfile to use
         dockerfiles = [
+            self.project_root / "deployment" / "docker" / "Dockerfile.frontend",
             self.project_root / "Dockerfile.frontend.staging",
             self.project_root / "frontend" / "Dockerfile.frontend"
         ]

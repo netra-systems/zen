@@ -62,9 +62,9 @@ class DeploymentLoggingFixer:
         
         # Check Docker configurations
         dockerfiles = [
-            "Dockerfile.backend",
-            "Dockerfile.auth", 
-            "Dockerfile.frontend"
+            "deployment/docker/Dockerfile.backend",
+            "deployment/docker/Dockerfile.auth", 
+            "deployment/docker/Dockerfile.frontend"
         ]
         
         for dockerfile in dockerfiles:
@@ -235,7 +235,7 @@ class DeploymentLoggingFixer:
         """Validate Docker configurations are correct."""
         print("  Checking Docker configurations...")
         
-        dockerfiles = ["Dockerfile.backend", "Dockerfile.auth", "Dockerfile.frontend"]
+        dockerfiles = ["deployment/docker/Dockerfile.backend", "deployment/docker/Dockerfile.auth", "deployment/docker/Dockerfile.frontend"]
         
         for dockerfile in dockerfiles:
             file_path = self.project_root / dockerfile
