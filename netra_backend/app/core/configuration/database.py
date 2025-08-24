@@ -420,3 +420,19 @@ class DatabaseConfigManager:
             "environment": self._environment,
             "ssl_required": str(self._validation_rules.get(self._environment, {}).get("require_ssl", False))
         }
+
+
+# Global database config manager instance
+_config_manager = None
+
+
+def get_unified_config() -> DatabaseConfigManager:
+    """Get unified database configuration manager instance.
+    
+    Returns:
+        DatabaseConfigManager: The global database configuration manager
+    """
+    global _config_manager
+    if _config_manager is None:
+        _config_manager = DatabaseConfigManager()
+    return _config_manager

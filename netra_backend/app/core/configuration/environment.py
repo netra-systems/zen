@@ -1,17 +1,24 @@
-# Use backend-specific isolated environment
+# Import IsolatedEnvironment directly and provide fallback
 try:
-    from netra_backend.app.core.isolated_environment import get_env
+    from netra_backend.app.core.isolated_environment import IsolatedEnvironment, get_env
 except ImportError:
     # Production fallback if isolated_environment module unavailable
     import os
+    
+    class IsolatedEnvironment:
+        """Fallback IsolatedEnvironment for production."""
+        def get(self, key, default=None):
+            return os.environ.get(key, default)
+        def set(self, key, value, source="production"):
+            os.environ[key] = value
+    
     def get_env():
         """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv(), IsolatedEnvironment
+        return IsolatedEnvironment()
+
+# Always export IsolatedEnvironment for imports
+__all__ = ['IsolatedEnvironment', 'get_env', 'EnvironmentDetector']
+
 """Environment Detection Module
 
 Handles environment detection for configuration loading.
@@ -139,7 +146,7 @@ class EnvironmentDetector:
         Returns:
             bool: True if on AWS
         """
-        return EnvironmentDetector.is_aws()
+        return ConstantsEnvironmentDetector.is_aws()
     
     def _get_aws_environment(self) -> str:
         """Get environment for AWS deployment (deprecated).
@@ -149,7 +156,7 @@ class EnvironmentDetector:
         Returns:
             str: Environment based on AWS settings
         """
-        return EnvironmentDetector.get_aws_environment()
+        return ConstantsEnvironmentDetector.get_aws_environment()
     
     def is_production(self) -> bool:
         """Check if current environment is production.

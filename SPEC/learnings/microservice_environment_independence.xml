@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+    <metadata>
+        <title>Microservice Environment Independence</title>
+        <category>Architecture.MicroserviceIndependence</category>
+        <date>2025-08-24</date>
+        <severity>CRITICAL</severity>
+        <impact>Service coupling, deployment failures, testing complications</impact>
+    </metadata>
+
+    <problem_statement>
+        <description>
+            Both netra_backend and auth_service were importing environment management from 
+            dev_launcher, creating cross-service dependencies that violate microservice 
+            independence principles. This caused deployment issues in production where 
+            dev_launcher is not available.
+        </description>
+        <root_cause>
+            Attempt to enforce unified environment management across services led to
+            inappropriate cross-service imports, violating the principle that each
+            microservice must be 100% self-contained.
+        </root_cause>
+        <symptoms>
+            <symptom>ImportError in production: cannot import from dev_launcher</symptom>
+            <symptom>Tests failing when dev_launcher not available</symptom>
+            <symptom>Service startup failures due to missing dependencies</symptom>
+            <symptom>Deployment complexity due to inter-service dependencies</symptom>
+            <symptom>Auth service importing from netra_backend in connection_events.py</symptom>
+        </symptoms>
+    </problem_statement>
+
+    <solution>
+        <approach>Service-Local Environment Management</approach>
+        <description>
+            Each microservice maintains its own environment management module that
+            provides the same interface but is completely independent. This ensures
+            microservice independence while maintaining consistent patterns.
+        </description>
+        <implementation>
+            <step>Create netra_backend/app/core/isolated_environment.py</step>
+            <step>Create auth_service/auth_core/isolated_environment.py</step>
+            <step>Update all netra_backend imports from dev_launcher.isolated_environment to netra_backend.app.core.isolated_environment</step>
+            <step>Update all auth_service imports from dev_launcher.isolated_environment to auth_service.auth_core.isolated_environment</step>
+            <step>Remove cross-service imports (auth_service importing from netra_backend)</step>
+            <step>Add production fallback pattern for resilience</step>
+            <step>Remove all service discovery imports from dev_launcher</step>
+        </implementation>
+    </solution>
+
+    <prevention_guidelines>
+        <guideline priority="CRITICAL">
+            <title>Never Import Across Service Boundaries</title>
+            <description>
+                NEVER import from another service's codebase. Each service must be
+                completely self-contained. If similar functionality is needed,
+                implement it locally within the service.
+            </description>
+            <check>grep -r "from dev_launcher" netra_backend/app/ should return empty</check>
+            <check>grep -r "from dev_launcher" auth_service/ should return empty</check>
+            <check>grep -r "from auth_service" netra_backend/app/ should return empty</check>
+            <check>grep -r "from netra_backend" auth_service/ should return empty</check>
+        </guideline>
+        
+        <guideline priority="HIGH">
+            <title>Use Service-Local Implementations</title>
+            <description>
+                When implementing shared patterns (environment management, database connections,
+                configuration), each service should have its own implementation. This is
+                acceptable duplication per SPEC/acceptable_duplicates.xml.
+            </description>
+            <examples>
+                <example>netra_backend/app/core/isolated_environment.py</example>
+                <example>auth_service/auth_core/isolated_environment.py</example>
+                <example>frontend/src/environment.js (if applicable)</example>
+            </examples>
+        </guideline>
+        
+        <guideline priority="HIGH">
+            <title>Production Fallback Pattern</title>
+            <description>
+                Always provide a fallback pattern for production environments where
+                development-specific modules may not be available.
+            </description>
+            <pattern><![CDATA[
+# For netra_backend:
+try:
+    from netra_backend.app.core.isolated_environment import get_env, IsolatedEnvironment
+except ImportError:
+    # Production fallback
+    import os
+    class IsolatedEnvironment:
+        def get(self, key, default=None):
+            return os.environ.get(key, default)
+
+# For auth_service:
+from auth_service.auth_core.isolated_environment import get_env, IsolatedEnvironment
+# No fallback needed - auth_service always has its own implementation
+            ]]></pattern>
+        </guideline>
+        
+        <guideline priority="MEDIUM">
+            <title>Test Service Independence</title>
+            <description>
+                Regularly test that services can start and run without other services
+                being available. This catches dependency violations early.
+            </description>
+            <test_command>python -m netra_backend.app.main --no-dev-launcher</test_command>
+            <test_command>python -m auth_service.main --no-dev-launcher</test_command>
+        </guideline>
+    </prevention_guidelines>
+
+    <architectural_principles>
+        <principle>
+            <name>Service Independence Over Code Reuse</name>
+            <description>
+                Prioritize service independence over code reuse. Duplication within
+                reason is acceptable to maintain clear service boundaries.
+            </description>
+        </principle>
+        
+        <principle>
+            <name>Clear Service Boundaries</name>
+            <description>
+                Services communicate only through well-defined APIs (HTTP, gRPC, etc.),
+                never through direct code imports.
+            </description>
+        </principle>
+        
+        <principle>
+            <name>Local-First Development</name>
+            <description>
+                Each service should be able to run and be developed independently,
+                with its own environment management, configuration, and utilities.
+            </description>
+        </principle>
+    </architectural_principles>
+
+    <related_specs>
+        <spec>SPEC/independent_services.xml</spec>
+        <spec>SPEC/acceptable_duplicates.xml</spec>
+        <spec>SPEC/unified_environment_management.xml</spec>
+    </related_specs>
+
+    <validation_checklist>
+        <item>No cross-service imports in app code</item>
+        <item>Each service has its own environment management</item>
+        <item>Production fallback patterns in place</item>
+        <item>Services can start independently</item>
+        <item>Tests pass without dev_launcher available</item>
+    </validation_checklist>
+</learnings>

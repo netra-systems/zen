@@ -3,13 +3,15 @@ Secret loader for auth service.
 Handles loading secrets from environment variables and Google Secret Manager.
 Ensures consistency with main backend service.
 
-**UPDATED**: Now uses IsolatedEnvironment for unified environment management.
-Follows SPEC/unified_environment_management.xml for consistent environment access.
+**UPDATED**: Now uses auth_service's own IsolatedEnvironment for unified environment management.
+Follows SPEC/unified_environment_management.xml and SPEC/independent_services.xml for consistent 
+environment access while maintaining complete microservice independence.
 """
 import logging
 from typing import Optional
 
-from dev_launcher.isolated_environment import get_env
+# Use auth_service's own isolated environment management - NEVER import from dev_launcher or netra_backend
+from auth_service.auth_core.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 

@@ -2,12 +2,14 @@
 Auth Service Configuration
 Handles environment variable loading with staging/production awareness
 
-**UPDATED**: Now uses IsolatedEnvironment for unified environment management.
-Follows SPEC/unified_environment_management.xml for consistent environment access.
+**UPDATED**: Now uses auth_service's own IsolatedEnvironment for unified environment management.
+Follows SPEC/unified_environment_management.xml and SPEC/independent_services.xml for consistent 
+environment access while maintaining complete microservice independence.
 """
 import logging
 
-from dev_launcher.isolated_environment import get_env
+# Use auth_service's own isolated environment management - NEVER import from dev_launcher or netra_backend
+from auth_service.auth_core.isolated_environment import get_env
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 
 logger = logging.getLogger(__name__)
