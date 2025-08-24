@@ -42,6 +42,7 @@ pytestmark = [
 class LoadBalancingL4Tests:
     """Load balancing specific test implementations."""
     
+    @pytest.mark.asyncio
     async def test_load_balancing_algorithms_l4(self, manager, service_name: str) -> Dict[str, Any]:
         """Test load balancing algorithms with L4 realism."""
         try:
@@ -87,6 +88,7 @@ class LoadBalancingL4Tests:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_round_robin_lb(self, manager, service_name: str, instances: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test round-robin load balancing."""
         try:
@@ -127,6 +129,7 @@ class LoadBalancingL4Tests:
         except Exception as e:
             return {"success": False, "algorithm": "round_robin", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_weighted_round_robin_lb(self, manager, service_name: str, instances: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test weighted round-robin load balancing."""
         try:
@@ -186,6 +189,7 @@ class LoadBalancingL4Tests:
         except Exception as e:
             return {"success": False, "algorithm": "weighted_round_robin", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_least_connections_lb(self, manager, service_name: str, instances: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test least connections load balancing."""
         try:
@@ -230,6 +234,7 @@ class LoadBalancingL4Tests:
         except Exception as e:
             return {"success": False, "algorithm": "least_connections", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_random_lb(self, manager, service_name: str, instances: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test random load balancing."""
         try:
@@ -267,6 +272,7 @@ class LoadBalancingL4Tests:
         except Exception as e:
             return {"success": False, "algorithm": "random", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_zone_aware_lb(self, manager, service_name: str, instances: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test zone-aware load balancing."""
         try:

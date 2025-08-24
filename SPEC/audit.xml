@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<audit_specification>
+  <metadata>
+    <title>Netra Apex Audit Framework</title>
+    <version>1.0.0</version>
+    <priority>CRITICAL</priority>
+    <description>
+      Comprehensive audit framework for ensuring code quality, architectural compliance,
+      and business value alignment across all development activities in the Netra Apex platform.
+    </description>
+    <references>
+      <ref>CLAUDE.md</ref>
+      <ref>SPEC/core.xml</ref>
+      <ref>SPEC/type_safety.xml</ref>
+      <ref>SPEC/conventions.xml</ref>
+      <ref>SPEC/compliance_reporting.xml</ref>
+      <ref>MASTER_WIP_STATUS.md</ref>
+    </references>
+  </metadata>
+
+  <audit_principles>
+    <principle id="P1">
+      <name>Comprehensive Coverage</name>
+      <description>Every audit must validate ALL aspects: business value, architectural compliance, code quality, and system stability</description>
+    </principle>
+    <principle id="P2">
+      <name>Evidence-Based</name>
+      <description>All findings must be supported by concrete evidence from code, tests, or system metrics</description>
+    </principle>
+    <principle id="P3">
+      <name>Actionable Outcomes</name>
+      <description>Audits must produce specific, prioritized action items with clear remediation paths</description>
+    </principle>
+    <principle id="P4">
+      <name>Multi-Agent Collaboration</name>
+      <description>Complex audits leverage specialized agents for deep domain analysis</description>
+    </principle>
+  </audit_principles>
+
+  <audit_types>
+    <audit_type id="post_session">
+      <name>Post-Session Audit</name>
+      <trigger>After every development session</trigger>
+      <scope>All code changes made during the session</scope>
+      <mandatory>true</mandatory>
+      <agent_roles>
+        <role>Principal Engineer: Overall coordination and synthesis</role>
+        <role>QA Agent: Test coverage and stability verification</role>
+      </agent_roles>
+      <checklist>
+        <item category="compliance">Verify adherence to CLAUDE.md Section 2.1 Architectural Tenets</item>
+        <item category="scope">Confirm ATOMIC SCOPE - all changes are complete</item>
+        <item category="legacy">Ensure all legacy code has been removed</item>
+        <item category="tests">Validate test coverage meets requirements</item>
+        <item category="specs">Confirm all relevant specs have been updated</item>
+        <item category="imports">Verify absolute imports only (no relative imports)</item>
+        <item category="bvj">Validate Business Value Justification exists and is accurate</item>
+      </checklist>
+    </audit_type>
+
+    <audit_type id="pre_deployment">
+      <name>Pre-Deployment Audit</name>
+      <trigger>Before any deployment to staging/production</trigger>
+      <scope>All changes since last deployment</scope>
+      <mandatory>true</mandatory>
+      <agent_roles>
+        <role>Principal Engineer: Strategic assessment</role>
+        <role>QA Agent: Comprehensive test validation</role>
+        <role>Security Agent: Security and vulnerability assessment</role>
+        <role>PM Agent: Business value validation</role>
+      </agent_roles>
+      <checklist>
+        <item category="stability">Run full test suite across all environments</item>
+        <item category="security">Security audit for exposed endpoints and data handling</item>
+        <item category="performance">Performance regression testing</item>
+        <item category="slo">Verify SLO/SLA compliance</item>
+        <item category="rollback">Confirm rollback procedures</item>
+        <item category="documentation">Validate all documentation is current</item>
+        <item category="monitoring">Ensure observability is configured</item>
+      </checklist>
+    </audit_type>
+
+    <audit_type id="architectural">
+      <name>Architectural Compliance Audit</name>
+      <trigger>Weekly or after major architectural changes</trigger>
+      <scope>Entire codebase or specific services</scope>
+      <mandatory>false</mandatory>
+      <agent_roles>
+        <role>Principal Engineer: Architectural oversight</role>
+        <role>Implementation Agent: Code structure analysis</role>
+      </agent_roles>
+      <checklist>
+        <item category="srp">Single Responsibility Principle adherence</item>
+        <item category="coupling">High cohesion, loose coupling verification</item>
+        <item category="complexity">Cyclomatic complexity within thresholds</item>
+        <item category="duplication">No code duplication (SSOT)</item>
+        <item category="boundaries">Service boundaries respected</item>
+        <item category="patterns">Consistent pattern usage</item>
+      </checklist>
+    </audit_type>
+
+    <audit_type id="business_value">
+      <name>Business Value Audit</name>
+      <trigger>Monthly or after major feature releases</trigger>
+      <scope>All features and changes in period</scope>
+      <mandatory>false</mandatory>
+      <agent_roles>
+        <role>PM Agent: Business value assessment</role>
+        <role>Principal Engineer: Technical value assessment</role>
+      </agent_roles>
+      <checklist>
+        <item category="revenue">Revenue impact assessment</item>
+        <item category="conversion">Conversion rate improvements</item>
+        <item category="retention">Customer retention impact</item>
+        <item category="efficiency">AI spend optimization achieved</item>
+        <item category="pmf">Product-market fit alignment</item>
+      </checklist>
+    </audit_type>
+  </audit_types>
+
+  <agent_backgrounds>
+    <agent type="QA_Agent">
+      <background>
+        You are a Senior QA Engineer with expertise in test automation, regression analysis,
+        and multi-environment validation. You understand TDD/BDD methodologies and have deep
+        knowledge of the Netra Apex test infrastructure.
+      </background>
+      <focus_areas>
+        <area>Test coverage analysis</area>
+        <area>Regression impact assessment</area>
+        <area>E2E test validation</area>
+        <area>Performance testing</area>
+        <area>Multi-environment verification</area>
+      </focus_areas>
+      <audit_capabilities>
+        <capability>Identify test gaps and missing scenarios</capability>
+        <capability>Validate test quality (real tests vs mocks)</capability>
+        <capability>Assess regression risks</capability>
+        <capability>Verify TDC (Test-Driven Correction) compliance</capability>
+      </audit_capabilities>
+    </agent>
+
+    <agent type="Security_Agent">
+      <background>
+        You are a Security Architect with expertise in application security, threat modeling,
+        and secure coding practices. You understand OWASP principles and cloud security best practices.
+      </background>
+      <focus_areas>
+        <area>Authentication and authorization</area>
+        <area>Data protection and encryption</area>
+        <area>API security</area>
+        <area>Secret management</area>
+        <area>Vulnerability assessment</area>
+      </focus_areas>
+      <audit_capabilities>
+        <capability>Identify security vulnerabilities</capability>
+        <capability>Validate secure coding practices</capability>
+        <capability>Assess compliance with security specs</capability>
+        <capability>Review secret handling and isolation</capability>
+      </audit_capabilities>
+    </agent>
+
+    <agent type="PM_Agent">
+      <background>
+        You are a Product Manager with a Stanford MBA and deep understanding of SaaS business models,
+        particularly in the AI/LLM optimization space. You focus on value creation and capture.
+      </background>
+      <focus_areas>
+        <area>Business Value Justification (BVJ)</area>
+        <area>Customer segment alignment</area>
+        <area>Feature prioritization</area>
+        <area>Market fit assessment</area>
+        <area>Revenue impact analysis</area>
+      </focus_areas>
+      <audit_capabilities>
+        <capability>Validate BVJ accuracy and completeness</capability>
+        <capability>Assess feature value relative to AI spend</capability>
+        <capability>Identify monetization opportunities</capability>
+        <capability>Evaluate customer impact</capability>
+      </audit_capabilities>
+    </agent>
+  </agent_backgrounds>
+
+  <audit_prompts>
+    <prompt_template type="post_session">
+      <for_agent>QA_Agent</for_agent>
+      <template>
+        Conduct a post-session audit of the following changes:
+        
+        CONTEXT:
+        - Session duration: {session_duration}
+        - Files modified: {modified_files}
+        - Tests added/modified: {test_changes}
+        - Primary objective: {session_objective}
+        
+        AUDIT REQUIREMENTS:
+        1. Verify all changes comply with CLAUDE.md Section 2.1 (Architectural Tenets)
+        2. Confirm ATOMIC SCOPE - validate that all changes represent COMPLETE work
+        3. Check for any remaining legacy code that should have been removed
+        4. Validate test coverage for new/modified functionality
+        5. Verify absolute imports are used (no relative imports)
+        6. Assess regression risks
+        
+        DELIVERABLES:
+        - Compliance score (0-100)
+        - List of violations with severity (CRITICAL/HIGH/MEDIUM/LOW)
+        - Specific remediation actions required
+        - Test gaps identified
+        - Regression risks assessment
+      </template>
+    </prompt_template>
+
+    <prompt_template type="architectural">
+      <for_agent>Implementation_Agent</for_agent>
+      <template>
+        Perform an architectural compliance audit on {service_name}:
+        
+        SCOPE:
+        - Service path: {service_path}
+        - Focus areas: {focus_areas}
+        - Known issues: {known_issues}
+        
+        AUDIT CRITERIA:
+        1. Single Responsibility Principle (SRP) adherence
+        2. Unique concepts exist ONCE per service (no duplicates)
+        3. High cohesion, loose coupling
+        4. Cyclomatic complexity within thresholds (&lt;25 lines/function, &lt;500 lines/module)
+        5. Interface-first design implementation
+        6. Composability and reusability
+        
+        ANALYSIS REQUIRED:
+        - Identify SRP violations with specific examples
+        - Find duplicate concepts/implementations
+        - Measure complexity metrics
+        - Assess module boundaries and dependencies
+        - Validate naming conventions (Agent/Executor/Manager/Service suffixes)
+        
+        OUTPUT FORMAT:
+        - Overall architectural health score
+        - Detailed findings by category
+        - Refactoring recommendations with priority
+        - Estimated effort for remediation
+      </template>
+    </prompt_template>
+
+    <prompt_template type="business_value">
+      <for_agent>PM_Agent</for_agent>
+      <template>
+        Audit the business value of features implemented in {time_period}:
+        
+        FEATURES TO AUDIT:
+        {feature_list}
+        
+        EVALUATION CRITERIA:
+        1. Each feature has a complete BVJ with:
+           - Customer segment (Free/Early/Mid/Enterprise)
+           - Business goal (Conversion/Expansion/Retention/Stability)
+           - Value impact description
+           - Strategic/Revenue impact quantification
+        
+        2. Value capture assessment:
+           - Does the feature capture value proportional to AI spend?
+           - Is the feature indispensable for the target segment?
+           - What is the monetization potential?
+        
+        3. Strategic alignment:
+           - Product-market fit contribution
+           - Competitive differentiation
+           - Customer retention impact
+        
+        DELIVERABLES:
+        - BVJ completeness score for each feature
+        - Revenue impact projection
+        - Missing value capture opportunities
+        - Prioritized recommendations for value optimization
+        - Features that should be deprecated (negative value)
+      </template>
+    </prompt_template>
+  </audit_prompts>
+
+  <audit_outcomes>
+    <positive_example>
+      <scenario>Post-session audit of WebSocket connection optimization</scenario>
+      <findings>
+        <finding severity="PASS">All changes follow ATOMIC SCOPE principle</finding>
+        <finding severity="PASS">Legacy WebSocket handlers completely removed</finding>
+        <finding severity="PASS">100% test coverage for new connection logic</finding>
+        <finding severity="PASS">Absolute imports used throughout</finding>
+        <finding severity="PASS">BVJ clearly defines 30% reduction in connection overhead</finding>
+      </findings>
+      <score>95/100</score>
+      <actions>
+        <action priority="LOW">Add performance monitoring metrics</action>
+      </actions>
+    </positive_example>
+
+    <failure_example>
+      <scenario>Pre-deployment audit of authentication service refactor</scenario>
+      <findings>
+        <finding severity="CRITICAL">Incomplete refactor - legacy auth handlers still present</finding>
+        <finding severity="HIGH">Missing tests for edge cases in token refresh</finding>
+        <finding severity="CRITICAL">Relative imports found in 3 test files</finding>
+        <finding severity="MEDIUM">BVJ missing revenue impact quantification</finding>
+        <finding severity="HIGH">No staging environment validation performed</finding>
+      </findings>
+      <score>45/100</score>
+      <actions>
+        <action priority="CRITICAL">Remove all legacy auth handlers</action>
+        <action priority="CRITICAL">Fix relative imports using scripts/fix_all_import_issues.py</action>
+        <action priority="HIGH">Add comprehensive token refresh tests</action>
+        <action priority="HIGH">Run staging validation before deployment</action>
+        <action priority="MEDIUM">Update BVJ with revenue metrics</action>
+      </actions>
+      <deployment_decision>BLOCKED - Critical issues must be resolved</deployment_decision>
+    </failure_example>
+  </audit_outcomes>
+
+  <audit_reporting>
+    <report_format>
+      <section name="Executive Summary">
+        <field>Audit Type</field>
+        <field>Scope</field>
+        <field>Overall Score</field>
+        <field>Deployment Readiness</field>
+        <field>Critical Issues Count</field>
+      </section>
+      
+      <section name="Detailed Findings">
+        <subsection name="Compliance">
+          <field>Architectural Compliance Score</field>
+          <field>Code Quality Score</field>
+          <field>Test Coverage Score</field>
+          <field>Documentation Score</field>
+        </subsection>
+        
+        <subsection name="Business Value">
+          <field>BVJ Completeness</field>
+          <field>Revenue Impact Assessment</field>
+          <field>Customer Value Alignment</field>
+        </subsection>
+        
+        <subsection name="Risks">
+          <field>Security Risks</field>
+          <field>Performance Risks</field>
+          <field>Regression Risks</field>
+          <field>Operational Risks</field>
+        </subsection>
+      </section>
+      
+      <section name="Action Items">
+        <field>Critical Actions (Must fix immediately)</field>
+        <field>High Priority (Fix before next deployment)</field>
+        <field>Medium Priority (Fix within sprint)</field>
+        <field>Low Priority (Backlog)</field>
+      </section>
+      
+      <section name="Agent Assessments">
+        <field>QA Agent Findings</field>
+        <field>Security Agent Findings</field>
+        <field>PM Agent Findings</field>
+        <field>Implementation Agent Findings</field>
+      </section>
+    </report_format>
+
+    <storage_location>
+      <path>audit_reports/</path>
+      <naming_convention>audit_{type}_{timestamp}.json</naming_convention>
+      <retention_period>90_days</retention_period>
+    </storage_location>
+  </audit_reporting>
+
+  <integration_points>
+    <integration>
+      <system>MASTER_WIP_STATUS.md</system>
+      <description>Audit scores feed into overall system compliance tracking</description>
+      <update_trigger>Post-audit completion</update_trigger>
+    </integration>
+    
+    <integration>
+      <system>CI/CD Pipeline</system>
+      <description>Pre-deployment audits gate production deployments</description>
+      <blocking_criteria>Score below 80 or any CRITICAL findings</blocking_criteria>
+    </integration>
+    
+    <integration>
+      <system>GitHub Actions</system>
+      <description>Automated audit triggers on PR creation/update</description>
+      <workflow_file>.github/workflows/audit.yml</workflow_file>
+    </integration>
+    
+    <integration>
+      <system>Unified Test Runner</system>
+      <description>Audit validation integrated into test execution</description>
+      <command>python unified_test_runner.py --audit</command>
+    </integration>
+  </integration_points>
+
+  <audit_automation>
+    <script>
+      <name>run_audit.py</name>
+      <location>scripts/run_audit.py</location>
+      <description>Automated audit execution with agent orchestration</description>
+      <usage>
+        <command>python scripts/run_audit.py --type post_session</command>
+        <command>python scripts/run_audit.py --type pre_deployment --env staging</command>
+        <command>python scripts/run_audit.py --type architectural --service auth_service</command>
+      </usage>
+    </script>
+    
+    <hooks>
+      <hook>
+        <name>pre-commit</name>
+        <trigger>Git pre-commit</trigger>
+        <action>Run minimal post-session audit</action>
+      </hook>
+      
+      <hook>
+        <name>pre-push</name>
+        <trigger>Git pre-push</trigger>
+        <action>Run comprehensive audit if pushing to main/staging</action>
+      </hook>
+    </hooks>
+  </audit_automation>
+
+  <remediation_procedures>
+    <procedure category="architectural_violations">
+      <steps>
+        <step>Identify the specific violation using audit report</step>
+        <step>Create isolated branch for fixes</step>
+        <step>Apply ATOMIC SCOPE principle - fix must be complete</step>
+        <step>Remove all related legacy code</step>
+        <step>Run targeted tests to verify fix</step>
+        <step>Update relevant specs</step>
+        <step>Re-run audit to confirm resolution</step>
+      </steps>
+    </procedure>
+    
+    <procedure category="test_gaps">
+      <steps>
+        <step>Use TDC process to create failing tests first</step>
+        <step>Implement minimal code to pass tests</step>
+        <step>Add E2E tests for critical paths</step>
+        <step>Validate in all environments (local/dev/staging)</step>
+        <step>Update test documentation</step>
+      </steps>
+    </procedure>
+    
+    <procedure category="business_value_gaps">
+      <steps>
+        <step>Spawn PM Agent to analyze value proposition</step>
+        <step>Quantify revenue/efficiency impact</step>
+        <step>Update BVJ with specific metrics</step>
+        <step>Validate with customer segment data</step>
+        <step>Document in relevant specs</step>
+      </steps>
+    </procedure>
+  </remediation_procedures>
+
+  <critical_notes>
+    <note priority="CRITICAL">
+      Every development session MUST end with a post-session audit.
+      This is not optional - it's a core requirement per CLAUDE.md Section 2.1.
+    </note>
+    
+    <note priority="CRITICAL">
+      Audit findings with CRITICAL severity block all deployments.
+      No exceptions without explicit executive override and documented risk acceptance.
+    </note>
+    
+    <note priority="HIGH">
+      Multi-agent audits provide deeper analysis but require careful orchestration.
+      Use the Firewall Technique to prevent context bleed between agents.
+    </note>
+    
+    <note priority="HIGH">
+      Audit reports are legal documents for compliance purposes.
+      Maintain accurate records and never modify historical audit reports.
+    </note>
+  </critical_notes>
+</audit_specification>

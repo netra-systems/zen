@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -36,6 +36,7 @@ def mock_user():
 
 class TestListThreads:
     """Test cases for GET / endpoint"""
+    @pytest.mark.asyncio
     async def test_list_threads_success(self, mock_db, mock_user):
         """Test successful thread listing with pagination"""
         mock_thread = create_mock_thread()
@@ -49,6 +50,7 @@ class TestListThreads:
         assert len(result) == 1
         assert_thread_response(result[0], "thread_abc123", 5)
         assert_repo_calls(thread_repo, message_repo, mock_db, "test_user_123", "thread_abc123")
+    @pytest.mark.asyncio
     async def test_list_threads_with_pagination(self, mock_db, mock_user):
         """Test thread listing with offset and limit"""
         threads = create_multiple_threads(30)
@@ -62,6 +64,7 @@ class TestListThreads:
         assert len(result) == 5
         assert result[0].id == "thread_10"
         assert result[4].id == "thread_14"
+    @pytest.mark.asyncio
     async def test_list_threads_empty_metadata(self, mock_db, mock_user):
         """Test thread listing when metadata == None"""
         thread = create_empty_metadata_thread()
@@ -75,6 +78,7 @@ class TestListThreads:
         assert len(result) == 1
         assert result[0].title == None
         assert result[0].updated_at == None
+    @pytest.mark.asyncio
     async def test_list_threads_exception(self, mock_db, mock_user):
         """Test error handling in list_threads"""
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \

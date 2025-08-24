@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from cryptography.fernet import Fernet
@@ -28,6 +28,7 @@ def oauth_security_service():
 class TestSecurityServiceOAuth:
     """Test OAuth integration functionality"""
     
+    @pytest.mark.asyncio
     async def test_create_user_from_oauth_new_user(self, oauth_security_service):
         """Test creating new user from OAuth data"""
         mock_db_session, oauth_user_info, created_user = self._setup_new_oauth_user_test()
@@ -54,6 +55,7 @@ class TestSecurityServiceOAuth:
                 mock_db_session, oauth_user_info
             )
     
+    @pytest.mark.asyncio
     async def test_get_existing_user_from_oauth(self, oauth_security_service):
         """Test getting existing user from OAuth data"""
         mock_db_session, existing_user, oauth_user_info = self._setup_existing_oauth_user_test()
@@ -79,6 +81,7 @@ class TestSecurityServiceOAuth:
                 mock_db_session, oauth_user_info
             )
     
+    @pytest.mark.asyncio
     async def test_oauth_token_validation(self, oauth_security_service):
         """Test OAuth token validation"""
         oauth_user = _create_oauth_user()
@@ -89,6 +92,7 @@ class TestSecurityServiceOAuth:
         
         _assert_oauth_token_validation(validation_result, oauth_user)
     
+    @pytest.mark.asyncio
     async def test_oauth_user_profile_update(self, oauth_security_service):
         """Test OAuth user profile update"""
         mock_db_session, existing_user, updated_oauth_info = self._setup_profile_update_test()
@@ -108,6 +112,7 @@ class TestSecurityServiceOAuth:
         }
         return mock_db_session, existing_user, updated_oauth_info
     
+    @pytest.mark.asyncio
     async def test_oauth_error_handling(self, oauth_security_service):
         """Test OAuth error handling scenarios"""
         mock_db_session = AsyncMock()
@@ -120,6 +125,7 @@ class TestSecurityServiceOAuth:
                 mock_db_session, invalid_oauth_info
             )
     
+    @pytest.mark.asyncio
     async def test_oauth_security_validation(self, oauth_security_service):
         """Test OAuth security validation"""
         oauth_user_info = _get_oauth_user_info()
@@ -138,6 +144,7 @@ class TestSecurityServiceOAuth:
             "picture": "javascript:alert('xss')"
         }
     
+    @pytest.mark.asyncio
     async def test_oauth_rate_limiting(self, oauth_security_service):
         """Test OAuth-specific rate limiting"""
         identifier = "oauth_client_123"
@@ -158,6 +165,7 @@ class TestSecurityServiceOAuth:
 class TestSecurityServiceConcurrency:
     """Test concurrent security service operations"""
     
+    @pytest.mark.asyncio
     async def test_concurrent_authentication_attempts(self, oauth_security_service):
         """Test concurrent authentication attempts"""
         user = _create_oauth_user()
@@ -181,6 +189,7 @@ class TestSecurityServiceConcurrency:
         tasks = [authenticate_user_func() for _ in range(5)]
         return await asyncio.gather(*tasks, return_exceptions=True)
     
+    @pytest.mark.asyncio
     async def test_concurrent_token_validation(self, oauth_security_service):
         """Test concurrent token validation"""
         user, token = self._setup_token_validation_test(oauth_security_service)
@@ -208,6 +217,7 @@ class TestSecurityServiceConcurrency:
         tasks = [validate_token_func() for _ in range(10)]
         return await asyncio.gather(*tasks)
     
+    @pytest.mark.asyncio
     async def test_concurrent_rate_limiting(self, oauth_security_service):
         """Test concurrent rate limiting"""
         identifier = "concurrent_test"

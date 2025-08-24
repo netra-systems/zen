@@ -14,7 +14,7 @@ async def mock_agent_service():
         "response": "Test response",
         "metadata": {"test": True}
     }
-    return mock_service
+    yield mock_service
 
 @pytest.fixture
 def mock_websocket_manager():

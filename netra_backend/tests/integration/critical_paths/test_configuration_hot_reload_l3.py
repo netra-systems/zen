@@ -27,7 +27,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -437,6 +437,7 @@ class ConfigurationHotReloader:
         # Update current configuration
         self.current_configs[config_type] = rollback_snapshot
     
+    @pytest.mark.asyncio
     async def test_concurrent_reloads(self, config_changes: List[Tuple[ConfigurationType, Dict[str, Any]]]) -> Dict[str, Any]:
         """Test concurrent configuration reloads."""
         start_time = time.time()
@@ -463,6 +464,7 @@ class ConfigurationHotReloader:
             "concurrent_reload_efficiency": len(successful_reloads) / len(results) * 100.0
         }
     
+    @pytest.mark.asyncio
     async def test_rollback_capabilities(self, config_type: ConfigurationType) -> Dict[str, Any]:
         """Test configuration rollback capabilities."""
         # Apply initial configuration
@@ -513,6 +515,7 @@ async def config_hot_reloader():
 class TestConfigurationHotReloadL3:
     """L3 integration tests for configuration hot reload capabilities."""
     
+    @pytest.mark.asyncio
     async def test_reload_time_under_ten_seconds(self, config_hot_reloader):
         """Test that configuration reload completes within 10 seconds SLA."""
         reloader = config_hot_reloader
@@ -553,6 +556,7 @@ class TestConfigurationHotReloadL3:
         assert metrics["average_reload_time"] <= 5.0, \
             f"Average reload time {metrics['average_reload_time']:.2f}s should be ≤5s"
     
+    @pytest.mark.asyncio
     async def test_zero_downtime_updates(self, config_hot_reloader):
         """Test zero-downtime configuration updates."""
         reloader = config_hot_reloader
@@ -601,6 +605,7 @@ class TestConfigurationHotReloadL3:
         assert reload_result["duration"] < 10.0, \
             "Zero-downtime reload should complete quickly"
     
+    @pytest.mark.asyncio
     async def test_rollback_capabilities(self, config_hot_reloader):
         """Test rollback capabilities when configuration changes fail."""
         reloader = config_hot_reloader
@@ -633,6 +638,7 @@ class TestConfigurationHotReloadL3:
         assert metrics["rollbacks"] >= 1, \
             "Rollback count should be tracked in metrics"
     
+    @pytest.mark.asyncio
     async def test_validation_mechanisms(self, config_hot_reloader):
         """Test configuration validation mechanisms prevent invalid updates."""
         reloader = config_hot_reloader
@@ -680,6 +686,7 @@ class TestConfigurationHotReloadL3:
             assert result["status"] != "completed", \
                 "Invalid configurations should not complete successfully"
     
+    @pytest.mark.asyncio
     async def test_service_coordination(self, config_hot_reloader):
         """Test service coordination during configuration changes."""
         reloader = config_hot_reloader
@@ -714,6 +721,7 @@ class TestConfigurationHotReloadL3:
         assert metrics["service_coordination_time"] < 5.0, \
             "Service coordination should complete quickly"
     
+    @pytest.mark.asyncio
     async def test_concurrent_configuration_updates(self, config_hot_reloader):
         """Test concurrent configuration updates don't interfere."""
         reloader = config_hot_reloader
@@ -756,6 +764,7 @@ class TestConfigurationHotReloadL3:
         assert metrics["total_reloads"] >= len(concurrent_configs), \
             "All concurrent reloads should be counted"
     
+    @pytest.mark.asyncio
     async def test_configuration_persistence_and_recovery(self, config_hot_reloader):
         """Test configuration persistence and recovery capabilities."""
         reloader = config_hot_reloader
@@ -801,6 +810,7 @@ class TestConfigurationHotReloadL3:
         assert current_config.validate(), \
             "Current configuration should maintain integrity"
     
+    @pytest.mark.asyncio
     async def test_performance_under_load(self, config_hot_reloader):
         """Test configuration reload performance under sustained load."""
         reloader = config_hot_reloader

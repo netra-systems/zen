@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <title>Staging Database Configuration Migration Issue</title>
+    <date>2025-08-24</date>
+    <severity>CRITICAL</severity>
+    <category>deployment,configuration,migration</category>
+    
+    <problem>
+        <description>
+            Staging deployment failed with "RuntimeError: Database engine creation failed: name 'DatabaseConfig' is not defined"
+            at postgres_core.py line 283 during _create_engine_components execution.
+        </description>
+        <error_message>
+            RuntimeError: Database engine creation failed: name 'DatabaseConfig' is not defined
+        </error_message>
+        <location>netra_backend/app/db/postgres_core.py:283</location>
+        <environment>staging</environment>
+    </problem>
+    
+    <root_cause>
+        <analysis method="five_whys">
+            <why number="1">
+                <question>Why is DatabaseConfig not defined?</question>
+                <answer>The code was migrated from using DatabaseConfig class attributes to get_unified_config() function calls, but staging had an older version deployed.</answer>
+            </why>
+            <why number="2">
+                <question>Why was an older version deployed to staging?</question>
+                <answer>The deployment may have failed partially or cached an older Docker image layer.</answer>
+            </why>
+            <why number="3">
+                <question>Why did this pass local tests but fail in staging?</question>
+                <answer>Local tests run against the current codebase while staging ran an inconsistent version where some files were updated but others weren't.</answer>
+            </why>
+            <why number="4">
+                <question>Why wasn't this caught in CI/CD?</question>
+                <answer>CI/CD tests don't run in the exact staging environment and don't test the actual deployed container image.</answer>
+            </why>
+            <why number="5">
+                <question>What is the root systemic issue?</question>
+                <answer>Incomplete migration patterns where configuration references are changed incrementally rather than atomically across the entire codebase.</answer>
+            </why>
+        </analysis>
+        <summary>
+            The issue was caused by an incomplete migration from static DatabaseConfig class attributes to dynamic get_unified_config() function calls. 
+            While the code in the repository was correct, the staging deployment had a version mismatch where some files were updated but the deployment 
+            container still contained older code referencing DatabaseConfig directly.
+        </summary>
+    </root_cause>
+    
+    <solution>
+        <implemented>
+            <action>Verified all database configuration code uses get_unified_config() pattern</action>
+            <action>Created comprehensive tests to detect configuration migration issues</action>
+            <action>Redeployed staging with complete, consistent codebase</action>
+            <action>Added validation tests for import patterns and configuration usage</action>
+        </implemented>
+        <files_modified>
+            <file>tests/e2e/test_staging_database_config_migration.py</file>
+            <file>tests/e2e/test_staging_import_and_config_issues.py</file>
+        </files_modified>
+    </solution>
+    
+    <prevention>
+        <guideline>
+            Always perform configuration migrations atomically - update all references in a single deployment
+        </guideline>
+        <guideline>
+            Test the actual Docker container images that will be deployed, not just the source code
+        </guideline>
+        <guideline>
+            Use explicit imports rather than wildcards to catch missing dependencies early
+        </guideline>
+        <guideline>
+            Add pre-deployment validation that checks for consistent configuration patterns
+        </guideline>
+        <guideline>
+            When migrating configuration patterns, search for ALL occurrences across the entire codebase including tests
+        </guideline>
+    </prevention>
+    
+    <testing>
+        <test_case>
+            <name>test_postgres_core_uses_unified_config</name>
+            <purpose>Verify postgres_core.py doesn't reference DatabaseConfig attributes directly</purpose>
+            <location>tests/e2e/test_staging_database_config_migration.py</location>
+        </test_case>
+        <test_case>
+            <name>test_database_initialization_with_unified_config</name>
+            <purpose>Test database initialization doesn't throw DatabaseConfig NameError</purpose>
+            <location>tests/e2e/test_staging_database_config_migration.py</location>
+        </test_case>
+        <test_case>
+            <name>test_no_mixed_config_patterns</name>
+            <purpose>Ensure files don't mix old and new configuration patterns</purpose>
+            <location>tests/e2e/test_staging_import_and_config_issues.py</location>
+        </test_case>
+    </testing>
+    
+    <monitoring>
+        <metric>Deployment success rate</metric>
+        <metric>Container startup failures due to import errors</metric>
+        <metric>Configuration-related error frequency in staging logs</metric>
+    </monitoring>
+    
+    <related_specs>
+        <spec>unified_environment_management.xml</spec>
+        <spec>database_connectivity_architecture.xml</spec>
+        <spec>deployment_architecture.xml</spec>
+        <spec>import_management_architecture.xml</spec>
+    </related_specs>
+    
+    <keywords>
+        DatabaseConfig, get_unified_config, configuration migration, staging deployment, 
+        import error, NameError, postgres_core, database initialization
+    </keywords>
+</learning>

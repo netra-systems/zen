@@ -7,7 +7,7 @@ Ensures both services use the same JWT secret for token validation.
 
 import os
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -169,6 +169,7 @@ class TestJWTSecretConsistency:
 class TestJWTSecretIntegration:
     """Integration tests for JWT secret consistency."""
     
+    @pytest.mark.asyncio
     async def test_auth_client_and_auth_service_consistency(self):
         """Test that auth client fallback uses same logic as auth service."""
         from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -191,9 +192,10 @@ class TestJWTSecretIntegration:
             assert validation_result["user_id"] == "dev-user-1"
             assert validation_result["email"] == "dev@example.com"
     
+    @pytest.mark.asyncio
     async def test_backend_auth_integration_uses_same_secret(self):
         """Test that backend auth integration validates tokens consistently."""
-        from unittest.mock import AsyncMock
+        from unittest.mock import AsyncMock, MagicMock
 
         from netra_backend.app.auth_integration.auth import get_current_user
         from netra_backend.app.clients.auth_client import auth_client

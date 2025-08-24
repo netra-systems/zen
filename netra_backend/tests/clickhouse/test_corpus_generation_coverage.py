@@ -13,7 +13,7 @@ import json
 import os
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from netra_backend.app.schemas import ContentGenParams, CorpusCreate, CorpusUpdate
@@ -32,6 +32,7 @@ from netra_backend.app.services.generation_service import (
 
 class TestCorpusLifecycle:
     """Test complete corpus lifecycle from creation to deletion"""
+    @pytest.mark.asyncio
     async def test_corpus_creation_workflow(self):
         """Test 1: Verify complete corpus creation workflow"""
         service = CorpusService()
@@ -62,6 +63,7 @@ class TestCorpusLifecycle:
             metadata = json.loads(corpus.metadata_)
             assert metadata["content_source"] == ContentSource.GENERATE.value
             assert metadata["version"] == 1
+    @pytest.mark.asyncio
     async def test_corpus_status_transitions(self):
         """Test 2: Verify corpus status transitions"""
         service = CorpusService()
@@ -87,6 +89,7 @@ class TestCorpusLifecycle:
             # Verify status update to FAILED
             calls = db.query().filter().update.call_args_list
             assert {"status": CorpusStatus.FAILED.value} in [call[0][0] for call in calls]
+    @pytest.mark.asyncio
     async def test_corpus_deletion_workflow(self):
         """Test 3: Verify complete corpus deletion workflow"""
         service = CorpusService()
@@ -113,6 +116,7 @@ class TestCorpusLifecycle:
 
 class TestWorkloadTypesCoverage:
     """Test coverage of all workload types"""
+    @pytest.mark.asyncio
     async def test_all_workload_types_supported(self):
         """Test 4: Verify all workload types are supported"""
         service = CorpusService()
@@ -135,6 +139,7 @@ class TestWorkloadTypesCoverage:
             
             result = service._validate_records(records)
             assert result["valid"], f"Workload type {workload_type} should be valid"
+    @pytest.mark.asyncio
     async def test_workload_distribution_tracking(self):
         """Test 5: Verify workload distribution is tracked correctly"""
         service = CorpusService()
@@ -170,6 +175,7 @@ class TestWorkloadTypesCoverage:
 
 class TestContentGeneration:
     """Test content generation workflows"""
+    @pytest.mark.asyncio
     async def test_content_generation_job_flow(self):
         """Test 6: Verify content generation job workflow"""
         with patch('app.services.generation_service.update_job_status') as mock_update:
@@ -197,6 +203,7 @@ class TestContentGeneration:
                     saved_corpus = mock_save.call_args[0][0]
                     assert "simple_chat" in saved_corpus
                     assert "rag_pipeline" in saved_corpus
+    @pytest.mark.asyncio
     async def test_corpus_save_to_clickhouse(self):
         """Test 7: Verify corpus is properly saved to ClickHouse"""
         corpus = {
@@ -220,6 +227,7 @@ class TestContentGeneration:
             
             # Should insert 4 total records
             assert len(insert_call[0][1]) == 4
+    @pytest.mark.asyncio
     async def test_corpus_load_from_clickhouse(self):
         """Test 8: Verify corpus is properly loaded from ClickHouse"""
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
@@ -242,6 +250,7 @@ class TestContentGeneration:
 
 class TestBatchProcessing:
     """Test batch processing capabilities"""
+    @pytest.mark.asyncio
     async def test_batch_content_upload(self):
         """Test 9: Verify batch content upload with buffering"""
         service = CorpusService()
@@ -279,6 +288,7 @@ class TestBatchProcessing:
             
             # Should process all buffered records
             assert result2["records_uploaded"] == 2
+    @pytest.mark.asyncio
     async def test_synthetic_data_batch_ingestion(self):
         """Test 10: Verify synthetic data batch ingestion"""
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
@@ -314,6 +324,7 @@ class TestBatchProcessing:
 
 class TestCorpusCloning:
     """Test corpus cloning functionality"""
+    @pytest.mark.asyncio
     async def test_corpus_clone_workflow(self):
         """Test 11: Verify corpus cloning creates new corpus with data"""
         service = CorpusService()
@@ -342,6 +353,7 @@ class TestCorpusCloning:
             assert result != None
             assert result.name == "Cloned Corpus"
             assert result.description == "Clone of Original Corpus"
+    @pytest.mark.asyncio
     async def test_corpus_content_copy(self):
         """Test 12: Verify corpus content is copied correctly"""
         service = CorpusService()
@@ -402,6 +414,7 @@ class TestValidationAndSafety:
             assert not result["valid"]
             for expected in expected_errors:
                 assert any(expected in error for error in result["errors"])
+    @pytest.mark.asyncio
     async def test_corpus_access_control(self):
         """Test 15: Verify corpus access control"""
         service = CorpusService()
@@ -418,6 +431,7 @@ class TestValidationAndSafety:
 
 class TestMetadataTracking:
     """Test metadata tracking throughout corpus lifecycle"""
+    @pytest.mark.asyncio
     async def test_corpus_metadata_creation(self):
         """Test 16: Verify metadata is properly initialized"""
         service = CorpusService()
@@ -437,6 +451,7 @@ class TestMetadataTracking:
         assert metadata["content_source"] == "upload"
         assert metadata["version"] == 1
         assert "created_at" in metadata
+    @pytest.mark.asyncio
     async def test_corpus_metadata_update(self):
         """Test 17: Verify metadata is updated correctly"""
         service = CorpusService()
@@ -457,6 +472,7 @@ class TestMetadataTracking:
 
 class TestErrorRecovery:
     """Test error recovery mechanisms"""
+    @pytest.mark.asyncio
     async def test_table_creation_failure_recovery(self):
         """Test 18: Verify recovery from table creation failure"""
         service = CorpusService()
@@ -476,6 +492,7 @@ class TestErrorRecovery:
             db.query().filter().update.assert_called_with(
                 {"status": CorpusStatus.FAILED.value}
             )
+    @pytest.mark.asyncio
     async def test_upload_failure_recovery(self):
         """Test 19: Verify recovery from upload failure"""
         service = CorpusService()
@@ -501,6 +518,7 @@ class TestErrorRecovery:
             
             assert result["records_uploaded"] == 0
             assert "Insert failed" in str(result["validation_errors"])
+    @pytest.mark.asyncio
     async def test_deletion_failure_recovery(self):
         """Test 20: Verify recovery from deletion failure"""
         service = CorpusService()

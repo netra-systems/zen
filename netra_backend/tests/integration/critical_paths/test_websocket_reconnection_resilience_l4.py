@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
 # from app.services.websocket_service import WebSocketService
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -32,7 +32,7 @@ class TestWebSocketReconnectionResilienceL4:
     @pytest.fixture
     async def ws_system(self):
         """WebSocket system setup"""
-        return {
+        yield {
             'ws_service': WebSocketService(),
             'session_service': SessionService(),
             'queue_service': MessageQueueService(),
@@ -44,6 +44,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_graceful_reconnection(self, ws_system):
         """Test graceful WebSocket reconnection with state preservation"""
         client_id = "client_graceful"
@@ -104,6 +105,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_exponential_backoff_reconnection(self, ws_system):
         """Test exponential backoff for reconnection attempts"""
         client_id = "client_backoff"
@@ -156,6 +158,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_message_replay_on_reconnect(self, ws_system):
         """Test message replay functionality on reconnection"""
         client_id = "client_replay"
@@ -204,6 +207,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_connection_state_machine(self, ws_system):
         """Test WebSocket connection state machine transitions"""
         client_id = "client_state_machine"
@@ -248,6 +252,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_heartbeat_failure_detection(self, ws_system):
         """Test heartbeat-based connection failure detection"""
         client_id = "client_heartbeat"
@@ -290,6 +295,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_reconnect_with_auth_refresh(self, ws_system):
         """Test reconnection with auth token refresh"""
         client_id = "client_auth_refresh"
@@ -332,6 +338,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_parallel_reconnection_prevention(self, ws_system):
         """Test prevention of parallel reconnection attempts"""
         client_id = "client_parallel"
@@ -373,6 +380,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_subscription_restoration(self, ws_system):
         """Test subscription restoration after reconnection"""
         client_id = "client_subscriptions"
@@ -421,6 +429,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_reconnect_quota_limits(self, ws_system):
         """Test reconnection attempt quota and rate limiting"""
         client_id = "client_quota"
@@ -462,6 +471,7 @@ class TestWebSocketReconnectionResilienceL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_state_diff_sync(self, ws_system):
         """Test state differential synchronization on reconnect"""
         client_id = "client_diff_sync"

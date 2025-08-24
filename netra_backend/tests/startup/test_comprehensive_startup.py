@@ -31,12 +31,14 @@ class StartupTestSuite:
     """Comprehensive startup test suite with ultra-deep validation"""
     
     @staticmethod
+    @pytest.mark.asyncio
     async def test_frontend_type_exports():
         """Test all TypeScript type exports are valid"""
         errors = await FrontendTypeValidator().validate_all_exports()
         assert len(errors) == 0, f"Type export errors: {errors}"
     
     @staticmethod
+    @pytest.mark.asyncio
     async def test_auth_service_connectivity():
         """Test auth service is reachable and configured"""
         validator = AuthServiceValidator()
@@ -44,6 +46,7 @@ class StartupTestSuite:
         assert result.success, f"Auth service error: {result.error}"
     
     @staticmethod
+    @pytest.mark.asyncio
     async def test_clickhouse_authentication():
         """Test ClickHouse authentication and permissions"""
         validator = ClickHouseValidator()
@@ -51,6 +54,7 @@ class StartupTestSuite:
         assert result.success, f"ClickHouse error: {result.error}"
     
     @staticmethod
+    @pytest.mark.asyncio
     async def test_redis_connection():
         """Test Redis connectivity and operations"""
         validator = RedisValidator()

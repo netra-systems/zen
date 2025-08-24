@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy import JSON, Column, DateTime, Float, Integer, String
@@ -76,6 +76,7 @@ class MetricRepository:
 class TestUserRepositoryAuth:
     """test_user_repository_auth - Test user authentication and password hashing"""
     
+    @pytest.mark.asyncio
     async def test_password_hashing(self):
         """Test password hashing on user creation"""
         mock_session = AsyncMock(spec=AsyncSession)
@@ -104,6 +105,7 @@ class TestUserRepositoryAuth:
             assert user.password_hash == "hashed_password"
             mock_hash.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_authentication_flow(self):
         """Test user authentication flow"""
         mock_session = AsyncMock(spec=AsyncSession)
@@ -141,6 +143,7 @@ class TestUserRepositoryAuth:
 class TestOptimizationRepositoryStorage:
     """test_optimization_repository_storage - Test optimization storage and versioning"""
     
+    @pytest.mark.asyncio
     async def test_optimization_versioning(self):
         """Test optimization versioning system"""
         mock_session = AsyncMock(spec=AsyncSession)
@@ -166,6 +169,7 @@ class TestOptimizationRepositoryStorage:
         assert new_version.version == 2
         assert new_version.parent_id == "opt123"
     
+    @pytest.mark.asyncio
     async def test_optimization_history(self):
         """Test optimization version history"""
         mock_session = AsyncMock(spec=AsyncSession)
@@ -182,6 +186,7 @@ class TestOptimizationRepositoryStorage:
 class TestMetricRepositoryAggregation:
     """test_metric_repository_aggregation - Test metric aggregation and time-series queries"""
     
+    @pytest.mark.asyncio
     async def test_metric_aggregation(self):
         """Test metric aggregation functions"""
         mock_session = AsyncMock(spec=AsyncSession)
@@ -206,6 +211,7 @@ class TestMetricRepositoryAggregation:
         )
         assert max_val == 70.0
     
+    @pytest.mark.asyncio
     async def test_time_series_queries(self):
         """Test time series data queries"""
         mock_session = AsyncMock(spec=AsyncSession)

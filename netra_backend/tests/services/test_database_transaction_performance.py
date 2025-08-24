@@ -9,7 +9,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import List
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,6 +24,7 @@ def performance_repository():
 class TestTransactionPerformanceAndScaling:
     """Test transaction performance under various load conditions"""
     
+    @pytest.mark.asyncio
     async def test_high_concurrency_transactions(self, performance_repository):
         """Test transaction handling under high concurrency"""
         num_concurrent = 50
@@ -34,6 +35,7 @@ class TestTransactionPerformanceAndScaling:
         
         _assert_performance_results(execution_time, results, num_concurrent, sessions)
     
+    @pytest.mark.asyncio
     async def test_transaction_throughput_measurement(self, performance_repository):
         """Test transaction throughput under sustained load"""
         test_duration = 1.0  # 1 second test
@@ -46,6 +48,7 @@ class TestTransactionPerformanceAndScaling:
         # Should handle at least 100 transactions per second
         assert transactions_completed >= 100
     
+    @pytest.mark.asyncio
     async def test_memory_usage_during_batch_operations(self, performance_repository):
         """Test memory efficiency during batch operations"""
         batch_size = 1000
@@ -54,6 +57,7 @@ class TestTransactionPerformanceAndScaling:
         await _execute_batch_operations(performance_repository, sessions)
         _verify_session_cleanup(sessions)
     
+    @pytest.mark.asyncio
     async def test_transaction_latency_distribution(self, performance_repository):
         """Test transaction latency distribution"""
         num_transactions = 100
@@ -63,6 +67,7 @@ class TestTransactionPerformanceAndScaling:
         
         _assert_latency_distribution(latencies)
     
+    @pytest.mark.asyncio
     async def test_deadlock_recovery_performance(self, performance_repository):
         """Test performance of deadlock recovery mechanisms"""
         deadlock_sessions = _create_deadlock_sessions(10)
@@ -72,6 +77,7 @@ class TestTransactionPerformanceAndScaling:
         # Recovery should be fast
         assert all(time < 0.1 for time in recovery_times)
     
+    @pytest.mark.asyncio
     async def test_connection_pool_stress(self, performance_repository):
         """Test connection pool under stress conditions"""
         pool_size = 20

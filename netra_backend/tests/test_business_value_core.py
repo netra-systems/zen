@@ -10,7 +10,7 @@ from pathlib import Path
 
 import uuid
 from typing import Dict, List
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -70,6 +70,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         return [call for call in tool_calls 
                 if "cost" in str(call).lower()]
 
+    @pytest.mark.asyncio
     async def test_1_cost_optimization_request(self, setup_test_infrastructure):
         """
         Business Value Test 1: Cost Optimization Analysis
@@ -98,6 +99,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         return [call for call in tool_dispatcher.dispatch_tool.call_args_list
                 if "bottleneck" in str(call).lower()]
 
+    @pytest.mark.asyncio
     async def test_2_performance_bottleneck_identification(self, setup_test_infrastructure):
         """
         Business Value Test 2: Performance Bottleneck Analysis
@@ -118,6 +120,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         """Verify model comparison analysis was performed"""
         assert llm_manager.ask_llm.call_count > 0
 
+    @pytest.mark.asyncio
     async def test_3_model_comparison_and_selection(self, setup_test_infrastructure):
         """
         Business Value Test 3: Model Comparison for Use Case
@@ -153,6 +156,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         message_types = [msg.get("type") for msg in streamed_messages]
         assert "agent_started" in message_types
 
+    @pytest.mark.asyncio
     async def test_4_real_time_streaming_updates(self, setup_test_infrastructure):
         """
         Business Value Test 4: Real-time Progress Updates
@@ -174,6 +178,7 @@ class TestBusinessValueCore(BusinessValueFixtures):
         return [call for call in llm_manager.ask_llm.call_args_list
                 if "batch" in str(call).lower() or "optimiz" in str(call).lower()]
 
+    @pytest.mark.asyncio
     async def test_5_batch_processing_optimization(self, setup_test_infrastructure):
         """
         Business Value Test 5: Batch Processing Recommendations

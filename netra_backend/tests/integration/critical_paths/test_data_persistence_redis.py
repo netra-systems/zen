@@ -11,7 +11,7 @@ from pathlib import Path
 import asyncio
 import json
 import time
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as redis
@@ -26,6 +26,7 @@ class TestDataPersistenceRedisL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_key_value_persistence(self):
         """Test basic key-value persistence"""
         redis_service = RedisService()
@@ -47,6 +48,7 @@ class TestDataPersistenceRedisL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_complex_data_serialization(self):
         """Test complex data type serialization"""
         redis_service = RedisService()
@@ -72,6 +74,7 @@ class TestDataPersistenceRedisL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_ttl_expiration(self):
         """Test TTL and key expiration"""
         redis_service = RedisService()
@@ -93,6 +96,7 @@ class TestDataPersistenceRedisL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_atomic_operations(self):
         """Test atomic operations (increment, decrement)"""
         redis_service = RedisService()
@@ -116,6 +120,7 @@ class TestDataPersistenceRedisL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_list_operations(self):
         """Test Redis list operations"""
         redis_service = RedisService()

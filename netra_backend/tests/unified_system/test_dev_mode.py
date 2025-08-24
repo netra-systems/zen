@@ -26,7 +26,7 @@ import asyncio
 import json
 import os
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -75,6 +75,7 @@ class TestDevModeAuthentication:
             with TestClient(app) as client:
                 yield client
 
+    @pytest.mark.asyncio
     async def test_dev_user_quick_auth(self, mock_dev_mode_config, mock_dev_user):
         """Test development user quick authentication
         
@@ -141,6 +142,7 @@ class TestDevModeAuthentication:
                 # Verify: Auth client called with dev token
                 mock_validate.assert_called_once_with("dev-token-auto-generated")
 
+    @pytest.mark.asyncio
     async def test_bypass_oauth_in_dev(self, client_with_dev_mode, mock_dev_mode_config):
         """Test OAuth bypass in development
         
@@ -175,6 +177,7 @@ class TestDevModeAuthentication:
                 assert data["token"] == "dev-token-instant"
                 assert data["user"]["email"] == "dev@netrasystems.ai"
 
+    @pytest.mark.asyncio
     async def test_immediate_chat_availability(self, client_with_dev_mode):
         """Test instant chat access in dev
         
@@ -213,6 +216,7 @@ class TestDevModeAuthentication:
                 assert response["type"] in ["agent_response", "typing"]
                 assert "dev-thread-123" in str(response)
 
+    @pytest.mark.asyncio
     async def test_dev_mode_agent_responses(self, client_with_dev_mode):
         """Test agent behavior in dev mode
         
@@ -278,6 +282,7 @@ class TestDevModeAuthentication:
                     assert "latency_ms" in perf_metrics
                     assert "memory_usage" in perf_metrics
 
+    @pytest.mark.asyncio
     async def test_dev_mode_error_handling(self, client_with_dev_mode):
         """Test enhanced error handling in dev mode
         
@@ -322,6 +327,7 @@ class TestDevModeAuthentication:
                     # Verify: Error message preserved
                     assert "Test error for dev mode" in str(response)
 
+    @pytest.mark.asyncio
     async def test_dev_mode_mock_llm_integration(self):
         """Test mock LLM integration in dev mode
         
@@ -362,6 +368,7 @@ class TestDevModeAuthentication:
                 # Verify: Mock called instead of real API
                 mock_generate.assert_called_once_with("Test prompt")
 
+    @pytest.mark.asyncio
     async def test_dev_mode_config_validation(self):
         """Test dev mode configuration validation
         
@@ -391,6 +398,7 @@ class TestDevModeAuthentication:
                 SKIP_AUTH_IN_DEV=True
             )
 
+    @pytest.mark.asyncio
     async def test_dev_mode_performance_baseline(self, client_with_dev_mode):
         """Test dev mode performance baselines
         
@@ -438,6 +446,7 @@ class TestDevModeAuthentication:
 class TestDevModeIntegration:
     """Integration tests for dev mode across system components"""
 
+    @pytest.mark.asyncio
     async def test_dev_mode_full_stack_integration(self):
         """Test complete dev mode integration across all components
         
@@ -481,6 +490,7 @@ class TestDevModeIntegration:
                         # Full integration test would require actual WebSocket connection
                         # This validates the mocking setup is correct for integration testing
 
+    @pytest.mark.asyncio
     async def test_dev_mode_data_seeding(self):
         """Test dev mode data seeding capabilities
         

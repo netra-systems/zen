@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
 # from app.services.websocket_service import WebSocketService
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -40,7 +40,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
     @pytest.fixture
     async def service_mesh(self):
         """Multi-service infrastructure setup"""
-        return {
+        yield {
             'auth_service': AuthService(),
             'api_gateway': APIGatewayService(),
             'websocket_service': WebSocketService(),
@@ -52,6 +52,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_token_propagation_through_gateway(self, service_mesh):
         """Test auth token propagation from gateway to backend services"""
         user_id = "user_gateway_prop"
@@ -90,6 +91,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_websocket_auth_handoff_from_http(self, service_mesh):
         """Test auth handoff from HTTP to WebSocket connection"""
         user_id = "user_ws_handoff"
@@ -127,6 +129,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_context_enrichment_across_services(self, service_mesh):
         """Test auth context enrichment as it flows through services"""
         user_id = "user_enrichment"
@@ -171,6 +174,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_invalidation_cascade(self, service_mesh):
         """Test auth invalidation cascading across all services"""
         user_id = "user_cascade"
@@ -226,6 +230,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_service_to_service_auth_chain(self, service_mesh):
         """Test service-to-service authentication chain"""
         
@@ -262,6 +267,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_state_sync_during_failover(self, service_mesh):
         """Test auth state synchronization during service failover"""
         user_id = "user_failover"
@@ -301,6 +307,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_quota_enforcement_across_services(self, service_mesh):
         """Test auth quota enforcement across multiple services"""
         user_id = "user_quota"
@@ -362,6 +369,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_context_isolation_between_tenants(self, service_mesh):
         """Test auth context isolation between different tenants"""
         tenant1_user = "tenant1_user"
@@ -406,6 +414,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_delegation_chain_validation(self, service_mesh):
         """Test validation of auth delegation chains"""
         original_user = "user_original"
@@ -452,6 +461,7 @@ class TestCrossServiceAuthPropagationCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_auth_migration_between_service_versions(self, service_mesh):
         """Test auth migration between different service versions"""
         user_id = "user_migration"

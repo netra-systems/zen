@@ -84,6 +84,7 @@ class BackpressureTestHarness:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_comprehensive_rate_limiting_integration():
     """CRITICAL: Comprehensive rate limiting protecting $75K infrastructure."""
     # Validate token bucket core functionality
@@ -97,6 +98,7 @@ async def test_comprehensive_rate_limiting_integration():
 
 @pytest.mark.asyncio
 @pytest.mark.integration 
+@pytest.mark.asyncio
 async def test_rate_limiting_fairness_validation():
     """Test fairness algorithms ensuring equitable resource allocation."""
     total_requests = 30
@@ -110,6 +112,7 @@ async def test_rate_limiting_fairness_validation():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_rate_limiting_metrics_collection():
     """Test metrics collection for business monitoring."""
     metrics = RateLimitMetrics()

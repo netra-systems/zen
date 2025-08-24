@@ -229,6 +229,7 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
         logger.info(f"Activating fallback auth for {endpoint.name}")
         await asyncio.sleep(0.05)
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_recovery_coordination(self) -> Dict[str, Any]:
         """Test circuit breaker recovery coordination across services."""
         await self.simulate_auth_service_failure()

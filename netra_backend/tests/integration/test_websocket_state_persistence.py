@@ -54,6 +54,7 @@ class TestWebSocketMessageQueueRecovery:
 
         return await setup_test_manager_with_helper()
     
+    @pytest.mark.asyncio
     async def test_message_queue_during_disconnection(self, queue_recovery_setup):
 
         """Test message queue behavior during WebSocket disconnection."""
@@ -108,6 +109,7 @@ class TestWebSocketMessageQueueRecovery:
 
         assert stats["pending_messages"] >= 0, "Message queue should be in valid state"
     
+    @pytest.mark.asyncio
     async def test_message_priority_during_queue_recovery(self, queue_recovery_setup):
 
         """Test message priority handling during queue recovery."""
@@ -170,6 +172,7 @@ class TestWebSocketPartialMessageRecovery:
 
     """Partial message handling during WebSocket state recovery tests."""
     
+    @pytest.mark.asyncio
     async def test_partial_message_handling_during_recovery(self):
 
         """Test partial message handling during WebSocket state recovery."""
@@ -224,6 +227,7 @@ class TestWebSocketPartialMessageRecovery:
 
         assert stats["pending_messages"] >= 0, "Partial messages should be handled"
     
+    @pytest.mark.asyncio
     async def test_large_message_recovery_resilience(self):
 
         """Test recovery resilience with large message payloads."""
@@ -270,6 +274,7 @@ class TestWebSocketComprehensiveStateRecovery:
 
     """Comprehensive state recovery scenarios including complex workflows."""
     
+    @pytest.mark.asyncio
     async def test_comprehensive_state_recovery_workflow(self):
 
         """Test comprehensive WebSocket state recovery across complex workflows."""
@@ -375,6 +380,7 @@ class TestWebSocketZeroMessageLoss:
 
     """Critical tests ensuring zero message loss during reconnection scenarios."""
     
+    @pytest.mark.asyncio
     async def test_zero_message_loss_during_reconnection(self):
 
         """Critical test ensuring zero message loss during reconnection scenarios."""

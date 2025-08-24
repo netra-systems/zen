@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 from typing import Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -55,6 +55,7 @@ class TestAgentRoute:
             if get_agent_service in app.dependency_overrides:
                 del app.dependency_overrides[get_agent_service]
     
+    @pytest.mark.asyncio
     async def test_agent_streaming_response(self):
         """Test agent streaming response capability."""
         import json
@@ -157,6 +158,7 @@ class TestAgentRoute:
             if get_agent_service in app.dependency_overrides:
                 del app.dependency_overrides[get_agent_service]
     
+    @pytest.mark.asyncio
     async def test_agent_context_management(self):
         """Test agent context and thread management."""
         from netra_backend.app.routes.agent_route import process_with_context
@@ -212,6 +214,7 @@ class TestAgentRoute:
             if get_agent_service in app.dependency_overrides:
                 del app.dependency_overrides[get_agent_service]
     
+    @pytest.mark.asyncio
     async def test_agent_multi_modal_input(self):
         """Test agent handling of multi-modal input."""
         from netra_backend.app.routes.agent_route import process_multimodal_message
@@ -267,6 +270,7 @@ class TestAgentRoute:
             if get_agent_service in app.dependency_overrides:
                 del app.dependency_overrides[get_agent_service]
     
+    @pytest.mark.asyncio
     async def test_agent_fallback_mechanisms(self):
         """Test agent fallback and recovery mechanisms."""
         from netra_backend.app.routes.agent_route import process_with_fallback

@@ -22,7 +22,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as redis
@@ -32,7 +32,7 @@ from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.websocket_core.manager import WebSocketManager
 
 # ApplicationState and StateUpdate don't exist - creating mock classes for testing
-# from netra_backend.app.websocket_core.state_synchronization_manager import (
+# Removed broken import statement
 #     ApplicationState,
 #     StateUpdate,
 # )
@@ -170,6 +170,7 @@ class TestRedisWebSocketStateSyncL3:
 
         )
     
+    @pytest.mark.asyncio
     async def test_session_store_websocket_state_recovery(self, redis_client, session_store, test_user):
 
         """Test L3 Redis session state storage and retrieval integration."""
@@ -258,6 +259,7 @@ class TestRedisWebSocketStateSyncL3:
 
         assert deserialized["recovered_state"]["current_thread"] == "thread_optimization_123"
     
+    @pytest.mark.asyncio
     async def test_multiple_websocket_connections_share_redis_session(self, redis_client, session_store, test_user):
 
         """Test L3 Redis session sharing across multiple connection simulations."""
@@ -343,6 +345,7 @@ class TestRedisWebSocketStateSyncL3:
 
             assert final_state["connection_tracking"][connection_key]["status"] == "active"
     
+    @pytest.mark.asyncio
     async def test_session_expiry_and_cleanup_from_redis(self, session_store, redis_client, test_user):
 
         """Test session expiry and cleanup mechanisms."""
@@ -383,6 +386,7 @@ class TestRedisWebSocketStateSyncL3:
 
         assert expired_session is None
     
+    @pytest.mark.asyncio
     async def test_concurrent_session_updates_from_multiple_connections(self, session_store, test_user):
 
         """Test L3 Redis concurrent session updates simulation."""
@@ -457,6 +461,7 @@ class TestRedisWebSocketStateSyncL3:
 
             assert final_state[connection_key]["update_sequence"] == conn_id
     
+    @pytest.mark.asyncio
     async def test_state_recovery_after_redis_restart(self, redis_container, session_store, test_user):
 
         """Test L3 Redis state persistence through restart simulation."""

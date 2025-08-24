@@ -114,6 +114,7 @@ class L3ResourcePoolManager:
             "initial_cpu_percent": initial_stats["cpu_percent"]
         }
     
+    @pytest.mark.asyncio
     async def test_agent_allocation_within_limits(self, target_agent_count: int) -> Dict[str, Any]:
         """Test agent allocation respecting resource limits."""
         allocation_start = time.time()
@@ -200,6 +201,7 @@ class L3ResourcePoolManager:
                 "allocation_time": time.time() - allocation_start
             }
     
+    @pytest.mark.asyncio
     async def test_resource_pool_scaling(self, load_pattern: List[int]) -> Dict[str, Any]:
         """Test resource pool scaling with varying load patterns."""
         scaling_start = time.time()
@@ -307,6 +309,7 @@ class L3ResourcePoolManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_memory_pressure_handling(self, memory_stress_mb: int) -> Dict[str, Any]:
         """Test resource pool behavior under memory pressure."""
         stress_start = time.time()
@@ -350,6 +353,7 @@ class L3ResourcePoolManager:
                 "stress_duration": time.time() - stress_start
             }
     
+    @pytest.mark.asyncio
     async def test_cpu_throttling(self, cpu_stress_percent: float) -> Dict[str, Any]:
         """Test CPU throttling and resource management."""
         throttle_start = time.time()
@@ -593,6 +597,7 @@ async def l3_resource_manager(testcontainer_infrastructure):
 class TestAgentResourcePoolManagementL3:
     """L3 integration tests for agent resource pool management."""
     
+    @pytest.mark.asyncio
     async def test_basic_resource_allocation(self, l3_resource_manager):
         """Test basic agent resource allocation within limits."""
         # Configure resource pool
@@ -619,6 +624,7 @@ class TestAgentResourcePoolManagementL3:
         assert allocation_result["peak_memory_mb"] <= pool_config["max_memory_mb"]
         assert allocation_result["peak_cpu_percent"] <= pool_config["max_cpu_percent"]
     
+    @pytest.mark.asyncio
     async def test_resource_limit_enforcement(self, l3_resource_manager):
         """Test enforcement of resource limits."""
         # Configure strict limits
@@ -641,6 +647,7 @@ class TestAgentResourcePoolManagementL3:
         critical_violations = [v for v in violations if v.get("severity") == "high"]
         assert len(critical_violations) == 0  # No critical violations
     
+    @pytest.mark.asyncio
     async def test_dynamic_pool_scaling(self, l3_resource_manager):
         """Test dynamic scaling of resource pool."""
         # Configure pool
@@ -669,6 +676,7 @@ class TestAgentResourcePoolManagementL3:
         max_scaling_duration = max(event["duration"] for event in events)
         assert max_scaling_duration < 3.0  # Individual scaling should be fast
     
+    @pytest.mark.asyncio
     async def test_memory_pressure_handling(self, l3_resource_manager):
         """Test behavior under memory pressure."""
         # Configure memory-constrained environment
@@ -687,6 +695,7 @@ class TestAgentResourcePoolManagementL3:
         if stress_result["peak_memory_mb"] > 192 * 0.8:
             assert stress_result["cleanup_triggered"] is True
     
+    @pytest.mark.asyncio
     async def test_cpu_throttling(self, l3_resource_manager):
         """Test CPU throttling under load."""
         # Configure CPU-constrained environment
@@ -704,6 +713,7 @@ class TestAgentResourcePoolManagementL3:
         if throttle_result["peak_cpu_percent"] > 40.0:
             assert throttle_result["throttling_applied"] is True
     
+    @pytest.mark.asyncio
     async def test_concurrent_resource_requests(self, l3_resource_manager):
         """Test concurrent resource allocation requests."""
         # Configure pool
@@ -730,6 +740,7 @@ class TestAgentResourcePoolManagementL3:
         max_allocation_time = max(r["allocation_time"] for r in allocation_results)
         assert max_allocation_time < 8.0
     
+    @pytest.mark.asyncio
     async def test_resource_efficiency_metrics(self, l3_resource_manager):
         """Test comprehensive resource efficiency metrics."""
         # Configure pool

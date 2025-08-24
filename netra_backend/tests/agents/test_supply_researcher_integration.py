@@ -8,7 +8,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from decimal import Decimal
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.services.background_task_manager import BackgroundTaskManager

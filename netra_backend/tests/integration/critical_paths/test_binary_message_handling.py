@@ -23,7 +23,7 @@ import json
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -446,6 +446,7 @@ class TestBinaryMessageHandling:
 
             return data[:size_kb * 1024], "text/plain", "test_file.txt"
     
+    @pytest.mark.asyncio
     async def test_file_upload_validation(self, binary_processor):
 
         """Test file upload validation logic."""
@@ -483,6 +484,7 @@ class TestBinaryMessageHandling:
 
         assert any("Invalid filename" in error for error in invalid_filename_validation["errors"])
     
+    @pytest.mark.asyncio
     async def test_chunked_upload_creation(self, binary_processor):
 
         """Test creation of upload chunks."""
@@ -521,6 +523,7 @@ class TestBinaryMessageHandling:
 
         assert reconstructed == test_data
     
+    @pytest.mark.asyncio
     async def test_progress_tracking_functionality(self, progress_tracker):
 
         """Test upload progress tracking."""
@@ -575,6 +578,7 @@ class TestBinaryMessageHandling:
 
         assert "completed_at" in final_status
     
+    @pytest.mark.asyncio
     async def test_chunk_corruption_detection(self, binary_processor):
 
         """Test detection of corrupted chunks."""
@@ -603,6 +607,7 @@ class TestBinaryMessageHandling:
 
             binary_processor.reconstruct_from_chunks(chunks)
     
+    @pytest.mark.asyncio
     async def test_resume_capability(self, binary_processor, progress_tracker):
 
         """Test upload resume capability."""
@@ -647,6 +652,7 @@ class TestBinaryMessageHandling:
     
     @mock_justified("L2: Binary message handling with real internal components")
 
+    @pytest.mark.asyncio
     async def test_websocket_binary_transmission(self, ws_manager, binary_processor, test_user):
 
         """Test binary message transmission through WebSocket."""
@@ -718,6 +724,7 @@ class TestBinaryMessageHandling:
 
         await ws_manager.disconnect_user(test_user.id, mock_websocket)
     
+    @pytest.mark.asyncio
     async def test_large_file_performance(self, binary_processor, progress_tracker):
 
         """Test performance with large file uploads."""
@@ -771,6 +778,7 @@ class TestBinaryMessageHandling:
 
         assert final_status["status"] == "completed"
     
+    @pytest.mark.asyncio
     async def test_concurrent_uploads(self, binary_processor, progress_tracker):
 
         """Test handling of concurrent file uploads."""

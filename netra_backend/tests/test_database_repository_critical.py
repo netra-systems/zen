@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -39,6 +39,7 @@ class MockMessage:
 
 class TestDatabaseRepositoryCritical:
     """Critical database repository tests"""
+    @pytest.mark.asyncio
     async def test_user_repository_crud(self):
         """Test user repository CRUD operations"""
         mock_user_repo = AsyncMock()
@@ -71,6 +72,7 @@ class TestDatabaseRepositoryCritical:
         mock_user_repo.delete = AsyncMock(return_value=True)
         deleted = await mock_user_repo.delete(1)
         assert deleted == True
+    @pytest.mark.asyncio
     async def test_thread_repository_operations(self):
         """Test thread repository operations"""
         mock_thread_repo = AsyncMock()
@@ -100,6 +102,7 @@ class TestDatabaseRepositoryCritical:
         mock_thread_repo.update = AsyncMock(return_value=new_thread)
         updated_thread = await mock_thread_repo.update(thread_id, title="Updated Thread")
         assert updated_thread.title == "Updated Thread"
+    @pytest.mark.asyncio
     async def test_message_repository_operations(self):
         """Test message repository operations"""
         mock_message_repo = AsyncMock()
@@ -133,6 +136,7 @@ class TestDatabaseRepositoryCritical:
         mock_message_repo.get_recent_messages = AsyncMock(return_value=[new_message])
         recent_messages = await mock_message_repo.get_recent_messages(thread_id, limit=10, offset=0)
         assert len(recent_messages) == 1
+    @pytest.mark.asyncio
     async def test_transaction_management(self):
         """Test database transaction management"""
         mock_db_session = AsyncMock()
@@ -170,6 +174,7 @@ class TestDatabaseRepositoryCritical:
         
         assert transaction_failed == True
         mock_db_session.rollback.assert_called_once()
+    @pytest.mark.asyncio
     async def test_connection_pool_management(self):
         """Test database connection pool management"""
         mock_pool = AsyncMock()
@@ -207,6 +212,7 @@ class TestDatabaseRepositoryCritical:
         assert stats["size"] == 10
         assert stats["free"] + stats["used"] == stats["size"]
         assert stats["waiting"] == 0
+    @pytest.mark.asyncio
     async def test_query_optimization(self):
         """Test query optimization strategies"""
         mock_query_optimizer = AsyncMock()
@@ -236,6 +242,7 @@ class TestDatabaseRepositoryCritical:
             [{"email": f"user{i}@example.com"} for i in range(100)]
         )
         assert batch_result["inserted"] == 100
+    @pytest.mark.asyncio
     async def test_migration_execution(self):
         """Test database migration execution"""
         mock_migrator = AsyncMock()
@@ -260,6 +267,7 @@ class TestDatabaseRepositoryCritical:
         
         downgrade_result = await mock_migrator.downgrade(target_version="v1.0.0")
         assert downgrade_result["success"] == True
+    @pytest.mark.asyncio
     async def test_data_integrity_constraints(self):
         """Test data integrity constraints"""
         mock_db = AsyncMock()
@@ -277,6 +285,7 @@ class TestDatabaseRepositoryCritical:
         with pytest.raises(Exception) as exc_info:
             await mock_db.insert("messages", {"thread_id": "non_existent_thread"})
         assert "FOREIGN KEY constraint" in str(exc_info.value)
+    @pytest.mark.asyncio
     async def test_caching_layer(self):
         """Test database caching layer"""
         mock_cache = AsyncMock()
@@ -302,6 +311,7 @@ class TestDatabaseRepositoryCritical:
             await mock_cache.set("user:2", db_result, ttl=300)
         
         mock_cache.set.assert_called_once()
+    @pytest.mark.asyncio
     async def test_bulk_operations(self):
         """Test bulk database operations"""
         mock_bulk_ops = AsyncMock()

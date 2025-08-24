@@ -11,7 +11,7 @@ import asyncio
 import time
 from datetime import UTC, datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from fastapi import WebSocket
@@ -52,6 +52,7 @@ class TestWebSocketManagerConnectionPooling:
 
         return WebSocketTestHelpers.create_mock_websockets(5)
     
+    @pytest.mark.asyncio
     async def test_websocket_manager_singleton_pattern(self):
 
         """Test WebSocket manager singleton pattern"""
@@ -78,6 +79,7 @@ class TestWebSocketManagerConnectionPooling:
 
         assert id(m1) == id(m2) == id(m3)
         
+    @pytest.mark.asyncio
     async def test_connection_establishment(self, websocket_manager, mock_websockets):
 
         """Test WebSocket connection establishment"""
@@ -108,6 +110,7 @@ class TestWebSocketManagerConnectionPooling:
 
         assert len(websocket_manager.connection_manager.active_connections[user_id]) == 1
         
+    @pytest.mark.asyncio
     async def test_multiple_connections_same_user(self, websocket_manager):
 
         """Test multiple connections for same user"""
@@ -146,6 +149,7 @@ class TestWebSocketManagerConnectionPooling:
 
         assert len(connection_ids) == 3
         
+    @pytest.mark.asyncio
     async def test_connection_limit_enforcement(self, websocket_manager):
 
         """Test enforcement of connection limits per user"""
@@ -198,6 +202,7 @@ class TestWebSocketManagerConnectionPooling:
 
         assert oldest_ws.close_code == 1008
         
+    @pytest.mark.asyncio
     async def test_connection_cleanup_on_disconnect(self, websocket_manager, mock_websockets):
 
         """Test connection cleanup when WebSocket disconnects"""
@@ -234,6 +239,7 @@ class TestWebSocketManagerConnectionPooling:
 
         assert websocket.state == WebSocketState.DISCONNECTED
         
+    @pytest.mark.asyncio
     async def test_heartbeat_mechanism(self, websocket_manager):
 
         """Test WebSocket heartbeat mechanism"""
@@ -288,6 +294,7 @@ class TestWebSocketManagerConnectionPooling:
 
         ]
         
+    @pytest.mark.asyncio
     async def test_heartbeat_timeout_detection(self, websocket_manager):
 
         """Test detection of heartbeat timeouts"""
@@ -311,6 +318,7 @@ class TestWebSocketManagerConnectionPooling:
 
         await websocket_manager.disconnect_user(user_id, websocket)
         
+    @pytest.mark.asyncio
     async def test_concurrent_connection_management(self, websocket_manager):
 
         """Test concurrent connection establishment and cleanup"""
@@ -391,6 +399,7 @@ class TestWebSocketManagerConnectionPooling:
 
         assert len(websocket_manager.connection_manager.connection_registry) == 0
         
+    @pytest.mark.asyncio
     async def test_message_broadcasting_to_multiple_connections(self, websocket_manager):
 
         """Test broadcasting messages to multiple connections"""
@@ -439,6 +448,7 @@ class TestWebSocketManagerConnectionPooling:
 
             await websocket_manager.disconnect_user(user_id, websocket)
             
+    @pytest.mark.asyncio
     async def test_connection_statistics_tracking(self, websocket_manager):
 
         """Test connection statistics tracking"""

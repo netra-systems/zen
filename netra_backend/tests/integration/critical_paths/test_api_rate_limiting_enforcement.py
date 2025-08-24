@@ -129,6 +129,7 @@ class RateLimitTester:
             print(f"[ERROR] User setup error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_basic_rate_limit(self) -> bool:
         """Test basic per-user rate limiting."""
         print("\n[BASIC] STEP 2: Testing basic rate limiting...")
@@ -182,6 +183,7 @@ class RateLimitTester:
             print(f"[ERROR] Basic rate limit test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_burst_handling(self) -> bool:
         """Test burst request handling."""
         print("\n[BURST] STEP 3: Testing burst handling...")
@@ -229,6 +231,7 @@ class RateLimitTester:
             print(f"[ERROR] Burst handling test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_per_endpoint_limits(self) -> bool:
         """Test different rate limits per endpoint."""
         print("\n[ENDPOINT] STEP 4: Testing per-endpoint rate limits...")
@@ -290,6 +293,7 @@ class RateLimitTester:
             print(f"[ERROR] Per-endpoint limits test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_tier_based_limits(self) -> bool:
         """Test different rate limits for user tiers."""
         print("\n[TIERS] STEP 5: Testing tier-based rate limits...")
@@ -343,6 +347,7 @@ class RateLimitTester:
             print(f"[ERROR] Tier-based limits test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_retry_after_header(self) -> bool:
         """Test Retry-After header in rate limit responses."""
         print("\n[RETRY] STEP 6: Testing Retry-After header...")
@@ -386,6 +391,7 @@ class RateLimitTester:
             print(f"[ERROR] Retry-After test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_distributed_rate_limiting(self) -> bool:
         """Test distributed rate limiting across multiple connections."""
         print("\n[DISTRIBUTED] STEP 7: Testing distributed rate limiting...")
@@ -443,6 +449,7 @@ class RateLimitTester:
             print(f"[ERROR] Distributed rate limiting test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_rate_limit_reset(self) -> bool:
         """Test rate limit reset after time window."""
         print("\n[RESET] STEP 8: Testing rate limit reset...")
@@ -499,6 +506,7 @@ class RateLimitTester:
             print(f"[ERROR] Rate limit reset test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_ip_based_limiting(self) -> bool:
         """Test IP-based rate limiting (unauthenticated)."""
         print("\n[IP] STEP 9: Testing IP-based rate limiting...")
@@ -536,6 +544,7 @@ class RateLimitTester:
             print(f"[ERROR] IP-based limiting test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_rate_limit_metrics(self) -> bool:
         """Test rate limit metrics and monitoring."""
         print("\n[METRICS] STEP 10: Testing rate limit metrics...")
@@ -623,6 +632,7 @@ class RateLimitTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_api_rate_limiting_enforcement():
     """Test API rate limiting enforcement."""
     async with RateLimitTester() as tester:

@@ -84,6 +84,7 @@ class DatabaseTransactionL4Tester:
         except Exception as e:
             raise RuntimeError(f"Staging database connectivity verification failed: {e}")
     
+    @pytest.mark.asyncio
     async def test_postgres_transaction_atomicity(self, transaction_data: Dict[str, Any]) -> Dict[str, Any]:
         """Test PostgreSQL ACID atomicity with multi-operation transactions."""
         transaction_id = str(uuid.uuid4())
@@ -171,6 +172,7 @@ class DatabaseTransactionL4Tester:
                 "staging_verified": True
             }
     
+    @pytest.mark.asyncio
     async def test_clickhouse_consistency(self, analytics_data: Dict[str, Any]) -> Dict[str, Any]:
         """Test ClickHouse data consistency with basic operations."""
         sync_id = str(uuid.uuid4())

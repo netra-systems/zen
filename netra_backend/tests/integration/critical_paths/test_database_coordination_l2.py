@@ -15,7 +15,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -120,7 +120,7 @@ class TestDatabaseCoordinationL2:
                 self.active += 1
                 return MagicMock()
             
-            def release(self, conn):
+            async def release(self, conn):
                 self.active -= 1
         
         pool = ConnectionPool(max_size=3)
@@ -245,7 +245,7 @@ class TestDatabaseCoordinationL2:
                 ordered = []
                 visited = set()
                 
-                def visit(migration):
+                async def visit(migration):
                     if migration["name"] in visited:
                         return
                     visited.add(migration["name"])
@@ -435,7 +435,7 @@ class TestDatabaseCoordinationL2:
                 self.locks[resource] = time.time()
                 return True
             
-            def release(self, resource):
+            async def release(self, resource):
                 self.locks.pop(resource, None)
         
         manager = LockManager()
@@ -573,7 +573,7 @@ class TestDatabaseCoordinationL2:
                 self.last_refresh[view_name] = datetime.now()
                 return time.time() - start
             
-            def needs_refresh(self, view_name, max_age_seconds=3600):
+            async def needs_refresh(self, view_name, max_age_seconds=3600):
                 if view_name not in self.last_refresh:
                     return True
                 
@@ -757,7 +757,7 @@ class TestDatabaseCoordinationL2:
             async def record_error(self, error):
                 self.metrics["error_count"] += 1
             
-            def get_health_status(self):
+            async def get_health_status(self):
                 if self.metrics["error_count"] > 10:
                     return "unhealthy"
                 elif len(self.metrics["slow_queries"]) > 5:

@@ -643,6 +643,7 @@ async def timeout_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_service_timeout_handling(timeout_manager):
     """Test basic service timeout handling."""
     # Test request that should timeout
@@ -658,6 +659,7 @@ async def test_service_timeout_handling(timeout_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_timeout_retry_mechanism(timeout_manager):
     """Test timeout retry mechanisms."""
     # Test request that times out but should retry
@@ -676,6 +678,7 @@ async def test_timeout_retry_mechanism(timeout_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_circuit_breaker_activation(timeout_manager):
     """Test circuit breaker activation on repeated timeouts."""
     # Make multiple requests to trigger circuit breaker
@@ -698,6 +701,7 @@ async def test_circuit_breaker_activation(timeout_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_timeout_cascade_detection(timeout_manager):
     """Test detection of timeout cascades."""
     cascade_result = await timeout_manager.simulate_timeout_cascade(
@@ -715,6 +719,7 @@ async def test_timeout_cascade_detection(timeout_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_different_timeout_types(timeout_manager):
     """Test different types of timeouts."""
     timeout_scenarios = [
@@ -733,6 +738,7 @@ async def test_different_timeout_types(timeout_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_service_recovery_after_timeout(timeout_manager):
     """Test service recovery after timeout issues."""
     service_path = "/api/v1/users"
@@ -755,6 +761,7 @@ async def test_service_recovery_after_timeout(timeout_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_concurrent_timeout_handling(timeout_manager):
     """Test concurrent timeout handling."""
     # Make concurrent requests with various delays
@@ -779,6 +786,7 @@ async def test_concurrent_timeout_handling(timeout_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_network_partition_simulation(timeout_manager):
     """Test network partition timeout scenario."""
     cascade_result = await timeout_manager.simulate_timeout_cascade(
@@ -794,6 +802,7 @@ async def test_network_partition_simulation(timeout_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_timeout_metrics_accuracy(timeout_manager):
     """Test accuracy of timeout metrics collection."""
     # Generate timeout events
@@ -830,6 +839,7 @@ async def test_timeout_metrics_accuracy(timeout_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_timeout_performance_requirements(timeout_manager):
     """Test timeout performance requirements."""
     # Test that timeout detection is fast

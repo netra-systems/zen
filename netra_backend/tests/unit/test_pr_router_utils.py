@@ -8,7 +8,7 @@ or removed as the functionality no longer exists in the current implementation.
 import sys
 from pathlib import Path
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from fastapi import HTTPException

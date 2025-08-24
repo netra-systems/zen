@@ -300,6 +300,7 @@ async def retry_dead_letter_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_basic_retry_mechanism_l3(retry_dead_letter_manager):
     """Test basic job retry mechanism with real Redis infrastructure."""
     # Enqueue retry test jobs
@@ -327,6 +328,7 @@ async def test_basic_retry_mechanism_l3(retry_dead_letter_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_exponential_backoff_implementation_l3(retry_dead_letter_manager):
     """Test exponential backoff retry delays with real timing."""
     # Enqueue a single flaky job for precise timing measurement
@@ -368,6 +370,7 @@ async def test_exponential_backoff_implementation_l3(retry_dead_letter_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_dead_letter_queue_handling_l3(retry_dead_letter_manager):
     """Test dead letter queue for permanently failed jobs."""
     # Enqueue jobs that will fail permanently
@@ -416,6 +419,7 @@ async def test_dead_letter_queue_handling_l3(retry_dead_letter_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_retry_limit_enforcement_l3(retry_dead_letter_manager):
     """Test that retry limits are properly enforced."""
     # Enqueue job with specific retry limit
@@ -457,6 +461,7 @@ async def test_retry_limit_enforcement_l3(retry_dead_letter_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_successful_retry_recovery_l3(retry_dead_letter_manager):
     """Test successful job recovery after initial failure."""
     # Enqueue recovery job that succeeds on retry
@@ -496,6 +501,7 @@ async def test_successful_retry_recovery_l3(retry_dead_letter_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_concurrent_retry_handling_l3(retry_dead_letter_manager):
     """Test retry handling under concurrent load."""
     # Enqueue multiple jobs with different retry scenarios

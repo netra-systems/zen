@@ -10,7 +10,7 @@ that could result in enterprise contract penalties and customer churn.
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -55,6 +55,7 @@ class TestHealthCheckersCore:
         return mock_manager, mock_client
     
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
+    @pytest.mark.asyncio
     async def test_check_postgres_health_success(self, mock_db_manager, mock_postgres_engine):
         """Test successful PostgreSQL health check."""
         # Mock db_manager.get_async_session to return a working session
@@ -72,6 +73,7 @@ class TestHealthCheckersCore:
         assert result.details["success"] is True
     
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
+    @pytest.mark.asyncio
     async def test_check_postgres_health_no_engine(self, mock_db_manager):
         """Test PostgreSQL health check with no engine."""
         # Mock db_manager to raise ValueError (forcing fallback to direct engine)
@@ -89,6 +91,7 @@ class TestHealthCheckersCore:
         assert "Connection failed" in error_msg or "Database engine not initialized" in error_msg
     
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
+    @pytest.mark.asyncio
     async def test_check_postgres_health_connection_error(self, mock_db_manager):
         """Test PostgreSQL health check with connection error."""
         # Mock db_manager to raise connection error
@@ -106,6 +109,7 @@ class TestHealthCheckersCore:
     @patch('netra_backend.app.db.clickhouse.get_clickhouse_client')
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
     @patch('netra_backend.app.core.health_checkers._is_clickhouse_disabled')
+    @pytest.mark.asyncio
     async def test_check_clickhouse_health_success(self, mock_disabled, mock_dev_mode, mock_get_client, mock_clickhouse_client):
         """Test successful ClickHouse health check."""
         mock_dev_mode.return_value = False
@@ -121,6 +125,7 @@ class TestHealthCheckersCore:
     
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
     @patch('netra_backend.app.core.health_checkers._is_clickhouse_disabled')
+    @pytest.mark.asyncio
     async def test_check_clickhouse_health_disabled_in_dev(self, mock_disabled, mock_dev_mode):
         """Test ClickHouse health check when disabled in development."""
         mock_dev_mode.return_value = True
@@ -135,6 +140,7 @@ class TestHealthCheckersCore:
     @patch('netra_backend.app.db.clickhouse.get_clickhouse_client')
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
     @patch('netra_backend.app.core.health_checkers._is_clickhouse_disabled')
+    @pytest.mark.asyncio
     async def test_check_clickhouse_health_connection_error(self, mock_disabled, mock_dev_mode, mock_get_client):
         """Test ClickHouse health check with connection error."""
         mock_dev_mode.return_value = False
@@ -148,6 +154,7 @@ class TestHealthCheckersCore:
         assert "ClickHouse connection failed" in result.details["error_message"]
     
     @patch('netra_backend.app.redis_manager.redis_manager')
+    @pytest.mark.asyncio
     async def test_check_redis_health_success(self, mock_manager, mock_redis_manager):
         """Test successful Redis health check."""
         redis_manager, redis_client = mock_redis_manager
@@ -162,6 +169,7 @@ class TestHealthCheckersCore:
         redis_client.ping.assert_called_once()
     
     @patch('netra_backend.app.redis_manager.redis_manager')
+    @pytest.mark.asyncio
     async def test_check_redis_health_disabled(self, mock_manager):
         """Test Redis health check when disabled."""
         mock_manager.enabled = False
@@ -173,6 +181,7 @@ class TestHealthCheckersCore:
         assert "Redis disabled in development" in result.details["error_message"]
     
     @patch('netra_backend.app.redis_manager.redis_manager')
+    @pytest.mark.asyncio
     async def test_check_redis_health_no_client(self, mock_manager):
         """Test Redis health check when client unavailable."""
         mock_manager.enabled = True
@@ -185,6 +194,7 @@ class TestHealthCheckersCore:
         assert "Redis client not available" in result.details["error_message"]
     
     @patch('netra_backend.app.websocket_core.utils.get_connection_monitor')
+    @pytest.mark.asyncio
     async def test_check_websocket_health_success(self, mock_get_manager):
         """Test successful WebSocket health check."""
         mock_manager = self._create_mock_websocket_manager()
@@ -198,6 +208,7 @@ class TestHealthCheckersCore:
         assert "metadata" in result.details
     
     @patch('netra_backend.app.websocket_core.utils.get_connection_monitor')
+    @pytest.mark.asyncio
     async def test_check_websocket_health_manager_error(self, mock_get_manager):
         """Test WebSocket health check with manager error."""
         mock_get_manager.side_effect = Exception("WebSocket manager error")

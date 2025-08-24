@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -61,10 +61,12 @@ class TestHTTPClientManager:
         
         assert client1 is client2
         assert len(manager._clients) == 1
+    @pytest.mark.asyncio
     async def test_health_check_all_empty(self, manager):
         """Test health check with no clients."""
         result = await manager.health_check_all()
         assert result == {}
+    @pytest.mark.asyncio
     async def test_health_check_all_with_clients(self, manager):
         """Test health check with multiple clients."""
         mock_clients = self._setup_mock_clients(manager)
@@ -91,10 +93,12 @@ class TestHTTPClientManager:
         assert result["client2"] == {"status": "degraded"}
         mock_clients["client1"].health_check.assert_called_once_with("client1")
         mock_clients["client2"].health_check.assert_called_once_with("client2")
+    @pytest.mark.asyncio
     async def test_close_all_empty(self, manager):
         """Test closing all clients when none exist."""
         await manager.close_all()
         assert manager._clients == {}
+    @pytest.mark.asyncio
     async def test_close_all_with_clients(self, manager):
         """Test closing all clients."""
         mock_clients = self._setup_mock_clients_for_close(manager)
@@ -121,9 +125,10 @@ class TestHTTPClientManager:
 
 class TestGetHTTPClient:
     """Test get_http_client context manager."""
+    @pytest.mark.asyncio
     async def test_get_http_client_context_manager(self):
         """Test get_http_client context manager."""
-        from unittest.mock import Mock, patch
+        from unittest.mock import Mock, patch, AsyncMock, MagicMock
         with patch('app.services.external_api_client.http_client_manager') as mock_manager:
             mock_client = Mock()
             mock_manager.get_client.return_value = mock_client

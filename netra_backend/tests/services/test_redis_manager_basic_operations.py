@@ -6,7 +6,7 @@ Tests Redis GET, SET, DELETE operations and connection management
 import sys
 from pathlib import Path
 
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -32,12 +32,14 @@ from netra_backend.tests.helpers.redis_test_helpers import (
 
 class TestRedisManagerOperations:
     """Test basic Redis manager operations"""
+    @pytest.mark.asyncio
     async def test_redis_manager_initialization(self):
         """Test Redis manager initialization"""
         manager = RedisManager()
         assert hasattr(manager, 'enabled')
         assert hasattr(manager, 'redis_client')
         assert manager.redis_client == None
+    @pytest.mark.asyncio
     async def test_redis_connection_success(self, mock_redis_client):
         """Test successful Redis connection"""
         manager = RedisManager()
@@ -49,6 +51,7 @@ class TestRedisManagerOperations:
                 await manager.connect()
         
         assert manager.redis_client is mock_redis_client
+    @pytest.mark.asyncio
     async def test_redis_connection_failure(self):
         """Test Redis connection failure handling"""
         manager = RedisManager()
@@ -64,6 +67,7 @@ class TestRedisManagerOperations:
                 setup_redis_settings_mock(mock_settings)
                 await manager.connect()
                 assert manager.redis_client == None
+    @pytest.mark.asyncio
     async def test_redis_get_operation(self, redis_manager, mock_redis_client):
         """Test Redis GET operation"""
         test_key = "test_key"
@@ -75,12 +79,14 @@ class TestRedisManagerOperations:
         verify_redis_get_result(result, test_value)
         verify_redis_operation_basic(mock_redis_client, 1)
         verify_command_in_history(mock_redis_client, ('get', test_key))
+    @pytest.mark.asyncio
     async def test_redis_get_nonexistent_key(self, redis_manager, mock_redis_client):
         """Test Redis GET operation for nonexistent key"""
         result = await redis_manager.get("nonexistent_key")
         
         verify_redis_get_result(result, None)
         verify_redis_operation_basic(mock_redis_client, 1)
+    @pytest.mark.asyncio
     async def test_redis_set_operation(self, redis_manager, mock_redis_client):
         """Test Redis SET operation"""
         test_key = "set_test_key"
@@ -91,6 +97,7 @@ class TestRedisManagerOperations:
         verify_redis_set_result(result, mock_redis_client, test_key, test_value)
         verify_redis_operation_basic(mock_redis_client, 1)
         verify_command_in_history(mock_redis_client, ('set', test_key, test_value, None))
+    @pytest.mark.asyncio
     async def test_redis_set_with_expiration(self, redis_manager, mock_redis_client):
         """Test Redis SET operation with expiration"""
         test_key = "expire_test_key"
@@ -101,6 +108,7 @@ class TestRedisManagerOperations:
         
         verify_redis_set_result(result, mock_redis_client, test_key, test_value)
         verify_redis_set_with_ttl(mock_redis_client, test_key, expiration)
+    @pytest.mark.asyncio
     async def test_redis_set_backward_compatibility(self, redis_manager, mock_redis_client):
         """Test Redis SET backward compatibility with 'expire' parameter"""
         test_key = "compat_test_key"
@@ -111,6 +119,7 @@ class TestRedisManagerOperations:
         
         verify_redis_set_result(result, mock_redis_client, test_key, test_value)
         verify_redis_set_with_ttl(mock_redis_client, test_key, expiration)
+    @pytest.mark.asyncio
     async def test_redis_delete_operation(self, redis_manager, mock_redis_client):
         """Test Redis DELETE operation"""
         test_key = "delete_test_key"
@@ -121,12 +130,14 @@ class TestRedisManagerOperations:
         
         verify_redis_delete_result(result, mock_redis_client, test_key, 1)
         verify_command_in_history(mock_redis_client, ('delete', test_key))
+    @pytest.mark.asyncio
     async def test_redis_delete_nonexistent_key(self, redis_manager, mock_redis_client):
         """Test Redis DELETE operation for nonexistent key"""
         result = await redis_manager.delete("nonexistent_delete_key")
         
         verify_redis_delete_result(result, mock_redis_client, "nonexistent_delete_key", 0)
         verify_redis_operation_basic(mock_redis_client, 1)
+    @pytest.mark.asyncio
     async def test_redis_operations_when_disabled(self):
         """Test Redis operations when service is disabled"""
         manager = create_disabled_redis_manager()
@@ -136,6 +147,7 @@ class TestRedisManagerOperations:
         delete_result = await manager.delete("test_key")
         
         verify_disabled_operations(get_result, set_result, delete_result)
+    @pytest.mark.asyncio
     async def test_redis_disconnect(self, redis_manager, mock_redis_client):
         """Test Redis disconnection"""
         assert redis_manager.redis_client != None

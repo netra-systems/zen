@@ -10,7 +10,7 @@ from pathlib import Path
 
 import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -101,6 +101,7 @@ class TestAuthBruteForceProtectionL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_failed_login_tracking(self):
         """Test tracking of failed login attempts"""
         auth_service = MockAuthService()
@@ -120,6 +121,7 @@ class TestAuthBruteForceProtectionL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_account_lockout_after_threshold(self):
         """Test account lockout after exceeding attempt threshold"""
         auth_service = MockAuthService()
@@ -147,6 +149,7 @@ class TestAuthBruteForceProtectionL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_lockout_duration_expiry(self):
         """Test automatic unlock after lockout duration"""
         auth_service = MockAuthService()
@@ -172,6 +175,7 @@ class TestAuthBruteForceProtectionL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_ip_based_rate_limiting(self):
         """Test IP-based login rate limiting"""
         auth_service = MockAuthService()
@@ -193,6 +197,7 @@ class TestAuthBruteForceProtectionL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_captcha_requirement_after_failures(self):
         """Test CAPTCHA requirement after multiple failures"""
         auth_service = MockAuthService()

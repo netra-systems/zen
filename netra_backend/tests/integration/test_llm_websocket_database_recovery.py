@@ -15,7 +15,7 @@ import time
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -25,6 +25,7 @@ class TestLLMManagerInit:
 
     """Test 7: LLM Manager Connection Pool Initialization"""
     
+    @pytest.mark.asyncio
     async def test_connection_pool_creation(self):
 
         """Test LLM connection pool initializes properly."""
@@ -52,6 +53,7 @@ class TestLLMManagerInit:
 
         llm_manager.initialize_pool.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_provider_health_checks(self):
 
         """Test health checks for each LLM provider."""
@@ -79,6 +81,7 @@ class TestLLMManagerInit:
 
         assert healthy_count >= 2
     
+    @pytest.mark.asyncio
     async def test_connection_pool_warmup(self):
 
         """Test connection pool warmup reduces first-call latency."""
@@ -113,6 +116,7 @@ class TestWebSocketRecovery:
 
     """Test 8: WebSocket Reconnect State Recovery"""
     
+    @pytest.mark.asyncio
     async def test_state_preservation_on_disconnect(self):
 
         """Test state is preserved when WebSocket disconnects."""
@@ -142,6 +146,7 @@ class TestWebSocketRecovery:
 
         assert preserved is True
     
+    @pytest.mark.asyncio
     async def test_automatic_reconnection_logic(self):
 
         """Test automatic reconnection with exponential backoff."""
@@ -170,6 +175,7 @@ class TestWebSocketRecovery:
 
         assert reconnect_attempts[2]["delay"] == 4  # 2^2
     
+    @pytest.mark.asyncio
     async def test_message_queue_recovery(self):
 
         """Test pending messages are recovered after reconnect."""
@@ -200,6 +206,7 @@ class TestDatabaseRollback:
 
     """Test 9: Database Transaction Rollback Safety"""
     
+    @pytest.mark.asyncio
     async def test_transaction_atomicity(self):
 
         """Test database transactions are atomic."""
@@ -237,6 +244,7 @@ class TestDatabaseRollback:
             
             assert rolled_back is True
     
+    @pytest.mark.asyncio
     async def test_nested_transaction_handling(self):
 
         """Test nested transactions handle correctly."""
@@ -269,6 +277,7 @@ class TestDatabaseRollback:
 
         assert inner_transaction["status"] == "rolled_back"
     
+    @pytest.mark.asyncio
     async def test_distributed_transaction_coordination(self):
 
         """Test coordination between multiple databases."""

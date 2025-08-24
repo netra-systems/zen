@@ -19,13 +19,13 @@ from pathlib import Path
 import os
 from pathlib import Path
 from typing import Dict, Optional, Set
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-# from scripts.dev_launcher_google_secret_manager import  # Should be mocked in tests GoogleSecretManager
-# from scripts.dev_launcher_secret_config import  # Should be mocked in tests SecretConfig
-# from scripts.dev_launcher_secret_loader import  # Should be mocked in tests SecretLoader
+# Removed broken import statement
+# Removed broken import statement
+# Removed broken import statement
 from test_framework.mock_utils import mock_justified
 
 class TestStagingSecretsManagerIntegration:

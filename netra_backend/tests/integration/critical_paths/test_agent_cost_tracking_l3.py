@@ -24,7 +24,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import ROUND_HALF_UP, Decimal
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
@@ -436,6 +436,7 @@ class AgentCostTracker:
         
         return cost_entry
     
+    @pytest.mark.asyncio
     async def test_cost_calculation_accuracy(self, test_cases: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test cost calculation accuracy against known test cases."""
         accuracy_results = []
@@ -469,6 +470,7 @@ class AgentCostTracker:
             "failed_cases": [r for r in accuracy_results if not r["within_tolerance"]]
         }
     
+    @pytest.mark.asyncio
     async def test_budget_enforcement(self, budget_test_scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Test budget enforcement mechanisms."""
         # Set up budget limit
@@ -517,6 +519,7 @@ class AgentCostTracker:
         
         return test_results
     
+    @pytest.mark.asyncio
     async def test_real_time_tracking_performance(self, concurrent_operations: int) -> Dict[str, Any]:
         """Test real-time cost tracking performance under load."""
         start_time = time.time()
@@ -591,6 +594,7 @@ async def agent_cost_tracker():
 class TestAgentCostTrackingL3:
     """L3 integration tests for agent cost tracking and budgeting."""
     
+    @pytest.mark.asyncio
     async def test_cost_calculation_accuracy_above_99_percent(self, agent_cost_tracker):
         """Test cost calculation accuracy exceeds 99% target."""
         tracker = agent_cost_tracker
@@ -648,6 +652,7 @@ class TestAgentCostTrackingL3:
             assert result["within_tolerance"], \
                 f"Cost calculation for {result['cost_type']} should meet tolerance"
     
+    @pytest.mark.asyncio
     async def test_real_time_cost_tracking(self, agent_cost_tracker):
         """Test real-time cost tracking performance and accuracy."""
         tracker = agent_cost_tracker
@@ -673,6 +678,7 @@ class TestAgentCostTrackingL3:
         assert metrics["cost_tracking"]["total_entries"] >= 50, \
             "All cost entries should be tracked"
     
+    @pytest.mark.asyncio
     async def test_budget_enforcement_mechanisms(self, agent_cost_tracker):
         """Test budget enforcement and alert systems."""
         tracker = agent_cost_tracker
@@ -725,6 +731,7 @@ class TestAgentCostTrackingL3:
         assert metrics["budget_enforcement"]["active_budgets"] >= 1, \
             "Active budget should be tracked"
     
+    @pytest.mark.asyncio
     async def test_cost_attribution_accuracy(self, agent_cost_tracker):
         """Test accurate cost attribution to users, agents, and sessions."""
         tracker = agent_cost_tracker
@@ -796,6 +803,7 @@ class TestAgentCostTrackingL3:
             assert entry.session_id is not None, \
                 "All entries should have session attribution"
     
+    @pytest.mark.asyncio
     async def test_usage_forecasting_capabilities(self, agent_cost_tracker):
         """Test usage forecasting accuracy and capabilities."""
         tracker = agent_cost_tracker
@@ -842,6 +850,7 @@ class TestAgentCostTrackingL3:
         assert accuracy >= 80.0, \
             f"Forecast accuracy {accuracy:.1f}% should be ≥80%"
     
+    @pytest.mark.asyncio
     async def test_budget_alert_systems(self, agent_cost_tracker):
         """Test budget alert and notification systems."""
         tracker = agent_cost_tracker
@@ -901,6 +910,7 @@ class TestAgentCostTrackingL3:
             assert alert["budget_id"] == "alert_test_budget", \
                 "Alert should reference correct budget"
     
+    @pytest.mark.asyncio
     async def test_concurrent_cost_tracking_consistency(self, agent_cost_tracker):
         """Test cost tracking consistency under concurrent operations."""
         tracker = agent_cost_tracker
@@ -946,6 +956,7 @@ class TestAgentCostTrackingL3:
         assert abs(total_tracked_cost - expected_cost) < 0.01, \
             f"Total cost {total_tracked_cost:.4f} should match expected {expected_cost:.4f}"
     
+    @pytest.mark.asyncio
     async def test_comprehensive_cost_management_workflow(self, agent_cost_tracker):
         """Test complete cost management workflow from tracking to forecasting."""
         tracker = agent_cost_tracker

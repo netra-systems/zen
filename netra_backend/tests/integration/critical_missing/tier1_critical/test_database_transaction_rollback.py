@@ -55,6 +55,7 @@ async def db_session(l3_database):
         yield conn
 
 @pytest.fixture
+@pytest.mark.asyncio
 async def test_data():
     """Test data for transaction scenarios"""
     return {
@@ -78,6 +79,7 @@ async def test_data():
 class TestDatabaseTransactionRollback:
     """Test multi-table transaction rollback scenarios"""
 
+    @pytest.mark.asyncio
     async def test_basic_transaction_rollback(self, db_session, test_data):
         """Test basic single-table transaction rollback < 100ms"""
         start_time = time.time()
@@ -102,6 +104,7 @@ class TestDatabaseTransactionRollback:
         )
         assert result is None
 
+    @pytest.mark.asyncio
     async def test_multi_table_rollback_cascade(self, db_session, test_data):
         """Test multi-table transaction rollback cascade"""
         try:
@@ -142,6 +145,7 @@ class TestDatabaseTransactionRollback:
         assert thread_result is None
         assert message_count == 0
 
+    @pytest.mark.asyncio
     async def test_nested_transaction_rollback(self, db_session, test_data):
         """Test nested transaction rollback scenarios"""
         user = test_data["user"]
@@ -172,6 +176,7 @@ class TestDatabaseTransactionRollback:
         except Exception:
             pass
 
+    @pytest.mark.asyncio
     async def test_deadlock_detection_and_rollback(self, db_session, test_data):
         """Test deadlock detection and automatic rollback"""
         user1 = test_data["user"]
@@ -218,6 +223,7 @@ class TestDatabaseTransactionRollback:
         
         await asyncio.gather(transaction1(), transaction2())
 
+    @pytest.mark.asyncio
     async def test_concurrent_rollback_scenarios(self, db_session, test_data):
         """Test concurrent transaction rollback scenarios"""
         tasks = []
@@ -248,6 +254,7 @@ class TestDatabaseTransactionRollback:
         except DatabaseTransactionError as e:
             raise e
 
+    @pytest.mark.asyncio
     async def test_rollback_with_recovery_strategy(self, db_session, test_data):
         """Test rollback with database recovery strategy"""
         recovery_strategy = ConnectionPoolRefreshStrategy()
@@ -273,6 +280,7 @@ class TestDatabaseTransactionRollback:
         except DatabaseTransactionError:
             pass
 
+    @pytest.mark.asyncio
     async def test_large_transaction_rollback_performance(self, db_session, test_data):
         """Test large transaction rollback performance < 100ms"""
         start_time = time.time()

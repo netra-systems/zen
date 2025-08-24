@@ -23,7 +23,7 @@ import asyncio
 import statistics
 from datetime import datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -125,11 +125,12 @@ def sla_tracker():
 @pytest.fixture
 async def enterprise_monitoring_infrastructure():
     """Setup enterprise monitoring infrastructure."""
-    return await MonitoringTestHelpers.setup_telemetry_infrastructure()
+    yield await MonitoringTestHelpers.setup_telemetry_infrastructure()
 
 class TestEnterpriseResponseTimeSLA:
     """Test Enterprise tier response time SLA compliance."""
 
+    @pytest.mark.asyncio
     async def test_api_response_time_sla_compliance(self, sla_tracker):
         """Test API response times meet Enterprise SLA (<100ms p99)."""
         await self._generate_response_time_samples(sla_tracker, 100)
@@ -146,6 +147,7 @@ class TestEnterpriseResponseTimeSLA:
                 response_time = 50 + (i % 30)  # 50-80ms
             tracker.record_response_time(f"endpoint_{i%10}", response_time)
 
+    @pytest.mark.asyncio
     async def test_critical_path_response_times(self, sla_tracker):
         """Test critical business path response times."""
         critical_endpoints = [("auth_validate", 45), ("websocket_connect", 25), ("agent_dispatch", 85)]
@@ -154,6 +156,7 @@ class TestEnterpriseResponseTimeSLA:
         compliance = sla_tracker._check_response_time_sla()
         assert compliance["compliant"], "Critical path response times exceed SLA"
 
+    @pytest.mark.asyncio
     async def test_sla_breach_detection_alerting(self, sla_tracker):
         """Test SLA breach detection triggers appropriate alerts."""
         sla_tracker.record_response_time("slow_endpoint", 150)
@@ -165,6 +168,7 @@ class TestEnterpriseResponseTimeSLA:
 class TestEnterpriseAvailabilitySLA:
     """Test Enterprise tier availability SLA compliance (>99.9%)."""
 
+    @pytest.mark.asyncio
     async def test_service_availability_monitoring(self, sla_tracker):
         """Test comprehensive service availability monitoring."""
         services = ["api_gateway", "auth_service", "agent_manager", "websocket_service"]
@@ -175,6 +179,7 @@ class TestEnterpriseAvailabilitySLA:
         compliance = sla_tracker._check_availability_sla()
         assert compliance["compliant"], f"Availability SLA violated: {compliance['uptime']}"
 
+    @pytest.mark.asyncio
     async def test_availability_during_deployments(self, sla_tracker):
         """Test availability maintained during rolling deployments."""
         for phase in ["phase1", "phase2", "phase3"]:
@@ -184,6 +189,7 @@ class TestEnterpriseAvailabilitySLA:
         compliance = sla_tracker._check_availability_sla()
         assert compliance["uptime"] > 0.98, "Deployment impacts availability too much"
 
+    @pytest.mark.asyncio
     async def test_availability_failure_detection(self, sla_tracker):
         """Test availability failure detection and logging."""
         sla_tracker.record_availability_check("test_service", False)
@@ -194,6 +200,7 @@ class TestEnterpriseAvailabilitySLA:
 class TestEnterpriseThroughputSLA:
     """Test Enterprise tier throughput SLA compliance (>1000 RPS)."""
 
+    @pytest.mark.asyncio
     async def test_peak_throughput_capacity(self, sla_tracker):
         """Test system can handle >1000 RPS for Enterprise SLA."""
         throughput_samples = [1200, 1150, 1300, 1100, 1250, 1180, 1220]
@@ -202,6 +209,7 @@ class TestEnterpriseThroughputSLA:
         compliance = sla_tracker._check_throughput_sla()
         assert compliance["compliant"], f"Throughput SLA violated: peak={compliance['peak_rps']} RPS"
 
+    @pytest.mark.asyncio
     async def test_sustained_throughput_performance(self, sla_tracker):
         """Test sustained throughput maintains SLA over time."""
         for second in range(10):
@@ -212,6 +220,7 @@ class TestEnterpriseThroughputSLA:
         compliance = sla_tracker._check_throughput_sla()
         assert compliance["compliant"], "Sustained throughput drops below SLA"
 
+    @pytest.mark.asyncio
     async def test_throughput_degradation_monitoring(self, sla_tracker):
         """Test throughput degradation detection and alerting."""
         sla_tracker.record_throughput(800)  # Below 1000 RPS requirement
@@ -223,6 +232,7 @@ class TestEnterpriseThroughputSLA:
 class TestSLAComplianceReporting:
     """Test SLA compliance reporting and monitoring integration."""
 
+    @pytest.mark.asyncio
     async def test_comprehensive_sla_compliance_report(self, sla_tracker, enterprise_monitoring_infrastructure):
         """Test comprehensive SLA compliance reporting."""
         await self._generate_compliant_workload(sla_tracker)
@@ -243,6 +253,7 @@ class TestSLAComplianceReporting:
         for rps in [1100, 1200, 1150, 1300, 1180]:
             tracker.record_throughput(rps)
 
+    @pytest.mark.asyncio
     async def test_sla_violation_escalation_workflow(self, sla_tracker):
         """Test SLA violation triggers escalation workflow."""
         violations = [("response_time", "critical_api", 200), ("availability", "auth_service", 0), ("throughput", "api_gateway", 500)]

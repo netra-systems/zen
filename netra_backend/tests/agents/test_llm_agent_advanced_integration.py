@@ -11,7 +11,7 @@ from pathlib import Path
 import asyncio
 import time
 import uuid
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 

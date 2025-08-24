@@ -61,6 +61,7 @@ class TestWebSocketBasicReconnection:
 
         return create_standard_reconnection_config()
     
+    @pytest.mark.asyncio
     async def test_basic_reconnection_cycle(self, recovery_setup):
 
         """Test basic WebSocket reconnection cycle with telemetry tracking."""
@@ -121,6 +122,7 @@ class TestWebSocketBasicReconnection:
 
         assert manager.telemetry["connections_opened"] >= 2, "Reconnection should be tracked"
     
+    @pytest.mark.asyncio
     async def test_connection_state_preservation(self, recovery_setup):
 
         """Test WebSocket connection state preservation during reconnection."""
@@ -189,6 +191,7 @@ class TestWebSocketMultiClientRecovery:
 
     """Multi-client WebSocket recovery coordination tests."""
     
+    @pytest.mark.asyncio
     async def test_multi_client_recovery_coordination(self):
 
         """Test state recovery coordination across multiple WebSocket clients."""
@@ -265,6 +268,7 @@ class TestWebSocketMultiClientRecovery:
 
         assert reconnected_count > 0, "At least one client should reconnect successfully"
     
+    @pytest.mark.asyncio
     async def test_concurrent_reconnection_handling(self):
 
         """Test handling of concurrent reconnection attempts."""
@@ -311,6 +315,7 @@ class TestWebSocketReconnectionWithStateSync:
 
     """WebSocket reconnection with complete state synchronization tests."""
     
+    @pytest.mark.asyncio
     async def test_reconnection_with_state_synchronization(self):
 
         """Test WebSocket reconnection with complete state synchronization."""

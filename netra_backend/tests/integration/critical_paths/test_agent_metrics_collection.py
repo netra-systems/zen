@@ -25,7 +25,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
@@ -748,6 +748,7 @@ async def metrics_collection_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_metric_recording(metrics_collection_manager):
     """Test basic metric recording functionality."""
     manager = metrics_collection_manager
@@ -767,6 +768,7 @@ async def test_basic_metric_recording(metrics_collection_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_metric_buffer_operations(metrics_collection_manager):
     """Test metric buffer operations and overflow handling."""
     manager = metrics_collection_manager
@@ -788,6 +790,7 @@ async def test_metric_buffer_operations(metrics_collection_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_metric_aggregation(metrics_collection_manager):
     """Test metric aggregation functionality."""
     manager = metrics_collection_manager
@@ -819,6 +822,7 @@ async def test_metric_aggregation(metrics_collection_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_metric_export_functionality(metrics_collection_manager):
     """Test metric export to different targets."""
     manager = metrics_collection_manager
@@ -846,6 +850,7 @@ async def test_metric_export_functionality(metrics_collection_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_alert_rule_evaluation(metrics_collection_manager):
     """Test alert rule evaluation and triggering."""
     manager = metrics_collection_manager
@@ -875,6 +880,7 @@ async def test_alert_rule_evaluation(metrics_collection_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_prometheus_format_export(metrics_collection_manager):
     """Test Prometheus format export."""
     manager = metrics_collection_manager
@@ -899,6 +905,7 @@ async def test_prometheus_format_export(metrics_collection_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_dashboard_integration(metrics_collection_manager):
     """Test dashboard integration functionality."""
     manager = metrics_collection_manager
@@ -935,6 +942,7 @@ async def test_dashboard_integration(metrics_collection_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_system_metrics_collection(metrics_collection_manager):
     """Test automatic system metrics collection."""
     manager = metrics_collection_manager
@@ -958,6 +966,7 @@ async def test_system_metrics_collection(metrics_collection_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_agent_metrics_simulation(metrics_collection_manager):
     """Test agent metrics simulation and collection."""
     manager = metrics_collection_manager
@@ -984,6 +993,7 @@ async def test_agent_metrics_simulation(metrics_collection_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_metric_collection(metrics_collection_manager):
     """Test concurrent metric collection performance."""
     manager = metrics_collection_manager
@@ -1019,6 +1029,7 @@ async def test_concurrent_metric_collection(metrics_collection_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_metrics_collection_performance(metrics_collection_manager):
     """Benchmark metrics collection performance."""
     manager = metrics_collection_manager

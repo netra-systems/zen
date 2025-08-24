@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -66,6 +66,7 @@ class TestLLMCacheRoute:
             else:
                 assert response.status_code in [404, 401]
     
+    @pytest.mark.asyncio
     async def test_selective_cache_invalidation(self):
         """Test selective cache invalidation by pattern."""
         from netra_backend.app.routes.llm_cache import clear_cache_pattern
@@ -132,6 +133,7 @@ class TestLLMCacheRoute:
         else:
             assert response.status_code in [404, 401]
     
+    @pytest.mark.asyncio
     async def test_cache_warm_up(self):
         """Test cache warm-up functionality."""
         from netra_backend.app.routes.llm_cache import warm_up_cache
@@ -216,6 +218,7 @@ class TestLLMCacheRoute:
             else:
                 assert response.status_code in [404, 422, 401]
     
+    @pytest.mark.asyncio
     async def test_cache_backup_restore(self):
         """Test cache backup and restore functionality."""
         from netra_backend.app.routes.llm_cache import backup_cache, restore_cache

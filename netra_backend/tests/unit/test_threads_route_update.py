@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -36,6 +36,7 @@ def mock_user():
 class TestUpdateThread:
     """Test cases for PUT /{thread_id} endpoint"""
     @patch('app.routes.utils.thread_helpers.time.time')
+    @pytest.mark.asyncio
     async def test_update_thread_success(self, mock_time, mock_db, mock_user):
         """Test successful thread update"""
         create_thread_update_scenario(mock_time)
@@ -54,6 +55,7 @@ class TestUpdateThread:
         assert mock_thread.metadata_["updated_at"] == 1234567900
         mock_db.commit.assert_called_once()
     @patch('app.routes.utils.thread_helpers.time.time')
+    @pytest.mark.asyncio
     async def test_update_thread_empty_metadata(self, mock_time, mock_db, mock_user):
         """Test updating thread with empty initial metadata"""
         create_thread_update_scenario(mock_time)
@@ -63,7 +65,7 @@ class TestUpdateThread:
              patch('app.routes.utils.thread_helpers.MessageRepository') as MockMessageRepo:
             
             thread_repo = MockThreadRepo.return_value
-            def get_thread(db, thread_id):
+            async def get_thread(db, thread_id):
                 if hasattr(mock_thread.metadata_, 'call_count') and mock_thread.metadata_.call_count > 0:
                     mock_thread.metadata_ = None
                 return mock_thread
@@ -77,6 +79,7 @@ class TestUpdateThread:
         assert mock_thread.metadata_ != None
         assert mock_thread.metadata_["title"] == "New Title"
         assert mock_thread.metadata_["updated_at"] == 1234567900
+    @pytest.mark.asyncio
     async def test_update_thread_not_found(self, mock_db, mock_user):
         """Test updating non-existent thread"""
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
@@ -88,6 +91,7 @@ class TestUpdateThread:
                 await update_thread("nonexistent", thread_update, mock_db, mock_user)
             
             assert_http_exception(exc_info, 404, "Thread not found")
+    @pytest.mark.asyncio
     async def test_update_thread_access_denied(self, mock_db, mock_user):
         """Test updating thread owned by another user"""
         mock_thread = create_access_denied_thread()
@@ -101,6 +105,7 @@ class TestUpdateThread:
                 await update_thread("thread_abc123", thread_update, mock_db, mock_user)
             
             assert_http_exception(exc_info, 403, "Access denied")
+    @pytest.mark.asyncio
     async def test_update_thread_exception(self, mock_db, mock_user):
         """Test general exception in update_thread"""
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \

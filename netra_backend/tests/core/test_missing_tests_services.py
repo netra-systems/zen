@@ -15,7 +15,7 @@ import json
 import logging
 import os
 import tempfile
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from cryptography.fernet import Fernet

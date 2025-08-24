@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from datetime import UTC, datetime
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 

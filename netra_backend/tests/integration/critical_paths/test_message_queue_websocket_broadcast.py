@@ -35,7 +35,7 @@ import time
 import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as aioredis
@@ -630,6 +630,7 @@ async def broadcast_manager(redis_client):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_broadcast_to_all_clients(broadcast_manager):
 
     """Test broadcasting message to all connected WebSocket clients."""
@@ -677,6 +678,7 @@ async def test_broadcast_to_all_clients(broadcast_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_subscription_based_broadcast(broadcast_manager):
 
     """Test broadcasting to clients subscribed to specific channels."""
@@ -722,6 +724,7 @@ async def test_subscription_based_broadcast(broadcast_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_user_targeted_messaging(broadcast_manager):
 
     """Test sending messages to specific users."""
@@ -787,6 +790,7 @@ async def test_user_targeted_messaging(broadcast_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_redis_pubsub_message_routing(broadcast_manager):
 
     """Test Redis pub/sub message routing to WebSocket clients."""
@@ -830,6 +834,7 @@ async def test_redis_pubsub_message_routing(broadcast_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_message_delivery_failure_handling(broadcast_manager):
 
     """Test handling of WebSocket delivery failures."""
@@ -867,6 +872,7 @@ async def test_message_delivery_failure_handling(broadcast_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_concurrent_broadcasting_performance(broadcast_manager):
 
     """Test concurrent broadcasting performance and reliability."""
@@ -916,6 +922,7 @@ async def test_concurrent_broadcasting_performance(broadcast_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_client_connection_lifecycle(broadcast_manager):
 
     """Test client registration and unregistration lifecycle."""
@@ -952,6 +959,7 @@ async def test_client_connection_lifecycle(broadcast_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_message_routing_rules(broadcast_manager):
 
     """Test custom message routing rules."""
@@ -986,6 +994,7 @@ async def test_message_routing_rules(broadcast_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_broadcast_metrics_tracking(broadcast_manager):
 
     """Test comprehensive broadcast metrics tracking."""
@@ -1022,6 +1031,7 @@ async def test_broadcast_metrics_tracking(broadcast_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_fan_out_message_distribution(broadcast_manager):
 
     """Test fan-out message distribution patterns."""

@@ -7,7 +7,7 @@ Tests for basic JWT manager setup and utility functions.
 import sys
 from pathlib import Path
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -25,7 +25,7 @@ def mock_config():
 @pytest.fixture
 def mock_redis_manager():
     """Mock Redis manager with enabled state."""
-    from unittest.mock import AsyncMock
+    from unittest.mock import AsyncMock, MagicMock
     redis = AsyncMock()
     redis.enabled = True
     redis.get = AsyncMock(return_value=None)

@@ -12,7 +12,7 @@ import asyncio
 import json
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import clickhouse_driver
 import psycopg2
@@ -103,6 +103,7 @@ class TestCriticalDatabaseIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_redis_cache_invalidation_cascade(self):
 
         """Test Redis cache invalidation across dependent keys"""
@@ -195,6 +196,7 @@ class TestAgentOrchestrationIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_agent_memory_leak_under_sustained_load(self):
 
         """Test for memory leaks during sustained agent operations"""
@@ -261,6 +263,7 @@ class TestWebSocketIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_websocket_broadcast_atomicity(self):
 
         """Test atomic broadcast to multiple WebSocket clients"""
@@ -292,6 +295,7 @@ class TestWebSocketIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_websocket_rate_limiting_per_client(self):
 
         """Test per-client WebSocket rate limiting"""
@@ -325,6 +329,7 @@ class TestSecurityIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_sql_injection_prevention_all_endpoints(self):
 
         """Test SQL injection prevention across all database queries"""
@@ -355,6 +360,7 @@ class TestSecurityIntegration:
     
     @pytest.mark.integration  
 
+    @pytest.mark.asyncio
     async def test_jwt_token_rotation_during_active_session(self):
 
         """Test JWT token rotation without disrupting active sessions"""
@@ -385,6 +391,7 @@ class TestSecurityIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_rate_limit_distributed_enforcement(self):
 
         """Test distributed rate limiting across multiple instances"""
@@ -449,6 +456,7 @@ class TestDataConsistencyIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_event_sourcing_replay_consistency(self):
 
         """Test event sourcing replay produces consistent state"""
@@ -483,6 +491,7 @@ class TestDataConsistencyIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_cache_consistency_during_failover(self):
 
         """Test cache consistency during Redis failover"""
@@ -559,6 +568,7 @@ class TestPerformanceIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_batch_processing_optimization(self):
 
         """Test batch processing optimizes database operations"""
@@ -595,6 +605,7 @@ class TestPerformanceIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_memory_pressure_graceful_degradation(self):
 
         """Test system degrades gracefully under memory pressure"""
@@ -623,6 +634,7 @@ class TestObservabilityIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_distributed_tracing_correlation(self):
 
         """Test distributed tracing across service boundaries"""
@@ -652,6 +664,7 @@ class TestObservabilityIntegration:
     
     @pytest.mark.integration  
 
+    @pytest.mark.asyncio
     async def test_metrics_aggregation_accuracy(self):
 
         """Test metrics aggregation accuracy under load"""
@@ -686,6 +699,7 @@ class TestObservabilityIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_log_correlation_across_async_contexts(self):
 
         """Test log correlation across async execution contexts"""
@@ -754,6 +768,7 @@ class TestErrorHandlingIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_poison_message_handling_queue(self):
 
         """Test poison message handling in message queue"""
@@ -792,6 +807,7 @@ class TestErrorHandlingIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_graceful_shutdown_inflight_requests(self):
 
         """Test graceful shutdown with in-flight requests"""
@@ -836,6 +852,7 @@ class TestStateManagementIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_distributed_lock_timeout_handling(self):
 
         """Test distributed lock timeout and cleanup"""
@@ -866,6 +883,7 @@ class TestStateManagementIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_state_machine_transition_atomicity(self):
 
         """Test state machine transitions are atomic"""
@@ -908,6 +926,7 @@ class TestStateManagementIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_session_consistency_across_replicas(self):
 
         """Test session consistency across service replicas"""
@@ -934,6 +953,7 @@ class TestContractValidationIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_api_versioning_backward_compatibility(self):
 
         """Test API versioning maintains backward compatibility"""
@@ -968,6 +988,7 @@ class TestContractValidationIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_schema_evolution_migration(self):
 
         """Test schema evolution with zero-downtime migration"""
@@ -998,6 +1019,7 @@ class TestContractValidationIntegration:
     
     @pytest.mark.integration
 
+    @pytest.mark.asyncio
     async def test_graphql_query_depth_limiting(self):
 
         """Test GraphQL query depth limiting"""

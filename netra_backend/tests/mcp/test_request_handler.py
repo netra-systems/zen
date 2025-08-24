@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import json
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -33,6 +33,7 @@ class TestRequestHandler:
     def handler(self, mock_server):
         """Create request handler"""
         return RequestHandler(mock_server)
+    @pytest.mark.asyncio
     async def test_process_request_string(self, handler, mock_server):
         """Test processing string request"""
         mock_server.handle_request.return_value = {
@@ -47,6 +48,7 @@ class TestRequestHandler:
         assert isinstance(response, str)
         response_dict = json.loads(response)
         assert response_dict["result"]["success"] == True
+    @pytest.mark.asyncio
     async def test_process_request_dict(self, handler, mock_server):
         """Test processing dict request"""
         mock_server.handle_request.return_value = {
@@ -60,6 +62,7 @@ class TestRequestHandler:
         
         assert isinstance(response, dict)
         assert response["result"]["success"] == True
+    @pytest.mark.asyncio
     async def test_process_invalid_json(self, handler):
         """Test processing invalid JSON string"""
         request_str = '{"invalid json'
@@ -69,6 +72,7 @@ class TestRequestHandler:
         response_dict = json.loads(response)
         assert "error" in response_dict
         assert response_dict["error"]["code"] == -32700
+    @pytest.mark.asyncio
     async def test_process_batch_request(self, handler, mock_server):
         """Test processing batch requests"""
         mock_server.handle_request.side_effect = [
@@ -87,6 +91,7 @@ class TestRequestHandler:
         assert len(response) == 2
         assert response[0]["result"]["id"] == 1
         assert response[1]["result"]["id"] == 2
+    @pytest.mark.asyncio
     async def test_process_notification(self, handler, mock_server):
         """Test processing notification (no id)"""
         mock_server.handle_request.return_value = None
@@ -95,6 +100,7 @@ class TestRequestHandler:
         response = await handler.process_request(request)
         
         assert response == None
+    @pytest.mark.asyncio
     async def test_process_single_request_invalid_type(self, handler):
         """Test processing request with invalid type"""
         response = await handler._process_single_request("not a dict")
@@ -102,6 +108,7 @@ class TestRequestHandler:
         assert "error" in response
         assert response["error"]["code"] == -32600
         assert "must be an object" in response["error"]["message"]
+    @pytest.mark.asyncio
     async def test_process_single_request_invalid_version(self, handler):
         """Test processing request with invalid JSON-RPC version"""
         response = await handler._process_single_request({"method": "test"})
@@ -109,6 +116,7 @@ class TestRequestHandler:
         assert "error" in response
         assert response["error"]["code"] == -32600
         assert "Invalid or missing jsonrpc" in response["error"]["message"]
+    @pytest.mark.asyncio
     async def test_process_single_request_missing_method(self, handler):
         """Test processing request with missing method"""
         response = await handler._process_single_request({"jsonrpc": "2.0"})
@@ -116,6 +124,7 @@ class TestRequestHandler:
         assert "error" in response
         assert response["error"]["code"] == -32600
         assert "Invalid or missing method" in response["error"]["message"]
+    @pytest.mark.asyncio
     async def test_process_single_request_invalid_params(self, handler):
         """Test processing request with invalid params type"""
         response = await handler._process_single_request({
@@ -127,6 +136,7 @@ class TestRequestHandler:
         assert "error" in response
         assert response["error"]["code"] == -32602
         assert "Params must be object or array" in response["error"]["message"]
+    @pytest.mark.asyncio
     async def test_process_business_error(self, handler, mock_server):
         """Test processing request that raises business error"""
         mock_server.handle_request.side_effect = NetraException("Business error")
@@ -140,6 +150,7 @@ class TestRequestHandler:
         assert "error" in response
         assert response["error"]["code"] == -32000
         assert "Business error" in response["error"]["message"]
+    @pytest.mark.asyncio
     async def test_process_unexpected_error(self, handler, mock_server):
         """Test processing request that raises unexpected error"""
         mock_server.handle_request.side_effect = Exception("Unexpected error")

@@ -8,6 +8,7 @@ are enforced in the staging environment.
 import sys
 from pathlib import Path
 
+import pytest
 # Test framework import - using pytest fixtures instead
 
 import asyncio
@@ -23,6 +24,7 @@ from netra_backend.tests.integration.staging_config.base import StagingConfigTes
 class TestResourceLimits(StagingConfigTestBase):
     """Test resource limits in staging."""
     
+    @pytest.mark.asyncio
     async def test_memory_limits(self):
         """Test memory limit enforcement."""
         self.skip_if_not_staging()
@@ -54,6 +56,7 @@ class TestResourceLimits(StagingConfigTestBase):
                 self.assertEqual(response.status_code, 507,
                                "Should return 507 if memory limit exceeded")
                                
+    @pytest.mark.asyncio
     async def test_cpu_limits(self):
         """Test CPU limit enforcement."""
         self.skip_if_not_staging()
@@ -78,6 +81,7 @@ class TestResourceLimits(StagingConfigTestBase):
                     self.assertLess(data.get('cpu_usage_percent', 100), 100,
                                   "CPU should be throttled")
                                   
+    @pytest.mark.asyncio
     async def test_connection_limits(self):
         """Test connection limit enforcement."""
         self.skip_if_not_staging()
@@ -107,6 +111,7 @@ class TestResourceLimits(StagingConfigTestBase):
             self.assertLess(successful, max_connections,
                           "Connection limit should be enforced")
                           
+    @pytest.mark.asyncio
     async def test_request_rate_limits(self):
         """Test request rate limiting."""
         self.skip_if_not_staging()
@@ -142,6 +147,7 @@ class TestResourceLimits(StagingConfigTestBase):
                                       "Rate limit should trigger before 50 requests")
                         break
                         
+    @pytest.mark.asyncio
     async def test_payload_size_limits(self):
         """Test request payload size limits."""
         self.skip_if_not_staging()
@@ -165,6 +171,7 @@ class TestResourceLimits(StagingConfigTestBase):
             self.assertIn(response.status_code, [413, 400],
                         "Should reject oversized payload")
                         
+    @pytest.mark.asyncio
     async def test_file_upload_limits(self):
         """Test file upload size limits."""
         self.skip_if_not_staging()
@@ -188,6 +195,7 @@ class TestResourceLimits(StagingConfigTestBase):
             self.assertIn(response.status_code, [413, 400, 404],
                         "Should enforce file upload limits")
                         
+    @pytest.mark.asyncio
     async def test_timeout_enforcement(self):
         """Test request timeout enforcement."""
         self.skip_if_not_staging()
@@ -210,6 +218,7 @@ class TestResourceLimits(StagingConfigTestBase):
                 self.assertIn(response.status_code, [408, 504],
                             "Long requests should timeout")
                             
+    @pytest.mark.asyncio
     async def test_disk_space_limits(self):
         """Test disk space limit enforcement."""
         self.skip_if_not_staging()
@@ -237,6 +246,7 @@ class TestResourceLimits(StagingConfigTestBase):
                 self.assertLess(usage_percent, 90,
                               "Disk usage should be below 90%")
                               
+    @pytest.mark.asyncio
     async def test_database_connection_pool(self):
         """Test database connection pool limits."""
         self.skip_if_not_staging()

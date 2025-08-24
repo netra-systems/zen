@@ -35,7 +35,7 @@ import time
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as aioredis
@@ -932,6 +932,7 @@ async def multitab_manager(redis_client):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_tab_registration_and_leader_election(multitab_manager):
 
     """Test tab registration and automatic leader election."""
@@ -974,6 +975,7 @@ async def test_tab_registration_and_leader_election(multitab_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_leader_reelection_on_disconnect(multitab_manager):
 
     """Test leader re-election when leader tab disconnects."""
@@ -1020,6 +1022,7 @@ async def test_leader_reelection_on_disconnect(multitab_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_message_deduplication_across_tabs(multitab_manager):
 
     """Test message deduplication across multiple tabs."""
@@ -1072,6 +1075,7 @@ async def test_message_deduplication_across_tabs(multitab_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_shared_state_synchronization(multitab_manager):
 
     """Test shared state synchronization across tabs."""
@@ -1118,6 +1122,7 @@ async def test_shared_state_synchronization(multitab_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_leader_only_actions(multitab_manager):
 
     """Test actions that can only be performed by leader tab."""
@@ -1164,6 +1169,7 @@ async def test_leader_only_actions(multitab_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_broadcast_to_user_tabs(multitab_manager):
 
     """Test broadcasting messages to all user tabs."""
@@ -1222,6 +1228,7 @@ async def test_broadcast_to_user_tabs(multitab_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_concurrent_tab_operations(multitab_manager):
 
     """Test concurrent tab operations and state consistency."""
@@ -1266,6 +1273,7 @@ async def test_concurrent_tab_operations(multitab_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_state_conflict_resolution(multitab_manager):
 
     """Test state conflict resolution between tabs."""
@@ -1338,6 +1346,7 @@ async def test_state_conflict_resolution(multitab_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_tab_lifecycle_performance(multitab_manager):
 
     """Test tab lifecycle performance under load."""
@@ -1390,6 +1399,7 @@ async def test_tab_lifecycle_performance(multitab_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_comprehensive_metrics_tracking(multitab_manager):
 
     """Test comprehensive metrics tracking across all components."""

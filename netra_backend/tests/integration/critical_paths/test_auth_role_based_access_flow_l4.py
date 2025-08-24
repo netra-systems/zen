@@ -100,7 +100,7 @@ class TestAuthRoleBasedAccessFlow:
     @pytest.fixture
     async def role_hierarchy(self):
         """Define role hierarchy for testing"""
-        return {
+        yield {
             "super_admin": RoleDefinition(
                 name="super_admin",
                 level=100,
@@ -171,6 +171,7 @@ class TestAuthRoleBasedAccessFlow:
         }
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_users(self, role_hierarchy):
         """Create test users with different roles"""
         users = []
@@ -265,10 +266,11 @@ class TestAuthRoleBasedAccessFlow:
             except Exception as e:
                 logger.warning(f"Failed to store audit event: {e}")
         
-        return {"events": events, "record": record_event}
+        yield {"events": events, "record": record_event}
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_complete_rbac_flow_all_roles(
         self, test_users, role_hierarchy, audit_tracker
     ):
@@ -342,6 +344,7 @@ class TestAuthRoleBasedAccessFlow:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_permission_inheritance_chain(
         self, test_users, role_hierarchy
     ):
@@ -374,6 +377,7 @@ class TestAuthRoleBasedAccessFlow:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_resource_limit_enforcement(
         self, test_users, role_hierarchy
     ):
@@ -432,6 +436,7 @@ class TestAuthRoleBasedAccessFlow:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_cross_service_authorization(
         self, test_users
     ):
@@ -468,6 +473,7 @@ class TestAuthRoleBasedAccessFlow:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_role_elevation_prevention(
         self, test_users
     ):
@@ -498,6 +504,7 @@ class TestAuthRoleBasedAccessFlow:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_delegation_and_impersonation(
         self, test_users, audit_tracker
     ):
@@ -554,6 +561,7 @@ class TestAuthRoleBasedAccessFlow:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_audit_trail_completeness(
         self, test_users, audit_tracker
     ):

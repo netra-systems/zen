@@ -172,13 +172,17 @@ class DatabaseMockMixin:
     """Mixin for database-related test mocking."""
     
     @pytest.fixture(autouse=True)
-    def mock_database(self):
+    async def mock_database(self):
         """Mock database operations."""
         with patch('netra_backend.app.db.postgres.get_db') as mock_db:
             mock_session = MagicMock()
             mock_db.return_value = mock_session
             self.mock_db_session = mock_session
-            yield mock_session
+            try:
+                yield session
+            finally:
+                if hasattr(session, "close"):
+                    await session.close()
     
     def setup_db_query_result(self, result: Any) -> None:
         """Set up mock database query result."""

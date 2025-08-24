@@ -38,6 +38,7 @@ from netra_backend.tests.integration.first_time_user_fixtures import (
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(45)
+@pytest.mark.asyncio
 async def test_first_chat_session_initialization(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -70,6 +71,7 @@ async def test_first_chat_session_initialization(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_chat_thread_persistence(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -104,6 +106,7 @@ async def test_chat_thread_persistence(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(60)
+@pytest.mark.asyncio
 async def test_websocket_connection_lifecycle(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -145,6 +148,7 @@ async def test_websocket_connection_lifecycle(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_websocket_concurrent_messages(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -181,6 +185,7 @@ async def test_websocket_concurrent_messages(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_session_persistence_across_refresh(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -225,6 +230,7 @@ async def test_session_persistence_across_refresh(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(60)
+@pytest.mark.asyncio
 async def test_multi_agent_coordination_flow(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],

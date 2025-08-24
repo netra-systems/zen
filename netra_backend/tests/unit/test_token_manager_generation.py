@@ -9,7 +9,7 @@ from pathlib import Path
 
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from jose import JWTError, jwt
@@ -91,6 +91,7 @@ class TestJWTTokenGeneration:
 
     # Test JWT generation
     @patch('uuid.uuid4')
+    @pytest.mark.asyncio
     async def test_generate_jwt_success(self, mock_uuid, jwt_manager, sample_user_data):
         """Test successful JWT token generation."""
         mock_uuid.return_value = Mock(return_value="mock_jti")
@@ -101,6 +102,7 @@ class TestJWTTokenGeneration:
         assert len(token.split('.')) == 3  # JWT has 3 parts
 
     @patch('uuid.uuid4')
+    @pytest.mark.asyncio
     async def test_generate_jwt_with_pr_number(self, mock_uuid, jwt_manager, sample_user_data):
         """Test JWT generation with PR number included."""
         mock_uuid.return_value = Mock(return_value="mock_jti")
@@ -111,6 +113,7 @@ class TestJWTTokenGeneration:
         assert claims["pr_number"] == "PR-123"
 
     @patch('uuid.uuid4')
+    @pytest.mark.asyncio
     async def test_generate_jwt_no_pr_number(self, mock_uuid, jwt_manager, sample_user_data):
         """Test JWT generation without PR number."""
         mock_uuid.return_value = Mock(return_value="mock_jti")
@@ -121,11 +124,13 @@ class TestJWTTokenGeneration:
         assert claims["pr_number"] is None
 
     # Test JWT validation
+    @pytest.mark.asyncio
     async def test_validate_jwt_success(self, jwt_manager, valid_jwt_token):
         """Test successful JWT token validation."""
         claims = await jwt_manager.validate_jwt(valid_jwt_token)
         assert_token_claims_match(claims, "user_123", "test@example.com")
 
+    @pytest.mark.asyncio
     async def test_validate_jwt_expired(self, jwt_manager):
         """Test validation fails for expired token."""
         with patch('jose.jwt.decode') as mock_decode:
@@ -134,6 +139,7 @@ class TestJWTTokenGeneration:
             with pytest.raises(AuthenticationError, match="Invalid JWT token"):
                 await jwt_manager.validate_jwt("expired_token")
 
+    @pytest.mark.asyncio
     async def test_validate_jwt_invalid_signature(self, jwt_manager, sample_token_claims):
         """Test validation fails for invalid signature."""
         invalid_token = jwt.encode(sample_token_claims, "wrong_secret", algorithm="HS256")
@@ -141,6 +147,7 @@ class TestJWTTokenGeneration:
         with pytest.raises(AuthenticationError, match="Invalid JWT token"):
             await jwt_manager.validate_jwt(invalid_token)
 
+    @pytest.mark.asyncio
     async def test_validate_jwt_revoked_token(self, jwt_manager, valid_jwt_token):
         """Test validation fails for revoked token."""
         jwt_manager.redis_manager.get = AsyncMock(return_value="revoked")
@@ -149,11 +156,13 @@ class TestJWTTokenGeneration:
             await jwt_manager.validate_jwt(valid_jwt_token)
 
     # Test JWT claims extraction
+    @pytest.mark.asyncio
     async def test_get_jwt_claims_success(self, jwt_manager, valid_jwt_token):
         """Test successful JWT claims extraction."""
         claims = await jwt_manager.get_jwt_claims(valid_jwt_token)
         assert_token_claims_match(claims, "user_123", "test@example.com")
 
+    @pytest.mark.asyncio
     async def test_get_jwt_claims_malformed(self, jwt_manager):
         """Test claims extraction fails for malformed token."""
         malformed_token = create_malformed_token()
@@ -162,6 +171,7 @@ class TestJWTTokenGeneration:
             await jwt_manager.get_jwt_claims(malformed_token)
 
     # Test token expiry time
+    @pytest.mark.asyncio
     async def test_token_expiry_time(self, jwt_manager, sample_user_data):
         """Test token contains correct expiry time."""
         from datetime import timezone
@@ -174,6 +184,7 @@ class TestJWTTokenGeneration:
             assert abs(claims.exp - expected_exp) <= 5  # 5 second tolerance
 
     # Test token claims structure
+    @pytest.mark.asyncio
     async def test_token_claims_structure(self, jwt_manager, valid_jwt_token):
         """Test token claims have all required fields."""
         claims = await jwt_manager.get_jwt_claims(valid_jwt_token)
@@ -183,16 +194,19 @@ class TestJWTTokenGeneration:
             assert getattr(claims, field) is not None
 
     # Additional security tests
+    @pytest.mark.asyncio
     async def test_validate_jwt_empty_token(self, jwt_manager):
         """Test validation fails for empty token."""
         with pytest.raises(AuthenticationError, match="Invalid JWT token"):
             await jwt_manager.validate_jwt("")
 
+    @pytest.mark.asyncio
     async def test_validate_jwt_none_token(self, jwt_manager):
         """Test validation fails for None token."""
         with pytest.raises(Exception):
             await jwt_manager.validate_jwt(None)
 
+    @pytest.mark.asyncio
     async def test_token_signature_verification(self, jwt_manager, sample_token_claims):
         """Test that tokens with wrong signature are rejected."""
         # Create token with wrong secret

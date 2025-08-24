@@ -14,7 +14,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import psutil
 import pytest
@@ -34,7 +34,11 @@ class TestComprehensiveDatabaseOperations:
         session.rollback = AsyncMock()
         session.add = MagicMock()
         session.close = AsyncMock()
-        return session
+        try:
+            yield session
+        finally:
+            if hasattr(session, "close"):
+                await session.close()
     
     @pytest.fixture  
     async def mock_database_pool(self):
@@ -43,9 +47,10 @@ class TestComprehensiveDatabaseOperations:
         pool.size = MagicMock(return_value=10)
         pool.checked_out = MagicMock(return_value=2)
         pool.checked_in = MagicMock(return_value=8)
-        return pool
+        yield pool
 
     # Test 1: Connection Pool Efficiency
+    @pytest.mark.asyncio
     async def test_connection_pool_efficiency(self, mock_database_pool):
         """Test connection pooling efficiency metrics."""
         start_time = time.time()
@@ -59,6 +64,7 @@ class TestComprehensiveDatabaseOperations:
         assert acquisition_time < 1.0, "Pool acquisition too slow"
         assert mock_database_pool.acquire.call_count == 5
     
+    @pytest.mark.asyncio
     async def test_connection_pool_statistics(self, mock_database_pool):
         """Test connection pool statistics tracking."""
         # Check pool statistics
@@ -72,6 +78,7 @@ class TestComprehensiveDatabaseOperations:
         assert checked_out + checked_in == total_size
     
     # Test 2: Transaction Management and Rollback
+    @pytest.mark.asyncio
     async def test_transaction_commit_rollback(self, mock_db_session):
         """Test transaction commit and rollback operations."""
         # Test successful commit
@@ -89,6 +96,7 @@ class TestComprehensiveDatabaseOperations:
         )
         assert result.scalar() == "tx_user"
     
+    @pytest.mark.asyncio
     async def test_nested_transactions(self, mock_db_session):
         """Test nested transaction handling."""
         # Setup nested transaction mock
@@ -109,6 +117,7 @@ class TestComprehensiveDatabaseOperations:
         mock_db_session.begin_nested.assert_called_once()
     
     # Test 3: Query Optimization Verification  
+    @pytest.mark.asyncio
     async def test_query_optimization_timing(self, mock_db_session):
         """Test query execution time optimization."""
         # Mock fast query response
@@ -126,6 +135,7 @@ class TestComprehensiveDatabaseOperations:
         assert query_time < 1.0, "Query too slow"
         assert count == 100
     
+    @pytest.mark.asyncio
     async def test_bulk_insert_performance(self, mock_db_session):
         """Test bulk insert optimization."""
         users = [
@@ -145,6 +155,7 @@ class TestComprehensiveDatabaseOperations:
         mock_db_session.execute.assert_called()
     
     # Test 4: Migration Execution and Rollback
+    @pytest.mark.asyncio
     async def test_schema_migration_simulation(self, mock_db_session):
         """Test schema migration simulation."""
         # Simulate adding a column
@@ -163,6 +174,7 @@ class TestComprehensiveDatabaseOperations:
         column_names = [col['name'] for col in columns]
         assert 'test_migration_col' in column_names
     
+    @pytest.mark.asyncio
     async def test_migration_rollback_simulation(self, mock_db_session):
         """Test migration rollback simulation.""" 
         # Simulate successful rollback
@@ -176,6 +188,7 @@ class TestComprehensiveDatabaseOperations:
         mock_db_session.commit.assert_called()
     
     # Test 5: Backup and Restore Operations
+    @pytest.mark.asyncio
     async def test_backup_simulation(self, mock_db_session):
         """Test backup operation simulation."""
         # Mock backup data counting
@@ -193,6 +206,7 @@ class TestComprehensiveDatabaseOperations:
         user_count = result.scalar()
         assert user_count == 150, "Backup data count incorrect"
     
+    @pytest.mark.asyncio
     async def test_restore_verification(self, mock_db_session):
         """Test restore verification simulation."""
         # Mock restore verification
@@ -208,6 +222,7 @@ class TestComprehensiveDatabaseOperations:
         assert restored_user == "backup_test", "Data restore failed"
     
     # Test 6: Replication Lag Handling
+    @pytest.mark.asyncio
     async def test_read_write_split_simulation(self, mock_db_session):
         """Test read/write split handling simulation."""
         # Mock write operation
@@ -226,6 +241,7 @@ class TestComprehensiveDatabaseOperations:
         )
         assert result.scalar() == "rw_test"
     
+    @pytest.mark.asyncio
     async def test_replication_lag_monitoring(self, mock_db_session):
         """Test replication lag monitoring simulation."""
         # Mock fast response
@@ -243,6 +259,7 @@ class TestComprehensiveDatabaseOperations:
         assert result.scalar() == 1
     
     # Test 7: Deadlock Detection and Resolution  
+    @pytest.mark.asyncio
     async def test_concurrent_operations(self):
         """Test concurrent database operations."""
         async def concurrent_insert(user_id: int):
@@ -258,6 +275,7 @@ class TestComprehensiveDatabaseOperations:
         successful = [r for r in results if isinstance(r, int)]
         assert len(successful) == 3, "Concurrent operations failed"
     
+    @pytest.mark.asyncio
     async def test_deadlock_simulation(self, mock_db_session):
         """Test deadlock detection simulation."""
         # Mock successful update without deadlock
@@ -281,6 +299,7 @@ class TestComprehensiveDatabaseOperations:
         assert result.rowcount == 2
     
     # Test 8: Index Usage Verification
+    @pytest.mark.asyncio
     async def test_index_performance_comparison(self, mock_db_session):
         """Test query performance with and without indexes."""
         # Mock indexed query performance
@@ -299,6 +318,7 @@ class TestComprehensiveDatabaseOperations:
         user = result.fetchone()
         assert user is None  # Expected for test data
     
+    @pytest.mark.asyncio
     async def test_index_usage_verification(self):
         """Test that indexes are being used correctly."""
         # Mock inspector for index verification
@@ -313,6 +333,7 @@ class TestComprehensiveDatabaseOperations:
         assert any(idx['name'] == 'idx_users_email' for idx in indexes)
     
     # Test 9: Data Integrity Constraints
+    @pytest.mark.asyncio
     async def test_unique_constraint_violation(self, mock_db_session):
         """Test unique constraint enforcement."""
         unique_email = f"unique_test_{uuid.uuid4()}@test.com"
@@ -330,6 +351,7 @@ class TestComprehensiveDatabaseOperations:
             mock_db_session.add(mock_user2)
             await mock_db_session.commit()
     
+    @pytest.mark.asyncio
     async def test_foreign_key_constraint(self, mock_db_session):
         """Test foreign key constraint enforcement."""
         # Mock user and thread creation
@@ -350,6 +372,7 @@ class TestComprehensiveDatabaseOperations:
         assert mock_thread.user_id == 1
     
     # Test 10: Performance Monitoring
+    @pytest.mark.asyncio
     async def test_query_performance_monitoring(self, mock_db_session):
         """Test database performance monitoring."""
         # Monitor memory usage before operation
@@ -375,6 +398,7 @@ class TestComprehensiveDatabaseOperations:
         # Memory check (relaxed for test environment)
         assert memory_after >= memory_before
     
+    @pytest.mark.asyncio
     async def test_resource_usage_tracking(self, mock_database_pool):
         """Test resource usage tracking."""
         # Track connection count
@@ -392,6 +416,7 @@ class TestComprehensiveDatabaseOperations:
         assert connections_after == connections_before + 1
     
     # Test 11: Schema Validation
+    @pytest.mark.asyncio
     async def test_schema_validation(self):
         """Test database schema validation."""
         # Mock inspector for schema validation
@@ -406,6 +431,7 @@ class TestComprehensiveDatabaseOperations:
         for table in required_tables:
             assert table in table_names, f"Required table {table} missing"
     
+    @pytest.mark.asyncio
     async def test_data_type_validation(self, mock_db_session):
         """Test data type validations."""
         # Mock successful user creation with correct types
@@ -426,6 +452,7 @@ class TestComprehensiveDatabaseOperations:
         assert result.scalar() == "type_test"
     
     # Test 12: Audit Trail Completeness
+    @pytest.mark.asyncio
     async def test_audit_trail_logging(self, mock_db_session):
         """Test audit trail and logging functionality."""
         # Create user with timestamp tracking
@@ -442,6 +469,7 @@ class TestComprehensiveDatabaseOperations:
         assert isinstance(mock_user.created_at, datetime)
         assert isinstance(mock_user.updated_at, datetime)
     
+    @pytest.mark.asyncio
     async def test_change_tracking(self, mock_db_session):
         """Test change tracking and history."""
         # Create and update user

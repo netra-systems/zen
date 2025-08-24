@@ -39,7 +39,7 @@ from netra_backend.app.db.session import get_db_session
 from netra_backend.app.services.user_auth_service import UserAuthService
 
 # Mock models for testing
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 User = Mock
 Thread = Mock
 AgentRun = Mock

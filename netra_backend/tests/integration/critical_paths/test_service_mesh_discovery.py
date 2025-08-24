@@ -38,6 +38,7 @@ pytestmark = [
 class ServiceDiscoveryL4Tests:
     """Service discovery specific test implementations."""
     
+    @pytest.mark.asyncio
     async def test_service_discovery_l4(self, manager, service_name: str) -> Dict[str, Any]:
         """Test service discovery with L4 realism."""
         try:
@@ -94,6 +95,7 @@ class ServiceDiscoveryL4Tests:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_instance_health(self, manager, instance: Dict[str, Any]) -> Dict[str, Any]:
         """Test health of a service instance."""
         try:

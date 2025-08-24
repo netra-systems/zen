@@ -10,7 +10,7 @@ from pathlib import Path
 
 import json
 import uuid
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -172,12 +172,17 @@ def _configure_supervisor_agent(supervisor):
     supervisor.engine.execute_pipeline = AsyncMock(return_value=[])
 
 @pytest.fixture
-def supervisor_agent(mock_db_session, mock_llm_manager, 
-                    mock_websocket_manager, mock_tool_dispatcher, mock_persistence_service):
+def supervisor_agent(db_session, mock_llm_manager, 
+                    mock_websocket_manager, mock_tool_dispatcher):
     """Create supervisor agent with all dependencies mocked"""
-    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence_service):
+    # Mock the persistence service
+    mock_persistence = Mock()
+    mock_persistence.save_agent_state = AsyncMock(return_value=(True, "test_state_id"))
+    mock_persistence.load_agent_state = AsyncMock(return_value=None)
+    
+    with patch('netra_backend.app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         supervisor = SupervisorAgent(
-            mock_db_session,
+            db_session,
             mock_llm_manager,
             mock_websocket_manager,
             mock_tool_dispatcher

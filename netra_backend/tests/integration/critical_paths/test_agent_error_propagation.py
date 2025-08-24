@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 # from app.monitoring.metrics_collector import MetricsCollector  # TODO: Fix import path
@@ -438,6 +438,7 @@ async def error_propagation_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_error_collection_and_classification(error_propagation_manager):
     """Test error collection and automatic classification."""
     manager = error_propagation_manager
@@ -467,6 +468,7 @@ async def test_error_collection_and_classification(error_propagation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_error_enrichment_pipeline(error_propagation_manager):
     """Test error enrichment with additional context."""
     manager = error_propagation_manager
@@ -485,6 +487,7 @@ async def test_error_enrichment_pipeline(error_propagation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_error_propagation_routing(error_propagation_manager):
     """Test error propagation routing logic."""
     manager = error_propagation_manager
@@ -492,7 +495,7 @@ async def test_error_propagation_routing(error_propagation_manager):
     # Track routed errors
     routed_errors = []
     
-    def test_handler(error_event: ErrorEvent):
+    async def test_handler(error_event: ErrorEvent):
         routed_errors.append(error_event.error_id)
     
     # Add test route for validation errors
@@ -513,6 +516,7 @@ async def test_error_propagation_routing(error_propagation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_critical_error_reporting(error_propagation_manager):
     """Test immediate reporting of critical errors."""
     manager = error_propagation_manager
@@ -533,6 +537,7 @@ async def test_critical_error_reporting(error_propagation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_error_aggregation_rules(error_propagation_manager):
     """Test error aggregation and bucketing."""
     manager = error_propagation_manager
@@ -556,6 +561,7 @@ async def test_error_aggregation_rules(error_propagation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_error_severity_classification(error_propagation_manager):
     """Test error severity classification logic."""
     manager = error_propagation_manager
@@ -575,6 +581,7 @@ async def test_error_severity_classification(error_propagation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_error_processing(error_propagation_manager):
     """Test concurrent error processing and pipeline integrity."""
     manager = error_propagation_manager
@@ -603,6 +610,7 @@ async def test_concurrent_error_processing(error_propagation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_error_context_preservation(error_propagation_manager):
     """Test that error context is preserved through the pipeline."""
     manager = error_propagation_manager
@@ -627,12 +635,13 @@ async def test_error_context_preservation(error_propagation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_error_pipeline_resilience(error_propagation_manager):
     """Test error pipeline resilience to processing failures."""
     manager = error_propagation_manager
     
     # Add failing handler
-    def failing_handler(error_event: ErrorEvent):
+    async def failing_handler(error_event: ErrorEvent):
         raise Exception("Handler failure")
     
     manager.error_propagator.add_global_handler(failing_handler)
@@ -653,6 +662,7 @@ async def test_error_pipeline_resilience(error_propagation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_error_propagation_performance(error_propagation_manager):
     """Benchmark error propagation performance."""
     manager = error_propagation_manager

@@ -10,7 +10,7 @@ for operational insights and user experience optimization.
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import WebSocket
@@ -98,6 +98,7 @@ class TestWebSocketConnectionManager:
             assert is_alive is True
             mock_validator.is_websocket_connected.assert_called_once_with(connection_info.websocket)
     
+    @pytest.mark.asyncio
     async def test_find_connection_success(self, manager, mock_websocket, connection_info):
         """Test finding connection for user and websocket."""
         manager.active_connections["test-user"] = [connection_info]
@@ -106,12 +107,14 @@ class TestWebSocketConnectionManager:
         
         assert found_conn == connection_info
     
+    @pytest.mark.asyncio
     async def test_find_connection_not_found(self, manager, mock_websocket):
         """Test finding non-existent connection."""
         found_conn = await manager.find_connection("test-user", mock_websocket)
         
         assert found_conn is None
     
+    @pytest.mark.asyncio
     async def test_get_stats_with_orchestrator(self, manager):
         """Test getting comprehensive connection statistics."""
         manager.active_connections = {"user1": [Mock(), Mock()], "user2": [Mock()]}
@@ -128,6 +131,7 @@ class TestWebSocketConnectionManager:
         assert stats["total_connections"] == 10
         assert stats["modern_stats"]["modern_metric"] == 42
     
+    @pytest.mark.asyncio
     async def test_get_stats_orchestrator_failure(self, manager):
         """Test getting stats when orchestrator fails."""
         orchestrator_result = Mock(success=False)

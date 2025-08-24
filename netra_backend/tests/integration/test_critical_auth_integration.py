@@ -19,12 +19,12 @@ import asyncio
 import json
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.integration.integration.helpers.user_flow_helpers import MockAuthService
+from netra_backend.tests.integration.helpers.user_flow_helpers import MockAuthService
 
 class TestCriticalAuthIntegration:
     """Test critical authentication integration scenarios"""

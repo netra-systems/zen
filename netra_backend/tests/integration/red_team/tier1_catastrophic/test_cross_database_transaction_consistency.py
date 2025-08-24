@@ -31,7 +31,7 @@ from sqlalchemy import text, select, insert, delete, MetaData, Table, Column, St
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError, OperationalError
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 # Real service imports - NO MOCKS for databases
 from netra_backend.app.main import app
@@ -142,14 +142,14 @@ class TestCrossDatabaseTransactionConsistency:
                 "metadata": {"test": True, "category": "integration"}
             }
         }
-        return test_data
+        yield test_data
 
     @pytest.fixture
     async def cleanup_test_data(self, real_postgresql_session, real_clickhouse_client):
         """Clean up test data after each test."""
         cleanup_operations = []
         
-        def register_cleanup(table: str, condition: str, params: Dict[str, Any], database: str = "postgresql"):
+        async def register_cleanup(table: str, condition: str, params: Dict[str, Any], database: str = "postgresql"):
             cleanup_operations.append({
                 "table": table,
                 "condition": condition,

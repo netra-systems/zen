@@ -19,7 +19,7 @@ import asyncio
 import os
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -59,6 +59,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_health_check_before_startup_complete(self, async_client):
         """Test 1: Health check should indicate not ready before startup completes."""
         # Simulate early health check
@@ -75,6 +76,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_health_check_after_startup_complete(self, async_client):
         """Test 2: Health check should indicate ready after startup completes."""
         # Simulate completed startup
@@ -95,6 +97,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_startup_initialization_order(self):
         """Test 3: Services should initialize in correct order."""
         initialization_order = []
@@ -136,6 +139,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_readiness_check_basic_dependencies(self, async_client):
         """Test 4: Readiness check should verify all basic dependencies."""
         # Mock health checker
@@ -159,6 +163,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_api_endpoints_available_after_startup(self, async_client):
         """Test 5: Basic API endpoints should be available after startup."""
         # Mock successful startup
@@ -187,6 +192,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_configuration_loading_on_startup(self):
         """Test 6: Configuration should be properly loaded on startup."""
         # Get settings instance
@@ -208,6 +214,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_startup_failure_handling(self):
         """Test 7: System should handle startup failures gracefully."""
         # Simulate database connection failure
@@ -224,6 +231,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_cold_start_performance(self, async_client):
         """Test 8: Cold start should complete within acceptable time."""
         start_time = time.perf_counter()
@@ -241,6 +249,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_startup_idempotency(self):
         """Test 9: Startup should be idempotent (safe to call multiple times)."""
         initialization_count = {"count": 0}
@@ -264,6 +273,7 @@ class TestBasicSystemColdStartup:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_graceful_degradation_missing_optional_services(self, async_client):
         """Test 10: System should start even if optional services are unavailable."""
         # Mock optional service failures

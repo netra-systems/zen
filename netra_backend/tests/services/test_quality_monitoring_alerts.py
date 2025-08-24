@@ -5,7 +5,7 @@ from pathlib import Path
 
 import asyncio
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -37,6 +37,7 @@ from netra_backend.tests.helpers.quality_monitoring_helpers import (
 
 class TestAlerting:
     """Test alerting functionality"""
+    @pytest.mark.asyncio
     async def test_alert_management_structure(self):
         """Test alert manager structure"""
         service = QualityMonitoringService()
@@ -46,6 +47,7 @@ class TestAlerting:
         assert hasattr(service.alert_manager, 'active_alerts')
         assert hasattr(service.alert_manager, 'alert_history')
         assert isinstance(service.alert_manager.active_alerts, dict)
+    @pytest.mark.asyncio
     async def test_immediate_alert_check(self, poor_quality_metrics):
         """Test immediate alert checking on poor quality"""
         service = QualityMonitoringService()
@@ -64,6 +66,7 @@ class TestAlerting:
 
 class TestRealTimeMonitoring:
     """Test real-time monitoring functionality"""
+    @pytest.mark.asyncio
     async def test_record_quality_event_real(self, real_quality_monitoring_service, sample_quality_metrics):
         """Test recording quality events with real service"""
         await record_test_quality_event(
@@ -76,6 +79,7 @@ class TestRealTimeMonitoring:
         buffer = real_quality_monitoring_service.metrics_collector.get_buffer()
         event = buffer["test_agent"][0]
         assert_event_properties(event, "test_agent", 0.75)
+    @pytest.mark.asyncio
     async def test_start_stop_monitoring_real(self, real_quality_monitoring_service):
         """Test monitoring lifecycle"""
         await real_quality_monitoring_service.start_monitoring(interval_seconds=0.001)
@@ -85,6 +89,7 @@ class TestRealTimeMonitoring:
         await asyncio.sleep(0.005)
         await real_quality_monitoring_service.stop_monitoring()
         assert real_quality_monitoring_service.monitoring_active is False
+    @pytest.mark.asyncio
     async def test_get_dashboard_data_real(self, real_quality_monitoring_service, sample_quality_metrics):
         """Test dashboard data generation"""
         await record_test_quality_event(
@@ -105,6 +110,7 @@ class TestRealTimeMonitoring:
 
 class TestAlertManagement:
     """Test alert management functionality"""
+    @pytest.mark.asyncio
     async def test_acknowledge_resolve_alerts_real(self, real_quality_monitoring_service):
         """Test alert acknowledgment and resolution"""
         alert = create_test_alert("ack_alert", AlertSeverity.WARNING, "test_agent")
@@ -117,6 +123,7 @@ class TestAlertManagement:
         result = await real_quality_monitoring_service.resolve_alert(alert.id)
         assert result is True
         assert real_quality_monitoring_service.alert_manager.active_alerts[alert.id].resolved is True
+    @pytest.mark.asyncio
     async def test_acknowledge_nonexistent_alert(self, real_quality_monitoring_service):
         """Test acknowledging non-existent alert"""
         result = await real_quality_monitoring_service.acknowledge_alert("fake_id")
@@ -150,6 +157,7 @@ class TestAlertManagement:
 
 class TestMonitoringWithMocks:
     """Test monitoring functionality with mocks"""
+    @pytest.mark.asyncio
     async def test_monitoring_with_no_data(self):
         """Test monitoring loop with no data"""
         service = QualityMonitoringService()

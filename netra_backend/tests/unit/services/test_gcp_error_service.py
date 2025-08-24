@@ -19,7 +19,7 @@ from pathlib import Path
 
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -86,8 +86,9 @@ class TestGCPErrorService:
         with patch.object(service, 'client_manager') as mock_manager:
             mock_manager.initialize_client = AsyncMock(return_value=Mock())
             await service.initialize()
-            return service
+            yield service
 
+    @pytest.mark.asyncio
     async def test_initialize_service_success(self, mock_gcp_config):
         """Test successful service initialization."""
         service = GCPErrorService(mock_gcp_config)
@@ -100,6 +101,7 @@ class TestGCPErrorService:
             assert service.client == mock_client
             mock_init.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_fetch_errors_successful_flow(self, gcp_service, sample_gcp_error_stats):
         """Test successful error fetching with complete flow."""
         query = ErrorQuery(status=ErrorStatus.OPEN, limit=10, time_range="1h")
@@ -113,6 +115,7 @@ class TestGCPErrorService:
             self._verify_error_response(result)
             assert mock_format.called
 
+    @pytest.mark.asyncio
     async def test_fetch_errors_rate_limiting_enforced(self, gcp_service):
         """Test rate limiting is enforced before API calls."""
         query = ErrorQuery(status=ErrorStatus.OPEN, limit=5)
@@ -125,6 +128,7 @@ class TestGCPErrorService:
                 
                 mock_rate.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_fetch_errors_gcp_api_failure_raises_exception(self, gcp_service):
         """Test GCP API failure handling."""
         query = ErrorQuery(status=ErrorStatus.OPEN)
@@ -135,6 +139,7 @@ class TestGCPErrorService:
         
         self._assert_netra_exception(exc_info, "Failed to fetch errors from GCP", ErrorCode.EXTERNAL_SERVICE_ERROR)
 
+    @pytest.mark.asyncio
     async def test_build_time_range_hour_parsing(self, gcp_service):
         """Test hour-based time range parsing."""
         result = gcp_service._build_time_range("3h")
@@ -146,6 +151,7 @@ class TestGCPErrorService:
         time_diff = result["period"]["end_time"] - result["period"]["start_time"]
         assert abs(time_diff.total_seconds() - 10800) < 60  # 3 hours ±1 minute
 
+    @pytest.mark.asyncio
     async def test_build_time_range_day_parsing(self, gcp_service):
         """Test day-based time range parsing."""
         result = gcp_service._build_time_range("2d")
@@ -153,6 +159,7 @@ class TestGCPErrorService:
         time_diff = result["period"]["end_time"] - result["period"]["start_time"]
         assert abs(time_diff.total_seconds() - 172800) < 3600  # 2 days ±1 hour
 
+    @pytest.mark.asyncio
     async def test_build_time_range_invalid_format_defaults(self, gcp_service):
         """Test invalid time range format defaults to 24 hours."""
         result = gcp_service._build_time_range("invalid")
@@ -160,6 +167,7 @@ class TestGCPErrorService:
         time_diff = result["period"]["end_time"] - result["period"]["start_time"]
         assert abs(time_diff.total_seconds() - 86400) < 3600  # 24 hours ±1 hour
 
+    @pytest.mark.asyncio
     async def test_build_list_request_with_filters(self, gcp_service):
         """Test GCP API request building with all filters."""
         query = ErrorQuery(
@@ -176,6 +184,7 @@ class TestGCPErrorService:
         assert result["page_token"] == "next-page"
         assert result["page_size"] == 25
 
+    @pytest.mark.asyncio
     async def test_build_list_request_minimal_query(self, gcp_service):
         """Test GCP API request building with minimal query."""
         query = ErrorQuery(limit=50)
@@ -187,6 +196,7 @@ class TestGCPErrorService:
         assert "page_token" not in result
         assert result["page_size"] == 50
 
+    @pytest.mark.asyncio
     async def test_create_summary_comprehensive_counts(self, gcp_service):
         """Test summary creation with comprehensive error counts."""
         errors = self._create_test_errors_for_summary()
@@ -196,6 +206,7 @@ class TestGCPErrorService:
         
         self._verify_summary_statistics(result, errors)
 
+    @pytest.mark.asyncio
     async def test_count_by_severity_all_levels(self, gcp_service):
         """Test severity counting for all error levels."""
         errors = [
@@ -212,6 +223,7 @@ class TestGCPErrorService:
         assert result["warning_errors"] == 0  # Method doesn't count warnings yet
         assert result["info_errors"] == 0
 
+    @pytest.mark.asyncio
     async def test_count_by_status_open_and_resolved(self, gcp_service):
         """Test status counting for open and resolved errors."""
         errors = [
@@ -225,6 +237,7 @@ class TestGCPErrorService:
         assert result["open_errors"] == 2
         assert result["resolved_errors"] == 1
 
+    @pytest.mark.asyncio
     async def test_get_error_details_success(self, gcp_service):
         """Test successful error details retrieval."""
         error_id = "test-error-123"
@@ -241,6 +254,7 @@ class TestGCPErrorService:
                 assert result.error == mock_error
                 mock_fetch.assert_called_once_with(error_id)
 
+    @pytest.mark.asyncio
     async def test_fetch_error_details_gcp_failure(self, gcp_service):
         """Test error details fetch failure handling."""
         error_id = "invalid-error"
@@ -251,6 +265,7 @@ class TestGCPErrorService:
         
         self._assert_netra_exception(exc_info, "Failed to fetch error details", ErrorCode.EXTERNAL_SERVICE_ERROR)
 
+    @pytest.mark.asyncio
     async def test_update_error_status_success(self, gcp_service):
         """Test successful error status update."""
         error_id = "test-error-123"
@@ -264,6 +279,7 @@ class TestGCPErrorService:
             assert result is True
             mock_resolve.assert_called_once_with(error_id, resolution)
 
+    @pytest.mark.asyncio
     async def test_update_error_status_failure_handling(self, gcp_service):
         """Test error status update failure handling."""
         error_id = "test-error-123"
@@ -277,6 +293,7 @@ class TestGCPErrorService:
             
             self._assert_netra_exception(exc_info, "Failed to update error status", ErrorCode.EXTERNAL_SERVICE_ERROR)
 
+    @pytest.mark.asyncio
     async def test_get_service_status_complete_info(self, gcp_service):
         """Test service status reporting with complete information."""
         gcp_service.client = Mock()  # Set initialized client

@@ -28,7 +28,7 @@ from typing import Any, Dict, List, Optional, Set
 
 # from app.services.cache.invalidation_service import CacheInvalidationService  # Class may not exist, commented out
 # Session cache replaced with mock
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import redis.asyncio as aioredis
@@ -146,7 +146,7 @@ class CacheCoherenceL4Manager:
         for i, url in enumerate(redis_urls):
             try:
                 # Use mock Redis client to avoid event loop conflicts
-                from unittest.mock import AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
                 client = AsyncMock()
                 client.ping = AsyncMock()
                 client.get = AsyncMock(return_value=None)
@@ -158,6 +158,7 @@ class CacheCoherenceL4Manager:
             except Exception as e:
                 logger.warning(f"Could not connect to Redis cluster {i}: {e}")
     
+    @pytest.mark.asyncio
     async def test_cache_write_performance(self, key_count: int) -> Dict[str, Any]:
         """Test cache write performance with multiple keys."""
         write_times = []
@@ -202,6 +203,7 @@ class CacheCoherenceL4Manager:
             "max_write_time": max(write_times) if write_times else 0
         }
     
+    @pytest.mark.asyncio
     async def test_cache_read_performance(self, read_count: int) -> Dict[str, Any]:
         """Test cache read performance and hit rates."""
         read_times = []
@@ -245,6 +247,7 @@ class CacheCoherenceL4Manager:
             "avg_read_time": statistics.mean(read_times) if read_times else 0
         }
     
+    @pytest.mark.asyncio
     async def test_cache_invalidation_coherence(self, key_count: int) -> Dict[str, Any]:
         """Test cache invalidation propagation across distributed nodes."""
         invalidation_times = []
@@ -318,6 +321,7 @@ class CacheCoherenceL4Manager:
             logger.error(f"Coherence verification failed for key {key}: {e}")
             return False
     
+    @pytest.mark.asyncio
     async def test_ttl_accuracy_and_eviction(self, key_count: int) -> Dict[str, Any]:
         """Test TTL accuracy and eviction policy effectiveness."""
         ttl_tests = []
@@ -371,6 +375,7 @@ class CacheCoherenceL4Manager:
             "ttl_accuracy": (accurate_ttls / len(ttl_tests) * 100) if ttl_tests else 0
         }
     
+    @pytest.mark.asyncio
     async def test_concurrent_cache_operations(self, concurrent_ops: int) -> Dict[str, Any]:
         """Test cache coherence under concurrent operations."""
         # Create tasks for concurrent operations
@@ -436,6 +441,7 @@ class CacheCoherenceL4Manager:
         else:
             return {"operation": "invalidate", "key": None, "success": False}
     
+    @pytest.mark.asyncio
     async def test_session_cache_coherence(self) -> Dict[str, Any]:
         """Test session cache coherence across authentication flows."""
         test_users = []
@@ -567,6 +573,7 @@ async def cache_l4_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_cache_hit_rate_under_load(cache_l4_manager):
     """Test cache hit rates under high load conditions."""
     # Pre-populate cache with test data
@@ -588,6 +595,7 @@ async def test_cache_hit_rate_under_load(cache_l4_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_distributed_cache_invalidation_coherence(cache_l4_manager):
     """Test cache invalidation propagation across distributed nodes."""
     # Test invalidation coherence
@@ -608,6 +616,7 @@ async def test_distributed_cache_invalidation_coherence(cache_l4_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_ttl_accuracy_and_eviction_policies(cache_l4_manager):
     """Test TTL accuracy and cache eviction policy effectiveness."""
     # Test TTL accuracy
@@ -624,6 +633,7 @@ async def test_ttl_accuracy_and_eviction_policies(cache_l4_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_concurrent_cache_operations_coherence(cache_l4_manager):
     """Test cache coherence under concurrent read/write/invalidate operations."""
     # Execute concurrent operations
@@ -641,6 +651,7 @@ async def test_concurrent_cache_operations_coherence(cache_l4_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_session_cache_coherence_across_services(cache_l4_manager):
     """Test session cache coherence across authentication and user services."""
     # Test session cache coherence
@@ -657,6 +668,7 @@ async def test_session_cache_coherence_across_services(cache_l4_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_cache_performance_sla_compliance(cache_l4_manager):
     """Test overall cache performance SLA compliance under realistic load."""
     # Execute comprehensive performance test

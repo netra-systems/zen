@@ -9,7 +9,7 @@ from pathlib import Path
 
 import json
 from typing import List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from pydantic import BaseModel, Field
@@ -85,6 +85,7 @@ class TestMockStructuredLLM:
         assert isinstance(structured_llm, MockStructuredLLM)
         assert structured_llm.model_name == "test-model"
         assert structured_llm.schema == SampleResponseModel
+    @pytest.mark.asyncio
     async def test_mock_structured_llm_invoke(self):
         """Test invoking mock structured LLM returns valid schema instance."""
         mock_llm = MockLLM("test-model")
@@ -96,6 +97,7 @@ class TestMockStructuredLLM:
         assert isinstance(result.message, str)
         assert 0.0 <= result.confidence <= 1.0
         assert isinstance(result.tags, list)
+    @pytest.mark.asyncio
     async def test_mock_structured_llm_complex_model(self):
         """Test mock structured LLM with complex model."""
         mock_llm = MockLLM("test-model")
@@ -143,6 +145,7 @@ class TestLLMManagerStructuredGeneration:
         
         mock_llm_instance.with_structured_output.assert_called_once()
         assert structured_llm == "structured_llm"
+    @pytest.mark.asyncio
     async def test_ask_structured_llm_success(self, llm_manager):
         """Test successful structured LLM call."""
         # Create a mock structured LLM that returns a valid response
@@ -169,6 +172,7 @@ class TestLLMManagerStructuredGeneration:
             assert result.message == "Test response"
             assert result.confidence == 0.95
             assert result.tags == ["test", "success"]
+    @pytest.mark.asyncio
     async def test_ask_structured_llm_with_cache(self, llm_manager):
         """Test structured LLM with caching."""
         cached_data = SampleResponseModel(
@@ -192,6 +196,7 @@ class TestLLMManagerStructuredGeneration:
             assert result.message == "Cached response"
             assert result.confidence == 0.85
             assert result.tags == ["cached"]
+    @pytest.mark.asyncio
     async def test_ask_structured_llm_fallback_to_json(self, llm_manager):
         """Test fallback to JSON parsing when structured generation fails."""
         json_response = json.dumps({
@@ -223,6 +228,7 @@ class TestLLMManagerStructuredGeneration:
                 assert isinstance(result, SampleResponseModel)
                 assert result.message == "JSON fallback"
                 assert result.confidence == 0.75
+    @pytest.mark.asyncio
     async def test_ask_structured_llm_complete_failure(self, llm_manager):
         """Test complete failure of structured generation."""
         with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get:
@@ -249,6 +255,7 @@ class TestLLMManagerStructuredGeneration:
 
 class TestNestedJSONParsing:
     """Test nested JSON parsing functionality."""
+    @pytest.mark.asyncio
     async def test_parse_nested_json_with_tool_recommendations(self, llm_manager):
         """Test parsing nested JSON strings in tool_recommendations parameters."""
         # This is the exact structure that was failing
@@ -278,6 +285,7 @@ class TestNestedJSONParsing:
         # Verify the actual values
         assert parsed["tool_recommendations"][0]["parameters"]["feature_X_latency"] == "50ms"
         assert parsed["tool_recommendations"][1]["parameters"]["threshold"] == 100
+    @pytest.mark.asyncio
     async def test_parse_deeply_nested_json(self, llm_manager):
         """Test parsing deeply nested JSON strings."""
         raw_data = {
@@ -295,6 +303,7 @@ class TestNestedJSONParsing:
 
 class TestIntegrationWithAgents:
     """Test integration of structured generation with agents."""
+    @pytest.mark.asyncio
     async def test_triage_agent_structured_response(self):
         """Test that triage agent can use structured responses."""
         from netra_backend.app.agents.triage_sub_agent import TriageResult
@@ -312,6 +321,7 @@ class TestIntegrationWithAgents:
         assert result.category == "Test Category"
         assert result.confidence_score == 0.9
         assert result.priority.value == "medium"  # Default value
+    @pytest.mark.asyncio
     async def test_triage_result_with_nested_json_parameters(self, llm_manager):
         """Test TriageResult validation with nested JSON in tool_recommendations."""
         from netra_backend.app.agents.triage_sub_agent.models import TriageResult
@@ -340,6 +350,7 @@ class TestIntegrationWithAgents:
         assert len(result.tool_recommendations) == 1
         assert isinstance(result.tool_recommendations[0].parameters, dict)
         assert result.tool_recommendations[0].parameters["feature_X_latency"] == "50ms"
+    @pytest.mark.asyncio
     async def test_data_agent_structured_response(self):
         """Test that data agent can use structured responses."""
         from netra_backend.app.agents.data_sub_agent.models import DataAnalysisResponse

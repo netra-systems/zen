@@ -36,7 +36,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as aioredis
@@ -423,7 +423,7 @@ class AuthCacheInvalidationTestManager:
         """Initialize real services for testing."""
         try:
             # Use fake Redis for testing to avoid event loop conflicts
-            from unittest.mock import AsyncMock
+            from unittest.mock import AsyncMock, MagicMock
             
             self.redis_client = AsyncMock()
             self.redis_client.get = AsyncMock(return_value=None)
@@ -483,6 +483,7 @@ class AuthCacheInvalidationTestManager:
             logger.error(f"Service initialization failed: {e}")
             raise
 
+    @pytest.mark.asyncio
     async def test_user_cache_invalidation_flow(self, user_id: str) -> Dict[str, Any]:
         """Test complete user cache invalidation flow."""
         flow_start = time.time()
@@ -542,6 +543,7 @@ class AuthCacheInvalidationTestManager:
         for key, data in cache_data.items():
             await self.redis_client.setex(key, 3600, json.dumps(data))
 
+    @pytest.mark.asyncio
     async def test_cache_coherency_validation(self, user_id: str) -> Dict[str, Any]:
         """Test cache coherency after invalidation."""
         coherency_start = time.time()
@@ -597,6 +599,7 @@ class AuthCacheInvalidationTestManager:
                 "coherency_time": time.time() - coherency_start
             }
 
+    @pytest.mark.asyncio
     async def test_permission_invalidation_cascade(self, permission: str, affected_users: List[str]) -> Dict[str, Any]:
         """Test permission-based cache invalidation cascade."""
         cascade_start = time.time()
@@ -643,6 +646,7 @@ class AuthCacheInvalidationTestManager:
                 "cascade_time": time.time() - cascade_start
             }
 
+    @pytest.mark.asyncio
     async def test_real_time_notification_latency(self, user_id: str) -> Dict[str, Any]:
         """Test real-time notification latency."""
         latency_start = time.time()
@@ -729,6 +733,7 @@ async def auth_cache_invalidation_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_complete_auth_cache_invalidation_flow(auth_cache_invalidation_manager):
     """
     Test complete auth cache invalidation flow.

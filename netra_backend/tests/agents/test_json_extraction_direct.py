@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 

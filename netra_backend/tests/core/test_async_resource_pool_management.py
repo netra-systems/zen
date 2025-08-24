@@ -15,7 +15,7 @@ import time
 import weakref
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -31,6 +31,7 @@ from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeo
 
 class TestAsyncResourceManagerComplete:
     """Complete tests for AsyncResourceManager."""
+    @pytest.mark.asyncio
     async def test_full_lifecycle(self):
         """Test complete resource manager lifecycle."""
         manager = AsyncResourceManager()
@@ -59,6 +60,7 @@ class TestAsyncResourceManagerComplete:
         await manager.cleanup()
         assert cleanup_calls == [1, 2]  # Both should execute despite error
         assert len(manager._cleanup_callbacks) == 0
+    @pytest.mark.asyncio
     async def test_weak_reference_behavior(self):
         """Test that cleanup callbacks are removed when objects are garbage collected."""
         manager = AsyncResourceManager()
@@ -85,6 +87,7 @@ class TestAsyncResourceManagerComplete:
         # Check that the weak reference was cleaned up
         manager._cleanup_dead_refs()
         assert len(manager._cleanup_callbacks) == 0
+    @pytest.mark.asyncio
     async def test_concurrent_cleanup_registration(self):
         """Test concurrent cleanup registration and execution."""
         manager = AsyncResourceManager()
@@ -113,6 +116,7 @@ class TestAsyncResourceManagerComplete:
 
 class TestAsyncTaskPoolComplete:
     """Complete tests for AsyncTaskPool."""
+    @pytest.mark.asyncio
     async def test_pool_limits_and_queuing(self):
         """Test task pool with limits and queuing."""
         pool = AsyncTaskPool(max_concurrent_tasks=2)
@@ -130,6 +134,7 @@ class TestAsyncTaskPoolComplete:
         
         assert results == [0, 1, 2, 3]
         assert len(execution_order) == 8  # 4 starts + 4 ends
+    @pytest.mark.asyncio
     async def test_pool_shutdown_behavior(self):
         """Test task pool shutdown behavior."""
         pool = AsyncTaskPool(max_concurrent_tasks=2)
@@ -150,6 +155,7 @@ class TestAsyncTaskPoolComplete:
         # Wait for completion
         await asyncio.gather(task1, task2, return_exceptions=True)
         assert len(results) <= 2  # May not all complete
+    @pytest.mark.asyncio
     async def test_pool_task_exception_handling(self):
         """Test exception handling in task pool."""
         pool = AsyncTaskPool(max_concurrent_tasks=3)
@@ -173,10 +179,12 @@ class TestAsyncTaskPoolComplete:
         assert isinstance(results[0], ValueError)
         assert results[1] == "success"
         assert isinstance(results[2], ValueError)
+    @pytest.mark.asyncio
     async def test_pool_context_manager(self):
         """Test task pool as context manager."""
         execution_log = []
         
+        @pytest.mark.asyncio
         async def test_task(task_id):
             execution_log.append(f"task_{task_id}")
             return task_id
@@ -190,6 +198,7 @@ class TestAsyncTaskPoolComplete:
 
 class TestAsyncConnectionPoolComplete:
     """Complete tests for AsyncConnectionPool."""
+    @pytest.mark.asyncio
     async def test_connection_pool_lifecycle(self):
         """Test complete connection pool lifecycle."""
         created_connections = []
@@ -227,6 +236,7 @@ class TestAsyncConnectionPoolComplete:
         # Close pool
         await pool.close()
         assert len(closed_connections) > 0
+    @pytest.mark.asyncio
     async def test_connection_pool_timeout_handling(self):
         """Test connection pool timeout handling."""
         async def slow_create_connection():
@@ -256,6 +266,7 @@ class TestAsyncConnectionPoolComplete:
         assert execution_time <= 1.0  # Should not take too long
         
         await pool.close()
+    @pytest.mark.asyncio
     async def test_connection_pool_error_recovery(self):
         """Test connection pool error recovery."""
         failure_count = 0
@@ -287,6 +298,7 @@ class TestAsyncConnectionPoolComplete:
         assert conn is not None
         await pool.return_connection(conn)
         await pool.close()
+    @pytest.mark.asyncio
     async def test_connection_pool_concurrent_access(self):
         """Test concurrent access to connection pool."""
         connection_counter = 0
@@ -323,6 +335,7 @@ class TestAsyncConnectionPoolComplete:
 
 class TestGlobalResourceManagement:
     """Test global resource management functions."""
+    @pytest.mark.asyncio
     async def test_global_resource_manager_access(self):
         """Test access to global resource manager."""
         manager1 = get_global_resource_manager()
@@ -331,6 +344,7 @@ class TestGlobalResourceManagement:
         # Should return the same instance
         assert manager1 is manager2
         assert isinstance(manager1, AsyncResourceManager)
+    @pytest.mark.asyncio
     async def test_global_task_pool_access(self):
         """Test access to global task pool."""
         pool1 = get_global_task_pool()
@@ -339,9 +353,10 @@ class TestGlobalResourceManagement:
         # Should return the same instance
         assert pool1 is pool2
         assert isinstance(pool1, AsyncTaskPool)
+    @pytest.mark.asyncio
     async def test_run_in_threadpool_functionality(self):
         """Test run_in_threadpool functionality."""
-        def cpu_bound_task(n):
+        async def cpu_bound_task(n):
             """Simulate CPU-bound work."""
             total = 0
             for i in range(n):
@@ -352,9 +367,10 @@ class TestGlobalResourceManagement:
         result = await run_in_threadpool(cpu_bound_task, 100)
         expected = sum(range(100))
         assert result == expected
+    @pytest.mark.asyncio
     async def test_run_in_threadpool_with_exception(self):
         """Test run_in_threadpool exception handling."""
-        def failing_task():
+        async def failing_task():
             raise ValueError("Thread task failed")
         
         with pytest.raises(ValueError, match="Thread task failed"):

@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -55,6 +55,7 @@ class TestCorpusAuditRepository:
             corpus_id="corpus-456"
         )
 
+    @pytest.mark.asyncio
     async def test_find_by_user_success(self, repository, mock_db, sample_audit_log):
         """Test finding audit records by user ID."""
         mock_result = MagicMock()
@@ -66,6 +67,7 @@ class TestCorpusAuditRepository:
         assert len(records) == 1
         assert records[0].user_id == "user-123"
 
+    @pytest.mark.asyncio
     async def test_find_by_user_database_error(self, repository, mock_db):
         """Test database error handling in find_by_user."""
         mock_db.execute.side_effect = Exception("Database error")
@@ -73,6 +75,7 @@ class TestCorpusAuditRepository:
         with pytest.raises(DatabaseError):
             await repository.find_by_user(mock_db, "user-123")
 
+    @pytest.mark.asyncio
     async def test_search_records_with_filters(self, repository, mock_db, sample_audit_log):
         """Test searching records with comprehensive filters."""
         filters = CorpusAuditSearchFilter(
@@ -91,6 +94,7 @@ class TestCorpusAuditRepository:
         assert len(records) == 1
         assert records[0].action == "create"
 
+    @pytest.mark.asyncio
     async def test_count_records_success(self, repository, mock_db):
         """Test counting audit records with filters."""
         filters = CorpusAuditSearchFilter(user_id="user-123")
@@ -103,6 +107,7 @@ class TestCorpusAuditRepository:
         
         assert count == 42
 
+    @pytest.mark.asyncio
     async def test_get_summary_stats_success(self, repository, mock_db):
         """Test getting summary statistics."""
         mock_results = [("create", "success", 10), ("update", "failure", 2)]
@@ -139,6 +144,7 @@ class TestCorpusAuditLogger:
             configuration={"setting": "value"}
         )
 
+    @pytest.mark.asyncio
     async def test_log_operation_success(self, audit_logger, mock_repository, mock_db, sample_metadata):
         """Test successful operation logging."""
         mock_audit_log = CorpusAuditLog(
@@ -162,6 +168,7 @@ class TestCorpusAuditLogger:
         assert result.action == CorpusAuditAction.CREATE
         mock_repository.create.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_log_operation_with_duration(self, audit_logger, mock_repository, mock_db):
         """Test logging operation with timing data."""
         mock_audit_log = CorpusAuditLog(
@@ -183,6 +190,7 @@ class TestCorpusAuditLogger:
         
         assert result.operation_duration_ms == 150.5
 
+    @pytest.mark.asyncio
     async def test_log_operation_failure(self, audit_logger, mock_repository, mock_db):
         """Test handling of logging failures."""
         mock_repository.create.side_effect = Exception("Database error")
@@ -194,6 +202,7 @@ class TestCorpusAuditLogger:
                 "corpus"
             )
 
+    @pytest.mark.asyncio
     async def test_search_audit_logs_success(self, audit_logger, mock_repository, mock_db):
         """Test searching audit logs with report generation."""
         filters = CorpusAuditSearchFilter(limit=10)
@@ -215,6 +224,7 @@ class TestCorpusAuditLogger:
         assert len(report.records) == 1
         assert "create_success" in report.summary
 
+    @pytest.mark.asyncio
     async def test_search_audit_logs_failure(self, audit_logger, mock_repository, mock_db):
         """Test search failure handling."""
         filters = CorpusAuditSearchFilter()
@@ -250,6 +260,7 @@ class TestAuditIntegration:
     def mock_db(self):
         return AsyncMock(spec=AsyncSession)
 
+    @pytest.mark.asyncio
     async def test_create_audit_logger_factory(self, mock_db):
         """Test audit logger factory function."""
         logger = await create_audit_logger(mock_db)
@@ -257,6 +268,7 @@ class TestAuditIntegration:
         assert isinstance(logger, CorpusAuditLogger)
         assert isinstance(logger.repository, CorpusAuditRepository)
 
+    @pytest.mark.asyncio
     async def test_end_to_end_audit_workflow(self, mock_db):
         """Test complete audit workflow from logging to reporting."""
         # Setup
@@ -312,6 +324,7 @@ class TestAuditPerformance:
     def mock_db(self):
         return AsyncMock(spec=AsyncSession)
 
+    @pytest.mark.asyncio
     async def test_large_result_data_handling(self, audit_logger, mock_db):
         """Test handling of large result data objects."""
         large_data = {"results": ["item"] * 1000}  # Large data set
@@ -335,6 +348,7 @@ class TestAuditPerformance:
         
         assert len(result.result_data["results"]) == 1000
 
+    @pytest.mark.asyncio
     async def test_metadata_edge_cases(self, audit_logger, mock_db):
         """Test metadata handling with edge cases."""
         empty_metadata = CorpusAuditMetadata()

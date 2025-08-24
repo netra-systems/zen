@@ -12,7 +12,7 @@ from pathlib import Path
 import asyncio
 from datetime import datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -37,8 +37,9 @@ class TestSupervisorAgentInitializationChain:
             "db_session": Mock(),
             "redis_manager": Mock(get=AsyncMock(), set=AsyncMock())
         }
-        return deps
+        yield deps
     
+    @pytest.mark.asyncio
     async def test_complete_initialization_sequence(self, mock_dependencies):
         """Test supervisor initialization from cold to ready."""
         supervisor = SupervisorAgent(**mock_dependencies)
@@ -71,6 +72,7 @@ class TestSupervisorAgentInitializationChain:
         assert len(supervisor.agents) >= 5  # Core agents
         assert len(capabilities) >= 20  # Multiple capabilities
     
+    @pytest.mark.asyncio
     async def test_sub_agent_registration_order(self, mock_dependencies):
         """Test correct order of sub-agent registration."""
         supervisor = SupervisorAgent(**mock_dependencies)
@@ -80,7 +82,7 @@ class TestSupervisorAgentInitializationChain:
         
         # Mock registration to track order
         original_register = supervisor.registry.register
-        def track_register(agent_name, agent):
+        async def track_register(agent_name, agent):
             registration_order.append(agent_name)
             return original_register(agent_name, agent)
         
@@ -92,6 +94,7 @@ class TestSupervisorAgentInitializationChain:
         for i, agent in enumerate(priority_agents):
             assert registration_order[i] == agent
     
+    @pytest.mark.asyncio
     async def test_capability_validation_completeness(self, mock_dependencies):
         """Test all agent capabilities are validated."""
         supervisor = SupervisorAgent(**mock_dependencies)
@@ -109,6 +112,7 @@ class TestSupervisorAgentInitializationChain:
         # All capabilities should be valid
         assert len(invalid_capabilities) == 0
     
+    @pytest.mark.asyncio
     async def test_initialization_error_recovery(self, mock_dependencies):
         """Test recovery from initialization failures."""
         supervisor = SupervisorAgent(**mock_dependencies)
@@ -133,6 +137,7 @@ class TestSupervisorAgentInitializationChain:
         # Verify recovery succeeded
         assert supervisor.state != "failed"
     
+    @pytest.mark.asyncio
     async def test_ready_state_requirements(self, mock_dependencies):
         """Test requirements for reaching ready state."""
         supervisor = SupervisorAgent(**mock_dependencies)

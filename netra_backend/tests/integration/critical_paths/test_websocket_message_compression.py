@@ -25,7 +25,7 @@ import zlib
 import base64
 from typing import Dict, Any, List, Tuple
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 
 import redis.asyncio as redis
@@ -306,6 +306,7 @@ class TestWebSocketMessageCompressionL3:
 
         )
     
+    @pytest.mark.asyncio
     async def test_basic_message_compression(self, message_compressor):
 
         """Test basic message compression and decompression."""
@@ -351,6 +352,7 @@ class TestWebSocketMessageCompressionL3:
 
         assert decompressed_message["decompression_time"] < 0.1  # Should be fast
     
+    @pytest.mark.asyncio
     async def test_compression_methods_comparison(self, message_compressor):
 
         """Test different compression methods."""
@@ -402,6 +404,7 @@ class TestWebSocketMessageCompressionL3:
 
         assert compression_results["zlib"]["compression_time"] < 0.2
     
+    @pytest.mark.asyncio
     async def test_compression_threshold_handling(self, message_compressor):
 
         """Test compression threshold behavior."""
@@ -429,6 +432,7 @@ class TestWebSocketMessageCompressionL3:
 
         assert compressed_large["original_size"] > message_compressor.compression_threshold
     
+    @pytest.mark.asyncio
     async def test_compressed_message_redis_storage(self, redis_client, message_compressor, test_users):
 
         """Test storing and retrieving compressed messages in Redis."""
@@ -475,6 +479,7 @@ class TestWebSocketMessageCompressionL3:
 
         await redis_client.delete(message_key)
     
+    @pytest.mark.asyncio
     async def test_websocket_compression_integration(self, websocket_manager, redis_client, message_compressor, test_users):
 
         """Test compression integration with WebSocket messaging."""
@@ -551,6 +556,7 @@ class TestWebSocketMessageCompressionL3:
 
         await redis_client.delete(storage_key)
     
+    @pytest.mark.asyncio
     async def test_compression_performance_under_load(self, message_compressor):
 
         """Test compression performance with multiple concurrent operations."""
@@ -642,6 +648,7 @@ class TestWebSocketMessageCompressionL3:
     
     @mock_justified("L3: Message compression testing with real Redis storage")
 
+    @pytest.mark.asyncio
     async def test_compression_bandwidth_savings(self, redis_client, message_compressor, test_users):
 
         """Test bandwidth savings from message compression."""

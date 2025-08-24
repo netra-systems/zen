@@ -33,6 +33,7 @@ from netra_backend.tests.integration.first_time_user_fixtures import (
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_user_registration_with_email_verification(
     async_client: httpx.AsyncClient,
     test_user_data,
@@ -58,6 +59,7 @@ async def test_user_registration_with_email_verification(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_email_verification_activation(
     async_client: httpx.AsyncClient,
     test_user_data,
@@ -83,6 +85,7 @@ async def test_email_verification_activation(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_user_authentication_after_verification(
     async_client: httpx.AsyncClient,
     test_user_data,
@@ -108,6 +111,7 @@ async def test_user_authentication_after_verification(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(10)
+@pytest.mark.asyncio
 async def test_duplicate_registration_prevention(
     async_client: httpx.AsyncClient,
     test_user_data
@@ -125,6 +129,7 @@ async def test_duplicate_registration_prevention(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(45)
+@pytest.mark.asyncio
 async def test_google_oauth_signup_flow(
     async_client: httpx.AsyncClient,
     async_session: AsyncSession
@@ -156,6 +161,7 @@ async def test_google_oauth_signup_flow(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_github_oauth_signup_flow(
     async_client: httpx.AsyncClient,
     async_session: AsyncSession
@@ -189,6 +195,7 @@ async def test_github_oauth_signup_flow(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_oauth_account_linking(
     async_client: httpx.AsyncClient,
     async_session: AsyncSession

@@ -9,7 +9,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import time
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -29,6 +29,7 @@ class TestAsyncRateLimiter:
     def test_initialization(self, rate_limiter):
         """Test rate limiter initialization"""
         assert_rate_limiter_state(rate_limiter, 3, 1.0, 0)
+    @pytest.mark.asyncio
     async def test_acquire_under_limit(self, rate_limiter):
         """Test acquiring under rate limit"""
         start_time = time.time()
@@ -38,6 +39,7 @@ class TestAsyncRateLimiter:
         end_time = time.time()
         assert end_time - start_time < 0.1
         assert_rate_limiter_state(rate_limiter, 3, 1.0, 3)
+    @pytest.mark.asyncio
     async def test_acquire_over_limit(self, rate_limiter):
         """Test acquiring over rate limit causes delay"""
         await self._fill_rate_limiter(rate_limiter)
@@ -51,6 +53,7 @@ class TestAsyncRateLimiter:
         await rate_limiter.acquire()
         await rate_limiter.acquire()
         await rate_limiter.acquire()
+    @pytest.mark.asyncio
     async def test_time_window_cleanup(self, rate_limiter):
         """Test that old calls are cleaned up"""
         with patch('time.time', side_effect=[0, 0, 0, 2.0]):

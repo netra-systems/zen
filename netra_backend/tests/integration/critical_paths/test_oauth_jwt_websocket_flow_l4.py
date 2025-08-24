@@ -30,7 +30,7 @@ import uuid
 from typing import Any, Dict, Optional
 
 # OAuth service replaced with mock
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import httpx
@@ -45,11 +45,11 @@ OAuthService = AsyncMock
 # JWT service replaced with auth_integration
 # from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
 # from app.auth_integration.auth import create_access_token
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 create_access_token = AsyncMock()
 # from app.core.unified.jwt_validator import validate_token_jwt
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 validate_token_jwt = AsyncMock()
 JWTService = AsyncMock
@@ -410,6 +410,7 @@ async def oauth_jwt_websocket_l4_test():
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.L4
+@pytest.mark.asyncio
 async def test_complete_oauth_jwt_websocket_flow_l4(oauth_jwt_websocket_l4_test):
     """Test complete OAuth → JWT → WebSocket authentication flow in staging."""
     test_metrics = await oauth_jwt_websocket_l4_test.run_complete_critical_path_test()
@@ -420,6 +421,7 @@ async def test_complete_oauth_jwt_websocket_flow_l4(oauth_jwt_websocket_l4_test)
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.L4
+@pytest.mark.asyncio
 async def test_oauth_websocket_message_flow_l4(oauth_jwt_websocket_l4_test):
     """Test OAuth-authenticated WebSocket message flow specifically."""
     oauth_data = await oauth_jwt_websocket_l4_test._execute_oauth_flow()
@@ -432,6 +434,7 @@ async def test_oauth_websocket_message_flow_l4(oauth_jwt_websocket_l4_test):
 @pytest.mark.asyncio  
 @pytest.mark.staging
 @pytest.mark.L4
+@pytest.mark.asyncio
 async def test_oauth_token_refresh_session_persistence_l4(oauth_jwt_websocket_l4_test):
     """Test OAuth token refresh maintains session persistence."""
     oauth_data = await oauth_jwt_websocket_l4_test._execute_oauth_flow()
@@ -445,6 +448,7 @@ async def test_oauth_token_refresh_session_persistence_l4(oauth_jwt_websocket_l4
 @pytest.mark.asyncio
 @pytest.mark.staging 
 @pytest.mark.L4
+@pytest.mark.asyncio
 async def test_oauth_cross_service_auth_consistency_l4(oauth_jwt_websocket_l4_test):
     """Test OAuth authentication consistency across all staging services."""
     oauth_data = await oauth_jwt_websocket_l4_test._execute_oauth_flow()

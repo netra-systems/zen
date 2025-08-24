@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -46,6 +46,7 @@ class TestFallbackCoordinatorExecution:
             
             return coordinator
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_success(self, coordinator):
         """Test successful operation execution with coordination."""
         # Setup
@@ -76,6 +77,7 @@ class TestFallbackCoordinatorExecution:
         # Verify success was recorded
         coordinator.health_monitor.record_success.assert_called_once_with(agent_name)
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_emergency_mode(self, coordinator):
         """Test execution during emergency mode."""
         # Setup emergency mode
@@ -98,6 +100,7 @@ class TestFallbackCoordinatorExecution:
             agent_name, operation_name, "critical"
         )
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_cascade_prevention(self, coordinator):
         """Test execution with cascade prevention active."""
         # Setup cascade prevention
@@ -120,6 +123,7 @@ class TestFallbackCoordinatorExecution:
             agent_name, operation_name
         )
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_unregistered_agent(self, coordinator):
         """Test execution with unregistered agent."""
         agent_name = "UnregisteredAgent"
@@ -134,6 +138,7 @@ class TestFallbackCoordinatorExecution:
                 agent_name, mock_operation, operation_name
             )
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_failure(self, coordinator):
         """Test execution with operation failure."""
         # Setup
@@ -160,6 +165,7 @@ class TestFallbackCoordinatorExecution:
         coordinator.health_monitor.update_circuit_breaker_status.assert_called_once_with(agent_name)
         coordinator.health_monitor.update_system_health.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_execute_with_coordination_custom_fallback_type(self, coordinator):
         """Test execution with custom fallback type."""
         agent_name = "TestAgent"
@@ -184,6 +190,7 @@ class TestFallbackCoordinatorExecution:
             mock_operation, operation_name, agent_name, fallback_type
         )
     
+    @pytest.mark.asyncio
     async def test_concurrent_operations(self, coordinator):
         """Test concurrent operations on different agents."""
         # Setup multiple agents
@@ -215,6 +222,7 @@ class TestFallbackCoordinatorExecution:
             assert results[i] == f"result_{agent}"
             handlers[agent].execute_with_fallback.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_error_handling_in_health_monitoring(self, coordinator):
         """Test error handling when health monitoring fails."""
         agent_name = "TestAgent"
@@ -254,6 +262,7 @@ class TestFallbackCoordinatorIntegration:
             coordinator = FallbackCoordinator()
             return coordinator, mock_handler_class, mock_cb_class, mock_health_class, mock_emergency_class
     
+    @pytest.mark.asyncio
     async def test_full_workflow_success(self, full_coordinator):
         """Test complete workflow from registration to execution."""
         coordinator, mock_handler_class, mock_cb_class, mock_health_class, mock_emergency_class = full_coordinator
@@ -273,6 +282,7 @@ class TestFallbackCoordinatorIntegration:
         assert agent_name in coordinator.get_registered_agents()
         
         # Execute operation
+        @pytest.mark.asyncio
         async def test_operation():
             return {"raw": "data"}
         
@@ -289,6 +299,7 @@ class TestFallbackCoordinatorIntegration:
         # Verify health monitoring
         coordinator.health_monitor.record_success.assert_called_once_with(agent_name)
     
+    @pytest.mark.asyncio
     async def test_full_workflow_with_failure_and_reset(self, full_coordinator):
         """Test workflow including failure handling and reset."""
         coordinator, mock_handler_class, mock_cb_class, mock_health_class, mock_emergency_class = full_coordinator

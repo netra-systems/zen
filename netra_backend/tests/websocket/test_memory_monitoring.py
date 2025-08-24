@@ -12,7 +12,7 @@ import random
 import time
 import uuid
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import psutil
 import pytest
@@ -83,6 +83,7 @@ class MemoryMonitoredWebSocket:
         checkpoint['timestamp'] = time.time()
         self.memory_checkpoints.append(checkpoint)
 @pytest.mark.slow
+@pytest.mark.asyncio
 async def test_memory_leak_detection_long_connections():
     """Test for memory leaks in long-running WebSocket connections (<=8 lines)"""
     NUM_CONNECTIONS, MESSAGES_PER_SECOND, TEST_DURATION_SECONDS = 10, 10, 3

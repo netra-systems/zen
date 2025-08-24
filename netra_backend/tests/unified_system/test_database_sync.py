@@ -15,7 +15,7 @@ import asyncio
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import sqlalchemy
@@ -40,6 +40,7 @@ class TestDatabaseSynchronization:
 
     """Test database synchronization and real-time updates"""
 
+    @pytest.mark.asyncio
     async def test_thread_creation_flow(self, clean_database_state):
 
         """Test complete thread creation flow with real-time updates"""
@@ -143,6 +144,7 @@ class TestDatabaseSynchronization:
 
         assert sent_data["payload"]["thread_id"] == "thread-123"
 
+    @pytest.mark.asyncio
     async def test_postgres_persistence(self, clean_database_state):
 
         """Test data persistence in PostgreSQL across service restarts"""
@@ -249,6 +251,7 @@ class TestDatabaseSynchronization:
 
         assert restored_message.thread_id == restored_thread.id
 
+    @pytest.mark.asyncio
     async def test_ui_update_via_websocket(self, clean_database_state):
 
         """Test UI updates through WebSocket events"""
@@ -337,6 +340,7 @@ class TestDatabaseSynchronization:
 
         assert sent_message_2["payload"]["thread_id"] == "ui-update-thread"
 
+    @pytest.mark.asyncio
     async def test_frontend_state_sync(self, clean_database_state):
 
         """Test frontend state synchronization across multiple tabs"""
@@ -467,6 +471,7 @@ class TestDatabaseSynchronization:
 
             assert sent_data["payload"]["changes"]["title"] == "Updated Title"
 
+    @pytest.mark.asyncio
     async def test_concurrent_database_operations(self, clean_database_state):
 
         """Test concurrent database operations with proper synchronization"""
@@ -583,6 +588,7 @@ class TestDatabaseSynchronization:
 
             assert connection.send_text.call_count == 5
 
+    @pytest.mark.asyncio
     async def test_database_transaction_rollback(self, clean_database_state):
 
         """Test transaction rollback and consistency"""
@@ -661,6 +667,7 @@ class TestDatabaseSynchronization:
 
         assert rollback_thread is None
 
+    @pytest.mark.asyncio
     async def test_websocket_connection_recovery(self, clean_database_state):
 
         """Test WebSocket connection recovery and state restoration"""

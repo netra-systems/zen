@@ -12,7 +12,7 @@ from pathlib import Path
 
 import asyncio
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -53,6 +53,7 @@ class TestAgentServiceUnit:
             'message_handler': AsyncMock(spec=['send', 'broadcast'])
         }
     
+    @pytest.mark.asyncio
     async def test_process_request_delegates_to_supervisor(self, mock_dependencies):
         """
         Test that process_request correctly delegates to supervisor.
@@ -124,6 +125,7 @@ class TestAgentServiceIntegration:
         await db.cleanup()
         await db.close()
     
+    @pytest.mark.asyncio
     async def test_complete_request_flow_with_persistence(self, real_database):
         """
         Test complete request processing with database persistence.
@@ -177,6 +179,7 @@ class TestAgentPerformance:
     """
     
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_concurrent_request_handling(self):
         """
         Test system handles 100 concurrent requests within SLA.
@@ -249,6 +252,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         ("invalid_input", "Invalid request format"),
         ("agent_crash", "Agent process terminated unexpectedly"),
     ])
+    @pytest.mark.asyncio
     async def test_graceful_error_handling(self, failure_type, expected_error):
         """
         Test system handles various failure modes gracefully.

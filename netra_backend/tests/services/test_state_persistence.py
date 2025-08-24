@@ -3,7 +3,7 @@ from pathlib import Path
 
 import json
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -11,6 +11,7 @@ from netra_backend.app.services.state_persistence import StatePersistenceService
 
 class TestStatePersistence:
     
+    @pytest.mark.asyncio
     async def test_save_agent_state(self):
         """Test saving agent state to database"""
         mock_db = AsyncMock()
@@ -58,6 +59,7 @@ class TestStatePersistence:
         assert result[0] == True
         assert result[1] is not None  # snapshot_id should be generated
     
+    @pytest.mark.asyncio
     async def test_restore_agent_state(self):
         """Test restoring agent state from database"""
         mock_db = AsyncMock()
@@ -94,6 +96,7 @@ class TestStatePersistence:
         assert restored_state.step_count == 0
         assert restored_state.final_report == None
     
+    @pytest.mark.asyncio
     async def test_cleanup_old_states(self):
         """Test cleanup of old state records"""
         mock_db = AsyncMock()
@@ -108,6 +111,7 @@ class TestStatePersistence:
         mock_db.execute.assert_called_once()
         assert isinstance(result, list)
     
+    @pytest.mark.asyncio
     async def test_state_versioning(self):
         """Test state versioning for rollback capability"""
         mock_db = AsyncMock()
@@ -134,6 +138,7 @@ class TestStatePersistence:
         assert len(history) == 3
         assert history[0]["id"] == "run-0"
     
+    @pytest.mark.asyncio
     async def test_concurrent_state_updates(self):
         """Test handling concurrent state updates"""
         mock_db = AsyncMock()

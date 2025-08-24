@@ -11,7 +11,7 @@ from pathlib import Path
 import asyncio
 import json
 import time
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -25,6 +25,7 @@ class TestSessionValidationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_valid_session_validation(self):
         """Test validation of valid active session"""
         session_service = SessionService()
@@ -45,6 +46,7 @@ class TestSessionValidationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_expired_session_validation(self):
         """Test validation of expired session"""
         session_service = SessionService()
@@ -64,6 +66,7 @@ class TestSessionValidationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_invalid_session_id_validation(self):
         """Test validation with invalid session ID"""
         session_service = SessionService()
@@ -82,6 +85,7 @@ class TestSessionValidationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_activity_update(self):
         """Test session last activity update"""
         session_service = SessionService()
@@ -106,6 +110,7 @@ class TestSessionValidationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_validation_with_ip_check(self):
         """Test session validation with IP address verification"""
         session_service = SessionService()

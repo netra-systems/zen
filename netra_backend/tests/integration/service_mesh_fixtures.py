@@ -231,7 +231,7 @@ async def populated_service_registry(mock_service_registry, sample_services):
     """Provide a service registry populated with sample services."""
     for service in sample_services:
         await mock_service_registry.register_service(service)
-    return mock_service_registry
+    yield mock_service_registry
 
 
 @pytest.fixture

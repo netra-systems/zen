@@ -136,7 +136,7 @@ class CacheWarmingStrategyL3Manager:
                 redis_urls[name] = url
                 
                 # Use mock Redis client to avoid event loop conflicts
-                from unittest.mock import AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
                 client = AsyncMock()
                 client.ping = AsyncMock()
                 client.get = AsyncMock(return_value=None)
@@ -513,6 +513,7 @@ class CacheWarmingStrategyL3Manager:
             "warming_rate": (warmed_keys / len(access_pattern) * 100) if access_pattern else 0
         }
     
+    @pytest.mark.asyncio
     async def test_cache_hit_rate_improvement(self, strategy: str, pattern_type: str, test_requests: int) -> Dict[str, Any]:
         """Test cache hit rate improvement from warming strategy."""
         # Generate access pattern
@@ -566,6 +567,7 @@ class CacheWarmingStrategyL3Manager:
         
         return (hits / total_requests * 100) if total_requests > 0 else 0.0
     
+    @pytest.mark.asyncio
     async def test_cold_vs_warm_latency(self, strategy: str, pattern_type: str) -> Dict[str, Any]:
         """Test latency difference between cold and warm cache scenarios."""
         pattern_data = await self.simulate_data_access_patterns(pattern_type, 50)
@@ -621,6 +623,7 @@ class CacheWarmingStrategyL3Manager:
         
         return latencies
     
+    @pytest.mark.asyncio
     async def test_warming_efficiency(self, strategy: str, pattern_type: str) -> Dict[str, Any]:
         """Test warming strategy efficiency."""
         pattern_data = await self.simulate_data_access_patterns(pattern_type, 80)
@@ -727,6 +730,7 @@ async def cache_warming_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_priority_based_warming_strategy(cache_warming_manager):
     """L3: Test priority-based cache warming strategy."""
     result = await cache_warming_manager.test_cache_hit_rate_improvement("priority_based", "hotspot", 100)
@@ -741,6 +745,7 @@ async def test_priority_based_warming_strategy(cache_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_frequency_based_warming_strategy(cache_warming_manager):
     """L3: Test frequency-based cache warming strategy."""
     result = await cache_warming_manager.test_cache_hit_rate_improvement("frequency_based", "temporal", 100)
@@ -754,6 +759,7 @@ async def test_frequency_based_warming_strategy(cache_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_predictive_warming_strategy(cache_warming_manager):
     """L3: Test predictive cache warming strategy."""
     result = await cache_warming_manager.test_cache_hit_rate_improvement("predictive", "user_based", 100)
@@ -767,6 +773,7 @@ async def test_predictive_warming_strategy(cache_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cold_vs_warm_latency_improvement(cache_warming_manager):
     """L3: Test latency improvement from cold to warm cache."""
     result = await cache_warming_manager.test_cold_vs_warm_latency("priority_based", "hotspot")
@@ -781,6 +788,7 @@ async def test_cold_vs_warm_latency_improvement(cache_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_warming_efficiency_across_strategies(cache_warming_manager):
     """L3: Test warming efficiency across different strategies."""
     strategies = ["priority_based", "frequency_based", "predictive", "bulk_load"]
@@ -806,6 +814,7 @@ async def test_warming_efficiency_across_strategies(cache_warming_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cache_warming_strategy_sla_compliance(cache_warming_manager):
     """L3: Test comprehensive cache warming strategy SLA compliance."""
     # Execute comprehensive test suite across strategies and patterns

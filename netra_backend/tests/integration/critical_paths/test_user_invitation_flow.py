@@ -39,7 +39,7 @@ async def team_with_admin():
     admin_invitation = await manager.invite_user(team.team_id, owner_id, "admin@test.com", TeamRole.ADMIN)
     await manager.accept_invitation(admin_invitation["token"], admin_id)
     
-    return {
+    yield {
         "manager": manager,
         "team": team,
         "owner_id": owner_id,

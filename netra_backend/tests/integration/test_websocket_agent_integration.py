@@ -14,7 +14,7 @@ from pathlib import Path
 import asyncio
 import json
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -26,6 +26,7 @@ logger = central_logger.get_logger(__name__)
 class TestWebSocketAgentIntegration:
     """Integration tests for WebSocket-Agent communication."""
     
+    @pytest.mark.asyncio
     async def test_end_to_end_message_flow(self):
         """Test complete flow: WebSocket message → Agent → Response."""
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -79,6 +80,7 @@ class TestWebSocketAgentIntegration:
         assert len(sent_messages) > 0
         assert any(msg.get("type") == "agent_completed" for msg in sent_messages)
     
+    @pytest.mark.asyncio
     async def test_agent_registration_during_startup(self):
         """Test that agents are properly registered during startup."""
         from fastapi import FastAPI
@@ -102,6 +104,7 @@ class TestWebSocketAgentIntegration:
         supervisor = app.state.agent_supervisor
         assert len(supervisor.registry.list_agents()) >= 5  # At least 5 core agents
     
+    @pytest.mark.asyncio
     async def test_thread_context_preservation(self):
         """Test that thread context is preserved across messages."""
         from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -146,6 +149,7 @@ class TestWebSocketAgentIntegration:
         call_args = mock_supervisor.run.call_args
         assert "thread_123" in call_args[0] or "thread_123" in call_args[1]
     
+    @pytest.mark.asyncio
     async def test_error_handling_in_message_flow(self):
         """Test error handling when agent execution fails."""
         from netra_backend.app.services.agent_service_core import AgentService
@@ -180,6 +184,7 @@ class TestWebSocketAgentIntegration:
         # Verify error was handled
         assert error_sent
     
+    @pytest.mark.asyncio
     async def test_concurrent_message_handling(self):
         """Test handling multiple concurrent WebSocket messages."""
         from netra_backend.app.services.agent_service_core import AgentService

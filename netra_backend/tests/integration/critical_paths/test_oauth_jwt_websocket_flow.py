@@ -35,7 +35,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from urllib.parse import parse_qs, urlparse
 
 import httpx
@@ -125,7 +125,7 @@ class OAuthJWTWebSocketTestManager:
             self.ws_manager = get_unified_manager()
             
             # Use fake Redis for testing to avoid event loop conflicts
-            from unittest.mock import AsyncMock
+            from unittest.mock import AsyncMock, MagicMock
             
             self.redis_client = AsyncMock()
             self.redis_client.get = AsyncMock(return_value=None)
@@ -323,6 +323,7 @@ class OAuthJWTWebSocketTestManager:
                 "connection_time": time.time() - ws_start
             }
 
+    @pytest.mark.asyncio
     async def test_token_propagation(self, access_token: str) -> Dict[str, Any]:
         """Test token propagation across services."""
         propagation_start = time.time()
@@ -368,6 +369,7 @@ class OAuthJWTWebSocketTestManager:
                 "propagation_time": time.time() - propagation_start
             }
 
+    @pytest.mark.asyncio
     async def test_error_scenarios(self) -> List[Dict[str, Any]]:
         """Test error scenarios across the authentication flow."""
         error_tests = []
@@ -458,6 +460,7 @@ async def oauth_jwt_ws_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_complete_oauth_jwt_websocket_flow(oauth_jwt_ws_manager):
     """
     Test complete OAuth→JWT→WebSocket authentication flow.

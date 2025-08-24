@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -54,6 +54,7 @@ class TestSystemComponentIntegration:
         agent.reliability = mock_reliability
         mock_reliability.execute_safely.return_value = malformed_response
         return agent
+    @pytest.mark.asyncio
     async def test_http_client_with_json_parsing_integration(self):
         """Test HTTP client integration with JSON parsing."""
         with patch('app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
@@ -108,6 +109,7 @@ class TestSystemComponentIntegration:
                 "Implement circuit breakers"
             ]
             assert parsed_response["metadata"]["response_time"] == 150
+    @pytest.mark.asyncio
     async def test_http_client_with_reliability_integration(self):
         """Test HTTP client integration with reliability components."""
         with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:
@@ -162,6 +164,7 @@ class TestSystemComponentIntegration:
                 assert result == {"api_result": "success", "data": [1, 2, 3]}
                 assert len(agent.operation_times) == 1
                 assert len(agent.error_history) == 0
+    @pytest.mark.asyncio
     async def test_json_parsing_error_handling_integration(self):
         """Test JSON parsing error handling integration with reliability."""
         with patch('app.core.agent_reliability_mixin.get_reliability_wrapper') as mock_wrapper:

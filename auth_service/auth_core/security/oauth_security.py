@@ -396,7 +396,7 @@ class JWTSecurityValidator:
         # Ensure secret is strong enough for production environments
         env = os.getenv("ENVIRONMENT", "development").lower()
         if len(secret) < 32 and env in ["staging", "production"]:
-            raise ValueError("JWT_SECRET must be at least 32 characters in production")
+            raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production")
         
         return secret
     

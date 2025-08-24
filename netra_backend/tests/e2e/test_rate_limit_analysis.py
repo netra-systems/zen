@@ -34,6 +34,7 @@ def scaling_analysis_setup(real_llm_manager, real_websocket_manager, real_tool_d
 class TestRateLimitImpactAnalysis:
     """Test rate limit impact analysis for scaling scenarios."""
     
+    @pytest.mark.asyncio
     async def test_rate_limit_bottleneck_identification(self, scaling_analysis_setup):
         """Test identification of rate limit bottlenecks during scaling."""
         setup = scaling_analysis_setup
@@ -41,6 +42,7 @@ class TestRateLimitImpactAnalysis:
         results = await execute_scaling_workflow(setup, state)
         validate_rate_limit_analysis(results, state)
     
+    @pytest.mark.asyncio
     async def test_multi_provider_rate_limit_strategy(self, scaling_analysis_setup):
         """Test multi-provider rate limit strategy development."""
         setup = scaling_analysis_setup

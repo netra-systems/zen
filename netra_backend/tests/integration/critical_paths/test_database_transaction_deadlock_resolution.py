@@ -229,6 +229,7 @@ class DatabaseDeadlockManager:
         
         return deadlock_result
     
+    @pytest.mark.asyncio
     async def test_deadlock_detection_timeout(self) -> Dict[str, Any]:
         """Test deadlock detection via timeout mechanisms."""
         timeout_result = {
@@ -304,6 +305,7 @@ class DatabaseDeadlockManager:
         
         return timeout_result
     
+    @pytest.mark.asyncio
     async def test_optimistic_locking_deadlock_prevention(self) -> Dict[str, Any]:
         """Test optimistic locking as deadlock prevention mechanism."""
         locking_result = {
@@ -428,6 +430,7 @@ async def deadlock_manager():
 class TestDatabaseTransactionDeadlockResolutionL3:
     """L3 integration tests for database deadlock detection and resolution."""
     
+    @pytest.mark.asyncio
     async def test_classic_deadlock_detection_and_resolution(self, deadlock_manager):
         """Test detection and resolution of classic deadlock scenarios."""
         # Run deadlock scenario multiple times to increase probability
@@ -454,6 +457,7 @@ class TestDatabaseTransactionDeadlockResolutionL3:
         # Note: Deadlock detection might not always occur in test environments
         assert resolution_successful is True  # At least one transaction should always succeed
     
+    @pytest.mark.asyncio
     async def test_deadlock_timeout_mechanisms(self, deadlock_manager):
         """Test timeout-based deadlock detection and recovery."""
         result = await deadlock_manager.test_deadlock_detection_timeout()
@@ -463,6 +467,7 @@ class TestDatabaseTransactionDeadlockResolutionL3:
         assert result["timeout_reasonable"] is True
         assert result["recovery_successful"] is True
     
+    @pytest.mark.asyncio
     async def test_optimistic_locking_prevents_deadlocks(self, deadlock_manager):
         """Test that optimistic locking prevents deadlock scenarios."""
         result = await deadlock_manager.test_optimistic_locking_deadlock_prevention()
@@ -476,6 +481,7 @@ class TestDatabaseTransactionDeadlockResolutionL3:
         success_rate = result["successful_transactions"] / result["total_transactions"]
         assert success_rate >= 0.8  # At least 80% success rate
     
+    @pytest.mark.asyncio
     async def test_transaction_isolation_levels(self, deadlock_manager):
         """Test different isolation levels and their deadlock behavior."""
         isolation_results = {}
@@ -515,6 +521,7 @@ class TestDatabaseTransactionDeadlockResolutionL3:
         # At least READ COMMITTED should work
         assert isolation_results["READ COMMITTED"]["success"] is True
     
+    @pytest.mark.asyncio
     async def test_deadlock_monitoring_and_logging(self, deadlock_manager):
         """Test deadlock monitoring and logging capabilities."""
         # Create scenario and capture deadlock information

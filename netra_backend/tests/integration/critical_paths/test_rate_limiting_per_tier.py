@@ -37,7 +37,7 @@ import uuid
 from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as aioredis
@@ -326,7 +326,7 @@ class RateLimitingPerTierTestManager:
         """Initialize real services for testing."""
         try:
             # Use fake Redis for testing to avoid event loop conflicts
-            from unittest.mock import AsyncMock
+            from unittest.mock import AsyncMock, MagicMock
             
             self.redis_client = AsyncMock()
             self.redis_client.get = AsyncMock(return_value=None)
@@ -397,6 +397,7 @@ class RateLimitingPerTierTestManager:
             logger.error(f"Service initialization failed: {e}")
             raise
 
+    @pytest.mark.asyncio
     async def test_tier_differentiation(self) -> Dict[str, Any]:
         """Test rate limiting differentiation across tiers."""
         test_start = time.time()
@@ -460,6 +461,7 @@ class RateLimitingPerTierTestManager:
                 "differentiation_time": time.time() - test_start
             }
 
+    @pytest.mark.asyncio
     async def test_burst_handling(self, user_id: str) -> Dict[str, Any]:
         """Test burst allowance handling."""
         burst_start = time.time()
@@ -512,6 +514,7 @@ class RateLimitingPerTierTestManager:
                 "burst_test_time": time.time() - burst_start
             }
 
+    @pytest.mark.asyncio
     async def test_dynamic_limit_updates(self) -> Dict[str, Any]:
         """Test dynamic tier limit updates."""
         update_start = time.time()
@@ -566,6 +569,7 @@ class RateLimitingPerTierTestManager:
                 "update_test_time": time.time() - update_start
             }
 
+    @pytest.mark.asyncio
     async def test_fair_queuing(self) -> Dict[str, Any]:
         """Test fair queuing with tier prioritization."""
         queue_start = time.time()
@@ -653,6 +657,7 @@ async def rate_limiting_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_tier_based_rate_limiting_differentiation(rate_limiting_manager):
     """
     Test rate limiting differentiation across all tiers.

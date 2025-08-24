@@ -13,7 +13,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -26,7 +26,7 @@ class TestPaymentGatewayIntegration:
     @pytest.fixture
     async def payment_infrastructure(self):
         """Setup payment gateway infrastructure"""
-        return {
+        yield {
             "stripe_client": Mock(),  # Stripe client is sync, keep as Mock
             "payment_processor": AsyncMock(),
             "subscription_manager": AsyncMock(),

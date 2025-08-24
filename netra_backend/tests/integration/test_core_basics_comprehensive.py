@@ -14,7 +14,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import aiohttp
 import jwt
@@ -1693,6 +1693,7 @@ class TestAPIEndpointsCore:
 
     @pytest.mark.skip(reason="Requires running server")
 
+    @pytest.mark.asyncio
     async def test_api_versioning_backward_compatibility(self):
 
         """Test API maintains backward compatibility"""

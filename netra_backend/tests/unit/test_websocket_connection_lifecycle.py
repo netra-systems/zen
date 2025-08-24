@@ -13,7 +13,7 @@ from pathlib import Path
 import asyncio
 import time
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import WebSocket
@@ -64,6 +64,7 @@ class TestWebSocketConnectionLifecycle:
     
     # Removed unused orchestrator fixtures - using real WebSocketManager methods instead
     
+    @pytest.mark.asyncio
     async def test_connect_success(self, manager, mock_websocket):
         """Test successful WebSocket connection establishment."""
         # Test the actual connect_user method
@@ -75,6 +76,7 @@ class TestWebSocketConnectionLifecycle:
         assert manager.connection_stats["total_connections"] == 1
         assert manager.connection_stats["active_connections"] == 1
     
+    @pytest.mark.asyncio
     async def test_connect_failure(self, manager, mock_websocket):
         """Test failed WebSocket connection establishment with mocked websocket."""
         # Simulate a WebSocket connection failure by making websocket.accept fail
@@ -89,6 +91,7 @@ class TestWebSocketConnectionLifecycle:
         except Exception as e:
             assert "Connection failed" in str(e)
     
+    @pytest.mark.asyncio
     async def test_connect_enforces_connection_limit(self, manager, mock_websocket):
         """Test connection limit enforcement by closing oldest."""
         manager.max_connections_per_user = 2
@@ -113,6 +116,7 @@ class TestWebSocketConnectionLifecycle:
         conn_id3 = await manager.connect_user("test-user", mock_websocket)
         assert conn_id3 is not None
     
+    @pytest.mark.asyncio
     async def test_disconnect_success(self, manager, mock_websocket):
         """Test successful WebSocket disconnection."""
         # First connect the user
@@ -131,6 +135,7 @@ class TestWebSocketConnectionLifecycle:
         assert connection_id not in manager.connections
         assert manager.connection_stats["active_connections"] == 0
     
+    @pytest.mark.asyncio
     async def test_disconnect_user_not_found(self, manager, mock_websocket):
         """Test disconnection when user not in active connections."""
         # This should not raise exception, just log and return
@@ -140,6 +145,7 @@ class TestWebSocketConnectionLifecycle:
         assert len(manager.connections) == 0
         assert len(manager.user_connections) == 0
     
+    @pytest.mark.asyncio
     async def test_disconnect_connection_not_found(self, manager, mock_websocket):
         """Test disconnection when connection not found for user."""
         # Try to disconnect a user that doesn't have any connections
@@ -149,6 +155,7 @@ class TestWebSocketConnectionLifecycle:
         assert len(manager.connections) == 0
         assert manager.connection_stats["active_connections"] == 0
     
+    @pytest.mark.asyncio
     async def test_cleanup_dead_connections(self, manager):
         """Test cleanup of dead WebSocket connections."""
         # Create mock websockets with different states
@@ -168,6 +175,7 @@ class TestWebSocketConnectionLifecycle:
         assert isinstance(cleaned_count, int)
         assert cleaned_count >= 0
     
+    @pytest.mark.asyncio
     async def test_shutdown_graceful(self, manager):
         """Test graceful shutdown of connection manager."""
         # Connect a user first
@@ -187,6 +195,7 @@ class TestWebSocketConnectionLifecycle:
         assert len(manager.user_connections) == 0
         assert len(manager.room_memberships) == 0
     
+    @pytest.mark.asyncio
     async def test_shutdown_with_connection_errors(self, manager):
         """Test shutdown handles connection close errors gracefully."""
         # Connect a user with a websocket that will fail on close
@@ -202,6 +211,7 @@ class TestWebSocketConnectionLifecycle:
         # State should still be cleared despite close errors
         assert len(manager.connections) == 0
     
+    @pytest.mark.asyncio
     async def test_connection_lifecycle_state_management(self, manager):
         """Test connection state is properly managed through lifecycle."""
         # Test with the real manager methods
@@ -222,6 +232,7 @@ class TestWebSocketConnectionLifecycle:
         # Verify cleanup
         assert connection_id not in manager.connections
     
+    @pytest.mark.asyncio
     async def test_concurrent_connection_operations(self, manager, mock_websocket):
         """Test handling of concurrent connection operations."""
         # Create separate websocket mocks for each connection
@@ -242,6 +253,7 @@ class TestWebSocketConnectionLifecycle:
         assert len(manager.user_connections) == 5
         assert manager.connection_stats["active_connections"] == 5
     
+    @pytest.mark.asyncio
     async def test_connection_limit_edge_cases(self, manager, mock_websocket):
         """Test edge cases in connection limit enforcement."""
         # Note: The real WebSocketManager doesn't enforce limits in connect_user

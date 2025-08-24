@@ -10,7 +10,7 @@ from pathlib import Path
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as redis
@@ -25,6 +25,7 @@ class TestAuthSessionPersistenceL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_storage_in_redis(self):
         """Test session is properly stored in Redis"""
         auth_service = AuthService()
@@ -50,6 +51,7 @@ class TestAuthSessionPersistenceL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_ttl_configuration(self):
         """Test session TTL is properly configured"""
         auth_service = AuthService()
@@ -72,6 +74,7 @@ class TestAuthSessionPersistenceL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_recovery_after_redis_restart(self):
         """Test session recovery after Redis connection loss"""
         auth_service = AuthService()
@@ -92,6 +95,7 @@ class TestAuthSessionPersistenceL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_session_updates(self):
         """Test concurrent session updates don't cause race conditions"""
         auth_service = AuthService()
@@ -120,6 +124,7 @@ class TestAuthSessionPersistenceL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_cleanup_on_logout(self):
         """Test session is properly cleaned up on logout"""
         auth_service = AuthService()

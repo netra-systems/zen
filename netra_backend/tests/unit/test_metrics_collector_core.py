@@ -14,7 +14,7 @@ import sys
 import asyncio
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -74,6 +74,7 @@ class TestMetricsCollectorCore:
 
         )
     
+    @pytest.mark.asyncio
     async def test_start_collection_creates_tasks(self, collector):
 
         """Test that start_collection creates required background tasks."""
@@ -86,6 +87,7 @@ class TestMetricsCollectorCore:
         
         await collector.stop_collection()
     
+    @pytest.mark.asyncio
     async def test_stop_collection_cancels_tasks(self, collector):
 
         """Test that stop_collection properly cancels all tasks."""
@@ -188,6 +190,7 @@ class TestMetricsCollectorCore:
     
     @patch('netra_backend.app.websocket_core.utils.get_connection_monitor')
 
+    @pytest.mark.asyncio
     async def test_gather_websocket_metrics_success(self, mock_get_manager, collector):
 
         """Test successful WebSocket metrics gathering."""

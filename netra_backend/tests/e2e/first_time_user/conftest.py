@@ -37,7 +37,7 @@ async def conversion_environment():
     demo_service.get_optimization_preview = AsyncMock(return_value={"preview_data": "sample"})
     demo_service.run_scenario = AsyncMock(return_value={"scenario_result": "success", "savings": 1200})
     
-    return {
+    yield {
         "user_id": "test_user_123",
         "thread_id": "test_thread_456", 
         "run_id": "test_run_789",
@@ -71,7 +71,7 @@ async def cost_savings_calculator():
         "roi_percentage": 300.0,
         "optimization_score": 85
     })
-    return calculator
+    yield calculator
 
 
 @pytest.fixture
@@ -84,7 +84,7 @@ async def permission_system():
         "upgrade_required": True,
         "remaining_usage": 0
     })
-    return system
+    yield system
 
 
 @pytest.fixture
@@ -96,7 +96,7 @@ async def upgrade_flow_manager():
         "discount_code": "FIRST20",
         "expires_at": "2024-01-01T00:00:00Z"
     })
-    return manager
+    yield manager
 
 
 @pytest.fixture
@@ -108,7 +108,7 @@ async def pricing_engine():
         "pro": {"api_calls": 10000, "storage": "100GB", "support": "email"},
         "enterprise": {"api_calls": "unlimited", "storage": "unlimited", "support": "priority"}
     })
-    return engine
+    yield engine
 
 
 @pytest.fixture
@@ -136,7 +136,7 @@ async def ai_provider_simulator():
         "requests": 15000,
         "tokens_used": 500000
     })
-    return simulator
+    yield simulator
 
 
 @pytest.fixture
@@ -149,7 +149,7 @@ async def enterprise_security_checker():
         "encryption": "AES-256",
         "data_residency": "US"
     })
-    return checker
+    yield checker
 
 
 @pytest.fixture
@@ -162,7 +162,7 @@ async def onboarding_flow_manager():
         "current_step": "welcome"
     })
     manager.complete_step = AsyncMock(return_value={"next_step": "api_setup"})
-    return manager
+    yield manager
 
 
 @pytest.fixture
@@ -184,7 +184,7 @@ async def real_llm_manager():
         "confidence": 0.85,
         "potential_savings": 1200
     })
-    return manager
+    yield manager
 
 
 @pytest.fixture
@@ -197,4 +197,4 @@ async def real_websocket_manager():
     manager.send_upgrade_prompt = AsyncMock()
     manager.broadcast = AsyncMock()
     manager.disconnect = AsyncMock()
-    return manager
+    yield manager

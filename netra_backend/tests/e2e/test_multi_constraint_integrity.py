@@ -34,6 +34,7 @@ def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_d
 class TestWorkflowDataIntegrity:
     """Test data integrity across multi-constraint workflows."""
     
+    @pytest.mark.asyncio
     async def test_constraint_data_consistency(self, multi_constraint_setup):
         """Test constraint data consistency throughout workflow."""
         setup = multi_constraint_setup
@@ -41,6 +42,7 @@ class TestWorkflowDataIntegrity:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_constraint_data_consistency(results, state)
     
+    @pytest.mark.asyncio
     async def test_optimization_state_preservation(self, multi_constraint_setup):
         """Test optimization state preservation across agents."""
         setup = multi_constraint_setup
@@ -48,6 +50,7 @@ class TestWorkflowDataIntegrity:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_optimization_state_preservation(results, state)
     
+    @pytest.mark.asyncio
     async def test_metadata_propagation_integrity(self, multi_constraint_setup):
         """Test metadata propagation integrity across workflow."""
         setup = multi_constraint_setup
@@ -59,6 +62,7 @@ class TestWorkflowDataIntegrity:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_metadata_propagation_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_constraint_validation_chain(self, multi_constraint_setup):
         """Test constraint validation chain integrity."""
         setup = multi_constraint_setup
@@ -70,6 +74,7 @@ class TestWorkflowDataIntegrity:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_validation_chain_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_workflow_state_transitions(self, multi_constraint_setup):
         """Test workflow state transition integrity."""
         setup = multi_constraint_setup
@@ -81,6 +86,7 @@ class TestWorkflowDataIntegrity:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_state_transition_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_cross_agent_data_consistency(self, multi_constraint_setup):
         """Test data consistency across different agents."""
         setup = multi_constraint_setup

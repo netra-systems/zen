@@ -22,7 +22,7 @@ import json
 import time
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 
 import redis.asyncio as redis
@@ -321,6 +321,7 @@ class TestWebSocketRateLimitingPerClientL3:
 
         ]
     
+    @pytest.mark.asyncio
     async def test_basic_rate_limiting_enforcement(self, rate_limiter, test_users):
 
         """Test basic rate limiting enforcement."""
@@ -371,6 +372,7 @@ class TestWebSocketRateLimitingPerClientL3:
 
         assert allowed_count >= 45  # Most messages allowed
     
+    @pytest.mark.asyncio
     async def test_tier_based_rate_limiting(self, rate_limiter, test_users):
 
         """Test different rate limits based on user tier."""
@@ -417,6 +419,7 @@ class TestWebSocketRateLimitingPerClientL3:
 
             await rate_limiter.reset_rate_limit(user.id)
     
+    @pytest.mark.asyncio
     async def test_rate_limit_status_tracking(self, rate_limiter, test_users):
 
         """Test accurate rate limit status tracking."""
@@ -459,6 +462,7 @@ class TestWebSocketRateLimitingPerClientL3:
 
         await rate_limiter.reset_rate_limit(user.id)
     
+    @pytest.mark.asyncio
     async def test_concurrent_rate_limiting(self, rate_limiter, test_users):
 
         """Test rate limiting with concurrent message sending."""
@@ -501,6 +505,7 @@ class TestWebSocketRateLimitingPerClientL3:
 
         await rate_limiter.reset_rate_limit(user.id)
     
+    @pytest.mark.asyncio
     async def test_rate_limit_window_reset(self, rate_limiter, test_users):
 
         """Test rate limit window reset behavior."""
@@ -543,6 +548,7 @@ class TestWebSocketRateLimitingPerClientL3:
 
         assert post_reset_status["remaining_messages"] == 50
     
+    @pytest.mark.asyncio
     async def test_websocket_integration_with_rate_limiting(self, websocket_manager, rate_limiter, test_users):
 
         """Test rate limiting integration with WebSocket messaging."""
@@ -627,6 +633,7 @@ class TestWebSocketRateLimitingPerClientL3:
     
     @mock_justified("L3: Rate limiting testing with real Redis state management")
 
+    @pytest.mark.asyncio
     async def test_rate_limiting_accuracy_and_performance(self, rate_limiter, test_users):
 
         """Test rate limiting accuracy and performance under load."""

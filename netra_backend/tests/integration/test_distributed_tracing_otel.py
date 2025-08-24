@@ -34,8 +34,9 @@ except ImportError:
     AioHttpClientInstrumentor = MagicMock
     TracerProvider = MagicMock
     BatchSpanProcessor = MagicMock
-from tracing.span_processor import CustomSpanProcessor
-from tracing.tracer_manager import TracerManager
+# Comment out missing tracing imports - these modules don't exist
+# from tracing.span_processor import CustomSpanProcessor  
+# from tracing.tracer_manager import TracerManager
 
 @pytest.mark.L3
 class TestDistributedTracingOtelL3:
@@ -87,6 +88,7 @@ class TestDistributedTracingOtelL3:
         container.remove()
     
     @pytest.fixture(scope="class")
+    @pytest.mark.asyncio
     async def test_service_containers(self, docker_client):
         """Start test service containers for distributed tracing."""
         services = {}
@@ -373,7 +375,7 @@ class TestDistributedTracingOtelL3:
                 # Add custom attributes on span start
                 span.set_attribute("processor.custom", "true")
             
-            def on_end(self, span):
+            async def on_end(self, span):
                 super().on_end(span)
                 processed_spans.append(span.name)
         

@@ -55,6 +55,7 @@ class TestWorkloadEventsTable:
         yield
         # Cleanup test data (optional) - kept for analysis
 
+    @pytest.mark.asyncio
     async def test_insert_workload_events(self, setup_workload_table):
         """Test inserting real workload events"""
         async with get_clickhouse_client() as client:
@@ -141,6 +142,7 @@ class TestWorkloadEventsTable:
         assert count >= 10, f"Expected at least 10 inserted events, found {count}"
         logger.info(f"Successfully inserted {count} test events")
 
+    @pytest.mark.asyncio
     async def test_query_with_array_syntax_fix(self, setup_workload_table):
         """Test querying with array syntax that needs fixing"""
         async with get_clickhouse_client() as client:
@@ -173,6 +175,7 @@ class TestWorkloadEventsTable:
             if row.get('first_metric_name'):
                 logger.info(f"Metric: {row['first_metric_name']} = {row['first_metric_value']} {row['first_metric_unit']}")
 
+    @pytest.mark.asyncio
     async def test_complex_aggregation_queries(self, setup_workload_table):
         """Test complex aggregation queries with nested arrays"""
         async with get_clickhouse_client() as client:
@@ -217,6 +220,7 @@ class TestWorkloadEventsTable:
                       f"avg latency {row['avg_latency_ms']:.2f}ms, "
                       f"total cost ${row['total_cost_cents']/100:.2f}")
 
+    @pytest.mark.asyncio
     async def test_time_series_analysis(self, setup_workload_table):
         """Test time-series analysis queries"""
         async with get_clickhouse_client() as client:

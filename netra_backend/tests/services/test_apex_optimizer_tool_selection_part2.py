@@ -11,7 +11,7 @@ import json
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from netra_backend.app.schemas import AppConfig, RequestModel
@@ -56,6 +56,7 @@ class TestApexOptimizerAdvancedToolSelection:
     def apex_tool_selector(self, mock_llm_connector, mock_app_config):
         """Create Apex tool selector"""
         return ApexToolSelector(mock_llm_connector, mock_app_config)
+    @pytest.mark.asyncio
     async def test_tool_selection_latency_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for latency optimization requests"""
         # Create latency-focused request
@@ -95,6 +96,7 @@ class TestApexOptimizerAdvancedToolSelection:
         assert state.current_tool_name == "tool_latency_optimization"
         assert "target_latency" in state.current_tool_args
         assert state.current_tool_args["optimization_level"] == "aggressive"
+    @pytest.mark.asyncio
     async def test_tool_selection_cache_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for cache optimization requests"""
         # Create cache-focused request
@@ -134,6 +136,7 @@ class TestApexOptimizerAdvancedToolSelection:
         assert state.current_tool_name == "kv_cache_optimization_audit"
         assert "cache_size" in state.current_tool_args
         assert "ttl" in state.current_tool_args
+    @pytest.mark.asyncio
     async def test_tool_selection_model_analysis(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for model analysis requests"""
         # Create model analysis request
@@ -173,6 +176,7 @@ class TestApexOptimizerAdvancedToolSelection:
         assert state.current_tool_name == "new_model_effectiveness_analysis"
         assert "model_candidates" in state.current_tool_args
         assert "metrics" in state.current_tool_args
+    @pytest.mark.asyncio
     async def test_tool_selection_multi_objective(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for multi-objective optimization"""
         # Create multi-objective request
@@ -212,6 +216,7 @@ class TestApexOptimizerAdvancedToolSelection:
         assert state.current_tool_name == "multi_objective_optimization"
         assert "objectives" in state.current_tool_args
         assert "weights" in state.current_tool_args
+    @pytest.mark.asyncio
     async def test_tool_selection_empty_query(self, apex_tool_selector, mock_app_config):
         """Test tool selection with empty query"""
         # Create state with empty query
@@ -250,6 +255,7 @@ class TestApexOptimizerAdvancedToolSelection:
         # Should handle empty query gracefully
         assert "No query found" in result
         assert state.current_tool_name == None
+    @pytest.mark.asyncio
     async def test_tool_selection_llm_failure(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection when LLM fails"""
         # Create sample agent state
@@ -287,6 +293,7 @@ class TestApexOptimizerAdvancedToolSelection:
         # Execute tool selection
         with pytest.raises(NetraException):
             await apex_tool_selector.run(state)
+    @pytest.mark.asyncio
     async def test_tool_selection_invalid_json_response(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection with invalid JSON response from LLM"""
         # Create sample agent state
@@ -324,6 +331,7 @@ class TestApexOptimizerAdvancedToolSelection:
         # Execute tool selection
         with pytest.raises(json.JSONDecodeError):
             await apex_tool_selector.run(state)
+    @pytest.mark.asyncio
     async def test_custom_tool_selection(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test custom tool selection logic"""
         # Create custom tool selection scenario

@@ -10,7 +10,7 @@ import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.websocket_core.compression import WebSocketCompressor
@@ -106,6 +106,7 @@ class WebSocketIntegrationTestVerifier:
 class TestWebSocketIntegratedPerformance:
     """Integration tests for WebSocket performance improvements."""
     
+    @pytest.mark.asyncio
     async def test_integrated_performance_improvements(self):
         """Integration test of all performance improvements working together."""
         helper = WebSocketIntegrationTestHelper()
@@ -144,6 +145,7 @@ class TestWebSocketIntegratedPerformance:
         finally:
             await helper.cleanup_services(memory_manager, performance_monitor, batcher)
     
+    @pytest.mark.asyncio
     async def test_integrated_stress_scenario(self):
         """Stress test with all components under high load."""
         helper = WebSocketIntegrationTestHelper()
@@ -192,6 +194,7 @@ class TestWebSocketIntegratedPerformance:
         finally:
             await helper.cleanup_services(memory_manager, performance_monitor, batcher)
     
+    @pytest.mark.asyncio
     async def test_integrated_component_interaction(self):
         """Test interaction between different performance components."""
         helper = WebSocketIntegrationTestHelper()

@@ -13,7 +13,7 @@ import asyncio
 import json
 from datetime import UTC, datetime
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -75,6 +75,7 @@ class TestMetricsPipelineIntegration:
         """Create core metrics collector."""
         return CoreMetricsCollector()
     
+    @pytest.mark.asyncio
     async def test_metrics_collection_from_all_services(self, core_metrics_collector):
         """Test metrics collection from all system services."""
         # Test metrics collection initialization
@@ -97,6 +98,7 @@ class TestMetricsPipelineIntegration:
             # This would be the actual collection test
             pass  # Implementation depends on actual collector interface
     
+    @pytest.mark.asyncio
     async def test_prometheus_scraping_endpoint_validation(self, prometheus_exporter):
         """Test Prometheus scraping endpoint format and validation."""
         # Test snapshot export
@@ -124,6 +126,7 @@ class TestMetricsPipelineIntegration:
         metadata_present = any('corpus_metrics_export_info' in line for line in lines)
         assert metadata_present, "Export metadata not found in Prometheus output"
     
+    @pytest.mark.asyncio
     async def test_prometheus_endpoint_multiple_metrics(self, prometheus_exporter):
         """Test Prometheus endpoint with multiple metric types."""
         # Test corpus metrics list export
@@ -145,6 +148,7 @@ class TestMetricsPipelineIntegration:
     
     @mock_justified("OpenTelemetry tracer not available in test environment")
     @patch('opentelemetry.trace.get_tracer')
+    @pytest.mark.asyncio
     async def test_opentelemetry_trace_propagation(self, mock_tracer):
         """Test OpenTelemetry trace propagation across metrics collection."""
         # Setup mock tracer
@@ -175,6 +179,7 @@ class TestMetricsPipelineIntegration:
         mock_tracer_instance.start_span.assert_called_once_with("metrics_collection")
         assert mock_span.set_attribute.call_count >= 4
     
+    @pytest.mark.asyncio
     async def test_metrics_aggregation_and_storage(self, core_metrics_collector):
         """Test metrics aggregation and storage pipeline."""
         # Test metrics aggregation interface
@@ -195,6 +200,7 @@ class TestMetricsPipelineIntegration:
             assert "service" in metric
             assert isinstance(metric["timestamp"], datetime)
     
+    @pytest.mark.asyncio
     async def test_custom_metric_registration(self):
         """Test custom metric registration and collection."""
         # Test custom metric definition
@@ -225,6 +231,7 @@ class TestMetricsPipelineIntegration:
         assert "agent_execution_time" in registered_metrics
         assert "agent_success_rate" in registered_metrics
     
+    @pytest.mark.asyncio
     async def test_performance_metric_collection(self):
         """Test performance metric collection and validation."""
         # Test performance metrics structure
@@ -250,6 +257,7 @@ class TestMetricsPipelineIntegration:
     
     @mock_justified("Alert manager service not available in test environment")
     @patch('app.services.alerting.AlertManager')
+    @pytest.mark.asyncio
     async def test_alert_rule_evaluation(self, mock_alert_manager):
         """Test alert rule evaluation based on metrics."""
         # Setup mock alert manager
@@ -280,6 +288,7 @@ class TestMetricsPipelineIntegration:
         
         mock_alert_instance.evaluate_rules.assert_called_once_with(test_metrics)
     
+    @pytest.mark.asyncio
     async def test_metrics_pipeline_error_handling(self, prometheus_exporter):
         """Test error handling in metrics pipeline."""
         # Test invalid data handling
@@ -299,6 +308,7 @@ class TestMetricsPipelineIntegration:
                 # If exception is raised, it should be a specific expected type
                 assert isinstance(e, (ValueError, TypeError))
     
+    @pytest.mark.asyncio
     async def test_metrics_pipeline_performance(self, prometheus_exporter):
         """Test metrics pipeline performance under load."""
         # Create large metrics dataset
@@ -328,6 +338,7 @@ class TestMetricsPipelineIntegration:
         metric_lines = [line for line in lines if not line.startswith('#') and line.strip()]
         assert len(metric_lines) >= 100, "Not all metrics were exported"
     
+    @pytest.mark.asyncio
     async def test_metrics_data_integrity(self, prometheus_exporter):
         """Test metrics data integrity throughout pipeline."""
         # Create test metrics with specific values

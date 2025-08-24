@@ -19,7 +19,7 @@ from pathlib import Path
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, status
@@ -67,6 +67,7 @@ class TestNewUserCriticalFlows:
             "password": "SecurePassword123!"
         }
 
+    @pytest.mark.asyncio
     async def test_1_user_registration_signup_flow_complete(self, mock_db_session, mock_auth_client, new_user_data):
         """
         BVJ: Test complete signup process - CRITICAL revenue entry point.
@@ -82,6 +83,7 @@ class TestNewUserCriticalFlows:
         self._verify_user_registration_success(created_user, new_user_data)
         self._verify_database_operations_called(mock_db_session)
 
+    @pytest.mark.asyncio
     async def test_2_first_time_welcome_onboarding_flow(self, mock_db_session, new_user_data):
         """
         BVJ: Test onboarding flow completion - determines user retention.
@@ -95,6 +97,7 @@ class TestNewUserCriticalFlows:
         assert onboarding_state["setup_completed"] == True
         assert onboarding_state["plan_explained"] == True
 
+    @pytest.mark.asyncio
     async def test_3_initial_workspace_organization_creation(self, mock_db_session, new_user_data):
         """
         BVJ: Test workspace creation for new users - enables feature usage.
@@ -108,6 +111,7 @@ class TestNewUserCriticalFlows:
         assert workspace["owner_id"] == new_user.id
         assert workspace["plan_tier"] == "free"
 
+    @pytest.mark.asyncio
     async def test_4_first_api_key_generation_validation(self, mock_db_session, new_user_data):
         """
         BVJ: Test API key generation - enables platform usage.
@@ -122,6 +126,7 @@ class TestNewUserCriticalFlows:
         assert len(api_key["full_key"]) == 64
         assert api_key["permissions"] == ["read", "write"]
 
+    @pytest.mark.asyncio
     async def test_5_pricing_tier_understanding_free_limits(self, mock_db_session, new_user_data):
         """
         BVJ: Test free tier limit awareness - drives upgrade conversion.
@@ -136,6 +141,7 @@ class TestNewUserCriticalFlows:
         assert tier_info["upgrade_available"] == True
         assert "growth" in tier_info["upgrade_options"]
 
+    @pytest.mark.asyncio
     async def test_6_initial_llm_provider_configuration(self, mock_db_session, new_user_data):
         """
         BVJ: Test LLM provider setup - enables AI functionality.
@@ -149,6 +155,7 @@ class TestNewUserCriticalFlows:
         assert llm_config["model"] == "gemini-2.5-flash"
         assert llm_config["free_tier_access"] == True
 
+    @pytest.mark.asyncio
     async def test_7_first_chat_conversation_initialization(self, mock_db_session, new_user_data):
         """
         BVJ: Test first conversation creation - demonstrates value.
@@ -163,6 +170,7 @@ class TestNewUserCriticalFlows:
         assert conversation["message_count"] == 1
         assert conversation["status"] == "active"
 
+    @pytest.mark.asyncio
     async def test_8_free_tier_quota_limits_enforcement(self, mock_db_session, new_user_data):
         """
         BVJ: Test quota enforcement - creates conversion pressure.
@@ -176,6 +184,7 @@ class TestNewUserCriticalFlows:
         assert usage_result["tokens_per_request"] == 1000
         assert usage_result["upgrade_prompted"] == True
 
+    @pytest.mark.asyncio
     async def test_9_email_verification_flow_complete(self, mock_db_session, mock_auth_client, new_user_data):
         """
         BVJ: Test email verification - ensures account security.
@@ -192,6 +201,7 @@ class TestNewUserCriticalFlows:
         assert verification["sent"] == True
         assert verified_user.is_active == True
 
+    @pytest.mark.asyncio
     async def test_10_tutorial_guided_tour_completion(self, mock_db_session, new_user_data):
         """
         BVJ: Test tutorial completion tracking - improves conversion.

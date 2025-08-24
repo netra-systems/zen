@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -42,6 +42,7 @@ class TestAdminRoute:
         regular_user = TEST_USER_DATA["regular"] 
         assert verify_admin_role(regular_user) == False
     
+    @pytest.mark.asyncio
     async def test_admin_user_management(self):
         """Test admin user management operations."""
         from netra_backend.app.routes.admin import get_all_users, update_user_role
@@ -154,6 +155,7 @@ class TestAdminRoute:
         else:
             assert response.status_code in [404, 401]
     
+    @pytest.mark.asyncio
     async def test_admin_audit_log_access(self):
         """Test admin access to audit logs."""
         from netra_backend.app.routes.admin import get_audit_logs

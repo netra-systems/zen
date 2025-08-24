@@ -8,6 +8,7 @@ with staging URLs.
 import sys
 from pathlib import Path
 
+import pytest
 # Test framework import - using pytest fixtures instead
 
 import asyncio
@@ -20,6 +21,7 @@ from netra_backend.tests.integration.staging_config.base import StagingConfigTes
 class TestCORSConfiguration(StagingConfigTestBase):
     """Test CORS configuration in staging."""
     
+    @pytest.mark.asyncio
     async def test_cors_preflight(self):
         """Test CORS preflight requests."""
         self.skip_if_not_staging()
@@ -53,6 +55,7 @@ class TestCORSConfiguration(StagingConfigTestBase):
                     self.assertIn(allowed_origin, [origin, '*'],
                                 f"Origin {origin} not allowed")
                                 
+    @pytest.mark.asyncio
     async def test_cors_actual_request(self):
         """Test CORS headers on actual requests."""
         self.skip_if_not_staging()
@@ -72,6 +75,7 @@ class TestCORSConfiguration(StagingConfigTestBase):
             if 'Access-Control-Allow-Credentials' in response.headers:
                 self.assertEqual(response.headers['Access-Control-Allow-Credentials'], 'true')
                 
+    @pytest.mark.asyncio
     async def test_cors_blocked_origin(self):
         """Test CORS blocks unauthorized origins."""
         self.skip_if_not_staging()
@@ -92,6 +96,7 @@ class TestCORSConfiguration(StagingConfigTestBase):
                 self.assertNotEqual(allowed, 'https://malicious-site.com',
                                   "Malicious origin should not be allowed")
                                   
+    @pytest.mark.asyncio
     async def test_cors_methods(self):
         """Test allowed CORS methods."""
         self.skip_if_not_staging()
@@ -113,6 +118,7 @@ class TestCORSConfiguration(StagingConfigTestBase):
                     self.assertIn(method, allowed_methods,
                                 f"Method {method} not in allowed methods")
                                 
+    @pytest.mark.asyncio
     async def test_cors_headers(self):
         """Test allowed CORS headers."""
         self.skip_if_not_staging()
@@ -140,6 +146,7 @@ class TestCORSConfiguration(StagingConfigTestBase):
                     self.assertIn(header.lower(), allowed_headers,
                                 f"Header {header} not allowed")
                                 
+    @pytest.mark.asyncio
     async def test_cors_max_age(self):
         """Test CORS preflight cache duration."""
         self.skip_if_not_staging()
@@ -162,6 +169,7 @@ class TestCORSConfiguration(StagingConfigTestBase):
                 self.assertLessEqual(max_age, 86400,
                                    "CORS max age too long")
                                    
+    @pytest.mark.asyncio
     async def test_cors_websocket(self):
         """Test CORS for WebSocket endpoints."""
         self.skip_if_not_staging()

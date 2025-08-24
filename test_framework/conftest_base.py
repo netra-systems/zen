@@ -338,16 +338,25 @@ def e2e_logger():
 # ASYNC UTILITIES
 # =============================================================================
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def event_loop():
-    """Shared event loop for session-scoped async fixtures"""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
+    """Create a new event loop for each test function to prevent async issues"""
+    # Always create a new event loop for each test to prevent contamination
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
+    asyncio.set_event_loop(loop)
     yield loop
-    if not loop.is_closed():
-        loop.close()
+    # Proper cleanup: cancel all tasks and close the loop
+    try:
+        # Cancel any remaining tasks
+        pending_tasks = [task for task in asyncio.all_tasks(loop) if not task.done()]
+        if pending_tasks:
+            loop.run_until_complete(asyncio.gather(*pending_tasks, return_exceptions=True))
+    except Exception:
+        pass
+    finally:
+        if not loop.is_closed():
+            loop.close()
 
 # =============================================================================
 # TEST DATA FACTORIES

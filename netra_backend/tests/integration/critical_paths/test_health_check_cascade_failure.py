@@ -50,6 +50,7 @@ class HealthCheckCascadeTester:
         if self.session:
             await self.session.close()
             
+    @pytest.mark.asyncio
     async def test_all_services_healthy(self) -> bool:
         """Verify all services are healthy initially."""
         print("\n[HEALTHY] Testing all services healthy state...")
@@ -71,6 +72,7 @@ class HealthCheckCascadeTester:
                 
         return healthy_count == len(SERVICES)
         
+    @pytest.mark.asyncio
     async def test_simulate_database_failure(self) -> bool:
         """Simulate database failure and detect cascade."""
         print("\n[CASCADE] Simulating database failure...")
@@ -103,6 +105,7 @@ class HealthCheckCascadeTester:
         
         return len(affected_services) > 0
         
+    @pytest.mark.asyncio
     async def test_circuit_breaker_activation(self) -> bool:
         """Test circuit breaker activation on repeated failures."""
         print("\n[BREAKER] Testing circuit breaker activation...")
@@ -128,6 +131,7 @@ class HealthCheckCascadeTester:
             
         return circuit_opened or failures > 10
         
+    @pytest.mark.asyncio
     async def test_graceful_degradation(self) -> bool:
         """Test graceful degradation when dependencies fail."""
         print("\n[DEGRADE] Testing graceful degradation...")
@@ -147,6 +151,7 @@ class HealthCheckCascadeTester:
                     
         return False
         
+    @pytest.mark.asyncio
     async def test_recovery_detection(self) -> bool:
         """Test automatic recovery detection."""
         print("\n[RECOVER] Testing recovery detection...")
@@ -191,6 +196,7 @@ class HealthCheckCascadeTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_health_check_cascade_failure():
     """Test health check cascade failure detection."""
     async with HealthCheckCascadeTester() as tester:

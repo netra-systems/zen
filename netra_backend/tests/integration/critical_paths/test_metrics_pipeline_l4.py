@@ -24,7 +24,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -214,6 +214,7 @@ class MetricsPipelineL4Manager:
         except Exception as e:
             return {"found": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_cardinality_management_l4(self) -> Dict[str, Any]:
         """Test metric cardinality management in real Prometheus."""
         try:
@@ -321,6 +322,7 @@ class MetricsPipelineL4Manager:
         except Exception:
             return []
     
+    @pytest.mark.asyncio
     async def test_alerting_rules_l4(self) -> Dict[str, Any]:
         """Test alerting rules trigger correctly in staging."""
         try:
@@ -459,6 +461,7 @@ class MetricsPipelineL4Manager:
         except Exception as e:
             return {"active": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_grafana_integration_l4(self) -> Dict[str, Any]:
         """Test Grafana dashboard integration with real data."""
         try:
@@ -514,6 +517,7 @@ class MetricsPipelineL4Manager:
         except Exception as e:
             return {"error": str(e), "dashboards_tested": [], "data_sources_verified": []}
     
+    @pytest.mark.asyncio
     async def test_dashboard_queries(self, dashboard_uid: str) -> Dict[str, Any]:
         """Test dashboard query performance."""
         try:
@@ -540,6 +544,7 @@ class MetricsPipelineL4Manager:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_datasource_connection(self, datasource_uid: str) -> Dict[str, Any]:
         """Test data source connection."""
         try:

@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -47,6 +47,7 @@ class TestConfigRoute:
         response = basic_test_client.put("/api/config", json=invalid_config)
         CommonResponseValidators.validate_error_response(response, [422, 400, 404, 403])
     
+    @pytest.mark.asyncio
     async def test_config_persistence(self):
         """Test configuration persistence."""
         from netra_backend.app.routes.config import update_config
@@ -136,6 +137,7 @@ class TestConfigRoute:
         else:
             assert response.status_code in [404, 401]
     
+    @pytest.mark.asyncio
     async def test_config_backup_and_restore(self):
         """Test configuration backup and restore functionality."""
         from netra_backend.app.routes.config import backup_config, restore_config

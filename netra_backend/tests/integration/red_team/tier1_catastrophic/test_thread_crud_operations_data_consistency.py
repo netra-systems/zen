@@ -14,7 +14,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 import json
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 # Fix imports with error handling
 try:
@@ -45,7 +45,7 @@ except ImportError:
         async def delete(self, message_id): return True
 
 # Thread model - creating mock for tests
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 Thread = Mock
 ThreadStatus = Mock
 # Message model - creating mock for tests
@@ -91,7 +91,7 @@ class TestThreadCrudOperationsDataConsistency:
     @pytest.fixture
     async def settings(self):
         """Get application settings"""
-        return get_settings()
+        yield get_settings()
     
     @pytest.fixture
     async def db_manager(self, settings):
@@ -104,14 +104,15 @@ class TestThreadCrudOperationsDataConsistency:
     @pytest.fixture
     async def thread_repository(self, db_manager):
         """Real thread repository"""
-        return ThreadRepository(db_manager)
+        yield ThreadRepository(db_manager)
     
     @pytest.fixture
     async def message_repository(self, db_manager):
         """Real message repository"""
-        return MessageRepository(db_manager)
+        yield MessageRepository(db_manager)
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_user_id(self):
         """Generate test user ID"""
         return str(uuid.uuid4())

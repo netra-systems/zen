@@ -12,7 +12,7 @@ import asyncio
 import json
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, call, patch
 
 import pytest
 from fastapi import WebSocket
@@ -280,7 +280,7 @@ class TestCriticalMessageRoutingToAgentService:
         message_str = json.dumps(message)
         
         call_count = 0
-        def mock_db_side_effect():
+        async def mock_db_side_effect():
             nonlocal call_count
             call_count += 1
             if call_count <= 2:  # Fail first 2 attempts

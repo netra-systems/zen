@@ -16,7 +16,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from typing import Any, Dict
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -32,6 +32,7 @@ from netra_backend.tests.integration.first_time_user_fixtures import (
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_openai_provider_connection(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -62,6 +63,7 @@ async def test_openai_provider_connection(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_anthropic_provider_connection(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -84,6 +86,7 @@ async def test_anthropic_provider_connection(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(25)
+@pytest.mark.asyncio
 async def test_provider_listing_and_management(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -110,6 +113,7 @@ async def test_provider_listing_and_management(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_provider_settings_update(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -139,6 +143,7 @@ async def test_provider_settings_update(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_provider_key_rotation(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -164,6 +169,7 @@ async def test_provider_key_rotation(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_provider_disconnection(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -190,6 +196,7 @@ async def test_provider_disconnection(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(45)
+@pytest.mark.asyncio
 async def test_google_oauth_provider_flow(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -226,6 +233,7 @@ async def test_google_oauth_provider_flow(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(60)
+@pytest.mark.asyncio
 async def test_optimization_workflow_with_providers(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -274,6 +282,7 @@ async def test_optimization_workflow_with_providers(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_optimization_results_validation(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -331,6 +340,7 @@ async def test_optimization_results_validation(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_optimization_follow_up_workflow(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]

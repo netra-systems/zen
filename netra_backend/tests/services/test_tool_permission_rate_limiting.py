@@ -46,12 +46,14 @@ def sample_context():
 class TestRateLimiting:
     """Test rate limiting functionality"""
     
+    @pytest.mark.asyncio
     async def test_check_rate_limits_no_limits(self, service, sample_context):
         """Test rate limit check when no limits are defined"""
         result = await service._check_rate_limits(sample_context, [])
         assert result["allowed"] == True
         assert result["limits"] == {}
     
+    @pytest.mark.asyncio
     async def test_check_rate_limits_within_limit(self, service_with_redis, sample_context):
         """Test rate limit check within limits"""
         permissions = ["analytics"]
@@ -61,6 +63,7 @@ class TestRateLimiting:
         rate_limits = get_rate_limit_test_data()["analytics"]
         assert_rate_limits_within_bounds(result, rate_limits["per_hour"], rate_limits["per_day"])
     
+    @pytest.mark.asyncio
     async def test_check_rate_limits_exceeded(self, service_with_redis, sample_context):
         """Test rate limit check when limit is exceeded"""
         permissions = ["analytics"]
@@ -71,6 +74,7 @@ class TestRateLimiting:
         assert "Exceeded per_hour limit" in result["message"]
         assert result["current_usage"] == 101
     
+    @pytest.mark.asyncio
     async def test_check_rate_limits_multiple_periods(self, service_with_redis, sample_context):
         """Test rate limit check across multiple time periods"""
         permissions = ["data_management"]
@@ -80,34 +84,40 @@ class TestRateLimiting:
         rate_limits = get_rate_limit_test_data()["data_management"]
         assert_rate_limits_within_bounds(result, rate_limits["per_hour"], rate_limits["per_day"])
     
+    @pytest.mark.asyncio
     async def test_get_usage_count_minute(self, service_with_redis):
         """Test getting usage count for minute period"""
         await setup_redis_usage(service_with_redis.redis, "user123", "tool_test", 5, "minute")
         count = await service_with_redis._get_usage_count("user123", "tool_test", "minute")
         assert_redis_usage_count(count, 5)
     
+    @pytest.mark.asyncio
     async def test_get_usage_count_hour(self, service_with_redis):
         """Test getting usage count for hour period"""
         await setup_redis_usage(service_with_redis.redis, "user123", "tool_test", 25, "hour")
         count = await service_with_redis._get_usage_count("user123", "tool_test", "hour")
         assert_redis_usage_count(count, 25)
     
+    @pytest.mark.asyncio
     async def test_get_usage_count_day(self, service_with_redis):
         """Test getting usage count for day period"""
         await setup_redis_usage(service_with_redis.redis, "user123", "tool_test", 150, "day")
         count = await service_with_redis._get_usage_count("user123", "tool_test", "day")
         assert_redis_usage_count(count, 150)
     
+    @pytest.mark.asyncio
     async def test_get_usage_count_no_redis(self, service):
         """Test getting usage count when Redis is not available"""
         count = await service._get_usage_count("user123", "tool_test", "day")
         assert_redis_usage_count(count, 0)
     
+    @pytest.mark.asyncio
     async def test_get_usage_count_invalid_period(self, service_with_redis):
         """Test getting usage count with invalid period"""
         count = await service_with_redis._get_usage_count("user123", "tool_test", "invalid")
         assert_redis_usage_count(count, 0)
     
+    @pytest.mark.asyncio
     async def test_get_usage_count_redis_error(self, service_with_redis):
         """Test getting usage count when Redis raises error"""
         service_with_redis.redis.get = create_failing_redis_method("get")
@@ -116,6 +126,7 @@ class TestRateLimiting:
 class TestRecordToolUsage:
     """Test tool usage recording functionality"""
     
+    @pytest.mark.asyncio
     async def test_record_tool_usage(self, service_with_redis):
         """Test recording tool usage"""
         await service_with_redis.record_tool_usage("user123", "test_tool", 250, "success")
@@ -124,6 +135,7 @@ class TestRecordToolUsage:
         day_count = await service_with_redis.redis.get(day_key)
         assert day_count == "1"
     
+    @pytest.mark.asyncio
     async def test_record_tool_usage_multiple_calls(self, service_with_redis):
         """Test recording multiple tool usages"""
         for i in range(3):
@@ -133,10 +145,12 @@ class TestRecordToolUsage:
         day_count = await service_with_redis.redis.get(day_key)
         assert day_count == "3"
     
+    @pytest.mark.asyncio
     async def test_record_tool_usage_no_redis(self, service):
         """Test recording tool usage when Redis is not available"""
         await service.record_tool_usage("user123", "test_tool", 100, "success")
     
+    @pytest.mark.asyncio
     async def test_record_tool_usage_redis_error(self, service_with_redis):
         """Test recording tool usage when Redis raises error"""
         service_with_redis.redis.incr = create_failing_redis_method("incr")
@@ -144,6 +158,7 @@ class TestRecordToolUsage:
 class TestRateLimitEdgeCases:
     """Test rate limiting edge cases"""
     
+    @pytest.mark.asyncio
     async def test_rate_limit_key_generation_edge_cases(self, service_with_redis):
         """Test rate limit key generation with edge case inputs"""
         special_context = create_context_with_special_chars()
@@ -151,6 +166,7 @@ class TestRateLimitEdgeCases:
             special_context.user_id, special_context.tool_name, "day")
         assert_redis_usage_count(count, 0)
     
+    @pytest.mark.asyncio
     async def test_concurrent_rate_limit_updates(self, service_with_redis):
         """Test concurrent rate limit updates"""
         user_id = "concurrent_user"

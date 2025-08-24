@@ -10,7 +10,7 @@ from pathlib import Path
 
 import asyncio
 import time
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -24,6 +24,7 @@ class TestSessionCleanupL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_manual_session_cleanup(self):
         """Test manual session cleanup/logout"""
         session_service = SessionService()
@@ -46,6 +47,7 @@ class TestSessionCleanupL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_automatic_expired_session_cleanup(self):
         """Test automatic cleanup of expired sessions"""
         session_service = SessionService()
@@ -73,6 +75,7 @@ class TestSessionCleanupL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_cleanup_preserves_active(self):
         """Test cleanup preserves active sessions"""
         session_service = SessionService()
@@ -99,6 +102,7 @@ class TestSessionCleanupL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_bulk_session_cleanup(self):
         """Test bulk session cleanup for user"""
         session_service = SessionService()
@@ -121,6 +125,7 @@ class TestSessionCleanupL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_cleanup_race_condition(self):
         """Test race conditions during session cleanup"""
         session_service = SessionService()

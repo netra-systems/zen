@@ -115,6 +115,7 @@ class DevEnvironmentTester:
             print(f"[ERROR] Failed to start dev launcher: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_backend_health(self) -> bool:
         """Test that backend health endpoint responds."""
         print("\n[HEALTH] STEP 2: Testing backend health...")
@@ -132,6 +133,7 @@ class DevEnvironmentTester:
             print(f"[ERROR] Backend health check failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_auth_service(self) -> bool:
         """Test that auth service is running."""
         print("\n[AUTH] STEP 3: Testing auth service...")
@@ -210,6 +212,7 @@ class DevEnvironmentTester:
             print(f"[ERROR] Login error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_authenticated_api(self) -> bool:
         """Test an authenticated API endpoint."""
         print("\n[API] STEP 6: Testing authenticated API access...")
@@ -241,6 +244,7 @@ class DevEnvironmentTester:
             print(f"[ERROR] API error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_websocket_connection(self) -> bool:
         """Test WebSocket connection with authentication."""
         print("\n[WS] STEP 7: Testing WebSocket connection...")
@@ -288,6 +292,7 @@ class DevEnvironmentTester:
             print(f"[ERROR] WebSocket error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_websocket_data_flow(self) -> bool:
         """Test that data flows properly through WebSocket."""
         print("\n[DATA] STEP 8: Testing WebSocket data flow...")
@@ -331,6 +336,7 @@ class DevEnvironmentTester:
             print(f"[ERROR] WebSocket data error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_thread_creation(self) -> bool:
         """Test creating a thread through WebSocket."""
         print("\n[THREAD] STEP 9: Testing thread creation...")
@@ -403,6 +409,7 @@ class DevEnvironmentTester:
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_dev_environment_full_flow():
     """Test the complete dev environment flow."""
     async with DevEnvironmentTester() as tester:

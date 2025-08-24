@@ -21,7 +21,7 @@ Business Value Justification (BVJ):
 
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -189,7 +189,7 @@ class TestStartupCheckIntegration:
         
         This test will fail if any startup check module has the wrong import.
         """
-        from unittest.mock import AsyncMock, MagicMock
+        from unittest.mock import AsyncMock, MagicMock, MagicMock
 
         from netra_backend.app.startup_checks.checker import StartupChecker
         

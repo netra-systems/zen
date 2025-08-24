@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 import time
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -81,6 +81,7 @@ class TestTimestampValidation:
 class TestCsrfTokenValidation:
     """Test CSRF token validation functions."""
 
+    @pytest.mark.asyncio
     async def test_store_csrf_token_redis_enabled(self, mock_redis_manager):
         """Test storing CSRF token when Redis is enabled."""
         await _store_csrf_token_in_redis("123", "csrf-token", mock_redis_manager)
@@ -89,6 +90,7 @@ class TestCsrfTokenValidation:
         call_args = mock_redis_manager.setex.call_args[0]
         assert "oauth_csrf:pr:123:csrf-token" in call_args[0]
 
+    @pytest.mark.asyncio
     async def test_validate_csrf_token_success(self, mock_redis_manager):
         """Test successful CSRF token validation."""
         state_data = {"pr_number": "123", "csrf_token": "valid-token"}
@@ -99,6 +101,7 @@ class TestCsrfTokenValidation:
         
         mock_redis_manager.delete.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_validate_csrf_token_invalid(self, mock_redis_manager):
         """Test CSRF token validation with invalid token."""
         state_data = {"pr_number": "123", "csrf_token": "invalid-token"}
@@ -107,6 +110,7 @@ class TestCsrfTokenValidation:
         with pytest.raises(NetraSecurityException, match="Invalid or expired CSRF token"):
             await _validate_and_consume_csrf_token(state_data, mock_redis_manager)
 
+    @pytest.mark.asyncio
     async def test_store_csrf_token_redis_disabled(self):
         """Test storing CSRF token when Redis is disabled."""
         mock_redis = Mock()
@@ -115,6 +119,7 @@ class TestCsrfTokenValidation:
         # Should not raise exception and not call Redis
         await _store_csrf_token_in_redis("123", "csrf-token", mock_redis)
 
+    @pytest.mark.asyncio
     async def test_validate_csrf_token_redis_disabled(self):
         """Test CSRF token validation when Redis is disabled."""
         mock_redis = Mock()

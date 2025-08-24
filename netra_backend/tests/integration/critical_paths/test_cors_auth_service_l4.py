@@ -463,6 +463,7 @@ async def cors_auth_l4_test():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L4
+@pytest.mark.asyncio
 async def test_cors_configuration_frontend_auth_service_l4(cors_auth_l4_test):
     """Test CORS configuration between Frontend and Auth Service (L4)."""
     # Run complete critical path test

@@ -11,7 +11,7 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,6 +31,7 @@ from netra_backend.app.services.thread_service import ThreadService
 
 class ContextPreservationTests:
     """Tests for context preservation across messages."""
+    @pytest.mark.asyncio
     async def test_context_preservation_across_messages(self, db_session: AsyncSession):
         """Test context maintains state across multiple messages."""
         service = ThreadService()
@@ -71,6 +72,7 @@ class ContextPreservationTests:
         # Verify chronological ordering
         timestamps = [msg.created_at for msg in retrieved_messages]
         assert timestamps == sorted(timestamps)
+    @pytest.mark.asyncio
     async def test_context_state_validation(self, db_session: AsyncSession):
         """Test context state validation and integrity."""
         service = ThreadService()
@@ -96,6 +98,7 @@ class ContextPreservationTests:
 
 class MessageHistoryTests:
     """Tests for message history loading and management."""
+    @pytest.mark.asyncio
     async def test_message_history_chronological_order(self, db_session: AsyncSession):
         """Test message history loads in chronological order."""
         service = ThreadService()
@@ -133,6 +136,7 @@ class MessageHistoryTests:
         # Verify chronological order
         for i in range(1, len(messages)):
             assert messages[i].created_at >= messages[i-1].created_at
+    @pytest.mark.asyncio
     async def test_message_history_pagination(self, db_session: AsyncSession):
         """Test message history pagination functionality."""
         service = ThreadService()
@@ -161,6 +165,7 @@ class MessageHistoryTests:
 
 class StateIsolationTests:
     """Tests for state isolation between threads."""
+    @pytest.mark.asyncio
     async def test_thread_state_isolation(self, db_session: AsyncSession):
         """Test threads maintain isolated states."""
         service = ThreadService()
@@ -218,6 +223,7 @@ class StateIsolationTests:
 
 class ThreadResumeTests:
     """Tests for thread resume after interruption."""
+    @pytest.mark.asyncio
     async def test_thread_resume_after_interruption(self, db_session: AsyncSession):
         """Test thread can resume after interruption with state recovery."""
         service = ThreadService()
@@ -292,6 +298,7 @@ class ThreadResumeTests:
 
 class ContextLimitsTests:
     """Tests for context limits and truncation."""
+    @pytest.mark.asyncio
     async def test_context_limits_and_truncation(self, db_session: AsyncSession):
         """Test context limits and proper truncation."""
         service = ThreadService()
@@ -345,7 +352,11 @@ async def db_session():
     session.begin = AsyncMock()
     session.commit = AsyncMock()
     session.rollback = AsyncMock()
-    return session
+    try:
+        yield session
+    finally:
+        if hasattr(session, "close"):
+            await session.close()
 
 @pytest.fixture
 def mock_agent_service():

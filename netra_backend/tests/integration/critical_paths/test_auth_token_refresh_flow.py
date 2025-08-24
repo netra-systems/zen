@@ -26,6 +26,7 @@ from test_framework.test_patterns import L3IntegrationTest
 class TestAuthTokenRefreshFlow(L3IntegrationTest):
     """Test token refresh flow from multiple angles."""
     
+    @pytest.mark.asyncio
     async def test_successful_token_refresh(self):
         """Test successful refresh token flow."""
         async with aiohttp.ClientSession() as session:
@@ -55,6 +56,7 @@ class TestAuthTokenRefreshFlow(L3IntegrationTest):
                 assert data["access_token"] != access_token
                 assert data["refresh_token"] != refresh_token
                 
+    @pytest.mark.asyncio
     async def test_refresh_with_expired_access_token(self):
         """Test that refresh works even when access token is expired."""
         async with aiohttp.ClientSession() as session:
@@ -78,6 +80,7 @@ class TestAuthTokenRefreshFlow(L3IntegrationTest):
                 data = await resp.json()
                 assert "access_token" in data
                 
+    @pytest.mark.asyncio
     async def test_refresh_with_invalid_token(self):
         """Test refresh with invalid or malformed refresh token."""
         async with aiohttp.ClientSession() as session:
@@ -92,6 +95,7 @@ class TestAuthTokenRefreshFlow(L3IntegrationTest):
                 assert "error" in data
                 assert "Invalid refresh token" in data["error"]
                 
+    @pytest.mark.asyncio
     async def test_refresh_with_revoked_token(self):
         """Test refresh with a revoked refresh token."""
         async with aiohttp.ClientSession() as session:
@@ -119,6 +123,7 @@ class TestAuthTokenRefreshFlow(L3IntegrationTest):
                 data = await resp.json()
                 assert "Token has been revoked" in data.get("error", "")
                 
+    @pytest.mark.asyncio
     async def test_refresh_token_rotation(self):
         """Test that refresh tokens are rotated on use."""
         async with aiohttp.ClientSession() as session:
@@ -146,6 +151,7 @@ class TestAuthTokenRefreshFlow(L3IntegrationTest):
                     
                 await asyncio.sleep(0.5)
                 
+    @pytest.mark.asyncio
     async def test_concurrent_refresh_attempts(self):
         """Test multiple concurrent refresh attempts with same token."""
         async with aiohttp.ClientSession() as session:
@@ -173,6 +179,7 @@ class TestAuthTokenRefreshFlow(L3IntegrationTest):
             )
             assert success_count == 1, "Only one refresh should succeed"
             
+    @pytest.mark.asyncio
     async def test_refresh_token_expiry(self):
         """Test that refresh tokens have proper expiry."""
         async with aiohttp.ClientSession() as session:
@@ -195,6 +202,7 @@ class TestAuthTokenRefreshFlow(L3IntegrationTest):
             assert time_diff > 86400  # More than 1 day
             assert time_diff < 864000  # Less than 10 days
             
+    @pytest.mark.asyncio
     async def test_refresh_maintains_user_context(self):
         """Test that refresh maintains user context and permissions."""
         async with aiohttp.ClientSession() as session:
@@ -223,6 +231,7 @@ class TestAuthTokenRefreshFlow(L3IntegrationTest):
                 assert decoded["sub"] == original_user_id
                 assert decoded["email"] == user_data["email"]
                 
+    @pytest.mark.asyncio
     async def test_refresh_updates_last_activity(self):
         """Test that token refresh updates user's last activity timestamp."""
         redis_manager = RedisManager()
@@ -253,6 +262,7 @@ class TestAuthTokenRefreshFlow(L3IntegrationTest):
             new_activity = await redis_manager.get(activity_key)
             assert new_activity != initial_activity
             
+    @pytest.mark.asyncio
     async def test_refresh_rate_limiting(self):
         """Test that refresh endpoint has rate limiting."""
         async with aiohttp.ClientSession() as session:

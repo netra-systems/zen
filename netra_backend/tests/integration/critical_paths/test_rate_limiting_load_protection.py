@@ -760,6 +760,7 @@ async def rate_limiting_load_test():
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_rate_limiting_under_load_l4(rate_limiting_load_test):
     """Test rate limiting protection under high load in staging."""
     # Execute complete critical path test
@@ -785,6 +786,7 @@ async def test_rate_limiting_under_load_l4(rate_limiting_load_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_tier_based_rate_limiting_l4(rate_limiting_load_test):
     """Test tier-based rate limiting differences."""
     # Setup users and execute load tests
@@ -807,6 +809,7 @@ async def test_tier_based_rate_limiting_l4(rate_limiting_load_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_burst_protection_effectiveness_l4(rate_limiting_load_test):
     """Test burst protection prevents system overload."""
     # Setup users

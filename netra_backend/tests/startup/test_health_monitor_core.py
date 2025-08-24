@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from datetime import datetime
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 

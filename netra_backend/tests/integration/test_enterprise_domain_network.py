@@ -11,7 +11,7 @@ from pathlib import Path
 
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

@@ -15,7 +15,7 @@ import json
 import time
 from datetime import datetime
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -25,6 +25,7 @@ class TestRedisCacheBootstrap:
 
     """Test 10: Redis Cache Layer Bootstrap"""
     
+    @pytest.mark.asyncio
     async def test_redis_connection_initialization(self):
 
         """Test Redis connection pool initializes correctly."""
@@ -52,6 +53,7 @@ class TestRedisCacheBootstrap:
 
         redis_manager.initialize.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_cache_layer_initialization(self):
 
         """Test cache layers initialize with Redis backend."""
@@ -84,6 +86,7 @@ class TestRedisCacheBootstrap:
 
         assert all(l["initialized"] for l in initialized_layers.values())
     
+    @pytest.mark.asyncio
     async def test_session_storage_setup(self):
 
         """Test session storage initializes in Redis."""
@@ -122,6 +125,7 @@ class TestRateLimitingProtection:
 
     """Test 11: Rate Limiting First User Protection"""
     
+    @pytest.mark.asyncio
     async def test_first_user_generous_limits(self):
 
         """Test first-time users get generous rate limits."""
@@ -151,6 +155,7 @@ class TestRateLimitingProtection:
 
         assert limits["requests_per_hour"] >= 100
     
+    @pytest.mark.asyncio
     async def test_rate_limit_enforcement(self):
 
         """Test rate limits are enforced correctly."""
@@ -179,6 +184,7 @@ class TestRateLimitingProtection:
 
         assert blocked_count == 5
     
+    @pytest.mark.asyncio
     async def test_rate_limit_reset(self):
 
         """Test rate limit counters reset after window."""
@@ -201,6 +207,7 @@ class TestErrorPropagation:
 
     """Test 12: Error Propagation to Frontend"""
     
+    @pytest.mark.asyncio
     async def test_backend_error_to_websocket(self):
 
         """Test backend errors propagate to WebSocket."""
@@ -226,6 +233,7 @@ class TestErrorPropagation:
         
         ws_manager.send_error.assert_called_once_with("user_123", error)
     
+    @pytest.mark.asyncio
     async def test_error_formatting_for_frontend(self):
 
         """Test errors are formatted correctly for frontend."""
@@ -254,6 +262,7 @@ class TestErrorPropagation:
 
         assert "error_id" in formatted_error
     
+    @pytest.mark.asyncio
     async def test_error_recovery_suggestions(self):
 
         """Test error responses include recovery suggestions."""

@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import CorpusCreate, CorpusUpdate
@@ -24,6 +24,7 @@ from netra_backend.app.services.corpus_service import (
 class TestMetadataTracking:
     """Test metadata tracking throughout corpus lifecycle"""
     
+    @pytest.mark.asyncio
     async def test_corpus_metadata_creation(self):
         """Test 16: Verify metadata is properly initialized"""
         service = CorpusService()
@@ -40,6 +41,7 @@ class TestMetadataTracking:
         assert metadata["version"] == 1
         assert "created_at" in metadata
 
+    @pytest.mark.asyncio
     async def test_corpus_metadata_update(self):
         """Test 17: Verify metadata is updated correctly"""
         service = CorpusService()
@@ -60,6 +62,7 @@ class TestMetadataTracking:
 class TestErrorRecovery:
     """Test error recovery mechanisms"""
     
+    @pytest.mark.asyncio
     async def test_table_creation_failure_recovery(self):
         """Test 18: Verify recovery from table creation failure"""
         service = CorpusService()
@@ -80,6 +83,7 @@ class TestErrorRecovery:
                 {"status": CorpusStatus.FAILED.value}
             )
 
+    @pytest.mark.asyncio
     async def test_upload_failure_recovery(self):
         """Test 19: Verify recovery from upload failure"""
         service = CorpusService()
@@ -104,6 +108,7 @@ class TestErrorRecovery:
             assert result["records_uploaded"] == 0
             assert "Insert failed" in str(result["validation_errors"])
 
+    @pytest.mark.asyncio
     async def test_deletion_failure_recovery(self):
         """Test 20: Verify recovery from deletion failure"""
         service = CorpusService()

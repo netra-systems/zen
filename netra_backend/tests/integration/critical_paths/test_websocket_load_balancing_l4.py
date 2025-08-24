@@ -29,7 +29,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import websockets
@@ -272,6 +272,7 @@ class WebSocketLoadBalancingL4TestSuite:
             # Fallback: use connection info or random assignment
             return f"server_{random.randint(1, len(self.websocket_servers))}"
     
+    @pytest.mark.asyncio
     async def test_connection_distribution_l4(self, connection_count: int = 100) -> LoadBalancingMetrics:
         """Test connection distribution across multiple servers."""
         connection_tasks = []
@@ -314,6 +315,7 @@ class WebSocketLoadBalancingL4TestSuite:
             health_check_success_rate=0.0
         )
     
+    @pytest.mark.asyncio
     async def test_sticky_sessions_l4(self, test_sessions: int = 20) -> Dict[str, Any]:
         """Test sticky session behavior - connections should return to same server."""
         sticky_session_results = {
@@ -369,6 +371,7 @@ class WebSocketLoadBalancingL4TestSuite:
         
         return sticky_session_results
     
+    @pytest.mark.asyncio
     async def test_server_failover_l4(self) -> Dict[str, Any]:
         """Test server failover behavior when servers become unavailable."""
         failover_results = {
@@ -450,6 +453,7 @@ class WebSocketLoadBalancingL4TestSuite:
         
         return failover_results
     
+    @pytest.mark.asyncio
     async def test_health_check_monitoring_l4(self) -> Dict[str, Any]:
         """Test health check monitoring of WebSocket servers."""
         health_monitoring_results = {
@@ -525,6 +529,7 @@ async def websocket_load_balancing_l4_suite():
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_websocket_connection_distribution_l4(websocket_load_balancing_l4_suite):
     """Test WebSocket connection distribution across multiple servers."""
     # Test connection distribution with 50 concurrent connections
@@ -549,6 +554,7 @@ async def test_websocket_connection_distribution_l4(websocket_load_balancing_l4_
 @pytest.mark.asyncio  
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_websocket_sticky_sessions_l4(websocket_load_balancing_l4_suite):
     """Test WebSocket sticky session behavior."""
     # Test sticky sessions with 15 session reconnections
@@ -568,6 +574,7 @@ async def test_websocket_sticky_sessions_l4(websocket_load_balancing_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging  
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_websocket_server_failover_l4(websocket_load_balancing_l4_suite):
     """Test WebSocket server failover and recovery."""
     # Test server failover scenarios
@@ -592,6 +599,7 @@ async def test_websocket_server_failover_l4(websocket_load_balancing_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4  
+@pytest.mark.asyncio
 async def test_websocket_health_check_monitoring_l4(websocket_load_balancing_l4_suite):
     """Test WebSocket server health check monitoring."""
     # Test health check monitoring
@@ -612,6 +620,7 @@ async def test_websocket_health_check_monitoring_l4(websocket_load_balancing_l4_
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_websocket_load_balancing_performance_l4(websocket_load_balancing_l4_suite):
     """Test WebSocket load balancing performance under realistic load."""
     # Test performance with moderate load

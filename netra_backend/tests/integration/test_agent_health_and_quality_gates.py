@@ -14,7 +14,7 @@ import asyncio
 import time
 from datetime import datetime
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -22,6 +22,7 @@ import pytest
 class TestAgentHealthMonitoring:
     """Test 13: Agent Registry Health Monitoring"""
     
+    @pytest.mark.asyncio
     async def test_agent_health_check_cycle(self):
         """Test periodic health checks for all agents."""
         from netra_backend.app.agents.registry import AgentRegistry
@@ -45,6 +46,7 @@ class TestAgentHealthMonitoring:
         degraded = [name for name, r in health_results.items() if r["status"] == "degraded"]
         assert len(degraded) <= 1
     
+    @pytest.mark.asyncio
     async def test_unhealthy_agent_detection(self):
         """Test detection of unhealthy agents."""
         health_status = {
@@ -59,6 +61,7 @@ class TestAgentHealthMonitoring:
         assert "agent_2" in unhealthy
         assert len(unhealthy) == 1
     
+    @pytest.mark.asyncio
     async def test_agent_replacement_on_failure(self):
         """Test automatic agent replacement when unhealthy."""
         from netra_backend.app.agents.registry import AgentRegistry
@@ -80,6 +83,7 @@ class TestAgentHealthMonitoring:
 class TestToolDispatcherInit:
     """Test 14: Tool Dispatcher Initialization"""
     
+    @pytest.mark.asyncio
     async def test_tool_registry_population(self):
         """Test tool dispatcher registers all required tools."""
         from netra_backend.app.services.tool_dispatcher import ToolDispatcher
@@ -103,6 +107,7 @@ class TestToolDispatcherInit:
         assert len(result["tools"]) >= 5
         assert "gpu_analyzer" in result["tools"]
     
+    @pytest.mark.asyncio
     async def test_tool_availability_check(self):
         """Test checking tool availability before dispatch."""
         tools = {
@@ -116,6 +121,7 @@ class TestToolDispatcherInit:
         assert len(available_tools) == 2
         assert "legacy_tool" not in available_tools
     
+    @pytest.mark.asyncio
     async def test_tool_execution_routing(self):
         """Test proper routing of tool execution requests."""
         from netra_backend.app.services.tool_dispatcher import ToolDispatcher
@@ -138,6 +144,7 @@ class TestToolDispatcherInit:
 class TestQualityGateValidation:
     """Test 15: Quality Gate First Response Validation"""
     
+    @pytest.mark.asyncio
     async def test_response_quality_scoring(self):
         """Test quality scoring for agent responses."""
         from netra_backend.app.services.quality_gate import QualityGate
@@ -156,6 +163,7 @@ class TestQualityGateValidation:
         assert scores["overall"] >= 0.8
         assert scores["relevance"] >= 0.85
     
+    @pytest.mark.asyncio
     async def test_quality_gate_rejection(self):
         """Test rejection of low-quality responses."""
         quality_thresholds = {
@@ -176,6 +184,7 @@ class TestQualityGateValidation:
         
         assert passed is False  # Should be rejected
     
+    @pytest.mark.asyncio
     async def test_quality_improvement_retry(self):
         """Test retry mechanism for quality improvement."""
         from netra_backend.app.services.quality_gate import QualityGate

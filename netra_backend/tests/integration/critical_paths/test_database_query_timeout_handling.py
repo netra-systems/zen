@@ -179,6 +179,7 @@ class DatabaseQueryTimeoutManager:
                 chunk
             )
     
+    @pytest.mark.asyncio
     async def test_postgres_query_timeout_enforcement(self, timeout_seconds: int = 5) -> Dict[str, Any]:
         """Test PostgreSQL query timeout enforcement."""
         timeout_result = {
@@ -249,6 +250,7 @@ class DatabaseQueryTimeoutManager:
         
         return timeout_result
     
+    @pytest.mark.asyncio
     async def test_clickhouse_query_timeout_enforcement(self, timeout_seconds: int = 5) -> Dict[str, Any]:
         """Test ClickHouse query timeout enforcement."""
         timeout_result = {
@@ -327,6 +329,7 @@ class DatabaseQueryTimeoutManager:
         
         return timeout_result
     
+    @pytest.mark.asyncio
     async def test_concurrent_timeout_handling(self, concurrent_queries: int = 5) -> Dict[str, Any]:
         """Test timeout handling under concurrent query load."""
         concurrent_result = {
@@ -412,6 +415,7 @@ class DatabaseQueryTimeoutManager:
         
         return concurrent_result
     
+    @pytest.mark.asyncio
     async def test_timeout_with_transaction_rollback(self) -> Dict[str, Any]:
         """Test timeout behavior within transactions and rollback safety."""
         transaction_result = {
@@ -475,6 +479,7 @@ class DatabaseQueryTimeoutManager:
         
         return transaction_result
     
+    @pytest.mark.asyncio
     async def test_adaptive_timeout_strategies(self) -> Dict[str, Any]:
         """Test adaptive timeout strategies based on query complexity."""
         adaptive_result = {
@@ -579,6 +584,7 @@ async def timeout_manager():
 class TestDatabaseQueryTimeoutHandlingL3:
     """L3 integration tests for database query timeout handling."""
     
+    @pytest.mark.asyncio
     async def test_postgres_timeout_enforcement(self, timeout_manager):
         """Test PostgreSQL query timeout enforcement and recovery."""
         result = await timeout_manager.test_postgres_query_timeout_enforcement(3)
@@ -591,6 +597,7 @@ class TestDatabaseQueryTimeoutHandlingL3:
         if result["timeout_enforced"]:
             assert 2 <= result["timeout_detection_time"] <= 5
     
+    @pytest.mark.asyncio
     async def test_clickhouse_timeout_enforcement(self, timeout_manager):
         """Test ClickHouse query timeout enforcement and recovery."""
         result = await timeout_manager.test_clickhouse_query_timeout_enforcement(3)
@@ -603,6 +610,7 @@ class TestDatabaseQueryTimeoutHandlingL3:
         if result["timeout_enforced"]:
             assert 2 <= result["timeout_detection_time"] <= 6
     
+    @pytest.mark.asyncio
     async def test_concurrent_timeout_stability(self, timeout_manager):
         """Test system stability under concurrent timeout scenarios."""
         result = await timeout_manager.test_concurrent_timeout_handling(4)
@@ -614,6 +622,7 @@ class TestDatabaseQueryTimeoutHandlingL3:
         total_handled = result["queries_completed"] + result["queries_timed_out"]
         assert total_handled >= result["concurrent_queries"] * 0.8
     
+    @pytest.mark.asyncio
     async def test_transaction_timeout_rollback_safety(self, timeout_manager):
         """Test timeout behavior within transactions maintains data consistency."""
         result = await timeout_manager.test_timeout_with_transaction_rollback()
@@ -625,6 +634,7 @@ class TestDatabaseQueryTimeoutHandlingL3:
             assert result["rollback_successful"] is True
             assert result["data_consistency_maintained"] is True
     
+    @pytest.mark.asyncio
     async def test_adaptive_timeout_strategies(self, timeout_manager):
         """Test adaptive timeout strategies for different query types."""
         result = await timeout_manager.test_adaptive_timeout_strategies()

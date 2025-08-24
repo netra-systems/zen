@@ -7,7 +7,7 @@ Maximum 300 lines, functions ≤8 lines.
 import asyncio
 import uuid
 from typing import Dict, List
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -103,6 +103,7 @@ class TestCompleteUserFlow:
 
     """Test complete user workflow from request to response."""
     
+    @pytest.mark.asyncio
     async def test_happy_path_complete_flow(self, orchestration_setup):
 
         """Test successful end-to-end orchestration workflow."""
@@ -179,6 +180,7 @@ class TestAgentHandoffs:
 
     """Test agent handoffs and state passing between workflow steps."""
     
+    @pytest.mark.asyncio
     async def test_triage_to_data_handoff(self, orchestration_setup):
 
         """Test User Request → Triage → Data Analysis handoff with 5 assertions."""
@@ -241,6 +243,7 @@ class TestFailureRecovery:
 
     """Test failure recovery mechanisms at each workflow stage."""
     
+    @pytest.mark.asyncio
     async def test_triage_failure_recovery(self, orchestration_setup):
 
         """Test recovery from triage agent failure."""
@@ -257,6 +260,7 @@ class TestFailureRecovery:
 
         assert agent.state in [SubAgentLifecycle.FAILED, SubAgentLifecycle.COMPLETED]
     
+    @pytest.mark.asyncio
     async def test_optimization_timeout_handling(self, orchestration_setup):
 
         """Test timeout handling in optimization step."""
@@ -293,6 +297,7 @@ class TestConcurrentRequests:
 
     """Test concurrent request handling and resource constraints."""
     
+    @pytest.mark.asyncio
     async def test_concurrent_triage_requests(self, orchestration_setup):
 
         """Test multiple concurrent triage requests."""
@@ -339,6 +344,7 @@ class TestConcurrentRequests:
 
         return agent
     
+    @pytest.mark.asyncio
     async def test_resource_constraint_handling(self, orchestration_setup):
 
         """Test handling of resource constraints."""
@@ -361,6 +367,7 @@ class TestWebSocketIntegration:
 
     """Test WebSocket communication throughout workflow."""
     
+    @pytest.mark.asyncio
     async def test_websocket_message_flow(self, orchestration_setup):
 
         """Test WebSocket messages during complete workflow."""
@@ -377,6 +384,7 @@ class TestWebSocketIntegration:
 
         assert setup['websocket'].send_message.call_count >= 0
     
+    @pytest.mark.asyncio
     async def test_websocket_error_handling(self, orchestration_setup):
 
         """Test WebSocket error handling during execution."""
@@ -408,6 +416,7 @@ class TestWorkflowValidation:
 
     """Test comprehensive workflow validation and metrics."""
     
+    @pytest.mark.asyncio
     async def test_complete_workflow_metrics(self, orchestration_setup):
 
         """Test metrics collection across complete workflow."""

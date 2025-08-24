@@ -13,7 +13,7 @@ import asyncio
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.schemas import Thread, User
@@ -44,16 +44,21 @@ class TestThreadAutoCreation:
             await conn.run_sync(Run.metadata.create_all)
         
         async with async_session() as session:
-            yield session
+            try:
+                yield session
+            finally:
+                if hasattr(session, "close"):
+                    await session.close()
     
     @pytest.fixture
     async def thread_service(self, db_session):
         """Create thread service with test database."""
         service = ThreadService()
         service.db_session = db_session
-        return service
+        yield service
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_user(self):
         """Create test user for thread operations."""
         return User(
@@ -64,6 +69,7 @@ class TestThreadAutoCreation:
             created_at=datetime.now(timezone.utc)
         )
     
+    @pytest.mark.asyncio
     async def test_no_existing_thread_creates_new(
         self, thread_service, db_session, test_user
     ):
@@ -90,6 +96,7 @@ class TestThreadAutoCreation:
         assert len(threads) == 1
         assert threads[0].id == thread.id
     
+    @pytest.mark.asyncio
     async def test_message_association_with_auto_thread(
         self, thread_service, db_session, test_user
     ):
@@ -119,6 +126,7 @@ class TestThreadAutoCreation:
         assert len(messages) == 1
         assert messages[0].id == message.id
     
+    @pytest.mark.asyncio
     async def test_concurrent_thread_creation_safety(
         self, thread_service, test_user
     ):
@@ -144,6 +152,7 @@ class TestThreadAutoCreation:
         for thread in threads:
             assert thread.id == first_thread.id
     
+    @pytest.mark.asyncio
     async def test_thread_metadata_initialization(
         self, thread_service, test_user
     ):
@@ -170,6 +179,7 @@ class TestThreadAutoCreation:
         assert thread.updated_at is not None
         assert thread.last_message_at is None  # No messages yet
     
+    @pytest.mark.asyncio
     async def test_state_persistence_across_sessions(
         self, thread_service, db_session, test_user
     ):
@@ -207,6 +217,7 @@ class TestThreadAutoCreation:
             assert retrieved_thread.id == thread_id
             assert retrieved_thread.title == "Persistent Thread"
     
+    @pytest.mark.asyncio
     async def test_thread_creation_with_run_tracking(
         self, thread_service, test_user
     ):
@@ -236,6 +247,7 @@ class TestThreadAutoCreation:
         updated_run = await thread_service.get_run(run.id)
         assert updated_run.status == "completed"
     
+    @pytest.mark.asyncio
     async def test_error_handling_during_creation(
         self, thread_service, test_user
     ):
@@ -256,6 +268,7 @@ class TestThreadAutoCreation:
         threads = await thread_service.get_user_threads(test_user.id)
         assert len(threads) == 0
     
+    @pytest.mark.asyncio
     async def test_thread_title_generation(self, thread_service, test_user):
         """Test automatic title generation for threads."""
         

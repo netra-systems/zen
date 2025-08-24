@@ -10,7 +10,7 @@ import asyncio
 import socket
 from datetime import datetime
 from decimal import Decimal
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -26,6 +26,7 @@ from netra_backend.tests.validation_formatting_test_helpers import (
 class TestFormattingUtilsDisplay:
     """test_formatting_utils_display - Test data formatting and localization"""
     
+    @pytest.mark.asyncio
     async def test_data_formatting(self):
         from netra_backend.app.utils.formatting_utils import FormattingUtils
         utils = FormattingUtils()
@@ -35,6 +36,7 @@ class TestFormattingUtilsDisplay:
         self._assert_percentage_formatting(utils)
         self._assert_file_size_formatting(utils)
     
+    @pytest.mark.asyncio
     async def test_localization(self):
         from netra_backend.app.utils.formatting_utils import FormattingUtils
         utils_us = FormattingUtils(locale="en_US")
@@ -87,6 +89,7 @@ class TestFormattingUtilsDisplay:
 class TestMathUtilsCalculations:
     """test_math_utils_calculations - Test mathematical operations and precision handling"""
     
+    @pytest.mark.asyncio
     async def test_mathematical_operations(self):
         from netra_backend.app.utils.math_utils import MathUtils
         utils = MathUtils()
@@ -96,6 +99,7 @@ class TestMathUtilsCalculations:
         self._assert_percentiles(utils, data)
         self._assert_moving_average(utils, data)
     
+    @pytest.mark.asyncio
     async def test_precision_handling(self):
         from netra_backend.app.utils.math_utils import MathUtils
         utils = MathUtils()
@@ -140,6 +144,7 @@ class TestMathUtilsCalculations:
 class TestNetworkUtilsRequests:
     """test_network_utils_requests - Test network utilities and retry logic"""
     
+    @pytest.mark.asyncio
     async def test_network_utilities(self):
         from netra_backend.app.utils.network_utils import NetworkUtils
         utils = NetworkUtils()
@@ -148,6 +153,7 @@ class TestNetworkUtilsRequests:
         self._assert_ip_validation(utils)
         await self._assert_port_checking(utils)
     
+    @pytest.mark.asyncio
     async def test_retry_logic(self):
         from netra_backend.app.utils.network_utils import NetworkUtils
         utils = NetworkUtils()

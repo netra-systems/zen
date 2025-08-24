@@ -26,6 +26,7 @@ from netra_backend.tests.helpers.redis_test_helpers import (
 
 class TestRedisManagerRetryAndFailover:
     """Test Redis retry logic and failover mechanisms"""
+    @pytest.mark.asyncio
     async def test_retry_on_transient_failure(self, enhanced_redis_manager_with_retry):
         """Test retry logic on transient failures"""
         mock_client = MockRedisClient()
@@ -38,6 +39,7 @@ class TestRedisManagerRetryAndFailover:
         
         assert result == "success_test_key"
         assert get_attempt_count() == 3
+    @pytest.mark.asyncio
     async def test_retry_exhaustion(self, enhanced_redis_manager_with_retry):
         """Test behavior when retry attempts are exhausted"""
         mock_client = MockRedisClient()
@@ -51,6 +53,7 @@ class TestRedisManagerRetryAndFailover:
         
         metrics = enhanced_redis_manager_with_retry.get_metrics()
         assert metrics['failed_operations'] == 3
+    @pytest.mark.asyncio
     async def test_exponential_backoff_timing(self, enhanced_redis_manager_with_retry):
         """Test exponential backoff timing"""
         mock_client = MockRedisClient()
@@ -65,6 +68,7 @@ class TestRedisManagerRetryAndFailover:
         assert len(retry_times) == 3
         expected_delays = [(0.05, 0.15), (0.15, 0.25)]
         assert verify_exponential_backoff(retry_times, expected_delays)
+    @pytest.mark.asyncio
     async def test_set_operation_retry(self, enhanced_redis_manager_with_retry):
         """Test retry logic for SET operations"""
         mock_client = MockRedisClient()
@@ -83,6 +87,7 @@ class TestRedisManagerRetryAndFailover:
         
         assert result == True
         assert attempt_count == 2
+    @pytest.mark.asyncio
     async def test_failover_to_backup_strategy(self, enhanced_redis_manager_with_retry):
         """Test failover to backup caching strategy"""
         enhanced_redis_manager_with_retry.redis_client = None

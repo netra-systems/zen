@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -49,6 +49,7 @@ class TestValidationAndSafety:
             for expected in expected_errors:
                 assert any(expected in error for error in result["errors"])
 
+    @pytest.mark.asyncio
     async def test_corpus_access_control(self):
         """Test 15: Verify corpus access control"""
         service = CorpusService()
@@ -66,6 +67,7 @@ class TestValidationAndSafety:
 class TestCorpusCloning:
     """Test corpus cloning functionality"""
     
+    @pytest.mark.asyncio
     async def test_corpus_clone_workflow(self):
         """Test 11: Verify corpus cloning creates new corpus with data"""
         service = CorpusService()
@@ -90,6 +92,7 @@ class TestCorpusCloning:
             assert result.name == "Cloned Corpus"
             assert result.description == "Clone of Original Corpus"
 
+    @pytest.mark.asyncio
     async def test_corpus_content_copy(self):
         """Test 12: Verify corpus content is copied correctly"""
         service = CorpusService()

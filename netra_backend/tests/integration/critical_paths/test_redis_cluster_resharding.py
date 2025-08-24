@@ -114,7 +114,7 @@ class ClusterReshardingL3Manager:
                 cluster_info["nodes"].append({"node_id": i, "port": port, "url": url})
                 
                 # Use mock Redis client to avoid event loop conflicts
-                from unittest.mock import AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
                 client = AsyncMock()
                 client.ping = AsyncMock()
                 client.cluster = AsyncMock()
@@ -175,6 +175,7 @@ class ClusterReshardingL3Manager:
             "nodes_used": self.simulated_nodes
         }
     
+    @pytest.mark.asyncio
     async def test_simple_resharding_operation(self, keys_to_migrate: int) -> Dict[str, Any]:
         """Test a simple resharding operation between two virtual nodes."""
         if self.simulated_nodes < 2:
@@ -268,6 +269,7 @@ class ClusterReshardingL3Manager:
             "migration_success_rate": (migrated_keys / keys_to_migrate * 100) if keys_to_migrate > 0 else 0
         }
     
+    @pytest.mark.asyncio
     async def test_data_consistency_during_resharding(self, consistency_checks: int) -> Dict[str, Any]:
         """Test data consistency during cluster resharding operations."""
         consistency_results = {
@@ -375,6 +377,7 @@ class ClusterReshardingL3Manager:
             except Exception as e:
                 logger.error(f"Concurrent resharding failed for key {source_key}: {e}")
     
+    @pytest.mark.asyncio
     async def test_performance_impact_during_resharding(self, operation_count: int) -> Dict[str, Any]:
         """Test performance impact during cluster resharding."""
         # Measure baseline performance
@@ -460,6 +463,7 @@ class ClusterReshardingL3Manager:
             "max_operation_time": max(resharding_times) if resharding_times else 0
         }
     
+    @pytest.mark.asyncio
     async def test_cluster_node_failure_during_resharding(self) -> Dict[str, Any]:
         """Test cluster behavior when a node fails during resharding."""
         if len(self.cluster_nodes) < 3:
@@ -635,6 +639,7 @@ async def cluster_resharding_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cluster_data_population_and_distribution(cluster_resharding_manager):
     """L3: Test cluster data population and distribution across nodes."""
     result = await cluster_resharding_manager.populate_cluster_data(200)
@@ -652,6 +657,7 @@ async def test_cluster_data_population_and_distribution(cluster_resharding_manag
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_simple_cluster_resharding_operation(cluster_resharding_manager):
     """L3: Test simple resharding operation between cluster nodes."""
     result = await cluster_resharding_manager.test_simple_resharding_operation(50)
@@ -667,6 +673,7 @@ async def test_simple_cluster_resharding_operation(cluster_resharding_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_data_consistency_during_cluster_resharding(cluster_resharding_manager):
     """L3: Test data consistency during cluster resharding operations."""
     result = await cluster_resharding_manager.test_data_consistency_during_resharding(100)
@@ -682,6 +689,7 @@ async def test_data_consistency_during_cluster_resharding(cluster_resharding_man
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_performance_impact_during_resharding(cluster_resharding_manager):
     """L3: Test performance impact during cluster resharding."""
     result = await cluster_resharding_manager.test_performance_impact_during_resharding(100)
@@ -696,6 +704,7 @@ async def test_performance_impact_during_resharding(cluster_resharding_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cluster_node_failure_during_resharding(cluster_resharding_manager):
     """L3: Test cluster behavior when node fails during resharding."""
     result = await cluster_resharding_manager.test_cluster_node_failure_during_resharding()
@@ -710,6 +719,7 @@ async def test_cluster_node_failure_during_resharding(cluster_resharding_manager
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cluster_resharding_sla_compliance(cluster_resharding_manager):
     """L3: Test comprehensive cluster resharding SLA compliance."""
     # Execute comprehensive test suite

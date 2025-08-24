@@ -13,7 +13,7 @@ from pathlib import Path
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -60,6 +60,7 @@ class TestCompensationEngine:
         """Create test compensation data."""
         return {"amount": 100.50, "user_id": "user123", "transaction_type": "billing"}
     
+    @pytest.mark.asyncio
     async def test_create_compensation_action_success(self, engine, mock_handler, recovery_context, compensation_data):
         """Test successful compensation action creation."""
         engine.register_handler(mock_handler)
@@ -70,6 +71,7 @@ class TestCompensationEngine:
         assert action.operation_id == "op123"
         assert action.compensation_data == compensation_data
     
+    @pytest.mark.asyncio
     async def test_create_compensation_action_no_handler(self, engine, recovery_context, compensation_data):
         """Test compensation action creation with no available handler."""
         action_id = await engine.create_compensation_action("op123", recovery_context, compensation_data)
@@ -77,6 +79,7 @@ class TestCompensationEngine:
         assert action_id not in engine.active_compensations
         mock_handler.can_compensate.assert_not_called()
     
+    @pytest.mark.asyncio
     async def test_execute_compensation_success(self, engine, mock_handler, recovery_context, compensation_data):
         """Test successful compensation execution."""
         action_id = await self._create_test_action(engine, mock_handler, recovery_context, compensation_data)
@@ -87,6 +90,7 @@ class TestCompensationEngine:
         action = engine.active_compensations[action_id]
         assert action.state == CompensationState.COMPLETED
     
+    @pytest.mark.asyncio
     async def test_execute_compensation_handler_failure(self, engine, mock_handler, recovery_context, compensation_data):
         """Test compensation execution with handler failure."""
         mock_handler.execute_compensation.return_value = False
@@ -98,6 +102,7 @@ class TestCompensationEngine:
         action = engine.active_compensations[action_id]
         assert action.state == CompensationState.FAILED
     
+    @pytest.mark.asyncio
     async def test_execute_compensation_handler_exception(self, engine, mock_handler, recovery_context, compensation_data):
         """Test compensation execution with handler exception."""
         mock_handler.execute_compensation.side_effect = Exception("Handler error")
@@ -110,6 +115,7 @@ class TestCompensationEngine:
         assert action.state == CompensationState.FAILED
         assert "Handler error" in action.error
     
+    @pytest.mark.asyncio
     async def test_execute_compensation_nonexistent_action(self, engine):
         """Test compensation execution for non-existent action."""
         fake_id = str(uuid.uuid4())
@@ -176,6 +182,7 @@ class TestCompensationEngine:
         priorities = [h.get_priority() for h in engine.handlers]
         assert priorities == [1, 2, 3]
     
+    @pytest.mark.asyncio
     async def test_find_compatible_handler_multiple_handlers(self, engine, recovery_context):
         """Test finding compatible handler with multiple available."""
         handler1 = Mock(spec=BaseCompensationHandler)
@@ -189,6 +196,7 @@ class TestCompensationEngine:
         
         assert handler == handler2
     
+    @pytest.mark.asyncio
     async def test_find_compatible_handler_none_available(self, engine, recovery_context):
         """Test finding compatible handler when none available."""
         handler1 = Mock(spec=BaseCompensationHandler)

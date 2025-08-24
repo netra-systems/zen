@@ -6,7 +6,7 @@ when using the unified configuration system.
 
 import pytest
 import asyncio
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine
 

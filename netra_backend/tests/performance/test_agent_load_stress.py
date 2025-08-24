@@ -17,7 +17,7 @@ import statistics
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import psutil
 import pytest
@@ -190,6 +190,7 @@ class TestAgentLoadScenarios:
 
     @pytest.mark.performance
 
+    @pytest.mark.asyncio
     async def test_gradual_load_ramp_up(self):
 
         """Test gradual increase in concurrent users."""
@@ -216,6 +217,7 @@ class TestAgentLoadScenarios:
 
     @pytest.mark.performance
 
+    @pytest.mark.asyncio
     async def test_sustained_peak_load(self):
 
         """Test system under sustained peak load."""
@@ -242,6 +244,7 @@ class TestAgentLoadScenarios:
 
     @pytest.mark.performance
 
+    @pytest.mark.asyncio
     async def test_burst_traffic_patterns(self):
 
         """Test handling of sudden traffic bursts."""
@@ -272,6 +275,7 @@ class TestAgentLoadScenarios:
 
     @pytest.mark.performance
 
+    @pytest.mark.asyncio
     async def test_mixed_workload_types(self):
 
         """Test mixed agent types under concurrent load."""
@@ -482,6 +486,7 @@ class TestAgentStressScenarios:
 
     @pytest.mark.performance
 
+    @pytest.mark.asyncio
     async def test_beyond_capacity_limits(self):
 
         """Test system behavior beyond designed capacity."""

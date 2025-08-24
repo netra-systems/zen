@@ -67,6 +67,7 @@ class TestBaseServiceMixin:
         """Helper: Verify task is tracked in background tasks."""
         assert task in mixin._background_tasks
 
+    @pytest.mark.asyncio
     async def test_create_background_task(self):
         """Test creating background tasks."""
         mixin = BaseServiceMixin()
@@ -91,6 +92,7 @@ class TestBaseServiceMixin:
         assert task1.cancelled()
         assert task2.cancelled()
 
+    @pytest.mark.asyncio
     async def test_cancel_background_tasks(self):
         """Test cancelling background tasks."""
         mixin = BaseServiceMixin()

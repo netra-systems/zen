@@ -14,7 +14,7 @@ import time
 from datetime import datetime, timedelta
 import httpx
 import redis.asyncio as redis
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 import json
 from typing import List, Dict, Any
 
@@ -39,7 +39,7 @@ class TestApiGatewayRateLimitingAccuracy:
     @pytest.fixture
     async def settings(self):
         """Get application settings"""
-        return get_unified_config()
+        yield get_unified_config()
     
     @pytest.fixture
     async def redis_client(self, settings):
@@ -62,23 +62,23 @@ class TestApiGatewayRateLimitingAccuracy:
                 self.client = client
             
             async def get(self, key):
-                return await self.client.get(key)
+                yield await self.client.get(key)
             
             async def set(self, key, value, ex=None):
-                return await self.client.set(key, value, ex=ex)
+                yield await self.client.set(key, value, ex=ex)
             
             async def incr(self, key):
-                return await self.client.incr(key)
+                yield await self.client.incr(key)
             
             async def expire(self, key, seconds):
-                return await self.client.expire(key, seconds)
+                yield await self.client.expire(key, seconds)
         
-        return MockRedisManager(redis_client)
+        yield MockRedisManager(redis_client)
     
     @pytest.fixture
     async def rate_limiter(self, redis_manager, settings):
         """Real rate limiter instance"""
-        return RateLimiter(redis_manager, settings)
+        yield RateLimiter(redis_manager, settings)
     
     @pytest.fixture(autouse=True)
     async def cleanup_redis(self, redis_client):

@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -128,6 +128,7 @@ class TestSupplyResearch:
             else:
                 assert response.status_code in [404, 422, 401]
     
+    @pytest.mark.asyncio
     async def test_supply_validation(self):
         """Test supply chain validation."""
         from netra_backend.app.routes.supply import validate_supply_chain

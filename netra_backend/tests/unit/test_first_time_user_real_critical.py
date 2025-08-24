@@ -81,6 +81,7 @@ class TestFirstTimeUserRealCritical:
             # Rollback any changes made during test
             await session.rollback()
 
+    @pytest.mark.asyncio
     async def test_1_real_jwt_token_generation_validation_cycle(self, jwt_secret_key):
         """
         BVJ: Test REAL JWT token creation and validation - CRITICAL auth entry point.
@@ -107,6 +108,7 @@ class TestFirstTimeUserRealCritical:
         assert decoded_payload["email"] == user_data["email"]
         assert "exp" in decoded_payload
 
+    @pytest.mark.asyncio
     async def test_2_real_cost_calculator_with_savings_display(self):
         """
         BVJ: Test REAL cost calculations showing value proposition to users.
@@ -137,6 +139,7 @@ class TestFirstTimeUserRealCritical:
         assert isinstance(optimal_model, str)
         assert len(optimal_model) > 0
 
+    @pytest.mark.asyncio
     async def test_3_real_database_session_lifecycle_management(self, real_db_session):
         """
         BVJ: Test REAL database session lifecycle with actual SQLAlchemy operations.
@@ -161,6 +164,7 @@ class TestFirstTimeUserRealCritical:
         assert isinstance(stats["active_sessions"], int)
         assert stats["active_sessions"] >= 0
 
+    @pytest.mark.asyncio
     async def test_4_real_api_rate_limit_enforcement_free_tier(self):
         """
         BVJ: Test REAL rate limiting for free tier users (10 requests/day).
@@ -171,7 +175,7 @@ class TestFirstTimeUserRealCritical:
         rate_limiter = RateLimiter(max_requests=10, window_seconds=86400)  # 10/day
         
         # Create mock websocket for ConnectionInfo
-        from unittest.mock import Mock
+        from unittest.mock import Mock, AsyncMock, MagicMock
         mock_websocket = Mock()
         mock_websocket.client_state = "connected"
         
@@ -199,6 +203,7 @@ class TestFirstTimeUserRealCritical:
         assert rate_info["max_requests"] == 10
         assert rate_info["is_limited"] is True
 
+    @pytest.mark.asyncio
     async def test_5_real_websocket_connection_handshake_flow(self):
         """
         BVJ: Test REAL WebSocket connection setup for real-time chat features.
@@ -206,7 +211,7 @@ class TestFirstTimeUserRealCritical:
         Revenue Impact: No real-time chat = poor UX = lower conversion rates.
         """
         # Create mock websocket for ConnectionInfo
-        from unittest.mock import Mock
+        from unittest.mock import Mock, AsyncMock, MagicMock
         mock_websocket = Mock()
         mock_websocket.client_state = "connected"
         
@@ -234,6 +239,7 @@ class TestFirstTimeUserRealCritical:
         assert conn_info.rate_limit_count == 0
         assert isinstance(conn_info.rate_limit_window_start, datetime)
 
+    @pytest.mark.asyncio
     async def test_6_real_llm_provider_configuration_setup(self):
         """
         BVJ: Test REAL LLM provider setup using actual provider configurations.
@@ -264,6 +270,7 @@ class TestFirstTimeUserRealCritical:
         assert isinstance(test_cost, Decimal)
         assert test_cost >= Decimal('0')
 
+    @pytest.mark.asyncio
     async def test_7_real_error_recovery_with_user_feedback(self):
         """
         BVJ: Test REAL error handling and recovery mechanisms with user messages.
@@ -294,6 +301,7 @@ class TestFirstTimeUserRealCritical:
         parsed_detail = json.loads(json_detail)
         assert parsed_detail["error"] == "validation_failed"
 
+    @pytest.mark.asyncio
     async def test_8_real_usage_metrics_collection_to_database(self, real_db_session):
         """
         BVJ: Test REAL metrics collection and database storage operations.
@@ -333,6 +341,7 @@ class TestFirstTimeUserRealCritical:
         assert isinstance(usage_log.id, str)
         assert hasattr(usage_log, 'created_at')
 
+    @pytest.mark.asyncio
     async def test_9_real_permission_boundary_validation(self, real_db_session):
         """
         BVJ: Test REAL permission checking for tier-based feature access.
@@ -378,6 +387,7 @@ class TestFirstTimeUserRealCritical:
         assert has_feature_access("free", "advanced_analytics") is False
         assert has_feature_access("growth", "advanced_analytics") is True
 
+    @pytest.mark.asyncio
     async def test_10_real_email_verification_token_flow(self, jwt_secret_key):
         """
         BVJ: Test REAL email verification token generation and validation.
@@ -418,6 +428,7 @@ class TestFirstTimeUserRealCritical:
         expiration = datetime.fromtimestamp(decoded_data["exp"], tz=timezone.utc)
         assert expiration > datetime.now(timezone.utc)
 
+    @pytest.mark.asyncio
     async def test_11_real_password_hashing_security_validation(self, real_password_hasher):
         """
         BONUS TEST - BVJ: Test REAL password hashing and verification security.

@@ -15,7 +15,7 @@ from pathlib import Path
 
 import asyncio
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -34,6 +34,7 @@ from netra_backend.app.core.error_recovery import RecoveryContext
 class TestTriageAgentRecoveryStrategy:
     """Business Value: Ensures triage agent reliability for customer request routing"""
     
+    @pytest.mark.asyncio
     async def test_intent_detection_failure_assessment(self):
         """Test intent detection failure properly assessed and categorized"""
         # Arrange - Mock intent detection failure
@@ -49,6 +50,7 @@ class TestTriageAgentRecoveryStrategy:
         assert assessment['failure_type'] == 'intent_detection'
         assert assessment['try_primary_recovery'] is True
     
+    @pytest.mark.asyncio
     async def test_entity_extraction_failure_assessment(self):
         """Test entity extraction failure triggers fallback recovery"""
         # Arrange - Mock entity extraction failure
@@ -64,6 +66,7 @@ class TestTriageAgentRecoveryStrategy:
         assert assessment['failure_type'] == 'entity_extraction'
         assert assessment['try_fallback_recovery'] is True
     
+    @pytest.mark.asyncio
     async def test_tool_recommendation_failure_triggers_degraded_mode(self):
         """Test tool recommendation failure triggers degraded mode"""
         # Arrange - Mock tool recommendation failure
@@ -79,6 +82,7 @@ class TestTriageAgentRecoveryStrategy:
         assert assessment['failure_type'] == 'tool_recommendation'
         assert assessment['try_degraded_mode'] is True
     
+    @pytest.mark.asyncio
     async def test_timeout_failure_sets_recovery_time_estimate(self):
         """Test timeout failure sets appropriate recovery time estimate"""
         # Arrange - Mock timeout failure
@@ -99,6 +103,7 @@ class TestTriageAgentRecoveryStrategy:
 class TestTriageRecoveryExecution:
     """Business Value: Ensures triage recovery mechanisms work correctly"""
     
+    @pytest.mark.asyncio
     async def test_primary_recovery_returns_simplified_result(self):
         """Test primary recovery returns simplified triage result"""
         # Arrange - Setup strategy and context
@@ -115,6 +120,7 @@ class TestTriageRecoveryExecution:
         assert result['recovery_method'] == 'simplified_triage'
         assert 'tools' in result
     
+    @pytest.mark.asyncio
     async def test_fallback_recovery_returns_cached_result(self):
         """Test fallback recovery returns cached triage result"""
         # Arrange - Setup strategy and context
@@ -131,6 +137,7 @@ class TestTriageRecoveryExecution:
         assert result['recovery_method'] == 'cached_fallback'
         assert result['tools'] == ['default_tool']
     
+    @pytest.mark.asyncio
     async def test_degraded_mode_returns_manual_review_result(self):
         """Test degraded mode returns manual review result"""
         # Arrange - Setup strategy and context
@@ -147,6 +154,7 @@ class TestTriageRecoveryExecution:
         assert result['requires_manual_review'] is True
         assert result['tools'] == ['manual_review']
     
+    @pytest.mark.asyncio
     async def test_primary_recovery_handles_exceptions_gracefully(self):
         """Test primary recovery handles exceptions without crashing"""
         # Arrange - Mock strategy with exception-prone method
@@ -167,6 +175,7 @@ class TestTriageRecoveryExecution:
 class TestDataAnalysisRecoveryStrategy:
     """Business Value: Ensures data analysis agent reliability for customer insights"""
     
+    @pytest.mark.asyncio
     async def test_database_failure_assessment(self):
         """Test database failure properly assessed for data analysis"""
         # Arrange - Mock database failure
@@ -182,6 +191,7 @@ class TestDataAnalysisRecoveryStrategy:
         assert assessment['failure_type'] == 'database_failure'
         assert assessment['data_availability'] == 'limited'
     
+    @pytest.mark.asyncio
     async def test_query_timeout_failure_triggers_primary_recovery(self):
         """Test query timeout failure triggers primary recovery attempt"""
         # Arrange - Mock query timeout
@@ -197,6 +207,7 @@ class TestDataAnalysisRecoveryStrategy:
         assert assessment['failure_type'] == 'query_timeout'
         assert assessment['try_primary_recovery'] is True
     
+    @pytest.mark.asyncio
     async def test_memory_failure_assessment(self):
         """Test memory/resource failure properly categorized"""
         # Arrange - Mock memory failure
@@ -212,6 +223,7 @@ class TestDataAnalysisRecoveryStrategy:
         assert 'failure_type' in assessment
         assert 'estimated_recovery_time' in assessment
     
+    @pytest.mark.asyncio
     async def test_data_analysis_default_assessment_includes_timing(self):
         """Test data analysis assessment includes recovery time estimates"""
         # Arrange - Setup strategy
@@ -232,6 +244,7 @@ class TestDataAnalysisRecoveryStrategy:
 class TestAgentRecoveryErrorEscalation:
     """Business Value: Ensures proper error escalation for enterprise customers"""
     
+    @pytest.mark.asyncio
     async def test_multiple_recovery_failure_escalation(self):
         """Test multiple recovery failures trigger proper escalation"""
         # Arrange - Mock strategy with failing recoveries
@@ -250,6 +263,7 @@ class TestAgentRecoveryErrorEscalation:
         assert primary_result is None
         assert fallback_result is None
     
+    @pytest.mark.asyncio
     async def test_degraded_mode_always_provides_result(self):
         """Test degraded mode always provides a result for continuity"""
         # Arrange - Setup multiple agent strategies
@@ -269,6 +283,7 @@ class TestAgentRecoveryErrorEscalation:
         assert all(result is not None for result in results)
         assert all(isinstance(result, dict) for result in results)
     
+    @pytest.mark.asyncio
     async def test_recovery_context_preserves_error_information(self):
         """Test recovery context preserves error information for debugging"""
         # Arrange - Create recovery context with error
@@ -293,6 +308,7 @@ class TestAgentRecoveryErrorEscalation:
 class TestAgentRecoveryConfiguration:
     """Business Value: Ensures proper recovery configuration for different environments"""
     
+    @pytest.mark.asyncio
     async def test_recovery_strategy_initialization_with_config(self):
         """Test recovery strategy properly initializes with configuration"""
         # Arrange - Create recovery config
@@ -310,6 +326,7 @@ class TestAgentRecoveryConfiguration:
         assert hasattr(triage_strategy, 'recovery_manager')
         assert hasattr(data_strategy, 'recovery_manager')
     
+    @pytest.mark.asyncio
     async def test_recovery_strategies_have_consistent_interface(self):
         """Test all recovery strategies implement consistent interface"""
         # Arrange - Create strategies
@@ -327,6 +344,7 @@ class TestAgentRecoveryConfiguration:
             assert hasattr(strategy, 'execute_degraded_mode')
             assert callable(strategy.assess_failure)
     
+    @pytest.mark.asyncio
     async def test_recovery_strategies_handle_configuration_missing(self):
         """Test recovery strategies handle missing configuration gracefully"""
         # Arrange - Create strategy with minimal config
@@ -342,6 +360,7 @@ class TestAgentRecoveryConfiguration:
         assessment = await strategy.assess_failure(context)
         assert isinstance(assessment, dict)
     
+    @pytest.mark.asyncio
     async def test_base_recovery_strategy_abstract_methods(self):
         """Test base strategy defines required abstract methods"""
         # Arrange - Check abstract base class

@@ -18,7 +18,7 @@ import json
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -111,12 +111,13 @@ async def agent_service_with_mocks():
     
     # Create and return agent service
     agent_service = AgentService(supervisor)
-    return agent_service, supervisor, llm_manager
+    yield agent_service, supervisor, llm_manager
 
 @pytest.mark.asyncio
 class TestMessagePipeline:
     """Test complete message processing pipeline."""
     
+    @pytest.mark.asyncio
     async def test_first_message_agent_activation(self, agent_service_with_mocks, message_helper):
         """Test first user message triggers agent pipeline.
         
@@ -183,6 +184,7 @@ class TestMessagePipeline:
         
         logger.info(f"✅ First message pipeline completed in {response_time:.2f}s")
     
+    @pytest.mark.asyncio
     async def test_message_routing_to_supervisor(self, agent_service_with_mocks, message_helper):
         """Test message routing logic.
         
@@ -253,6 +255,7 @@ class TestMessagePipeline:
         
         logger.info(f"✅ Message routing test completed - {len(test_messages)} messages routed successfully")
     
+    @pytest.mark.asyncio
     async def test_streaming_response_flow(self, agent_service_with_mocks, message_helper):
         """Test streaming responses.
         
@@ -328,6 +331,7 @@ class TestMessagePipeline:
         
         logger.info(f"✅ Streaming response test completed in {response_time:.2f}s")
     
+    @pytest.mark.asyncio
     async def test_concurrent_message_processing(self, agent_service_with_mocks, message_helper):
         """Test concurrent message processing from multiple users.
         
@@ -386,6 +390,7 @@ class TestMessagePipeline:
         
         logger.info(f"✅ Concurrent processing test: {concurrent_users} users, {messages_per_user} msgs/user in {total_time:.2f}s")
     
+    @pytest.mark.asyncio
     async def test_error_handling_and_recovery(self, agent_service_with_mocks, message_helper):
         """Test error handling in message pipeline.
         
@@ -441,6 +446,7 @@ class TestMessagePipeline:
         
         logger.info(f"✅ Error handling test completed - {len(message_helper.sent_messages)} messages handled")
     
+    @pytest.mark.asyncio
     async def test_message_validation_and_rejection(self, agent_service_with_mocks, message_helper):
         """Test message validation and rejection of invalid messages."""
         agent_service, supervisor, llm_manager = agent_service_with_mocks

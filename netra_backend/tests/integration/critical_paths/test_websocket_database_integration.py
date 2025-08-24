@@ -21,7 +21,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as redis
@@ -98,7 +98,11 @@ class WebSocketDatabaseIntegrationTestManager:
 
         async with get_postgres_session() as session:
 
-            yield session
+            try:
+                yield session
+            finally:
+                if hasattr(session, "close"):
+                    await session.close()
     
     async def create_websocket_session(self, user_id: str, websocket_mock: AsyncMock) -> str:
 
@@ -251,6 +255,7 @@ class WebSocketDatabaseIntegrationTestManager:
         
         return True
     
+    @pytest.mark.asyncio
     async def test_concurrent_sessions(self, session_count: int = 3) -> Dict[str, Any]:
 
         """Test concurrent WebSocket sessions use separate DB sessions."""
@@ -277,6 +282,7 @@ class WebSocketDatabaseIntegrationTestManager:
         
         return {"sessions": len(session_ids), "messages": len(message_ids), "success": True}
     
+    @pytest.mark.asyncio
     async def test_transaction_rollback(self, session_id: str) -> Dict[str, Any]:
 
         """Test transaction rollback on WebSocket error."""
@@ -340,6 +346,7 @@ async def ws_db_manager():
 
 @pytest.mark.l3_realism
 
+@pytest.mark.asyncio
 async def test_websocket_database_session_lifecycle(ws_db_manager):
 
     """Test WebSocket connection creates and manages database session."""
@@ -370,6 +377,7 @@ async def test_websocket_database_session_lifecycle(ws_db_manager):
 
 @pytest.mark.l3_realism
 
+@pytest.mark.asyncio
 async def test_websocket_message_persistence(ws_db_manager):
 
     """Test WebSocket message persists to PostgreSQL."""
@@ -398,6 +406,7 @@ async def test_websocket_message_persistence(ws_db_manager):
 
 @pytest.mark.l3_realism
 
+@pytest.mark.asyncio
 async def test_websocket_session_cleanup(ws_db_manager):
 
     """Test database session properly closed on WebSocket disconnect."""
@@ -428,6 +437,7 @@ async def test_websocket_session_cleanup(ws_db_manager):
 
 @pytest.mark.l3_realism
 
+@pytest.mark.asyncio
 async def test_concurrent_websocket_sessions(ws_db_manager):
 
     """Test concurrent WebSocket connections use separate DB sessions."""
@@ -446,6 +456,7 @@ async def test_concurrent_websocket_sessions(ws_db_manager):
 
 @pytest.mark.l3_realism
 
+@pytest.mark.asyncio
 async def test_websocket_transaction_rollback(ws_db_manager):
 
     """Test transaction rollback on WebSocket error."""

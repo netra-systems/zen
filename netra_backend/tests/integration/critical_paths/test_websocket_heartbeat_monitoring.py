@@ -22,7 +22,7 @@ import json
 import time
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 
 import redis.asyncio as redis
@@ -239,6 +239,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         ]
     
+    @pytest.mark.asyncio
     async def test_basic_heartbeat_functionality(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test basic heartbeat send and check functionality."""
@@ -283,6 +284,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         await heartbeat_monitor.cleanup_dead_connection(user.id, connection_info.connection_id)
     
+    @pytest.mark.asyncio
     async def test_heartbeat_expiration_detection(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test detection of expired heartbeats."""
@@ -337,6 +339,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         await heartbeat_monitor.cleanup_dead_connection(user.id, connection_info.connection_id)
     
+    @pytest.mark.asyncio
     async def test_multiple_connection_heartbeat_tracking(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test heartbeat tracking for multiple connections."""
@@ -399,6 +402,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
             await heartbeat_monitor.cleanup_dead_connection(user.id, connection_info.connection_id)
     
+    @pytest.mark.asyncio
     async def test_heartbeat_recovery_after_reconnection(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test heartbeat recovery after connection drop and reconnection."""
@@ -455,6 +459,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
         await heartbeat_monitor.cleanup_dead_connection(user.id, second_connection.connection_id)
     
+    @pytest.mark.asyncio
     async def test_heartbeat_performance_under_load(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test heartbeat performance with multiple concurrent connections."""
@@ -531,6 +536,7 @@ class TestWebSocketHeartbeatMonitoringL3:
 
             await heartbeat_monitor.cleanup_dead_connection(user_id, connection_info.connection_id)
     
+    @pytest.mark.asyncio
     async def test_automated_dead_connection_cleanup(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test automated cleanup of dead connections."""
@@ -581,6 +587,7 @@ class TestWebSocketHeartbeatMonitoringL3:
     
     @mock_justified("L3: Heartbeat monitoring testing with real Redis infrastructure")
 
+    @pytest.mark.asyncio
     async def test_heartbeat_monitoring_reliability(self, websocket_manager, heartbeat_monitor, test_users):
 
         """Test reliability of heartbeat monitoring system."""

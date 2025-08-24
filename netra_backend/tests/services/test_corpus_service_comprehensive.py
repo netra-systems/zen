@@ -7,7 +7,7 @@ import hashlib
 import json
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from netra_backend.app.schemas import Corpus, CorpusCreate, CorpusUpdate
@@ -126,6 +126,7 @@ def agent_or_service(corpus_service):
 class TestCorpusDocumentIndexing:
     """Test document indexing pipeline."""
 
+    @pytest.mark.asyncio
     async def test_index_single_document(self, corpus_service, mock_vector_store, mock_llm_manager):
         """Test indexing a single document with metadata."""
         document = {
@@ -154,6 +155,7 @@ class TestCorpusDocumentIndexing:
         assert result["status"] == "indexed"
         assert result["document_id"] == "doc123"
 
+    @pytest.mark.asyncio
     async def test_batch_indexing_pipeline(self, corpus_service):
         """Test batch document indexing with progress tracking."""
         documents = [
@@ -178,6 +180,7 @@ class TestCorpusDocumentIndexing:
         # Verify progress callback was called (implementation calls once at end)
         assert progress_callback.call_count >= 1
 
+    @pytest.mark.asyncio
     async def test_reindex_corpus_with_new_model(self, corpus_service):
         """Test reindexing entire corpus when embedding model changes."""
         corpus_id = "corpus789"
@@ -197,6 +200,7 @@ class TestCorpusDocumentIndexing:
         assert result["model_version"] == "v2"
         assert result["status"] == "completed"
 
+    @pytest.mark.asyncio
     async def test_incremental_indexing(self, corpus_service):
         """Test incremental indexing of new documents."""
         corpus_id = "corpus_incremental"
@@ -220,6 +224,7 @@ class TestCorpusDocumentIndexing:
         assert result["newly_indexed"] == 2
         assert result["total_indexed"] == 102
 
+    @pytest.mark.asyncio
     async def test_document_deduplication(self, corpus_service):
         """Test document deduplication during indexing."""
         documents = [
@@ -242,11 +247,13 @@ class TestCorpusDocumentIndexing:
 class TestCorpusSearchRelevance:
     """Test search relevance and ranking."""
 
+    @pytest.mark.asyncio
     async def test_semantic_search(self, corpus_service, mock_vector_store):
         """Test semantic search with vector similarity."""
         # Skip test - semantic_search method not yet implemented
         pytest.skip("semantic_search method not yet implemented in CorpusService")
 
+    @pytest.mark.asyncio
     async def test_hybrid_search(self, corpus_service):
         """Test hybrid search combining semantic and keyword matching."""
         # Skip test - hybrid_search method not yet implemented
@@ -254,6 +261,7 @@ class TestCorpusSearchRelevance:
 
     # Removed test_search_with_filters - test stub for unimplemented search_with_filters method
 
+    @pytest.mark.asyncio
     async def test_relevance_feedback(self, corpus_service):
         """Test relevance feedback for improving search results."""
         # Add mock for query_expansion
@@ -283,6 +291,7 @@ class TestCorpusSearchRelevance:
         if hasattr(corpus_service, 'query_expansion') and corpus_service.query_expansion.called:
             assert "relevant" in str(corpus_service.query_expansion.call_args)
 
+    @pytest.mark.asyncio
     async def test_search_result_reranking(self, corpus_service):
         """Test reranking search results using advanced models."""
         initial_results = [
@@ -307,6 +316,7 @@ class TestCorpusSearchRelevance:
 class TestCorpusManagement:
     """Test corpus lifecycle management."""
 
+    @pytest.mark.asyncio
     async def test_create_corpus_with_validation(self, corpus_service):
         """Test corpus creation with validation."""
         corpus_data = CorpusCreate(
@@ -321,6 +331,7 @@ class TestCorpusManagement:
         assert corpus.status == CorpusStatus.CREATING.value
         assert corpus.created_by_id == "user123"
 
+    @pytest.mark.asyncio
     async def test_update_corpus_metadata(self, corpus_service):
         """Test updating corpus metadata."""
         corpus_id = "corpus123"
@@ -353,6 +364,7 @@ class TestIndexOptimization:
 
     # Removed test_index_cache_warming - test stub for unimplemented warm_cache method
 
+    @pytest.mark.asyncio
     async def test_index_performance_monitoring(self, corpus_service):
         """Test monitoring index performance metrics."""
         corpus_id = "corpus_perf"
@@ -382,6 +394,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert True  # Test passes - CorpusService operates without Redis
 
     # Removed test_handle_indexing_failure - test expects exception that isn't raised
+    @pytest.mark.asyncio
     async def test_retry_on_failure(self, agent_or_service):
         """Override shared test - CorpusService doesn't have _process_internal."""
         # CorpusService doesn't implement retry pattern with _process_internal
@@ -389,6 +402,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         # This functionality is tested through other corpus-specific tests
         pass
 
+    @pytest.mark.asyncio
     async def test_recover_from_partial_batch_failure(self, corpus_service):
         """Test recovery from partial batch indexing failure."""
         documents = [
@@ -409,6 +423,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert results["failed"] == 1
         assert "doc2" in results["failed_ids"]
 
+    @pytest.mark.asyncio
     async def test_database_connection_failure(self, corpus_service):
         """Test handling of database connection failures."""
         corpus_service.db.commit = MagicMock(side_effect=Exception("Connection lost"))
@@ -417,6 +432,7 @@ class TestErrorHandling(SharedTestErrorHandling):
                 corpus_service.db, CorpusCreate(name="Test", description="Test"), "user123"
             )
 
+    @pytest.mark.asyncio
     async def test_search_fallback_on_vector_store_failure(self, corpus_service):
         """Test fallback to keyword search when vector store fails."""
         corpus_service.vector_store.search = AsyncMock(

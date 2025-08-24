@@ -11,7 +11,7 @@ import json
 import uuid
 from datetime import datetime
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy import select
@@ -47,12 +47,14 @@ class TestStatePersistenceCritical:
         client.set = AsyncMock()
         client.get = AsyncMock()
         return client
+    @pytest.mark.asyncio
     async def test_sessionmaker_error_reproduction(self):
         """Reproduce async_sessionmaker.execute() error"""
         sessionmaker = Mock(spec=async_sessionmaker)
         with pytest.raises(AttributeError) as exc_info:
             sessionmaker.execute("SELECT 1")
         assert "Mock object has no attribute 'execute'" in str(exc_info.value)
+    @pytest.mark.asyncio
     async def test_correct_session_pattern(self, mock_db_session):
         """Test correct async session usage"""
         # Correct: get session instance then call execute
@@ -60,6 +62,7 @@ class TestStatePersistenceCritical:
         await mock_db_session.commit()
         mock_db_session.execute.assert_called_once()
         mock_db_session.commit.assert_called_once()
+    @pytest.mark.asyncio
     async def test_save_state_with_datetime(self, mock_db_session, mock_redis_client):
         """Test state save with datetime serialization"""
         state = DeepAgentState(
@@ -84,6 +87,7 @@ class TestStatePersistenceCritical:
             assert result is True
             mock_redis_client.set.assert_called()
             mock_db_session.flush.assert_called_once()
+    @pytest.mark.asyncio
     async def test_load_state_fallback(self, mock_db_session, mock_redis_client):
         """Test loading state from PostgreSQL when Redis misses"""
         # Redis returns None
@@ -104,6 +108,7 @@ class TestStatePersistenceCritical:
             assert result is not None
             assert result.user_request == "Test"
             mock_redis_client.set.assert_called()  # Re-caches in Redis
+    @pytest.mark.asyncio
     async def test_datetime_serialization(self):
         """Test JSON serialization handles datetime fields"""
         state = DeepAgentState(
@@ -122,6 +127,7 @@ class TestStatePersistenceCritical:
         # Should deserialize back to dict
         deserialized = json.loads(json_str)
         assert deserialized["user_request"] == "Test"
+    @pytest.mark.asyncio
     async def test_save_sub_agent_result(self, mock_db_session, mock_redis_client):
         """Test saving individual sub-agent results"""
         result_data = {"status": "completed", "data": [1, 2, 3]}
@@ -137,6 +143,7 @@ class TestStatePersistenceCritical:
             mock_redis_client.set.assert_called()
             mock_db_session.add.assert_called()
             mock_db_session.flush.assert_called()
+    @pytest.mark.asyncio
     async def test_get_sub_agent_result_fallback(self, mock_db_session, mock_redis_client):
         """Test sub-agent result retrieval with fallback"""
         # Redis miss
@@ -158,6 +165,7 @@ class TestStatePersistenceCritical:
             
             assert result == {"data": "test"}
             mock_db_session.execute.assert_called_once()
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_error(self, mock_db_session, mock_redis_client):
         """Test transaction rollback when save fails"""
         mock_db_session.flush.side_effect = Exception("DB Error")
@@ -171,6 +179,7 @@ class TestStatePersistenceCritical:
             
             assert result is False
             mock_db_session.rollback.assert_called_once()
+    @pytest.mark.asyncio
     async def test_get_thread_context(self, mock_redis_client):
         """Test thread context retrieval from Redis"""
         context = {"current_run_id": "test", "user_id": "user123"}
@@ -183,6 +192,7 @@ class TestStatePersistenceCritical:
             
             assert result == context
             mock_redis_client.get.assert_called_with("thread_context:thread123")
+    @pytest.mark.asyncio
     async def test_list_thread_runs(self, mock_db_session):
         """Test listing runs for a thread"""
         mock_runs = [Mock(spec=Run) for _ in range(3)]

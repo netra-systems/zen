@@ -7,7 +7,7 @@ from pathlib import Path
 
 import time
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -65,6 +65,7 @@ class TestHealthCheckerHelpers:
 
 class TestPostgresHealthChecker:
     """Test PostgreSQL health checker."""
+    @pytest.mark.asyncio
     async def test_postgres_health_success(self):
         """Test successful PostgreSQL health check."""
         mock_engine = Mock()
@@ -80,6 +81,7 @@ class TestPostgresHealthChecker:
         assert result.health_score == 1.0
         assert result.response_time_ms > 0
         mock_conn.execute.assert_called_once_with("SELECT 1")
+    @pytest.mark.asyncio
     async def test_postgres_health_no_engine(self):
         """Test PostgreSQL health check with no engine."""
         with patch("app.core.health_checkers.async_engine", None):
@@ -89,6 +91,7 @@ class TestPostgresHealthChecker:
         assert result.success is False
         assert result.health_score == 0.0
         assert "not initialized" in result.error_message
+    @pytest.mark.asyncio
     async def test_postgres_health_connection_error(self):
         """Test PostgreSQL health check with connection error."""
         mock_engine = Mock()
@@ -103,6 +106,7 @@ class TestPostgresHealthChecker:
 
 class TestClickHouseHealthChecker:
     """Test ClickHouse health checker."""
+    @pytest.mark.asyncio
     async def test_clickhouse_health_success(self):
         """Test successful ClickHouse health check."""
         mock_client = AsyncMock()
@@ -116,6 +120,7 @@ class TestClickHouseHealthChecker:
         assert result.success is True
         assert result.health_score == 1.0
         mock_client.execute.assert_called_once_with("SELECT 1")
+    @pytest.mark.asyncio
     async def test_clickhouse_health_error(self):
         """Test ClickHouse health check with error."""
         mock_get_client = AsyncMock()
@@ -129,6 +134,7 @@ class TestClickHouseHealthChecker:
 
 class TestRedisHealthChecker:
     """Test Redis health checker."""
+    @pytest.mark.asyncio
     async def test_redis_health_success(self):
         """Test successful Redis health check."""
         mock_redis_manager = Mock()
@@ -143,6 +149,7 @@ class TestRedisHealthChecker:
         assert result.success is True
         assert result.health_score == 1.0
         mock_client.ping.assert_called_once()
+    @pytest.mark.asyncio
     async def test_redis_health_disabled(self):
         """Test Redis health check when disabled."""
         mock_redis_manager = Mock()
@@ -155,6 +162,7 @@ class TestRedisHealthChecker:
         assert result.success is True
         assert result.health_score == 1.0
         assert result.metadata["status"] == "disabled"
+    @pytest.mark.asyncio
     async def test_redis_health_no_client(self):
         """Test Redis health check with no client."""
         mock_redis_manager = Mock()
@@ -166,6 +174,7 @@ class TestRedisHealthChecker:
         
         assert result.success is False
         assert "not available" in result.error_message
+    @pytest.mark.asyncio
     async def test_redis_health_ping_error(self):
         """Test Redis health check with ping error."""
         mock_redis_manager = Mock()
@@ -182,6 +191,7 @@ class TestRedisHealthChecker:
 
 class TestWebSocketHealthChecker:
     """Test WebSocket health checker."""
+    @pytest.mark.asyncio
     async def test_websocket_health_success(self):
         """Test successful WebSocket health check."""
         mock_connection_manager = Mock()
@@ -199,6 +209,7 @@ class TestWebSocketHealthChecker:
         assert result.success is True
         assert result.health_score > 0.7  # Should be high with reasonable connection count
         assert result.metadata == mock_stats
+    @pytest.mark.asyncio
     async def test_websocket_health_high_connections(self):
         """Test WebSocket health check with high connection count."""
         mock_connection_manager = Mock()
@@ -209,6 +220,7 @@ class TestWebSocketHealthChecker:
             result = await check_websocket_health()
         
         assert result.health_score < 1.0  # Should be lower due to high connections
+    @pytest.mark.asyncio
     async def test_websocket_health_error(self):
         """Test WebSocket health check with error."""
         with patch("app.core.health_checkers.connection_manager") as mock_manager:

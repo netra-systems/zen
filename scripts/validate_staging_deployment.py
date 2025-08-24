@@ -1,13 +1,54 @@
 #!/usr/bin/env python3
 """
 Staging Deployment Validation Script
-Validates all staging configuration before deployment to prevent deployment failures.
+
+Comprehensive pre-deployment validation script that runs all validation checks
+before deploying the auth service to staging environment.
+
+This script addresses the root causes identified in staging failures:
+- Database credentials and connectivity
+- JWT secret consistency between services
+- OAuth configuration and environment consistency  
+- SSL parameters for different connection types
+- Container lifecycle management readiness
+
+Usage:
+    python scripts/validate_staging_deployment.py [options]
+
+Options:
+    --verbose, -v     Enable verbose logging
+    --json, -j        Output results in JSON format
+    --fix-issues      Attempt to automatically fix non-critical issues
+    --check-only      Only check specific validation categories
+    --project         GCP project ID for deployment validation
+
+Business Value Justification (BVJ):
+- Segment: Platform/Internal
+- Business Goal: Prevent staging deployment failures
+- Value Impact: Reduces deployment downtime and debugging cycles
+- Strategic Impact: Ensures reliable auth service availability
 """
 
+import argparse
 import subprocess
 import sys
 import json
+import logging
+import os
+from pathlib import Path
 from typing import Dict, List, Tuple, Optional
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+# Try to import our comprehensive validation framework
+try:
+    from auth_service.auth_core.validation.pre_deployment_validator import PreDeploymentValidator
+    HAS_COMPREHENSIVE_VALIDATOR = True
+except ImportError:
+    HAS_COMPREHENSIVE_VALIDATOR = False
+    print("Warning: Comprehensive validator not available, using legacy validation only")
 
 
 class StagingValidator:
@@ -34,9 +75,44 @@ class StagingValidator:
             "compute.googleapis.com"
         ]
         
-    def validate_all(self) -> bool:
+    def validate_all(self, use_comprehensive: bool = True, verbose: bool = False, output_format: str = "human") -> bool:
         """Run all validation checks."""
-        print("🔍 STAGING DEPLOYMENT VALIDATION")
+        # First run comprehensive validation if available
+        comprehensive_passed = True
+        if use_comprehensive and HAS_COMPREHENSIVE_VALIDATOR:
+            print("🔍 COMPREHENSIVE VALIDATION FRAMEWORK")
+            print("=" * 60)
+            
+            # Set environment to staging for validation
+            original_env = os.environ.get("ENVIRONMENT")
+            os.environ["ENVIRONMENT"] = "staging"
+            
+            try:
+                validator = PreDeploymentValidator()
+                report = validator.run_comprehensive_validation()
+                
+                if output_format == "json":
+                    print(json.dumps(report, indent=2))
+                else:
+                    validator.print_validation_report()
+                
+                comprehensive_passed = report["overall_status"] in ["passed", "warning"]
+                
+            except Exception as e:
+                print(f"❌ COMPREHENSIVE VALIDATION ERROR: {e}")
+                if verbose:
+                    import traceback
+                    print(traceback.format_exc())
+                comprehensive_passed = False
+            finally:
+                # Restore original environment
+                if original_env:
+                    os.environ["ENVIRONMENT"] = original_env
+                elif "ENVIRONMENT" in os.environ:
+                    del os.environ["ENVIRONMENT"]
+        
+        # Run GCP-specific validation checks
+        print("\n🔍 GCP STAGING DEPLOYMENT VALIDATION")
         print("=" * 50)
         
         checks = [
@@ -54,7 +130,7 @@ class StagingValidator:
             ("Cloud SQL Instance", self.check_cloud_sql)
         ]
         
-        all_passed = True
+        gcp_passed = True
         results = []
         
         for check_name, check_func in checks:
@@ -65,14 +141,15 @@ class StagingValidator:
                 print(f"   {status}: {message}")
                 results.append((check_name, success, message))
                 if not success:
-                    all_passed = False
+                    gcp_passed = False
             except Exception as e:
-                print(f"   ❌ ERROR: {e}")
-                results.append((check_name, False, str(e)))
-                all_passed = False
+                error_msg = str(e) if not verbose else f"{e}\n{traceback.format_exc() if 'traceback' in sys.modules else ''}"
+                print(f"   ❌ ERROR: {error_msg}")
+                results.append((check_name, False, error_msg))
+                gcp_passed = False
                 
         print("\n" + "=" * 50)
-        print("📋 VALIDATION SUMMARY")
+        print("📋 GCP VALIDATION SUMMARY")
         print("=" * 50)
         
         for check_name, success, message in results:
@@ -80,12 +157,29 @@ class StagingValidator:
             print(f"{status} {check_name}")
             if not success:
                 print(f"   → {message}")
-                
+        
+        # Combined results
+        all_passed = comprehensive_passed and gcp_passed
+        
+        print("\n" + "=" * 60)
+        print("🎯 OVERALL DEPLOYMENT READINESS")
+        print("=" * 60)
+        
+        comp_status = "✅ PASS" if comprehensive_passed else "❌ FAIL"
+        gcp_status = "✅ PASS" if gcp_passed else "❌ FAIL"
+        
+        print(f"Comprehensive Validation: {comp_status}")
+        print(f"GCP-Specific Validation: {gcp_status}")
+        
         if all_passed:
-            print(f"\n🎉 ALL CHECKS PASSED - Ready for deployment!")
+            print(f"\n🎉 ALL VALIDATIONS PASSED - Ready for deployment!")
             print(f"Deploy with: python scripts/deploy_to_gcp.py --project {self.project_id} --build-local --run-checks")
         else:
             print(f"\n🚨 VALIDATION FAILED - Fix issues before deployment!")
+            if not comprehensive_passed:
+                print("   - Fix comprehensive validation issues first")
+            if not gcp_passed:
+                print("   - Fix GCP-specific deployment issues")
             print(f"See STAGING_DEPLOYMENT_CHECKLIST.md for fix instructions")
             
         return all_passed
@@ -448,16 +542,90 @@ class StagingValidator:
 
 def main():
     """Main entry point."""
-    import argparse
+    parser = argparse.ArgumentParser(
+        description="Auth Service Staging Deployment Validation",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python scripts/validate_staging_deployment.py
+  python scripts/validate_staging_deployment.py --verbose
+  python scripts/validate_staging_deployment.py --json
+  python scripts/validate_staging_deployment.py --no-comprehensive
+  python scripts/validate_staging_deployment.py --project netra-staging --verbose
+        """
+    )
     
-    parser = argparse.ArgumentParser(description="Validate staging deployment configuration")
-    parser.add_argument("--project", default="netra-staging", help="GCP Project ID")
+    parser.add_argument(
+        "--project", 
+        default="netra-staging", 
+        help="GCP Project ID for deployment validation"
+    )
+    
+    parser.add_argument(
+        "--verbose", "-v",
+        action="store_true",
+        help="Enable verbose output with detailed logging"
+    )
+    
+    parser.add_argument(
+        "--json", "-j",
+        action="store_true",
+        help="Output comprehensive validation results in JSON format"
+    )
+    
+    parser.add_argument(
+        "--no-comprehensive",
+        action="store_true",
+        help="Skip comprehensive validation, run only GCP-specific checks"
+    )
+    
+    parser.add_argument(
+        "--environment",
+        type=str,
+        choices=["development", "staging", "production"],
+        default="staging",
+        help="Environment for validation (default: staging)"
+    )
+    
     args = parser.parse_args()
     
-    validator = StagingValidator(args.project)
-    success = validator.validate_all()
+    # Set up logging if verbose
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
+    else:
+        logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     
-    sys.exit(0 if success else 1)
+    # Override environment if specified
+    os.environ["ENVIRONMENT"] = args.environment
+    
+    # Initialize validator
+    validator = StagingValidator(args.project)
+    
+    try:
+        # Run validation
+        output_format = "json" if args.json else "human"
+        success = validator.validate_all(
+            use_comprehensive=not args.no_comprehensive,
+            verbose=args.verbose,
+            output_format=output_format
+        )
+        
+        # Exit with appropriate code based on validation results
+        if success:
+            sys.exit(0)  # All validations passed
+        else:
+            sys.exit(1)  # Critical issues found
+            
+    except KeyboardInterrupt:
+        print("\nValidation interrupted by user", file=sys.stderr)
+        sys.exit(130)
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Validation failed with error: {e}")
+        if args.verbose:
+            import traceback
+            logger.error(traceback.format_exc())
+        sys.exit(3)  # Internal error
 
 
 if __name__ == "__main__":

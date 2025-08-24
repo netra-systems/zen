@@ -17,7 +17,7 @@ import asyncio
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -33,6 +33,7 @@ from netra_backend.tests.integration.first_time_user_fixtures import (
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_free_tier_usage_limits_enforcement(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -67,6 +68,7 @@ async def test_free_tier_usage_limits_enforcement(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_daily_limit_exceeded_blocking(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -94,6 +96,7 @@ async def test_daily_limit_exceeded_blocking(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_premium_features_access_control(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -122,6 +125,7 @@ async def test_premium_features_access_control(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_usage_tracking_accuracy(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -163,6 +167,7 @@ async def test_usage_tracking_accuracy(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_usage_reset_daily_cycle(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -184,6 +189,7 @@ async def test_usage_reset_daily_cycle(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(45)
+@pytest.mark.asyncio
 async def test_upgrade_to_pro_plan_flow(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -230,6 +236,7 @@ async def test_upgrade_to_pro_plan_flow(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_pro_plan_benefits_activation(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -260,6 +267,7 @@ async def test_pro_plan_benefits_activation(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_billing_invoice_generation(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -289,6 +297,7 @@ async def test_billing_invoice_generation(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_downgrade_prevention_during_billing(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]

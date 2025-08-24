@@ -147,6 +147,7 @@ class L3ContextIsolationManager:
             "context_hash": hashlib.sha256(json.dumps(tenant_context).encode()).hexdigest()[:16]
         }
     
+    @pytest.mark.asyncio
     async def test_cross_tenant_isolation(self, tenant_a: str, tenant_b: str) -> Dict[str, Any]:
         """Test isolation between agents from different tenants."""
         isolation_start = time.time()
@@ -363,6 +364,7 @@ class L3ContextIsolationManager:
         
         return len(permissions_a & permissions_b) > 0
     
+    @pytest.mark.asyncio
     async def test_intra_tenant_communication(self, tenant_id: str) -> Dict[str, Any]:
         """Test that agents within the same tenant can communicate properly."""
         try:
@@ -496,6 +498,7 @@ async def l3_isolation_manager(testcontainer_infrastructure):
 class TestAgentContextIsolationBoundariesL3:
     """L3 integration tests for agent context isolation boundaries."""
     
+    @pytest.mark.asyncio
     async def test_basic_tenant_isolation(self, l3_isolation_manager):
         """Test basic isolation between different tenant environments."""
         # Create two isolated tenant environments
@@ -520,6 +523,7 @@ class TestAgentContextIsolationBoundariesL3:
         assert isolation_result["checks_performed"] == 3
         assert isolation_result["test_duration"] < 5.0
     
+    @pytest.mark.asyncio
     async def test_multi_tenant_isolation_matrix(self, l3_isolation_manager):
         """Test isolation across multiple tenant combinations."""
         # Create three tenant environments
@@ -549,6 +553,7 @@ class TestAgentContextIsolationBoundariesL3:
         assert l3_isolation_manager.isolation_metrics["tenants_tested"] == 3
         assert l3_isolation_manager.isolation_metrics["context_checks_performed"] >= 9
     
+    @pytest.mark.asyncio
     async def test_intra_tenant_communication_allowed(self, l3_isolation_manager):
         """Test that agents within same tenant can communicate."""
         # Create tenant with multiple agents
@@ -566,6 +571,7 @@ class TestAgentContextIsolationBoundariesL3:
         assert communication_result["tenant_id"] == "collaborative_tenant"
         assert communication_result["agents_tested"] == 2
     
+    @pytest.mark.asyncio
     async def test_context_data_isolation_verification(self, l3_isolation_manager):
         """Test comprehensive context data isolation."""
         # Create tenants with different sensitive data
@@ -592,6 +598,7 @@ class TestAgentContextIsolationBoundariesL3:
         assert report["security_score"] >= 0.8  # High security score
         assert len(report["tenant_boundaries"]) == 2
     
+    @pytest.mark.asyncio
     async def test_redis_namespace_isolation(self, l3_isolation_manager):
         """Test Redis key namespace isolation between tenants."""
         # Create two tenants
@@ -622,6 +629,7 @@ class TestAgentContextIsolationBoundariesL3:
         ]
         assert len(redis_violations) == 0
     
+    @pytest.mark.asyncio
     async def test_isolation_under_concurrent_load(self, l3_isolation_manager):
         """Test isolation boundaries under concurrent multi-tenant load."""
         # Create multiple tenants concurrently

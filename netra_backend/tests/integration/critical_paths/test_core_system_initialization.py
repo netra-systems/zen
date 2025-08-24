@@ -20,7 +20,7 @@ import json
 import logging
 import time
 from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
 import pytest

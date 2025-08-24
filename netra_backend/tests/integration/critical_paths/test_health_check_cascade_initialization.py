@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import aiohttp
 import pytest
@@ -452,6 +452,7 @@ class HealthCheckCascadeInitializationValidator:
         
         return alert
     
+    @pytest.mark.asyncio
     async def test_dependency_chain_validation(self) -> Dict[str, Any]:
         """Test dependency chain validation during initialization."""
         validation_results = {
@@ -523,6 +524,7 @@ class HealthCheckCascadeInitializationValidator:
         
         return False
     
+    @pytest.mark.asyncio
     async def test_performance_overhead(self, baseline_requests: int = 100) -> Dict[str, Any]:
         """Test performance overhead of health check cascade system."""
         # Measure baseline performance (without health checks)
@@ -561,6 +563,7 @@ class HealthCheckCascadeInitializationValidator:
         # Simulate cascade detection check
         await asyncio.sleep(0.00001)
     
+    @pytest.mark.asyncio
     async def test_recovery_detection(self, failed_service: str = "redis") -> Dict[str, Any]:
         """Test recovery detection and cascade restoration."""
         recovery_results = {

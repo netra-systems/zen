@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -14,6 +14,7 @@ from netra_backend.app.services.external_api_client import (
 
 class TestConvenienceFunctions:
     """Test convenience functions for common APIs."""
+    @pytest.mark.asyncio
     async def test_call_google_api_get(self):
         """Test calling Google API with GET method."""
         with patch('app.services.external_api_client.get_http_client') as mock_context:
@@ -35,6 +36,7 @@ class TestConvenienceFunctions:
         mock_client.get.assert_called_once_with(
             "/test", "google_api", headers={"Auth": "token"}, params={"q": "test"}
         )
+    @pytest.mark.asyncio
     async def test_call_google_api_post(self):
         """Test calling Google API with POST method."""
         with patch('app.services.external_api_client.get_http_client') as mock_context:
@@ -56,6 +58,7 @@ class TestConvenienceFunctions:
         mock_client.post.assert_called_once_with(
             "/test", "google_api", headers={"Auth": "token"}, json_data={"data": "value"}
         )
+    @pytest.mark.asyncio
     async def test_call_google_api_other_method(self):
         """Test calling Google API with other HTTP method."""
         with patch('app.services.external_api_client.get_http_client') as mock_context:
@@ -77,6 +80,7 @@ class TestConvenienceFunctions:
         mock_client._request.assert_called_once_with(
             "PUT", "/test", "google_api", headers={"Auth": "token"}, data={"data": "value"}
         )
+    @pytest.mark.asyncio
     async def test_call_openai_api_post(self):
         """Test calling OpenAI API with POST method."""
         with patch('app.services.external_api_client.get_http_client') as mock_context:
@@ -92,6 +96,7 @@ class TestConvenienceFunctions:
         mock_client.post.assert_called_once_with(
             "/test", "openai_api", headers={"Auth": "Bearer token"}, json_data={"prompt": "test"}
         )
+    @pytest.mark.asyncio
     async def test_call_openai_api_get(self):
         """Test calling OpenAI API with GET method."""
         with patch('app.services.external_api_client.get_http_client') as mock_context:
@@ -107,6 +112,7 @@ class TestConvenienceFunctions:
         mock_client.get.assert_called_once_with(
             "/models", "openai_api", headers={"Auth": "Bearer token"}
         )
+    @pytest.mark.asyncio
     async def test_call_openai_api_other_method(self):
         """Test calling OpenAI API with other HTTP method."""
         with patch('app.services.external_api_client.get_http_client') as mock_context:

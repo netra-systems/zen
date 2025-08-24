@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 from contextlib import asynccontextmanager
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from fastapi import Depends, FastAPI
@@ -23,6 +23,7 @@ from netra_backend.app.services.database.thread_repository import ThreadReposito
 
 class TestDatabaseConnectionPooling:
     """Test suite for database connection pooling and dependency injection"""
+    @pytest.mark.asyncio
     async def test_get_db_dependency_returns_async_session(self):
         """Test that get_db_dependency properly yields AsyncSession"""
         mock_session = MagicMock(spec=AsyncSession)
@@ -42,6 +43,7 @@ class TestDatabaseConnectionPooling:
                 await async_gen.aclose()
             except StopAsyncIteration:
                 pass
+    @pytest.mark.asyncio
     async def test_get_db_dependency_validates_session_type(self):
         """Test that get_db_dependency validates session type"""
         invalid_session = MagicMock()  # Not an AsyncSession
@@ -54,6 +56,7 @@ class TestDatabaseConnectionPooling:
             with pytest.raises(RuntimeError, match="Expected AsyncSession"):
                 async_gen = get_db_dependency()
                 await async_gen.__anext__()
+    @pytest.mark.asyncio
     async def test_repository_receives_async_session(self):
         """Test that repository methods receive AsyncSession, not context manager"""
         mock_session = MagicMock(spec=AsyncSession)
@@ -66,6 +69,7 @@ class TestDatabaseConnectionPooling:
         
         assert result == []
         mock_session.execute.assert_called_once()
+    @pytest.mark.asyncio
     async def test_fastapi_dependency_injection(self):
         """Test that FastAPI properly injects AsyncSession through DbDep"""
         app = FastAPI()
@@ -76,6 +80,7 @@ class TestDatabaseConnectionPooling:
             yield mock_session
         
         @app.get("/test")
+        @pytest.mark.asyncio
         async def test_endpoint(db: DbDep):
             assert isinstance(db, AsyncSession)
             return {"session_type": type(db).__name__}
@@ -87,6 +92,7 @@ class TestDatabaseConnectionPooling:
                 response = client.get("/test")
                 assert response.status_code == 200
                 assert response.json()["session_type"] == "MagicMock"
+    @pytest.mark.asyncio
     async def test_connection_pool_logging(self):
         """Test that connection pool operations are properly logged"""
         mock_session = MagicMock(spec=AsyncSession)
@@ -106,6 +112,7 @@ class TestDatabaseConnectionPooling:
                     await async_gen.aclose()
                 except StopAsyncIteration:
                     pass
+    @pytest.mark.asyncio
     async def test_context_manager_not_passed_to_repository(self):
         """Ensure context manager itself is never passed to repository methods"""
         from contextlib import _AsyncGeneratorContextManager
@@ -122,6 +129,7 @@ class TestDatabaseConnectionPooling:
         with patch('app.services.database.thread_repository.logger'):
             result = await thread_repo.find_by_user(mock_context_manager, "test_user_id")
             assert result == []  # Repository should return empty list when error occurs
+    @pytest.mark.asyncio
     async def test_get_async_db_session_lifecycle(self):
         """Test the complete lifecycle of async database session"""
         mock_session = MagicMock(spec=AsyncSession)
@@ -141,6 +149,7 @@ class TestDatabaseConnectionPooling:
                 await async_gen.aclose()
             except StopAsyncIteration:
                 pass
+    @pytest.mark.asyncio
     async def test_multiple_concurrent_sessions(self):
         """Test that multiple concurrent sessions work correctly"""
         sessions = []

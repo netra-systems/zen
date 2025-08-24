@@ -29,7 +29,7 @@ import logging
 import time
 import uuid
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -389,6 +389,7 @@ async def oauth_provider_failover_l4_test():
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.L4
+@pytest.mark.asyncio
 async def test_oauth_provider_complete_failover_l4(oauth_provider_failover_l4_test):
     """Test complete OAuth provider failover in staging environment."""
     test_metrics = await oauth_provider_failover_l4_test.run_complete_critical_path_test()
@@ -399,6 +400,7 @@ async def test_oauth_provider_complete_failover_l4(oauth_provider_failover_l4_te
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.L4
+@pytest.mark.asyncio
 async def test_oauth_provider_outage_fallback_l4(oauth_provider_failover_l4_test):
     """Test OAuth provider outage with fallback authentication."""
     outage_result = await oauth_provider_failover_l4_test._test_complete_provider_outage()
@@ -411,6 +413,7 @@ async def test_oauth_provider_outage_fallback_l4(oauth_provider_failover_l4_test
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.L4
+@pytest.mark.asyncio
 async def test_oauth_rate_limiting_cached_auth_l4(oauth_provider_failover_l4_test):
     """Test OAuth rate limiting with cached authentication fallback."""
     rate_limit_result = await oauth_provider_failover_l4_test._test_provider_rate_limiting()
@@ -423,6 +426,7 @@ async def test_oauth_rate_limiting_cached_auth_l4(oauth_provider_failover_l4_tes
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.L4
+@pytest.mark.asyncio
 async def test_oauth_provider_recovery_session_preservation_l4(oauth_provider_failover_l4_test):
     """Test OAuth provider recovery with session preservation."""
     recovery_result = await oauth_provider_failover_l4_test._test_provider_recovery()
@@ -435,6 +439,7 @@ async def test_oauth_provider_recovery_session_preservation_l4(oauth_provider_fa
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.L4
+@pytest.mark.asyncio
 async def test_oauth_user_notification_system_l4(oauth_provider_failover_l4_test):
     """Test user notification system during OAuth provider issues."""
     notification_result = await oauth_provider_failover_l4_test._test_user_notification()

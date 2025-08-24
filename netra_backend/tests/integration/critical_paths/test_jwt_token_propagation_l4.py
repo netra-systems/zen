@@ -991,6 +991,7 @@ class TestJWTTokenPropagationL4:
         yield suite
         await suite.cleanup_l4_resources()
     
+    @pytest.mark.asyncio
     async def test_complete_jwt_token_propagation_flow(self, jwt_l4_suite):
         """Test complete JWT token propagation across all service boundaries."""
         # Execute the critical path test
@@ -1009,6 +1010,7 @@ class TestJWTTokenPropagationL4:
         logger.info(f"Service calls made: {test_metrics.service_calls}")
         logger.info(f"Success rate: {test_metrics.success_rate:.1f}%")
     
+    @pytest.mark.asyncio
     async def test_jwt_security_requirements_enterprise(self, jwt_l4_suite):
         """Test JWT security requirements specifically for enterprise tier."""
         # Validate enterprise-specific security requirements are met

@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 import os
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from sqlalchemy.orm import Session

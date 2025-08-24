@@ -23,7 +23,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -684,6 +684,7 @@ class TestConnectionPoolManagement:
 
         ]
     
+    @pytest.mark.asyncio
     async def test_basic_connection_acquisition(self, connection_pool, test_users):
 
         """Test basic connection acquisition and release."""
@@ -732,6 +733,7 @@ class TestConnectionPoolManagement:
 
         assert status["idle_connections"] == 1
     
+    @pytest.mark.asyncio
     async def test_connection_reuse(self, connection_pool, test_users):
 
         """Test connection reuse functionality."""
@@ -758,6 +760,7 @@ class TestConnectionPoolManagement:
 
         assert status["stats"]["total_created"] == 1  # Only one connection created
     
+    @pytest.mark.asyncio
     async def test_pool_capacity_limits(self, connection_pool, test_users):
 
         """Test pool capacity enforcement."""
@@ -811,6 +814,7 @@ class TestConnectionPoolManagement:
 
         assert status["stats"]["capacity_exceeded"] >= 0
     
+    @pytest.mark.asyncio
     async def test_idle_connection_cleanup(self, connection_pool, test_users):
 
         """Test cleanup of idle connections."""
@@ -853,6 +857,7 @@ class TestConnectionPoolManagement:
 
         assert status["stats"]["idle_timeouts"] == 1
     
+    @pytest.mark.asyncio
     async def test_connection_activity_tracking(self, connection_pool, test_users):
 
         """Test tracking of connection activity."""
@@ -913,6 +918,7 @@ class TestConnectionPoolManagement:
 
         assert conn_info["error_count"] == 1
     
+    @pytest.mark.asyncio
     async def test_multiple_user_connections(self, connection_pool, test_users):
 
         """Test managing connections for multiple users."""
@@ -967,6 +973,7 @@ class TestConnectionPoolManagement:
 
         assert status["user_count"] == len(test_users)
     
+    @pytest.mark.asyncio
     async def test_connection_reaper_functionality(self, connection_pool, connection_reaper, test_users):
 
         """Test connection reaper cleanup functionality."""
@@ -1019,6 +1026,7 @@ class TestConnectionPoolManagement:
     
     @mock_justified("L2: Connection pool management with real internal components")
 
+    @pytest.mark.asyncio
     async def test_websocket_integration_with_pool(self, connection_pool, test_users):
 
         """Test WebSocket integration with connection pool."""
@@ -1079,6 +1087,7 @@ class TestConnectionPoolManagement:
 
         assert connection_id not in connection_pool.active_connections
     
+    @pytest.mark.asyncio
     async def test_concurrent_pool_operations(self, connection_pool, test_users):
 
         """Test concurrent pool operations."""
@@ -1140,6 +1149,7 @@ class TestConnectionPoolManagement:
 
         assert status["total_connections"] >= 0  # Pool should be in valid state
     
+    @pytest.mark.asyncio
     async def test_pool_performance_benchmarks(self, connection_pool, test_users):
 
         """Test connection pool performance benchmarks."""

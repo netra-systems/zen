@@ -9,7 +9,7 @@ from pathlib import Path
 import sys
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from langchain_core.tools import BaseTool

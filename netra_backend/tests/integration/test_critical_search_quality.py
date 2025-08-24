@@ -10,7 +10,7 @@ from pathlib import Path
 
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -19,6 +19,7 @@ from netra_backend.tests.integration.test_fixtures_common import mock_infrastruc
 class TestSearchQualityIntegration:
     """Search and quality gate integration tests"""
 
+    @pytest.mark.asyncio
     async def test_corpus_search_and_ranking_integration(self, test_database, mock_infrastructure):
         """Document retrieval with relevance scoring"""
         search_infrastructure = await self._setup_corpus_search_infrastructure(test_database)
@@ -27,6 +28,7 @@ class TestSearchQualityIntegration:
         ranking_results = await self._execute_search_and_ranking(search_infrastructure, search_queries)
         await self._verify_relevance_scoring_accuracy(ranking_results, search_queries)
 
+    @pytest.mark.asyncio
     async def test_quality_gate_enforcement_with_rejection_flow(self, test_database, mock_infrastructure):
         """Response validation and rejection flow"""
         quality_gates = await self._setup_quality_gate_infrastructure()

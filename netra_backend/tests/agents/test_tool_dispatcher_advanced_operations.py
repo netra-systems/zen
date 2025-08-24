@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -133,7 +133,7 @@ class TestToolDispatcherAdvancedOperations:
         """Verify production tool execution result."""
         assert result == {"success": True}
         # Verify call was made with correct parameters and run_id, but use ANY for state comparison
-        from unittest.mock import ANY
+        from unittest.mock import ANY, AsyncMock, MagicMock
         production_tool.execute.assert_called_once_with({"param": "value"}, ANY, "run_123")
     
     def _setup_async_tool_test(self) -> tuple:

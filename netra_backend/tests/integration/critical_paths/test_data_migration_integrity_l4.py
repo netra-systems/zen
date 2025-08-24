@@ -26,7 +26,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 # from app.services.redis.session_manager import RedisSessionManager
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import asyncpg
 import pytest
@@ -1341,6 +1341,7 @@ async def l4_migration_test():
 class TestDataMigrationIntegrityL4:
     """L4 critical path tests for production data migration integrity."""
     
+    @pytest.mark.asyncio
     async def test_complete_data_migration_integrity_critical_path(self, l4_migration_test):
         """
         Test complete data migration integrity critical path.

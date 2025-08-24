@@ -21,7 +21,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -54,7 +54,7 @@ class TestExistingUserLoginFlow:
         user.last_login = datetime.utcnow() - timedelta(days=1)
         user.failed_login_attempts = 0
         user.check_password = MagicMock(return_value=True)
-        return user
+        yield user
     
     @pytest.fixture
     async def mock_auth_service(self):
@@ -65,7 +65,7 @@ class TestExistingUserLoginFlow:
         service.validate_token = AsyncMock(return_value=True)
         service.refresh_tokens = AsyncMock()
         service.revoke_token = AsyncMock()
-        return service
+        yield service
     
     @pytest.fixture
     async def mock_session_service(self):
@@ -75,7 +75,7 @@ class TestExistingUserLoginFlow:
         service.get_session = AsyncMock()
         service.update_session_activity = AsyncMock()
         service.end_session = AsyncMock()
-        return service
+        yield service
     
     @pytest.fixture
     async def async_client(self):
@@ -86,6 +86,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_successful_login_with_valid_credentials(self, async_client, mock_existing_user, mock_auth_service):
         """Test 1: Successful login with valid credentials should return tokens."""
         login_data = {
@@ -118,6 +119,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_failed_login_with_invalid_password(self, async_client, mock_existing_user):
         """Test 2: Login with invalid password should fail and increment attempt counter."""
         mock_existing_user.check_password.return_value = False
@@ -138,6 +140,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_account_lockout_after_failed_attempts(self, async_client, mock_existing_user):
         """Test 3: Account should be locked after multiple failed login attempts."""
         mock_existing_user.check_password.return_value = False
@@ -160,6 +163,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_session_creation_on_successful_login(self, async_client, mock_existing_user, mock_session_service):
         """Test 4: Successful login should create a new session."""
         mock_session = MagicMock()
@@ -187,6 +191,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_token_refresh_flow(self, async_client, mock_auth_service):
         """Test 5: Token refresh should return new access token."""
         refresh_token = "valid_refresh_token_123"
@@ -218,6 +223,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_authenticated_request_with_valid_token(self, async_client, mock_existing_user):
         """Test 6: Authenticated requests with valid token should succeed."""
         access_token = "valid_access_token_123"
@@ -234,6 +240,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_logout_revokes_tokens_and_ends_session(self, async_client, mock_auth_service, mock_session_service):
         """Test 7: Logout should revoke tokens and end session."""
         access_token = "valid_access_token_123"
@@ -259,6 +266,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_concurrent_login_sessions_handling(self, async_client, mock_existing_user):
         """Test 8: System should handle multiple concurrent sessions for same user."""
         login_data = {
@@ -293,6 +301,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_login_updates_last_login_timestamp(self, async_client, mock_existing_user):
         """Test 9: Successful login should update user's last login timestamp."""
         original_last_login = mock_existing_user.last_login
@@ -314,6 +323,7 @@ class TestExistingUserLoginFlow:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_remember_me_extends_token_expiry(self, async_client, mock_existing_user):
         """Test 10: 'Remember me' option should extend token expiry time."""
         # Login without remember me

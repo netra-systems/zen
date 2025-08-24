@@ -11,7 +11,7 @@ import asyncio
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from langchain_core.tools import BaseTool
@@ -150,6 +150,7 @@ class TestToolOrchestration:
             assert isinstance(step_result, str)
             assert 'Result from' in step_result
 
+    @pytest.mark.asyncio
     async def test_tool_orchestration_simple_chain(self, unified_registry, sample_tools):
         """Test simple tool chain orchestration"""
         chain_config = self._create_simple_chain_config()
@@ -176,6 +177,7 @@ class TestToolOrchestration:
         assert 'step_count' in result
         assert result['step_count'] == len(config['steps'])
 
+    @pytest.mark.asyncio
     async def test_tool_orchestration_complex_chain(self, unified_registry, sample_tools):
         """Test complex tool chain orchestration"""
         chain_config = self._create_complex_chain_config()
@@ -206,6 +208,7 @@ class TestToolOrchestration:
             assert isinstance(step_result, str)
             assert 'Result from' in step_result
 
+    @pytest.mark.asyncio
     async def test_parallel_tool_orchestration(self, unified_registry, sample_tools):
         """Test parallel tool orchestration"""
         parallel_config = self._create_parallel_chain_config()
@@ -232,6 +235,7 @@ class TestToolOrchestration:
         tolerance_factor = 1.5
         assert parallel_time <= sequential_time * tolerance_factor
 
+    @pytest.mark.asyncio
     async def test_sequential_vs_parallel_performance(self, orchestrator):
         """Test performance comparison between sequential and parallel execution"""
         sequential_config, parallel_config = self._create_sequential_vs_parallel_configs()
@@ -299,6 +303,7 @@ class TestToolOrchestration:
         assert len(result['phase_results']) == len(config['phases'])
         assert result['total_phases'] == len(config['phases'])
 
+    @pytest.mark.asyncio
     async def test_mixed_sequential_parallel_orchestration(self, orchestrator):
         """Test mixed sequential and parallel orchestration"""
         config = self._create_mixed_orchestration_config()
@@ -327,6 +332,7 @@ class TestToolOrchestration:
             expected_tool = config['steps'][i]['tool']
             assert expected_tool in step_result
 
+    @pytest.mark.asyncio
     async def test_dependency_aware_orchestration(self, orchestrator):
         """Test orchestration with tool dependencies"""
         config = self._create_dependency_chain_config()
@@ -342,6 +348,7 @@ class TestToolOrchestration:
             assert 'results' in execution
             assert 'timestamp' in execution
 
+    @pytest.mark.asyncio
     async def test_orchestration_history_tracking(self, orchestrator):
         """Test tracking of orchestration execution history"""
         config1 = self._create_simple_chain_config()

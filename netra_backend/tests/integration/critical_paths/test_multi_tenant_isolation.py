@@ -22,7 +22,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -207,6 +207,7 @@ class MultiTenantIsolationManager:
             logger.error(f"Failed to setup permissions for tenant {tenant_id}: {e}")
             raise
     
+    @pytest.mark.asyncio
     async def test_cross_tenant_access(self, source_tenant_id: str, target_tenant_id: str,
                                      user_id: str, resource_id: str) -> Dict[str, Any]:
         """Test cross-tenant access attempt and verify isolation."""

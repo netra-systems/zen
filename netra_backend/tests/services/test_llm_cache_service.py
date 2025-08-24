@@ -3,17 +3,19 @@ from pathlib import Path
 
 import json
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
 from netra_backend.app.services.llm_cache_service import LLMCacheService
 
+@pytest.mark.asyncio
 async def test_llm_cache_service_initialization():
     cache_service = LLMCacheService()
     assert cache_service.cache_core.default_ttl == 3600
     assert cache_service.enabled == True
     assert cache_service.cache_core.cache_prefix == "llm_cache:"
+@pytest.mark.asyncio
 async def test_cache_set_and_get():
     with patch('app.services.llm_cache_core.redis_manager') as mock_redis_manager:
         # Create mock Redis client
@@ -41,6 +43,7 @@ async def test_cache_set_and_get():
         retrieved_value = await cache_service.get_cached_response("test_prompt", "test_llm", {})
         
         assert retrieved_value == value["response"]
+@pytest.mark.asyncio
 async def test_cache_expiration():
     cache_service = LLMCacheService()
     cache_service.cache_core.default_ttl = 1
@@ -54,6 +57,7 @@ async def test_cache_expiration():
     
     retrieved_value = await cache_service.get_cached_response("test_prompt", "test_llm", {})
     # May be None if Redis clears it
+@pytest.mark.asyncio
 async def test_cache_size_limit():
     with patch('app.services.llm_cache_core.redis_manager') as mock_redis_manager:
         # Create mock Redis client
@@ -80,6 +84,7 @@ async def test_cache_size_limit():
         
         # Test that caching works
         assert await cache_service.get_cached_response("prompt3", "llm1", {}) != None
+@pytest.mark.asyncio
 async def test_cache_stats():
     with patch('app.services.llm_cache_core.redis_manager') as mock_redis_manager:
         # Create mock Redis client

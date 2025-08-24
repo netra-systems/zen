@@ -807,6 +807,7 @@ async def cost_tracking_billing_test():
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_cost_tracking_billing_pipeline_l4(cost_tracking_billing_test):
     """Test complete cost tracking and billing pipeline in staging."""
     # Execute complete critical path test
@@ -832,6 +833,7 @@ async def test_cost_tracking_billing_pipeline_l4(cost_tracking_billing_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_billing_accuracy_validation_l4(cost_tracking_billing_test):
     """Test billing accuracy across different tiers."""
     # Setup users and generate usage
@@ -851,6 +853,7 @@ async def test_billing_accuracy_validation_l4(cost_tracking_billing_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_quota_enforcement_across_tiers_l4(cost_tracking_billing_test):
     """Test quota enforcement works correctly across all billing tiers."""
     # Setup tier users

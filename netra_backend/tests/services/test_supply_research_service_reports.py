@@ -23,6 +23,7 @@ def service(db_session):
 class TestMarketReportGeneration:
     """Test comprehensive market report generation"""
     
+    @pytest.mark.asyncio
     async def test_generate_complete_market_report(self, service):
         """Test full market report generation with all sections"""
         report_deps = self._create_report_dependencies()
@@ -35,6 +36,7 @@ class TestMarketReportGeneration:
         
         self._verify_report_structure(report)
     
+    @pytest.mark.asyncio
     async def test_generate_report_with_long_query_truncation(self, service):
         """Test report generation with query truncation"""
         long_session = self._create_long_query_session()
@@ -46,6 +48,7 @@ class TestMarketReportGeneration:
         assert len(recent_research[0]["query"]) <= 103  # 100 + "..."
         assert recent_research[0]["query"].endswith("...")
     
+    @pytest.mark.asyncio
     async def test_generate_report_empty_data(self, service):
         """Test report generation with no data"""
         with self._patch_empty_dependencies(service):
@@ -53,6 +56,7 @@ class TestMarketReportGeneration:
         
         self._verify_empty_report_structure(report)
     
+    @pytest.mark.asyncio
     async def test_generate_report_with_anomalies(self, service):
         """Test report generation including anomalies section"""
         anomalies = self._create_sample_anomalies()
@@ -63,6 +67,7 @@ class TestMarketReportGeneration:
         assert "anomalies" in report["sections"]
         assert len(report["sections"]["anomalies"]) == 2
     
+    @pytest.mark.asyncio
     async def test_generate_report_statistics_section(self, service):
         """Test that statistics section is properly populated"""
         with self._patch_statistics_dependencies(service):

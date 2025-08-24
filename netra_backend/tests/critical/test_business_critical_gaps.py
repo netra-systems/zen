@@ -19,7 +19,7 @@ import json
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, mock_open, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, mock_open, patch
 
 import pytest
 from fastapi import WebSocket, WebSocketDisconnect
@@ -36,6 +36,7 @@ from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollect
 class TestWebSocketConnectionResilience:
     """Business Value: Prevents $8K MRR loss from poor real-time experience"""
     
+    @pytest.mark.asyncio
     async def test_websocket_reconnection_after_network_failure(self):
         """Test WebSocket automatically reconnects after network failures"""
         # Arrange - Mock WebSocket manager
@@ -63,6 +64,7 @@ class TestWebSocketConnectionResilience:
 class TestAgentTaskDelegation:
     """Business Value: Core agent orchestration ensures proper AI workload distribution"""
     
+    @pytest.mark.asyncio
     async def test_supervisor_delegates_to_subagents_correctly(self):
         """Test supervisor properly delegates tasks to appropriate sub-agents"""
         # Arrange - Mock supervisor and result
@@ -88,6 +90,7 @@ class TestAgentTaskDelegation:
 class TestLLMFallbackChain:
     """Business Value: Prevents service disruption when primary LLM fails"""
     
+    @pytest.mark.asyncio
     async def test_llm_fallback_primary_to_secondary_to_tertiary(self):
         """Test LLM fallback chain: primary → secondary → tertiary model"""
         # Arrange - Mock LLM providers with fallback chain
@@ -115,6 +118,7 @@ class TestLLMFallbackChain:
 class TestMetricsAggregationAccuracy:
     """Business Value: Accurate billing metrics for 20% performance fee capture"""
     
+    @pytest.mark.asyncio
     async def test_billing_metrics_calculation_accuracy(self):
         """Test metrics aggregation produces accurate billing calculations"""
         # Arrange - Create test usage data for billing calculation
@@ -145,6 +149,7 @@ class TestMetricsAggregationAccuracy:
 class TestAuthTokenRefresh:
     """Business Value: Prevents customer session interruptions"""
     
+    @pytest.mark.asyncio
     async def test_auth_token_refresh_before_expiry(self):
         """Test authentication tokens refresh automatically before expiry"""
         # Arrange - Mock expiring token and refresh
@@ -173,6 +178,7 @@ class TestAuthTokenRefresh:
 class TestDatabaseTransactionRollback:
     """Business Value: Data integrity prevents corrupt billing/audit records"""
     
+    @pytest.mark.asyncio
     async def test_database_transaction_rollback_on_failures(self):
         """Test database transactions rollback properly on failures"""
         # Arrange - Mock database session with transaction
@@ -200,6 +206,7 @@ class TestDatabaseTransactionRollback:
 class TestRateLimiterEnforcement:
     """Business Value: Prevents abuse and ensures fair resource allocation"""
     
+    @pytest.mark.asyncio
     async def test_websocket_rate_limiting_enforcement(self):
         """Test WebSocket rate limiter blocks excessive requests"""
         # Arrange - Mock rate limiter
@@ -225,6 +232,7 @@ class TestRateLimiterEnforcement:
 class TestCorpusDataValidation:
     """Business Value: Data quality ensures AI accuracy and customer satisfaction"""
     
+    @pytest.mark.asyncio
     async def test_corpus_crud_operations_data_integrity(self):
         """Test corpus CRUD operations maintain data integrity"""
         # Arrange - Mock corpus service
@@ -252,6 +260,7 @@ class TestCorpusDataValidation:
 class TestMultiAgentCoordination:
     """Business Value: Parallel agent execution increases processing throughput"""
     
+    @pytest.mark.asyncio
     async def test_parallel_agent_execution_coordination(self):
         """Test multiple agents execute in parallel without conflicts"""
         # Arrange - Mock agents with async processing
@@ -274,6 +283,7 @@ class TestMultiAgentCoordination:
 class TestErrorRecoveryPipeline:
     """Business Value: System resilience prevents cascade failures"""
     
+    @pytest.mark.asyncio
     async def test_error_handling_across_agent_pipeline(self):
         """Test error recovery mechanisms across the agent pipeline"""
         # Arrange - Mock pipeline with error recovery
@@ -297,6 +307,7 @@ class TestErrorRecoveryPipeline:
 class TestSystemHealthMonitoring:
     """Business Value: Proactive issue detection prevents downtime"""
     
+    @pytest.mark.asyncio
     async def test_health_check_accuracy_and_alerting(self):
         """Test system health monitoring accuracy"""
         # Arrange - Mock health checks
@@ -323,6 +334,7 @@ class TestSystemHealthMonitoring:
 class TestCostTrackingPrecision:
     """Business Value: Precise cost calculation for 20% performance fee"""
     
+    @pytest.mark.asyncio
     async def test_ai_cost_calculation_precision(self):
         """Test AI cost tracking maintains precision for billing"""
         # Arrange - Create cost tracking scenario
@@ -352,6 +364,7 @@ class TestCostTrackingPrecision:
 class TestAdditionalCriticalScenarios:
     """Business Value: Additional critical scenarios for comprehensive coverage"""
     
+    @pytest.mark.asyncio
     async def test_cache_invalidation_consistency(self):
         """Test cache invalidation maintains data consistency"""
         # Arrange - Mock cache operations
@@ -366,6 +379,7 @@ class TestAdditionalCriticalScenarios:
         assert cache_data["key1"] == "updated_value1"
         assert "key2" not in cache_data
     
+    @pytest.mark.asyncio
     async def test_websocket_message_ordering(self):
         """Test WebSocket message sequence preservation"""  
         # Arrange - Mock message queue
@@ -379,6 +393,7 @@ class TestAdditionalCriticalScenarios:
         # Assert - Order preserved
         assert received_messages == messages
     
+    @pytest.mark.asyncio
     async def test_concurrent_user_sessions(self):
         """Test system handles multiple users simultaneously"""
         # Arrange - Mock user sessions
@@ -394,6 +409,7 @@ class TestAdditionalCriticalScenarios:
         assert len(results) == 5
         assert all(r["status"] == "active" for r in results)
     
+    @pytest.mark.asyncio
     async def test_permission_boundaries_enforcement(self):
         """Test access control prevents unauthorized actions"""
         # Arrange - Mock permission system
@@ -404,6 +420,7 @@ class TestAdditionalCriticalScenarios:
         assert user_permissions["write"] is False
         assert user_permissions["admin"] is False
     
+    @pytest.mark.asyncio
     async def test_audit_trail_completeness(self):
         """Test audit logging completeness"""
         # Arrange - Mock audit operations
@@ -419,6 +436,7 @@ class TestAdditionalCriticalScenarios:
         assert len(audit_log) == 3
         assert all(entry["logged"] is True for entry in audit_log)
     
+    @pytest.mark.asyncio
     async def test_resource_cleanup_on_shutdown(self):
         """Test proper resource cleanup"""
         # Arrange - Mock resources

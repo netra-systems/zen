@@ -37,7 +37,7 @@ except ImportError:
         CLICKHOUSE_DEFAULT = 9000
 
 # ClickHouseManager - creating mock for tests
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 ClickHouseManager = Mock
 
 # DataIngestionService exists

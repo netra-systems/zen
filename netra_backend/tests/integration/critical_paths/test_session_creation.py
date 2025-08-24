@@ -12,7 +12,7 @@ import asyncio
 import json
 import time
 import uuid
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -26,6 +26,7 @@ class TestSessionCreationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_creation_with_user_data(self):
         """Test session creation with user data"""
         session_service = SessionService()
@@ -49,6 +50,7 @@ class TestSessionCreationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_unique_id_generation(self):
         """Test unique session ID generation"""
         session_service = SessionService()
@@ -69,6 +71,7 @@ class TestSessionCreationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_expiration_time_setting(self):
         """Test session expiration time configuration"""
         session_service = SessionService()
@@ -88,6 +91,7 @@ class TestSessionCreationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_session_metadata_storage(self):
         """Test session metadata storage"""
         session_service = SessionService()
@@ -111,6 +115,7 @@ class TestSessionCreationL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_session_creation(self):
         """Test concurrent session creation for same user"""
         session_service = SessionService()

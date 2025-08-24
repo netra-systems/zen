@@ -8,7 +8,7 @@ from pathlib import Path
 
 import asyncio
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -23,6 +23,7 @@ def recovery_service():
 
 class TestErrorRecovery:
     """Test error handling and recovery mechanisms"""
+    @pytest.mark.asyncio
     async def test_corpus_unavailable_fallback(self, recovery_service):
         """Test fallback when corpus is unavailable"""
         with patch.object(recovery_service, 'get_corpus_content', side_effect=Exception("Corpus not found")):
@@ -35,6 +36,7 @@ class TestErrorRecovery:
             
             assert len(records) == 100
             assert all(r.get("source") == "fallback_corpus" for r in records)
+    @pytest.mark.asyncio
     async def test_clickhouse_connection_recovery(self, recovery_service):
         """Test recovery from ClickHouse connection failures"""
         failure_count = 0
@@ -55,6 +57,7 @@ class TestErrorRecovery:
             
             assert result["success"] == True
             assert result["retry_count"] == 3
+    @pytest.mark.asyncio
     async def test_generation_checkpoint_recovery(self, recovery_service):
         """Test recovery from generation crashes using checkpoints"""
         # Simulate crash at 50%
@@ -79,6 +82,7 @@ class TestErrorRecovery:
             
             assert resumed_result["resumed_from_record"] == 100
             assert len(resumed_result["records"]) == 200
+    @pytest.mark.asyncio
     async def test_websocket_disconnect_recovery(self, recovery_service):
         """Test recovery from WebSocket disconnections"""
         ws_manager = MagicMock()
@@ -101,6 +105,7 @@ class TestErrorRecovery:
         
         assert result["generation_complete"] == True
         assert result["ws_failures"] == 1
+    @pytest.mark.asyncio
     async def test_memory_overflow_handling(self, recovery_service):
         """Test handling of memory overflow conditions"""
         config = GenerationConfig(
@@ -114,6 +119,7 @@ class TestErrorRecovery:
         assert result["completed"] == True
         assert result["memory_overflow_prevented"] == True
         assert result["batch_size_reduced"] == True
+    @pytest.mark.asyncio
     async def test_circuit_breaker_operation(self, recovery_service):
         """Test circuit breaker preventing cascade failures"""
         circuit_breaker = recovery_service.get_circuit_breaker()
@@ -133,6 +139,7 @@ class TestErrorRecovery:
         
         # Should transition to half-open
         assert circuit_breaker.state == "half_open"
+    @pytest.mark.asyncio
     async def test_dead_letter_queue_processing(self, recovery_service):
         """Test dead letter queue for failed records"""
         records = [{"id": i, "fail": i % 10 == 0} for i in range(100)]
@@ -149,6 +156,7 @@ class TestErrorRecovery:
         
         assert len(result["processed"]) == 90
         assert len(result["dead_letter_queue"]) == 10
+    @pytest.mark.asyncio
     async def test_transaction_rollback(self, recovery_service):
         """Test transaction rollback on failures"""
         async def failing_operation():
@@ -169,6 +177,7 @@ class TestErrorRecovery:
         # Should have rolled back
         result = await recovery_service.query_records()
         assert len(result) == 0
+    @pytest.mark.asyncio
     async def test_idempotent_generation(self, recovery_service):
         """Test idempotent generation to prevent duplicates"""
         job_id = str(uuid.uuid4())
@@ -186,6 +195,7 @@ class TestErrorRecovery:
         # Should return cached result
         assert result2["cached"] == True
         assert result1["records"] == result2["records"]
+    @pytest.mark.asyncio
     async def test_graceful_degradation(self, recovery_service):
         """Test graceful degradation under failures"""
         config = GenerationConfig(

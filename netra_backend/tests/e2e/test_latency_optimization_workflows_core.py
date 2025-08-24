@@ -42,6 +42,7 @@ def latency_optimization_setup(real_llm_manager, real_websocket_manager, real_to
 class TestLatencyOptimization3x:
     """Test 3x latency reduction without budget increase."""
     
+    @pytest.mark.asyncio
     async def test_3x_latency_reduction_zero_budget(self, latency_optimization_setup):
         """Test: 'My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.'"""
         setup = latency_optimization_setup
@@ -49,6 +50,7 @@ class TestLatencyOptimization3x:
         results = await execute_latency_workflow(setup, state)
         await validate_3x_latency_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_latency_bottleneck_identification(self, latency_optimization_setup):
         """Test identification of specific latency bottlenecks."""
         setup = latency_optimization_setup
@@ -59,6 +61,7 @@ class TestLatencyOptimization3x:
 class TestLatencyOptimizationStrategies:
     """Test various latency optimization strategies."""
     
+    @pytest.mark.asyncio
     async def test_caching_strategy_optimization(self, latency_optimization_setup):
         """Test optimization focusing on caching strategies."""
         setup = latency_optimization_setup
@@ -66,6 +69,7 @@ class TestLatencyOptimizationStrategies:
         results = await execute_latency_workflow(setup, state)
         validate_caching_strategy_results(results)
     
+    @pytest.mark.asyncio
     async def test_parallel_processing_optimization(self, latency_optimization_setup):
         """Test optimization focusing on parallel processing."""
         setup = latency_optimization_setup
@@ -76,6 +80,7 @@ class TestLatencyOptimizationStrategies:
 class TestWorkflowPerformance:
     """Test performance characteristics of latency optimization workflows."""
     
+    @pytest.mark.asyncio
     async def test_workflow_execution_time_bounds(self, latency_optimization_setup):
         """Test that workflow execution stays within reasonable time bounds."""
         setup = latency_optimization_setup
@@ -87,6 +92,7 @@ class TestWorkflowPerformance:
         
         validate_execution_time_bounds(results, total_time)
     
+    @pytest.mark.asyncio
     async def test_agent_step_timing_consistency(self, latency_optimization_setup):
         """Test timing consistency across agent steps."""
         setup = latency_optimization_setup
@@ -98,6 +104,7 @@ class TestWorkflowPerformance:
 class TestExamplePromptsPerformanceOptimization:
     """Test specific example prompts EP-002 and EP-004 with real LLM validation."""
     
+    @pytest.mark.asyncio
     async def test_ep_002_latency_budget_constraint_real_llm(self, latency_optimization_setup):
         """Test EP-002: Latency optimization with budget constraints using real LLM."""
         setup = latency_optimization_setup
@@ -105,6 +112,7 @@ class TestExamplePromptsPerformanceOptimization:
         results = await execute_latency_workflow(setup, state)
         await _validate_ep_002_results(results, state, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_004_function_optimization_real_llm(self, latency_optimization_setup):
         """Test EP-004: Function optimization methods using real LLM."""
         setup = latency_optimization_setup

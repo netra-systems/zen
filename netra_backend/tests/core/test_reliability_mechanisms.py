@@ -11,7 +11,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -85,6 +85,7 @@ class TestCircuitBreakerStateTransitions:
 
 class TestRetryMechanisms:
     """Test retry handler functionality"""
+    @pytest.mark.asyncio
     async def test_exponential_backoff_timing(self):
         """Test exponential backoff and max delay"""
         config = RetryConfig(max_retries=3, base_delay=0.01, jitter=False)
@@ -111,6 +112,7 @@ class TestRetryMechanisms:
         
         delays = [handler._calculate_delay(1) for _ in range(5)]
         assert len(set(delays)) > 1
+    @pytest.mark.asyncio
     async def test_selective_retry_logic(self):
         """Test retryable vs non-retryable errors"""
         config = RetryConfig(max_retries=2, base_delay=0.01)
@@ -129,6 +131,7 @@ class TestRetryMechanisms:
 
 class TestTimeoutAndFallback:
     """Test timeout handling and fallback patterns"""
+    @pytest.mark.asyncio
     async def test_timeout_enforcement_and_fallback(self):
         """Test timeout enforcement with fallback"""
         wrapper = AgentReliabilityWrapper("test_agent")
@@ -144,6 +147,7 @@ class TestTimeoutAndFallback:
             slow_operation, "test_op", fallback=fast_fallback, timeout=0.01
         )
         assert result == "fallback_result"
+    @pytest.mark.asyncio
     async def test_cascading_timeout_behavior(self):
         """Test timeout cascades through retry attempts"""
         config = RetryConfig(max_retries=2, base_delay=0.01)
@@ -172,6 +176,7 @@ class TestResourceIsolationAndScenarios:
         assert wrapper2.circuit_breaker.failure_count == 0
         assert wrapper1.error_history[0]["error_type"] == "ValueError"
         assert wrapper2.error_history[0]["error_type"] == "ConnectionError"
+    @pytest.mark.asyncio
     async def test_sustained_failure_and_recovery(self):
         """Test sustained failures trigger circuit breaker"""
         config = CircuitBreakerConfig(failure_threshold=3, recovery_timeout=0.1)
@@ -185,6 +190,7 @@ class TestResourceIsolationAndScenarios:
                 await wrapper.execute_safely(always_fails, "failing_op")
         
         assert wrapper.circuit_breaker.state == CircuitBreakerState.OPEN
+    @pytest.mark.asyncio
     async def test_intermittent_failures_and_degradation(self):
         """Test intermittent failures and graceful degradation"""
         wrapper = AgentReliabilityWrapper("test_agent")

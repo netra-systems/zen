@@ -24,7 +24,7 @@ import base64
 import hashlib
 from typing import Dict, Any, List, Tuple
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 import os
 import tempfile
@@ -364,6 +364,7 @@ class TestWebSocketBinaryMessageHandlingL3:
         
         return header + pixel_data, "test_image.bmp"
     
+    @pytest.mark.asyncio
     async def test_basic_binary_message_creation(self, binary_handler):
 
         """Test basic binary message creation and structure."""
@@ -408,6 +409,7 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         assert binary_message["hash"] == expected_hash
     
+    @pytest.mark.asyncio
     async def test_binary_chunked_storage_and_retrieval(self, binary_handler):
 
         """Test binary data chunked storage and retrieval."""
@@ -446,6 +448,7 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         await binary_handler.cleanup_binary_message(message_id)
     
+    @pytest.mark.asyncio
     async def test_large_binary_file_handling(self, binary_handler):
 
         """Test handling of large binary files."""
@@ -492,6 +495,7 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         await binary_handler.cleanup_binary_message(message_id)
     
+    @pytest.mark.asyncio
     async def test_binary_message_websocket_transmission(self, websocket_manager, binary_handler, test_users):
 
         """Test binary message transmission through WebSocket."""
@@ -566,6 +570,7 @@ class TestWebSocketBinaryMessageHandlingL3:
 
         await binary_handler.cleanup_binary_message(message_id)
     
+    @pytest.mark.asyncio
     async def test_concurrent_binary_uploads(self, binary_handler, test_users):
 
         """Test concurrent binary file uploads."""
@@ -672,6 +677,7 @@ class TestWebSocketBinaryMessageHandlingL3:
 
                 await binary_handler.cleanup_binary_message(message_id)
     
+    @pytest.mark.asyncio
     async def test_binary_message_size_limits(self, binary_handler):
 
         """Test binary message size limit enforcement."""
@@ -705,6 +711,7 @@ class TestWebSocketBinaryMessageHandlingL3:
     
     @mock_justified("L3: Binary message handling with real Redis storage")
 
+    @pytest.mark.asyncio
     async def test_binary_corruption_detection(self, binary_handler):
 
         """Test detection of binary data corruption."""

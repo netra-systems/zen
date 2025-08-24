@@ -261,6 +261,7 @@ class MultiTenantIsolationTester:
                     
         return all(len(t.resources) > 0 for t in self.tenants.values())
         
+    @pytest.mark.asyncio
     async def test_data_segregation(self) -> bool:
         """Test that data is properly segregated between tenants."""
         print("\n[SEGREGATION] Testing data segregation...")
@@ -302,6 +303,7 @@ class MultiTenantIsolationTester:
         self.isolation_violations.extend(violations)
         return len(violations) == 0
         
+    @pytest.mark.asyncio
     async def test_cache_isolation(self) -> bool:
         """Test that cache is isolated between tenants."""
         print("\n[CACHE] Testing cache isolation...")
@@ -362,6 +364,7 @@ class MultiTenantIsolationTester:
         self.isolation_violations.extend(violations)
         return len(violations) == 0
         
+    @pytest.mark.asyncio
     async def test_websocket_isolation(self) -> bool:
         """Test WebSocket channel isolation between tenants."""
         print("\n[WEBSOCKET] Testing WebSocket channel isolation...")
@@ -436,6 +439,7 @@ class MultiTenantIsolationTester:
         self.isolation_violations.extend(violations)
         return len(violations) == 0
         
+    @pytest.mark.asyncio
     async def test_resource_quotas(self) -> bool:
         """Test resource quota enforcement per tenant."""
         print("\n[QUOTAS] Testing resource quota enforcement...")
@@ -486,6 +490,7 @@ class MultiTenantIsolationTester:
                 
         return True
         
+    @pytest.mark.asyncio
     async def test_encryption_keys(self) -> bool:
         """Test tenant-specific encryption keys."""
         print("\n[ENCRYPTION] Testing tenant-specific encryption...")
@@ -528,6 +533,7 @@ class MultiTenantIsolationTester:
                 
         return True
         
+    @pytest.mark.asyncio
     async def test_audit_trails(self) -> bool:
         """Test tenant-specific audit trails."""
         print("\n[AUDIT] Testing tenant-specific audit trails...")
@@ -564,6 +570,7 @@ class MultiTenantIsolationTester:
                 
         return len(self.isolation_violations) == 0
         
+    @pytest.mark.asyncio
     async def test_database_partitioning(self) -> bool:
         """Test database-level partitioning."""
         print("\n[DATABASE] Testing database partitioning...")
@@ -623,6 +630,7 @@ class MultiTenantIsolationTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_multi_tenant_data_isolation():
     """Test complete multi-tenant data isolation."""
     async with MultiTenantIsolationTester() as tester:

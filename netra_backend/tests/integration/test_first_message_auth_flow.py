@@ -13,7 +13,7 @@ import asyncio
 import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import jwt
 import pytest
@@ -38,6 +38,7 @@ class TestFirstMessageAuthenticationFlow:
     
     @pytest.fixture
 
+    @pytest.mark.asyncio
     async def test_user(self):
 
         """Create test user for authentication testing."""
@@ -100,6 +101,7 @@ class TestFirstMessageAuthenticationFlow:
 
         return WebSocketManager()
     
+    @pytest.mark.asyncio
     async def test_unauthenticated_to_authenticated_flow(
 
         self, auth_service, ws_manager, mock_websocket, test_user
@@ -167,6 +169,7 @@ class TestFirstMessageAuthenticationFlow:
 
         assert connection.authenticated is True
     
+    @pytest.mark.asyncio
     async def test_jwt_validation_with_expiry(self, auth_service):
 
         """Test JWT validation including expiry checks."""
@@ -209,6 +212,7 @@ class TestFirstMessageAuthenticationFlow:
 
         assert decoded["user_id"] == "test_user"
     
+    @pytest.mark.asyncio
     async def test_websocket_auth_middleware_integration(
 
         self, ws_manager, mock_websocket, test_user
@@ -252,6 +256,7 @@ class TestFirstMessageAuthenticationFlow:
 
         assert authenticated_user is None
     
+    @pytest.mark.asyncio
     async def test_first_message_after_authentication(
 
         self, ws_manager, mock_websocket, test_user
@@ -311,6 +316,7 @@ class TestFirstMessageAuthenticationFlow:
 
         )
     
+    @pytest.mark.asyncio
     async def test_auth_failure_scenarios(self, auth_service, ws_manager):
 
         """Test various authentication failure scenarios."""
@@ -356,6 +362,7 @@ class TestFirstMessageAuthenticationFlow:
 
             assert user is None
     
+    @pytest.mark.asyncio
     async def test_concurrent_auth_requests(self, ws_manager, test_user):
 
         """Test handling of concurrent authentication requests."""
@@ -396,6 +403,7 @@ class TestFirstMessageAuthenticationFlow:
 
             assert user_id in ws_manager.active_connections
     
+    @pytest.mark.asyncio
     async def test_auth_token_refresh_during_session(
 
         self, ws_manager, mock_websocket, test_user

@@ -14,7 +14,7 @@ Each function ≤8 lines, file ≤300 lines.
 
 import os
 from typing import Any, Dict, Optional
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 

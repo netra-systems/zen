@@ -17,7 +17,7 @@ These tests should initially FAIL (demonstrating the bugs exist) and will PASS a
 
 import asyncio
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from typing import Dict, Any
 from contextlib import asynccontextmanager
 
@@ -321,6 +321,7 @@ class TestBackgroundTaskManagerErrors:
         """Test proper coroutine handling in BackgroundTaskManager."""
         manager = BackgroundTaskManager()
         
+        @pytest.mark.asyncio
         async def test_coroutine():
             await asyncio.sleep(0.1)
             return "success"

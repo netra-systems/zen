@@ -119,6 +119,7 @@ class FreeTierLimitsTester:
             print(f"[ERROR] Setup error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_api_rate_limiting(self) -> bool:
         """Test API rate limiting for free tier."""
         print("\n[RATE LIMIT] Testing API rate limiting...")
@@ -177,6 +178,7 @@ class FreeTierLimitsTester:
             print(f"[ERROR] Rate limiting test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_storage_quota(self) -> bool:
         """Test storage quota enforcement."""
         print("\n[STORAGE] Testing storage quota enforcement...")
@@ -242,6 +244,7 @@ class FreeTierLimitsTester:
             print(f"[ERROR] Storage quota test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_agent_count_limit(self) -> bool:
         """Test agent count restrictions."""
         print("\n[AGENTS] Testing agent count limits...")
@@ -314,6 +317,7 @@ class FreeTierLimitsTester:
             print(f"[ERROR] Agent limit test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_concurrent_connections(self) -> bool:
         """Test concurrent WebSocket connection limits."""
         print("\n[CONNECTIONS] Testing concurrent connection limits...")
@@ -385,6 +389,7 @@ class FreeTierLimitsTester:
             print(f"[ERROR] Connection limit test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_feature_restrictions(self) -> bool:
         """Test restricted feature access for free tier."""
         print("\n[FEATURES] Testing feature restrictions...")
@@ -467,6 +472,7 @@ class FreeTierLimitsTester:
             print(f"[ERROR] Feature restriction test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_usage_tracking(self) -> bool:
         """Test accuracy of usage tracking."""
         print("\n[USAGE] Testing usage tracking accuracy...")
@@ -524,6 +530,7 @@ class FreeTierLimitsTester:
             print(f"[ERROR] Usage tracking test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_upgrade_path(self) -> bool:
         """Test upgrade path from free tier."""
         print("\n[UPGRADE] Testing upgrade path...")
@@ -578,6 +585,7 @@ class FreeTierLimitsTester:
             print(f"[ERROR] Upgrade path test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_daily_limit_reset(self) -> bool:
         """Test daily limit reset mechanism."""
         print("\n[RESET] Testing daily limit reset...")
@@ -649,6 +657,7 @@ class FreeTierLimitsTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_free_tier_limitations_enforcement():
     """Test comprehensive free tier limitations enforcement."""
     async with FreeTierLimitsTester() as tester:

@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -47,6 +47,7 @@ def mock_process() -> Mock:
 class TestAdaptiveRules:
     """Test adaptive monitoring rules."""
     
+    @pytest.mark.asyncio
     async def test_apply_adaptive_rules_slow_startup(self, health_monitor: StagedHealthMonitor,
                                                     mock_service_config: ServiceConfig) -> None:
         """Test adaptive rules for slow startup."""
@@ -59,6 +60,7 @@ class TestAdaptiveRules:
         
         assert state.grace_multiplier == 1.5
 
+    @pytest.mark.asyncio
     async def test_apply_adaptive_rules_frequent_failures(self, health_monitor: StagedHealthMonitor,
                                                          mock_service_config: ServiceConfig) -> None:
         """Test adaptive rules for frequent failures."""

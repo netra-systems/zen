@@ -23,7 +23,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
@@ -188,6 +188,7 @@ class AgentPipelineCircuitManager:
             
         return self.load_shedding_active
     
+    @pytest.mark.asyncio
     async def test_recovery_mechanism(self) -> Dict[str, Any]:
         """Test circuit breaker recovery mechanisms."""
         recovery_start = time.time()
@@ -329,6 +330,7 @@ class AgentPipelineLoadTester:
             "performance_summary": self.circuit_manager.get_performance_summary()
         }
     
+    @pytest.mark.asyncio
     async def test_cascade_prevention(self) -> Dict[str, Any]:
         """Test that circuit breaking prevents cascading failures."""
         # Create multiple pipeline instances to test cascade prevention
@@ -395,6 +397,7 @@ async def agent_pipeline_load_tester(agent_pipeline_circuit_manager):
 class TestAgentPipelineCircuitBreakingL3:
     """L3 integration tests for agent pipeline circuit breaking."""
     
+    @pytest.mark.asyncio
     async def test_circuit_activation_under_load(self, agent_pipeline_load_tester):
         """Test that circuit breaker activates within 5 seconds under load."""
         config = LoadTestConfig(
@@ -422,6 +425,7 @@ class TestAgentPipelineCircuitBreakingL3:
         assert performance["metrics"]["success_rate"] < 100.0, \
             "Should have some failures to trigger circuit breaking"
     
+    @pytest.mark.asyncio
     async def test_graceful_degradation_mechanisms(self, agent_pipeline_circuit_manager):
         """Test graceful degradation when agent pipeline is overloaded."""
         manager = agent_pipeline_circuit_manager
@@ -452,6 +456,7 @@ class TestAgentPipelineCircuitBreakingL3:
         assert performance["circuit_breaker"]["state"] in ["OPEN", "HALF_OPEN"], \
             "Circuit should be in protective state during degradation"
     
+    @pytest.mark.asyncio
     async def test_load_shedding_strategies(self, agent_pipeline_circuit_manager):
         """Test load shedding strategies under high failure rates."""
         manager = agent_pipeline_circuit_manager
@@ -492,6 +497,7 @@ class TestAgentPipelineCircuitBreakingL3:
         assert high_priority_success_rate >= 0.5, \
             "High priority requests should have better success rate during load shedding"
     
+    @pytest.mark.asyncio
     async def test_cascade_prevention(self, agent_pipeline_load_tester):
         """Test that circuit breaking prevents cascading failures across services."""
         result = await agent_pipeline_load_tester.test_cascade_prevention()
@@ -510,6 +516,7 @@ class TestAgentPipelineCircuitBreakingL3:
         assert secondary_state["metrics"]["metrics"]["success_rate"] > 50.0, \
             "Secondary pipeline should maintain >50% success rate"
     
+    @pytest.mark.asyncio
     async def test_recovery_mechanisms(self, agent_pipeline_circuit_manager):
         """Test circuit breaker recovery mechanisms after failure."""
         manager = agent_pipeline_circuit_manager
@@ -544,6 +551,7 @@ class TestAgentPipelineCircuitBreakingL3:
             assert recovery_result["final_circuit_state"] in ["OPEN", "HALF_OPEN"], \
                 "Failed recovery should keep circuit in protective state"
     
+    @pytest.mark.asyncio
     async def test_performance_under_sustained_load(self, agent_pipeline_load_tester):
         """Test agent pipeline performance under sustained load conditions."""
         # Test with sustained moderate load
@@ -573,6 +581,7 @@ class TestAgentPipelineCircuitBreakingL3:
             assert performance["load_shedding"]["operations"] > 0, \
                 "If load shedding is active, should have shed some operations"
     
+    @pytest.mark.asyncio
     async def test_concurrent_circuit_breakers(self, agent_pipeline_load_tester):
         """Test multiple concurrent circuit breakers don't interfere."""
         # Create multiple concurrent load tests

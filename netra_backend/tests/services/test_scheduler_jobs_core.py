@@ -9,7 +9,7 @@ from pathlib import Path
 
 import asyncio
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.services.background_task_manager import BackgroundTaskManager
@@ -54,6 +54,7 @@ def scheduler(mock_dependencies):
 class TestSupplyResearchSchedulerJobs:
     """Test job execution for supply research scheduler"""
     
+    @pytest.mark.asyncio
     async def test_schedule_job_execution_success(self, scheduler, mock_dependencies):
         """Test successful job execution."""
         # Setup
@@ -69,6 +70,7 @@ class TestSupplyResearchSchedulerJobs:
         assert result != None
         mock_dependencies['background_manager'].add_task.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_schedule_job_execution_with_retry(self, scheduler, mock_dependencies):
         """Test job execution with retry logic."""
         # Setup
@@ -91,6 +93,7 @@ class TestSupplyResearchSchedulerJobs:
         assert result == True
         assert scheduler._execute_research_job.call_count == 2
 
+    @pytest.mark.asyncio
     async def test_schedule_job_execution_max_retries_exceeded(self, scheduler, mock_dependencies):
         """Test job execution when max retries exceeded."""
         # Setup
@@ -109,6 +112,7 @@ class TestSupplyResearchSchedulerJobs:
         assert result == False
         assert scheduler._execute_research_job.call_count == 3
 
+    @pytest.mark.asyncio
     async def test_concurrent_job_execution(self, scheduler, mock_dependencies):
         """Test concurrent execution of multiple jobs."""
         # Setup
@@ -127,6 +131,7 @@ class TestSupplyResearchSchedulerJobs:
         assert all(result != None for result in results)
         assert mock_dependencies['background_manager'].add_task.call_count == 5
 
+    @pytest.mark.asyncio
     async def test_job_execution_resource_cleanup(self, scheduler, mock_dependencies):
         """Test proper resource cleanup after job execution."""
         # Setup
@@ -134,7 +139,7 @@ class TestSupplyResearchSchedulerJobs:
         
         cleanup_called = False
         
-        def mock_cleanup(*args, **kwargs):
+        async def mock_cleanup(*args, **kwargs):
             nonlocal cleanup_called
             cleanup_called = True
         
@@ -148,6 +153,7 @@ class TestSupplyResearchSchedulerJobs:
         assert cleanup_called
         scheduler._cleanup_job_resources.assert_called_once_with(schedule)
 
+    @pytest.mark.asyncio
     async def test_job_execution_timeout_handling(self, scheduler, mock_dependencies):
         """Test job execution timeout handling."""
         # Setup
@@ -167,6 +173,7 @@ class TestSupplyResearchSchedulerJobs:
                 timeout=1.0
             )
 
+    @pytest.mark.asyncio
     async def test_job_execution_error_logging(self, scheduler, mock_dependencies):
         """Test proper error logging during job execution."""
         # Setup
@@ -187,6 +194,7 @@ class TestSupplyResearchSchedulerJobs:
         error_call_args = mock_logger.error.call_args_list
         assert any("Test error message" in str(call) for call in error_call_args)
 
+    @pytest.mark.asyncio
     async def test_job_execution_metrics_tracking(self, scheduler, mock_dependencies):
         """Test job execution metrics tracking."""
         # Setup

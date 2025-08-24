@@ -23,6 +23,7 @@ from netra_backend.tests.clickhouse.clickhouse_test_fixtures import (
 class TestCorpusTableOperations:
     """Test corpus table creation and management"""
     
+    @pytest.mark.asyncio
     async def test_create_dynamic_corpus_table(self):
         """Test creating a dynamic corpus table"""
         async with get_clickhouse_client() as client:

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import uuid
 from typing import Dict, List
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -42,6 +42,7 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', context_mock):
                     return await supervisor.run(user_request, "test_thread", "test_user", run_id)
 
+    @pytest.mark.asyncio
     async def test_6_cache_effectiveness_analysis(self, setup_test_infrastructure):
         """
         Business Value Test 6: Cache Effectiveness
@@ -123,6 +124,7 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
                     except Exception:
                         pass
 
+    @pytest.mark.asyncio
     async def test_7_error_recovery_resilience(self, setup_test_infrastructure):
         """
         Business Value Test 7: System Resilience
@@ -145,6 +147,7 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
         return [call for call in llm_manager.ask_llm.call_args_list
                 if "report" in str(call).lower() or "summary" in str(call).lower()]
 
+    @pytest.mark.asyncio
     async def test_8_report_generation_with_insights(self, setup_test_infrastructure):
         """
         Business Value Test 8: Executive Report Generation
@@ -161,6 +164,7 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
         assert result_state != None
         self._verify_report_generation(infra["llm_manager"])
 
+    @pytest.mark.asyncio
     async def test_9_concurrent_user_isolation(self, setup_test_infrastructure):
         """
         Business Value Test 9: Multi-tenant Isolation
@@ -210,6 +214,7 @@ class TestBusinessValueAdvanced(BusinessValueFixtures):
         assert user_contexts[user1_request["user_id"]]["request"] == user1_request["request"]
         assert user_contexts[user2_request["user_id"]]["request"] == user2_request["request"]
 
+    @pytest.mark.asyncio
     async def test_10_end_to_end_optimization_workflow(self, setup_test_infrastructure):
         """
         Business Value Test 10: Complete Optimization Workflow

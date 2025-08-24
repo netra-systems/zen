@@ -11,7 +11,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 def assert_agent_service_initialized(service, supervisor):
     """Assert agent service is properly initialized."""

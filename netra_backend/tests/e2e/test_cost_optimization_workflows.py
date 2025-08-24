@@ -86,6 +86,7 @@ class TestCostQualityConstraints:
 
     """Test cost optimization with quality preservation requirements."""
     
+    @pytest.mark.asyncio
     async def test_cost_reduction_quality_preservation(self, cost_optimization_setup):
 
         """Test: 'I need to reduce costs but keep quality the same. For feature X, I can accept latency of 500ms. For feature Y, I need to maintain current latency of 200ms.'"""
@@ -98,6 +99,7 @@ class TestCostQualityConstraints:
 
         _validate_cost_quality_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_multi_constraint_optimization(self, cost_optimization_setup):
 
         """Test: 'I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?'"""
@@ -281,6 +283,7 @@ class TestBudgetConstrainedOptimization:
 
     """Test optimization workflows with strict budget constraints."""
     
+    @pytest.mark.asyncio
     async def test_zero_budget_latency_improvement(self, cost_optimization_setup):
 
         """Test: 'My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.'"""
@@ -343,6 +346,7 @@ class TestWorkflowIntegrity:
 
     """Test integrity of complete cost optimization workflows."""
     
+    @pytest.mark.asyncio
     async def test_agent_state_transitions(self, cost_optimization_setup):
 
         """Test proper agent state transitions throughout workflow."""
@@ -355,6 +359,7 @@ class TestWorkflowIntegrity:
 
         _validate_state_transitions(results)
     
+    @pytest.mark.asyncio
     async def test_data_flow_continuity(self, cost_optimization_setup):
 
         """Test data flow continuity between agents."""
@@ -393,6 +398,7 @@ class TestErrorHandling:
 
     """Test error handling in cost optimization workflows."""
     
+    @pytest.mark.asyncio
     async def test_invalid_constraint_handling(self, cost_optimization_setup):
 
         """Test handling of invalid or contradictory constraints."""
@@ -411,6 +417,7 @@ class TestErrorHandling:
 
             pass  # Expected for some invalid constraints
     
+    @pytest.mark.asyncio
     async def test_agent_failure_recovery(self, cost_optimization_setup):
 
         """Test recovery from individual agent failures."""
@@ -509,6 +516,7 @@ class TestExamplePromptsCostOptimization:
 
     """Test specific example prompts EP-001 and EP-007 with real LLM validation."""
     
+    @pytest.mark.asyncio
     async def test_ep_001_cost_quality_constraints_real_llm(self, cost_optimization_setup):
 
         """Test EP-001: Cost reduction with quality preservation using real LLM."""
@@ -521,6 +529,7 @@ class TestExamplePromptsCostOptimization:
 
         _validate_ep_001_results(results, state, setup)
     
+    @pytest.mark.asyncio
     async def test_ep_007_multi_constraint_real_llm(self, cost_optimization_setup):
 
         """Test EP-007: Multi-constraint optimization using real LLM."""

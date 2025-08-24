@@ -18,7 +18,7 @@ from pathlib import Path
 
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -28,6 +28,7 @@ from netra_backend.tests.e2e.first_time_user.helpers import FirstTimeUserTestHel
 class TestCriticalMissingE2E:
     """TOP 5 most critical missing E2E tests for first-time user conversion"""
 
+    @pytest.mark.asyncio
     async def test_1_first_api_key_validation_security_e2e(
         self, conversion_environment, ai_provider_simulator
     ):
@@ -52,6 +53,7 @@ class TestCriticalMissingE2E:
         # Phase 4: Security confirmation and trust building
         await self._confirm_security_compliance(env, connection_result)
 
+    @pytest.mark.asyncio
     async def test_2_realtime_value_dashboard_first_load_e2e(
         self, conversion_environment, cost_savings_calculator
     ):
@@ -75,6 +77,7 @@ class TestCriticalMissingE2E:
         # Phase 4: Interactive value exploration
         await self._enable_value_exploration(env, savings_result)
 
+    @pytest.mark.asyncio
     async def test_3_team_invitation_collaboration_e2e(
         self, conversion_environment
     ):
@@ -98,6 +101,7 @@ class TestCriticalMissingE2E:
         # Phase 4: Team billing and upgrade path
         await self._present_team_upgrade_path(env, collaboration_result)
 
+    @pytest.mark.asyncio
     async def test_4_first_billing_payment_setup_e2e(
         self, conversion_environment
     ):
@@ -121,6 +125,7 @@ class TestCriticalMissingE2E:
         # Phase 4: Success confirmation and next steps
         await self._confirm_purchase_success(env, purchase_result)
 
+    @pytest.mark.asyncio
     async def test_5_first_export_report_generation_e2e(
         self, conversion_environment, cost_savings_calculator
     ):

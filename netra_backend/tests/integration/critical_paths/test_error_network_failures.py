@@ -9,7 +9,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -24,6 +24,7 @@ class TestErrorNetworkFailuresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_network_timeout_handling(self):
         """Test handling of network timeouts"""
         api_client = APIClient()
@@ -39,6 +40,7 @@ class TestErrorNetworkFailuresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_connection_refused_handling(self):
         """Test handling of connection refused errors"""
         api_client = APIClient()
@@ -53,6 +55,7 @@ class TestErrorNetworkFailuresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_dns_resolution_failure(self):
         """Test handling of DNS resolution failures"""
         api_client = APIClient()
@@ -67,6 +70,7 @@ class TestErrorNetworkFailuresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_partial_response_handling(self):
         """Test handling of partial/incomplete responses"""
         api_client = APIClient()
@@ -84,6 +88,7 @@ class TestErrorNetworkFailuresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_network_retry_with_backoff(self):
         """Test network retry with exponential backoff"""
         api_client = APIClient()

@@ -933,6 +933,46 @@ def get_environment_manager(isolation_mode: Optional[bool] = None):
     return get_manager(isolation_mode)
 
 
+def load_secrets() -> bool:
+    """
+    Legacy compatibility function for loading secrets.
+    
+    This is a placeholder for the load_secrets functionality that was moved.
+    Returns True to indicate successful loading for backward compatibility.
+    
+    Returns:
+        bool: Always returns True for compatibility
+    """
+    # Simple compatibility implementation
+    logger.info("load_secrets called - compatibility mode")
+    return True
+
+
+class SecretLoader:
+    """
+    Legacy compatibility class for secret loading functionality.
+    
+    This provides a compatibility layer for existing code that expects SecretLoader.
+    Actual secret loading functionality is handled by the environment management system.
+    """
+    
+    def __init__(self, env_manager: Optional[IsolatedEnvironment] = None):
+        """Initialize secret loader."""
+        self.env_manager = env_manager or get_env()
+        
+    def load_secrets(self) -> bool:
+        """Load secrets (compatibility method)."""
+        return load_secrets()
+    
+    def get_secret(self, key: str, default: Optional[str] = None) -> Optional[str]:
+        """Get a secret value."""
+        return self.env_manager.get(key, default)
+    
+    def set_secret(self, key: str, value: str, source: str = "secret_loader") -> bool:
+        """Set a secret value."""
+        return self.env_manager.set(key, value, source)
+
+
 # Backwards Compatibility: EnvironmentValidator class
 # This provides a compatibility layer for existing code that expects EnvironmentValidator
 class EnvironmentValidator:

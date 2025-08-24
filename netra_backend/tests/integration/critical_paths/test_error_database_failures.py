@@ -9,7 +9,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import psycopg2
 import pytest
@@ -24,6 +24,7 @@ class TestErrorDatabaseFailuresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_database_connection_failure(self):
         """Test handling of database connection failures"""
         db_service = DatabaseService()
@@ -41,6 +42,7 @@ class TestErrorDatabaseFailuresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_database_timeout_handling(self):
         """Test handling of database query timeouts"""
         db_service = DatabaseService()
@@ -64,6 +66,7 @@ class TestErrorDatabaseFailuresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_database_deadlock_recovery(self):
         """Test recovery from database deadlocks"""
         db_service = DatabaseService()
@@ -86,6 +89,7 @@ class TestErrorDatabaseFailuresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_database_constraint_violation(self):
         """Test handling of database constraint violations"""
         db_service = DatabaseService()
@@ -104,6 +108,7 @@ class TestErrorDatabaseFailuresL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_database_connection_pool_exhaustion(self):
         """Test handling of connection pool exhaustion"""
         db_service = DatabaseService()

@@ -28,7 +28,7 @@ import os
 import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -265,7 +265,7 @@ class TestSubAgentRegistryDiscovery:
         ]
         
         # Mock intelligent routing function
-        def route_request(request: str, registry: AgentRegistry) -> Dict[str, Any]:
+        async def route_request(request: str, registry: AgentRegistry) -> Dict[str, Any]:
             """Simulate intelligent request routing based on content analysis."""
             request_lower = request.lower()
             

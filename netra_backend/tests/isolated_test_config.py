@@ -204,7 +204,11 @@ async def isolated_postgres(isolated_test_config):
     session_factory = db_config["session_factory"]
     
     async with session_factory() as session:
-        yield session, isolated_test_config
+        try:
+            yield session
+        finally:
+            if hasattr(session, "close"):
+                await session.close()
 
 @pytest.fixture
 async def isolated_clickhouse(isolated_test_config):

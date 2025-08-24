@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -76,21 +76,25 @@ class TestValidatePrNumberFormat:
 class TestInputValidation:
     """Test input validation functions."""
 
+    @pytest.mark.asyncio
     async def test_validate_pr_inputs_success(self):
         """Test successful input validation."""
         # Should not raise exception
         await _validate_pr_inputs("123", "https://app.staging.netrasystems.ai")
 
+    @pytest.mark.asyncio
     async def test_validate_pr_inputs_invalid_pr(self):
         """Test input validation with invalid PR number."""
         with pytest.raises(AuthenticationError, match="Invalid PR number format"):
             await _validate_pr_inputs("abc", "https://example.com")
 
+    @pytest.mark.asyncio
     async def test_validate_pr_inputs_invalid_url(self):
         """Test input validation with invalid return URL."""
         with pytest.raises(AuthenticationError, match="Invalid return URL"):
             await _validate_pr_inputs("123", "not-a-url")
 
+    @pytest.mark.asyncio
     async def test_validate_pr_inputs_malicious_domain(self):
         """Test input validation rejects malicious domains."""
         with pytest.raises(NetraSecurityException, match="Return URL not in allowed domains"):
@@ -100,6 +104,7 @@ class TestInputValidation:
 class TestGitHubValidation:
     """Test GitHub PR validation functions."""
 
+    @pytest.mark.asyncio
     async def test_validate_pr_with_github_success(self):
         """Test successful GitHub PR validation."""
         mock_client = Mock()
@@ -111,6 +116,7 @@ class TestGitHubValidation:
         # Should not raise exception
         await _validate_pr_with_github("123", mock_client)
 
+    @pytest.mark.asyncio
     async def test_validate_pr_with_github_not_found(self):
         """Test GitHub PR validation when PR not found."""
         mock_client = Mock()
@@ -121,6 +127,7 @@ class TestGitHubValidation:
         with pytest.raises(AuthenticationError, match="PR #123 not found"):
             await _validate_pr_with_github("123", mock_client)
 
+    @pytest.mark.asyncio
     async def test_validate_pr_with_github_closed(self):
         """Test GitHub PR validation when PR is closed."""
         mock_client = Mock()
@@ -132,6 +139,7 @@ class TestGitHubValidation:
         with pytest.raises(AuthenticationError, match="PR #123 is not open"):
             await _validate_pr_with_github("123", mock_client)
 
+    @pytest.mark.asyncio
     async def test_validate_pr_with_github_network_error(self):
         """Test GitHub PR validation with network error."""
         import httpx

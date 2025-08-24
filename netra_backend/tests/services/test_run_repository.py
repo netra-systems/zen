@@ -21,6 +21,7 @@ pytest_plugins = ["netra_backend.tests.helpers.database_repository_fixtures"]
 class TestRunRepository:
     """Test run repository specific functionality."""
 
+    @pytest.mark.asyncio
     async def test_create_run_with_tools(self, unit_of_work):
         """Test creating a run with tool configurations."""
         async with unit_of_work as uow:
@@ -36,6 +37,7 @@ class TestRunRepository:
             
             assert_run_created_correctly(run, thread.id, "in_progress", ["code_interpreter", "retrieval"])
 
+    @pytest.mark.asyncio
     async def test_update_run_status(self, unit_of_work):
         """Test updating run status."""
         async with unit_of_work as uow:
@@ -50,6 +52,7 @@ class TestRunRepository:
             assert updated.completed_at is not None
             assert updated.metadata["tokens_used"] == 150
 
+    @pytest.mark.asyncio
     async def test_get_active_runs(self, unit_of_work):
         """Test getting active runs."""
         async with unit_of_work as uow:

@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -53,6 +53,7 @@ class TestThreadsRoute:
                 if "threads" in data:
                     assert len(data["threads"]) <= 10
 
+    @pytest.mark.asyncio
     async def test_thread_archival(self):
         """Test thread archival functionality."""
         from netra_backend.app.services.thread_service import ThreadService

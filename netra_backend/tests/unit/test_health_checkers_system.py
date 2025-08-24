@@ -10,7 +10,7 @@ and performance optimization to maintain service quality.
 import sys
 from pathlib import Path
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 

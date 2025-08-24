@@ -28,7 +28,7 @@ from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -401,6 +401,7 @@ class CostOptimizationWorkflowL4TestSuite:
                 "tracking_rate": 0
             }
     
+    @pytest.mark.asyncio
     async def test_cost_calculation_accuracy_l4(self) -> Dict[str, Any]:
         """Test cost calculation accuracy and billing engine performance."""
         cost_calculation_results = {
@@ -469,6 +470,7 @@ class CostOptimizationWorkflowL4TestSuite:
         
         return cost_calculation_results
     
+    @pytest.mark.asyncio
     async def test_budget_monitoring_and_alerts_l4(self) -> Dict[str, Any]:
         """Test budget monitoring and alert generation."""
         budget_monitoring_results = {
@@ -553,6 +555,7 @@ class CostOptimizationWorkflowL4TestSuite:
         
         return budget_monitoring_results
     
+    @pytest.mark.asyncio
     async def test_cost_optimization_algorithms_l4(self) -> Dict[str, Any]:
         """Test cost optimization algorithms and recommendations."""
         optimization_results = {
@@ -613,6 +616,7 @@ class CostOptimizationWorkflowL4TestSuite:
         
         return optimization_results
     
+    @pytest.mark.asyncio
     async def test_resource_allocation_efficiency_l4(self) -> Dict[str, Any]:
         """Test resource allocation efficiency and recommendations."""
         allocation_results = {
@@ -700,6 +704,7 @@ async def cost_optimization_workflow_l4_suite():
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_realistic_usage_data_generation_l4(cost_optimization_workflow_l4_suite):
     """Test realistic usage data generation and tracking."""
     # Create test users
@@ -723,6 +728,7 @@ async def test_realistic_usage_data_generation_l4(cost_optimization_workflow_l4_
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_cost_calculation_accuracy_l4(cost_optimization_workflow_l4_suite):
     """Test cost calculation accuracy and billing engine performance."""
     # Setup test data
@@ -750,6 +756,7 @@ async def test_cost_calculation_accuracy_l4(cost_optimization_workflow_l4_suite)
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_budget_monitoring_and_alerts_l4(cost_optimization_workflow_l4_suite):
     """Test budget monitoring and alert generation functionality."""
     # Setup test data
@@ -777,6 +784,7 @@ async def test_budget_monitoring_and_alerts_l4(cost_optimization_workflow_l4_sui
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_cost_optimization_algorithms_l4(cost_optimization_workflow_l4_suite):
     """Test cost optimization algorithms and recommendations."""
     # Setup test data with focus on high-usage users
@@ -804,6 +812,7 @@ async def test_cost_optimization_algorithms_l4(cost_optimization_workflow_l4_sui
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_resource_allocation_efficiency_l4(cost_optimization_workflow_l4_suite):
     """Test resource allocation efficiency and optimization."""
     # Setup test data
@@ -828,6 +837,7 @@ async def test_resource_allocation_efficiency_l4(cost_optimization_workflow_l4_s
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_cost_optimization_workflow_e2e_l4(cost_optimization_workflow_l4_suite):
     """Test end-to-end cost optimization workflow performance."""
     e2e_start = time.time()

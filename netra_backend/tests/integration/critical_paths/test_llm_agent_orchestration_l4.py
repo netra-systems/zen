@@ -29,7 +29,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 # # # from app.agents.supervisor_agent_modern import SupervisorAgent
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -39,11 +39,11 @@ from netra_backend.tests.integration.critical_paths.l4_staging_critical_base imp
 )
 
 SupervisorAgent = AsyncMock
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 SupervisorAgent = AsyncMock
 # # # from app.agents.base.interface import ExecutionContext, ExecutionResult
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 ExecutionContext = dict
 ExecutionResult = dict
@@ -54,7 +54,7 @@ ExecutionResult = dict   # Use dict as placeholder
 # # from app.llm.llm_manager import LLMManager
 LLMManager = AsyncMock
 # # # from app.agents.tool_dispatcher import ToolDispatcher
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.core.configuration.base import get_unified_config
 
@@ -751,6 +751,7 @@ class L4RealLLMAgentOrchestrationTest(L4StagingCriticalPathTestBase):
 @pytest.mark.l4
 @pytest.mark.staging
 @pytest.mark.llm_integration
+@pytest.mark.asyncio
 async def test_l4_real_llm_agent_orchestration():
     """Test L4 real LLM agent orchestration critical path."""
     test_instance = L4RealLLMAgentOrchestrationTest()
@@ -776,6 +777,7 @@ async def test_l4_real_llm_agent_orchestration():
 @pytest.mark.l4 
 @pytest.mark.staging
 @pytest.mark.cost_validation
+@pytest.mark.asyncio
 async def test_l4_llm_cost_optimization_scenario():
     """Test specific cost optimization scenario for business validation."""
     test_instance = L4RealLLMAgentOrchestrationTest()

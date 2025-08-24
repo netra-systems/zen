@@ -32,7 +32,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text, select, insert, delete
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 # Real service imports - NO MOCKS
 from netra_backend.app.main import app
@@ -48,7 +48,7 @@ try:
     from netra_backend.app.db.models import User, Organization
 except ImportError:
     # Create mock models if not available
-    from unittest.mock import Mock
+    from unittest.mock import Mock, AsyncMock, MagicMock
     User = Mock()
     Organization = Mock()
 
@@ -120,7 +120,7 @@ class TestOAuthDatabaseConsistency:
         test_emails = []
         test_user_ids = []
         
-        def register_cleanup(email: str = None, user_id: str = None):
+        async def register_cleanup(email: str = None, user_id: str = None):
             if email:
                 test_emails.append(email)
             if user_id:
@@ -282,7 +282,11 @@ class TestOAuthDatabaseConsistency:
                     if call_count == 0:
                         # Auth DB session - should succeed
                         async with real_auth_db_session as session:
-                            yield session
+                            try:
+                                yield session
+                            finally:
+                                if hasattr(session, "close"):
+                                    await session.close()
                     else:
                         # Main DB session - should fail
                         raise Exception("Main database connection failed")

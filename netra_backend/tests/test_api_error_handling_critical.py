@@ -13,12 +13,13 @@ from pathlib import Path
 import json
 import uuid
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
 class TestAPIErrorHandlingCritical:
     """Critical API error handling tests."""
+    @pytest.mark.asyncio
     async def test_bad_request_error(self):
         """Test 400 Bad Request error handling."""
         mock_client = AsyncMock()
@@ -32,6 +33,7 @@ class TestAPIErrorHandlingCritical:
         response = await mock_client.post("/api/auth/login", json={})
         assert response["status_code"] == 400
         assert "detail" in response["json"]
+    @pytest.mark.asyncio
     async def test_unauthorized_error(self):
         """Test 401 Unauthorized error handling."""
         mock_client = AsyncMock()
@@ -44,6 +46,7 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.get("/api/threads")
         assert response["status_code"] == 401
+    @pytest.mark.asyncio
     async def test_forbidden_error(self):
         """Test 403 Forbidden error handling."""
         mock_client = AsyncMock()
@@ -56,6 +59,7 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.delete("/api/admin/users/1")
         assert response["status_code"] == 403
+    @pytest.mark.asyncio
     async def test_not_found_error(self):
         """Test 404 Not Found error handling."""
         mock_client = AsyncMock()
@@ -68,6 +72,7 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.get("/api/threads/nonexistent")
         assert response["status_code"] == 404
+    @pytest.mark.asyncio
     async def test_internal_server_error(self):
         """Test 500 Internal Server Error handling."""
         mock_client = AsyncMock()
@@ -80,6 +85,7 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.post("/api/agent/query", json={"query": "test"})
         assert response["status_code"] == 500
+    @pytest.mark.asyncio
     async def test_validation_error_detail(self):
         """Test validation error detail formatting."""
         mock_client = AsyncMock()
@@ -100,6 +106,7 @@ class TestAPIErrorHandlingCritical:
         response = await mock_client.post("/api/auth/register", json={})
         assert response["status_code"] == 422
         assert "detail" in response["json"]
+    @pytest.mark.asyncio
     async def test_authentication_invalid_credentials(self):
         """Test authentication with invalid credentials."""
         mock_client = AsyncMock()
@@ -115,6 +122,7 @@ class TestAPIErrorHandlingCritical:
         })
         assert response["status_code"] == 401
         assert response["json"]["detail"] == "Invalid email or password"
+    @pytest.mark.asyncio
     async def test_permission_insufficient_rights(self):
         """Test insufficient permission rights."""
         mock_client = AsyncMock()
@@ -131,6 +139,7 @@ class TestAPIErrorHandlingCritical:
             headers=auth_headers
         )
         assert response["status_code"] == 403
+    @pytest.mark.asyncio
     async def test_resource_not_found_specific(self):
         """Test specific resource not found errors."""
         mock_client = AsyncMock()
@@ -150,6 +159,7 @@ class TestAPIErrorHandlingCritical:
             
             response = await mock_client.get(endpoint, headers=auth_headers)
             assert response["status_code"] == 404
+    @pytest.mark.asyncio
     async def test_malformed_json_error(self):
         """Test malformed JSON request error."""
         mock_client = AsyncMock()
@@ -162,6 +172,7 @@ class TestAPIErrorHandlingCritical:
         # Simulate malformed JSON by sending invalid data
         response = await mock_client.post("/api/threads", data="invalid json")
         assert response["status_code"] == 400
+    @pytest.mark.asyncio
     async def test_missing_required_headers(self):
         """Test missing required headers error."""
         mock_client = AsyncMock()
@@ -174,6 +185,7 @@ class TestAPIErrorHandlingCritical:
         # Request without auth header
         response = await mock_client.get("/api/threads")
         assert response["status_code"] == 401
+    @pytest.mark.asyncio
     async def test_invalid_token_format(self):
         """Test invalid token format error."""
         mock_client = AsyncMock()
@@ -186,6 +198,7 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.get("/api/threads", headers=auth_headers)
         assert response["status_code"] == 401
+    @pytest.mark.asyncio
     async def test_expired_token_error(self):
         """Test expired token error."""
         mock_client = AsyncMock()
@@ -199,6 +212,7 @@ class TestAPIErrorHandlingCritical:
         response = await mock_client.get("/api/threads", headers=auth_headers)
         assert response["status_code"] == 401
         assert response["json"]["detail"] == "Token has expired"
+    @pytest.mark.asyncio
     async def test_method_not_allowed(self):
         """Test method not allowed error."""
         mock_client = AsyncMock()
@@ -211,6 +225,7 @@ class TestAPIErrorHandlingCritical:
         # Try PATCH on endpoint that only accepts GET
         response = await mock_client.patch("/api/health/live")
         assert response["status_code"] == 405
+    @pytest.mark.asyncio
     async def test_content_type_validation(self):
         """Test content type validation error."""
         mock_client = AsyncMock()
@@ -228,6 +243,7 @@ class TestAPIErrorHandlingCritical:
             headers=auth_headers
         )
         assert response["status_code"] == 415
+    @pytest.mark.asyncio
     async def test_request_timeout_error(self):
         """Test request timeout error."""
         mock_client = AsyncMock()
@@ -244,6 +260,7 @@ class TestAPIErrorHandlingCritical:
             headers=auth_headers
         )
         assert response["status_code"] == 408
+    @pytest.mark.asyncio
     async def test_payload_too_large(self):
         """Test payload too large error."""
         mock_client = AsyncMock()
@@ -261,6 +278,7 @@ class TestAPIErrorHandlingCritical:
             headers=auth_headers
         )
         assert response["status_code"] == 413
+    @pytest.mark.asyncio
     async def test_service_unavailable(self):
         """Test service unavailable error."""
         mock_client = AsyncMock()
@@ -272,6 +290,7 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.get("/api/health/ready")
         assert response["status_code"] == 503
+    @pytest.mark.asyncio
     async def test_database_connection_error(self):
         """Test database connection error handling."""
         mock_client = AsyncMock()
@@ -284,6 +303,7 @@ class TestAPIErrorHandlingCritical:
         
         response = await mock_client.get("/api/threads", headers=auth_headers)
         assert response["status_code"] == 503
+    @pytest.mark.asyncio
     async def test_error_response_consistency(self):
         """Test error response format consistency."""
         mock_client = AsyncMock()
@@ -299,6 +319,7 @@ class TestAPIErrorHandlingCritical:
             response = await mock_client.get("/test/endpoint")
             assert response["status_code"] == code
             assert "detail" in response["json"]
+    @pytest.mark.asyncio
     async def test_cascading_error_prevention(self):
         """Test cascading error prevention."""
         mock_client = AsyncMock()

@@ -30,13 +30,23 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
-// Mock the auth service to return controlled states
-const mockUseAuth = jest.fn();
+// Auth service is mocked globally in jest.setup.js with dynamic state support via global.mockAuthState
 
-// Override the jest.setup.js mock completely
-jest.mock('@/auth', () => ({
-  authService: {
-    useAuth: mockUseAuth,
+// Mock required stores
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: () => ({
+    login: jest.fn(),
+    logout: jest.fn(),
+  }),
+}));
+
+// Mock logger
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
   },
 }));
 
@@ -48,17 +58,22 @@ describe('Landing Page - First-Time User Experience', () => {
     jest.clearAllMocks();
     mockPush.mockClear();
     mockReplace.mockClear();
-    mockUseAuth.mockClear();
+    // Reset global mock auth state
+    global.mockAuthState = {
+      user: null,
+      loading: false,
+      error: null
+    };
   });
 
   describe('P0: Brand New User Landing Experience', () => {
     it('should show loading state initially for new users', async () => {
       // Setup: New user with loading auth state
-      mockUseAuth.mockReturnValue({
+      global.mockAuthState = {
         user: null,
         loading: true,
-        error: null,
-      });
+        error: null
+      };
 
       render(<HomePage />);
 
@@ -72,11 +87,11 @@ describe('Landing Page - First-Time User Experience', () => {
       const startTime = performance.now();
       
       // Setup: Unauthenticated user
-      mockUseAuth.mockReturnValue({
+      global.mockAuthState = {
         user: null,
         loading: false,
-        error: null,
-      });
+        error: null
+      };
 
       await act(async () => {
         render(<HomePage />);
@@ -98,11 +113,11 @@ describe('Landing Page - First-Time User Experience', () => {
         name: 'Test User',
       };
 
-      mockUseAuth.mockReturnValue({
+      global.mockAuthState = {
         user: mockUser,
         loading: false,
-        error: null,
-      });
+        error: null
+      };
 
       await act(async () => {
         render(<HomePage />);
@@ -115,11 +130,11 @@ describe('Landing Page - First-Time User Experience', () => {
 
     it('should handle auth service errors gracefully', async () => {
       // Setup: Auth service error
-      mockUseAuth.mockReturnValue({
+      global.mockAuthState = {
         user: null,
         loading: false,
-        error: 'Authentication service unavailable',
-      });
+        error: 'Authentication service unavailable'
+      };
 
       await act(async () => {
         render(<HomePage />);
@@ -136,11 +151,11 @@ describe('Landing Page - First-Time User Experience', () => {
     it('should achieve Time to Interactive < 2s for auth check', async () => {
       const startTime = performance.now();
       
-      mockUseAuth.mockReturnValue({
+      global.mockAuthState = {
         user: null,
         loading: false,
-        error: null,
-      });
+        error: null
+      };
 
       await act(async () => {
         render(<HomePage />);
@@ -158,11 +173,11 @@ describe('Landing Page - First-Time User Experience', () => {
     it('should render without console errors', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      mockUseAuth.mockReturnValue({
+      global.mockAuthState = {
         user: null,
         loading: false,
-        error: null,
-      });
+        error: null
+      };
 
       await act(async () => {
         render(<HomePage />);
@@ -179,11 +194,9 @@ describe('Landing Page - First-Time User Experience', () => {
 
   describe('P0: Mobile Responsiveness & Accessibility', () => {
     it('should be accessible with proper ARIA attributes', () => {
-      mockUseAuth.mockReturnValue({
-        user: null,
-        loading: true,
-        error: null,
-      });
+      mockAuthState.user = null;
+      mockAuthState.loading = true;
+      mockAuthState.error = null;
 
       render(<HomePage />);
 
@@ -197,11 +210,11 @@ describe('Landing Page - First-Time User Experience', () => {
 
   describe('P0: Edge Cases & Error Recovery', () => {
     it('should prevent navigation loops with proper state management', async () => {
-      mockUseAuth.mockReturnValue({
+      global.mockAuthState = {
         user: null,
         loading: false,
-        error: null,
-      });
+        error: null
+      };
 
       await act(async () => {
         render(<HomePage />);
@@ -219,11 +232,11 @@ describe('Landing Page - First-Time User Experience', () => {
   describe('P0: Conversion Gateway Simulation', () => {
     it('should simulate complete new user journey to login', async () => {
       // Step 1: User lands on homepage
-      mockUseAuth.mockReturnValue({
+      global.mockAuthState = {
         user: null,
         loading: false,
-        error: null,
-      });
+        error: null
+      };
 
       await act(async () => {
         render(<HomePage />);
@@ -238,11 +251,11 @@ describe('Landing Page - First-Time User Experience', () => {
     it('should track timing for conversion analytics', async () => {
       const timingStart = performance.now();
       
-      mockUseAuth.mockReturnValue({
+      global.mockAuthState = {
         user: null,
         loading: false,
-        error: null,
-      });
+        error: null
+      };
 
       await act(async () => {
         render(<HomePage />);

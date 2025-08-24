@@ -15,7 +15,7 @@ import threading
 import time
 import weakref
 from typing import Any, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -31,6 +31,7 @@ from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeo
 
 class TestErrorContextIntegration:
     """Test error context integration with async utilities."""
+    @pytest.mark.asyncio
     async def test_error_context_with_task_pool(self):
         """Test error context integration with task pool."""
         pool = AsyncTaskPool(max_concurrent_tasks=2)
@@ -55,6 +56,7 @@ class TestErrorContextIntegration:
         assert results[0] == "success_1"
         assert isinstance(results[1], ServiceError)
         assert results[2] == "success_3"
+    @pytest.mark.asyncio
     async def test_error_context_with_circuit_breaker(self):
         """Test error context with circuit breaker."""
         breaker = AsyncCircuitBreaker(failure_threshold=2, timeout=0.5)
@@ -75,6 +77,7 @@ class TestErrorContextIntegration:
                 pass
         
         assert len(context_failures) >= 2
+    @pytest.mark.asyncio
     async def test_error_context_propagation(self):
         """Test error context propagation through async calls."""
         propagation_log = []
@@ -98,6 +101,7 @@ class TestErrorContextIntegration:
             await level_1_operation()
         
         assert propagation_log == ["level_1", "level_2", "level_3"]
+    @pytest.mark.asyncio
     async def test_error_context_with_timeout(self):
         """Test error context with timeout operations."""
         timeout_contexts = []
@@ -112,6 +116,7 @@ class TestErrorContextIntegration:
             await asyncio.wait_for(timeout_operation(), timeout=0.2)
         
         assert len(timeout_contexts) == 1
+    @pytest.mark.asyncio
     async def test_error_context_cleanup_on_exception(self):
         """Test error context cleanup when exceptions occur."""
         cleanup_log = []
@@ -133,6 +138,7 @@ class TestErrorContextIntegration:
 
 class TestWeakRefBehavior:
     """Test weak reference behavior in async utilities."""
+    @pytest.mark.asyncio
     async def test_resource_manager_weak_ref_cleanup(self):
         """Test resource manager weak reference cleanup."""
         manager = AsyncResourceManager()
@@ -162,6 +168,7 @@ class TestWeakRefBehavior:
         # Clean up dead references
         manager._cleanup_dead_refs()
         assert len(manager._cleanup_callbacks) == 0
+    @pytest.mark.asyncio
     async def test_weak_ref_with_circular_references(self):
         """Test weak references with circular reference scenarios."""
         manager = AsyncResourceManager()
@@ -197,6 +204,7 @@ class TestWeakRefBehavior:
         # Clean up dead references
         manager._cleanup_dead_refs()
         assert len(manager._cleanup_callbacks) == 0
+    @pytest.mark.asyncio
     async def test_weak_ref_callback_exceptions(self):
         """Test weak reference callback exceptions don't break cleanup."""
         manager = AsyncResourceManager()
@@ -228,6 +236,7 @@ class TestWeakRefBehavior:
 
 class TestConcurrencyEdgeCases:
     """Test concurrency edge cases and race conditions."""
+    @pytest.mark.asyncio
     async def test_rapid_task_submission(self):
         """Test rapid task submission to task pool."""
         pool = AsyncTaskPool(max_concurrent_tasks=5)
@@ -251,6 +260,7 @@ class TestConcurrencyEdgeCases:
         
         assert len(results) == submission_count
         assert completion_count == submission_count
+    @pytest.mark.asyncio
     async def test_concurrent_rate_limiter_stress(self):
         """Test rate limiter under concurrent stress."""
         limiter = AsyncRateLimiter(rate=10, window=1.0)
@@ -273,6 +283,7 @@ class TestConcurrencyEdgeCases:
         # Some should be delayed (beyond rate limit)
         delayed_requests = [t for t in request_times if t[1] > 0.1]
         assert len(delayed_requests) > 0
+    @pytest.mark.asyncio
     async def test_circuit_breaker_race_conditions(self):
         """Test circuit breaker race conditions."""
         breaker = AsyncCircuitBreaker(failure_threshold=5, timeout=0.5)
@@ -302,6 +313,7 @@ class TestConcurrencyEdgeCases:
         
         assert len(successes) > 0
         assert len(errors) > 0
+    @pytest.mark.asyncio
     async def test_shutdown_during_active_operations(self):
         """Test shutdown behavior during active operations."""
         pool = AsyncTaskPool(max_concurrent_tasks=3)
@@ -332,6 +344,7 @@ class TestConcurrencyEdgeCases:
         # Some should have started
         started_count = len([r for r in shutdown_results if r.startswith("started_")])
         assert started_count > 0
+    @pytest.mark.asyncio
     async def test_memory_cleanup_under_load(self):
         """Test memory cleanup under sustained load."""
         import os
@@ -370,6 +383,7 @@ class TestConcurrencyEdgeCases:
         
         # Memory growth should be reasonable (less than 50MB)
         assert memory_growth < 50 * 1024 * 1024
+    @pytest.mark.asyncio
     async def test_global_shutdown_cleanup(self):
         """Test global shutdown cleanup behavior."""
         # This should work without errors even when called multiple times
@@ -379,6 +393,7 @@ class TestConcurrencyEdgeCases:
         # Should still be able to create new utilities after shutdown
         new_manager = AsyncResourceManager()
         assert new_manager is not None
+    @pytest.mark.asyncio
     async def test_exception_propagation_edge_cases(self):
         """Test exception propagation in edge case scenarios."""
         edge_case_results = []

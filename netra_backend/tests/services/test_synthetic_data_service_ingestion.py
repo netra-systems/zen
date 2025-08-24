@@ -9,7 +9,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -31,6 +31,7 @@ def mock_clickhouse():
 
 class TestRealTimeIngestion:
     """Test real-time data ingestion to ClickHouse"""
+    @pytest.mark.asyncio
     async def test_batch_ingestion_to_clickhouse(self, ingestion_service, mock_clickhouse):
         """Test batch ingestion of generated data to ClickHouse"""
         records = [{"id": i, "data": f"record_{i}"} for i in range(1000)]
@@ -45,6 +46,7 @@ class TestRealTimeIngestion:
         assert result["records_ingested"] == 1000
         assert result["batches_processed"] == 10
         assert mock_clickhouse.execute.call_count == 10
+    @pytest.mark.asyncio
     async def test_streaming_ingestion_with_backpressure(self, ingestion_service):
         """Test streaming ingestion with backpressure handling"""
         async def generate_stream():
@@ -61,6 +63,7 @@ class TestRealTimeIngestion:
         
         assert ingestion_metrics.records_processed == 10000
         assert ingestion_metrics.backpressure_events > 0
+    @pytest.mark.asyncio
     async def test_ingestion_error_recovery(self, ingestion_service, mock_clickhouse):
         """Test error recovery during ingestion"""
         # Simulate intermittent failures
@@ -87,6 +90,7 @@ class TestRealTimeIngestion:
         assert result["records_ingested"] > 0
         assert result["failed_records"] < len(records)
         assert result["retries_performed"] > 0
+    @pytest.mark.asyncio
     async def test_ingestion_deduplication(self, ingestion_service):
         """Test deduplication during ingestion"""
         records_with_duplicates = [
@@ -104,6 +108,7 @@ class TestRealTimeIngestion:
         
         assert result["records_ingested"] == 3
         assert result["duplicates_removed"] == 2
+    @pytest.mark.asyncio
     async def test_table_creation_on_demand(self, ingestion_service, mock_clickhouse):
         """Test automatic table creation before ingestion"""
         table_name = f"synthetic_data_{uuid.uuid4().hex}"
@@ -119,6 +124,7 @@ class TestRealTimeIngestion:
             if "CREATE TABLE" in str(call)
         ]
         assert len(create_table_calls) > 0
+    @pytest.mark.asyncio
     async def test_ingestion_metrics_tracking(self, ingestion_service):
         """Test tracking ingestion metrics and performance"""
         start_time = datetime.now(UTC)
@@ -137,6 +143,7 @@ class TestRealTimeIngestion:
         assert metrics.avg_latency_ms > 0
         assert metrics.max_latency_ms >= 149
         assert metrics.min_latency_ms <= 50
+    @pytest.mark.asyncio
     async def test_parallel_batch_ingestion(self, ingestion_service):
         """Test parallel ingestion of multiple batches"""
         batches = [
@@ -153,9 +160,10 @@ class TestRealTimeIngestion:
         
         total_ingested = sum(r["records_ingested"] for r in results)
         assert total_ingested == 1000
+    @pytest.mark.asyncio
     async def test_ingestion_with_transformation(self, ingestion_service):
         """Test data transformation during ingestion"""
-        def transform_record(record):
+        async def transform_record(record):
             record["timestamp"] = datetime.now(UTC).isoformat()
             record["processed"] = True
             return record
@@ -169,6 +177,7 @@ class TestRealTimeIngestion:
         
         assert all("timestamp" in r for r in result["transformed_records"])
         assert all(r["processed"] == True for r in result["transformed_records"])
+    @pytest.mark.asyncio
     async def test_ingestion_circuit_breaker(self, ingestion_service):
         """Test circuit breaker for ingestion failures"""
         circuit_breaker = ingestion_service.get_circuit_breaker(
@@ -189,6 +198,7 @@ class TestRealTimeIngestion:
         # Should reject calls
         with pytest.raises(Exception, match="Circuit breaker is open"):
             await circuit_breaker.call(lambda: "test")
+    @pytest.mark.asyncio
     async def test_ingestion_progress_tracking(self, ingestion_service):
         """Test real-time progress tracking during ingestion"""
         progress_updates = []

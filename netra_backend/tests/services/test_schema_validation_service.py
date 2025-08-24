@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from typing import List, Optional
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from pydantic import BaseModel, ValidationError
@@ -18,6 +18,7 @@ class UserDataSchema(BaseModel):
     tags: List[str] = []
 class TestSchemaValidationService:
     
+    @pytest.mark.asyncio
     async def test_validate_schema(self):
         """Test schema validation against database."""
         mock_engine = Mock(spec=AsyncEngine)
@@ -41,6 +42,7 @@ class TestSchemaValidationService:
             # Expected due to mocking, just test that method exists
             assert hasattr(SchemaValidationService, 'validate_schema')
 
+    @pytest.mark.asyncio
     async def test_schema_service_import(self):
         """Test that the schema validation service can be imported."""
         assert SchemaValidationService != None

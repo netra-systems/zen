@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -33,6 +33,7 @@ def mock_user():
 
 class TestGetThread:
     """Test cases for GET /{thread_id} endpoint"""
+    @pytest.mark.asyncio
     async def test_get_thread_success(self, mock_db, mock_user):
         """Test successful thread retrieval"""
         mock_thread = create_mock_thread()
@@ -46,6 +47,7 @@ class TestGetThread:
         assert result.id == "thread_abc123"
         assert result.message_count == 10
         thread_repo.get_by_id.assert_called_once_with(mock_db, "thread_abc123")
+    @pytest.mark.asyncio
     async def test_get_thread_not_found(self, mock_db, mock_user):
         """Test thread not found"""
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
@@ -56,6 +58,7 @@ class TestGetThread:
                 await get_thread(thread_id="nonexistent", db=mock_db, current_user=mock_user)
             
             assert_http_exception(exc_info, 404, "Thread not found")
+    @pytest.mark.asyncio
     async def test_get_thread_access_denied(self, mock_db, mock_user):
         """Test access denied for thread owned by another user"""
         mock_thread = create_access_denied_thread()
@@ -68,6 +71,7 @@ class TestGetThread:
                 await get_thread(thread_id="thread_abc123", db=mock_db, current_user=mock_user)
             
             assert_http_exception(exc_info, 403, "Access denied")
+    @pytest.mark.asyncio
     async def test_get_thread_general_exception(self, mock_db, mock_user):
         """Test general exception handling"""
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \

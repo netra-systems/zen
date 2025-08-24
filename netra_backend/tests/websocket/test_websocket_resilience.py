@@ -9,7 +9,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -24,6 +24,7 @@ from netra_backend.app.routes.websocket_unified import (
 class TestWebSocketConnectionResilience:
     """Test WebSocket connection resilience."""
     
+    @pytest.mark.asyncio
     async def test_connection_survives_rapid_messages(self):
         """Test connection survives rapid message sending."""
         user_id = "rapid_test_user"
@@ -52,6 +53,7 @@ class TestWebSocketConnectionResilience:
         finally:
             await connection_manager.remove_connection(user_id, actual_conn_id)
             
+    @pytest.mark.asyncio
     async def test_connection_handles_malformed_messages(self):
         """Test connection handles malformed messages gracefully."""
         user_id = "malform_test_user"
@@ -89,6 +91,7 @@ class TestWebSocketConnectionResilience:
         finally:
             await connection_manager.remove_connection(user_id, conn_id)
             
+    @pytest.mark.asyncio
     async def test_connection_recovery_after_errors(self):
         """Test connection can recover after errors."""
         user_id = "recovery_test_user"
@@ -121,6 +124,7 @@ class TestWebSocketConnectionResilience:
 class TestWebSocketNetworkInstability:
     """Test WebSocket behavior under network instability."""
     
+    @pytest.mark.asyncio
     async def test_connection_timeout_handling(self):
         """Test connection timeout handling."""
         user_id = "timeout_user"
@@ -146,6 +150,7 @@ class TestWebSocketNetworkInstability:
         finally:
             await connection_manager.remove_connection(user_id, conn_id)
             
+    @pytest.mark.asyncio
     async def test_graceful_disconnection_handling(self):
         """Test graceful disconnection handling."""
         user_id = "disconnect_user"
@@ -165,6 +170,7 @@ class TestWebSocketNetworkInstability:
         stats = connection_manager.get_connection_stats()
         assert user_id not in stats.get("connections_per_user", {})
         
+    @pytest.mark.asyncio
     async def test_abnormal_disconnection_cleanup(self):
         """Test cleanup after abnormal disconnection."""
         user_id = "abnormal_disconnect_user"
@@ -193,6 +199,7 @@ class TestWebSocketNetworkInstability:
 class TestWebSocketErrorRecovery:
     """Test WebSocket error recovery mechanisms."""
     
+    @pytest.mark.asyncio
     async def test_json_parse_error_recovery(self):
         """Test recovery from JSON parse errors."""
         user_id = "json_error_user"
@@ -221,6 +228,7 @@ class TestWebSocketErrorRecovery:
         finally:
             await connection_manager.remove_connection(user_id, conn_id)
             
+    @pytest.mark.asyncio
     async def test_validation_error_recovery(self):
         """Test recovery from message validation errors."""
         user_id = "validation_error_user"
@@ -256,6 +264,7 @@ class TestWebSocketErrorRecovery:
         finally:
             await connection_manager.remove_connection(user_id, conn_id)
             
+    @pytest.mark.asyncio
     async def test_rate_limiting_recovery(self):
         """Test recovery from rate limiting."""
         user_id = "rate_limit_user"
@@ -282,6 +291,7 @@ class TestWebSocketErrorRecovery:
         finally:
             await connection_manager.remove_connection(user_id, conn_id)
             
+    @pytest.mark.asyncio
     async def test_database_error_recovery(self):
         """Test recovery from database errors."""
         user_id = "db_error_user"
@@ -313,6 +323,7 @@ class TestWebSocketErrorRecovery:
 class TestWebSocketConcurrencyResilience:
     """Test WebSocket resilience under concurrent load."""
     
+    @pytest.mark.asyncio
     async def test_concurrent_connection_handling(self):
         """Test handling multiple concurrent connections."""
         base_user_id = "concurrent_user"
@@ -343,6 +354,7 @@ class TestWebSocketConcurrencyResilience:
             for user_id, conn_id in connections:
                 await connection_manager.remove_connection(user_id, conn_id)
                 
+    @pytest.mark.asyncio
     async def test_concurrent_message_processing(self):
         """Test concurrent message processing."""
         user_id = "concurrent_msg_user"
@@ -373,6 +385,7 @@ class TestWebSocketConcurrencyResilience:
         finally:
             await connection_manager.remove_connection(user_id, conn_id)
             
+    @pytest.mark.asyncio
     async def test_connection_limit_enforcement(self):
         """Test connection limits are properly enforced."""
         user_id = "limit_test_user" 
@@ -440,6 +453,7 @@ class TestWebSocketCORSResilience:
         assert cors_handler.is_origin_allowed("https://example.com.malicious.com") is False
         assert cors_handler.is_origin_allowed("http://app.example.com") is False  # Wrong protocol
         
+    @pytest.mark.asyncio
     async def test_cors_enforcement_in_connection(self):
         """Test CORS enforcement during connection establishment."""
         from netra_backend.app.core.websocket_cors import validate_websocket_origin

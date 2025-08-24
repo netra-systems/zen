@@ -165,7 +165,7 @@ def upgrade():
     # Force a lock timeout by trying to access locked resources
     op.execute("SELECT * FROM pg_stat_activity WHERE state = 'active'")
 
-def downgrade():
+async def downgrade():
     op.drop_table('test_migration_table')
 """)
             
@@ -231,7 +231,7 @@ def upgrade():
         sa.Column('id', sa.Integer, primary_key=True)
     )
 
-def downgrade():
+async def downgrade():
     op.drop_table('partial_table3')
     op.drop_table('partial_table2')
     op.drop_table('partial_table1')

@@ -241,6 +241,7 @@ async def priority_processing_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_basic_priority_queue_processing_l3(priority_processing_manager):
     """Test basic priority queue processing with real Redis infrastructure."""
     # Enqueue mixed priority jobs
@@ -266,6 +267,7 @@ async def test_basic_priority_queue_processing_l3(priority_processing_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_concurrent_priority_processing_l3(priority_processing_manager):
     """Test priority processing under concurrent load."""
     # Enqueue large number of mixed priority jobs
@@ -302,6 +304,7 @@ async def test_concurrent_priority_processing_l3(priority_processing_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_queue_statistics_accuracy_l3(priority_processing_manager):
     """Test accuracy of queue statistics during processing."""
     # Enqueue test jobs
@@ -336,6 +339,7 @@ async def test_queue_statistics_accuracy_l3(priority_processing_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration  
+@pytest.mark.asyncio
 async def test_priority_queue_performance_l3(priority_processing_manager):
     """Test priority queue performance under high load."""
     # Create high-volume test scenario
@@ -374,6 +378,7 @@ async def test_priority_queue_performance_l3(priority_processing_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_mixed_workload_priority_handling_l3(priority_processing_manager):
     """Test priority handling with mixed AI workload scenarios."""
     # Create realistic mixed workload

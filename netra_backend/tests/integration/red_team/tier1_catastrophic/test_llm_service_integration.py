@@ -64,7 +64,7 @@ except ImportError:
             return {"response": "Fallback response"}
 
 # AgentRun model - creating mock for tests
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 AgentRun = Mock
 
 try:

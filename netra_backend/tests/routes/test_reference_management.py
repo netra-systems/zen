@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient

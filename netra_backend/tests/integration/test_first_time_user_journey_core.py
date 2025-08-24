@@ -19,7 +19,7 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -36,7 +36,7 @@ class TestFirstTimeUserJourneyCore:
     @pytest.fixture
     async def first_time_user_setup(self):
         """Setup isolated test environment for first-time user testing"""
-        return await self._create_first_time_user_env()
+        yield await self._create_first_time_user_env()
 
     @pytest.fixture
     def payment_system(self):
@@ -93,6 +93,7 @@ class TestFirstTimeUserJourneyCore:
         llm_manager.route_model = AsyncMock()
         return llm_manager
 
+    @pytest.mark.asyncio
     async def test_complete_registration_to_first_login_flow(self, first_time_user_setup, email_system, payment_system):
         """
         Test complete user registration to first successful login.
@@ -152,6 +153,7 @@ class TestFirstTimeUserJourneyCore:
         
         return onboarding_data
 
+    @pytest.mark.asyncio
     async def test_first_agent_creation_to_success(self, first_time_user_setup, llm_system):
         """
         Test first agent creation and successful task execution.
@@ -204,6 +206,7 @@ class TestFirstTimeUserJourneyCore:
         
         return {"message": message, "response": agent_response, "task_completed": True}
 
+    @pytest.mark.asyncio
     async def test_trial_activation_to_first_optimization(self, first_time_user_setup, llm_system):
         """
         Test trial activation to first successful optimization.

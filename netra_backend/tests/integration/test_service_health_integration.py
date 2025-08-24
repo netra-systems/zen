@@ -18,7 +18,7 @@ import asyncio
 import time
 from datetime import datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.startup_checks import StartupChecker
@@ -62,6 +62,7 @@ class TestServiceHealthIntegration:
             'llm_providers': {'status': 'healthy', 'response_time_ms': 150, 'last_check': time.time()}
         }
 
+    @pytest.mark.asyncio
     async def test_health_check_endpoint_validation(self, mock_healthy_services):
         """
         Test health check endpoint returns correct status and metrics.
@@ -112,6 +113,7 @@ class TestServiceHealthIntegration:
         assert response['status'] == expected, \
             f"Expected overall status {expected}, got {response['status']}"
 
+    @pytest.mark.asyncio
     async def test_service_dependency_health_checks(self):
         """Test health checks validate all service dependencies correctly."""
         # Test database health check
@@ -168,6 +170,7 @@ class TestServiceHealthIntegration:
         
         return {'healthy_mock': healthy_mock, 'unhealthy_mock': unhealthy_mock}
 
+    @pytest.mark.asyncio
     async def test_circuit_breaker_behavior_on_failures(self):
         """
         Test circuit breaker behavior when services fail.
@@ -224,6 +227,7 @@ class TestServiceHealthIntegration:
             result = await health_service._check_database_with_circuit_breaker()
             assert result['status'] == 'healthy'
 
+    @pytest.mark.asyncio
     async def test_service_recovery_after_failures(self):
         """
         Test service recovery detection and healing process.
@@ -255,6 +259,7 @@ class TestServiceHealthIntegration:
             if all(svc['status'] == 'healthy' for svc in recovery_result['services'].values()):
                 assert recovery_result['status'] == 'healthy'
 
+    @pytest.mark.asyncio
     async def test_health_aggregation_across_services(self):
         """
         Test health status aggregation logic across multiple services.
@@ -315,6 +320,7 @@ class TestServiceHealthIntegration:
             assert result['status'] == scenario['expected_overall'], \
                 f"Scenario {scenario['name']}: expected {scenario['expected_overall']}, got {result['status']}"
 
+    @pytest.mark.asyncio
     async def test_health_check_performance_and_timeouts(self):
         """Test health check performance and timeout handling."""
         timeout_mock = AsyncMock(side_effect=asyncio.TimeoutError("Health check timed out"))
@@ -326,6 +332,7 @@ class TestServiceHealthIntegration:
             # ClickHouse should be unhealthy (timed out)
             assert result['services']['clickhouse']['status'] == 'unhealthy'
 
+    @pytest.mark.asyncio
     async def test_health_monitoring_in_startup_integration(self):
         """Test integration between health monitoring and startup checks."""
         from netra_backend.app.core.app_factory import create_app

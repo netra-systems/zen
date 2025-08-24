@@ -10,7 +10,7 @@ from pathlib import Path
 import logging
 import time
 from typing import List, Tuple
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 

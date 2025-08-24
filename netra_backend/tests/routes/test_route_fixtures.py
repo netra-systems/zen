@@ -9,7 +9,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
-from unittest.mock import AsyncMock, MagicMock, Mock
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -36,7 +36,7 @@ class MockDependencyManager:
     @staticmethod
     def setup_core_dependencies(app):
         """Set up core application dependencies for testing."""
-        from unittest.mock import AsyncMock, MagicMock
+        from unittest.mock import AsyncMock, MagicMock, MagicMock
 
         from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -76,7 +76,7 @@ class MockDependencyManager:
         from contextlib import asynccontextmanager
         @asynccontextmanager
         async def mock_get_db_session():
-            from unittest.mock import AsyncMock
+            from unittest.mock import AsyncMock, MagicMock
             mock_session = AsyncMock(spec=AsyncSession)
             # Mock methods commonly used in auth
             mock_session.execute = AsyncMock()

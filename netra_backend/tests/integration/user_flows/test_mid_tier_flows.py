@@ -19,7 +19,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Any
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import httpx
@@ -27,24 +27,25 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Team model - creating mock for tests
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 Team = Mock
 from netra_backend.app.services.user_service import UserService as UsageService
 
 # UserFlowTestBase - using unittest.TestCase
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 UserFlowTestBase = unittest.TestCase
 assert_successful_registration = Mock
 assert_plan_compliance = Mock
 # User journey data - creating mocks
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 UserTestData = Mock()
 UserJourneyScenarios = Mock()
 
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(45)
+@pytest.mark.asyncio
 async def test_early_to_mid_tier_upgrade_with_team_setup(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -87,6 +88,7 @@ async def test_early_to_mid_tier_upgrade_with_team_setup(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_mid_tier_team_member_management(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -131,6 +133,7 @@ async def test_mid_tier_team_member_management(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_mid_tier_shared_analytics_workspace(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -179,6 +182,7 @@ async def test_mid_tier_shared_analytics_workspace(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_mid_tier_bulk_optimization_operations(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -238,6 +242,7 @@ async def test_mid_tier_bulk_optimization_operations(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_mid_tier_integrations_and_dashboards(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -273,6 +278,7 @@ async def test_mid_tier_integrations_and_dashboards(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_mid_tier_cost_allocation_and_api_limits(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]

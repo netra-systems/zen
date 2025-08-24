@@ -5,7 +5,7 @@ from pathlib import Path
 
 import asyncio
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -34,6 +34,7 @@ from netra_backend.tests.helpers.quality_monitoring_helpers import (
 
 class TestIntegrationWithOtherServices:
     """Integration tests with other services"""
+    @pytest.mark.asyncio
     async def test_service_component_integration(self):
         """Test service components work together"""
         service = QualityMonitoringService()
@@ -56,6 +57,7 @@ class TestIntegrationWithOtherServices:
         # Verify event was processed by metrics collector
         buffer = service.metrics_collector.get_buffer()
         assert "integration_agent" in buffer
+    @pytest.mark.asyncio
     async def test_monitoring_cycle_integration(self):
         """Test full monitoring cycle"""
         service = QualityMonitoringService()
@@ -83,6 +85,7 @@ class TestIntegrationWithOtherServices:
 
 class TestEdgeCasesAndErrorHandling:
     """Test edge cases and error handling"""
+    @pytest.mark.asyncio
     async def test_empty_metrics_buffer(self, service_with_mocks):
         """Test behavior with empty metrics buffer"""
         dashboard_data = await service_with_mocks.get_dashboard_data()
@@ -90,12 +93,14 @@ class TestEdgeCasesAndErrorHandling:
         assert dashboard_data["overall_stats"]["total_events"] == 0
         assert dashboard_data["overall_stats"]["average_quality"] == 0.0
         assert len(dashboard_data["agent_profiles"]) == 0
+    @pytest.mark.asyncio
     async def test_get_agent_report_nonexistent(self, service_with_mocks):
         """Test getting report for non-existent agent"""
         report = await service_with_mocks.get_agent_report("fake_agent")
         
         assert "error" in report
         assert "No data for agent fake_agent" in report["error"]
+    @pytest.mark.asyncio
     async def test_record_event_with_minimal_metrics(self, service_with_mocks, minimal_quality_metrics):
         """Test recording event with minimal metrics"""
         await service_with_mocks.record_quality_event(
@@ -125,6 +130,7 @@ class TestBufferAndHistoryLimits:
 
 class TestComplexScenarios:
     """Test complex real-world scenarios"""
+    @pytest.mark.asyncio
     async def test_high_volume_event_processing(self):
         """Test processing high volume of events"""
         service = QualityMonitoringService()
@@ -152,6 +158,7 @@ class TestComplexScenarios:
         buffer = service.metrics_collector.get_buffer()
         total_events = sum(len(agent_buffer) for agent_buffer in buffer.values())
         assert total_events == 100
+    @pytest.mark.asyncio
     async def test_concurrent_alert_handling(self):
         """Test handling multiple concurrent alerts"""
         service = QualityMonitoringService()
@@ -177,6 +184,7 @@ class TestComplexScenarios:
         # Verify all alerts are acknowledged
         for alert in alerts:
             assert service.alert_manager.active_alerts[alert.id].acknowledged is True
+    @pytest.mark.asyncio
     async def test_service_resilience_during_failures(self):
         """Test service resilience during component failures"""
         service = QualityMonitoringService()
@@ -208,6 +216,7 @@ class TestComplexScenarios:
 
 class TestServiceShutdownAndCleanup:
     """Test proper service shutdown and cleanup"""
+    @pytest.mark.asyncio
     async def test_graceful_shutdown_with_active_monitoring(self):
         """Test graceful shutdown while monitoring is active"""
         service = QualityMonitoringService()
@@ -235,6 +244,7 @@ class TestServiceShutdownAndCleanup:
         # Verify data is preserved
         buffer = service.metrics_collector.get_buffer()
         assert "shutdown_test" in buffer
+    @pytest.mark.asyncio
     async def test_alert_history_management(self):
         """Test alert history is properly managed"""
         service = QualityMonitoringService()

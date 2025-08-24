@@ -14,7 +14,7 @@ import pickle
 import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -32,7 +32,7 @@ class TestUserStatePersistenceCompleteL4:
     @pytest.fixture
     async def persistence_stack(self):
         """Persistence infrastructure setup"""
-        return {
+        yield {
             'user_service': UserService(),
             'session_service': SessionService(),
             'redis_service': RedisService(),
@@ -44,6 +44,7 @@ class TestUserStatePersistenceCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_user_state_across_service_restart(self, persistence_stack):
         """Test user state persistence across service restart"""
         user_id = "user_restart_test"
@@ -88,6 +89,7 @@ class TestUserStatePersistenceCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_user_preferences_sync_across_devices(self, persistence_stack):
         """Test user preferences synchronization across multiple devices"""
         user_id = "user_multi_device"
@@ -148,6 +150,7 @@ class TestUserStatePersistenceCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_user_state_during_database_failure(self, persistence_stack):
         """Test user state persistence during database failure"""
         user_id = "user_db_failure"
@@ -192,6 +195,7 @@ class TestUserStatePersistenceCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_user_activity_tracking_persistence(self, persistence_stack):
         """Test user activity tracking and persistence"""
         user_id = "user_activity"
@@ -230,6 +234,7 @@ class TestUserStatePersistenceCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_user_state_versioning(self, persistence_stack):
         """Test user state versioning and rollback"""
         user_id = "user_versioning"
@@ -270,6 +275,7 @@ class TestUserStatePersistenceCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_user_state_bulk_operations(self, persistence_stack):
         """Test bulk user state operations"""
         user_ids = [f"user_bulk_{i}" for i in range(100)]
@@ -307,6 +313,7 @@ class TestUserStatePersistenceCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_user_state_expiry_and_cleanup(self, persistence_stack):
         """Test user state expiry and cleanup mechanisms"""
         user_id = "user_expiry"
@@ -352,6 +359,7 @@ class TestUserStatePersistenceCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_user_state_migration(self, persistence_stack):
         """Test user state migration between schema versions"""
         user_id = "user_migration"
@@ -393,6 +401,7 @@ class TestUserStatePersistenceCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_user_state_consistency_validation(self, persistence_stack):
         """Test user state consistency validation and repair"""
         user_id = "user_consistency"
@@ -430,6 +439,7 @@ class TestUserStatePersistenceCompleteL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_user_state_atomic_operations(self, persistence_stack):
         """Test atomic operations on user state"""
         user_id = "user_atomic"

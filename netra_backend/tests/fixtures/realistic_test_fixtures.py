@@ -124,7 +124,7 @@ async def realistic_llm_responses(realistic_fixtures):
             )
             responses.append(response)
     
-    return responses
+    yield responses
 
 # Re-export all fixture functions
 __all__ = [

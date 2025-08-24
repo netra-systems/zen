@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>WebSocket to Agent Integration Architecture</title>
+    <version>1.0.0</version>
+    <created>2025-08-24</created>
+    <category>Core Architecture</category>
+    <business_value>
+      <segment>Platform/Internal</segment>
+      <goal>Real-time Agent Communication</goal>
+      <impact>Enables customer interactions with AI agents through WebSocket connections</impact>
+    </business_value>
+  </metadata>
+
+  <overview>
+    <description>
+      Complete architecture for WebSocket to Agent message flow, enabling real-time 
+      AI agent communication through the Netra Apex platform.
+    </description>
+    <key_capabilities>
+      <capability>Real-time bidirectional communication</capability>
+      <capability>Agent initialization and context management</capability>
+      <capability>Message routing and processing</capability>
+      <capability>Error handling and recovery</capability>
+      <capability>Performance monitoring and statistics</capability>
+    </key_capabilities>
+  </overview>
+
+  <message_flow>
+    <step number="1" component="Frontend">
+      <action>Send WebSocket message</action>
+      <details>
+        Frontend sends either 'start_agent' for new conversations or 
+        'user_message' for ongoing conversations via WebSocket client
+      </details>
+      <location>frontend/services/webSocketService.ts</location>
+    </step>
+
+    <step number="2" component="WebSocket Endpoint">
+      <action>Receive and authenticate</action>
+      <details>
+        WebSocket endpoint authenticates JWT, accepts connection,
+        and prepares to route messages
+      </details>
+      <location>netra_backend/app/routes/websocket.py:69-174</location>
+    </step>
+
+    <step number="3" component="Message Router">
+      <action>Route to handler</action>
+      <details>
+        MessageRouter identifies message type and routes to appropriate
+        handler based on registered handlers
+      </details>
+      <location>netra_backend/app/websocket_core/handlers.py:334-431</location>
+    </step>
+
+    <step number="4" component="Agent Message Handler">
+      <action>Process agent message</action>
+      <details>
+        AgentMessageHandler processes start_agent or user_message types,
+        manages database sessions, and calls MessageHandlerService
+      </details>
+      <location>netra_backend/app/websocket_core/agent_handler.py</location>
+    </step>
+
+    <step number="5" component="Message Handler Service">
+      <action>Execute agent workflow</action>
+      <details>
+        MessageHandlerService creates/validates threads, initializes
+        supervisor agent, and executes agent workflow
+      </details>
+      <location>netra_backend/app/services/message_handlers.py:74-308</location>
+    </step>
+
+    <step number="6" component="Supervisor Agent">
+      <action>Process user request</action>
+      <details>
+        SupervisorAgent receives prompt and context, orchestrates
+        sub-agents, and generates response
+      </details>
+      <location>netra_backend/app/agents/supervisor_consolidated.py</location>
+    </step>
+
+    <step number="7" component="WebSocket Response">
+      <action>Send response to client</action>
+      <details>
+        Agent response is sent back through WebSocket connection
+        to the frontend client
+      </details>
+      <location>Via WebSocket manager</location>
+    </step>
+  </message_flow>
+
+  <message_types>
+    <type name="start_agent">
+      <description>Initialize new agent conversation</description>
+      <payload>
+        <field name="user_request" type="string" required="true">Initial user prompt</field>
+        <field name="thread_id" type="string" required="false">Optional existing thread ID</field>
+        <field name="context" type="object" required="false">Additional context data</field>
+        <field name="settings" type="object" required="false">Agent settings</field>
+      </payload>
+    </type>
+
+    <type name="user_message">
+      <description>Continue existing conversation</description>
+      <payload>
+        <field name="content" type="string" required="true">User message content</field>
+        <field name="thread_id" type="string" required="true">Existing thread ID</field>
+        <field name="message_id" type="string" required="false">Optional message ID</field>
+      </payload>
+    </type>
+
+    <type name="agent_response">
+      <description>Response from agent execution</description>
+      <payload>
+        <field name="content" type="string">Agent response content</field>
+        <field name="thread_id" type="string">Associated thread ID</field>
+        <field name="agent_name" type="string">Name of responding agent</field>
+        <field name="metadata" type="object">Additional response metadata</field>
+      </payload>
+    </type>
+  </message_types>
+
+  <components>
+    <component name="WebSocket Infrastructure">
+      <description>Core WebSocket handling and connection management</description>
+      <modules>
+        <module>netra_backend/app/websocket_core/</module>
+        <module>netra_backend/app/routes/websocket.py</module>
+      </modules>
+      <responsibilities>
+        <responsibility>Connection authentication and management</responsibility>
+        <responsibility>Message routing and dispatching</responsibility>
+        <responsibility>Heartbeat and health monitoring</responsibility>
+        <responsibility>Error handling and recovery</responsibility>
+      </responsibilities>
+    </component>
+
+    <component name="Agent Message Handler">
+      <description>Bridge between WebSocket and Agent systems</description>
+      <modules>
+        <module>netra_backend/app/websocket_core/agent_handler.py</module>
+      </modules>
+      <responsibilities>
+        <responsibility>Handle start_agent and user_message types</responsibility>
+        <responsibility>Manage database sessions</responsibility>
+        <responsibility>Call MessageHandlerService methods</responsibility>
+        <responsibility>Collect statistics and metrics</responsibility>
+      </responsibilities>
+    </component>
+
+    <component name="Message Handler Service">
+      <description>Business logic for agent message processing</description>
+      <modules>
+        <module>netra_backend/app/services/message_handlers.py</module>
+      </modules>
+      <responsibilities>
+        <responsibility>Thread creation and validation</responsibility>
+        <responsibility>User message persistence</responsibility>
+        <responsibility>Agent initialization and execution</responsibility>
+        <responsibility>Response handling and persistence</responsibility>
+      </responsibilities>
+    </component>
+
+    <component name="Agent System">
+      <description>AI agent orchestration and execution</description>
+      <modules>
+        <module>netra_backend/app/agents/</module>
+      </modules>
+      <responsibilities>
+        <responsibility>Process user requests</responsibility>
+        <responsibility>Orchestrate sub-agents</responsibility>
+        <responsibility>Generate intelligent responses</responsibility>
+        <responsibility>Maintain conversation context</responsibility>
+      </responsibilities>
+    </component>
+  </components>
+
+  <error_handling>
+    <scenario name="Database Connection Failure">
+      <trigger>Database session cannot be obtained</trigger>
+      <handling>
+        Log error, send error response to client, maintain WebSocket connection
+      </handling>
+    </scenario>
+
+    <scenario name="Agent Execution Error">
+      <trigger>Agent fails during execution</trigger>
+      <handling>
+        Capture exception, log details, send error message to client, mark run as failed
+      </handling>
+    </scenario>
+
+    <scenario name="Invalid Message Format">
+      <trigger>Message missing required fields or invalid structure</trigger>
+      <handling>
+        Validate message, send format error to client, continue processing other messages
+      </handling>
+    </scenario>
+
+    <scenario name="Authentication Failure">
+      <trigger>Invalid or expired JWT token</trigger>
+      <handling>
+        Reject WebSocket connection with appropriate error code
+      </handling>
+    </scenario>
+  </error_handling>
+
+  <monitoring>
+    <metrics>
+      <metric name="messages_processed">Total messages handled by type</metric>
+      <metric name="agent_executions">Successful agent runs</metric>
+      <metric name="errors_by_type">Categorized error counts</metric>
+      <metric name="response_times">Agent processing latencies</metric>
+      <metric name="active_connections">Current WebSocket connections</metric>
+    </metrics>
+
+    <statistics_endpoints>
+      <endpoint path="/ws/stats">Detailed WebSocket statistics</endpoint>
+      <endpoint path="/ws/health">Health check and metrics</endpoint>
+    </statistics_endpoints>
+  </monitoring>
+
+  <testing>
+    <test_coverage>
+      <category name="Integration Tests">
+        <location>netra_backend/tests/integration/test_websocket_agent_flow.py</location>
+        <tests>15 comprehensive integration tests</tests>
+      </category>
+      <category name="Unit Tests">
+        <location>Various test files for individual components</location>
+      </category>
+      <category name="E2E Tests">
+        <location>tests/e2e/ for full system validation</location>
+      </category>
+    </test_coverage>
+  </testing>
+
+  <configuration>
+    <setting name="max_connections_per_user" default="3">
+      Maximum concurrent WebSocket connections per user
+    </setting>
+    <setting name="max_message_rate_per_minute" default="30">
+      Rate limiting for message processing
+    </setting>
+    <setting name="heartbeat_interval_seconds" default="45">
+      WebSocket heartbeat interval
+    </setting>
+    <setting name="message_timeout_seconds" default="300">
+      Maximum time for agent message processing
+    </setting>
+  </configuration>
+
+  <security>
+    <authentication>JWT-based authentication via header or subprotocol</authentication>
+    <authorization>User-based thread access validation</authorization>
+    <rate_limiting>Per-user message rate limiting</rate_limiting>
+    <validation>Input validation and sanitization</validation>
+  </security>
+
+  <learnings>
+    <learning>
+      Integration between generic WebSocket handlers and specific business logic
+      requires explicit handler registration to maintain separation of concerns
+    </learning>
+    <learning>
+      Database session management in WebSocket contexts requires careful
+      handling to avoid connection leaks
+    </learning>
+    <learning>
+      Message type enums provide type safety and prevent string literal errors
+      in message routing
+    </learning>
+  </learnings>
+</specification>

@@ -194,6 +194,37 @@ class WebSocketConfig(BaseModel):
     allowed_origins: List[str] = Field(default_factory=list)
 
 
+class ReconnectionConfig(BaseModel):
+    """Configuration for WebSocket reconnection behavior."""
+    enabled: bool = True
+    max_attempts: int = 5
+    initial_delay_seconds: float = 1.0
+    max_delay_seconds: float = 30.0
+    backoff_multiplier: float = 2.0
+    jitter_enabled: bool = True
+    max_jitter_seconds: float = 2.0
+    connection_timeout_seconds: float = 10.0
+    ping_interval_seconds: float = 30.0
+    ping_timeout_seconds: float = 5.0
+    
+    def calculate_delay(self, attempt: int) -> float:
+        """Calculate delay for given attempt number."""
+        import random
+        if attempt <= 0:
+            return self.initial_delay_seconds
+            
+        delay = min(
+            self.initial_delay_seconds * (self.backoff_multiplier ** (attempt - 1)),
+            self.max_delay_seconds
+        )
+        
+        if self.jitter_enabled:
+            jitter = random.uniform(0, min(self.max_jitter_seconds, delay * 0.1))
+            delay += jitter
+            
+        return delay
+
+
 class AuthInfo(BaseModel):
     """Authentication information for WebSocket connections."""
     user_id: str

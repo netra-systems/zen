@@ -21,7 +21,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as redis
@@ -115,6 +115,7 @@ class AuthJWTRedisManager:
         
         logger.info("Auth services initialized with Redis backend")
     
+    @pytest.mark.asyncio
     async def test_jwt_token_lifecycle(self, user_count: int) -> Dict[str, Any]:
         """Test complete JWT token lifecycle with Redis persistence."""
         lifecycle_results = {
@@ -187,6 +188,7 @@ class AuthJWTRedisManager:
         
         return lifecycle_results
     
+    @pytest.mark.asyncio
     async def test_session_storage_persistence(self, session_count: int) -> Dict[str, Any]:
         """Test session storage and persistence in Redis."""
         storage_results = {
@@ -275,6 +277,7 @@ class AuthJWTRedisManager:
         
         return storage_results
     
+    @pytest.mark.asyncio
     async def test_token_refresh_flows(self, refresh_count: int) -> Dict[str, Any]:
         """Test JWT token refresh flows with Redis session updates."""
         refresh_results = {
@@ -343,6 +346,7 @@ class AuthJWTRedisManager:
         
         return refresh_results
     
+    @pytest.mark.asyncio
     async def test_token_revocation_scenarios(self, revocation_count: int) -> Dict[str, Any]:
         """Test JWT token revocation with Redis session cleanup."""
         revocation_results = {
@@ -482,6 +486,7 @@ class TestAuthJWTRedisSessionL3:
         yield manager
         await manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_jwt_token_lifecycle_validation(self, auth_manager):
         """Test complete JWT token lifecycle with Redis persistence."""
         results = await auth_manager.test_jwt_token_lifecycle(20)
@@ -500,6 +505,7 @@ class TestAuthJWTRedisSessionL3:
         
         logger.info(f"JWT lifecycle test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_session_storage_redis_persistence(self, auth_manager):
         """Test session storage and persistence in Redis."""
         results = await auth_manager.test_session_storage_persistence(25)
@@ -521,6 +527,7 @@ class TestAuthJWTRedisSessionL3:
         
         logger.info(f"Session storage test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_token_refresh_flow_validation(self, auth_manager):
         """Test JWT token refresh flows with Redis session updates."""
         results = await auth_manager.test_token_refresh_flows(15)
@@ -542,6 +549,7 @@ class TestAuthJWTRedisSessionL3:
         
         logger.info(f"Token refresh flow test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_token_revocation_cleanup(self, auth_manager):
         """Test JWT token revocation with Redis session cleanup."""
         results = await auth_manager.test_token_revocation_scenarios(18)
@@ -563,6 +571,7 @@ class TestAuthJWTRedisSessionL3:
         
         logger.info(f"Token revocation test completed: {results}")
     
+    @pytest.mark.asyncio
     async def test_auth_redis_integration_comprehensive(self, auth_manager):
         """Test comprehensive auth-Redis integration scenarios."""
         # Run comprehensive test suite

@@ -24,7 +24,7 @@ import time
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -196,6 +196,7 @@ class AuthServiceHealthDependencyManager:
         finally:
             await engine.dispose()
     
+    @pytest.mark.asyncio
     async def test_redis_connectivity(self, redis_url: str):
         """Test Redis connectivity and basic operations."""
         import redis.asyncio as redis
@@ -236,6 +237,7 @@ class AuthServiceHealthDependencyManager:
             )
             self.circuit_breakers[service] = CircuitBreaker(f"auth_{service}", config)
     
+    @pytest.mark.asyncio
     async def test_health_endpoint_basic(self) -> Dict[str, Any]:
         """Test basic /health endpoint response."""
         results = {
@@ -273,6 +275,7 @@ class AuthServiceHealthDependencyManager:
             
         return results
     
+    @pytest.mark.asyncio
     async def test_dependency_health_checks(self) -> Dict[str, Any]:
         """Test health checks for each dependency service."""
         results = {
@@ -313,6 +316,7 @@ class AuthServiceHealthDependencyManager:
             
         return results
     
+    @pytest.mark.asyncio
     async def test_readiness_endpoint(self) -> Dict[str, Any]:
         """Test /health/ready endpoint with dependency validation."""
         results = {
@@ -355,6 +359,7 @@ class AuthServiceHealthDependencyManager:
             
         return results
     
+    @pytest.mark.asyncio
     async def test_degraded_readiness(self) -> Dict[str, Any]:
         """Test readiness behavior when dependencies are degraded."""
         results = {
@@ -384,6 +389,7 @@ class AuthServiceHealthDependencyManager:
             
         return results
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_behavior(self) -> Dict[str, Any]:
         """Test circuit breaker behavior for auth service dependencies."""
         results = {
@@ -424,6 +430,7 @@ class AuthServiceHealthDependencyManager:
             
         return results
     
+    @pytest.mark.asyncio
     async def test_connection_pooling_and_retry(self) -> Dict[str, Any]:
         """Test connection pooling and retry logic for auth dependencies."""
         results = {
@@ -488,6 +495,7 @@ class AuthServiceHealthDependencyManager:
             
         return results
     
+    @pytest.mark.asyncio
     async def test_jwt_secret_availability(self) -> Dict[str, Any]:
         """Test JWT secret availability and rotation capability."""
         results = {
@@ -535,6 +543,7 @@ class AuthServiceHealthDependencyManager:
             
         return results
     
+    @pytest.mark.asyncio
     async def test_auth_service_performance_metrics(self) -> Dict[str, Any]:
         """Test performance metrics for auth service health checks."""
         results = {
@@ -611,6 +620,7 @@ async def auth_health_manager():
 class TestAuthServiceHealthDependenciesL3:
     """L3 integration tests for Auth Service health checks with real dependencies."""
     
+    @pytest.mark.asyncio
     async def test_auth_service_basic_health_endpoint(self, auth_health_manager):
         """Test basic auth service health endpoint functionality."""
         results = await auth_health_manager.test_health_endpoint_basic()
@@ -620,6 +630,7 @@ class TestAuthServiceHealthDependenciesL3:
         assert results["service_identified"] is True
         assert results["uptime_tracked"] is True
     
+    @pytest.mark.asyncio
     async def test_auth_service_dependency_health_validation(self, auth_health_manager):
         """Test auth service validates all dependency health correctly."""
         results = await auth_health_manager.test_dependency_health_checks()
@@ -630,6 +641,7 @@ class TestAuthServiceHealthDependenciesL3:
         assert results["clickhouse_healthy"] is True
         assert results["all_dependencies_healthy"] is True
     
+    @pytest.mark.asyncio
     async def test_auth_service_readiness_probe_with_dependencies(self, auth_health_manager):
         """Test readiness probe validates all dependencies are ready."""
         results = await auth_health_manager.test_readiness_endpoint()
@@ -639,6 +651,7 @@ class TestAuthServiceHealthDependenciesL3:
         assert results["service_ready_status"] is True
         assert results["graceful_degradation"] is True
     
+    @pytest.mark.asyncio
     async def test_auth_service_circuit_breaker_integration(self, auth_health_manager):
         """Test circuit breaker behavior for auth service dependencies."""
         results = await auth_health_manager.test_circuit_breaker_behavior()
@@ -648,6 +661,7 @@ class TestAuthServiceHealthDependenciesL3:
         assert results["circuit_opening"] is True
         # Recovery mechanism may take longer in real scenarios
     
+    @pytest.mark.asyncio
     async def test_auth_service_connection_resilience(self, auth_health_manager):
         """Test connection pooling and retry logic for auth dependencies."""
         results = await auth_health_manager.test_connection_pooling_and_retry()
@@ -657,6 +671,7 @@ class TestAuthServiceHealthDependenciesL3:
         assert results["connection_recovery"] is True
         assert results["pool_exhaustion_handled"] is True
     
+    @pytest.mark.asyncio
     async def test_auth_service_jwt_secret_management(self, auth_health_manager):
         """Test JWT secret availability and rotation for auth service."""
         results = await auth_health_manager.test_jwt_secret_availability()
@@ -665,6 +680,7 @@ class TestAuthServiceHealthDependenciesL3:
         assert results["secret_rotation_capable"] is True
         assert results["secret_validation_works"] is True
     
+    @pytest.mark.asyncio
     async def test_auth_service_health_performance_characteristics(self, auth_health_manager):
         """Test performance characteristics of auth service health checks."""
         results = await auth_health_manager.test_auth_service_performance_metrics()
@@ -673,6 +689,7 @@ class TestAuthServiceHealthDependenciesL3:
         assert results["throughput_adequate"] is True
         assert results["resource_usage_monitored"] is True
     
+    @pytest.mark.asyncio
     async def test_auth_service_dependency_failure_scenarios(self, auth_health_manager):
         """Test auth service behavior when dependencies fail."""
         # Stop Redis container to simulate failure
@@ -693,6 +710,7 @@ class TestAuthServiceHealthDependenciesL3:
             except Exception as e:
                 logger.warning(f"Could not restart Redis: {e}")
     
+    @pytest.mark.asyncio
     async def test_auth_service_recovery_after_dependency_restoration(self, auth_health_manager):
         """Test auth service recovery when dependencies come back online."""
         # This test validates that the auth service can recover gracefully

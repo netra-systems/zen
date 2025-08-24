@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -546,6 +546,7 @@ async def audit_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_audit_event_logging(audit_manager):
     """Test basic audit event logging."""
     manager = audit_manager
@@ -569,6 +570,7 @@ async def test_basic_audit_event_logging(audit_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_audit_event_enrichment(audit_manager):
     """Test audit event enrichment."""
     manager = audit_manager
@@ -603,6 +605,7 @@ async def test_audit_event_enrichment(audit_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_sensitive_data_detection(audit_manager):
     """Test sensitive data detection and hashing."""
     manager = audit_manager
@@ -630,6 +633,7 @@ async def test_sensitive_data_detection(audit_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_compliance_tagging(audit_manager):
     """Test automatic compliance framework tagging."""
     manager = audit_manager
@@ -672,6 +676,7 @@ async def test_compliance_tagging(audit_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_audit_event_querying(audit_manager):
     """Test audit event querying capabilities."""
     manager = audit_manager
@@ -725,6 +730,7 @@ async def test_audit_event_querying(audit_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_batch_event_processing(audit_manager):
     """Test batch processing of audit events."""
     manager = audit_manager
@@ -753,6 +759,7 @@ async def test_batch_event_processing(audit_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_compliance_reporting(audit_manager):
     """Test compliance report generation."""
     manager = audit_manager
@@ -795,6 +802,7 @@ async def test_compliance_reporting(audit_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_encrypted_storage(audit_manager):
     """Test encrypted storage for sensitive events."""
     manager = audit_manager
@@ -825,6 +833,7 @@ async def test_encrypted_storage(audit_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_redis_caching(audit_manager):
     """Test Redis caching of recent events."""
     manager = audit_manager
@@ -855,6 +864,7 @@ async def test_redis_caching(audit_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_audit_logging(audit_manager):
     """Test concurrent audit logging."""
     manager = audit_manager
@@ -884,6 +894,7 @@ async def test_concurrent_audit_logging(audit_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_audit_performance(audit_manager):
     """Benchmark audit logging performance."""
     manager = audit_manager

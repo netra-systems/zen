@@ -14,7 +14,7 @@ import asyncio
 import json
 from datetime import datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import jwt
 import pytest
@@ -66,6 +66,7 @@ class TestAuthToWebSocketFlow:
 
         )
     
+    @pytest.mark.asyncio
     async def test_successful_auth_to_websocket(self, auth_token, mock_user):
 
         """Test successful auth flow leading to WS connection."""
@@ -116,6 +117,7 @@ class TestAuthToWebSocketFlow:
         
         mock_websocket.send_json.assert_called()
     
+    @pytest.mark.asyncio
     async def test_invalid_token_blocks_websocket(self):
 
         """Test invalid token prevents WS connection."""
@@ -138,6 +140,7 @@ class TestAuthToWebSocketFlow:
 
         assert len(ws_manager.active_connections) == 0
     
+    @pytest.mark.asyncio
     async def test_expired_token_handling(self):
 
         """Test expired token gracefully handled."""
@@ -172,6 +175,7 @@ class TestAuthToWebSocketFlow:
 
             await auth_service.validate_token_jwt(expired_token)
     
+    @pytest.mark.asyncio
     async def test_auth_service_unavailable_fallback(self):
 
         """Test fallback when auth service is unavailable."""
@@ -213,6 +217,7 @@ class TestAuthToWebSocketFlow:
 
             await circuit_breaker.call(auth_service.validate_token, "token")
     
+    @pytest.mark.asyncio
     async def test_concurrent_auth_requests(self, auth_token, mock_user):
 
         """Test system handles concurrent auth requests."""
@@ -247,6 +252,7 @@ class TestAuthToWebSocketFlow:
 
         assert len(ws_manager.active_connections) == 10
     
+    @pytest.mark.asyncio
     async def test_auth_to_websocket_with_redis_session(self, auth_token, mock_user):
 
         """Test auth flow with Redis session storage."""
@@ -286,6 +292,7 @@ class TestAuthToWebSocketFlow:
 
         assert json.loads(session_data)["user_id"] == mock_user.id
     
+    @pytest.mark.asyncio
     async def test_websocket_auth_header_validation(self, auth_token):
 
         """Test WebSocket connection validates auth headers."""

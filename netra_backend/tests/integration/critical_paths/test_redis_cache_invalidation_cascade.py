@@ -88,7 +88,7 @@ class CacheInvalidationCascadeL3Manager:
                 
                 # Create Redis client
                 # Use mock Redis client to avoid event loop conflicts
-                from unittest.mock import AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
                 client = AsyncMock()
                 client.ping = AsyncMock()
                 client.get = AsyncMock(return_value=None)
@@ -112,6 +112,7 @@ class CacheInvalidationCascadeL3Manager:
         
         return redis_urls
     
+    @pytest.mark.asyncio
     async def test_single_level_invalidation(self, key_count: int) -> Dict[str, Any]:
         """Test invalidation within a single cache level."""
         successful_invalidations = 0
@@ -167,6 +168,7 @@ class CacheInvalidationCascadeL3Manager:
             "max_invalidation_time": max(invalidation_times) if invalidation_times else 0
         }
     
+    @pytest.mark.asyncio
     async def test_multi_level_cascade(self, key_count: int) -> Dict[str, Any]:
         """Test invalidation cascade across multiple cache levels."""
         successful_cascades = 0
@@ -273,6 +275,7 @@ class CacheInvalidationCascadeL3Manager:
             logger.error(f"Stale data detection failed for key {key}: {e}")
             return False
     
+    @pytest.mark.asyncio
     async def test_cross_service_invalidation(self, service_count: int, keys_per_service: int) -> Dict[str, Any]:
         """Test invalidation coordination across multiple services."""
         cross_service_results = {}
@@ -361,6 +364,7 @@ class CacheInvalidationCascadeL3Manager:
             logger.error(f"Cross-service conflict check failed for key {key}: {e}")
             return False
     
+    @pytest.mark.asyncio
     async def test_invalidation_under_load(self, concurrent_operations: int) -> Dict[str, Any]:
         """Test invalidation cascade under concurrent load."""
         # Create concurrent invalidation tasks
@@ -520,6 +524,7 @@ async def invalidation_cascade_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_single_level_invalidation_performance(invalidation_cascade_manager):
     """L3: Test single-level cache invalidation performance with real Redis."""
     result = await invalidation_cascade_manager.test_single_level_invalidation(100)
@@ -534,6 +539,7 @@ async def test_single_level_invalidation_performance(invalidation_cascade_manage
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_multi_level_cascade_invalidation(invalidation_cascade_manager):
     """L3: Test multi-level cache invalidation cascade with real Redis cluster."""
     result = await invalidation_cascade_manager.test_multi_level_cascade(50)
@@ -548,6 +554,7 @@ async def test_multi_level_cascade_invalidation(invalidation_cascade_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cross_service_invalidation_coordination(invalidation_cascade_manager):
     """L3: Test cache invalidation coordination across multiple services."""
     result = await invalidation_cascade_manager.test_cross_service_invalidation(5, 20)
@@ -565,6 +572,7 @@ async def test_cross_service_invalidation_coordination(invalidation_cascade_mana
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_invalidation_under_concurrent_load(invalidation_cascade_manager):
     """L3: Test cache invalidation cascade under concurrent load."""
     result = await invalidation_cascade_manager.test_invalidation_under_load(200)
@@ -579,6 +587,7 @@ async def test_invalidation_under_concurrent_load(invalidation_cascade_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_invalidation_cascade_sla_compliance(invalidation_cascade_manager):
     """L3: Test comprehensive invalidation cascade SLA compliance."""
     # Execute comprehensive test suite

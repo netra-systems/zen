@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
@@ -571,6 +571,7 @@ async def agent_resource_pool_manager():
 class TestAgentResourcePoolL3:
     """L3 integration tests for agent resource pool management."""
     
+    @pytest.mark.asyncio
     async def test_resource_utilization_efficiency(self, agent_resource_pool_manager):
         """Test resource utilization achieves >85% efficiency target."""
         manager = agent_resource_pool_manager
@@ -612,6 +613,7 @@ class TestAgentResourcePoolL3:
         for allocator_id in allocators:
             await manager.release_all_resources(allocator_id)
     
+    @pytest.mark.asyncio
     async def test_fair_scheduling_algorithms(self, agent_resource_pool_manager):
         """Test fair scheduling ensures equitable resource distribution."""
         manager = agent_resource_pool_manager
@@ -674,6 +676,7 @@ class TestAgentResourcePoolL3:
         for allocator_id, _, _ in allocators:
             await manager.release_all_resources(allocator_id)
     
+    @pytest.mark.asyncio
     async def test_resource_leak_prevention(self, agent_resource_pool_manager):
         """Test resource leak detection and prevention mechanisms."""
         manager = agent_resource_pool_manager
@@ -716,6 +719,7 @@ class TestAgentResourcePoolL3:
         manager.allocation_tracking[allocator_id] = original_tracking
         await manager.release_all_resources(allocator_id)
     
+    @pytest.mark.asyncio
     async def test_priority_based_allocation(self, agent_resource_pool_manager):
         """Test priority-based resource allocation under contention."""
         manager = agent_resource_pool_manager
@@ -775,6 +779,7 @@ class TestAgentResourcePoolL3:
         if low_priority_success:
             await manager.release_all_resources(low_priority_allocator)
     
+    @pytest.mark.asyncio
     async def test_pool_scaling_strategies(self, agent_resource_pool_manager):
         """Test automatic pool scaling under high demand."""
         manager = agent_resource_pool_manager
@@ -824,6 +829,7 @@ class TestAgentResourcePoolL3:
         for allocator in scaling_allocators:
             await manager.release_all_resources(allocator)
     
+    @pytest.mark.asyncio
     async def test_resource_pool_performance_under_load(self, agent_resource_pool_manager):
         """Test resource pool performance under sustained load."""
         manager = agent_resource_pool_manager
@@ -882,6 +888,7 @@ class TestAgentResourcePoolL3:
         assert final_status["overall_metrics"]["total_allocated"] == 0, \
             "All resources should be available after load test"
     
+    @pytest.mark.asyncio
     async def test_concurrent_resource_operations(self, agent_resource_pool_manager):
         """Test concurrent resource operations don't cause race conditions."""
         manager = agent_resource_pool_manager

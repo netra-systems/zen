@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.auth_integration.auth import get_current_user, require_admin

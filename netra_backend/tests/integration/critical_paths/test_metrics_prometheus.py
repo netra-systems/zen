@@ -19,7 +19,7 @@ import asyncio
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import requests
@@ -166,6 +166,7 @@ class MetricsPrometheusManager:
                 "validation_time": time.time() - validation_start
             }
     
+    @pytest.mark.asyncio
     async def test_metrics_time_series(self, metric_name: str, samples: int, 
                                      interval: float) -> Dict[str, Any]:
         """Test time series metrics collection."""
@@ -281,6 +282,7 @@ async def metrics_prometheus_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_metrics_collection_to_prometheus_export(metrics_prometheus_manager):
     """Test metrics collection and Prometheus export pipeline."""
     manager = metrics_prometheus_manager
@@ -306,6 +308,7 @@ async def test_metrics_collection_to_prometheus_export(metrics_prometheus_manage
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_prometheus_endpoint_accessibility(metrics_prometheus_manager):
     """Test Prometheus metrics endpoint accessibility."""
     manager = metrics_prometheus_manager
@@ -332,6 +335,7 @@ async def test_prometheus_endpoint_accessibility(metrics_prometheus_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_metrics_time_series_collection(metrics_prometheus_manager):
     """Test time series metrics collection over time."""
     manager = metrics_prometheus_manager
@@ -356,6 +360,7 @@ async def test_metrics_time_series_collection(metrics_prometheus_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_metrics_accuracy_validation(metrics_prometheus_manager):
     """Test metrics accuracy and consistency."""
     manager = metrics_prometheus_manager

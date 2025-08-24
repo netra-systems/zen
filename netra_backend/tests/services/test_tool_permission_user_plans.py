@@ -40,6 +40,7 @@ def developer_context():
 class TestGetUserPlan:
     """Test user plan retrieval"""
     
+    @pytest.mark.asyncio
     async def test_get_user_plan_default(self, service):
         """Test getting user plan returns default free plan"""
         user_plan = await service._get_user_plan("test_user")

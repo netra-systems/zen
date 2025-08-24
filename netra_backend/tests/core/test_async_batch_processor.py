@@ -27,11 +27,13 @@ class TestAsyncBatchProcessor:
     @pytest.fixture
     def batch_processor(self):
         return AsyncBatchProcessor(batch_size=3, max_concurrent_batches=2)
+    @pytest.mark.asyncio
     async def test_process_items_empty_list(self, batch_processor):
         """Test processing empty list"""
         processor = create_dummy_processor()
         results = await batch_processor.process_items([], processor)
         assert results == []
+    @pytest.mark.asyncio
     async def test_process_items_single_batch(self, batch_processor):
         """Test processing single batch"""
         items = [1, 2, 3]
@@ -39,12 +41,14 @@ class TestAsyncBatchProcessor:
         results = await batch_processor.process_items(items, processor)
         assert len(results) == 1
         assert results[0] == 6
+    @pytest.mark.asyncio
     async def test_process_items_multiple_batches(self, batch_processor):
         """Test processing multiple batches"""
         items = list(range(1, 8))
         processor = create_sum_processor()
         results = await batch_processor.process_items(items, processor)
         assert_batch_results(results, [6, 15, 7])
+    @pytest.mark.asyncio
     async def test_process_items_with_progress_callback(self, batch_processor):
         """Test processing with progress callback"""
         items = list(range(1, 7))
@@ -60,6 +64,7 @@ class TestAsyncBatchProcessor:
             await asyncio.sleep(0.01)
             return len(batch)
         return processor
+    @pytest.mark.asyncio
     async def test_process_items_handles_exceptions(self, batch_processor):
         """Test that processor exceptions are propagated"""
         items = [1, 2, 3]

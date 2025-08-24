@@ -396,6 +396,7 @@ async def session_invalidation_l4_suite():
 @pytest.mark.L4
 @pytest.mark.staging
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_single_session_logout_invalidation_l4(session_invalidation_l4_suite):
     """Test single session logout invalidates everywhere in staging."""
     test_results = await session_invalidation_l4_suite.run_complete_critical_path_test()
@@ -408,6 +409,7 @@ async def test_single_session_logout_invalidation_l4(session_invalidation_l4_sui
 @pytest.mark.L4
 @pytest.mark.staging
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_multi_device_session_invalidation_l4(session_invalidation_l4_suite):
     """Test logout invalidates sessions across multiple devices in staging."""
     test_results = await session_invalidation_l4_suite.run_complete_critical_path_test()
@@ -423,6 +425,7 @@ async def test_multi_device_session_invalidation_l4(session_invalidation_l4_suit
 @pytest.mark.L4
 @pytest.mark.staging
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_websocket_termination_on_logout_l4(session_invalidation_l4_suite):
     """Test WebSocket connections are terminated during logout in staging."""
     test_results = await session_invalidation_l4_suite.run_complete_critical_path_test()
@@ -435,6 +438,7 @@ async def test_websocket_termination_on_logout_l4(session_invalidation_l4_suite)
 @pytest.mark.asyncio
 @pytest.mark.L4
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_session_invalidation_performance_l4(session_invalidation_l4_suite):
     """Test session invalidation performance meets business requirements in staging."""
     test_results = await session_invalidation_l4_suite.run_complete_critical_path_test()

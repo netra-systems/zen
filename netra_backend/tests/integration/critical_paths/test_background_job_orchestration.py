@@ -67,6 +67,7 @@ class BackgroundJobOrchestrationTester:
                 data = await response.json()
                 self.auth_token = data.get("access_token")
                 
+    @pytest.mark.asyncio
     async def test_job_scheduling(self) -> bool:
         """Test basic job scheduling."""
         print("\n[SCHEDULE] Testing job scheduling...")
@@ -95,6 +96,7 @@ class BackgroundJobOrchestrationTester:
                 
         return False
         
+    @pytest.mark.asyncio
     async def test_delayed_job_scheduling(self) -> bool:
         """Test delayed job scheduling."""
         print("\n[DELAY] Testing delayed job scheduling...")
@@ -136,6 +138,7 @@ class BackgroundJobOrchestrationTester:
                             
         return False
         
+    @pytest.mark.asyncio
     async def test_job_dependencies(self) -> bool:
         """Test job dependency chaining."""
         print("\n[CHAIN] Testing job dependencies...")
@@ -181,6 +184,7 @@ class BackgroundJobOrchestrationTester:
                         
         return False
         
+    @pytest.mark.asyncio
     async def test_job_execution_monitoring(self) -> bool:
         """Test job execution monitoring."""
         print("\n[MONITOR] Testing job execution monitoring...")
@@ -217,6 +221,7 @@ class BackgroundJobOrchestrationTester:
             
         return False
         
+    @pytest.mark.asyncio
     async def test_job_retry_mechanism(self) -> bool:
         """Test job retry on failure."""
         print("\n[RETRY] Testing job retry mechanism...")
@@ -261,6 +266,7 @@ class BackgroundJobOrchestrationTester:
                             
         return False
         
+    @pytest.mark.asyncio
     async def test_job_cancellation(self) -> bool:
         """Test job cancellation."""
         print("\n[CANCEL] Testing job cancellation...")
@@ -304,6 +310,7 @@ class BackgroundJobOrchestrationTester:
                                     
         return False
         
+    @pytest.mark.asyncio
     async def test_cron_scheduling(self) -> bool:
         """Test cron-based job scheduling."""
         print("\n[CRON] Testing cron scheduling...")
@@ -340,6 +347,7 @@ class BackgroundJobOrchestrationTester:
                         
         return False
         
+    @pytest.mark.asyncio
     async def test_job_queue_status(self) -> bool:
         """Test job queue status monitoring."""
         print("\n[QUEUE] Testing job queue status...")
@@ -385,6 +393,7 @@ class BackgroundJobOrchestrationTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_background_job_orchestration():
     """Test background job orchestration."""
     async with BackgroundJobOrchestrationTester() as tester:

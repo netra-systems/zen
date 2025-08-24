@@ -10,7 +10,7 @@ from pathlib import Path
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from langchain_core.tools import BaseTool

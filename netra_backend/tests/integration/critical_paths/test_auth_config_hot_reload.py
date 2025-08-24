@@ -291,6 +291,7 @@ class AuthConfigHotReloader:
         self.active_sessions.append(session)
         return session
     
+    @pytest.mark.asyncio
     async def test_concurrent_reloads(self, configs: List[tuple]) -> Dict[str, Any]:
         """Test concurrent auth configuration reloads."""
         tasks = [self.hot_reload_auth_config(config_type, config_data) for config_type, config_data in configs]
@@ -326,6 +327,7 @@ async def auth_hot_reloader(auth_service_container):
 class TestAuthConfigHotReloadL3:
     """L3 integration tests for auth configuration hot reload."""
     
+    @pytest.mark.asyncio
     async def test_oauth_config_hot_reload_detection(self, auth_hot_reloader):
         """Test OAuth config changes detected and applied without restart."""
         reloader = auth_hot_reloader
@@ -349,6 +351,7 @@ class TestAuthConfigHotReloadL3:
         
         logger.info(f"OAuth hot reload test passed: {result['duration']:.3f}s")
     
+    @pytest.mark.asyncio
     async def test_session_preservation_during_reload(self, auth_hot_reloader):
         """Test active sessions maintained during config reload."""
         reloader = auth_hot_reloader
@@ -374,6 +377,7 @@ class TestAuthConfigHotReloadL3:
         
         logger.info(f"Session preservation test passed: {len(active_sessions)} sessions maintained")
     
+    @pytest.mark.asyncio
     async def test_config_validation_and_rollback(self, auth_hot_reloader):
         """Test configuration validation and rollback on failures."""
         reloader = auth_hot_reloader
@@ -400,6 +404,7 @@ class TestAuthConfigHotReloadL3:
         
         logger.info("Validation and rollback test passed")
     
+    @pytest.mark.asyncio
     async def test_concurrent_coordination_and_no_restart(self, auth_hot_reloader):
         """Test service coordination and hot reload without restart."""
         reloader = auth_hot_reloader
@@ -426,6 +431,7 @@ class TestAuthConfigHotReloadL3:
         
         logger.info(f"Coordination test passed: {coordination_result['successful_reloads']}/2 configs, {total_time:.2f}s")
     
+    @pytest.mark.asyncio
     async def test_performance_under_rapid_changes(self, auth_hot_reloader):
         """Test performance under rapid configuration changes."""
         reloader = auth_hot_reloader

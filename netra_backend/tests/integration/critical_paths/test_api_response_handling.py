@@ -22,6 +22,7 @@ class TestAPIResponseHandlingL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_successful_response_format(self):
         """Test successful response format consistency"""
         async with httpx.AsyncClient() as client:
@@ -40,6 +41,7 @@ class TestAPIResponseHandlingL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_error_response_format(self):
         """Test error response format consistency"""
         async with httpx.AsyncClient() as client:
@@ -59,6 +61,7 @@ class TestAPIResponseHandlingL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_response_headers(self):
         """Test required response headers"""
         async with httpx.AsyncClient() as client:
@@ -78,6 +81,7 @@ class TestAPIResponseHandlingL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_response_compression(self):
         """Test response compression for large payloads"""
         async with httpx.AsyncClient() as client:
@@ -98,6 +102,7 @@ class TestAPIResponseHandlingL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_response_caching_headers(self):
         """Test response caching headers"""
         async with httpx.AsyncClient() as client:

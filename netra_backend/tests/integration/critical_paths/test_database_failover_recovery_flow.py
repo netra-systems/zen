@@ -98,6 +98,7 @@ class DatabaseFailoverTester:
             print(f"[ERROR] Database connection error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_primary_health_monitoring(self) -> bool:
         """Test primary database health monitoring."""
         print("\n[HEALTH] Testing primary database health monitoring...")
@@ -135,6 +136,7 @@ class DatabaseFailoverTester:
             print(f"[ERROR] Health monitoring error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_replica_synchronization(self) -> bool:
         """Test replica synchronization and lag monitoring."""
         print("\n[SYNC] Testing replica synchronization...")
@@ -192,6 +194,7 @@ class DatabaseFailoverTester:
             print(f"[ERROR] Replica sync test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_failover_trigger(self) -> bool:
         """Test failover trigger detection."""
         print("\n[TRIGGER] Testing failover trigger detection...")
@@ -262,6 +265,7 @@ class DatabaseFailoverTester:
             print(f"[ERROR] Failover trigger test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_automatic_failover(self) -> bool:
         """Test automatic failover execution."""
         print("\n[FAILOVER] Testing automatic failover...")
@@ -371,6 +375,7 @@ class DatabaseFailoverTester:
             
         return state
         
+    @pytest.mark.asyncio
     async def test_data_consistency(self) -> bool:
         """Test data consistency after failover."""
         print("\n[CONSISTENCY] Testing data consistency...")
@@ -433,6 +438,7 @@ class DatabaseFailoverTester:
             print(f"[ERROR] Data consistency test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_connection_pool_recovery(self) -> bool:
         """Test connection pool recovery after failover."""
         print("\n[POOL] Testing connection pool recovery...")
@@ -498,6 +504,7 @@ class DatabaseFailoverTester:
             print(f"[ERROR] Connection pool test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_transaction_replay(self) -> bool:
         """Test transaction replay after failover."""
         print("\n[REPLAY] Testing transaction replay...")
@@ -553,6 +560,7 @@ class DatabaseFailoverTester:
             print(f"[ERROR] Transaction replay test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_recovery_to_primary(self) -> bool:
         """Test recovery back to primary database."""
         print("\n[RECOVERY] Testing recovery to primary...")
@@ -620,6 +628,7 @@ class DatabaseFailoverTester:
             print(f"[ERROR] Recovery test error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_clickhouse_failover(self) -> bool:
         """Test ClickHouse failover handling."""
         print("\n[CLICKHOUSE] Testing ClickHouse failover...")
@@ -682,6 +691,7 @@ class DatabaseFailoverTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_database_failover_recovery_flow():
     """Test complete database failover and recovery flow."""
     async with DatabaseFailoverTester() as tester:

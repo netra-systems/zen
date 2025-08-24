@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -279,6 +279,7 @@ class TestNotificationSender:
         """Create config with notifications disabled."""
         return MonitorConfig(enable_notifications=False)
 
+    @pytest.mark.asyncio
     async def test_send_notification_enabled_config(self, config_with_notifications):
         """Test notification sending with enabled configuration."""
         sender = NotificationSender(config_with_notifications)
@@ -287,6 +288,7 @@ class TestNotificationSender:
         
         assert result is False  # Implementation returns False as placeholder
 
+    @pytest.mark.asyncio
     async def test_send_notification_disabled_config(self, config_without_notifications):
         """Test notification sending with disabled configuration."""
         sender = NotificationSender(config_without_notifications)
@@ -295,6 +297,7 @@ class TestNotificationSender:
         
         assert result is False
 
+    @pytest.mark.asyncio
     async def test_send_notification_no_webhook_config(self):
         """Test notification sending without webhook configuration."""
         config = MonitorConfig(enable_notifications=True, notification_webhook=None)
@@ -321,6 +324,7 @@ class TestStagingErrorMonitor:
         """Create StagingErrorMonitor instance."""
         return StagingErrorMonitor(monitor_config)
 
+    @pytest.mark.asyncio
     async def test_check_deployment_errors_successful_flow(self, staging_monitor):
         """Test successful deployment error checking flow."""
         deployment_time = datetime.now(timezone.utc) - timedelta(minutes=10)
@@ -355,6 +359,7 @@ class TestStagingErrorMonitor:
         assert "✅ DEPLOYMENT HEALTHY" in result
         assert "Reason: All systems normal" in result
 
+    @pytest.mark.asyncio
     async def test_run_error_check_success_flow(self, staging_monitor):
         """Test complete error check execution flow."""
         deployment_time_str = "2024-01-15T14:30:00Z"
@@ -367,6 +372,7 @@ class TestStagingErrorMonitor:
                 
                 assert exit_code == 0
 
+    @pytest.mark.asyncio
     async def test_run_error_check_deployment_failure(self, staging_monitor):
         """Test error check with deployment failure detected."""
         deployment_time_str = "2024-01-15T14:30:00Z"
@@ -379,6 +385,7 @@ class TestStagingErrorMonitor:
                 
                 assert exit_code == 1
 
+    @pytest.mark.asyncio
     async def test_run_error_check_exception_handling(self, staging_monitor):
         """Test error check exception handling."""
         deployment_time_str = "2024-01-15T14:30:00Z"

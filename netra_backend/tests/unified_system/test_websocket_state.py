@@ -22,7 +22,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -90,7 +90,7 @@ class TestWebSocketStateManagement:
         # Clear any existing connections without using the problematic cleanup method
         if hasattr(manager, 'registry') and hasattr(manager.registry, 'active_connections'):
             manager.registry.active_connections.clear()
-        return manager
+        yield manager
 
     @pytest.fixture
     async def reconnection_handler(self):
@@ -98,9 +98,10 @@ class TestWebSocketStateManagement:
         handler = get_reconnection_handler()
         # Clean up any existing contexts
         await handler.cleanup_expired_contexts()
-        return handler
+        yield handler
 
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_session(self):
         """Create test session data."""
         return WebSocketTestSession(
@@ -152,6 +153,7 @@ class TestWebSocketStateManagement:
             if keys:
                 await redis_manager.redis_client.delete(*keys)
 
+    @pytest.mark.asyncio
     async def test_websocket_reconnection_flow(self, connection_manager, 
                                               reconnection_handler, test_session, redis_cleanup):
         """
@@ -310,6 +312,7 @@ class TestWebSocketStateManagement:
         
         logger.info("State continuity and message resume verified successfully")
 
+    @pytest.mark.asyncio
     async def test_state_preservation_on_disconnect(self, connection_manager,
                                                    reconnection_handler, test_session, redis_cleanup):
         """
@@ -414,6 +417,7 @@ class TestWebSocketStateManagement:
         assert context.user_id == session.user_id
         assert context.agent_state == session.agent_state
 
+    @pytest.mark.asyncio
     async def test_message_queue_persistence(self, connection_manager,
                                            reconnection_handler, test_session, redis_cleanup):
         """
@@ -554,6 +558,7 @@ class TestWebSocketStateManagement:
         
         logger.info(f"Verified delivery of {delivered_count} queued messages in correct order")
 
+    @pytest.mark.asyncio
     async def test_reconnection_with_auth(self, connection_manager,
                                         reconnection_handler, test_session, redis_cleanup):
         """

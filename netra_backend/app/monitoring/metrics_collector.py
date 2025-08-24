@@ -21,6 +21,7 @@ import psutil
 from netra_backend.app.core.performance_optimization_manager import performance_manager
 from netra_backend.app.db.observability_metrics import DatabaseMetrics
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.monitoring.resource_monitor import get_resource_monitor
 
 logger = central_logger.get_logger(__name__)
 

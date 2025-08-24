@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -40,6 +40,7 @@ class TestAgentReliabilityMixinExecution:
             agent.reliability = mock_reliability
             return agent
     
+    @pytest.mark.asyncio
     async def test_execute_with_reliability_success(self, mock_agent):
         """Test successful operation execution."""
         # Setup
@@ -69,6 +70,7 @@ class TestAgentReliabilityMixinExecution:
             timeout=10.0
         )
     
+    @pytest.mark.asyncio
     async def test_execute_with_reliability_failure_no_recovery(self, mock_agent):
         """Test operation failure without recovery."""
         # Setup
@@ -97,6 +99,7 @@ class TestAgentReliabilityMixinExecution:
         assert error_record.recovery_attempted is False
         assert error_record.recovery_successful is False
     
+    @pytest.mark.asyncio
     async def test_execute_with_reliability_failure_with_recovery(self, mock_agent):
         """Test operation failure with successful recovery."""
         # Setup
@@ -128,12 +131,14 @@ class TestAgentReliabilityMixinExecution:
         assert error_record.recovery_attempted is True
         assert error_record.recovery_successful is True
     
+    @pytest.mark.asyncio
     async def test_attempt_operation_recovery_no_strategy(self, mock_agent):
         """Test recovery attempt when no strategy exists."""
         error = ValueError("Test error")
         result = await mock_agent._attempt_operation_recovery("unknown_operation", error, {})
         assert result is None
     
+    @pytest.mark.asyncio
     async def test_attempt_operation_recovery_strategy_fails(self, mock_agent):
         """Test recovery attempt when strategy itself fails."""
         async def failing_recovery(error, context):
@@ -208,6 +213,7 @@ class TestDefaultRecoveryStrategies:
             agent.reliability = mock_reliability
             return agent
     
+    @pytest.mark.asyncio
     async def test_default_llm_recovery(self, mock_agent):
         """Test default LLM recovery strategy."""
         error = ValueError("LLM failed")
@@ -220,6 +226,7 @@ class TestDefaultRecoveryStrategies:
         assert result["error"] == "LLM failed"
         assert result["fallback_used"] is True
     
+    @pytest.mark.asyncio
     async def test_default_db_recovery(self, mock_agent):
         """Test default database recovery strategy."""
         error = ConnectionError("Database unavailable")
@@ -232,6 +239,7 @@ class TestDefaultRecoveryStrategies:
         assert result["error"] == "Database unavailable"
         assert result["fallback_used"] is True
     
+    @pytest.mark.asyncio
     async def test_default_api_recovery(self, mock_agent):
         """Test default API recovery strategy."""
         error = TimeoutError("API timeout")

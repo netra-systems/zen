@@ -10,7 +10,7 @@ from pathlib import Path
 
 import asyncio
 import time
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -28,6 +28,7 @@ from netra_backend.tests.core.helpers.shared_test_types import (
 
 class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     """Integration tests combining multiple async utilities"""
+    @pytest.mark.asyncio
     async def test_resource_manager_with_task_pool(self):
         """Test resource manager integrated with task pool"""
         resource_manager, task_pool = self._create_manager_and_pool()
@@ -48,6 +49,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         """Helper task for testing"""
         await asyncio.sleep(0.01)
         return "completed"
+    @pytest.mark.asyncio
     async def test_circuit_breaker_with_retry(self):
         """Test circuit breaker with retry decorator"""
         circuit_breaker = AsyncCircuitBreaker(failure_threshold=2, timeout=0.1)
@@ -67,6 +69,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
                 raise ValueError("Service unavailable")
             return "success"
         return operation
+    @pytest.mark.asyncio
     async def test_batch_processor_with_rate_limiter(self):
         """Test batch processor with rate limiting"""
         rate_limiter, batch_processor = self._create_rate_limited_processor()

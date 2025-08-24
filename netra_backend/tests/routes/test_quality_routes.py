@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 from datetime import UTC, datetime
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -73,6 +73,7 @@ class TestQualityRoute:
             else:
                 assert response.status_code in [404, 401]
     
+    @pytest.mark.asyncio
     async def test_quality_alerts(self):
         """Test quality threshold alerts."""
         from netra_backend.app.routes.quality_handlers import handle_alerts_request
@@ -217,6 +218,7 @@ class TestQualityRoute:
             else:
                 assert response.status_code in [404, 422, 401]
     
+    @pytest.mark.asyncio
     async def test_quality_real_time_monitoring(self):
         """Test real-time quality monitoring."""
         from netra_backend.app.routes.quality import start_monitoring, stop_monitoring

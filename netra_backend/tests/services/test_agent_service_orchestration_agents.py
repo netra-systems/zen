@@ -43,6 +43,7 @@ class TestAgentLifecycleManagement:
     def orchestrator(self):
         """Create agent orchestrator for testing."""
         return MockOrchestrator()
+    @pytest.mark.asyncio
     async def test_agent_creation_and_assignment(self, orchestrator):
         """Test agent creation and user assignment."""
         agent = await orchestrator.get_or_create_agent("user1")
@@ -55,6 +56,7 @@ class TestAgentLifecycleManagement:
         assert agent.user_id == "user1"
         assert orchestrator.active_agents == 1
         assert orchestrator.orchestration_metrics['agents_created'] == 1
+    @pytest.mark.asyncio
     async def test_agent_reuse_for_same_user(self, orchestrator):
         """Test agent reuse for same user."""
         agent1 = await orchestrator.get_or_create_agent("user1")
@@ -66,6 +68,7 @@ class TestAgentLifecycleManagement:
         """Verify the same agent instance is reused."""
         assert agent1 is agent2
         assert orchestrator.active_agents == 1  # Still only one active
+    @pytest.mark.asyncio
     async def test_agent_pool_management(self, orchestrator):
         """Test agent pool management and recycling."""
         agent = await orchestrator.get_or_create_agent("user1")
@@ -87,6 +90,7 @@ class TestAgentLifecycleManagement:
         assert agent2.user_id == "user2"
         assert len(orchestrator.agent_pool) == 0
         assert orchestrator.active_agents == 1
+    @pytest.mark.asyncio
     async def test_concurrent_agent_limit_enforcement(self, orchestrator):
         """Test enforcement of concurrent agent limits."""
         orchestrator.max_concurrent_agents = 3
@@ -113,6 +117,7 @@ class TestAgentLifecycleManagement:
             await orchestrator.get_or_create_agent("user_overflow")
         
         assert "Maximum concurrent agents reached" in str(exc_info.value)
+    @pytest.mark.asyncio
     async def test_agent_task_execution_tracking(self, orchestrator):
         """Test agent task execution tracking and metrics."""
         result = await orchestrator.execute_agent_task(
@@ -134,6 +139,7 @@ class TestAgentLifecycleManagement:
         assert metrics['failed_executions'] == 0
         assert metrics['success_rate'] == 100.0
         assert metrics['average_execution_time'] > 0
+    @pytest.mark.asyncio
     async def test_agent_task_failure_handling(self, orchestrator):
         """Test agent task failure handling and metrics."""
         await self._setup_failing_agent(orchestrator, "user1")
@@ -158,6 +164,7 @@ class TestAgentLifecycleManagement:
         """Verify failure tracking metrics."""
         assert metrics['failed_executions'] == 1
         assert metrics['success_rate'] == 0.0
+    @pytest.mark.asyncio
     async def test_concurrent_agent_orchestration(self, orchestrator):
         """Test concurrent agent orchestration across multiple users."""
         num_tasks = 5
@@ -186,6 +193,7 @@ class TestAgentLifecycleManagement:
         assert metrics['total_executions'] == num_tasks
         assert metrics['failed_executions'] == 0
         assert metrics['concurrent_peak'] == num_tasks
+    @pytest.mark.asyncio
     async def test_agent_state_transitions(self, orchestrator):
         """Test agent state transitions during lifecycle."""
         agent = await orchestrator.get_or_create_agent("user1")

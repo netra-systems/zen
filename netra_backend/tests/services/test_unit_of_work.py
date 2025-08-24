@@ -24,6 +24,7 @@ pytest_plugins = ["netra_backend.tests.helpers.database_repository_fixtures"]
 class TestUnitOfWork:
     """Test Unit of Work pattern implementation."""
 
+    @pytest.mark.asyncio
     async def test_uow_initialization(self, unit_of_work):
         """Test UoW initialization and repository access."""
         async with unit_of_work as uow:
@@ -34,6 +35,7 @@ class TestUnitOfWork:
             assert hasattr(uow.messages, 'create')
             assert hasattr(uow.threads, 'create')
 
+    @pytest.mark.asyncio
     async def test_uow_transaction_commit(self, unit_of_work):
         """Test successful transaction commit."""
         thread_id = None
@@ -48,6 +50,7 @@ class TestUnitOfWork:
             assert retrieved_thread is not None
             assert_thread_created_correctly(retrieved_thread, "test_user", "Test Thread")
 
+    @pytest.mark.asyncio
     async def test_uow_transaction_rollback(self, unit_of_work):
         """Test transaction rollback on error."""
         try:
@@ -60,6 +63,7 @@ class TestUnitOfWork:
         assert unit_of_work.session.rollback.called
 
     @pytest.mark.skip(reason="begin_nested not implemented in current UnitOfWork")
+    @pytest.mark.asyncio
     async def test_uow_nested_transactions(self, unit_of_work):
         """Test nested transaction handling."""
         thread_id = None
@@ -78,6 +82,7 @@ class TestUnitOfWork:
             messages = await uow.messages.get_by_thread(thread_id)
             assert len(messages) == 0
 
+    @pytest.mark.asyncio
     async def test_uow_concurrent_access(self, unit_of_work):
         """Test concurrent UoW instances."""
         async def create_thread_task(uow, thread_id):

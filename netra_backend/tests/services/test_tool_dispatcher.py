@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -45,6 +45,7 @@ class ToolDispatcher:
         }
 class TestToolDispatcher:
     
+    @pytest.mark.asyncio
     async def test_tool_registration(self):
         """Test dynamic tool registration in dispatcher"""
         tool_dispatcher = ToolDispatcher({})
@@ -58,6 +59,7 @@ class TestToolDispatcher:
         assert "custom_analyzer" in tool_dispatcher.tools
         assert tool_dispatcher.tools["custom_analyzer"] == mock_tool
     
+    @pytest.mark.asyncio
     async def test_tool_execution_with_validation(self):
         """Test tool execution with parameter validation"""
         mock_log_fetcher = AsyncMock()
@@ -77,6 +79,7 @@ class TestToolDispatcher:
         assert result["logs"] == ["log1", "log2"]
         mock_log_fetcher.execute.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_tool_chain_execution(self):
         """Test executing multiple tools in sequence"""
         mock_analyzer = AsyncMock(return_value={"patterns": ["pattern1"]})
@@ -98,6 +101,7 @@ class TestToolDispatcher:
         assert chain_result[0]["patterns"] == ["pattern1"]
         assert chain_result[1]["optimizations"] == ["opt1"]
     
+    @pytest.mark.asyncio
     async def test_tool_error_handling(self):
         """Test error handling when tool execution fails"""
         mock_failing_tool = AsyncMock()
@@ -113,6 +117,7 @@ class TestToolDispatcher:
         
         assert "Tool execution failed" in str(exc_info.value)
     
+    @pytest.mark.asyncio
     async def test_unknown_tool_handling(self):
         """Test handling of unknown tool requests"""
         tool_dispatcher = ToolDispatcher({})
@@ -122,6 +127,7 @@ class TestToolDispatcher:
         
         assert "Unknown tool" in str(exc_info.value)
     
+    @pytest.mark.asyncio
     async def test_concurrent_tool_execution(self):
         """Test concurrent execution of multiple tools"""
         import asyncio
@@ -155,6 +161,7 @@ class TestToolDispatcher:
         assert results[1]["result"] == "tool2"
         assert results[2]["result"] == "tool3"
     
+    @pytest.mark.asyncio
     async def test_tool_metadata_tracking(self):
         """Test tracking tool execution metadata"""
         mock_tool = AsyncMock()

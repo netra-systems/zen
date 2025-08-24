@@ -36,6 +36,7 @@ from netra_backend.tests.test_agent_service_mock_classes import AgentState
 
 class TestAgentLifecycleManagement:
     """Test agent lifecycle management functionality."""
+    @pytest.mark.asyncio
     async def test_agent_creation_and_assignment(self, orchestrator):
         """Test agent creation and user assignment."""
         agent = await orchestrator.get_or_create_agent("user1")
@@ -48,6 +49,7 @@ class TestAgentLifecycleManagement:
         """Verify agent creation updates metrics correctly."""
         assert orchestrator.active_agents == 1
         assert orchestrator.orchestration_metrics['agents_created'] == 1
+    @pytest.mark.asyncio
     async def test_agent_reuse_for_same_user(self, orchestrator):
         """Test agent reuse for same user."""
         agent1 = await orchestrator.get_or_create_agent("user1")
@@ -55,6 +57,7 @@ class TestAgentLifecycleManagement:
         
         assert agent1 is agent2
         assert orchestrator.active_agents == 1
+    @pytest.mark.asyncio
     async def test_agent_pool_management(self, orchestrator):
         """Test agent pool management and reuse."""
         agent = await orchestrator.get_or_create_agent("user1")
@@ -75,6 +78,7 @@ class TestAgentLifecycleManagement:
         assert reused_agent.user_id == "user2"
         assert len(orchestrator.agent_pool) == 0
         assert orchestrator.active_agents == 1
+    @pytest.mark.asyncio
     async def test_concurrent_agent_limit_enforcement(self, orchestrator):
         """Test enforcement of concurrent agent limits."""
         orchestrator.max_concurrent_agents = 3
@@ -94,6 +98,7 @@ class TestAgentLifecycleManagement:
             agent = await orchestrator.get_or_create_agent(f"user_{i}")
             agents.append(agent)
         return agents
+    @pytest.mark.asyncio
     async def test_agent_task_execution_tracking(self, orchestrator):
         """Test agent task execution tracking and metrics."""
         result = await orchestrator.execute_agent_task("user1", "test request", "run_123", True)
@@ -113,6 +118,7 @@ class TestAgentLifecycleManagement:
         assert metrics['failed_executions'] == 0
         assert metrics['success_rate'] == 100.0
         assert metrics['average_execution_time'] > 0
+    @pytest.mark.asyncio
     async def test_agent_task_failure_handling(self, orchestrator):
         """Test agent task failure handling and metrics."""
         agent = await self._setup_failing_agent(orchestrator, "user1")
@@ -133,6 +139,7 @@ class TestAgentLifecycleManagement:
         """Verify failure tracking metrics."""
         assert metrics['failed_executions'] == 1
         assert metrics['success_rate'] == 0.0
+    @pytest.mark.asyncio
     async def test_concurrent_agent_orchestration(self, orchestrator):
         """Test concurrent agent orchestration with multiple tasks."""
         num_tasks = 5
@@ -164,6 +171,7 @@ class TestAgentLifecycleManagement:
         assert metrics['total_executions'] == num_tasks
         assert metrics['failed_executions'] == 0
         assert metrics['concurrent_peak'] == num_tasks
+    @pytest.mark.asyncio
     async def test_agent_state_transitions(self, orchestrator):
         """Test agent state transitions during lifecycle."""
         agent = await orchestrator.get_or_create_agent("user1")
@@ -215,6 +223,7 @@ class TestAgentLifecycleManagement:
 
 class TestAgentPoolOptimization:
     """Test agent pool optimization and resource management."""
+    @pytest.mark.asyncio
     async def test_agent_pool_size_limits(self, orchestrator):
         """Test agent pool maintains size limits."""
         agents = []
@@ -224,6 +233,7 @@ class TestAgentPoolOptimization:
         for user_id, agent in agents:
             await orchestrator.release_agent(user_id)
         assert len(orchestrator.agent_pool) <= 5
+    @pytest.mark.asyncio
     async def test_agent_state_reset_on_release(self, orchestrator):
         """Test agent state is properly reset when released."""
         agent = await orchestrator.get_or_create_agent("user1")
@@ -240,6 +250,7 @@ class TestAgentPoolOptimization:
         assert agent.thread_id is None
         assert agent.db_session is None
         assert agent.state == AgentState.IDLE
+    @pytest.mark.asyncio
     async def test_agent_cleanup_on_error(self, orchestrator):
         """Test proper cleanup when agent assignment fails."""
         orchestrator.max_concurrent_agents = 1
@@ -257,6 +268,7 @@ class TestAgentPoolOptimization:
         
         # Active count should remain unchanged
         assert orchestrator.active_agents == initial_active
+    @pytest.mark.asyncio
     async def test_concurrent_pool_access(self, orchestrator):
         """Test concurrent access to agent pool is thread-safe."""
         num_concurrent = 10

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import json
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_mcp.netra_mcp_server import NetraMCPServer

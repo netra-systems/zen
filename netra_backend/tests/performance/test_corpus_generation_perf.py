@@ -13,7 +13,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import psutil
 import pytest
@@ -45,6 +45,7 @@ class TestCorpusGenerationPerformance:
         return manager
     
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_large_corpus_generation(self, mock_corpus_service, mock_synthetic_manager):
         """Test with 100k+ records"""
         start_time = time.time()
@@ -66,6 +67,7 @@ class TestCorpusGenerationPerformance:
         return {"success": True, "record_count": count}
     
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_concurrent_generations(self, mock_corpus_service):
         """Test multiple simultaneous requests"""
         concurrent_count = 10
@@ -91,6 +93,7 @@ class TestCorpusGenerationPerformance:
         return {"success": True, "corpus_id": corpus_id}
     
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_resource_utilization(self, mock_corpus_service):
         """Monitor CPU/memory usage"""
         initial_memory = psutil.Process().memory_info().rss / 1024 / 1024
@@ -113,6 +116,7 @@ class TestCorpusGenerationPerformance:
         await asyncio.gather(*tasks)
     
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_batch_processing_performance(self, mock_synthetic_manager):
         """Test batch processing efficiency"""
         batch_sizes = [100, 500, 1000, 5000]
@@ -145,6 +149,7 @@ class TestCorpusGenerationPerformance:
         return True
     
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_streaming_generation(self, mock_corpus_service):
         """Test streaming data generation"""
         stream_count = 0
@@ -160,6 +165,7 @@ class TestCorpusGenerationPerformance:
             yield {"chunk_id": i, "data": f"chunk_{i}"}
     
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_memory_leak_detection(self, mock_corpus_service):
         """Test for memory leaks during long operations"""
         initial_memory = self._get_memory_usage()
@@ -183,6 +189,7 @@ class TestCorpusGenerationPerformance:
         # Cleanup would happen here in real implementation
     
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_error_recovery_performance(self, mock_corpus_service):
         """Test performance during error conditions"""
         mock_corpus_service.generate_data.side_effect = [
@@ -206,6 +213,7 @@ class TestScalabilityMetrics:
     """Test scalability metrics"""
     
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_throughput_measurement(self):
         """Measure operation throughput"""
         operations = 1000
@@ -228,6 +236,7 @@ class TestScalabilityMetrics:
         return {"op_id": op_id, "completed": True}
     
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_latency_percentiles(self):
         """Measure latency percentiles"""
         latencies = await self._collect_latencies(100)

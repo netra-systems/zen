@@ -18,7 +18,7 @@ from pathlib import Path
 
 import asyncio
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, Request, Response
@@ -37,6 +37,7 @@ logger = central_logger.get_logger(__name__)
 class TestMiddlewareOrdering:
     """Test middleware ordering and execution sequence."""
     
+    @pytest.mark.asyncio
     async def test_middleware_execution_order(self):
         """Test correct middleware execution order."""
         execution_order = []
@@ -67,6 +68,7 @@ class TestMiddlewareOrdering:
         expected_order = ["first_start", "second_start", "app", "second_end", "first_end"]
         assert execution_order == expected_order
     
+    @pytest.mark.asyncio
     async def test_security_before_metrics(self):
         """Test security middleware executes before metrics."""
         security_middleware = self._create_security_middleware()
@@ -91,6 +93,7 @@ class TestMiddlewareOrdering:
         
         assert "security" in execution_log
     
+    @pytest.mark.asyncio
     async def test_error_middleware_coordination(self):
         """Test error middleware coordination in chain."""
         middleware = self._create_security_middleware()
@@ -103,6 +106,7 @@ class TestMiddlewareOrdering:
         with pytest.raises(ValueError):
             await middleware.dispatch(request, failing_call_next)
     
+    @pytest.mark.asyncio
     async def test_middleware_chain_interruption(self):
         """Test middleware chain interruption on errors."""
         middleware = self._create_security_middleware()
@@ -135,6 +139,7 @@ class TestMiddlewareOrdering:
 class TestHookExecutionSequence:
     """Test hook execution sequence and coordination."""
     
+    @pytest.mark.asyncio
     async def test_pre_request_hooks(self):
         """Test pre-request hook execution."""
         middleware = self._create_security_middleware()
@@ -150,6 +155,7 @@ class TestHookExecutionSequence:
             url_mock.assert_called_once()
             header_mock.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_post_request_hooks(self):
         """Test post-request hook execution."""
         middleware = self._create_security_middleware()
@@ -169,6 +175,7 @@ class TestHookExecutionSequence:
             
             headers_mock.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_error_hooks_execution(self):
         """Test error hook execution in middleware."""
         middleware = self._create_security_middleware()
@@ -181,6 +188,7 @@ class TestHookExecutionSequence:
             
             log_mock.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_hook_dependency_chain(self):
         """Test hook dependency chain execution."""
         middleware = self._create_security_middleware()
@@ -277,6 +285,7 @@ class TestMetricsMiddlewareIntegration:
         metrics_middleware = AgentMetricsMiddleware()
         
         @metrics_middleware.track_agent_operation()
+        @pytest.mark.asyncio
         async def test_operation():
             return "success"
         

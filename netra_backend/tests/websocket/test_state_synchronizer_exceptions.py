@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
@@ -20,6 +20,7 @@ from netra_backend.app.websocket_core.sync_types import CriticalCallbackFailure
 class TestStateSynchronizerExceptionHandling:
     """Test exception handling in state synchronizer."""
     
+    @pytest.mark.asyncio
     async def test_critical_callback_failure_propagation(self):
         """Test that critical callback failures are properly propagated."""
         connection_manager = MagicMock()
@@ -39,6 +40,7 @@ class TestStateSynchronizerExceptionHandling:
         assert "Critical callback failures" in str(exc_info.value)
         assert "test_conn" in str(exc_info.value)
     
+    @pytest.mark.asyncio
     async def test_non_critical_callback_failure_handling(self):
         """Test that non-critical callback failures are handled gracefully."""
         connection_manager = MagicMock()
@@ -57,6 +59,7 @@ class TestStateSynchronizerExceptionHandling:
         except CriticalCallbackFailure:
             pytest.fail("Non-critical callback failure should not propagate")
     
+    @pytest.mark.asyncio
     async def test_mixed_callback_failures(self):
         """Test mixed critical and non-critical callback failures."""
         connection_manager = MagicMock()
@@ -81,6 +84,7 @@ class TestStateSynchronizerExceptionHandling:
         with pytest.raises(CriticalCallbackFailure):
             await synchronizer._notify_sync_callbacks("test_conn", "state_desync")
     
+    @pytest.mark.asyncio
     async def test_callback_timeout_handling(self):
         """Test callback timeout handling."""
         connection_manager = MagicMock()
@@ -98,6 +102,7 @@ class TestStateSynchronizerExceptionHandling:
         except CriticalCallbackFailure:
             pytest.fail("Timeout should not be treated as critical failure")
     
+    @pytest.mark.asyncio
     async def test_callback_exception_classification(self):
         """Test that exception types are correctly classified."""
         connection_manager = MagicMock()
@@ -115,6 +120,7 @@ class TestStateSynchronizerExceptionHandling:
         assert not handler._is_critical_failure(RuntimeError("test"))
         assert not handler._is_critical_failure(KeyError("test"))
     
+    @pytest.mark.asyncio
     async def test_successful_callback_execution(self):
         """Test that successful callbacks execute without issues."""
         connection_manager = MagicMock()
@@ -132,6 +138,7 @@ class TestStateSynchronizerExceptionHandling:
         await synchronizer._notify_sync_callbacks("test_conn", "state_desync")
         assert results == ["test_conn:state_desync"]
     
+    @pytest.mark.asyncio
     async def test_no_callbacks_registered(self):
         """Test behavior when no callbacks are registered."""
         connection_manager = MagicMock()
@@ -140,6 +147,7 @@ class TestStateSynchronizerExceptionHandling:
         # Should complete successfully with no callbacks
         await synchronizer._notify_sync_callbacks("test_conn", "state_desync")
     
+    @pytest.mark.asyncio
     async def test_sync_callback_task_creation_failure(self):
         """Test handling of task creation failures."""
         connection_manager = MagicMock()
@@ -159,6 +167,7 @@ class TestStateSynchronizerExceptionHandling:
 class TestCallbackHandlerDirectly:
     """Test callback handler functionality directly."""
     
+    @pytest.mark.asyncio
     async def test_explicit_exception_inspection(self):
         """Test explicit exception inspection per specification."""
         from netra_backend.app.websocket_core.callback_handler import CallbackHandler
@@ -180,6 +189,7 @@ class TestCallbackHandlerDirectly:
         
         assert "2 failures" in str(exc_info.value)  # Two critical failures
     
+    @pytest.mark.asyncio
     async def test_no_exceptions_in_results(self):
         """Test behavior when no exceptions are in results."""
         from netra_backend.app.websocket_core.callback_handler import CallbackHandler
@@ -191,6 +201,7 @@ class TestCallbackHandlerDirectly:
         # Should complete without raising
         await handler._inspect_callback_results(results, "test_conn")
     
+    @pytest.mark.asyncio
     async def test_only_non_critical_exceptions(self):
         """Test behavior with only non-critical exceptions."""
         from netra_backend.app.websocket_core.callback_handler import CallbackHandler

@@ -383,12 +383,16 @@ async def mock_db_session():
     session.rollback = AsyncMock()
     session.flush = AsyncMock()
     session.refresh = AsyncMock()
-    return session
+    try:
+        yield session
+    finally:
+        if hasattr(session, "close"):
+            await session.close()
 
 @pytest.fixture
 async def thread_service():
     """Thread service fixture."""
-    return ThreadService()
+    yield ThreadService()
 
 @pytest.fixture
 def mock_websocket_manager():

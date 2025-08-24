@@ -19,17 +19,14 @@ import asyncio
 import json
 import time
 from typing import Any, Dict
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.integration.integration.helpers.user_flow_helpers import (
-
+from netra_backend.tests.integration.helpers.user_flow_helpers import (
     MockWebSocketManager,
-
     generate_test_user_data,
-
 )
 
 class TestUserWebSocketLifecycle:

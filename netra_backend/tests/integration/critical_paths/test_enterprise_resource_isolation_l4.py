@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import asyncpg
 import httpx
@@ -48,7 +48,7 @@ from netra_backend.tests.integration.critical_paths.l4_staging_critical_base imp
 TenantIsolator = AsyncMock
 ResourceMonitor = AsyncMock
 # from app.services.database.connection_pool_manager import ConnectionPoolManager
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 ConnectionPoolManager = AsyncMock
 # from app.services.redis.namespace_manager import RedisNamespaceManager

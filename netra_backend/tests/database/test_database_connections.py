@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,6 +22,7 @@ from netra_backend.app.db.migrations.migration_runner import MigrationRunner
 class TestClickHouseConnectionPool:
     """test_clickhouse_connection_pool - Test connection pooling and query timeout"""
     
+    @pytest.mark.asyncio
     async def test_connection_pooling(self):
         """Test connection pooling functionality"""
         with patch('clickhouse_connect.get_client') as mock_get_client:
@@ -51,6 +52,7 @@ class TestClickHouseConnectionPool:
             with pytest.raises(asyncio.TimeoutError):
                 await asyncio.wait_for(asyncio.sleep(5), timeout=0.1)  # Mock timeout
     
+    @pytest.mark.asyncio
     async def test_query_timeout(self):
         """Test query timeout handling"""
         with patch('clickhouse_connect.get_client') as mock_get_client:
@@ -83,6 +85,7 @@ class TestClickHouseConnectionPool:
 class TestMigrationRunnerSafety:
     """test_migration_runner_safety - Test migration safety and rollback capability"""
     
+    @pytest.mark.asyncio
     async def test_migration_rollback(self):
         """Test migration rollback on failure"""
         mock_session = AsyncMock(spec=AsyncSession)
@@ -95,6 +98,7 @@ class TestMigrationRunnerSafety:
         
         # Migration rollback is tested by exception handling
     
+    @pytest.mark.asyncio
     async def test_migration_transaction_safety(self):
         """Test migration transaction safety"""
         mock_session = AsyncMock(spec=AsyncSession)
@@ -112,6 +116,7 @@ class TestMigrationRunnerSafety:
 class TestDatabaseHealthChecks:
     """test_database_health_checks - Test health monitoring and alert thresholds"""
     
+    @pytest.mark.asyncio
     async def test_health_monitoring(self):
         """Test database health monitoring"""
         mock_session = AsyncMock(spec=AsyncSession)
@@ -134,6 +139,7 @@ class TestDatabaseHealthChecks:
         assert health["overall_status"] == "unhealthy"
         assert "database_checks" in health
     
+    @pytest.mark.asyncio
     async def test_alert_thresholds(self):
         """Test alert threshold monitoring"""
         mock_session = AsyncMock(spec=AsyncSession)

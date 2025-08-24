@@ -15,7 +15,7 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Set
 
 # from app.services.websocket_service import WebSocketService
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -32,7 +32,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
     @pytest.fixture
     async def ws_infrastructure(self):
         """WebSocket infrastructure setup"""
-        return {
+        yield {
             'ws_service': WebSocketService(),
             'queue_service': MessageQueueService(),
             'redis_service': RedisService(),
@@ -44,6 +44,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_message_ordering_under_load(self, ws_infrastructure):
         """Test message ordering is preserved under high load"""
         client_id = "client_order_test"
@@ -91,6 +92,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_message_acknowledgment_timeout(self, ws_infrastructure):
         """Test message acknowledgment timeout and retry"""
         client_id = "client_ack_test"
@@ -135,6 +137,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_broadcast_delivery_confirmation(self, ws_infrastructure):
         """Test broadcast message delivery to multiple clients"""
         # Connect multiple clients
@@ -180,6 +183,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_message_delivery_during_reconnection(self, ws_infrastructure):
         """Test message delivery during client reconnection"""
         client_id = "client_reconnect"
@@ -232,6 +236,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_message_deduplication(self, ws_infrastructure):
         """Test duplicate message detection and prevention"""
         client_id = "client_dedup"
@@ -266,6 +271,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_priority_message_delivery(self, ws_infrastructure):
         """Test priority-based message delivery"""
         client_id = "client_priority"
@@ -307,6 +313,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_message_batching_efficiency(self, ws_infrastructure):
         """Test efficient message batching for performance"""
         client_id = "client_batch"
@@ -348,6 +355,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_connection_failure_during_send(self, ws_infrastructure):
         """Test handling of connection failure during message send"""
         client_id = "client_failure"
@@ -393,6 +401,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_message_compression_large_payloads(self, ws_infrastructure):
         """Test message compression for large payloads"""
         client_id = "client_compress"
@@ -429,6 +438,7 @@ class TestWebSocketMessageDeliveryGuaranteesL4:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(30)
+    @pytest.mark.asyncio
     async def test_concurrent_client_message_isolation(self, ws_infrastructure):
         """Test message isolation between concurrent clients"""
         # Connect multiple clients

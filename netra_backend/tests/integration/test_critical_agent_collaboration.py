@@ -11,7 +11,7 @@ from pathlib import Path
 import time
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -22,6 +22,7 @@ from netra_backend.tests.integration.test_fixtures_common import mock_infrastruc
 class TestAgentCollaborationIntegration:
     """Agent collaboration and workflow integration tests"""
 
+    @pytest.mark.asyncio
     async def test_multi_agent_collaboration_with_state_sharing(self, test_database, mock_infrastructure):
         """End-to-end agent communication and task distribution"""
         agent_cluster = await self._create_agent_cluster(test_database, mock_infrastructure)
@@ -29,6 +30,7 @@ class TestAgentCollaborationIntegration:
         execution_flow = await self._execute_multi_agent_workflow(agent_cluster, collaboration_task)
         await self._verify_agent_state_sharing(execution_flow, agent_cluster)
 
+    @pytest.mark.asyncio
     async def test_mcp_tool_execution_pipeline(self, test_database, mock_infrastructure):
         """Full MCP client-server tool execution flow"""
         mcp_infrastructure = await self._setup_mcp_infrastructure()
@@ -36,6 +38,7 @@ class TestAgentCollaborationIntegration:
         execution_pipeline = await self._execute_mcp_tool_pipeline(mcp_infrastructure, tool_execution_request)
         await self._verify_mcp_response_handling(execution_pipeline)
 
+    @pytest.mark.asyncio
     async def test_supply_research_scheduling(self, test_database, mock_infrastructure):
         """Automated research job execution"""
         scheduler_infrastructure = await self._setup_supply_research_scheduler(test_database)
@@ -43,6 +46,7 @@ class TestAgentCollaborationIntegration:
         scheduling_flow = await self._execute_scheduled_research_workflow(scheduler_infrastructure, research_jobs)
         await self._verify_research_job_completion(scheduling_flow, research_jobs)
 
+    @pytest.mark.asyncio
     async def test_synthetic_data_generation_pipeline(self, test_database, mock_infrastructure):
         """Full data generation workflow"""
         data_pipeline = await self._setup_synthetic_data_pipeline(test_database)

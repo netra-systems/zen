@@ -31,7 +31,7 @@ async def team_workspace_config():
         "real_time_collaboration": True,
         "activity_logging": True
     })
-    return workspace_config
+    yield workspace_config
 
 @pytest.fixture
 def team_invitation_config():
@@ -70,7 +70,7 @@ async def error_recovery_config():
         "graceful_degradation": True,
         "user_notification": True
     }
-    return recovery_config
+    yield recovery_config
 
 @pytest.fixture
 def support_channel_config():
@@ -108,7 +108,7 @@ async def service_mesh_config():
         "monitoring_enabled": True,
         "tracing_enabled": True
     }
-    return mesh_config
+    yield mesh_config
 
 @pytest.fixture
 def token_validation_config():
@@ -131,7 +131,7 @@ async def value_demonstration_config():
         "competitive_comparison": True,
         "personalization_enabled": True
     }
-    return value_config
+    yield value_config
 
 @pytest.fixture
 def upgrade_flow_config():
@@ -161,7 +161,7 @@ async def free_tier_limitation_config():
             "urgency_factors": ["limited_time_discount", "feature_highlight"]
         }
     }
-    return limitation_config
+    yield limitation_config
 
 # Data Isolation and Concurrent Testing Fixtures
 @pytest.fixture
@@ -189,7 +189,7 @@ async def concurrent_testing_environment():
             "cpu_utilization_percent": 80
         }
     }
-    return concurrent_config
+    yield concurrent_config
 
 @pytest.fixture
 def stress_testing_scenarios():
@@ -230,7 +230,7 @@ async def real_time_monitoring_config():
             "retention_period": 86400  # 24 hours
         }
     }
-    return monitoring_config
+    yield monitoring_config
 
 @pytest.fixture
 def user_experience_metrics():
@@ -260,7 +260,7 @@ def user_experience_metrics():
 @pytest.fixture
 async def security_testing_config():
     """Security testing configuration"""
-    return {
+    yield {
         "authentication_validation": {"token_security": True, "session_management": True},
         "data_protection": {"encryption_in_transit": True, "encryption_at_rest": True},
         "access_control": {"role_based_permissions": True, "api_rate_limiting": True}
@@ -278,7 +278,7 @@ def compliance_validation_config():
 @pytest.fixture
 async def integration_testing_environment():
     """Integration testing environment configuration"""
-    return {
+    yield {
         "external_services": {"payment_gateway": "stripe_test", "email_service": "sendgrid_test"},
         "api_integrations": {"openai": "test_mode", "anthropic": "test_mode"},
         "database_connections": {"postgresql": "test_database", "redis": "test_instance"}

@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
@@ -258,6 +258,7 @@ class DeadLetterQueueManager:
             "success_rate": self.metrics.get_success_rate()
         }
     
+    @pytest.mark.asyncio
     async def test_poison_message_handling(self) -> Dict[str, Any]:
         """Test poison message detection and handling."""
         # Create a message designed to always fail
@@ -377,6 +378,7 @@ class MessageProcessingLoadTester:
             "comprehensive_metrics": comprehensive_metrics
         }
     
+    @pytest.mark.asyncio
     async def test_message_reliability_scenarios(self) -> Dict[str, Any]:
         """Test various message reliability scenarios."""
         scenarios = {}
@@ -433,6 +435,7 @@ async def message_load_tester(dlq_manager):
 class TestMessageProcessingDLQL3:
     """L3 integration tests for message processing and dead letter queue."""
     
+    @pytest.mark.asyncio
     async def test_zero_message_loss_guarantee(self, message_load_tester):
         """Test that zero message loss is maintained under all conditions."""
         # Execute comprehensive load test
@@ -461,6 +464,7 @@ class TestMessageProcessingDLQL3:
         assert total_accounted == result["load_test_config"]["message_count"], \
             "All messages must be accounted for"
     
+    @pytest.mark.asyncio
     async def test_retry_mechanisms_effectiveness(self, dlq_manager):
         """Test retry mechanisms handle transient failures effectively."""
         # Submit messages that will trigger retries
@@ -491,6 +495,7 @@ class TestMessageProcessingDLQL3:
         assert retry_ratio <= 3.0, \
             "Retry ratio should be reasonable (not excessive retries)"
     
+    @pytest.mark.asyncio
     async def test_poison_message_handling(self, dlq_manager):
         """Test poison message detection and isolation."""
         # Test poison message handling
@@ -514,6 +519,7 @@ class TestMessageProcessingDLQL3:
         assert metrics["dlq_metrics"]["poison_messages"] >= 1, \
             "Poison message should be tracked in metrics"
     
+    @pytest.mark.asyncio
     async def test_dlq_monitoring_and_alerting(self, dlq_manager):
         """Test DLQ monitoring capabilities and health metrics."""
         # Submit various message types to populate DLQ
@@ -548,6 +554,7 @@ class TestMessageProcessingDLQL3:
             assert health_metrics["max_dlq_age_seconds"] >= health_metrics["average_dlq_age_seconds"], \
                 "Max age should be >= average age"
     
+    @pytest.mark.asyncio
     async def test_message_reprocessing_capabilities(self, message_load_tester):
         """Test DLQ message reprocessing and recovery."""
         # First, generate messages that will end up in DLQ
@@ -577,6 +584,7 @@ class TestMessageProcessingDLQL3:
             assert total_processed == reprocessing_result["attempted"], \
                 "All reprocessing attempts should be accounted for"
     
+    @pytest.mark.asyncio
     async def test_high_volume_message_processing(self, message_load_tester):
         """Test high-volume message processing performance."""
         # Execute high-volume test
@@ -606,6 +614,7 @@ class TestMessageProcessingDLQL3:
         assert success_rate >= 50.0, \
             "Should maintain at least 50% success rate under high volume"
     
+    @pytest.mark.asyncio
     async def test_message_reliability_scenarios(self, message_load_tester):
         """Test comprehensive message reliability scenarios."""
         scenarios = await message_load_tester.test_message_reliability_scenarios()
@@ -630,6 +639,7 @@ class TestMessageProcessingDLQL3:
         assert poison_handling["detected_as_poison"], \
             "Poison message detection should work in reliability scenarios"
     
+    @pytest.mark.asyncio
     async def test_concurrent_dlq_operations(self, dlq_manager):
         """Test concurrent DLQ operations don't cause race conditions."""
         # Create concurrent operations

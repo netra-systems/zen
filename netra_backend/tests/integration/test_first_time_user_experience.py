@@ -30,9 +30,10 @@ class TestFirstTimeUserExperience:
     @pytest.fixture
     async def comprehensive_test_setup(self):
         """Setup comprehensive test environment"""
-        return await FirstTimeUserFixtures.create_comprehensive_test_env()
+        yield await FirstTimeUserFixtures.create_comprehensive_test_env()
 
     @tdd_test("first_time_user_flow", expected_to_fail=True)
+    @pytest.mark.asyncio
     async def test_free_tier_limit_enforcement_critical(self, comprehensive_test_setup, llm_optimization_system):
         """
         TEST 3: Free Tier Limit Enforcement
@@ -86,6 +87,7 @@ class TestFirstTimeUserExperience:
         return {"user": user, "limit_enforced": True, "upgrade_prompt_shown": True, "blocking_active": True}
 
     @tdd_test("first_time_user_flow", expected_to_fail=True)
+    @pytest.mark.asyncio
     async def test_mobile_desktop_responsive_critical(self, comprehensive_test_setup):
         """
         TEST 8: Mobile/Desktop Responsive Experience
@@ -125,6 +127,7 @@ class TestFirstTimeUserExperience:
         return validation_result
 
     @tdd_test("first_time_user_flow", expected_to_fail=True)
+    @pytest.mark.asyncio
     async def test_error_recovery_support_critical(self, comprehensive_test_setup):
         """
         TEST 9: Error Recovery & Support

@@ -19,7 +19,7 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -36,7 +36,7 @@ class TestFirstTimeUserJourneyAdvanced:
     @pytest.fixture
     async def first_time_user_setup(self):
         """Setup isolated test environment for first-time user testing"""
-        return await self._create_first_time_user_env()
+        yield await self._create_first_time_user_env()
 
     @pytest.fixture
     def email_system(self):
@@ -79,6 +79,7 @@ class TestFirstTimeUserJourneyAdvanced:
         llm_manager.route_model = AsyncMock()
         return llm_manager
 
+    @pytest.mark.asyncio
     async def test_first_api_key_generation_and_use(self, first_time_user_setup, llm_system):
         """
         Test first API key generation and successful API call.
@@ -119,6 +120,7 @@ class TestFirstTimeUserJourneyAdvanced:
         
         return {"api_key": api_key, "response": api_response, "success": True}
 
+    @pytest.mark.asyncio
     async def test_first_team_invite_collaboration(self, first_time_user_setup, email_system):
         """
         Test first team invite and collaboration setup.
@@ -166,6 +168,7 @@ class TestFirstTimeUserJourneyAdvanced:
         
         return {"owner_id": invite["inviter_id"], "member": team_member, "thread": shared_thread}
 
+    @pytest.mark.asyncio
     async def test_first_cost_savings_report(self, first_time_user_setup, llm_system):
         """
         Test first cost savings report generation.
@@ -200,6 +203,7 @@ class TestFirstTimeUserJourneyAdvanced:
         
         return {"user": user, "savings": optimization_result, "report_generated": True}
 
+    @pytest.mark.asyncio
     async def test_first_model_routing_config(self, first_time_user_setup, llm_system):
         """
         Test first model routing configuration.
@@ -234,6 +238,7 @@ class TestFirstTimeUserJourneyAdvanced:
         
         return routing_config
 
+    @pytest.mark.asyncio
     async def test_first_alert_notification_setup(self, first_time_user_setup, email_system):
         """
         Test first alert and notification setup.

@@ -21,7 +21,7 @@ import os
 import tempfile
 from pathlib import Path
 from typing import Any, Dict
-from unittest.mock import Mock, mock_open, patch
+from unittest.mock import Mock, mock_open, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -61,6 +61,7 @@ class TestConfigurationIntegration:
             "LOG_LEVEL": "INFO"
         }
 
+    @pytest.mark.asyncio
     async def test_configuration_loading_from_environment(self, base_environment_config):
         """
         Test configuration loads correctly from environment variables.
@@ -104,6 +105,7 @@ class TestConfigurationIntegration:
         if hasattr(config, 'log_level'):
             assert config.log_level.upper() in valid_levels
 
+    @pytest.mark.asyncio
     async def test_environment_specific_configurations(self, staging_environment_config):
         """
         Test environment-specific configuration overrides.
@@ -126,6 +128,7 @@ class TestConfigurationIntegration:
             # Verify K_SERVICE indicates Cloud Run deployment (test environment check)
             assert os.environ.get("K_SERVICE") == "netra-backend"
 
+    @pytest.mark.asyncio
     async def test_configuration_validation_and_errors(self):
         """Test configuration validation catches errors and provides helpful messages."""
         # Test missing database URL
@@ -144,6 +147,7 @@ class TestConfigurationIntegration:
                 error_text = str(e).lower()
                 assert "database" in error_text, f"Expected 'database' error in exception: {e}"
 
+    @pytest.mark.asyncio
     async def test_configuration_fallback_mechanisms(self):
         """
         Test configuration fallback to default values.
@@ -179,6 +183,7 @@ class TestConfigurationIntegration:
             assert config.environment in [None, "", "development", "test"]
 
     @mock_justified("File system operations for configuration testing")
+    @pytest.mark.asyncio
     async def test_configuration_file_loading(self, base_environment_config):
         """
         Test loading configuration from files with environment variable override.
@@ -207,6 +212,7 @@ class TestConfigurationIntegration:
                     assert config.database_url == base_environment_config["DATABASE_URL"]
                     assert config.environment == base_environment_config["ENVIRONMENT"]
 
+    @pytest.mark.asyncio
     async def test_configuration_hot_reload(self, base_environment_config):
         """
         Test configuration hot-reload functionality.
@@ -234,6 +240,7 @@ class TestConfigurationIntegration:
                 assert updated_config.debug == new_debug_value, \
                     f"Config not reloaded: expected {new_debug_value}, got {updated_config.debug}"
 
+    @pytest.mark.asyncio
     async def test_secret_management_integration(self):
         """
         Test integration with secret management systems.
@@ -262,6 +269,7 @@ class TestConfigurationIntegration:
             is_valid, errors = validate_configuration()
             assert is_valid, f"Config with secrets should be valid: {errors}"
 
+    @pytest.mark.asyncio
     async def test_configuration_caching_and_performance(self, base_environment_config):
         """
         Test configuration caching for performance.
@@ -290,6 +298,7 @@ class TestConfigurationIntegration:
             assert config3.database_url == config1.database_url
             assert config3.environment == config1.environment
 
+    @pytest.mark.asyncio
     async def test_configuration_environment_isolation(self):
         """Test configuration isolation between different environments."""
         # Test that test environment works
@@ -298,6 +307,7 @@ class TestConfigurationIntegration:
             assert config.environment == "test"
             assert config.database_url == "sqlite:///test.db"
 
+    @pytest.mark.asyncio
     async def test_microservice_configuration_independence(self):
         """Test configuration independence between microservices."""
         main_backend_config = {

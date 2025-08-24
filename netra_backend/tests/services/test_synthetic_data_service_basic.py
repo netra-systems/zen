@@ -9,7 +9,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -22,6 +22,7 @@ from netra_backend.tests.services.test_synthetic_data_service_fixtures import *
 
 class TestCorpusManagement:
     """Test corpus lifecycle management and integration"""
+    @pytest.mark.asyncio
     async def test_corpus_creation_with_clickhouse_table(self, corpus_service, mock_db, mock_clickhouse_client):
         """Test creating corpus with corresponding ClickHouse table"""
         corpus_data = schemas.CorpusCreate(
@@ -40,6 +41,7 @@ class TestCorpusManagement:
         assert "netra_content_corpus_" in result.table_name
         mock_db.add.assert_called_once()
         mock_db.commit.assert_called_once()
+    @pytest.mark.asyncio
     async def test_corpus_status_transitions(self, corpus_service):
         """Test corpus status lifecycle transitions"""
         valid_transitions = {
@@ -53,6 +55,7 @@ class TestCorpusManagement:
         for from_status, to_statuses in valid_transitions.items():
             for to_status in to_statuses:
                 assert corpus_service.is_valid_transition(from_status, to_status)
+    @pytest.mark.asyncio
     async def test_corpus_content_upload_batch(self, corpus_service, mock_clickhouse_client):
         """Test batch upload of corpus content"""
         corpus_id = str(uuid.uuid4())
@@ -74,6 +77,7 @@ class TestCorpusManagement:
         assert result["records_uploaded"] == 100
         assert result["batches_processed"] == 2
         assert mock_clickhouse_client.execute.call_count == 2
+    @pytest.mark.asyncio
     async def test_corpus_validation(self, corpus_service):
         """Test corpus content validation"""
         valid_record = {
@@ -91,6 +95,7 @@ class TestCorpusManagement:
         
         assert corpus_service.validate_corpus_record(valid_record) == True
         assert corpus_service.validate_corpus_record(invalid_record) == False
+    @pytest.mark.asyncio
     async def test_corpus_availability_check(self, corpus_service, mock_clickhouse_client):
         """Test checking corpus availability in ClickHouse"""
         corpus_id = str(uuid.uuid4())
@@ -105,6 +110,7 @@ class TestCorpusManagement:
         
         assert is_available == True
         assert record_count == 1000
+    @pytest.mark.asyncio
     async def test_corpus_fallback_to_default(self, corpus_service):
         """Test fallback to default corpus when primary unavailable"""
         with patch('app.services.corpus_service.get_default_corpus') as mock_default:
@@ -117,6 +123,7 @@ class TestCorpusManagement:
             
             assert result == {"default": "corpus"}
             mock_default.assert_called_once()
+    @pytest.mark.asyncio
     async def test_corpus_caching_mechanism(self, corpus_service):
         """Test corpus content caching for performance"""
         corpus_id = str(uuid.uuid4())
@@ -131,6 +138,7 @@ class TestCorpusManagement:
         result2 = await corpus_service.get_corpus_content_cached(corpus_id)
         assert result1 == result2
         assert corpus_id in corpus_service.content_buffer
+    @pytest.mark.asyncio
     async def test_corpus_deletion_cascade(self, corpus_service, mock_db, mock_clickhouse_client):
         """Test corpus deletion with ClickHouse table cleanup"""
         corpus_id = str(uuid.uuid4())
@@ -142,6 +150,7 @@ class TestCorpusManagement:
         mock_clickhouse_client.execute.assert_called()
         mock_db.query.assert_called()
         mock_db.delete.assert_called()
+    @pytest.mark.asyncio
     async def test_corpus_metadata_tracking(self, corpus_service):
         """Test corpus metadata and versioning"""
         metadata = corpus_service.create_corpus_metadata(
@@ -156,6 +165,7 @@ class TestCorpusManagement:
         assert metadata["domain"] == "healthcare"
         assert metadata["custom_fields"]["compliance"] == "HIPAA"
         assert "created_at" in metadata
+    @pytest.mark.asyncio
     async def test_corpus_concurrent_access(self, corpus_service):
         """Test concurrent corpus access handling"""
         corpus_id = str(uuid.uuid4())

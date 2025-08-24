@@ -154,6 +154,7 @@ class WriteConflictResolutionManager:
                 ON CONFLICT (account_number) DO NOTHING
             """)
     
+    @pytest.mark.asyncio
     async def test_optimistic_locking_conflict_detection(self, concurrent_editors: int = 5) -> Dict[str, Any]:
         """Test optimistic locking with concurrent editors."""
         conflict_result = {
@@ -290,6 +291,7 @@ class WriteConflictResolutionManager:
         
         return conflict_result
     
+    @pytest.mark.asyncio
     async def test_financial_transaction_conflict_safety(self) -> Dict[str, Any]:
         """Test write conflict resolution for financial transactions."""
         financial_result = {
@@ -466,6 +468,7 @@ class WriteConflictResolutionManager:
         
         return financial_result
     
+    @pytest.mark.asyncio
     async def test_document_collaborative_editing(self) -> Dict[str, Any]:
         """Test collaborative document editing with conflict resolution."""
         collaboration_result = {
@@ -650,6 +653,7 @@ async def conflict_manager():
 class TestDatabaseWriteConflictResolutionL3:
     """L3 integration tests for database write conflict resolution."""
     
+    @pytest.mark.asyncio
     async def test_optimistic_locking_concurrent_edits(self, conflict_manager):
         """Test optimistic locking handles concurrent edits correctly."""
         result = await conflict_manager.test_optimistic_locking_conflict_detection(4)
@@ -662,6 +666,7 @@ class TestDatabaseWriteConflictResolutionL3:
         # At least one editor should succeed
         assert result["successful_updates"] >= 1
     
+    @pytest.mark.asyncio
     async def test_financial_transaction_consistency(self, conflict_manager):
         """Test financial transactions maintain consistency under conflicts."""
         result = await conflict_manager.test_financial_transaction_conflict_safety()
@@ -675,6 +680,7 @@ class TestDatabaseWriteConflictResolutionL3:
         if result["conflicts_resolved"] > 0:
             assert result["successful_transactions"] > 0
     
+    @pytest.mark.asyncio
     async def test_collaborative_document_editing(self, conflict_manager):
         """Test collaborative document editing with conflict resolution."""
         result = await conflict_manager.test_document_collaborative_editing()

@@ -21,6 +21,7 @@ pytest_plugins = ["netra_backend.tests.helpers.database_repository_fixtures"]
 class TestReferenceRepository:
     """Test reference repository specific functionality."""
 
+    @pytest.mark.asyncio
     async def test_create_reference_with_metadata(self, unit_of_work):
         """Test creating a reference with metadata."""
         async with unit_of_work as uow:
@@ -41,6 +42,7 @@ class TestReferenceRepository:
             assert_reference_created_correctly(reference, message.id, "document", "knowledge_base")
             assert reference.metadata["relevance_score"] == 0.95
 
+    @pytest.mark.asyncio
     async def test_get_references_by_message(self, unit_of_work):
         """Test getting references by message ID."""
         async with unit_of_work as uow:
@@ -55,6 +57,7 @@ class TestReferenceRepository:
             assert len(references) == 3
             assert all(r.message_id == message.id for r in references)
 
+    @pytest.mark.asyncio
     async def test_search_references(self, unit_of_work):
         """Test searching references."""
         async with unit_of_work as uow:

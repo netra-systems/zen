@@ -32,6 +32,7 @@ class TestCompleteRealPipeline:
 
     """Test complete real agent pipeline with proper error handling."""
     
+    @pytest.mark.asyncio
     async def test_complete_triage_to_data_pipeline(self, real_agent_setup):
 
         """Test complete triage→data pipeline with real LLM calls."""
@@ -162,6 +163,7 @@ class TestRealPipelineErrorHandling:
 
     """Test error handling in real agent pipeline."""
     
+    @pytest.mark.asyncio
     async def test_pipeline_with_invalid_request(self, real_agent_setup):
 
         """Test pipeline behavior with invalid user request."""
@@ -233,6 +235,7 @@ class TestRealPipelineWithValidationReporting:
 
     """Test real pipeline with comprehensive validation reporting."""
     
+    @pytest.mark.asyncio
     async def test_pipeline_with_comprehensive_validation(self, real_agent_setup):
 
         """Test pipeline with detailed validation reporting."""
@@ -372,6 +375,7 @@ class TestRealPipelineConcurrencyAndStability:
 
     """Test real pipeline concurrency and stability."""
     
+    @pytest.mark.asyncio
     async def test_concurrent_pipeline_executions(self, real_agent_setup):
 
         """Test multiple concurrent pipeline executions."""
@@ -462,6 +466,7 @@ class TestRealPipelinePerformanceMetrics:
 
     """Test real pipeline performance and metrics collection."""
     
+    @pytest.mark.asyncio
     async def test_pipeline_performance_metrics(self, real_agent_setup):
 
         """Test pipeline performance metrics collection."""

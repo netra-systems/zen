@@ -66,6 +66,7 @@ class UserOnboardingTester:
         if self.session:
             await self.session.close()
             
+    @pytest.mark.asyncio
     async def test_user_registration(self) -> bool:
         """Step 1: Register new user."""
         print(f"\n[REGISTER] Step 1: Registering new user {self.test_email}...")
@@ -99,6 +100,7 @@ class UserOnboardingTester:
             print(f"[ERROR] Registration error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_email_verification(self) -> bool:
         """Step 2: Verify email address."""
         print("\n[VERIFY] Step 2: Verifying email address...")
@@ -143,6 +145,7 @@ class UserOnboardingTester:
             # Continue anyway for testing
             return True
             
+    @pytest.mark.asyncio
     async def test_first_login(self) -> bool:
         """Step 3: First login after registration."""
         print("\n[LOGIN] Step 3: First login...")
@@ -177,6 +180,7 @@ class UserOnboardingTester:
             print(f"[ERROR] Login error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_profile_setup(self) -> bool:
         """Step 4: Complete profile setup."""
         print("\n[PROFILE] Step 4: Setting up user profile...")
@@ -219,6 +223,7 @@ class UserOnboardingTester:
             print(f"[ERROR] Profile setup error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_workspace_creation(self) -> bool:
         """Step 5: Create initial workspace."""
         print("\n[WORKSPACE] Step 5: Creating initial workspace...")
@@ -261,6 +266,7 @@ class UserOnboardingTester:
             print(f"[ERROR] Workspace creation error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_agent_deployment(self) -> bool:
         """Step 6: Deploy first AI agent."""
         print("\n[AGENT] Step 6: Deploying first AI agent...")
@@ -305,6 +311,7 @@ class UserOnboardingTester:
             print(f"[ERROR] Agent deployment error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_free_tier_limits(self) -> bool:
         """Step 7: Validate free tier limitations."""
         print("\n[LIMITS] Step 7: Testing free tier limits...")
@@ -357,6 +364,7 @@ class UserOnboardingTester:
             print(f"[ERROR] Limits check error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_upgrade_prompt(self) -> bool:
         """Step 8: Test upgrade prompt simulation."""
         print("\n[UPGRADE] Step 8: Testing upgrade prompts...")
@@ -394,6 +402,7 @@ class UserOnboardingTester:
             # Not critical for onboarding
             return True
             
+    @pytest.mark.asyncio
     async def test_activity_tracking(self) -> bool:
         """Step 9: Verify activity tracking."""
         print("\n[ACTIVITY] Step 9: Verifying activity tracking...")
@@ -432,6 +441,7 @@ class UserOnboardingTester:
             print(f"[ERROR] Activity tracking error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_websocket_onboarding(self) -> bool:
         """Step 10: Test WebSocket connection for real-time updates."""
         print("\n[WEBSOCKET] Step 10: Testing WebSocket for onboarding updates...")
@@ -518,6 +528,7 @@ class UserOnboardingTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_user_onboarding_complete_flow():
     """Test the complete user onboarding flow."""
     async with UserOnboardingTester() as tester:

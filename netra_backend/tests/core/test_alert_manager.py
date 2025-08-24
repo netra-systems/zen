@@ -8,7 +8,7 @@ from pathlib import Path
 import asyncio
 import time
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -49,6 +49,7 @@ class TestHealthAlertManager:
         self.alert_manager.register_recovery_action(RecoveryAction.RESTART_SERVICE, action_handler)
         
         assert self.alert_manager.recovery_actions[RecoveryAction.RESTART_SERVICE.value] == action_handler
+    @pytest.mark.asyncio
     async def test_emit_alert(self):
         """Test emitting an alert."""
         callback = AsyncMock()
@@ -66,6 +67,7 @@ class TestHealthAlertManager:
         
         assert alert in self.alert_manager.alerts
         callback.assert_called_once_with(alert)
+    @pytest.mark.asyncio
     async def test_emit_alert_with_sync_callback(self):
         """Test emitting alert with synchronous callback."""
         callback = Mock()
@@ -82,6 +84,7 @@ class TestHealthAlertManager:
         await self.alert_manager.emit_alert(alert)
         
         callback.assert_called_once_with(alert)
+    @pytest.mark.asyncio
     async def test_emit_alert_callback_error(self):
         """Test alert emission with callback error."""
         failing_callback = Mock(side_effect=Exception("Callback failed"))
@@ -102,6 +105,7 @@ class TestHealthAlertManager:
         await self.alert_manager.emit_alert(alert)
         
         working_callback.assert_called_once_with(alert)
+    @pytest.mark.asyncio
     async def test_create_status_change_alert(self):
         """Test creating status change alert."""
         previous_health = ComponentHealth(
@@ -127,6 +131,7 @@ class TestHealthAlertManager:
         assert "degraded from healthy to critical" in alert.message
         assert alert.metadata["previous_status"] == "healthy"
         assert alert.metadata["current_status"] == "critical"
+    @pytest.mark.asyncio
     async def test_create_recovery_alert(self):
         """Test creating recovery alert."""
         previous_health = ComponentHealth(
@@ -147,6 +152,7 @@ class TestHealthAlertManager:
         
         assert "recovered to healthy" in alert.message
         assert alert.severity == "info"
+    @pytest.mark.asyncio
     async def test_create_threshold_alert(self):
         """Test creating threshold alert."""
         alert = await self.alert_manager.create_threshold_alert(
@@ -159,6 +165,7 @@ class TestHealthAlertManager:
         assert alert.metadata["metric"] == "response_time"
         assert alert.metadata["value"] == 8000.0
         assert alert.metadata["threshold"] == 5000.0
+    @pytest.mark.asyncio
     async def test_create_threshold_alert_critical(self):
         """Test creating critical threshold alert."""
         alert = await self.alert_manager.create_threshold_alert(
@@ -243,6 +250,7 @@ class TestHealthAlertManager:
         result = self.alert_manager.resolve_alert("nonexistent")
         
         assert result is False
+    @pytest.mark.asyncio
     async def test_alert_history_management(self):
         """Test alert history size management."""
         # Set small history limit
@@ -263,6 +271,7 @@ class TestHealthAlertManager:
         assert len(self.alert_manager.alerts) == 3
         assert self.alert_manager.alerts[0].alert_id == "alert_2"
         assert self.alert_manager.alerts[-1].alert_id == "alert_4"
+    @pytest.mark.asyncio
     async def test_recovery_action_execution(self):
         """Test automatic recovery action execution."""
         recovery_handler = AsyncMock()
@@ -281,6 +290,7 @@ class TestHealthAlertManager:
         
         # Recovery action should be called
         recovery_handler.assert_called_once_with(alert)
+    @pytest.mark.asyncio
     async def test_recovery_action_error_handling(self):
         """Test recovery action error handling."""
         failing_handler = AsyncMock(side_effect=Exception("Recovery failed"))

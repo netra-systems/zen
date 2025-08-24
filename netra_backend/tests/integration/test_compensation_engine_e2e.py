@@ -23,7 +23,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
@@ -49,6 +49,7 @@ class TestCompensationEngineE2E:
     """E2E tests for compensation engine revenue capture"""
 
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_database_setup(self):
         """Setup test database for compensation testing"""
         return await self._create_test_database()
@@ -110,6 +111,7 @@ class TestCompensationEngineE2E:
             "billing_cycle_start": datetime.now(timezone.utc) - timedelta(days=15)
         }
 
+    @pytest.mark.asyncio
     async def test_1_complete_compensation_cycle_enterprise_customer(
         self, test_database_setup, compensation_components, enterprise_customer_data
     ):
@@ -251,6 +253,7 @@ class TestCompensationEngineE2E:
         await db_setup["session"].close()
         await db_setup["engine"].dispose()
 
+    @pytest.mark.asyncio
     async def test_2_growth_tier_customer_fee_calculation(
         self, test_database_setup, compensation_components
     ):

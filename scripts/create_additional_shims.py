@@ -125,7 +125,7 @@ from netra_backend.app.core.error_handler import ErrorAggregator
     # Test helpers and fixtures
     "netra_backend/tests/integration/integration.py": """
 # Shim module for test backward compatibility
-from test_framework.base import BaseIntegrationTest
+from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.fixtures import *
 """,
     

@@ -8,7 +8,7 @@ import sys
 import asyncio
 import json
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import pytest
@@ -147,6 +147,7 @@ class TestWebSocketConnectionCore:
 
     """Test core WebSocket connection functionality."""
     
+    @pytest.mark.asyncio
     async def test_websocket_connection_establishment(self, mock_websocket, connection_manager):
 
         """Test basic WebSocket connection establishment."""
@@ -166,6 +167,7 @@ class TestWebSocketConnectionCore:
 
         assert len(mock_websocket.messages_received) == 0
     
+    @pytest.mark.asyncio
     async def test_websocket_message_sending(self, mock_websocket, sample_message):
 
         """Test sending messages through WebSocket."""
@@ -183,6 +185,7 @@ class TestWebSocketConnectionCore:
 
         assert mock_websocket.messages_sent[0] == sample_message
     
+    @pytest.mark.asyncio
     async def test_websocket_message_receiving(self, mock_websocket):
 
         """Test receiving messages through WebSocket."""
@@ -200,6 +203,7 @@ class TestWebSocketConnectionCore:
 
         assert received == test_message
     
+    @pytest.mark.asyncio
     async def test_websocket_connection_manager_integration(self, connection_manager, mock_websocket):
 
         """Test WebSocket integration with connection manager."""
@@ -213,6 +217,7 @@ class TestWebSocketConnectionCore:
 
         assert hasattr(connection_manager, 'add_connection') or hasattr(connection_manager, 'connect')
     
+    @pytest.mark.asyncio
     async def test_websocket_error_handling(self, error_prone_websocket):
 
         """Test WebSocket error handling."""
@@ -230,6 +235,7 @@ class TestWebSocketMessageHandler:
 
     """Test WebSocket message handling functionality."""
     
+    @pytest.mark.asyncio
     async def test_agent_request_message_handling(self, ws_manager, sample_message):
 
         """Test handling of agent request messages."""
@@ -243,6 +249,7 @@ class TestWebSocketMessageHandler:
 
         assert hasattr(ws_manager, 'handle_message') or hasattr(ws_manager, 'send_message')
     
+    @pytest.mark.asyncio
     async def test_websocket_connection_lifecycle(self, mock_websocket):
 
         """Test complete WebSocket connection lifecycle."""
@@ -272,6 +279,7 @@ class TestWebSocketMessageHandler:
 
         assert mock_websocket.closed is True
     
+    @pytest.mark.asyncio
     async def test_websocket_message_validation(self, mock_websocket):
 
         """Test WebSocket message validation."""
@@ -313,6 +321,7 @@ class TestWebSocketIntegration:
 
     """Test WebSocket integration with other components."""
     
+    @pytest.mark.asyncio
     async def test_websocket_auth_integration(self, mock_websocket, test_auth_token):
 
         """Test WebSocket integration with authentication."""
@@ -340,6 +349,7 @@ class TestWebSocketIntegration:
 
         assert mock_websocket.messages_sent[0]["type"] == "auth"
     
+    @pytest.mark.asyncio
     async def test_websocket_thread_integration(self, mock_websocket, thread_management_service):
 
         """Test WebSocket integration with thread management."""
@@ -367,6 +377,7 @@ class TestWebSocketIntegration:
 
         assert thread_management_service is not None
     
+    @pytest.mark.asyncio
     async def test_websocket_agent_communication(self, mock_websocket, agent_orchestration_service):
 
         """Test WebSocket communication with agent system."""

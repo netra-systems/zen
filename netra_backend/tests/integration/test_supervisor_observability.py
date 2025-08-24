@@ -12,7 +12,7 @@ from pathlib import Path
 import asyncio
 import json
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -95,6 +95,7 @@ class TestSupervisorObservabilityIntegration:
         return DeepAgentState(user_request="Test request")
 
     @patch('app.agents.supervisor.flow_logger.logger')
+    @pytest.mark.asyncio
     async def test_end_to_end_flow_logging(self, mock_logger, mock_registry, mock_websocket_manager):
         """Test complete flow logging during supervisor execution."""
         flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
@@ -113,6 +114,7 @@ class TestSupervisorObservabilityIntegration:
         assert mock_logger.info.call_count >= 5  # start + 2*(agent_start+completion) + completion
 
     @patch('app.agents.supervisor.flow_logger.logger')
+    @pytest.mark.asyncio
     async def test_inter_agent_communication_logging(self, mock_logger, mock_registry):
         """Test inter-agent communication is properly logged."""
         flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
@@ -129,6 +131,7 @@ class TestSupervisorObservabilityIntegration:
             assert "supervisor_inter_agent_comm" in call_data
 
     @patch('app.agents.supervisor.flow_logger.logger')
+    @pytest.mark.asyncio
     async def test_pipeline_execution_logging_with_metrics(self, mock_logger):
         """Test pipeline execution logging with performance metrics."""
         flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
@@ -147,6 +150,7 @@ class TestSupervisorObservabilityIntegration:
         assert mock_logger.info.call_count == 3
 
     @patch('app.agents.supervisor.flow_logger.logger')
+    @pytest.mark.asyncio
     async def test_todo_lifecycle_during_execution(self, mock_logger):
         """Test TODO lifecycle management during supervisor execution."""
         flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
@@ -172,6 +176,7 @@ class TestSupervisorObservabilityIntegration:
         assert mock_logger.info.call_count >= 7  # 3 creates + 4 state changes
 
     @patch('app.agents.supervisor.flow_logger.logger')
+    @pytest.mark.asyncio
     async def test_observability_with_agent_failures(self, mock_logger, mock_registry):
         """Test observability logging handles agent failures gracefully."""
         flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
@@ -204,6 +209,7 @@ class TestSupervisorObservabilityIntegration:
         assert completion_log["failed_steps"] == 1
 
     @patch('app.agents.supervisor.flow_logger.logger')
+    @pytest.mark.asyncio
     async def test_correlation_tracking_across_agents(self, mock_logger):
         """Test correlation ID tracking across multiple agent executions."""
         correlation_id = "correlation-abc-123"
@@ -224,6 +230,7 @@ class TestSupervisorObservabilityIntegration:
             assert correlation_id in call_data
 
     @patch('app.agents.supervisor.flow_logger.logger')
+    @pytest.mark.asyncio
     async def test_performance_metrics_collection(self, mock_logger):
         """Test collection and logging of performance metrics."""
         flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
@@ -242,6 +249,7 @@ class TestSupervisorObservabilityIntegration:
         # Verify performance data is captured in logs
         assert mock_logger.info.call_count == 4
 
+    @pytest.mark.asyncio
     async def test_flow_state_progression_validation(self):
         """Test that flow state progresses correctly through execution phases."""
         flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
@@ -262,6 +270,7 @@ class TestSupervisorObservabilityIntegration:
         flow_logger.log_flow_completion(True, 1, 0)
         assert flow_logger.flow_state == FlowState.COMPLETED
 
+    @pytest.mark.asyncio
     async def test_summary_generation_accuracy(self):
         """Test that flow summaries contain accurate execution data."""
         flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")

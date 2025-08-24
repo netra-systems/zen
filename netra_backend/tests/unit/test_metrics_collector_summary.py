@@ -12,7 +12,7 @@ import sys
 
 from collections import deque
 from datetime import datetime, timedelta
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 

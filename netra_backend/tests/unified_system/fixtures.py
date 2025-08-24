@@ -225,12 +225,12 @@ async def authenticated_user(test_user, unified_services) -> TestUser:
     test_user.access_token = token_data["access_token"]
     test_user.is_authenticated = True
     
-    return test_user
+    yield test_user
 
 @pytest.fixture(scope="function")
 async def mock_llm_responses() -> Dict[str, Any]:
     """Provide mock LLM responses for consistent testing."""
-    return {
+    yield {
         "chat_response": "Hello! I'm here to help with your AI optimization needs.",
         "analysis_response": "Based on the data, I recommend optimizing your model parameters.",
         "error_response": "I encountered an issue processing your request.",
@@ -246,7 +246,7 @@ async def mock_llm_responses() -> Dict[str, Any]:
 @pytest.fixture(scope="function")
 async def test_conversation_history() -> List[Dict[str, Any]]:
     """Provide test conversation history for user journey tests."""
-    return [
+    yield [
         {
             "role": "user",
             "content": "What is AI optimization?",

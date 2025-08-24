@@ -22,7 +22,7 @@ import json
 import time
 from typing import Dict, Any, List
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import redis.asyncio as redis
 from netra_backend.app.websocket_core.manager import WebSocketManager
@@ -130,6 +130,7 @@ class TestWebSocketConnectionPoolingL3:
 
         ]
     
+    @pytest.mark.asyncio
     async def test_connection_pool_initialization(self, websocket_manager, redis_client):
 
         """Test WebSocket connection pool initialization with Redis."""
@@ -153,6 +154,7 @@ class TestWebSocketConnectionPoolingL3:
 
         assert websocket_manager is not None
     
+    @pytest.mark.asyncio
     async def test_concurrent_connection_establishment(self, websocket_manager, redis_client, test_users):
 
         """Test concurrent WebSocket connection establishment."""
@@ -213,6 +215,7 @@ class TestWebSocketConnectionPoolingL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_connection_pool_scaling(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool scaling under load."""
@@ -259,6 +262,7 @@ class TestWebSocketConnectionPoolingL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_connection_pool_message_distribution(self, websocket_manager, redis_client, test_users):
 
         """Test message distribution across connection pool."""
@@ -315,6 +319,7 @@ class TestWebSocketConnectionPoolingL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_connection_pool_failover_handling(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool resilience during Redis issues."""
@@ -361,6 +366,7 @@ class TestWebSocketConnectionPoolingL3:
     
     @mock_justified("L3: Connection pool stress testing with real Redis")
 
+    @pytest.mark.asyncio
     async def test_connection_pool_resource_management(self, websocket_manager, redis_client, test_users):
 
         """Test connection pool resource management and cleanup."""

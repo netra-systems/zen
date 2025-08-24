@@ -37,7 +37,17 @@ class AuthConfig:
     @staticmethod
     def get_jwt_secret() -> str:
         """Get JWT secret key using unified secret loader"""
-        return AuthSecretLoader.get_jwt_secret()
+        secret = AuthSecretLoader.get_jwt_secret()
+        env = AuthConfig.get_environment()
+        
+        # Validate secret in staging/production
+        if env in ["staging", "production"] and not secret:
+            raise ValueError(f"JWT_SECRET_KEY must be set in {env} environment")
+        
+        if env in ["staging", "production"] and len(secret) < 32:
+            raise ValueError(f"JWT_SECRET_KEY must be at least 32 characters in {env} environment")
+        
+        return secret
     
     @staticmethod
     def get_service_secret() -> str:
@@ -55,7 +65,7 @@ class AuthConfig:
         # Validate service secret is distinct from JWT secret
         jwt_secret = AuthSecretLoader.get_jwt_secret()
         if service_secret == jwt_secret:
-            raise ValueError("SERVICE_SECRET must be different from JWT_SECRET")
+            raise ValueError("SERVICE_SECRET must be different from JWT_SECRET_KEY")
         
         if len(service_secret) < 32:
             env = AuthConfig.get_environment()

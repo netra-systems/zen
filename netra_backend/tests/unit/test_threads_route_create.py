@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -35,6 +35,7 @@ def mock_user():
 
 class TestCreateThread:
     """Test cases for POST / endpoint"""
+    @pytest.mark.asyncio
     async def test_create_thread_success(self, mock_db, mock_user):
         """Test successful thread creation"""
         mock_thread = create_mock_thread(title="New Thread")
@@ -51,6 +52,7 @@ class TestCreateThread:
             assert result.id == "thread_abc123"
             assert result.metadata_["title"] == "New Thread"
             mock_handler.assert_called_once_with(mock_db, thread_data, "test_user_123")
+    @pytest.mark.asyncio
     async def test_create_thread_no_title(self, mock_db, mock_user):
         """Test thread creation without title"""
         mock_thread = create_mock_thread()
@@ -64,6 +66,7 @@ class TestCreateThread:
             
             assert result.metadata_["user_id"] == "test_user_123"
             mock_handler.assert_called_once_with(mock_db, thread_data, "test_user_123")
+    @pytest.mark.asyncio
     async def test_create_thread_exception(self, mock_db, mock_user):
         """Test error handling in create_thread"""
         with patch('netra_backend.app.routes.utils.thread_helpers.handle_create_thread_request') as mock_handler, \

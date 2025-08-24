@@ -19,7 +19,7 @@ import asyncio
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import sqlalchemy as sa
@@ -281,6 +281,7 @@ async def migration_rollback_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_migration_with_backup_creation(migration_rollback_manager):
     """Test migration execution with backup point creation."""
     manager = migration_rollback_manager
@@ -306,6 +307,7 @@ async def test_migration_with_backup_creation(migration_rollback_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_migration_failure_rollback_recovery(migration_rollback_manager):
     """Test migration failure detection and rollback recovery."""
     manager = migration_rollback_manager
@@ -330,6 +332,7 @@ async def test_migration_failure_rollback_recovery(migration_rollback_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_data_integrity_validation_after_rollback(migration_rollback_manager):
     """Test data integrity validation after rollback."""
     manager = migration_rollback_manager
@@ -357,6 +360,7 @@ async def test_data_integrity_validation_after_rollback(migration_rollback_manag
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_rollback_performance_requirements(migration_rollback_manager):
     """Test rollback performance meets requirements."""
     manager = migration_rollback_manager

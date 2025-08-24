@@ -25,7 +25,7 @@ import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.websocket_core.manager import get_websocket_manager
@@ -520,6 +520,7 @@ class ConversionFlowManager:
                 "error": str(e)
             }
 
+    @pytest.mark.asyncio
     async def test_failed_payment_handling(self, user_id: str, target_tier: PlanTier) -> Dict[str, Any]:
         """Test handling of failed payment scenarios."""
         conversion_id = str(uuid.uuid4())
@@ -751,7 +752,7 @@ async def conversion_manager():
 async def free_tier_user(conversion_manager):
     """Create a free tier user for testing."""
     result = await conversion_manager.create_test_user(tier=PlanTier.FREE)
-    return result
+    yield result
 
 # L2 Integration Tests
 

@@ -31,15 +31,14 @@ import json
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import pytest
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.clients.auth_client import auth_client
 
-# from scripts.dev_launcher_health_monitor import  # Should be mocked in tests HealthMonitor
-
+# Removed broken import statement
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.postgres import get_async_db as get_postgres_client
@@ -130,7 +129,7 @@ class TestCrossServiceAuthentication:
                     user_data = await auth_client.validate_token_jwt("valid_token")
                     user_service = CRUDUser("user_service", User)
                     # Mock a database session for the CRUDUser.get call
-                    from unittest.mock import AsyncMock
+                    from unittest.mock import AsyncMock, MagicMock
                     mock_db = AsyncMock()
                     user_details = await user_service.get(mock_db, user_data["user_id"])
                     
@@ -227,7 +226,7 @@ class TestDatabaseConsistency:
             try:
                 # Simulate atomic operation across services
                 # Mock a database session for the CRUDUser.create call
-                from unittest.mock import AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
                 mock_db = AsyncMock()
                 await user_service.create(mock_db, obj_in=user_data)
                 await thread_service.create_thread(user_data['user_id'], mock_db)
@@ -392,7 +391,7 @@ class TestErrorPropagation:
                 
                 # Should still be able to get user data
                 # Mock a database session for the CRUDUser.get call
-                from unittest.mock import AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
                 mock_db = AsyncMock()
                 user_data = await user_service.get(mock_db, "test")
                 assert user_data is not None
@@ -456,7 +455,7 @@ class TestMultiServiceIntegration:
                 
                 user_service = CRUDUser("user_service", User)
                 # Mock a database session for the CRUDUser.get call
-                from unittest.mock import AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
                 mock_db = AsyncMock()
                 user_data = await user_service.get(mock_db, auth_result["user_id"])
                 assert user_data["user_id"] == "journey_user"

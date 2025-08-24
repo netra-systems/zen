@@ -6,7 +6,7 @@ Tests security headers middleware
 import sys
 from pathlib import Path
 
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 
 import pytest
 from fastapi import Response

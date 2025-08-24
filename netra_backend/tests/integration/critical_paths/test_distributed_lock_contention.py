@@ -120,7 +120,7 @@ class DistributedLockContentionL3Manager:
                 redis_urls[name] = url
                 
                 # Use mock Redis client to avoid event loop conflicts
-                from unittest.mock import AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
                 client = AsyncMock()
                 client.ping = AsyncMock()
                 client.get = AsyncMock(return_value=None)
@@ -238,6 +238,7 @@ class DistributedLockContentionL3Manager:
             logger.error(f"Lock release failed for {resource_id}: {e}")
             return False
     
+    @pytest.mark.asyncio
     async def test_high_contention_scenarios(self, worker_count: int, resource_count: int, operations_per_worker: int) -> Dict[str, Any]:
         """Test lock performance under high contention scenarios."""
         # Create workers competing for limited resources
@@ -330,6 +331,7 @@ class DistributedLockContentionL3Manager:
             "avg_operation_time": statistics.mean(operation_times) if operation_times else 0
         }
     
+    @pytest.mark.asyncio
     async def test_deadlock_detection_and_resolution(self, deadlock_scenario: str) -> Dict[str, Any]:
         """Test deadlock detection and resolution mechanisms."""
         if deadlock_scenario == "circular_wait":
@@ -530,6 +532,7 @@ class DistributedLockContentionL3Manager:
             "resolution_effective": len(timeout_resolutions) > 0
         }
     
+    @pytest.mark.asyncio
     async def test_lock_performance_under_load(self, concurrent_locks: int, duration: float) -> Dict[str, Any]:
         """Test lock performance under sustained load."""
         lock_operations = []
@@ -679,6 +682,7 @@ async def lock_contention_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_high_contention_lock_performance(lock_contention_manager):
     """L3: Test distributed lock performance under high contention."""
     result = await lock_contention_manager.test_high_contention_scenarios(
@@ -695,6 +699,7 @@ async def test_high_contention_lock_performance(lock_contention_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_circular_wait_deadlock_detection(lock_contention_manager):
     """L3: Test circular wait deadlock detection and resolution."""
     result = await lock_contention_manager.test_deadlock_detection_and_resolution("circular_wait")
@@ -713,6 +718,7 @@ async def test_circular_wait_deadlock_detection(lock_contention_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_resource_ordering_deadlock_prevention(lock_contention_manager):
     """L3: Test resource ordering deadlock prevention strategy."""
     result = await lock_contention_manager.test_deadlock_detection_and_resolution("resource_ordering")
@@ -727,6 +733,7 @@ async def test_resource_ordering_deadlock_prevention(lock_contention_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_timeout_based_deadlock_resolution(lock_contention_manager):
     """L3: Test timeout-based deadlock resolution mechanism."""
     result = await lock_contention_manager.test_deadlock_detection_and_resolution("timeout_resolution")
@@ -741,6 +748,7 @@ async def test_timeout_based_deadlock_resolution(lock_contention_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_sustained_lock_performance_under_load(lock_contention_manager):
     """L3: Test sustained lock performance under continuous load."""
     result = await lock_contention_manager.test_lock_performance_under_load(
@@ -757,6 +765,7 @@ async def test_sustained_lock_performance_under_load(lock_contention_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_distributed_lock_contention_sla_compliance(lock_contention_manager):
     """L3: Test comprehensive distributed lock contention SLA compliance."""
     # Execute comprehensive test suite

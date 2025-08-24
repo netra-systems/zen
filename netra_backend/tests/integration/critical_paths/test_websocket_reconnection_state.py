@@ -35,7 +35,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as aioredis
@@ -765,6 +765,7 @@ async def reconnection_manager(redis_client):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_connection_state_preservation(reconnection_manager):
 
     """Test WebSocket connection state is preserved during disconnection."""
@@ -811,6 +812,7 @@ async def test_connection_state_preservation(reconnection_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_message_buffering_during_disconnect(reconnection_manager):
 
     """Test messages are buffered while WebSocket is disconnected."""
@@ -857,6 +859,7 @@ async def test_message_buffering_during_disconnect(reconnection_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_successful_reconnection_with_state_restoration(reconnection_manager):
 
     """Test successful reconnection with state and message restoration."""
@@ -907,6 +910,7 @@ async def test_successful_reconnection_with_state_restoration(reconnection_manag
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_reconnection_attempt_limits(reconnection_manager):
 
     """Test reconnection attempt limits and failure handling."""
@@ -957,6 +961,7 @@ async def test_reconnection_attempt_limits(reconnection_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_message_buffer_size_limits(reconnection_manager):
 
     """Test message buffer size limits and overflow handling."""
@@ -993,6 +998,7 @@ async def test_message_buffer_size_limits(reconnection_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_concurrent_reconnection_attempts(reconnection_manager):
 
     """Test handling of concurrent reconnection attempts."""
@@ -1045,6 +1051,7 @@ async def test_concurrent_reconnection_attempts(reconnection_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_state_expiration_handling(reconnection_manager):
 
     """Test handling of expired connection states."""
@@ -1083,6 +1090,7 @@ async def test_state_expiration_handling(reconnection_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_message_replay_ordering(reconnection_manager):
 
     """Test message replay maintains correct ordering."""
@@ -1143,6 +1151,7 @@ async def test_message_replay_ordering(reconnection_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_cleanup_stale_sessions(reconnection_manager):
 
     """Test cleanup of stale reconnection sessions."""
@@ -1188,6 +1197,7 @@ async def test_cleanup_stale_sessions(reconnection_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_comprehensive_metrics_tracking(reconnection_manager):
 
     """Test comprehensive metrics tracking across all components."""

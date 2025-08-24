@@ -9,7 +9,7 @@ from pathlib import Path
 
 import asyncio
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.services.background_task_manager import BackgroundTaskManager
@@ -45,6 +45,7 @@ def scheduler_with_redis():
 class TestSupplyResearchSchedulerRetryLogic:
     """Test retry logic and failure handling"""
     
+    @pytest.mark.asyncio
     async def test_exponential_backoff_retry_timing(self, scheduler_with_redis):
         """Test exponential backoff timing in retry logic."""
         scheduler, mock_redis = scheduler_with_redis
@@ -70,6 +71,7 @@ class TestSupplyResearchSchedulerRetryLogic:
         assert sleep_times[1] == 2  # 2^1 = 2
         assert result == False
 
+    @pytest.mark.asyncio
     async def test_retry_state_persistence(self, scheduler_with_redis):
         """Test retry state persistence in Redis."""
         scheduler, mock_redis = scheduler_with_redis
@@ -90,6 +92,7 @@ class TestSupplyResearchSchedulerRetryLogic:
         # Assert Redis operations
         _assert_redis_retry_operations(mock_redis, schedule)
 
+    @pytest.mark.asyncio
     async def test_retry_circuit_breaker(self, scheduler_with_redis):
         """Test circuit breaker pattern for failing jobs."""
         scheduler, mock_redis = scheduler_with_redis
@@ -112,6 +115,7 @@ class TestSupplyResearchSchedulerRetryLogic:
         assert result == False
         scheduler._is_circuit_open.assert_called_once_with(schedule.name)
 
+    @pytest.mark.asyncio
     async def test_retry_jitter_randomization(self, scheduler_with_redis):
         """Test jitter in retry timing to prevent thundering herd."""
         scheduler, mock_redis = scheduler_with_redis

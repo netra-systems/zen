@@ -723,6 +723,7 @@ class L3MultiServiceStartupManager:
 @pytest.mark.asyncio
 @pytest.mark.l3
 @pytest.mark.critical
+@pytest.mark.asyncio
 async def test_multi_service_startup_sequence_validation_l3():
     """
     L3 Integration Test: Multi-Service Startup Sequence Validation

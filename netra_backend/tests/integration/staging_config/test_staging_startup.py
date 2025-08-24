@@ -8,6 +8,7 @@ with all dependencies and configurations.
 from netra_backend.app.websocket_core.manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 
+import pytest
 import asyncio
 import os
 import sys

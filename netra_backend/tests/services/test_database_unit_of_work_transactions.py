@@ -6,7 +6,7 @@ All functions ≤8 lines per requirements.
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,6 +24,7 @@ def mock_async_session_factory():
 class TestUnitOfWorkTransactions:
     """Test Unit of Work pattern transaction handling"""
     
+    @pytest.mark.asyncio
     async def test_unit_of_work_successful_transaction(self, mock_async_session_factory):
         """Test successful Unit of Work transaction"""
         factory, mock_session = mock_async_session_factory
@@ -36,6 +37,7 @@ class TestUnitOfWorkTransactions:
         # Session should not be rolled back on success
         mock_session.rollback.assert_not_called()
     
+    @pytest.mark.asyncio
     async def test_unit_of_work_rollback_on_exception(self, mock_async_session_factory):
         """Test Unit of Work rollback on exception"""
         factory, mock_session = mock_async_session_factory
@@ -46,6 +48,7 @@ class TestUnitOfWorkTransactions:
         # Should rollback on exception
         mock_session.rollback.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_unit_of_work_with_external_session(self):
         """Test Unit of Work with externally provided session"""
         external_session = AsyncMock(spec=AsyncSession)
@@ -56,6 +59,7 @@ class TestUnitOfWorkTransactions:
         
         _assert_external_session_not_modified(external_session)
     
+    @pytest.mark.asyncio
     async def test_unit_of_work_repository_access(self, mock_async_session_factory):
         """Test repository access through Unit of Work"""
         factory, mock_session = mock_async_session_factory
@@ -64,6 +68,7 @@ class TestUnitOfWorkTransactions:
             async with UnitOfWork() as uow:
                 _test_repository_access(uow)
     
+    @pytest.mark.asyncio
     async def test_unit_of_work_session_lifecycle(self, mock_async_session_factory):
         """Test Unit of Work session lifecycle management"""
         factory, mock_session = mock_async_session_factory
@@ -76,6 +81,7 @@ class TestUnitOfWorkTransactions:
         # Session should be properly managed
         mock_session.close.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_unit_of_work_nested_transactions(self, mock_async_session_factory):
         """Test nested transaction handling"""
         factory, mock_session = mock_async_session_factory
@@ -83,6 +89,7 @@ class TestUnitOfWorkTransactions:
         with patch('netra_backend.app.services.database.unit_of_work.async_session_factory', factory):
             await _execute_nested_transactions(UnitOfWork)
     
+    @pytest.mark.asyncio
     async def test_unit_of_work_error_handling(self, mock_async_session_factory):
         """Test error handling in Unit of Work"""
         factory, mock_session = mock_async_session_factory

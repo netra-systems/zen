@@ -52,6 +52,7 @@ class TestCacheDatabaseSync:
         
         await self.cache_manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_multi_layer_cache_consistency(self):
         """Validate consistency across L1, L2, L3, and Redis cache layers."""
         logger.info("Testing multi-layer cache consistency")
@@ -102,6 +103,7 @@ class TestCacheDatabaseSync:
         
         logger.info(f"Multi-layer consistency test passed: {metrics_summary['consistency_metrics']['total_consistency_checks']} checks")
     
+    @pytest.mark.asyncio
     async def test_ttl_management_coordination(self):
         """Validate TTL management across different cache layers."""
         logger.info("Testing TTL management coordination")
@@ -145,6 +147,7 @@ class TestCacheDatabaseSync:
         
         logger.info(f"TTL management test passed: {metrics_summary['consistency_metrics']['total_consistency_checks']} checks")
     
+    @pytest.mark.asyncio
     async def test_layer_synchronization_patterns(self):
         """Test different synchronization patterns between cache layers."""
         logger.info("Testing layer synchronization patterns")
@@ -197,6 +200,7 @@ class TestCacheDatabaseSync:
         
         logger.info("Layer synchronization patterns test passed")
     
+    @pytest.mark.asyncio
     async def test_cache_consistency_validation(self):
         """Test comprehensive cache consistency validation."""
         logger.info("Testing cache consistency validation")
@@ -232,6 +236,7 @@ class TestCacheDatabaseSync:
         
         logger.info(f"Cache consistency validation passed: {consistency_rate}% success rate")
     
+    @pytest.mark.asyncio
     async def test_database_cache_coherence(self):
         """Test coherence between database and cache layers."""
         logger.info("Testing database-cache coherence")

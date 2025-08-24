@@ -17,7 +17,7 @@ import asyncio
 import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -245,12 +245,13 @@ async def supervisor_with_registry(mock_agent_registry):
     # Replace registry with our mock
     supervisor.registry = registry
     
-    return supervisor, registry, analysis_agent, debug_agent, optimization_agent, llm_manager
+    yield supervisor, registry, analysis_agent, debug_agent, optimization_agent, llm_manager
 
 @pytest.mark.asyncio
 class TestAgentActivation:
     """Test agent activation and routing."""
     
+    @pytest.mark.asyncio
     async def test_supervisor_agent_routing(self, supervisor_with_registry, activation_helper):
         """Test supervisor routing decisions.
         
@@ -336,6 +337,7 @@ class TestAgentActivation:
         
         logger.info("✅ Supervisor routing test completed successfully")
     
+    @pytest.mark.asyncio
     async def test_sub_agent_spawning(self, supervisor_with_registry, activation_helper):
         """Test sub-agent creation and execution.
         
@@ -410,6 +412,7 @@ class TestAgentActivation:
         
         logger.info(f"✅ Sub-agent spawning test: {len(agents_to_spawn)} agents in {total_spawn_time:.2f}s")
     
+    @pytest.mark.asyncio
     async def test_agent_response_aggregation(self, supervisor_with_registry, activation_helper):
         """Test response aggregation from multiple agents.
         
@@ -494,6 +497,7 @@ class TestAgentActivation:
         
         logger.info(f"✅ Response aggregation test: {len(agent_responses)} responses aggregated")
     
+    @pytest.mark.asyncio
     async def test_agent_error_handling(self, supervisor_with_registry, activation_helper):
         """Test agent failure scenarios.
         
@@ -589,6 +593,7 @@ class TestAgentActivation:
         
         logger.info(f"✅ Error handling test: {len(error_activations)} errors handled gracefully")
     
+    @pytest.mark.asyncio
     async def test_agent_performance_benchmarks(self, supervisor_with_registry, activation_helper):
         """Test agent performance benchmarks and timing constraints."""
         supervisor, registry, analysis_agent, debug_agent, optimization_agent, llm_manager = supervisor_with_registry

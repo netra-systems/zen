@@ -32,7 +32,7 @@ import asyncio
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -95,6 +95,7 @@ class ErrorRecoveryTestFixtures:
 
 class TestCascadingFailureScenarios:
     """Test cascading failure scenarios across agent system"""
+    @pytest.mark.asyncio
     async def test_agent_failure_propagation_circuit_breaker(self):
         """Test Agent A failure → Circuit breaker → Impact on dependent agents"""
         config = CircuitBreakerConfig(failure_threshold=2, recovery_timeout=1.0)
@@ -113,6 +114,7 @@ class TestCascadingFailureScenarios:
         status = wrapper.circuit_breaker.get_status()
         assert status["state"] == CircuitBreakerState.OPEN.value
         assert status["failure_count"] >= 2
+    @pytest.mark.asyncio
     async def test_database_failure_system_response(self):
         """Test Database failure → System graceful degradation"""
         session = ErrorRecoveryTestFixtures.create_database_session_mock(fail_on_commit=True)
@@ -131,6 +133,7 @@ class TestCascadingFailureScenarios:
                 assert False, "Expected exception"
             except Exception as e:
                 assert "DATABASE_UNAVAILABLE" in str(e)
+    @pytest.mark.asyncio
     async def test_llm_service_down_fallback_behavior(self):
         """Test LLM service failure → Fallback to cached responses"""
         config = RetryConfig(max_retries=2, base_delay=0.1)
@@ -150,6 +153,7 @@ class TestCascadingFailureScenarios:
         )
         assert result["fallback"] is True
         assert "Cached response" in result["content"]
+    @pytest.mark.asyncio
     async def test_websocket_disconnect_reconnection(self):
         """Test WebSocket disconnect → Automatic reconnection with state sync"""
         recovery_manager = WebSocketRecoveryManager()
@@ -176,6 +180,7 @@ class TestCascadingFailureScenarios:
 
 class TestPartialSuccessHandling:
     """Test partial success scenarios and compensation patterns"""
+    @pytest.mark.asyncio
     async def test_multi_data_source_partial_availability(self):
         """Test 3/5 data sources available → Partial results with warnings"""
         data_sources = ["source1", "source2", "source3", "source4", "source5"]
@@ -193,6 +198,7 @@ class TestPartialSuccessHandling:
         assert len(failures) == 2
         success_ratio = len(results) / len(data_sources)
         assert success_ratio == 0.6
+    @pytest.mark.asyncio
     async def test_agent_workflow_partial_completion(self):
         """Test some agents complete, others fail → Partial workflow results"""
         agent_results = {}
@@ -210,6 +216,7 @@ class TestPartialSuccessHandling:
         assert len(agent_failures) == 2
         assert "triage" in agent_results
         assert "data" in agent_failures
+    @pytest.mark.asyncio
     async def test_database_partial_write_transaction(self):
         """Test partial database writes → Transaction rollback"""
         session = ErrorRecoveryTestFixtures.create_database_session_mock()
@@ -233,6 +240,7 @@ class TestPartialSuccessHandling:
 
 class TestRollbackMechanisms:
     """Test transaction rollback and state restoration mechanisms"""
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_error(self):
         """Test automatic transaction rollback when operation fails"""
         session = ErrorRecoveryTestFixtures.create_database_session_mock(fail_on_commit=True)
@@ -248,6 +256,7 @@ class TestRollbackMechanisms:
         # Verify rollback was executed
         session.rollback.assert_called_once()
         session.commit.assert_called_once()
+    @pytest.mark.asyncio
     async def test_agent_state_restoration_after_failure(self):
         """Test state restoration after agent failure"""
         initial_state = DeepAgentState(user_request="test", step_count=3)
@@ -264,6 +273,7 @@ class TestRollbackMechanisms:
         # Verify state restoration
         assert restored_state.user_request == "test"
         assert restored_state.step_count == 3
+    @pytest.mark.asyncio
     async def test_resource_cleanup_partial_operations(self):
         """Test cleanup of partial operations and resource deallocation"""
         allocated_resources = []
@@ -287,6 +297,7 @@ class TestRollbackMechanisms:
 
 class TestRecoveryMechanisms:
     """Test automatic retry, manual intervention, and graceful degradation"""
+    @pytest.mark.asyncio
     async def test_automatic_retry_success_after_failures(self):
         """Test automatic retry succeeds after initial failures"""
         config = RetryConfig(max_retries=3, base_delay=0.1, jitter=False)
@@ -298,6 +309,7 @@ class TestRecoveryMechanisms:
         result = await wrapper.execute_safely(failing_op, "retry_test")
         assert result["status"] == "success"
         assert result["attempt"] == 3
+    @pytest.mark.asyncio
     async def test_circuit_breaker_automatic_recovery(self):
         """Test circuit breaker automatic recovery after timeout"""
         config = CircuitBreakerConfig(failure_threshold=2, recovery_timeout=0.1)
@@ -316,6 +328,7 @@ class TestRecoveryMechanisms:
         
         # Verify circuit breaker allows execution after timeout
         assert wrapper.circuit_breaker.can_execute() is True
+    @pytest.mark.asyncio
     async def test_graceful_degradation_under_load(self):
         """Test graceful degradation when system under stress"""
         config = CircuitBreakerConfig(failure_threshold=1, recovery_timeout=0.5)
@@ -336,6 +349,7 @@ class TestRecoveryMechanisms:
         if not wrapper.circuit_breaker.can_execute():
             result = await degraded_operation()
             assert result["status"] == "degraded"
+    @pytest.mark.asyncio
     async def test_alternative_workflow_activation(self):
         """Test alternative workflow activation when primary fails"""
         primary_workflow_failed = True

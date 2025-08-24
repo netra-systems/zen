@@ -46,7 +46,7 @@ from netra_backend.app.db.session import get_db_session
 from netra_backend.app.services.agent_service import AgentService
 
 # Mock models for testing
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 User = Mock
 Thread = Mock
 AgentRun = Mock
@@ -468,7 +468,7 @@ class TestPerformanceBottlenecks:
             websocket_connections = []
             connection_results = []
             
-            def create_websocket_connection(connection_id: int):
+            async def create_websocket_connection(connection_id: int):
                 """Create a WebSocket connection for testing."""
                 try:
                     # FAILURE EXPECTED HERE - connection limits may not be enforced

@@ -54,6 +54,7 @@ class TestCacheRedisInvalidation:
         
         await self.cache_manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_cascade_invalidation_propagation(self):
         """Test cascade invalidation propagates through all cache layers."""
         logger.info("Testing cascade invalidation propagation")
@@ -83,6 +84,7 @@ class TestCacheRedisInvalidation:
         
         logger.info(f"Cascade test passed: avg_time={avg_cascade_time:.2f}ms, consistency={consistency_rate}%")
     
+    @pytest.mark.asyncio
     async def test_tag_based_invalidation_redis(self):
         """Test tag-based cache invalidation across Redis layer."""
         logger.info("Testing Redis tag-based invalidation")
@@ -137,6 +139,7 @@ class TestCacheRedisInvalidation:
         
         logger.info("Redis tag-based invalidation test passed")
     
+    @pytest.mark.asyncio
     async def test_redis_distributed_consistency(self):
         """Test Redis distributed cache consistency validation."""
         logger.info("Testing Redis distributed consistency")
@@ -175,6 +178,7 @@ class TestCacheRedisInvalidation:
         
         logger.info("Redis distributed consistency test passed")
     
+    @pytest.mark.asyncio
     async def test_redis_concurrent_invalidation(self):
         """Test concurrent Redis invalidation operations."""
         logger.info("Testing Redis concurrent invalidation")
@@ -213,6 +217,7 @@ class TestCacheRedisInvalidation:
         
         logger.info(f"Concurrent Redis invalidation passed: {consistency_rate}% consistency, {avg_cascade_time:.2f}ms avg")
     
+    @pytest.mark.asyncio
     async def test_redis_connection_resilience(self):
         """Test Redis invalidation with connection issues."""
         logger.info("Testing Redis connection resilience")

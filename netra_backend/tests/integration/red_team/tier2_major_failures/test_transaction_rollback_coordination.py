@@ -68,7 +68,7 @@ except ImportError:
     try:
         from netra_backend.app.db.models import User
     except ImportError:
-        from unittest.mock import Mock
+        from unittest.mock import Mock, AsyncMock, MagicMock
         User = Mock()
 
 try:
@@ -77,7 +77,7 @@ except ImportError:
     try:
         from netra_backend.app.db.models import Session as UserSession
     except ImportError:
-        from unittest.mock import Mock
+        from unittest.mock import Mock, AsyncMock, MagicMock
         UserSession = Mock()
 
 

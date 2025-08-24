@@ -23,7 +23,7 @@ import json
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.logging_config import central_logger
@@ -197,7 +197,7 @@ async def real_thread_service():
     
     # Mock the database URL and initialize for testing
     import netra_backend.app.db.postgres_core as postgres_module
-    from unittest.mock import patch, AsyncMock
+    from unittest.mock import patch, AsyncMock, MagicMock
     
     # Create a mock session factory that returns a proper async session
     mock_session = AsyncMock()
@@ -208,18 +208,22 @@ async def real_thread_service():
     mock_session.execute = AsyncMock()
     
     # Mock session factory that returns the session directly
-    def mock_session_factory():
-        return mock_session
+    async def mock_session_factory():
+        try:
+            yield session
+        finally:
+            if hasattr(session, "close"):
+                await session.close()
     
     # Patch the async_session_factory to use our mock
     with patch.object(postgres_module, 'async_session_factory', mock_session_factory):
-        return ThreadService()
+        yield ThreadService()
 
 @pytest.fixture
 async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mock_db_session):
     """Fixture providing real supervisor agent with real components."""
     from netra_backend.app.core.config import get_config
-    from unittest.mock import Mock, AsyncMock, patch
+    from unittest.mock import Mock, AsyncMock, MagicMock, patch
     
     try:
         # Try to create real LLM manager
@@ -254,10 +258,10 @@ async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mo
         # NOTE: Don't send agent_completed here - the AgentService message handler will send it
         # This prevents duplicate completion messages
         
-        return f"I can help user {user_id} with thread {thread_id} optimize AI costs for GPT-4 usage in production."
+        yield f"I can help user {user_id} with thread {thread_id} optimize AI costs for GPT-4 usage in production."
     
     supervisor.run = mock_supervisor_run
-    return supervisor
+    yield supervisor
 
 @pytest.fixture
 
@@ -270,7 +274,7 @@ async def real_agent_service(real_supervisor_agent):
 @pytest.fixture
 def mock_db_session():
     """Fixture providing mock database session."""
-    from unittest.mock import AsyncMock, MagicMock, Mock
+    from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock
     from sqlalchemy.ext.asyncio import AsyncSession
     
     session = AsyncMock(spec=AsyncSession)
@@ -312,7 +316,7 @@ def mock_db_session():
 @pytest.fixture(autouse=True)
 def setup_database_and_mocks():
     """Auto-setup database session factory and mocks for all tests in this file."""
-    from unittest.mock import patch, AsyncMock, MagicMock, Mock
+    from unittest.mock import patch, AsyncMock, MagicMock, MagicMock, Mock
     import netra_backend.app.db.postgres_core as postgres_module
     import netra_backend.app.services.database.unit_of_work as uow_module
     from netra_backend.app.db.models_postgres import Thread, Run
@@ -371,6 +375,7 @@ class TestAgentMessageFlow:
 
     """Test complete agent message flow end-to-end."""
     
+    @pytest.mark.asyncio
     async def test_complete_user_message_to_agent_response_flow(self, 
         real_agent_service: AgentService,
         websocket_capture: WebSocketMessageCapture,
@@ -383,7 +388,7 @@ class TestAgentMessageFlow:
         Validates complete message flow with real agent processing.
 
         """
-        from unittest.mock import patch
+        from unittest.mock import patch, AsyncMock, MagicMock
 
         user_id = "test_user_001"
 
@@ -447,6 +452,7 @@ class TestAgentMessageFlow:
 
         assert len(errors) == 0, f"Unexpected errors: {errors}"
     
+    @pytest.mark.asyncio
     async def test_agent_message_ordering_guarantees(
 
         self,
@@ -552,6 +558,7 @@ class TestAgentMessageFlow:
         assert len(processed_order) == len(test_messages), \
             "Not all messages completed processing"
     
+    @pytest.mark.asyncio
     async def test_streaming_response_handling(
 
         self,
@@ -654,6 +661,7 @@ class TestAgentMessageFlow:
             assert chunk_indices == sorted(chunk_indices), \
                 "Streaming chunks were not sent in order"
     
+    @pytest.mark.asyncio
     async def test_agent_error_handling_and_recovery(
 
         self,
@@ -713,6 +721,7 @@ class TestAgentMessageFlow:
         assert "Unknown message type" in error_message or "invalid" in error_message.lower(), \
             f"Error message not descriptive: {error_message}"
     
+    @pytest.mark.asyncio
     async def test_concurrent_user_message_isolation(
 
         self,
@@ -794,6 +803,7 @@ class TestAgentMessageFlow:
             assert user_id in response_content or f"thread_{user_id}" in response_content, \
                 f"Response for {user_id} doesn't contain user-specific content"
     
+    @pytest.mark.asyncio
     async def test_agent_websocket_connection_recovery(
 
         self,
@@ -890,6 +900,7 @@ class TestAgentMessageFlowPerformance:
 
     """Performance tests for agent message flow."""
     
+    @pytest.mark.asyncio
     async def test_message_processing_latency(
 
         self,
@@ -957,6 +968,7 @@ class TestAgentMessageFlowPerformance:
         
         logger.info(f"Message processing latency: {processing_time:.3f}s")
     
+    @pytest.mark.asyncio
     async def test_concurrent_message_throughput(
 
         self,

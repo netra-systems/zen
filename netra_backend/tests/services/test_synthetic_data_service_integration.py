@@ -9,7 +9,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -42,6 +42,7 @@ def full_stack():
 
 class TestIntegration(SharedTestIntegration):
     """Test end-to-end integration scenarios"""
+    @pytest.mark.asyncio
     async def test_complete_generation_workflow(self, full_stack):
         """Test complete workflow from corpus creation to data visualization"""
         # 1. Create corpus
@@ -74,6 +75,7 @@ class TestIntegration(SharedTestIntegration):
         )
         
         assert ingested[0][0] == 1000
+    @pytest.mark.asyncio
     async def test_multi_tenant_generation(self, full_stack):
         """Test multi-tenant data generation isolation"""
         tenant_configs = [
@@ -98,6 +100,7 @@ class TestIntegration(SharedTestIntegration):
             )
             assert len(data) == 1
             assert data[0][0] == tenant_configs[i]["tenant_id"]
+    @pytest.mark.asyncio
     async def test_real_time_streaming_pipeline(self, full_stack):
         """Test real-time streaming from generation to UI"""
         job_id = str(uuid.uuid4())
@@ -124,6 +127,7 @@ class TestIntegration(SharedTestIntegration):
         assert len(received_updates) > 0
         assert any(u["type"] == "generation_progress" for u in received_updates)
         assert received_updates[-1]["type"] == "generation_complete"
+    @pytest.mark.asyncio
     async def test_failure_recovery_integration(self, full_stack):
         """Test integrated failure recovery across components"""
         # Simulate ClickHouse failure midway
@@ -146,6 +150,7 @@ class TestIntegration(SharedTestIntegration):
         
         assert result["completed"] == True
         assert result["recovery_attempts"] > 0
+    @pytest.mark.asyncio
     async def test_cross_component_validation(self, full_stack):
         """Test validation across multiple components"""
         # Generate data
@@ -160,6 +165,7 @@ class TestIntegration(SharedTestIntegration):
         # Cross-check with generation metrics
         assert abs(ch_validation["record_count"] - generation_result["records_generated"]) < 10
         assert ch_validation["schema_valid"] == True
+    @pytest.mark.asyncio
     async def test_performance_under_load(self, full_stack):
         """Test system performance under concurrent load"""
         concurrent_jobs = 10
@@ -178,6 +184,7 @@ class TestIntegration(SharedTestIntegration):
         
         # Performance should scale reasonably
         assert total_time < 60  # Should complete within 1 minute
+    @pytest.mark.asyncio
     async def test_data_consistency_verification(self, full_stack):
         """Test data consistency across all storage layers"""
         job_id = str(uuid.uuid4())
@@ -201,6 +208,7 @@ class TestIntegration(SharedTestIntegration):
         
         # All should be consistent
         assert pg_metadata["record_count"] == ch_count == 1000
+    @pytest.mark.asyncio
     async def test_monitoring_integration(self, full_stack):
         """Test monitoring and metrics collection integration"""
         # Enable monitoring
@@ -217,6 +225,7 @@ class TestIntegration(SharedTestIntegration):
         assert metrics["generation_count"] > 0
         assert metrics["ingestion_success_rate"] > 0.95
         assert "latency_p99" in metrics
+    @pytest.mark.asyncio
     async def test_security_and_access_control(self, full_stack):
         """Test security and access control integration"""
         # Create corpus with restricted access
@@ -239,6 +248,7 @@ class TestIntegration(SharedTestIntegration):
         )
         
         assert result["success"] == True
+    @pytest.mark.asyncio
     async def test_cleanup_and_retention(self, full_stack):
         """Test data cleanup and retention policies"""
         # Generate data with retention policy

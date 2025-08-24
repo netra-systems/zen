@@ -36,6 +36,7 @@ from netra_backend.tests.e2e.first_time_user.real_critical_fixtures import *
 class TestRealCriticalUserJourney:
     """Real E2E tests for critical first-time user journey (with REAL services)"""
 
+    @pytest.mark.asyncio
     async def test_real_oauth_google_signup_and_first_login_e2e(
         self, real_llm_manager, real_websocket_manager, oauth_flow_environment
     ):
@@ -50,6 +51,7 @@ class TestRealCriticalUserJourney:
         session_result = await OAuthFlowHelpers.establish_user_session(profile_result)
         await OAuthFlowHelpers.validate_first_login_experience(session_result)
 
+    @pytest.mark.asyncio
     async def test_real_ai_provider_connection_validation_e2e(
         self, real_llm_manager, ai_provider_credentials
     ):
@@ -64,6 +66,7 @@ class TestRealCriticalUserJourney:
         health_result = await AIProviderHelpers.verify_provider_health(storage_result)
         await AIProviderHelpers.setup_usage_tracking(health_result)
 
+    @pytest.mark.asyncio
     async def test_real_websocket_onboarding_flow_e2e(
         self, real_websocket_manager, websocket_test_environment
     ):
@@ -78,6 +81,7 @@ class TestRealCriticalUserJourney:
         progress_result = await WebSocketHelpers.track_onboarding_progress(onboarding_result)
         await WebSocketHelpers.test_connection_recovery(progress_result)
 
+    @pytest.mark.asyncio
     async def test_real_first_optimization_analysis_e2e(
         self, real_llm_manager, usage_data_samples
     ):
@@ -92,6 +96,7 @@ class TestRealCriticalUserJourney:
         savings_result = await OptimizationHelpers.calculate_real_cost_savings(analysis_result)
         await OptimizationHelpers.verify_optimization_results(savings_result)
 
+    @pytest.mark.asyncio
     async def test_real_value_dashboard_with_live_data_e2e(
         self, real_llm_manager, db_session, performance_thresholds
     ):
@@ -106,6 +111,7 @@ class TestRealCriticalUserJourney:
         interactive_result = await self._test_interactive_features(tracking_result)
         await self._test_data_export_functionality(interactive_result)
 
+    @pytest.mark.asyncio
     async def test_real_free_tier_limitations_and_upgrade_prompt_e2e(
         self, real_llm_manager, user_profile_data
     ):
@@ -120,6 +126,7 @@ class TestRealCriticalUserJourney:
         paywall_result = await self._validate_paywall_enforcement(prompt_result)
         await self._test_upgrade_flow_initiation(paywall_result)
 
+    @pytest.mark.asyncio
     async def test_real_team_workspace_creation_and_invitation_e2e(
         self, real_websocket_manager, db_session, team_workspace_config
     ):
@@ -134,6 +141,7 @@ class TestRealCriticalUserJourney:
         permission_result = await self._validate_team_permissions(invitation_result)
         await self._test_collaborative_features(permission_result, real_websocket_manager)
 
+    @pytest.mark.asyncio
     async def test_real_error_recovery_and_support_flow_e2e(
         self, real_websocket_manager, error_simulation_scenarios
     ):
@@ -148,6 +156,7 @@ class TestRealCriticalUserJourney:
         message_result = await self._validate_error_messaging(recovery_result)
         await self._test_support_channel_access(message_result)
 
+    @pytest.mark.asyncio
     async def test_real_cross_service_auth_to_main_integration_e2e(
         self, real_websocket_manager, cross_service_config
     ):
@@ -162,6 +171,7 @@ class TestRealCriticalUserJourney:
         health_result = await self._test_service_health_monitoring(validation_result)
         await self._test_service_discovery_integration(health_result)
 
+    @pytest.mark.asyncio
     async def test_real_concurrent_first_time_users_performance_e2e(
         self, real_llm_manager, real_websocket_manager, concurrent_load_config
     ):

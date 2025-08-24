@@ -11,7 +11,7 @@ from pathlib import Path
 import asyncio
 import time
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -26,6 +26,7 @@ class TestAuthTokenLifecycleL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_token_creation_with_valid_user(self):
         """Test token creation for valid authenticated user"""
         auth_service = AuthService()
@@ -43,6 +44,7 @@ class TestAuthTokenLifecycleL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_token_expiration_handling(self):
         """Test token expiration and validation"""
         auth_service = AuthService()
@@ -60,6 +62,7 @@ class TestAuthTokenLifecycleL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_token_refresh_flow(self):
         """Test refresh token flow"""
         auth_service = AuthService()
@@ -79,6 +82,7 @@ class TestAuthTokenLifecycleL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_token_revocation(self):
         """Test token revocation mechanism"""
         auth_service = AuthService()
@@ -98,6 +102,7 @@ class TestAuthTokenLifecycleL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_token_validation(self):
         """Test concurrent token validation requests"""
         auth_service = AuthService()

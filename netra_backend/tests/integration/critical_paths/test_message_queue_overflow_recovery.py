@@ -61,6 +61,7 @@ class MessageQueueOverflowTester:
                 data = await response.json()
                 self.auth_token = data.get("access_token")
                 
+    @pytest.mark.asyncio
     async def test_queue_capacity_check(self) -> bool:
         """Check current queue capacity."""
         print("\n[CAPACITY] Checking queue capacity...")
@@ -77,6 +78,7 @@ class MessageQueueOverflowTester:
                 
         return False
         
+    @pytest.mark.asyncio
     async def test_overflow_simulation(self) -> bool:
         """Simulate queue overflow."""
         print("\n[OVERFLOW] Simulating queue overflow...")
@@ -111,6 +113,7 @@ class MessageQueueOverflowTester:
                     
         return overflow_detected or len(self.messages_sent) > 500
         
+    @pytest.mark.asyncio
     async def test_backpressure_handling(self) -> bool:
         """Test back-pressure mechanism."""
         print("\n[BACKPRESSURE] Testing back-pressure handling...")
@@ -142,6 +145,7 @@ class MessageQueueOverflowTester:
                 
         return success_count < 10  # Should be rate limited
         
+    @pytest.mark.asyncio
     async def test_dlq_routing(self) -> bool:
         """Test dead letter queue routing."""
         print("\n[DLQ] Testing dead letter queue...")
@@ -178,6 +182,7 @@ class MessageQueueOverflowTester:
                             
         return False
         
+    @pytest.mark.asyncio
     async def test_priority_processing(self) -> bool:
         """Test message priority handling."""
         print("\n[PRIORITY] Testing priority processing...")
@@ -222,6 +227,7 @@ class MessageQueueOverflowTester:
                     
         return len(message_ids) > 0
         
+    @pytest.mark.asyncio
     async def test_queue_recovery(self) -> bool:
         """Test queue recovery after overflow."""
         print("\n[RECOVERY] Testing queue recovery...")
@@ -279,6 +285,7 @@ class MessageQueueOverflowTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_message_queue_overflow_recovery():
     """Test message queue overflow and recovery."""
     async with MessageQueueOverflowTester() as tester:

@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -185,6 +185,7 @@ class TestBaseSubAgentLogging:
     
     @patch('app.llm.observability.SubAgentLogger._log_communication_json')
     @patch('app.config.get_config')
+    @pytest.mark.asyncio
     async def test_pre_run_logging(self, mock_get_config, mock_log_comm, test_agent, mock_state):
         """Test logging during pre_run."""
         # Mock config to enable logging

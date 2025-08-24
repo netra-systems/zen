@@ -21,7 +21,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -119,6 +119,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_valid_token_accepted_by_api_endpoint(self, async_client, valid_jwt_token):
 
         """Test 1: Valid token should be accepted by protected API endpoints."""
@@ -141,6 +142,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_expired_token_rejected(self, async_client, expired_jwt_token):
 
         """Test 2: Expired tokens should be rejected."""
@@ -161,6 +163,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_malformed_token_rejected(self, async_client):
 
         """Test 3: Malformed tokens should be rejected."""
@@ -191,6 +194,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_token_with_invalid_signature_rejected(self, async_client):
 
         """Test 4: Tokens with invalid signatures should be rejected."""
@@ -230,6 +234,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_service_to_service_token_propagation(self):
 
         """Test 5: Tokens should propagate correctly in service-to-service calls."""
@@ -272,6 +277,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_websocket_token_validation(self, async_client, valid_jwt_token):
 
         """Test 6: WebSocket connections should validate tokens."""
@@ -296,6 +302,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_token_permissions_enforcement(self, async_client):
 
         """Test 7: Token permissions should be enforced at endpoint level."""
@@ -338,6 +345,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_token_refresh_maintains_user_context(self, async_client):
 
         """Test 8: Token refresh should maintain user context and permissions."""
@@ -395,6 +403,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_concurrent_token_validation_performance(self, async_client, valid_jwt_token):
 
         """Test 9: System should handle concurrent token validations efficiently."""
@@ -433,6 +442,7 @@ class TestAuthTokenValidationCrossService:
 
     @pytest.mark.L3
 
+    @pytest.mark.asyncio
     async def test_token_blacklist_enforcement(self, async_client, valid_jwt_token):
 
         """Test 10: Blacklisted tokens should be rejected even if valid."""

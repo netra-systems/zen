@@ -25,7 +25,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as redis
@@ -319,6 +319,7 @@ class ApiRateLimitingFirstRequestsManager:
         
         return result
         
+    @pytest.mark.asyncio
     async def test_burst_traffic(self, user_id: str, endpoint: str, user_tier: str,
                                request_count: int, duration: float) -> Dict[str, Any]:
         """Test burst traffic patterns."""
@@ -351,6 +352,7 @@ class ApiRateLimitingFirstRequestsManager:
             "results": results
         }
         
+    @pytest.mark.asyncio
     async def test_concurrent_users(self, endpoint: str, user_count: int, 
                                   requests_per_user: int, user_tier: str = "free") -> Dict[str, Any]:
         """Test concurrent users hitting the same endpoint."""
@@ -439,6 +441,7 @@ async def rate_limit_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_first_request_always_allowed(rate_limit_manager):
     """Test that first request is always allowed regardless of limits."""
     endpoint = "/api/v1/agents"  # Low limit endpoint (5 req/min)
@@ -460,6 +463,7 @@ async def test_first_request_always_allowed(rate_limit_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_rate_limit_enforcement_after_first_request(rate_limit_manager):
     """Test rate limiting enforcement after first request."""
     endpoint = "/api/v1/agents"
@@ -484,6 +488,7 @@ async def test_rate_limit_enforcement_after_first_request(rate_limit_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_burst_allowance_behavior(rate_limit_manager):
     """Test burst allowance allows temporary exceeding of base limits."""
     endpoint = "/api/v1/chat"  # 10 req/min + 5 burst
@@ -508,6 +513,7 @@ async def test_burst_allowance_behavior(rate_limit_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_tier_based_rate_limit_differences(rate_limit_manager):
     """Test different tiers get different rate limits."""
     endpoint = "/api/v1/threads"  # Base: 20 req/min
@@ -548,6 +554,7 @@ async def test_tier_based_rate_limit_differences(rate_limit_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_per_user_rate_tracking(rate_limit_manager):
     """Test that rate limits are tracked per user independently."""
     endpoint = "/api/v1/chat"
@@ -570,6 +577,7 @@ async def test_per_user_rate_tracking(rate_limit_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_rate_limit_headers_accuracy(rate_limit_manager):
     """Test accuracy of rate limiting headers."""
     endpoint = "/api/v1/threads"
@@ -601,6 +609,7 @@ async def test_rate_limit_headers_accuracy(rate_limit_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_rate_limit_recovery_after_wait(rate_limit_manager):
     """Test rate limit recovery after waiting for reset."""
     endpoint = "/api/v1/agents"  # 5 req/min
@@ -625,6 +634,7 @@ async def test_rate_limit_recovery_after_wait(rate_limit_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration  
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_rate_limiting_performance_requirements(rate_limit_manager):
     """Test rate limiting performance meets requirements."""
     endpoint = "/api/v1/threads"
@@ -661,6 +671,7 @@ async def test_rate_limiting_performance_requirements(rate_limit_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_redis_rate_limit_data_consistency(rate_limit_manager):
     """Test Redis data consistency for rate limiting."""
     endpoint = "/api/v1/chat"
@@ -691,6 +702,7 @@ async def test_redis_rate_limit_data_consistency(rate_limit_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_comprehensive_rate_limiting_scenario(rate_limit_manager):
     """Test comprehensive rate limiting scenario with multiple patterns."""
     

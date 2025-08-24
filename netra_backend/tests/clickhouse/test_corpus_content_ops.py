@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import ContentGenParams
@@ -27,6 +27,7 @@ from netra_backend.app.services.generation_service import (
 class TestContentGeneration:
     """Test content generation workflows"""
     
+    @pytest.mark.asyncio
     async def test_content_generation_job_flow(self):
         """Test 6: Verify content generation job workflow"""
         with patch('app.services.generation_service.update_job_status') as mock_update:
@@ -48,6 +49,7 @@ class TestContentGeneration:
                     # Verify corpus was saved
                     _assert_corpus_saved_correctly(mock_save)
 
+    @pytest.mark.asyncio
     async def test_corpus_save_to_clickhouse(self):
         """Test 7: Verify corpus is properly saved to ClickHouse"""
         corpus = _create_test_corpus()
@@ -68,6 +70,7 @@ class TestContentGeneration:
             # Should insert 4 total records
             assert len(insert_call[0][1]) == 4
 
+    @pytest.mark.asyncio
     async def test_corpus_load_from_clickhouse(self):
         """Test 8: Verify corpus is properly loaded from ClickHouse"""
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
@@ -87,6 +90,7 @@ class TestContentGeneration:
 class TestBatchProcessing:
     """Test batch processing capabilities"""
     
+    @pytest.mark.asyncio
     async def test_batch_content_upload(self):
         """Test 9: Verify batch content upload with buffering"""
         service = CorpusService()
@@ -121,6 +125,7 @@ class TestBatchProcessing:
             # Should process all buffered records
             assert result2["records_uploaded"] == 2
 
+    @pytest.mark.asyncio
     async def test_synthetic_data_batch_ingestion(self):
         """Test 10: Verify synthetic data batch ingestion"""
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:

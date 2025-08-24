@@ -52,7 +52,7 @@ async def multi_team_environment():
             "workspace": workspace
         })
     
-    return {
+    yield {
         "manager": manager,
         "teams": teams_data
     }

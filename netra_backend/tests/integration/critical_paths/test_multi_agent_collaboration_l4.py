@@ -18,7 +18,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
@@ -192,6 +192,7 @@ class MultiAgentL4TestSuite:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_sub_agent_delegation(self, supervisor_result: Any, run_id: str) -> Dict[str, Any]:
         """Test real sub-agent delegation with LLM calls in staging."""
         try:
@@ -298,6 +299,7 @@ async def multi_agent_l4_suite():
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.real_llm
+@pytest.mark.asyncio
 async def test_enterprise_cost_optimization_workflow_l4(multi_agent_l4_suite):
     """Test enterprise cost optimization workflow with real LLM calls in staging."""
     # Create enterprise optimization request
@@ -329,6 +331,7 @@ async def test_enterprise_cost_optimization_workflow_l4(multi_agent_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.real_llm
+@pytest.mark.asyncio
 async def test_latency_optimization_agent_coordination_l4(multi_agent_l4_suite):
     """Test latency optimization with multi-agent coordination in staging."""
     # Create latency optimization scenario
@@ -357,6 +360,7 @@ async def test_latency_optimization_agent_coordination_l4(multi_agent_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.real_llm
+@pytest.mark.asyncio
 async def test_capacity_planning_multi_agent_flow_l4(multi_agent_l4_suite):
     """Test capacity planning multi-agent flow with real staging services."""
     # Create capacity planning scenario
@@ -379,6 +383,7 @@ async def test_capacity_planning_multi_agent_flow_l4(multi_agent_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.real_llm
+@pytest.mark.asyncio
 async def test_concurrent_agent_workflows_l4(multi_agent_l4_suite):
     """Test concurrent multi-agent workflows in staging environment."""
     # Create multiple concurrent optimization requests
@@ -413,6 +418,7 @@ async def test_concurrent_agent_workflows_l4(multi_agent_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.real_llm
+@pytest.mark.asyncio
 async def test_agent_failure_recovery_l4(multi_agent_l4_suite):
     """Test agent failure recovery in staging environment."""
     # Create optimization request

@@ -31,6 +31,7 @@ from netra_backend.tests.e2e.state_validation_utils import (
 class TestRealAgentOrchestration:
     """Test real agent orchestration with actual LLM calls."""
     
+    @pytest.mark.asyncio
     async def test_real_agent_triage_to_data_flow(self, real_agent_setup):
         """Test real triage→data agent flow with state validation."""
         setup = real_agent_setup
@@ -71,6 +72,7 @@ class TestRealAgentOrchestration:
 class TestRealAgentArtifactValidation:
     """Test artifact validation between real agent handoffs."""
     
+    @pytest.mark.asyncio
     async def test_triage_to_data_artifact_validation(self, real_agent_setup):
         """Test artifacts pass correctly from triage to data agent."""
         setup = real_agent_setup
@@ -106,6 +108,7 @@ class TestRealAgentArtifactValidation:
 class TestRealAgentErrorHandling:
     """Test real agent error handling and recovery."""
     
+    @pytest.mark.asyncio
     async def test_invalid_request_handling(self, real_agent_setup):
         """Test how real agents handle invalid user requests."""
         setup = real_agent_setup
@@ -135,6 +138,7 @@ class TestRealAgentErrorHandling:
 class TestRealAgentConcurrency:
     """Test real agent concurrent execution scenarios."""
     
+    @pytest.mark.asyncio
     async def test_concurrent_triage_requests(self, real_agent_setup):
         """Test multiple concurrent real triage requests."""
         setup = real_agent_setup
@@ -166,6 +170,7 @@ class TestRealAgentConcurrency:
 class TestRealAgentPipelineIntegration:
     """Test real agent pipeline integration and flow control."""
     
+    @pytest.mark.asyncio
     async def test_complete_pipeline_state_flow(self, real_agent_setup):
         """Test complete state flow through real agent pipeline."""
         setup = real_agent_setup
@@ -201,6 +206,7 @@ class TestRealAgentPipelineIntegration:
 class TestRealAgentInterimArtifactValidation:
     """Test comprehensive interim artifact validation between agents."""
     
+    @pytest.mark.asyncio
     async def test_interim_artifact_validation_with_reporter(self, real_agent_setup):
         """Test interim artifact validation with detailed reporting."""
         setup = real_agent_setup
@@ -242,6 +248,7 @@ class TestRealAgentInterimArtifactValidation:
 class TestRealAgentTypeValidation:
     """Test type validation in real agent workflows."""
     
+    @pytest.mark.asyncio
     async def test_agent_state_type_integrity(self, real_agent_setup):
         """Test agent state maintains type integrity throughout pipeline."""
         setup = real_agent_setup

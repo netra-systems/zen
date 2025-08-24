@@ -42,12 +42,12 @@ class JWTHandler:
         
         if not secret:
             if env in ["staging", "production"]:
-                raise ValueError("JWT_SECRET must be set in production/staging")
+                raise ValueError("JWT_SECRET_KEY must be set in production/staging")
             logger.warning("Using default JWT secret for development")
             return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
         
         if len(secret) < 32 and env in ["staging", "production"]:
-            raise ValueError("JWT_SECRET must be at least 32 characters in production")
+            raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production")
         
         return secret
         
@@ -87,6 +87,16 @@ class JWTHandler:
                       token_type: str = "access") -> Optional[Dict]:
         """Validate and decode JWT token with enhanced security and blacklist checking"""
         try:
+            # Validate token format first to prevent "Not enough segments" errors
+            if not token or not isinstance(token, str):
+                logger.warning("Invalid token format: token is None or not a string")
+                return None
+            
+            token_parts = token.split('.')
+            if len(token_parts) != 3:
+                logger.warning(f"Invalid token format: expected 3 segments, got {len(token_parts)}")
+                return None
+            
             # Check if token is blacklisted first
             if self.is_token_blacklisted(token):
                 logger.warning("Token is blacklisted")
@@ -147,6 +157,9 @@ class JWTHandler:
             return None
         except jwt.InvalidTokenError as e:
             logger.warning(f"Invalid token: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error during token validation: {e}")
             return None
     
     def validate_token_jwt(self, token: str, 

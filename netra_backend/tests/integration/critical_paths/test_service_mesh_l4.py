@@ -25,7 +25,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -242,6 +242,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             raise Exception(f"Service mesh infrastructure verification failed: {e}")
     
+    @pytest.mark.asyncio
     async def test_service_discovery_l4(self, service_name: str) -> Dict[str, Any]:
         """Test service discovery with L4 realism."""
         try:
@@ -298,6 +299,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_instance_health(self, instance: Dict[str, Any]) -> Dict[str, Any]:
         """Test health of a service instance."""
         try:
@@ -331,6 +333,7 @@ class ServiceMeshL4Manager:
                 "response_time": health_time
             }
     
+    @pytest.mark.asyncio
     async def test_load_balancing_algorithms_l4(self, service_name: str) -> Dict[str, Any]:
         """Test load balancing algorithms with L4 realism."""
         try:
@@ -376,6 +379,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_round_robin_lb(self, service_name: str, instances: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test round-robin load balancing."""
         try:
@@ -416,6 +420,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "algorithm": "round_robin", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_weighted_round_robin_lb(self, service_name: str, instances: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test weighted round-robin load balancing."""
         try:
@@ -474,6 +479,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "algorithm": "weighted_round_robin", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_least_connections_lb(self, service_name: str, instances: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test least connections load balancing."""
         try:
@@ -517,6 +523,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "algorithm": "least_connections", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_random_lb(self, service_name: str, instances: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test random load balancing."""
         try:
@@ -554,6 +561,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "algorithm": "random", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_zone_aware_lb(self, service_name: str, instances: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test zone-aware load balancing."""
         try:
@@ -700,6 +708,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_patterns_l4(self, service_name: str) -> Dict[str, Any]:
         """Test circuit breaker patterns with L4 realism."""
         try:
@@ -727,6 +736,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_closed_to_open(self, service_name: str) -> Dict[str, Any]:
         """Test circuit breaker transition from closed to open state."""
         try:
@@ -784,6 +794,7 @@ class ServiceMeshL4Manager:
         await asyncio.sleep(0.1)
         raise Exception("Simulated request failure")
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_open_to_half_open(self, service_name: str) -> Dict[str, Any]:
         """Test circuit breaker transition from open to half-open state."""
         try:
@@ -833,6 +844,7 @@ class ServiceMeshL4Manager:
         await asyncio.sleep(0.1)
         return {"success": True, "data": "test_response"}
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_half_open_to_closed(self, service_name: str) -> Dict[str, Any]:
         """Test circuit breaker transition from half-open to closed state."""
         try:
@@ -877,6 +889,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "test": "half_open_to_closed", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_failure_threshold(self, service_name: str) -> Dict[str, Any]:
         """Test circuit breaker failure threshold configuration."""
         try:
@@ -933,6 +946,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "test": "failure_threshold", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_timeout(self, service_name: str) -> Dict[str, Any]:
         """Test circuit breaker timeout behavior."""
         try:
@@ -979,6 +993,7 @@ class ServiceMeshL4Manager:
         await asyncio.sleep(delay)
         return {"success": True, "data": "slow_response"}
     
+    @pytest.mark.asyncio
     async def test_retry_policies_l4(self, service_name: str) -> Dict[str, Any]:
         """Test retry policies with L4 realism."""
         try:
@@ -1006,6 +1021,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_exponential_backoff_retry(self, service_name: str) -> Dict[str, Any]:
         """Test exponential backoff retry policy."""
         try:
@@ -1093,6 +1109,7 @@ class ServiceMeshL4Manager:
         
         return sum(accuracy_scores) / len(accuracy_scores)
     
+    @pytest.mark.asyncio
     async def test_fixed_delay_retry(self, service_name: str) -> Dict[str, Any]:
         """Test fixed delay retry policy."""
         try:
@@ -1160,6 +1177,7 @@ class ServiceMeshL4Manager:
         
         return consistent_delays / len(actual_delays)
     
+    @pytest.mark.asyncio
     async def test_linear_backoff_retry(self, service_name: str) -> Dict[str, Any]:
         """Test linear backoff retry policy."""
         try:
@@ -1217,6 +1235,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "test": "linear_backoff", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_max_attempts_retry(self, service_name: str) -> Dict[str, Any]:
         """Test max attempts retry limit."""
         try:
@@ -1253,6 +1272,7 @@ class ServiceMeshL4Manager:
         except Exception as e:
             return {"success": False, "test": "max_attempts", "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_retry_jitter(self, service_name: str) -> Dict[str, Any]:
         """Test retry jitter implementation."""
         try:

@@ -13,7 +13,7 @@ from pathlib import Path
 
 import asyncio
 from typing import Dict
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pytest_asyncio
@@ -63,6 +63,7 @@ def admin_corpus_setup(real_llm_manager, real_websocket_manager, real_tool_dispa
 class TestAdminCorpusGeneration:
     """Main test class for admin corpus generation E2E workflow"""
     
+    @pytest.mark.asyncio
     async def test_corpus_discovery_chat(self, admin_corpus_setup):
         """Test natural language discovery of corpus options"""
         setup = admin_corpus_setup
@@ -100,6 +101,7 @@ class TestAdminCorpusGeneration:
         from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
         assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], "Agent should complete execution"
     
+    @pytest.mark.asyncio
     async def test_configuration_suggestions(self, admin_corpus_setup):
         """Test auto-completion of configuration parameters"""
         setup = admin_corpus_setup
@@ -117,6 +119,7 @@ class TestAdminCorpusGeneration:
         )
         assert len(response.suggestions) >= 2
     
+    @pytest.mark.asyncio
     async def test_corpus_generation_flow(self, admin_corpus_setup):
         """Test complete corpus generation workflow"""
         setup = admin_corpus_setup
@@ -150,6 +153,7 @@ class TestAdminCorpusGeneration:
         from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
         assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], "Generation should complete"
     
+    @pytest.mark.asyncio
     async def test_error_recovery(self, admin_corpus_setup):
         """Test error scenarios and recovery mechanisms"""
         setup = admin_corpus_setup
@@ -171,6 +175,7 @@ class TestAdminCorpusGeneration:
 class TestDiscoveryWorkflow:
     """Test natural language discovery workflow"""
     
+    @pytest.mark.asyncio
     async def test_workload_type_discovery(self, admin_corpus_setup):
         """Test discovery of available workload types"""
         setup = admin_corpus_setup
@@ -189,6 +194,7 @@ class TestDiscoveryWorkflow:
         )
         assert len(response.suggestions) >= 3
     
+    @pytest.mark.asyncio
     async def test_parameter_discovery(self, admin_corpus_setup):
         """Test parameter discovery for configuration"""
         setup = admin_corpus_setup
@@ -209,6 +215,7 @@ class TestDiscoveryWorkflow:
 class TestAutoCompletion:
     """Test auto-completion functionality"""
     
+    @pytest.mark.asyncio
     async def test_workload_autocomplete(self, admin_corpus_setup):
         """Test auto-completion for workload types"""
         setup = admin_corpus_setup
@@ -229,6 +236,7 @@ class TestAutoCompletion:
 class TestWebSocketFlow:
     """Test WebSocket real-time updates"""
     
+    @pytest.mark.asyncio
     async def test_generation_progress_updates(self, admin_corpus_setup):
         """Test real-time progress updates via WebSocket"""
         setup = admin_corpus_setup
@@ -247,6 +255,7 @@ class TestWebSocketFlow:
         assert final_update["status"] == "completed"
         assert final_update["progress"] == 100
     
+    @pytest.mark.asyncio
     async def test_error_notifications(self, admin_corpus_setup):
         """Test error notification via WebSocket"""
         setup = admin_corpus_setup
@@ -263,6 +272,7 @@ class TestWebSocketFlow:
 class TestPerformanceScenarios:
     """Test performance and concurrent operations"""
     
+    @pytest.mark.asyncio
     async def test_concurrent_generation_requests(self, admin_corpus_setup):
         """Test handling multiple concurrent generation requests"""
         setup = admin_corpus_setup
@@ -286,6 +296,7 @@ class TestPerformanceScenarios:
         await asyncio.sleep(0.05)  # Simulate processing
         return f"Processed {request.session_id}"
     
+    @pytest.mark.asyncio
     async def test_large_corpus_handling(self, admin_corpus_setup):
         """Test handling of large corpus generation requests"""
         setup = admin_corpus_setup

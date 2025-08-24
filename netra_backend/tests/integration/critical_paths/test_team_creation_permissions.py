@@ -30,7 +30,7 @@ from netra_backend.tests.integration.test_helpers.team_collaboration_base import
 @pytest.fixture
 async def team_manager():
     """Create team collaboration manager for testing."""
-    return TeamCollaborationManager()
+    yield TeamCollaborationManager()
 
 class TestTeamCreationPermissions:
     """Critical path tests for team creation and permission management."""

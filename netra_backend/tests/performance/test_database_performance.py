@@ -14,7 +14,7 @@ import asyncio
 import time
 import uuid
 from typing import Dict, List
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -26,6 +26,7 @@ from netra_backend.app.services.generation_service import (
 class TestDatabasePerformance:
     """Test database performance under load"""
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_clickhouse_bulk_insert_performance(self):
         """Test bulk insert performance"""
         large_corpus = self._generate_large_test_corpus(50000)
@@ -57,6 +58,7 @@ class TestDatabasePerformance:
             
         return corpus
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_concurrent_database_operations(self):
         """Test concurrent database read/write operations"""
         table_names = [f'perf_test_{i}' for i in range(5)]
@@ -85,6 +87,7 @@ class TestDatabasePerformance:
                 assert len(results) == 5
                 assert duration < 30  # Should handle concurrent ops efficiently
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_batch_processing_optimization(self):
         """Test optimized batch processing patterns"""
         batch_sizes = [100, 500, 1000, 5000]
@@ -113,11 +116,12 @@ class TestDatabasePerformance:
             size_ratio = batch_sizes[i] / batch_sizes[i-1]
             assert time_ratio < size_ratio * 1.3  # Allow 30% overhead
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_connection_pool_utilization(self):
         """Test database connection pool efficiency"""
         connection_count = 0
         
-        def mock_connection_factory(*args, **kwargs):
+        async def mock_connection_factory(*args, **kwargs):
             """Mock connection factory to track usage"""
             nonlocal connection_count
             connection_count += 1
@@ -139,6 +143,7 @@ class TestDatabasePerformance:
             # Should reuse connections efficiently
             assert connection_count <= 20  # Should not exceed reasonable limit
     @pytest.mark.performance  
+    @pytest.mark.asyncio
     async def test_query_optimization_patterns(self):
         """Test query optimization for large datasets"""
         # Test different query patterns

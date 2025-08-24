@@ -9,7 +9,7 @@ from pathlib import Path
 
 import asyncio
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -31,6 +31,7 @@ def concurrent_scheduler():
 class TestSupplyResearchSchedulerConcurrency:
     """Test concurrent job execution and thread safety"""
     
+    @pytest.mark.asyncio
     async def test_concurrent_job_limit_enforcement(self, concurrent_scheduler):
         """Test enforcement of concurrent job limits."""
         # Setup
@@ -61,6 +62,7 @@ class TestSupplyResearchSchedulerConcurrency:
         assert total_time >= timedelta(seconds=0.3)  # At least 3 batches
         assert len(execution_times) == 10  # All jobs completed
 
+    @pytest.mark.asyncio
     async def test_job_queue_management(self, concurrent_scheduler):
         """Test job queue management under load."""
         # Setup
@@ -86,6 +88,7 @@ class TestSupplyResearchSchedulerConcurrency:
         assert processed_jobs[0] == "queued_job_0"
         assert processed_jobs[-1] == "queued_job_19"
 
+    @pytest.mark.asyncio
     async def test_deadlock_prevention(self, concurrent_scheduler):
         """Test deadlock prevention in job execution."""
         # Setup circular dependency scenario

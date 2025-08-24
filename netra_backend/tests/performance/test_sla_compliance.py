@@ -322,6 +322,7 @@ class WebSocketLatencyTester:
 
         return sorted_values[min(index, len(sorted_values) - 1)]
     
+    @pytest.mark.asyncio
     async def test_websocket_latency(self, num_messages: int = 50) -> List[float]:
 
         """Test WebSocket latency with ping-pong messages."""
@@ -405,6 +406,7 @@ class ConcurrentUserTester:
 
         self.connection_errors = 0
     
+    @pytest.mark.asyncio
     async def test_concurrent_capacity(self, target_users: int) -> Dict[str, Any]:
 
         """Test maximum concurrent user capacity."""
@@ -999,6 +1001,7 @@ class TestSLACompliance:
 
     @pytest.mark.slow
 
+    @pytest.mark.asyncio
     async def test_comprehensive_sla_compliance(self):
 
         """Run comprehensive SLA compliance test."""

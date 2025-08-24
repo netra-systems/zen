@@ -22,7 +22,7 @@ import time
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -368,6 +368,7 @@ class WebSocketResilienceManager:
 
             }
     
+    @pytest.mark.asyncio
     async def test_message_delivery_during_reconnection(self, session_id: str) -> Dict[str, Any]:
 
         """Test message delivery and queuing during reconnection process."""

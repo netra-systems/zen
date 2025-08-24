@@ -21,7 +21,7 @@ import json
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -131,6 +131,7 @@ class CircuitBreakerCascadeManager:
             "failure_time": time.time() - start_time
         }
     
+    @pytest.mark.asyncio
     async def test_cascade_protection(self, primary_service: str) -> Dict[str, Any]:
         """Test L3 circuit breaker cascade protection with real service dependencies."""
         cascade_start = time.time()
@@ -210,6 +211,7 @@ async def circuit_cascade_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_circuit_breaker_state_transitions(circuit_cascade_manager):
     """Test L2-L3 circuit breaker state transitions through failure and recovery."""
     manager = circuit_cascade_manager
@@ -241,6 +243,7 @@ async def test_circuit_breaker_state_transitions(circuit_cascade_manager):
 
 @pytest.mark.asyncio 
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_cascade_failure_prevention(circuit_cascade_manager):
     """Test L2-L3 circuit breaker cascade failure prevention."""
     manager = circuit_cascade_manager
@@ -264,6 +267,7 @@ async def test_cascade_failure_prevention(circuit_cascade_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_circuit_breaker_recovery_detection(circuit_cascade_manager):
     """Test L2-L3 automatic recovery detection and circuit breaker closing."""
     manager = circuit_cascade_manager
@@ -303,6 +307,7 @@ async def test_circuit_breaker_recovery_detection(circuit_cascade_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_circuit_breaker_redis_integration(circuit_cascade_manager):
     """Test L3 circuit breaker integration with Redis metrics."""
     manager = circuit_cascade_manager

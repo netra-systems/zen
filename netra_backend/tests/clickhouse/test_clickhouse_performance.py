@@ -26,6 +26,7 @@ from netra_backend.tests.clickhouse.test_clickhouse_permissions import (
 class TestClickHousePerformance:
     """Test ClickHouse performance and optimization"""
     
+    @pytest.mark.asyncio
     async def test_batch_insert_performance(self):
         """Test batch insert performance"""
         async with get_clickhouse_client() as client:
@@ -114,6 +115,7 @@ class TestClickHousePerformance:
         )
         assert count_result[0]['count'] >= expected_count
 
+    @pytest.mark.asyncio
     async def test_query_performance_with_indexes(self):
         """Test query performance with proper indexing"""
         async with get_clickhouse_client() as client:
@@ -165,6 +167,7 @@ class TestClickHousePerformance:
         WHERE input_text LIKE '%test%'
         """
 
+    @pytest.mark.asyncio
     async def test_query_interceptor_statistics(self):
         """Test query interceptor statistics tracking"""
         async with get_clickhouse_client() as client:

@@ -19,7 +19,7 @@ import asyncio
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy import exc as sqlalchemy_exc
@@ -47,6 +47,7 @@ class ConnectionManager:
     def get_session(self):
         return AsyncMock()
         
+    @pytest.mark.asyncio
     async def test_connectivity(self):
         return True
         
@@ -84,6 +85,7 @@ class TestDatabasePoolIntegration:
         """Test database URL with pool parameters."""
         return "sqlite+aiosqlite:///test_pool.db"
 
+    @pytest.mark.asyncio
     async def test_connection_pool_initialization(self, test_database_url, pool_config):
         """
         Test database connection pool initializes with correct configuration.
@@ -119,6 +121,7 @@ class TestDatabasePoolIntegration:
         if hasattr(pool, 'size'):
             assert pool.size() <= expected_config['pool_size'] + expected_config['max_overflow']
 
+    @pytest.mark.asyncio
     async def test_pool_sizing_and_limits(self, test_database_url):
         """
         Test connection pool respects sizing limits and overflow behavior.
@@ -159,6 +162,7 @@ class TestDatabasePoolIntegration:
                 await session.__aexit__(None, None, None)
             await db_manager.cleanup()
 
+    @pytest.mark.asyncio
     async def test_connection_lifecycle_and_recycling(self, test_database_url, pool_config):
         """
         Test connection lifecycle management and recycling.
@@ -197,6 +201,7 @@ class TestDatabasePoolIntegration:
             
         await db_manager.cleanup()
 
+    @pytest.mark.asyncio
     async def test_connection_pool_under_load(self, test_database_url, pool_config):
         """Test connection pool behavior under concurrent load."""
         db_manager = ConnectionManager(test_database_url, pool_config)
@@ -224,6 +229,7 @@ class TestDatabasePoolIntegration:
         
         await db_manager.cleanup()
 
+    @pytest.mark.asyncio
     async def test_pool_failover_scenarios(self, pool_config):
         """Test connection pool behavior during database failures and recovery."""
         failing_db_url = "postgresql+asyncpg://nonexistent:5432/nonexistent"
@@ -246,6 +252,7 @@ class TestDatabasePoolIntegration:
                 recovery_success = await db_manager.test_connectivity()
                 assert recovery_success is not None
 
+    @pytest.mark.asyncio
     async def test_connection_leak_detection_and_cleanup(self, test_database_url, pool_config):
         """Test connection leak detection and automatic cleanup."""
         db_manager = ConnectionManager(test_database_url, pool_config)
@@ -289,6 +296,7 @@ class TestDatabasePoolIntegration:
             return 0
 
     @mock_justified("Real database connections not needed for pool configuration testing")
+    @pytest.mark.asyncio
     async def test_pool_configuration_validation(self):
         """Test database pool configuration validation and error handling."""
         with pytest.raises(Exception) as exc_info:
@@ -297,6 +305,7 @@ class TestDatabasePoolIntegration:
         
         assert 'pool_size' in str(exc_info.value).lower()
 
+    @pytest.mark.asyncio
     async def test_database_connectivity_master_integration(self, test_database_url, pool_config):
         """
         Test integration with DatabaseConnectivityMaster for pool management.

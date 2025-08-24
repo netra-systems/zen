@@ -938,6 +938,7 @@ async def frontend_auth_l4_test():
 @pytest.mark.integration
 @pytest.mark.L4
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_frontend_initial_load_authentication_flow_l4(frontend_auth_l4_test):
     """Test frontend initial load authentication flow (L4)."""
     # Run complete critical path test
@@ -985,6 +986,7 @@ async def test_frontend_initial_load_authentication_flow_l4(frontend_auth_l4_tes
 @pytest.mark.integration
 @pytest.mark.L4
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_frontend_auth_flow_performance_l4(frontend_auth_l4_test):
     """Test frontend auth flow performance requirements (L4)."""
     # Run performance-focused test
@@ -1012,6 +1014,7 @@ async def test_frontend_auth_flow_performance_l4(frontend_auth_l4_test):
 @pytest.mark.integration
 @pytest.mark.L4
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_frontend_auth_flow_error_recovery_l4(frontend_auth_l4_test):
     """Test frontend auth flow error recovery (L4)."""
     # Initialize the test environment

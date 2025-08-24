@@ -26,6 +26,7 @@ from netra_backend.tests.e2e.first_time_user.helpers import FirstTimeUserTestHel
 class TestProviderConnectionE2E:
     """AI provider connection and optimization E2E tests"""
 
+    @pytest.mark.asyncio
     async def test_3_ai_provider_connection_and_first_analysis_e2e(
         self, conversion_environment, ai_provider_simulator
     ):
@@ -46,6 +47,7 @@ class TestProviderConnectionE2E:
         # Phase 3: Show optimization opportunities
         await self._display_optimization_opportunities(env, analysis_result)
 
+    @pytest.mark.asyncio
     async def test_4_first_optimization_result_delivery_e2e(
         self, conversion_environment, real_websocket_manager
     ):
@@ -66,6 +68,7 @@ class TestProviderConnectionE2E:
         # Phase 3: Show concrete savings achieved
         await self._display_achieved_savings(env, optimization_result)
 
+    @pytest.mark.asyncio
     async def test_6_first_agent_interaction_success_e2e(
         self, conversion_environment, real_llm_manager
     ):

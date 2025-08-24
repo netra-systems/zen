@@ -10,7 +10,7 @@ from pathlib import Path
 import asyncio
 from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List, Set
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -140,6 +140,7 @@ class TestServiceInitialization:
 class TestGetUserPlan:
     """Test user plan retrieval"""
     
+    @pytest.mark.asyncio
     async def test_get_user_plan_default(self, service):
         """Test getting default user plan"""
         plan = await service._get_user_plan("test_user")

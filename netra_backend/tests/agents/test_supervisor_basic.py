@@ -11,7 +11,7 @@ from pathlib import Path
 
 import asyncio
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.schemas import SubAgentLifecycle
@@ -219,7 +219,7 @@ class TestSupervisorOrchestration:
         opt_agent = supervisor.agents["optimization"]
         opt_agent.execute = AsyncMock()
         
-        def mock_opt_execute(state, run_id, stream_updates=True):
+        async def mock_opt_execute(state, run_id, stream_updates=True):
             # Modify state in place to avoid type conversion
             state.optimizations_result = {
                 "optimization_type": "accumulated",

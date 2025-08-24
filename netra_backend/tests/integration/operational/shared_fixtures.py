@@ -220,7 +220,7 @@ class QualityMonitoringTestHelper:
 async def operational_infrastructure():
     """Setup operational systems infrastructure."""
     mock_infra = MockOperationalInfrastructure()
-    return mock_infra.to_dict()
+    yield mock_infra.to_dict()
 
 @pytest.fixture
 def mcp_test_helper():

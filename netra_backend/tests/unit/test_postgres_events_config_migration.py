@@ -7,7 +7,7 @@ RuntimeError: Database engine creation failed: name 'DatabaseConfig' is not defi
 
 import pytest
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from pathlib import Path
 
 # Add netra_backend to path for imports
@@ -142,7 +142,7 @@ class TestDatabaseConfigMigrationEdgeCases:
     def test_resilience_handling_during_config_errors(self):
         """Test that resilience mechanisms work even with config issues"""
         # This tests the error handling path seen in the staging error
-        from unittest.mock import Mock
+        from unittest.mock import Mock, AsyncMock, MagicMock
         
         # Mock the resilience module
         mock_resilience = Mock()

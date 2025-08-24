@@ -54,7 +54,7 @@ async def collaboration_workspace():
             user_id, {PermissionType.READ, PermissionType.WRITE}
         )
     
-    return {
+    yield {
         "manager": manager,
         "team": team,
         "workspace": workspace,

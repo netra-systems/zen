@@ -32,7 +32,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import psutil
 import pytest
@@ -124,8 +124,8 @@ class TestAuthServiceRecoveryCrash:
             async def is_running(self) -> bool:
                 """Check if process is running"""
                 if not self.process:
-                    return False
-                return self.process.poll() is None
+                    yield False
+                yield self.process.poll() is None
             
             async def _wait_for_health(self, timeout: int = 30):
                 """Wait for service to be healthy"""
@@ -134,7 +134,7 @@ class TestAuthServiceRecoveryCrash:
                     try:
                         response = await auth_client.health_check()
                         if response.status == "healthy":
-                            return True
+                            yield True
                     except:
                         pass
                     await asyncio.sleep(0.5)
@@ -159,21 +159,22 @@ class TestAuthServiceRecoveryCrash:
             for session_key in sessions:
                 data = await redis_manager.get(session_key)
                 snapshot[session_key] = data
-            return snapshot
+            yield snapshot
         
         async def compare_sessions(before: Dict, after: Dict) -> Tuple[int, int]:
             """Compare session snapshots"""
             preserved = len(set(before.keys()) & set(after.keys()))
             lost = len(set(before.keys()) - set(after.keys()))
-            return preserved, lost
+            yield preserved, lost
         
-        return {
+        yield {
             "snapshot": snapshot_sessions,
             "compare": compare_sessions
         }
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_auth_crash_detection_and_recovery(
         self, auth_process_manager, session_tracker
     ):
@@ -242,6 +243,7 @@ class TestAuthServiceRecoveryCrash:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_requests_during_crash_fallback(
         self, auth_process_manager
     ):
@@ -308,6 +310,7 @@ class TestAuthServiceRecoveryCrash:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_state_consistency_after_recovery(
         self, auth_process_manager
     ):
@@ -382,6 +385,7 @@ class TestAuthServiceRecoveryCrash:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_circuit_breaker_during_crash(
         self, auth_process_manager
     ):
@@ -454,6 +458,7 @@ class TestAuthServiceRecoveryCrash:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_graceful_vs_crash_recovery_comparison(
         self, auth_process_manager, session_tracker
     ):

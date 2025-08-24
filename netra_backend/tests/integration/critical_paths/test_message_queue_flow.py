@@ -20,7 +20,7 @@ import json
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -212,6 +212,7 @@ async def message_flow_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_single_message_queue_to_database_flow(message_flow_manager):
     """Test single message flow from queue to database."""
     manager = message_flow_manager
@@ -237,6 +238,7 @@ async def test_single_message_queue_to_database_flow(message_flow_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_message_processing_error_recovery(message_flow_manager):
     """Test error recovery in message processing pipeline."""
     manager = message_flow_manager
@@ -255,6 +257,7 @@ async def test_message_processing_error_recovery(message_flow_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_message_queue_database_consistency(message_flow_manager):
     """Test database consistency across message processing."""
     manager = message_flow_manager

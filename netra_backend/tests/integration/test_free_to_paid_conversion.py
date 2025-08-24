@@ -21,7 +21,7 @@ import tempfile
 import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -43,6 +43,7 @@ class TestFreeToPaidConversionRevenuePipeline:
     """BVJ: Protects $100K-$200K MRR through complete conversion validation."""
 
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_infra(self):
         """Setup test database infrastructure"""
         db_file = tempfile.NamedTemporaryFile(delete=False, suffix='.db')

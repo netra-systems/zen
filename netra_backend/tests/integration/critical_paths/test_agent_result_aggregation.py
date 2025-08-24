@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -573,6 +573,7 @@ async def result_aggregation_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_result_aggregation(result_aggregation_manager):
     """Test basic result aggregation without conflicts."""
     manager = result_aggregation_manager
@@ -595,6 +596,7 @@ async def test_basic_result_aggregation(result_aggregation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_conflict_detection_and_resolution(result_aggregation_manager):
     """Test conflict detection and resolution."""
     manager = result_aggregation_manager
@@ -619,6 +621,7 @@ async def test_conflict_detection_and_resolution(result_aggregation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_numeric_result_aggregation(result_aggregation_manager):
     """Test numeric result aggregation strategies."""
     manager = result_aggregation_manager
@@ -644,6 +647,7 @@ async def test_numeric_result_aggregation(result_aggregation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_list_result_aggregation(result_aggregation_manager):
     """Test list result aggregation strategies."""
     manager = result_aggregation_manager
@@ -677,6 +681,7 @@ async def test_list_result_aggregation(result_aggregation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_priority_based_conflict_resolution(result_aggregation_manager):
     """Test priority-based conflict resolution."""
     manager = result_aggregation_manager
@@ -703,6 +708,7 @@ async def test_priority_based_conflict_resolution(result_aggregation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_confidence_weighted_resolution(result_aggregation_manager):
     """Test confidence-weighted conflict resolution."""
     manager = result_aggregation_manager
@@ -729,6 +735,7 @@ async def test_confidence_weighted_resolution(result_aggregation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_result_merging_strategy(result_aggregation_manager):
     """Test result merging for conflict resolution."""
     manager = result_aggregation_manager
@@ -756,6 +763,7 @@ async def test_result_merging_strategy(result_aggregation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_text_similarity_conflict_detection(result_aggregation_manager):
     """Test text similarity-based conflict detection."""
     manager = result_aggregation_manager
@@ -782,6 +790,7 @@ async def test_text_similarity_conflict_detection(result_aggregation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_result_formatting_output(result_aggregation_manager):
     """Test result formatting for different output types."""
     manager = result_aggregation_manager
@@ -808,6 +817,7 @@ async def test_result_formatting_output(result_aggregation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_result_aggregation(result_aggregation_manager):
     """Test concurrent result aggregation performance."""
     manager = result_aggregation_manager
@@ -842,6 +852,7 @@ async def test_concurrent_result_aggregation(result_aggregation_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_aggregation_performance_benchmark(result_aggregation_manager):
     """Benchmark result aggregation performance."""
     manager = result_aggregation_manager

@@ -30,7 +30,7 @@ import asyncio
 import json
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from fastapi import WebSocket

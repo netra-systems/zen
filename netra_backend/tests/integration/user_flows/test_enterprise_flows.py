@@ -19,7 +19,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Any
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import httpx
@@ -28,7 +28,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # UserFlowTestBase - using unittest.TestCase
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 UserFlowTestBase = unittest.TestCase
 assert_successful_registration = Mock
 assert_plan_compliance = Mock
@@ -36,6 +36,7 @@ assert_plan_compliance = Mock
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(45)
+@pytest.mark.asyncio
 async def test_enterprise_onboarding_with_sso_setup(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -100,6 +101,7 @@ async def test_enterprise_onboarding_with_sso_setup(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_enterprise_audit_logging_and_compliance(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -150,6 +152,7 @@ async def test_enterprise_audit_logging_and_compliance(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_enterprise_dedicated_support_access(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -205,6 +208,7 @@ async def test_enterprise_dedicated_support_access(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_enterprise_advanced_api_access(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -251,6 +255,7 @@ async def test_enterprise_advanced_api_access(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_enterprise_privacy_and_integrations(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -282,6 +287,7 @@ async def test_enterprise_privacy_and_integrations(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_enterprise_cost_management_and_deployment(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]

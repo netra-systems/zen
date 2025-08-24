@@ -11,7 +11,7 @@ import json
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from netra_backend.app.schemas import AppConfig, RequestModel
@@ -233,6 +233,7 @@ class TestApexOptimizerToolSelection:
             request=request
         )
         return state
+    @pytest.mark.asyncio
     async def test_tool_selection_cost_optimization(self, apex_tool_selector, sample_agent_state, mock_llm_connector):
         """Test tool selection for cost optimization requests"""
         # Execute tool selection

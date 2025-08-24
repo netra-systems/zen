@@ -19,7 +19,7 @@ import asyncio
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as redis
@@ -168,6 +168,7 @@ class RateLimitingManager:
         
         return request_record
     
+    @pytest.mark.asyncio
     async def test_burst_capacity(self, identifier: str, burst_size: int) -> Dict[str, Any]:
         """Test burst capacity handling."""
         burst_start = time.time()
@@ -191,6 +192,7 @@ class RateLimitingManager:
             "results": burst_results
         }
     
+    @pytest.mark.asyncio
     async def test_sustained_rate_limiting(self, identifier: str, duration_seconds: int,
                                          request_interval: float) -> Dict[str, Any]:
         """Test sustained rate limiting over time."""
@@ -221,6 +223,7 @@ class RateLimitingManager:
             "test_time": time.time() - test_start
         }
     
+    @pytest.mark.asyncio
     async def test_multi_identifier_isolation(self, identifiers: List[str],
                                             requests_per_identifier: int) -> Dict[str, Any]:
         """Test isolation between different identifiers."""
@@ -286,6 +289,7 @@ async def rate_limiting_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_token_bucket_rate_limiting_basic(rate_limiting_manager):
     """Test basic token bucket rate limiting functionality."""
     manager = rate_limiting_manager
@@ -309,6 +313,7 @@ async def test_token_bucket_rate_limiting_basic(rate_limiting_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_burst_capacity_enforcement(rate_limiting_manager):
     """Test burst capacity enforcement with token bucket."""
     manager = rate_limiting_manager
@@ -327,6 +332,7 @@ async def test_burst_capacity_enforcement(rate_limiting_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_sustained_rate_limiting_performance(rate_limiting_manager):
     """Test sustained rate limiting over time."""
     manager = rate_limiting_manager
@@ -347,6 +353,7 @@ async def test_sustained_rate_limiting_performance(rate_limiting_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_multi_user_rate_limit_isolation(rate_limiting_manager):
     """Test rate limit isolation between different users."""
     manager = rate_limiting_manager

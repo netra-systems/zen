@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -147,6 +147,7 @@ class TestFallbackCoordinator:
         assert status == {"status": "healthy"}
         coordinator.health_monitor.get_system_status.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_reset_agent_status_success(self, coordinator):
         """Test resetting agent status successfully."""
         agent_name = "TestAgent"
@@ -185,11 +186,13 @@ class TestFallbackCoordinator:
             )
             assert coordinator.agent_statuses[agent_name] == mock_new_status
     
+    @pytest.mark.asyncio
     async def test_reset_agent_status_unregistered(self, coordinator):
         """Test resetting status for unregistered agent."""
         result = await coordinator.reset_agent_status("UnregisteredAgent")
         assert result is False
     
+    @pytest.mark.asyncio
     async def test_reset_system_status(self, coordinator):
         """Test resetting entire system status."""
         # Setup multiple agents
@@ -275,6 +278,7 @@ class TestFallbackCoordinator:
                 assert agent in coordinator.agent_circuit_breakers
                 assert agent in coordinator.agent_statuses
     
+    @pytest.mark.asyncio
     async def test_reset_agent_status_partial_components(self, coordinator):
         """Test resetting agent status when some components don't exist."""
         agent_name = "TestAgent"

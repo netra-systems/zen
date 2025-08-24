@@ -997,6 +997,7 @@ async def websocket_state_recovery_test():
 
 @pytest.mark.staging
 
+@pytest.mark.asyncio
 async def test_websocket_state_recovery_after_restart_l4(websocket_state_recovery_test):
 
     """Test WebSocket state recovery after service restart in staging."""
@@ -1036,6 +1037,7 @@ async def test_websocket_state_recovery_after_restart_l4(websocket_state_recover
 
 @pytest.mark.staging
 
+@pytest.mark.asyncio
 async def test_websocket_connection_resilience_l4(websocket_state_recovery_test):
 
     """Test WebSocket connection resilience during network interruptions."""
@@ -1057,6 +1059,7 @@ async def test_websocket_connection_resilience_l4(websocket_state_recovery_test)
 
 @pytest.mark.staging  
 
+@pytest.mark.asyncio
 async def test_websocket_state_consistency_validation_l4(websocket_state_recovery_test):
 
     """Test WebSocket state consistency after recovery."""

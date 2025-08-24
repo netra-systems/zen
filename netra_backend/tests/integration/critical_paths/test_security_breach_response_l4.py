@@ -1749,6 +1749,7 @@ async def security_breach_l4_test():
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_brute_force_attack_detection_l4(security_breach_l4_test):
     """Test brute force attack detection and response in staging."""
     # Execute brute force attack vector
@@ -1779,6 +1780,7 @@ async def test_brute_force_attack_detection_l4(security_breach_l4_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_sql_injection_prevention_l4(security_breach_l4_test):
     """Test SQL injection attack prevention in staging."""
     # Execute SQL injection attack vectors
@@ -1808,6 +1810,7 @@ async def test_sql_injection_prevention_l4(security_breach_l4_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_xss_attack_sanitization_l4(security_breach_l4_test):
     """Test XSS attack sanitization in staging."""
     # Execute XSS attack vector
@@ -1836,6 +1839,7 @@ async def test_xss_attack_sanitization_l4(security_breach_l4_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_ddos_mitigation_l4(security_breach_l4_test):
     """Test DDoS attack mitigation in staging."""
     # Execute DDoS attack vector
@@ -1867,6 +1871,7 @@ async def test_ddos_mitigation_l4(security_breach_l4_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_session_hijacking_prevention_l4(security_breach_l4_test):
     """Test session hijacking prevention in staging."""
     # Execute session hijacking attack vector
@@ -1895,6 +1900,7 @@ async def test_session_hijacking_prevention_l4(security_breach_l4_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_multi_stage_attack_defense_l4(security_breach_l4_test):
     """Test defense against sophisticated multi-stage attacks in staging."""
     # Execute complete critical path test which includes multi-stage attack
@@ -1931,6 +1937,7 @@ async def test_multi_stage_attack_defense_l4(security_breach_l4_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_concurrent_attack_handling_l4(security_breach_l4_test):
     """Test handling of concurrent security attacks in staging."""
     # Execute complete critical path test which includes concurrent attacks
@@ -1956,6 +1963,7 @@ async def test_concurrent_attack_handling_l4(security_breach_l4_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_incident_escalation_procedures_l4(security_breach_l4_test):
     """Test security incident escalation procedures in staging."""
     # Execute complete critical path test which includes incident escalation
@@ -1981,6 +1989,7 @@ async def test_incident_escalation_procedures_l4(security_breach_l4_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_security_recovery_procedures_l4(security_breach_l4_test):
     """Test security recovery procedures in staging."""
     # Execute complete critical path test which includes recovery testing
@@ -2010,6 +2019,7 @@ async def test_security_recovery_procedures_l4(security_breach_l4_test):
 
 @pytest.mark.asyncio
 @pytest.mark.staging
+@pytest.mark.asyncio
 async def test_complete_security_breach_response_l4(security_breach_l4_test):
     """Test complete security breach detection and response critical path in staging."""
     # Execute complete critical path test

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import asyncio
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -34,6 +34,7 @@ class TestNoveltyCalculation:
     @pytest.fixture
     def quality_service(self, mock_redis):
         return QualityGateService(redis_manager=mock_redis)
+    @pytest.mark.asyncio
     async def test_novelty_redis_error_handling(self, quality_service, mock_redis):
         """Test novelty calculation when Redis operations fail"""
         content = "Test content"
@@ -43,6 +44,7 @@ class TestNoveltyCalculation:
         
         score = await quality_service.metrics_calculator.calculate_novelty(content)
         assert score == 0.5  # Should return default on error
+    @pytest.mark.asyncio
     async def test_novelty_large_cache(self, quality_service, mock_redis):
         """Test novelty with large cache list"""
         content = "Unique content"
@@ -59,6 +61,7 @@ class TestClarityCalculation:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
     async def test_clarity_very_long_sentences(self, quality_service):
         """Test clarity with very long sentences"""
         # Create a sentence with 50+ words
@@ -66,18 +69,21 @@ class TestClarityCalculation:
         
         score = await quality_service.metrics_calculator.calculate_clarity(long_sentence)
         assert score < 0.6  # Should be penalized for length
+    @pytest.mark.asyncio
     async def test_clarity_excessive_acronyms(self, quality_service):
         """Test clarity with many unexplained acronyms"""
         content = "Use API, SDK, CLI, GUI, REST, SOAP, XML, JSON, YAML, CSV for integration."
         
         score = await quality_service.metrics_calculator.calculate_clarity(content)
         assert score < 0.95  # Should be slightly penalized
+    @pytest.mark.asyncio
     async def test_clarity_nested_parentheses(self, quality_service):
         """Test clarity with nested parentheses"""
         content = "The system (which includes components (like cache (Redis) and database)) is complex."
         
         score = await quality_service.metrics_calculator.calculate_clarity(content)
         assert score < 0.95  # Should be penalized
+    @pytest.mark.asyncio
     async def test_clarity_no_sentences(self, quality_service):
         """Test clarity calculation with no proper sentences"""
         content = "optimization performance metrics"
@@ -91,18 +97,21 @@ class TestRedundancyCalculation:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
     async def test_redundancy_single_sentence(self, quality_service):
         """Test redundancy with single sentence"""
         content = "This is a single sentence."
         
         score = await quality_service.metrics_calculator.calculate_redundancy(content)
         assert score == 0.0  # No redundancy possible
+    @pytest.mark.asyncio
     async def test_redundancy_empty_sentences(self, quality_service):
         """Test redundancy with empty sentence splits"""
         content = "First. . . Last."
         
         score = await quality_service.metrics_calculator.calculate_redundancy(content)
         assert score >= 0  # Should handle empty splits
+    @pytest.mark.asyncio
     async def test_redundancy_high_overlap(self, quality_service):
         """Test redundancy with high word overlap"""
         content = """
@@ -120,6 +129,7 @@ class TestHallucinationRisk:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
     async def test_hallucination_specific_numbers_with_context(self, quality_service):
         """Test hallucination risk with specific numbers but with data source"""
         content = "The system processes exactly 12345.678 requests per second."
@@ -127,12 +137,14 @@ class TestHallucinationRisk:
         
         score = await quality_service.metrics_calculator.calculate_hallucination_risk(content, context)
         assert score < 0.2  # Should be low with data source
+    @pytest.mark.asyncio
     async def test_hallucination_claims_with_evidence(self, quality_service):
         """Test hallucination risk for claims with evidence"""
         content = "Studies show improvement according to Smith et al. (2023) [1]."
         
         score = await quality_service.metrics_calculator.calculate_hallucination_risk(content, None)
         assert score < 0.3  # Should be low with citations
+    @pytest.mark.asyncio
     async def test_hallucination_multiple_impossible_claims(self, quality_service):
         """Test hallucination risk with multiple impossible claims"""
         content = """

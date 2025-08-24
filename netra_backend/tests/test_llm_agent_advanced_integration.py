@@ -7,16 +7,19 @@ from typing import Dict, Any
 class TestAdvancedLLMIntegration:
     """Advanced LLM agent integration tests."""
 
+    @pytest.mark.asyncio
     async def test_advanced_agent_processing(self):
         """Test advanced agent processing capabilities."""
         # Placeholder for advanced integration tests
         pass
 
+    @pytest.mark.asyncio
     async def test_multi_agent_coordination(self):
         """Test multi-agent coordination patterns."""
         # Placeholder for multi-agent tests
         pass
 
+    @pytest.mark.asyncio
     async def test_complex_workflow_handling(self):
         """Test complex workflow handling."""
         # Placeholder for complex workflow tests
@@ -41,6 +44,7 @@ def get_advanced_test_utils():
     }
 
 
+@pytest.mark.asyncio
 async def test_concurrent_request_handling():
     """Test concurrent request handling capabilities."""
     # Mock implementation for concurrent request handling
@@ -60,6 +64,7 @@ async def test_concurrent_request_handling():
         assert result["status"] == "completed"
 
 
+@pytest.mark.asyncio
 async def test_end_to_end_optimization_flow():
     """Test end-to-end optimization flow."""
     # Mock implementation for E2E optimization flow
@@ -86,6 +91,7 @@ async def test_end_to_end_optimization_flow():
     assert final_result["performance_improvement"] > 0.2
 
 
+@pytest.mark.asyncio
 async def test_performance_metrics():
     """Test performance metrics collection and analysis."""
     # Mock performance metrics data
@@ -119,6 +125,7 @@ async def test_performance_metrics():
     assert performance_grade == "A", f"Expected grade A but got {performance_grade}"
 
 
+@pytest.mark.asyncio
 async def test_real_llm_interaction():
     """Test real LLM interaction capabilities."""
     # Mock real LLM interaction
@@ -142,9 +149,10 @@ async def test_real_llm_interaction():
     assert len(response["completion"]) > 50
 
 
+@pytest.mark.asyncio
 async def test_tool_execution_with_llm():
     """Test tool execution triggered by LLM response."""
-    from unittest.mock import AsyncMock, Mock
+    from unittest.mock import AsyncMock, MagicMock, Mock
     
     # Mock tool dispatcher
     tool_results = []

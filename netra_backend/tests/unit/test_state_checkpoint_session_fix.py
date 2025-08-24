@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from contextlib import asynccontextmanager
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -48,6 +48,7 @@ class TestStateCheckpointSessionFix:
             step_count=0
         )
     
+    @pytest.mark.asyncio
     async def test_session_factory_context_manager(self, mock_session):
         """Test db_session_factory works as async context manager."""
         @asynccontextmanager
@@ -61,6 +62,7 @@ class TestStateCheckpointSessionFix:
             assert session == mock_session
             assert hasattr(session, 'execute')
     
+    @pytest.mark.asyncio
     async def test_checkpoint_save_with_factory(self, mock_session, mock_state):
         """Test checkpoint save with proper session factory."""
         @asynccontextmanager
@@ -85,6 +87,7 @@ class TestStateCheckpointSessionFix:
             assert isinstance(call_args[3], DeepAgentState)  # state
             assert call_args[4] == mock_session  # session
     
+    @pytest.mark.asyncio
     async def test_supervisor_state_manager_initialization(self, mock_session):
         """Test SupervisorAgent correctly initializes StateManager."""
         llm_manager = Mock(spec=LLMManager)
@@ -104,6 +107,7 @@ class TestStateCheckpointSessionFix:
         async with factory() as session:
             assert session == mock_session
     
+    @pytest.mark.asyncio
     async def test_async_sessionmaker_error_prevention(self):
         """Test that passing async_sessionmaker directly would fail."""
         # This simulates the error case
@@ -113,6 +117,7 @@ class TestStateCheckpointSessionFix:
         with pytest.raises(AttributeError, match="has no attribute 'execute'"):
             await mock_sessionmaker.execute("SELECT 1")
     
+    @pytest.mark.asyncio
     async def test_session_reuse_in_pipeline(self, mock_session, mock_state):
         """Test session is properly reused in pipeline execution."""
         @asynccontextmanager

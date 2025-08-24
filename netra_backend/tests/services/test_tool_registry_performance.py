@@ -29,6 +29,7 @@ class TestToolRegistryPerformance:
         """Create tool registry for performance testing"""
         return ToolRegistry(mock_db_session)
     
+    @pytest.mark.asyncio
     async def test_large_scale_tool_registration(self, tool_registry):
         """Test registration performance with large number of tools"""
         # Create many tools

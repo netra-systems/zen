@@ -42,6 +42,7 @@ class PrometheusMetricsTester:
         if self.session:
             await self.session.close()
             
+    @pytest.mark.asyncio
     async def test_metrics_endpoint(self) -> bool:
         """Test metrics endpoint availability."""
         print("\n[ENDPOINT] Testing metrics endpoint...")
@@ -57,6 +58,7 @@ class PrometheusMetricsTester:
             print(f"[ERROR] Metrics endpoint test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_counter_metrics(self) -> bool:
         """Test counter metrics accuracy."""
         print("\n[COUNTER] Testing counter metrics...")
@@ -90,6 +92,7 @@ class PrometheusMetricsTester:
             print(f"[ERROR] Counter metrics test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_gauge_metrics(self) -> bool:
         """Test gauge metrics tracking."""
         print("\n[GAUGE] Testing gauge metrics...")
@@ -114,6 +117,7 @@ class PrometheusMetricsTester:
             print(f"[ERROR] Gauge metrics test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_histogram_metrics(self) -> bool:
         """Test histogram metrics distribution."""
         print("\n[HISTOGRAM] Testing histogram metrics...")
@@ -146,6 +150,7 @@ class PrometheusMetricsTester:
             print(f"[ERROR] Histogram metrics test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_summary_metrics(self) -> bool:
         """Test summary metrics calculation."""
         print("\n[SUMMARY] Testing summary metrics...")
@@ -172,6 +177,7 @@ class PrometheusMetricsTester:
             print(f"[ERROR] Summary metrics test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_custom_metrics(self) -> bool:
         """Test custom metrics registration."""
         print("\n[CUSTOM] Testing custom metrics...")
@@ -208,6 +214,7 @@ class PrometheusMetricsTester:
             print(f"[ERROR] Custom metrics test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_label_cardinality(self) -> bool:
         """Test label cardinality handling."""
         print("\n[CARDINALITY] Testing label cardinality...")
@@ -237,6 +244,7 @@ class PrometheusMetricsTester:
             print(f"[ERROR] Label cardinality test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_metrics_aggregation(self) -> bool:
         """Test metrics aggregation."""
         print("\n[AGGREGATION] Testing metrics aggregation...")
@@ -269,6 +277,7 @@ class PrometheusMetricsTester:
             print(f"[ERROR] Metrics aggregation test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_grafana_integration(self) -> bool:
         """Test Grafana integration readiness."""
         print("\n[GRAFANA] Testing Grafana integration...")
@@ -318,6 +327,7 @@ class PrometheusMetricsTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_prometheus_metrics_collection():
     """Test Prometheus metrics collection."""
     async with PrometheusMetricsTester() as tester:

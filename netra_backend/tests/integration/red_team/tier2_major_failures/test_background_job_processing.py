@@ -80,7 +80,7 @@ except ImportError:
 try:
     from netra_backend.app.db.models_agent import AgentRun
 except ImportError:
-    from unittest.mock import Mock
+    from unittest.mock import Mock, AsyncMock, MagicMock
     AgentRun = Mock()
 
 

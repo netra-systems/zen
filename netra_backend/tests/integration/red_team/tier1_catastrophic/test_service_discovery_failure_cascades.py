@@ -12,7 +12,7 @@ import pytest
 import asyncio
 import httpx
 import time
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 from contextlib import asynccontextmanager
 import subprocess
 import psutil
@@ -75,7 +75,7 @@ class TestServiceDiscoveryFailureCascades:
     @pytest.fixture
     async def settings(self):
         """Get application settings"""
-        return get_settings()
+        yield get_settings()
     
     @pytest.fixture
     async def health_checker(self, settings):
@@ -96,7 +96,7 @@ class TestServiceDiscoveryFailureCascades:
     @pytest.fixture
     async def auth_service(self, settings):
         """Real auth service instance"""
-        return UserAuthService(settings)
+        yield UserAuthService(settings)
     
     @pytest.mark.asyncio
     async def test_auth_service_down_cascade_failure(self, health_checker, service_registry, settings):
@@ -304,7 +304,7 @@ class TestServiceDiscoveryFailureCascades:
                     if scenario["postgres"] == "intermittent":
                         # Randomly fail connections
                         import random
-                        def intermittent_db(*args, **kwargs):
+                        async def intermittent_db(*args, **kwargs):
                             if random.random() < 0.5:  # 50% failure rate
                                 raise Exception("Database connection timeout")
                             return AsyncMock()
@@ -434,7 +434,7 @@ class TestServiceDiscoveryFailureCascades:
         call_count = 0
         failure_count = 0
         
-        def track_calls(*args, **kwargs):
+        async def track_calls(*args, **kwargs):
             nonlocal call_count, failure_count
             call_count += 1
             failure_count += 1

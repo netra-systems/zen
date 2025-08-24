@@ -33,6 +33,7 @@ def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_d
 class TestConstraintPriorityWorkflows:
     """Test workflows with constraint prioritization."""
     
+    @pytest.mark.asyncio
     async def test_priority_based_optimization(self, multi_constraint_setup):
         """Test optimization with prioritized constraints."""
         setup = multi_constraint_setup
@@ -40,6 +41,7 @@ class TestConstraintPriorityWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_priority_optimization_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_dynamic_constraint_adjustment(self, multi_constraint_setup):
         """Test dynamic constraint adjustment during optimization."""
         setup = multi_constraint_setup
@@ -47,6 +49,7 @@ class TestConstraintPriorityWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_dynamic_constraint_results(results)
     
+    @pytest.mark.asyncio
     async def test_hierarchical_constraint_resolution(self, multi_constraint_setup):
         """Test hierarchical constraint resolution."""
         setup = multi_constraint_setup
@@ -57,6 +60,7 @@ class TestConstraintPriorityWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_hierarchical_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_adaptive_priority_adjustment(self, multi_constraint_setup):
         """Test adaptive priority adjustment based on feedback."""
         setup = multi_constraint_setup
@@ -69,6 +73,7 @@ class TestConstraintPriorityWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_adaptive_adjustment_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_constraint_deadline_prioritization(self, multi_constraint_setup):
         """Test constraint prioritization based on deadlines."""
         setup = multi_constraint_setup

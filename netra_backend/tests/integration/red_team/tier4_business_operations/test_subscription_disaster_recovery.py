@@ -16,7 +16,7 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 from netra_backend.app.schemas.UserPlan import PlanTier
 

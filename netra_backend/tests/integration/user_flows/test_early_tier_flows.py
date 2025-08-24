@@ -19,7 +19,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Any
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 import httpx
@@ -31,18 +31,19 @@ from netra_backend.app.services.user_service import UserService as UsageService
 
 # UserFlowTestBase - using unittest.TestCase
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 UserFlowTestBase = unittest.TestCase
 assert_successful_registration = Mock
 assert_plan_compliance = Mock
 # User journey data - creating mocks
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 UserTestData = Mock()
 UserJourneyScenarios = Mock()
 
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(45)
+@pytest.mark.asyncio
 async def test_free_to_early_tier_upgrade_flow(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -75,6 +76,7 @@ async def test_free_to_early_tier_upgrade_flow(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_early_tier_increased_usage_limits(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any],
@@ -110,6 +112,7 @@ async def test_early_tier_increased_usage_limits(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_early_tier_api_key_generation(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -148,6 +151,7 @@ async def test_early_tier_api_key_generation(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_early_tier_enhanced_analytics_access(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -185,6 +189,7 @@ async def test_early_tier_enhanced_analytics_access(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_early_tier_improved_export_capabilities(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -224,6 +229,7 @@ async def test_early_tier_improved_export_capabilities(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_early_tier_priority_support_access(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -262,6 +268,7 @@ async def test_early_tier_priority_support_access(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_early_tier_advanced_optimization_features(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -292,6 +299,7 @@ async def test_early_tier_advanced_optimization_features(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+@pytest.mark.asyncio
 async def test_early_tier_concurrent_sessions_and_billing(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]

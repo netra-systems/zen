@@ -8,7 +8,7 @@ from pathlib import Path
 
 import json
 import re
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -49,6 +49,7 @@ class TestFallbackResponseService:
             suggestions=["Add specific metrics", "Provide concrete steps"]
         )
     
+    @pytest.mark.asyncio
     async def test_generate_optimization_fallback_low_quality(self, fallback_service, sample_quality_metrics):
         """Test fallback generation for low-quality optimization content"""
         context = FallbackContext(
@@ -76,6 +77,7 @@ class TestFallbackResponseService:
         # Should include actionable requests for information
         assert any(term in response_text for term in ["metrics", "performance", "constraints"])
     
+    @pytest.mark.asyncio
     async def test_generate_data_analysis_fallback_parsing_error(self, fallback_service):
         """Test fallback for data analysis parsing errors"""
         context = FallbackContext(
@@ -100,6 +102,7 @@ class TestFallbackResponseService:
         assert any(term in response_text.lower() for term in ["format", "json", "csv", "parsing", "data"])
         assert any(term in response_text.lower() for term in ["verify", "check", "validate"])
     
+    @pytest.mark.asyncio
     async def test_generate_action_plan_fallback_context_missing(self, fallback_service):
         """Test fallback for action plan with missing context"""
         context = FallbackContext(
@@ -122,6 +125,7 @@ class TestFallbackResponseService:
         assert "deployment plan" in response_text
         assert any(term in response_text.lower() for term in ["objectives", "timeline", "resources", "requirements"])
     
+    @pytest.mark.asyncio
     async def test_generate_report_fallback_validation_failed(self, fallback_service):
         """Test fallback for report with validation failure"""
         context = FallbackContext(
@@ -147,6 +151,7 @@ class TestFallbackResponseService:
         validation_terms = ["data", "missing", "required", "fields", "information", "details", "provide", "specify", "include", "error", "validation"]
         assert any(term in response_text.lower() for term in validation_terms), f"Expected validation terms not found in: {response_text}"
     
+    @pytest.mark.asyncio
     async def test_generate_triage_fallback_timeout(self, fallback_service):
         """Test fallback for triage timeout scenario"""
         context = FallbackContext(
@@ -171,6 +176,7 @@ class TestFallbackResponseService:
         assert context.retry_count == 2  # Should consider retry count
         assert any(term in response_text.lower() for term in ["taking longer", "reduce", "smaller", "expected", "scope"])
     
+    @pytest.mark.asyncio
     async def test_generate_error_message_fallback_llm_error(self, fallback_service):
         """Test fallback for error message generation with LLM error"""
         context = FallbackContext(
@@ -195,6 +201,7 @@ class TestFallbackResponseService:
         # Should acknowledge the limitation
         assert any(term in response_text.lower() for term in ["technical", "issue", "try"])
     
+    @pytest.mark.asyncio
     async def test_generate_fallback_with_circular_reasoning(self, fallback_service):
         """Test fallback specifically for circular reasoning detection"""
         context = FallbackContext(
@@ -221,6 +228,7 @@ class TestFallbackResponseService:
         assert "optimize by optimizing" not in response_text.lower()
         assert "improve by improving" not in response_text.lower()
     
+    @pytest.mark.asyncio
     async def test_generate_fallback_with_hallucination_risk(self, fallback_service):
         """Test fallback for high hallucination risk scenarios"""
         metrics = QualityMetrics(
@@ -252,6 +260,7 @@ class TestFallbackResponseService:
         # Should include terms related to data verification and caution about hallucination
         assert any(term in response_text.lower() for term in ["data", "verify", "metrics", "specific"])
     
+    @pytest.mark.asyncio
     async def test_generate_fallback_with_rate_limit(self, fallback_service):
         """Test fallback for rate limit scenarios"""
         context = FallbackContext(
@@ -275,6 +284,7 @@ class TestFallbackResponseService:
         assert any(term in response_text.lower() for term in ["moment", "shortly", "wait", "try"])
         assert any(term in response_text.lower() for term in ["consider", "upgrade", "batching", "optimization"])
     
+    @pytest.mark.asyncio
     async def test_generate_fallback_considers_retry_count(self, fallback_service):
         """Test that fallback responses adapt based on retry count"""
         base_context = FallbackContext(
@@ -311,6 +321,7 @@ class TestFallbackResponseService:
         if base_context.retry_count > 1:
             assert any(term in response2_text.lower() for term in ["different", "alternative", "simpler", "break"])
     
+    @pytest.mark.asyncio
     async def test_generate_fallback_includes_diagnostic_tips(self, fallback_service):
         """Test that fallback includes relevant diagnostic tips"""
         context = FallbackContext(
@@ -335,6 +346,7 @@ class TestFallbackResponseService:
         # Should mention common CSV issues
         assert any(term in response_text.lower() for term in ["format", "encoding", "delimiter", "types"])
     
+    @pytest.mark.asyncio
     async def test_generate_fallback_with_previous_responses(self, fallback_service):
         """Test fallback that considers previous failed responses"""
         context = FallbackContext(
@@ -360,6 +372,7 @@ class TestFallbackResponseService:
         # Should not repeat the exact same suggestion
         assert response_text != context.previous_responses[0]
     
+    @pytest.mark.asyncio
     async def test_format_response_with_placeholders(self, fallback_service):
         """Test that response formatting handles placeholders correctly"""
         template = "I need help with {context} to resolve {issue}."
@@ -383,6 +396,7 @@ class TestFallbackResponseService:
         assert all(isinstance(tip, str) for tip in tips)
         assert any("format" in tip.lower() or "structure" in tip.lower() for tip in tips)
     
+    @pytest.mark.asyncio
     async def test_get_recovery_suggestions(self, fallback_service):
         """Test generation of recovery suggestions"""
         suggestions = fallback_service._get_recovery_suggestions(
@@ -395,6 +409,7 @@ class TestFallbackResponseService:
         assert all(isinstance(s, str) for s in suggestions)
         assert any("specific" in s.lower() or "provide" in s.lower() for s in suggestions)
     
+    @pytest.mark.asyncio
     async def test_fallback_response_quality(self, fallback_service):
         """Test that fallback responses meet quality standards"""
         # Test various scenarios

@@ -12,7 +12,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import Any, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -24,6 +24,7 @@ from netra_backend.app.core.exceptions_service import ServiceError
 
 class TestAsyncBatchProcessorComplete:
     """Complete tests for AsyncBatchProcessor."""
+    @pytest.mark.asyncio
     async def test_batch_processor_basic_functionality(self):
         """Test basic batch processor functionality."""
         processed_batches = []
@@ -52,6 +53,7 @@ class TestAsyncBatchProcessorComplete:
         assert len(processed_batches) >= 1
         total_processed = sum(len(batch) for batch in processed_batches)
         assert total_processed == 5
+    @pytest.mark.asyncio
     async def test_batch_processor_size_triggering(self):
         """Test batch processor triggering on batch size."""
         process_calls = []
@@ -75,6 +77,7 @@ class TestAsyncBatchProcessorComplete:
         
         assert len(process_calls) == 1
         assert process_calls[0] == 2
+    @pytest.mark.asyncio
     async def test_batch_processor_time_triggering(self):
         """Test batch processor triggering on wait time."""
         process_calls = []
@@ -95,6 +98,7 @@ class TestAsyncBatchProcessorComplete:
         
         assert len(process_calls) >= 1
         assert process_calls[0][0] == 1  # Should process single item
+    @pytest.mark.asyncio
     async def test_batch_processor_concurrent_additions(self):
         """Test batch processor with concurrent item additions."""
         processed_items = []
@@ -122,6 +126,7 @@ class TestAsyncBatchProcessorComplete:
         await processor.flush()
         
         assert len(processed_items) == 9  # 3 workers * 3 items each
+    @pytest.mark.asyncio
     async def test_batch_processor_error_handling(self):
         """Test batch processor error handling."""
         process_attempts = []
@@ -152,6 +157,7 @@ class TestAsyncBatchProcessorComplete:
         await processor.flush()
         
         assert len(process_attempts) >= 1
+    @pytest.mark.asyncio
     async def test_batch_processor_flush_behavior(self):
         """Test batch processor flush behavior."""
         flush_calls = []
@@ -175,6 +181,7 @@ class TestAsyncBatchProcessorComplete:
         
         assert len(flush_calls) == 1
         assert flush_calls[0][1] == ["item1", "item2"]
+    @pytest.mark.asyncio
     async def test_batch_processor_shutdown(self):
         """Test batch processor shutdown behavior."""
         shutdown_processed = []
@@ -200,6 +207,7 @@ class TestAsyncBatchProcessorComplete:
 
 class TestAsyncLockComplete:
     """Complete tests for AsyncLock."""
+    @pytest.mark.asyncio
     async def test_lock_basic_functionality(self):
         """Test basic lock functionality."""
         lock = AsyncLock()
@@ -221,6 +229,7 @@ class TestAsyncLockComplete:
         for i in range(0, len(execution_order), 2):
             assert execution_order[i].startswith("start_")
             assert execution_order[i + 1].startswith("end_")
+    @pytest.mark.asyncio
     async def test_lock_acquisition_order(self):
         """Test lock acquisition order."""
         lock = AsyncLock()
@@ -246,6 +255,7 @@ class TestAsyncLockComplete:
         
         # Should acquire in order of waiting
         assert acquisition_order == [1, 2, 3]
+    @pytest.mark.asyncio
     async def test_lock_timeout_behavior(self):
         """Test lock timeout behavior."""
         lock = AsyncLock()
@@ -278,6 +288,7 @@ class TestAsyncLockComplete:
         await long_task
         
         assert "timeout_1" in timeout_results
+    @pytest.mark.asyncio
     async def test_lock_reentrant_behavior(self):
         """Test lock reentrant behavior (should not be reentrant)."""
         lock = AsyncLock()
@@ -291,6 +302,7 @@ class TestAsyncLockComplete:
         # Should complete normally (single acquisition)
         result = await nested_lock_attempt()
         assert result == "outer_complete"
+    @pytest.mark.asyncio
     async def test_lock_exception_handling(self):
         """Test lock exception handling and cleanup."""
         lock = AsyncLock()
@@ -321,6 +333,7 @@ class TestAsyncLockComplete:
         assert "entered_1" in exception_results
         assert "caught_1" in exception_results
         assert "normal_2" in exception_results
+    @pytest.mark.asyncio
     async def test_lock_concurrent_stress(self):
         """Test lock under concurrent stress."""
         lock = AsyncLock()
@@ -340,6 +353,7 @@ class TestAsyncLockComplete:
         
         # Should have exactly the expected count (no race conditions)
         assert shared_counter == increment_count
+    @pytest.mark.asyncio
     async def test_lock_fairness(self):
         """Test lock fairness under load."""
         lock = AsyncLock()
@@ -361,11 +375,13 @@ class TestAsyncLockComplete:
         # Later tasks should take longer (indicating proper queuing)
         times = list(completion_times.values())
         assert max(times) > min(times)  # Some variance in completion times
+    @pytest.mark.asyncio
     async def test_lock_context_manager_cleanup(self):
         """Test lock context manager cleanup."""
         lock = AsyncLock()
         cleanup_test_results = []
         
+        @pytest.mark.asyncio
         async def test_cleanup():
             try:
                 async with lock:

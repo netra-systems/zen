@@ -8,7 +8,7 @@ from pathlib import Path
 
 import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -24,6 +24,7 @@ from netra_backend.tests.rate_retry_monitoring_test_helpers import (
 class TestPaginationUtilsCursors:
     """test_pagination_utils_cursors - Test cursor pagination and edge cases"""
     
+    @pytest.mark.asyncio
     async def test_cursor_pagination(self):
         from netra_backend.app.utils.pagination_utils import PaginationUtils
         utils = PaginationUtils()
@@ -35,6 +36,7 @@ class TestPaginationUtilsCursors:
         
         self._assert_pagination_metadata(utils)
     
+    @pytest.mark.asyncio
     async def test_edge_cases(self):
         from netra_backend.app.utils.pagination_utils import PaginationUtils
         utils = PaginationUtils()
@@ -79,6 +81,7 @@ class TestPaginationUtilsCursors:
 class TestRateLimiterThrottling:
     """test_rate_limiter_throttling - Test rate limiting and bucket algorithms"""
     
+    @pytest.mark.asyncio
     async def test_rate_limiting(self):
         from netra_backend.app.utils.rate_limiter import RateLimiter
         limiter = RateLimiter(rate=5, per=1.0)  # 5 requests per second
@@ -89,6 +92,7 @@ class TestRateLimiterThrottling:
         await asyncio.sleep(0.3)
         assert await limiter.allow_request() == True
     
+    @pytest.mark.asyncio
     async def test_bucket_algorithms(self):
         from netra_backend.app.utils.rate_limiter import RateLimiter
         
@@ -113,6 +117,7 @@ class TestRateLimiterThrottling:
 class TestRetryUtilsBackoff:
     """test_retry_utils_backoff - Test retry strategies and exponential backoff"""
     
+    @pytest.mark.asyncio
     async def test_exponential_backoff(self):
         from netra_backend.app.utils.retry_utils import RetryUtils
         utils = RetryUtils()
@@ -121,6 +126,7 @@ class TestRetryUtilsBackoff:
         self._assert_jitter_backoff(utils)
         self._assert_max_backoff_limit(utils)
     
+    @pytest.mark.asyncio
     async def test_retry_strategies(self):
         from netra_backend.app.utils.retry_utils import RetryUtils
         utils = RetryUtils()

@@ -4,7 +4,7 @@ This module provides pytest fixtures for testing agent services.
 """
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 from netra_backend.tests.test_agent_service_mock_classes import MockOrchestrator, MockAgent
 
 

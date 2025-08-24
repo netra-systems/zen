@@ -21,7 +21,7 @@ import os
 import time
 from datetime import datetime
 from typing import Any, AsyncGenerator, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -63,7 +63,11 @@ class TestDevLoginColdStart:
     def client(self, mock_db_session, mock_security_service):
         """Create test client for API testing with mocked dependencies."""
         async def override_get_db():
-            yield mock_db_session
+            try:
+                yield session
+            finally:
+                if hasattr(session, "close"):
+                    await session.close()
         
         def override_get_security():
             return mock_security_service
@@ -81,10 +85,14 @@ class TestDevLoginColdStart:
     async def async_client(self, mock_db_session, mock_security_service):
         """Create async client for async API testing with mocked dependencies."""
         async def override_get_db():
-            yield mock_db_session
+            try:
+                yield session
+            finally:
+                if hasattr(session, "close"):
+                    await session.close()
         
         def override_get_security():
-            return mock_security_service
+            yield mock_security_service
         
         app.dependency_overrides[get_db_session] = override_get_db
         app.dependency_overrides[get_security_service] = override_get_security
@@ -98,6 +106,7 @@ class TestDevLoginColdStart:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_dev_login_disabled_in_test_environment(self, async_client):
         """Test 1: Dev login should be disabled in test environment by default."""
         # Get current OAuth config
@@ -123,6 +132,7 @@ class TestDevLoginColdStart:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_dev_login_enabled_in_dev_environment(self, async_client, monkeypatch):
         """Test 2: Dev login should be enabled in development environment."""
         # Note: Environment is already determined at startup and cannot be changed
@@ -145,6 +155,7 @@ class TestDevLoginColdStart:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_oauth_config_cold_start_initialization(self, async_client):
         """Test 3: OAuth config should be properly initialized on cold start."""
         # Clear any cached config
@@ -177,6 +188,7 @@ class TestDevLoginColdStart:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_environment_detection_consistency(self):
         """Test 4: Environment detection should be consistent across calls."""
         # Multiple calls should return same environment
@@ -192,6 +204,7 @@ class TestDevLoginColdStart:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_oauth_config_environment_specific(self):
         """Test 5: OAuth config should be environment-specific."""
         # Get configs for different environments
@@ -218,6 +231,7 @@ class TestDevLoginColdStart:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_auth_service_url_configuration(self):
         """Test 6: Auth service URL should be properly configured."""
         # Check auth client settings
@@ -231,6 +245,7 @@ class TestDevLoginColdStart:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_dev_login_user_creation(self, async_client, monkeypatch):
         """Test 7: Dev login should create user if not exists (when enabled)."""
         # This test would require mocking the database and auth service
@@ -251,6 +266,7 @@ class TestDevLoginColdStart:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_auth_config_endpoint_cold_start_performance(self, async_client):
         """Test 8: Auth config endpoint should respond quickly on cold start."""
         # Measure cold start time for auth config
@@ -266,6 +282,7 @@ class TestDevLoginColdStart:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_concurrent_dev_login_requests(self, async_client):
         """Test 9: System should handle concurrent dev login requests."""
         # Create multiple concurrent requests
@@ -288,6 +305,7 @@ class TestDevLoginColdStart:
     
     @pytest.mark.integration
     @pytest.mark.L3
+    @pytest.mark.asyncio
     async def test_auth_config_caching(self, async_client):
         """Test 10: Auth config should be properly cached after first call."""
         # First call - cold start

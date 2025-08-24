@@ -53,6 +53,7 @@ class TestCacheEdgeCases:
         
         await self.cache_manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_empty_cache_invalidation(self):
         """Test invalidation operations on empty cache."""
         logger.info("Testing empty cache invalidation")
@@ -78,6 +79,7 @@ class TestCacheEdgeCases:
         
         logger.info(f"Empty cache invalidation passed: avg_time={avg_cascade_time:.2f}ms")
     
+    @pytest.mark.asyncio
     async def test_large_value_invalidation(self):
         """Test invalidation of large cache values."""
         logger.info("Testing large value invalidation")
@@ -111,6 +113,7 @@ class TestCacheEdgeCases:
         
         logger.info("Large value invalidation test passed")
     
+    @pytest.mark.asyncio
     async def test_special_character_keys(self):
         """Test invalidation with special character keys."""
         logger.info("Testing special character keys")
@@ -143,6 +146,7 @@ class TestCacheEdgeCases:
         
         logger.info("Special character keys test passed")
     
+    @pytest.mark.asyncio
     async def test_concurrent_access_patterns(self):
         """Test various concurrent access patterns."""
         logger.info("Testing concurrent access patterns")
@@ -189,6 +193,7 @@ class TestCacheEdgeCases:
         
         logger.info("Concurrent access patterns test passed")
     
+    @pytest.mark.asyncio
     async def test_memory_pressure_scenarios(self):
         """Test cache behavior under memory pressure."""
         logger.info("Testing memory pressure scenarios")
@@ -215,6 +220,7 @@ class TestCacheEdgeCases:
         
         logger.info("Memory pressure scenarios test passed")
     
+    @pytest.mark.asyncio
     async def test_network_partition_simulation(self):
         """Test cache behavior during simulated network partitions."""
         logger.info("Testing network partition simulation")
@@ -257,6 +263,7 @@ class TestCacheEdgeCases:
         
         logger.info("Network partition simulation test passed")
     
+    @pytest.mark.asyncio
     async def test_extreme_load_conditions(self):
         """Test cache invalidation under extreme load conditions."""
         logger.info("Testing extreme load conditions")

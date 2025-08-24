@@ -21,7 +21,7 @@ import time
 import uuid
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import aiohttp
 import pytest
@@ -455,6 +455,7 @@ class ApiCorsManager:
         
         return cors_headers
     
+    @pytest.mark.asyncio
     async def test_cors_policy_compliance(self, endpoint: str, 
                                         test_scenarios: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test CORS policy compliance with multiple scenarios."""
@@ -578,6 +579,7 @@ async def cors_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_public_api_wildcard_cors(cors_manager):
     """Test public API with wildcard CORS policy."""
     test_scenarios = [
@@ -616,6 +618,7 @@ async def test_public_api_wildcard_cors(cors_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_auth_api_restricted_origins(cors_manager):
     """Test auth API with restricted origin policy."""
     test_scenarios = [
@@ -669,6 +672,7 @@ async def test_auth_api_restricted_origins(cors_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_preflight_request_handling(cors_manager):
     """Test CORS preflight request handling."""
     # Test valid preflight
@@ -699,6 +703,7 @@ async def test_preflight_request_handling(cors_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_admin_api_strict_policy(cors_manager):
     """Test admin API with strict CORS policy."""
     test_scenarios = [
@@ -744,6 +749,7 @@ async def test_admin_api_strict_policy(cors_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_webhook_no_cors_policy(cors_manager):
     """Test webhook endpoint with no CORS policy."""
     # Webhooks should not have CORS headers
@@ -762,6 +768,7 @@ async def test_webhook_no_cors_policy(cors_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_embed_api_permissive_policy(cors_manager):
     """Test embed API with permissive CORS policy for embeddable content."""
     test_scenarios = [
@@ -798,6 +805,7 @@ async def test_embed_api_permissive_policy(cors_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_complex_preflight_scenarios(cors_manager):
     """Test complex preflight scenarios with custom headers."""
     # Test preflight with custom headers
@@ -825,6 +833,7 @@ async def test_complex_preflight_scenarios(cors_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_cors_policy_violation_tracking(cors_manager):
     """Test tracking of CORS policy violations."""
     # Make requests that should violate policies
@@ -851,6 +860,7 @@ async def test_cors_policy_violation_tracking(cors_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_cors_performance_requirements(cors_manager):
     """Test CORS middleware performance."""
     # Test response times with CORS
@@ -892,6 +902,7 @@ async def test_cors_performance_requirements(cors_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_cors_metrics_accuracy(cors_manager):
     """Test accuracy of CORS metrics collection."""
     # Generate test traffic

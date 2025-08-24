@@ -10,7 +10,7 @@ from pathlib import Path
 import asyncio
 import tracemalloc
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -25,6 +25,7 @@ from netra_backend.app.services.supply_research_scheduler import (
 class TestSupplyResearchSchedulerPerformance:
     """Test performance and resource management"""
     
+    @pytest.mark.asyncio
     async def test_memory_usage_under_load(self):
         """Test memory usage doesn't grow excessively under load."""
         scheduler = SupplyResearchScheduler()
@@ -50,6 +51,7 @@ class TestSupplyResearchSchedulerPerformance:
         # Assert reasonable memory usage (< 100MB for this test)
         assert peak < 100 * 1024 * 1024  # 100MB
 
+    @pytest.mark.asyncio
     async def test_job_execution_performance_metrics(self):
         """Test job execution performance tracking."""
         scheduler = SupplyResearchScheduler()

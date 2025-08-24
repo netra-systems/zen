@@ -33,7 +33,7 @@ class AuthService {
             dev_login: authConfig.endpoints?.dev_login || `${config.baseUrl}/auth/dev/login`
           },
           authorized_javascript_origins: authConfig.authorized_javascript_origins || config.oauth?.javascriptOrigins || [],
-          authorized_redirect_uris: authConfig.authorized_redirect_uris || [config.oauth?.redirectUri || 'http://localhost:3000/auth/callback']
+          authorized_redirect_uris: authConfig.authorized_redirect_uris || [config.oauth?.redirectUri || window.location.origin + '/auth/callback']
         };
       } catch (error) {
         if (i < retries - 1) {

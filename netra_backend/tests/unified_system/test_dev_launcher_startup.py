@@ -32,19 +32,17 @@ import subprocess
 import threading
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 
-# from scripts.dev_launcher_config import  # Should be mocked in tests LauncherConfig
-# from scripts.dev_launcher_health_monitor import  # Should be mocked in tests HealthMonitor
-
+# Removed broken import statement
+# Removed broken import statement
 # Dev launcher imports
-# from scripts.dev_launcher_launcher import  # Should be mocked in tests DevLauncher
-# from scripts.dev_launcher_process_manager import  # Should be mocked in tests ProcessManager
-# from scripts.dev_launcher_service_discovery import  # Should be mocked in tests ServiceDiscovery
-# from scripts.dev_launcher_startup_validator import  # Should be mocked in tests StartupValidator
-
+# Removed broken import statement
+# Removed broken import statement
+# Removed broken import statement
+# Removed broken import statement
 # Test utilities
 from netra_backend.tests.startup_check_helpers import (
 
@@ -106,6 +104,7 @@ class TestFullSystemStartupSequence:
 
     """Business Value: $30K MRR - Complete system startup validation"""
     
+    @pytest.mark.asyncio
     async def test_full_system_startup_sequence(self, test_launcher):
 
         """Test complete startup of all 3 microservices"""
@@ -234,6 +233,7 @@ class TestServiceDependencyResolution:
 
     """Business Value: $15K MRR - Prevents cascade startup failures"""
     
+    @pytest.mark.asyncio
     async def test_service_dependency_resolution(self, test_launcher):
 
         """Test services start in correct dependency order"""
@@ -276,6 +276,7 @@ class TestServiceDependencyResolution:
 
         assert startup_order[2] == "frontend"
     
+    @pytest.mark.asyncio
     async def test_auth_service_prerequisite_validation(self, test_launcher):
 
         """Test auth service prerequisite checks"""
@@ -305,6 +306,7 @@ class TestServiceDependencyResolution:
 
         return all(key in config and config[key] for key in required_keys)
     
+    @pytest.mark.asyncio
     async def test_backend_database_dependency_check(self, test_launcher):
 
         """Test backend waits for database availability"""
@@ -332,6 +334,7 @@ class TestPortAllocationAndDiscovery:
 
     """Business Value: $10K MRR - Multi-environment deployment support"""
     
+    @pytest.mark.asyncio
     async def test_port_allocation_and_discovery(self, test_launcher):
 
         """Test dynamic port allocation and service discovery"""
@@ -381,6 +384,7 @@ class TestPortAllocationAndDiscovery:
 
             assert service_info.get("port") == expected_port
     
+    @pytest.mark.asyncio
     async def test_port_conflict_resolution(self, test_launcher):
 
         """Test handling of port conflicts during startup"""
@@ -413,6 +417,7 @@ class TestPortAllocationAndDiscovery:
 
         return True  # Assume port available for test
     
+    @pytest.mark.asyncio
     async def test_service_discovery_file_creation(self, test_launcher):
 
         """Test service discovery files are created correctly"""
@@ -490,6 +495,7 @@ class TestHealthEndpointValidation:
 
     """Business Value: $20K MRR - Customer-facing availability monitoring"""
     
+    @pytest.mark.asyncio
     async def test_all_health_endpoints_respond(self, test_launcher):
 
         """Test all service health endpoints respond correctly"""
@@ -536,6 +542,7 @@ class TestHealthEndpointValidation:
 
             assert result["response_time"] < 1000, f"{service} too slow"
     
+    @pytest.mark.asyncio
     async def test_health_check_timeout_handling(self, test_launcher):
 
         """Test health check timeout handling"""
@@ -575,6 +582,7 @@ class TestHealthEndpointValidation:
 
             return {"success": False, "response_time": response_time}
     
+    @pytest.mark.asyncio
     async def test_health_check_cascading_validation(self, test_launcher):
 
         """Test health checks validate service dependencies"""
@@ -630,6 +638,7 @@ class TestStartupPerformanceMetrics:
 
     """Business Value: $5K MRR - Optimal user experience through fast startup"""
     
+    @pytest.mark.asyncio
     async def test_startup_time_within_limits(self, test_launcher):
 
         """Test system startup completes within acceptable time limits"""
@@ -668,6 +677,7 @@ class TestStartupPerformanceMetrics:
         
         return True
     
+    @pytest.mark.asyncio
     async def test_parallel_startup_performance_gain(self, test_launcher):
 
         """Test parallel startup provides performance improvement"""

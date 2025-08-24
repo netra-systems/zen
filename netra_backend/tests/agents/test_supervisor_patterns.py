@@ -11,7 +11,7 @@ from pathlib import Path
 
 import asyncio
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from netra_backend.app.schemas import SubAgentLifecycle

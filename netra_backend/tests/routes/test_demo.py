@@ -6,7 +6,7 @@ from pathlib import Path
 import json
 import uuid
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.routes.demo import (
@@ -32,6 +32,7 @@ class TestDemoRoutes:
     def mock_current_user(self):
         """Create a mock current user."""
         return {"id": 1, "email": "test@example.com", "is_admin": False}
+    @pytest.mark.asyncio
     async def test_demo_chat_success(self, mock_demo_service, mock_current_user):
         """Test successful demo chat interaction."""
         from netra_backend.app.routes.demo import demo_chat
@@ -80,6 +81,7 @@ class TestDemoRoutes:
         
         # Verify background task was added
         background_tasks.add_task.assert_called_once()
+    @pytest.mark.asyncio
     async def test_demo_chat_without_session_id(self, mock_demo_service):
         """Test demo chat creates session ID if not provided."""
         from netra_backend.app.routes.demo import demo_chat
@@ -106,6 +108,7 @@ class TestDemoRoutes:
         # Verify session ID was generated
         assert response.session_id != None
         assert len(response.session_id) > 0
+    @pytest.mark.asyncio
     async def test_get_industry_templates_success(self, mock_demo_service):
         """Test getting industry templates."""
         from netra_backend.app.routes.demo import get_industry_templates
@@ -134,6 +137,7 @@ class TestDemoRoutes:
         assert templates[0]["industry"] == "healthcare"
         assert templates[0]["name"] == "Diagnostic AI"
         mock_demo_service.get_industry_templates.assert_called_once_with("healthcare")
+    @pytest.mark.asyncio
     async def test_get_industry_templates_invalid_industry(self, mock_demo_service):
         """Test getting templates for invalid industry."""
         from fastapi import HTTPException
@@ -150,6 +154,7 @@ class TestDemoRoutes:
         
         assert exc_info.value.status_code == 404
         assert "Unknown industry" in str(exc_info.value.detail)
+    @pytest.mark.asyncio
     async def test_calculate_roi_success(self, mock_demo_service):
         """Test ROI calculation."""
         from netra_backend.app.routes.demo import calculate_roi
@@ -198,6 +203,7 @@ class TestDemoRoutes:
             average_latency=250,
             industry="financial"
         )
+    @pytest.mark.asyncio
     async def test_get_synthetic_metrics_success(self, mock_demo_service):
         """Test synthetic metrics generation."""
         from netra_backend.app.routes.demo import get_synthetic_metrics
@@ -231,6 +237,7 @@ class TestDemoRoutes:
             scenario="standard",
             duration_hours=24
         )
+    @pytest.mark.asyncio
     async def test_export_report_success(self, mock_demo_service, mock_current_user):
         """Test report export."""
         from netra_backend.app.routes.demo import export_demo_report
@@ -266,6 +273,7 @@ class TestDemoRoutes:
             include_sections=["summary", "metrics"],
             user_id=1
         )
+    @pytest.mark.asyncio
     async def test_export_report_session_not_found(self, mock_demo_service):
         """Test report export with invalid session."""
         from fastapi import HTTPException
@@ -289,6 +297,7 @@ class TestDemoRoutes:
         
         assert exc_info.value.status_code == 404
         assert "Session not found" in str(exc_info.value.detail)
+    @pytest.mark.asyncio
     async def test_get_session_status_success(self, mock_demo_service):
         """Test getting demo session status."""
         from netra_backend.app.routes.demo import get_demo_session_status
@@ -315,6 +324,7 @@ class TestDemoRoutes:
         assert status["session_id"] == "session-123"
         assert status["progress_percentage"] == 83.3
         assert status["status"] == "active"
+    @pytest.mark.asyncio
     async def test_submit_feedback_success(self, mock_demo_service):
         """Test submitting demo feedback."""
         from netra_backend.app.routes.demo import submit_demo_feedback
@@ -339,6 +349,7 @@ class TestDemoRoutes:
         assert response["status"] == "success"
         assert response["message"] == "Feedback received"
         mock_demo_service.submit_feedback.assert_called_once_with("session-123", feedback)
+    @pytest.mark.asyncio
     async def test_get_analytics_admin_only(self, mock_demo_service):
         """Test analytics endpoint requires admin access."""
         from fastapi import HTTPException
@@ -357,6 +368,7 @@ class TestDemoRoutes:
         
         assert exc_info.value.status_code == 403
         assert "Admin access required" in str(exc_info.value.detail)
+    @pytest.mark.asyncio
     async def test_get_analytics_success(self, mock_demo_service):
         """Test getting demo analytics as admin."""
         from netra_backend.app.routes.demo import get_demo_analytics
@@ -388,6 +400,7 @@ class TestDemoRoutes:
         assert analytics["conversion_rate"] == 65.0
         assert analytics["report_exports"] == 98
         mock_demo_service.get_analytics_summary.assert_called_once_with(days=30)
+    @pytest.mark.asyncio
     async def test_demo_chat_error_handling(self, mock_demo_service):
         """Test demo chat error handling."""
         from fastapi import HTTPException

@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -499,6 +499,7 @@ async def priority_queue_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_priority_queue_operations(priority_queue_manager):
     """Test basic priority queue enqueue/dequeue operations."""
     manager = priority_queue_manager
@@ -531,6 +532,7 @@ async def test_basic_priority_queue_operations(priority_queue_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_task_scheduling_and_execution(priority_queue_manager):
     """Test task scheduling and execution by the scheduler."""
     manager = priority_queue_manager
@@ -558,6 +560,7 @@ async def test_task_scheduling_and_execution(priority_queue_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_priority_ordering_with_age_factor(priority_queue_manager):
     """Test that older tasks get priority boost."""
     manager = priority_queue_manager
@@ -583,6 +586,7 @@ async def test_priority_ordering_with_age_factor(priority_queue_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_deadline_based_priority_boost(priority_queue_manager):
     """Test deadline-based priority boost."""
     manager = priority_queue_manager
@@ -604,6 +608,7 @@ async def test_deadline_based_priority_boost(priority_queue_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_starvation_prevention(priority_queue_manager):
     """Test starvation prevention mechanism."""
     manager = priority_queue_manager
@@ -630,6 +635,7 @@ async def test_starvation_prevention(priority_queue_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_task_retry_mechanism(priority_queue_manager):
     """Test task retry mechanism for failed tasks."""
     manager = priority_queue_manager
@@ -675,6 +681,7 @@ async def test_task_retry_mechanism(priority_queue_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_task_processing(priority_queue_manager):
     """Test concurrent processing of multiple tasks."""
     manager = priority_queue_manager
@@ -709,6 +716,7 @@ async def test_concurrent_task_processing(priority_queue_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_queue_capacity_limits(priority_queue_manager):
     """Test queue capacity limits and rejection."""
     manager = priority_queue_manager
@@ -733,6 +741,7 @@ async def test_queue_capacity_limits(priority_queue_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_priority_distribution_stats(priority_queue_manager):
     """Test priority distribution statistics."""
     manager = priority_queue_manager
@@ -761,6 +770,7 @@ async def test_priority_distribution_stats(priority_queue_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_task_removal_and_cancellation(priority_queue_manager):
     """Test task removal and cancellation."""
     manager = priority_queue_manager
@@ -789,6 +799,7 @@ async def test_task_removal_and_cancellation(priority_queue_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_priority_queue_performance(priority_queue_manager):
     """Benchmark priority queue performance."""
     manager = priority_queue_manager

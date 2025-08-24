@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -15,6 +15,7 @@ from netra_backend.app.main import app
 @pytest.mark.parametrize("prompt", [
     "I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",
 ])
+@pytest.mark.asyncio
 async def test_apex_optimizer_agent(prompt: str):
     # Create a mock supervisor
     mock_supervisor = Mock()

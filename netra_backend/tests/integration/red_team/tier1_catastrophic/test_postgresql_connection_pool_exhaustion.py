@@ -62,6 +62,7 @@ class TestPostgreSQLConnectionPoolExhaustion:
         }
 
     @pytest.fixture(scope="class")
+    @pytest.mark.asyncio
     async def test_database_engine(self, connection_pool_config):
         """Create a test database engine with controlled pool settings."""
         config = get_unified_config()

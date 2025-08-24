@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 import sys
 from pathlib import Path
 
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -70,6 +70,7 @@ class TestMCPRoute:
         if response.status_code not in [404]:  # Skip if not implemented
             CommonResponseValidators.validate_error_response(response, [422, 400])
     
+    @pytest.mark.asyncio
     async def test_mcp_tool_execution(self):
         """Test MCP tool execution."""
         from netra_backend.app.routes.mcp.handlers import execute_tool
@@ -158,6 +159,7 @@ class TestMCPRoute:
                 # MCP endpoint may not be implemented
                 assert response.status_code in [404, 500]
     
+    @pytest.mark.asyncio
     async def test_mcp_resource_management(self):
         """Test MCP resource listing and access."""
         from netra_backend.app.routes.mcp.main import list_resources, read_resource

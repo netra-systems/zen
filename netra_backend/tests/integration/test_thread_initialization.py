@@ -15,7 +15,7 @@ import json
 import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -44,7 +44,11 @@ class TestFirstMessageThreadInit:
         
         async with async_session() as session:
 
-            yield session
+            try:
+                yield session
+            finally:
+                if hasattr(session, "close"):
+                    await session.close()
     
     @pytest.fixture
 
@@ -74,6 +78,7 @@ class TestFirstMessageThreadInit:
 
         }
     
+    @pytest.mark.asyncio
     async def test_new_thread_creation_first_message(self, db_session, thread_data):
 
         """Test thread creation when user sends first message."""
@@ -142,6 +147,7 @@ class TestFirstMessageThreadInit:
 
         message_service.add_message.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_thread_persistence_to_database(self, db_session):
 
         """Test thread data persists correctly to database."""
@@ -177,6 +183,7 @@ class TestFirstMessageThreadInit:
 
         assert result.title == "Cost optimization query"
     
+    @pytest.mark.asyncio
     async def test_thread_context_initialization(self, thread_data):
 
         """Test thread context properly initialized for agents."""
@@ -216,6 +223,7 @@ class TestFirstMessageThreadInit:
         
         context_service.initialize_context.assert_called_once_with(thread_data)
     
+    @pytest.mark.asyncio
     async def test_concurrent_thread_creation_race_condition(self, db_session):
 
         """Test handling of concurrent thread creation attempts."""
@@ -260,6 +268,7 @@ class TestFirstMessageThreadInit:
 
         assert creation_count == 5
     
+    @pytest.mark.asyncio
     async def test_thread_title_generation_from_message(self):
 
         """Test automatic thread title generation from first message."""
@@ -284,6 +293,7 @@ class TestFirstMessageThreadInit:
 
         assert thread_service.generate_title(long_msg) == "I need help optimizing my GPT-4 usage because cos..."
     
+    @pytest.mark.asyncio
     async def test_thread_metadata_includes_agent_routing(self, thread_data):
 
         """Test thread metadata includes agent routing information."""
@@ -317,6 +327,7 @@ class TestFirstMessageThreadInit:
 
         assert thread_data["metadata"]["routing"]["confidence"] == 0.95
     
+    @pytest.mark.asyncio
     async def test_websocket_notification_on_thread_creation(self, thread_data):
 
         """Test WebSocket notification sent when thread created."""

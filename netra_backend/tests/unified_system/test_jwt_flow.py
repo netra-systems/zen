@@ -106,6 +106,7 @@ class JWTTestHelper:
                 pass
         return None
     
+    @pytest.mark.asyncio
     async def test_websocket_connection(self, token: str, should_succeed: bool = True) -> bool:
         """Test WebSocket connection with token."""
         try:
@@ -192,6 +193,7 @@ class TestCrossServiceJWTValidation:
     """Test JWT validation across services."""
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_harness(self):
         """Setup test harness with all services."""
         harness = UnifiedTestHarness()
@@ -250,6 +252,7 @@ class TestSessionManagementUnified:
     """Test session consistency across services."""
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_harness(self):
         """Setup test harness with all services."""
         harness = UnifiedTestHarness()
@@ -309,6 +312,7 @@ class TestTokenExpirationHandling:
     """Test token expiry scenarios."""
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_harness(self):
         """Setup test harness with all services."""
         harness = UnifiedTestHarness()

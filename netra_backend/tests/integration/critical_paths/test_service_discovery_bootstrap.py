@@ -538,6 +538,7 @@ async def service_discovery_bootstrap():
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_service_discovery_during_initial_bootstrap_l3(service_discovery_bootstrap):
     """Test complete service discovery during initial bootstrap sequence."""
     manager = service_discovery_bootstrap
@@ -606,6 +607,7 @@ async def test_service_discovery_during_initial_bootstrap_l3(service_discovery_b
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_service_registration_within_time_limits_l3(service_discovery_bootstrap):
     """Test that services register within 5 seconds during bootstrap."""
     manager = service_discovery_bootstrap
@@ -627,6 +629,7 @@ async def test_service_registration_within_time_limits_l3(service_discovery_boot
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_service_discovery_returns_correct_endpoints_l3(service_discovery_bootstrap):
     """Test that discovery returns correct service endpoints."""
     manager = service_discovery_bootstrap
@@ -660,6 +663,7 @@ async def test_service_discovery_returns_correct_endpoints_l3(service_discovery_
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_health_status_propagation_l3(service_discovery_bootstrap):
     """Test that health status updates propagate correctly."""
     manager = service_discovery_bootstrap
@@ -692,6 +696,7 @@ async def test_health_status_propagation_l3(service_discovery_bootstrap):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_failed_services_removed_from_discovery_l3(service_discovery_bootstrap):
     """Test that failed services are properly removed from registry."""
     manager = service_discovery_bootstrap
@@ -726,6 +731,7 @@ async def test_failed_services_removed_from_discovery_l3(service_discovery_boots
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_load_balancing_works_correctly_l3(service_discovery_bootstrap):
     """Test that load balancing distributes requests correctly."""
     manager = service_discovery_bootstrap
@@ -758,6 +764,7 @@ async def test_load_balancing_works_correctly_l3(service_discovery_bootstrap):
 
 @pytest.mark.asyncio
 @pytest.mark.l3_realism
+@pytest.mark.asyncio
 async def test_service_versions_handled_properly_l3(service_discovery_bootstrap):
     """Test that multiple service versions are handled correctly."""
     manager = service_discovery_bootstrap

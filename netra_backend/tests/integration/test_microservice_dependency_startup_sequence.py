@@ -426,6 +426,7 @@ class TestMicroserviceDependencyStartupSequence:
         # For unit testing, mock the container behavior
         pass
     
+    @pytest.mark.asyncio
     async def test_correct_startup_dependency_order(self, orchestrator, microservices):
         """
         Test services start in correct dependency order.
@@ -463,6 +464,7 @@ class TestMicroserviceDependencyStartupSequence:
         health_status = await orchestrator.cascade_health_check()
         assert all(health_status.values()), f"Some services unhealthy: {health_status}"
     
+    @pytest.mark.asyncio
     async def test_backend_waits_for_auth_service_availability(self, orchestrator, microservices):
         """
         Test backend waits for auth service to be healthy before starting.
@@ -508,6 +510,7 @@ class TestMicroserviceDependencyStartupSequence:
             backend_time = datetime.fromisoformat(backend_events[0]["timestamp"])
             assert auth_time < backend_time, "Backend started before auth service"
     
+    @pytest.mark.asyncio
     async def test_graceful_shutdown_on_dependency_failure(self, orchestrator, microservices):
         """
         Test graceful shutdown when dependency fails.
@@ -540,6 +543,7 @@ class TestMicroserviceDependencyStartupSequence:
         shutdown_success = await orchestrator.teardown_test_environment()
         assert shutdown_success, "Graceful shutdown failed"
     
+    @pytest.mark.asyncio
     async def test_health_check_cascading_during_startup(self, orchestrator, microservices):
         """
         Test health check cascading during startup phase.
@@ -579,6 +583,7 @@ class TestMicroserviceDependencyStartupSequence:
         final_status = await orchestrator.cascade_health_check()
         assert all(final_status.values()), "Not all services healthy after startup"
     
+    @pytest.mark.asyncio
     async def test_service_discovery_and_registration(self, orchestrator, microservices):
         """
         Test service discovery and registration during startup.
@@ -607,6 +612,7 @@ class TestMicroserviceDependencyStartupSequence:
                 assert dep_service.state == ServiceState.HEALTHY, \
                     f"Dependency {dep} not healthy for {service_name}"
     
+    @pytest.mark.asyncio
     async def test_startup_timeout_handling(self, orchestrator, microservices):
         """
         Test handling of startup timeouts.
@@ -648,6 +654,7 @@ class TestMicroserviceDependencyStartupSequence:
         # Verify proper cleanup
         assert stuck_auth.state == ServiceState.FAILED or stuck_auth.state == ServiceState.UNHEALTHY
     
+    @pytest.mark.asyncio
     async def test_startup_retry_mechanism_on_transient_failures(self, orchestrator, microservices):
         """
         Test startup retry mechanism for transient failures.
@@ -689,6 +696,7 @@ class TestMicroserviceDependencyStartupSequence:
                        if "retry" in e.get("event_type", "").lower()]
         assert len(retry_events) > 0, "No retry events recorded"
     
+    @pytest.mark.asyncio
     async def test_partial_failure_recovery(self, orchestrator, microservices):
         """
         Test recovery from partial startup failures.
@@ -734,6 +742,7 @@ class TestMicroserviceDependencyStartupSequence:
             )
     
     @pytest.mark.smoke
+    @pytest.mark.asyncio
     async def test_basic_startup_smoke_test(self, orchestrator):
         """
         Quick smoke test for basic startup functionality.
@@ -774,16 +783,19 @@ class TestMicroserviceDependencyStartupSequence:
 class TestMicroserviceStartupIntegration:
     """Additional integration tests for microservice startup."""
     
+    @pytest.mark.asyncio
     async def test_startup_with_external_dependencies(self):
         """Test startup with external service dependencies (databases, cache)."""
         # Would test real external dependency handling
         pass
     
+    @pytest.mark.asyncio
     async def test_rolling_update_startup_sequence(self):
         """Test startup sequence during rolling updates."""
         # Would test zero-downtime deployment scenarios
         pass
     
+    @pytest.mark.asyncio
     async def test_startup_under_resource_constraints(self):
         """Test startup behavior under CPU/memory constraints."""
         # Would test resource-limited scenarios

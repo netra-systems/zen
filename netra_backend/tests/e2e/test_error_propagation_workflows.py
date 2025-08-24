@@ -18,7 +18,7 @@ from pathlib import Path
 
 import asyncio
 from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import Request, Response
@@ -41,6 +41,7 @@ logger = central_logger.get_logger(__name__)
 class TestErrorPropagationThroughLayers:
     """Test error propagation through middleware layers."""
     
+    @pytest.mark.asyncio
     async def test_authentication_error_propagation(self):
         """Test authentication error propagation."""
         middleware = self._create_security_middleware()
@@ -51,6 +52,7 @@ class TestErrorPropagationThroughLayers:
         # Verify error is tracked
         assert middleware.failed_auth_ips.get("192.168.1.1", 0) == 1
     
+    @pytest.mark.asyncio
     async def test_validation_error_propagation(self):
         """Test validation error propagation through layers."""
         middleware = self._create_security_middleware()
@@ -61,6 +63,7 @@ class TestErrorPropagationThroughLayers:
             with pytest.raises(NetraSecurityException):
                 middleware._validate_decoded_body(b"test data")
     
+    @pytest.mark.asyncio
     async def test_rate_limit_error_propagation(self):
         """Test rate limit error propagation."""
         from fastapi import HTTPException
@@ -73,6 +76,7 @@ class TestErrorPropagationThroughLayers:
         assert exc_info.value.status_code == 429
         assert "Retry-After" in exc_info.value.headers
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_error_propagation(self):
         """Test circuit breaker error propagation."""
         middleware = self._create_security_middleware()
@@ -91,6 +95,7 @@ class TestErrorPropagationThroughLayers:
 class TestRecoveryCoordinationAcrossLayers:
     """Test recovery coordination across different layers."""
     
+    @pytest.mark.asyncio
     async def test_hook_middleware_recovery_coordination(self):
         """Test recovery coordination between hooks and middleware."""
         hook_manager = self._create_hook_manager()
@@ -106,6 +111,7 @@ class TestRecoveryCoordinationAcrossLayers:
         # Verify error was recorded
         assert len(mixin.error_history) == 1
     
+    @pytest.mark.asyncio
     async def test_multi_layer_error_handling(self):
         """Test error handling across multiple layers."""
         hook_manager = self._create_hook_manager()
@@ -125,6 +131,7 @@ class TestRecoveryCoordinationAcrossLayers:
             # State should not have metrics due to error
             assert not hasattr(state, 'quality_metrics')
     
+    @pytest.mark.asyncio
     async def test_recovery_strategy_coordination(self):
         """Test recovery strategy coordination between components."""
         mixin = self._create_reliability_mixin()
@@ -143,6 +150,7 @@ class TestRecoveryCoordinationAcrossLayers:
         assert result["recovered"] is True
         assert result["strategy"] == "custom"
     
+    @pytest.mark.asyncio
     async def test_fallback_chain_coordination(self):
         """Test fallback chain coordination across layers."""
         mixin = self._create_reliability_mixin()
@@ -197,6 +205,7 @@ class TestRecoveryCoordinationAcrossLayers:
 class TestRealWorkflowIntegration:
     """Test real workflow integration points."""
     
+    @pytest.mark.asyncio
     async def test_agent_workflow_hooks_integration(self):
         """Test agent workflows integrate with hook system."""
         hook_manager = self._create_hook_manager()
@@ -212,12 +221,14 @@ class TestRealWorkflowIntegration:
         # Verify workflow completed successfully
         assert hook_manager.quality_stats['total_validations'] == 1
     
+    @pytest.mark.asyncio
     async def test_middleware_agent_coordination(self):
         """Test middleware coordination with agent systems."""
         middleware = self._create_security_middleware()
         mixin = self._create_reliability_mixin()
         
         # Test that middleware and agent reliability work together
+        @pytest.mark.asyncio
         async def test_operation():
             return "success"
         
@@ -228,6 +239,7 @@ class TestRealWorkflowIntegration:
         # Verify operation was tracked
         assert len(mixin.operation_times) == 1
     
+    @pytest.mark.asyncio
     async def test_complete_request_processing_chain(self):
         """Test complete request processing through all layers."""
         hook_manager = self._create_hook_manager()
@@ -253,6 +265,7 @@ class TestRealWorkflowIntegration:
         assert "X-Security-Middleware" in response.headers
         assert hook_manager.quality_stats['total_validations'] == 1
     
+    @pytest.mark.asyncio
     async def test_end_to_end_error_recovery(self):
         """Test end-to-end error recovery across all components."""
         hook_manager = self._create_hook_manager()
@@ -279,6 +292,7 @@ class TestRealWorkflowIntegration:
         assert len(mixin.error_history) == 1
         assert mixin.error_history[0].message == "Workflow error"
     
+    @pytest.mark.asyncio
     async def test_quality_gates_with_middleware_security(self):
         """Test quality gates integration with middleware security."""
         hook_manager = self._create_hook_manager()

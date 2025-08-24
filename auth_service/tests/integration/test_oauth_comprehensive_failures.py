@@ -1243,6 +1243,7 @@ class TestOAuthComprehensiveFailures:
 
     @pytest.mark.asyncio
     @pytest.mark.staging
+    @pytest.mark.asyncio
     async def test_staging_multi_service_oauth_flow(self, staging_env_config):
         """Test complete OAuth flow across all three services in staging"""
         try:
@@ -1286,6 +1287,7 @@ class TestOAuthComprehensiveFailures:
 
     @pytest.mark.asyncio
     @pytest.mark.staging
+    @pytest.mark.asyncio
     async def test_staging_oauth_provider_failover(self, staging_env_config):
         """Test OAuth provider failover in staging environment"""
         try:

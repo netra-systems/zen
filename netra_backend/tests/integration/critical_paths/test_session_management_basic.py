@@ -25,6 +25,7 @@ from test_framework.test_patterns import L3IntegrationTest
 class TestSessionManagementBasic(L3IntegrationTest):
     """Test session management from multiple angles."""
     
+    @pytest.mark.asyncio
     async def test_session_creation_on_login(self):
         """Test that session is properly created on login."""
         user_data = await self.create_test_user("session1@test.com")
@@ -60,6 +61,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             assert "created_at" in session_info
             assert "last_activity" in session_info
             
+    @pytest.mark.asyncio
     async def test_session_validation(self):
         """Test session validation with valid and invalid tokens."""
         user_data = await self.create_test_user("session2@test.com")
@@ -82,6 +84,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             ) as resp:
                 assert resp.status == 401
                 
+    @pytest.mark.asyncio
     async def test_session_expiration(self):
         """Test session expiration and cleanup."""
         user_data = await self.create_test_user("session3@test.com")
@@ -114,6 +117,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             ) as resp:
                 assert resp.status == 401
                 
+    @pytest.mark.asyncio
     async def test_session_logout_cleanup(self):
         """Test that logout properly cleans up session."""
         user_data = await self.create_test_user("session4@test.com")
@@ -146,6 +150,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             ) as resp:
                 assert resp.status == 401
                 
+    @pytest.mark.asyncio
     async def test_multiple_sessions_same_user(self):
         """Test multiple active sessions for same user."""
         user_data = await self.create_test_user("session5@test.com")
@@ -182,6 +187,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             sessions = await redis_manager.scan_keys(session_pattern)
             assert len(sessions) >= 3
             
+    @pytest.mark.asyncio
     async def test_session_activity_tracking(self):
         """Test that session tracks last activity."""
         user_data = await self.create_test_user("session6@test.com")
@@ -215,6 +221,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
         
         assert new_activity > initial_activity
         
+    @pytest.mark.asyncio
     async def test_session_device_tracking(self):
         """Test session tracks device information."""
         user_data = await self.create_test_user("session7@test.com")
@@ -258,6 +265,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
                 assert current_session["device_info"]["device_name"] == "Test Device"
                 assert current_session["device_info"]["device_type"] == "desktop"
                 
+    @pytest.mark.asyncio
     async def test_session_invalidation_cascade(self):
         """Test that invalidating a session cascades properly."""
         user_data = await self.create_test_user("session8@test.com")
@@ -286,6 +294,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
             if not ws_connection.closed:
                 await ws_connection.close()
                 
+    @pytest.mark.asyncio
     async def test_session_refresh_extends_expiry(self):
         """Test that using a session extends its expiry."""
         user_data = await self.create_test_user("session9@test.com")
@@ -318,6 +327,7 @@ class TestSessionManagementBasic(L3IntegrationTest):
         # TTL should be refreshed (close to original)
         assert new_ttl > initial_ttl - 10
         
+    @pytest.mark.asyncio
     async def test_concurrent_session_operations(self):
         """Test concurrent operations on same session."""
         user_data = await self.create_test_user("session10@test.com")

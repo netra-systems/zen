@@ -15,7 +15,7 @@ import json
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -39,8 +39,13 @@ class TestMessagePersistence:
 
         async with async_session() as session:
 
-            yield session
+            try:
+                yield session
+            finally:
+                if hasattr(session, "close"):
+                    await session.close()
     
+    @pytest.mark.asyncio
     async def test_message_saved_before_processing(self, db_session):
 
         """Ensure messages persist before agent processing."""
@@ -76,6 +81,7 @@ class TestMessagePersistence:
 
         message_service.save_message.assert_called_once_with(message)
     
+    @pytest.mark.asyncio
     async def test_message_recovery_after_crash(self, db_session):
 
         """Test message recovery after system crash."""
@@ -106,6 +112,7 @@ class TestMessagePersistence:
 
         assert all(m["status"] == "pending" for m in recovered)
     
+    @pytest.mark.asyncio
     async def test_message_queue_durability(self):
 
         """Test message queue persists during processing."""
@@ -139,6 +146,7 @@ class TestMultiAgentCoordination:
 
     """Test 5: Multi-Agent Coordination First Response"""
     
+    @pytest.mark.asyncio
     async def test_agent_orchestration_flow(self):
 
         """Test supervisor orchestrates multiple agents."""
@@ -178,6 +186,7 @@ class TestMultiAgentCoordination:
 
         assert result["performance"]["latency"] == 200
     
+    @pytest.mark.asyncio
     async def test_parallel_agent_execution(self):
 
         """Test agents execute in parallel for speed."""
@@ -213,6 +222,7 @@ class TestMultiAgentCoordination:
 
         assert len(results) == 3
     
+    @pytest.mark.asyncio
     async def test_agent_response_aggregation(self):
 
         """Test proper aggregation of multi-agent responses."""
@@ -257,6 +267,7 @@ class TestSessionStateSync:
 
     """Test 6: Session State Cross-Service Sync"""
     
+    @pytest.mark.asyncio
     async def test_session_sync_auth_to_backend(self):
 
         """Test session syncs from auth service to backend."""
@@ -294,6 +305,7 @@ class TestSessionStateSync:
 
         session_service.sync_session.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_redis_session_consistency(self):
 
         """Test Redis maintains session consistency."""
@@ -327,6 +339,7 @@ class TestSessionStateSync:
 
         assert parsed["active"] is True
     
+    @pytest.mark.asyncio
     async def test_websocket_state_synchronization(self):
 
         """Test WebSocket connection state syncs across services."""

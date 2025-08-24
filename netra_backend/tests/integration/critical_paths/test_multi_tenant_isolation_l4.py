@@ -23,7 +23,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -32,14 +32,14 @@ TenantService = AsyncMock
 # Permissions service replaced with auth_integration
 # from netra_backend.app.auth_integration.auth import require_permission
 # from app.auth_integration.auth import create_access_token
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 create_access_token = AsyncMock()
 # from app.core.unified.jwt_validator import validate_token_jwt
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 validate_token_jwt = AsyncMock()
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 PermissionsService = AsyncMock
 # from app.services.audit.audit_logger import AuditLogger
@@ -251,6 +251,7 @@ class MultiTenantIsolationL4Manager:
             logger.error(f"Failed to setup organization permissions: {e}")
             raise
     
+    @pytest.mark.asyncio
     async def test_cross_organization_access_prevention(self, source_org_id: str, target_org_id: str,
                                                        user_id: str, resource_id: str) -> Dict[str, Any]:
         """Test cross-organization access prevention with real staging data."""

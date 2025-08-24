@@ -23,7 +23,7 @@ import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import AgentCompleted, AgentStarted, SubAgentLifecycle, WebSocketMessage
@@ -374,6 +374,7 @@ class SupervisorSubAgentCommunicationTester:
 
         self.sub_agents["triage"] = triage_agent
         
+    @pytest.mark.asyncio
     async def test_basic_delegation_flow(self, user_request: str) -> Dict[str, Any]:
 
         """Test basic supervisor to sub-agent delegation flow."""
@@ -460,6 +461,7 @@ class SupervisorSubAgentCommunicationTester:
 
             }
     
+    @pytest.mark.asyncio
     async def test_sub_agent_tool_execution(self, agent_name: str, 
 
                                           tool_name: str) -> Dict[str, Any]:
@@ -530,6 +532,7 @@ class SupervisorSubAgentCommunicationTester:
 
             }
     
+    @pytest.mark.asyncio
     async def test_parallel_sub_agent_execution(self, 
 
                                               requests: List[str]) -> Dict[str, Any]:
@@ -617,6 +620,7 @@ class SupervisorSubAgentCommunicationTester:
 
             }
     
+    @pytest.mark.asyncio
     async def test_state_persistence_across_agents(self) -> Dict[str, Any]:
 
         """Test state persistence and sharing across agent interactions."""
@@ -710,6 +714,7 @@ class SupervisorSubAgentCommunicationTester:
 
             }
     
+    @pytest.mark.asyncio
     async def test_error_propagation_from_subagent(self) -> Dict[str, Any]:
 
         """Test error propagation from sub-agent to supervisor."""
@@ -801,6 +806,7 @@ class SupervisorSubAgentCommunicationTester:
 
             }
     
+    @pytest.mark.asyncio
     async def test_quality_gates_integration(self) -> Dict[str, Any]:
 
         """Test quality gate integration in agent communication."""
@@ -991,6 +997,7 @@ class TestSupervisorSubAgentCommunication:
 
     """L2 integration tests for supervisor-subagent communication."""
     
+    @pytest.mark.asyncio
     async def test_basic_supervisor_delegation(self, communication_tester):
 
         """Test basic supervisor to sub-agent delegation."""
@@ -1024,6 +1031,7 @@ class TestSupervisorSubAgentCommunication:
 
             print(f"Test failed with error: {result.get('error', 'No error message')}")
     
+    @pytest.mark.asyncio
     async def test_triage_agent_tool_execution(self, communication_tester):
 
         """Test triage agent tool execution through supervisor."""
@@ -1042,6 +1050,7 @@ class TestSupervisorSubAgentCommunication:
 
         assert result["final_state"] is not None
     
+    @pytest.mark.asyncio
     async def test_parallel_agent_execution(self, communication_tester):
 
         """Test parallel execution of multiple agent requests."""
@@ -1066,6 +1075,7 @@ class TestSupervisorSubAgentCommunication:
 
         assert result["concurrent_execution"] is True
     
+    @pytest.mark.asyncio
     async def test_state_persistence_flow(self, communication_tester):
 
         """Test state persistence across agent interactions."""
@@ -1080,6 +1090,7 @@ class TestSupervisorSubAgentCommunication:
 
         assert result["metadata_preserved"] is True
     
+    @pytest.mark.asyncio
     async def test_error_handling_propagation(self, communication_tester):
 
         """Test error propagation from sub-agent to supervisor."""
@@ -1093,6 +1104,7 @@ class TestSupervisorSubAgentCommunication:
         assert result["final_state_exists"] is True
         # Error messages may or may not be present depending on implementation
     
+    @pytest.mark.asyncio
     async def test_quality_gates_integration(self, communication_tester):
 
         """Test quality gate integration in agent communication."""
@@ -1105,6 +1117,7 @@ class TestSupervisorSubAgentCommunication:
         # Quality gates may not be fully implemented yet
         # assert result["quality_gates_active"] is True
     
+    @pytest.mark.asyncio
     async def test_websocket_message_flow(self, communication_tester):
 
         """Test WebSocket message flow during agent execution."""
@@ -1136,6 +1149,7 @@ class TestSupervisorSubAgentCommunication:
 
             assert "run_id" in message or "type" in message
     
+    @pytest.mark.asyncio
     async def test_tool_dispatcher_integration(self, communication_tester):
 
         """Test tool dispatcher integration across agents."""
@@ -1163,6 +1177,7 @@ class TestSupervisorSubAgentCommunication:
 
         assert isinstance(tool_executions, list)
     
+    @pytest.mark.asyncio
     async def test_agent_lifecycle_management(self, communication_tester):
 
         """Test complete agent lifecycle through supervisor."""
@@ -1198,6 +1213,7 @@ class TestSupervisorSubAgentCommunication:
 
             assert result["execution_time"] < 10.0
     
+    @pytest.mark.asyncio
     async def test_performance_benchmarks(self, communication_tester):
 
         """Test performance benchmarks for agent orchestration."""
@@ -1245,6 +1261,7 @@ class TestSupervisorSubAgentCommunication:
 
         assert metrics["websocket_efficiency"] > 0  # Some WebSocket messages
     
+    @pytest.mark.asyncio
     async def test_comprehensive_integration_scenario(self, communication_tester):
 
         """Test comprehensive integration scenario covering all components."""

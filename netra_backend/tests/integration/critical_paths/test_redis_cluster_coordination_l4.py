@@ -83,6 +83,7 @@ class RedisClusterTester:
         if self.session:
             await self.session.close()
             
+    @pytest.mark.asyncio
     async def test_cluster_initialization(self) -> bool:
         """Test cluster initialization and node discovery."""
         print("\n[INIT] Testing cluster initialization...")
@@ -119,6 +120,7 @@ class RedisClusterTester:
             
         return False
         
+    @pytest.mark.asyncio
     async def test_consistent_hashing(self) -> bool:
         """Test consistent hashing and key distribution."""
         print("\n[HASH] Testing consistent hashing...")
@@ -184,6 +186,7 @@ class RedisClusterTester:
         node = masters[master_index]
         return f"{node['host']}:{node['port']}"
         
+    @pytest.mark.asyncio
     async def test_master_slave_replication(self) -> bool:
         """Test master-slave replication."""
         print("\n[REPLICATION] Testing master-slave replication...")
@@ -241,6 +244,7 @@ class RedisClusterTester:
             print(f"[ERROR] Replication test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_automatic_failover(self) -> bool:
         """Test automatic failover on master failure."""
         print("\n[FAILOVER] Testing automatic failover...")
@@ -298,6 +302,7 @@ class RedisClusterTester:
             print(f"[ERROR] Failover test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_resharding(self) -> bool:
         """Test cluster resharding and rebalancing."""
         print("\n[RESHARD] Testing cluster resharding...")
@@ -352,6 +357,7 @@ class RedisClusterTester:
             print(f"[ERROR] Resharding test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_split_brain_detection(self) -> bool:
         """Test split-brain detection and resolution."""
         print("\n[SPLIT-BRAIN] Testing split-brain detection...")
@@ -414,6 +420,7 @@ class RedisClusterTester:
             print(f"[ERROR] Split-brain test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_performance_under_load(self) -> bool:
         """Test cluster performance under heavy load."""
         print("\n[PERFORMANCE] Testing performance under load...")
@@ -530,6 +537,7 @@ class RedisClusterTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_redis_cluster_coordination():
     """Test complete Redis cluster coordination."""
     async with RedisClusterTester() as tester:

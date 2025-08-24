@@ -11,7 +11,7 @@ from pathlib import Path
 
 import asyncio
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -69,6 +69,7 @@ class TestAgentInitializationIntegration:
         """Create mock WebSocket manager."""
         return MagicMock()
     
+    @pytest.mark.asyncio
     async def test_agent_registration_and_discovery(self, agent_registry):
         """Test agent registration and discovery mechanisms."""
         # Test initial empty state
@@ -95,6 +96,7 @@ class TestAgentInitializationIntegration:
         assert len(all_agents) == len(expected_agents)
         assert all(isinstance(agent, BaseSubAgent) for agent in all_agents)
     
+    @pytest.mark.asyncio
     async def test_agent_capability_matching_and_routing(self, agent_registry):
         """Test agent capability matching and request routing."""
         agent_registry.register_default_agents()
@@ -118,6 +120,7 @@ class TestAgentInitializationIntegration:
         assert optimization_agent is not None
         assert hasattr(optimization_agent, 'execute')
     
+    @pytest.mark.asyncio
     async def test_agent_pool_management_and_lifecycle(self, agent_registry, mock_websocket_manager):
         """Test agent pool management and lifecycle operations."""
         # Register agents
@@ -142,6 +145,7 @@ class TestAgentInitializationIntegration:
     
     @mock_justified("LLM service unavailable during agent initialization testing")
     @patch('app.agents.triage_sub_agent.agent.TriageSubAgent.execute')
+    @pytest.mark.asyncio
     async def test_supervisor_agent_initialization(self, mock_execute, agent_registry):
         """Test supervisor agent initialization and coordination setup."""
         mock_execute.return_value = {"status": "success", "agent": "supervisor"}
@@ -166,6 +170,7 @@ class TestAgentInitializationIntegration:
         assert result["status"] == "success"
         mock_execute.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_sub_agent_spawning_and_coordination(self, agent_registry, mock_websocket_manager):
         """Test sub-agent spawning and inter-agent coordination."""
         agent_registry.register_default_agents()
@@ -187,6 +192,7 @@ class TestAgentInitializationIntegration:
             assert agent.llm_manager is not None
             assert agent.tool_dispatcher is not None
     
+    @pytest.mark.asyncio
     async def test_agent_state_management(self, agent_registry):
         """Test agent state management and persistence."""
         agent_registry.register_default_agents()
@@ -210,6 +216,7 @@ class TestAgentInitializationIntegration:
     
     @mock_justified("External agent recovery service not available in test environment")
     @patch('app.core.agent_recovery_supervisor.SupervisorRecoveryStrategy')
+    @pytest.mark.asyncio
     async def test_agent_failure_and_recovery(self, mock_recovery_strategy, agent_registry):
         """Test agent failure detection and recovery mechanisms."""
         mock_recovery_instance = AsyncMock()
@@ -244,6 +251,7 @@ class TestAgentInitializationIntegration:
         assert "triage" in agent_names
         assert "data" in agent_names
     
+    @pytest.mark.asyncio
     async def test_agent_initialization_error_handling(self, mock_llm_manager, mock_tool_dispatcher):
         """Test error handling during agent initialization."""
         registry = AgentRegistry(mock_llm_manager, mock_tool_dispatcher)
@@ -263,6 +271,7 @@ class TestAgentInitializationIntegration:
         current_count = len(registry.list_agents())
         assert current_count >= initial_count
     
+    @pytest.mark.asyncio
     async def test_agent_registry_thread_safety(self, agent_registry):
         """Test agent registry operations under concurrent access."""
         # Register agents
@@ -288,6 +297,7 @@ class TestAgentInitializationIntegration:
             agent = agent_registry.get(agent_name)
             assert agent is not None
     
+    @pytest.mark.asyncio
     async def test_agent_dependency_injection_validation(self, agent_registry):
         """Test validation of agent dependency injection."""
         agent_registry.register_default_agents()

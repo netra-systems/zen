@@ -57,21 +57,15 @@ class AuthServiceClient:
         return None
     
     async def _try_cached_token(self, token: str) -> Optional[Dict]:
-        """Try to get token from cache, checking for invalidation."""
+        """Try to get token from cache with atomic blacklist checking."""
         cached_result = self.token_cache.get_cached_token(token)
         if cached_result:
-            # If we have a cached result, still check if token was blacklisted
-            # This provides additional security in case of race conditions
-            try:
-                blacklist_check = await self._check_token_blacklist(token)
-                logger.info(f"Blacklist check result: {blacklist_check}")
-                if blacklist_check and blacklist_check.get("blacklisted", False):
-                    # Token is blacklisted, mark as invalid and remove from cache
-                    logger.warning(f"Token is blacklisted, removing from cache and rejecting")
-                    self.token_cache.invalidate_cached_token(token)
-                    return None
-            except Exception as e:
-                logger.warning(f"Blacklist check failed, proceeding with cached result: {e}")
+            # ATOMIC FIX: Check blacklist BEFORE accepting cached result
+            # This prevents race conditions where token is cached but then blacklisted
+            if await self._is_token_blacklisted_atomic(token):
+                logger.warning("Token is blacklisted, removing from cache and rejecting")
+                self.token_cache.invalidate_cached_token(token)
+                return None
         return cached_result
     
     async def _validate_with_circuit_breaker(self, token: str) -> Optional[Dict]:
@@ -151,13 +145,11 @@ class AuthServiceClient:
         return client, request_data
     
     async def _validate_token_remote(self, token: str) -> Optional[Dict]:
-        """Remote token validation with blacklist checking."""
+        """Remote token validation with atomic blacklist checking."""
         client, request_data = await self._prepare_remote_validation(token)
         try:
-            # First check if token is blacklisted
-            blacklist_check = await self._check_token_blacklist(token)
-            logger.info(f"Remote validation blacklist check: {blacklist_check}")
-            if blacklist_check and blacklist_check.get("blacklisted", False):
+            # ATOMIC FIX: Use atomic blacklist check to prevent race conditions
+            if await self._is_token_blacklisted_atomic(token):
                 logger.warning("Token is blacklisted, rejecting remote validation")
                 return None
             
@@ -219,10 +211,10 @@ class AuthServiceClient:
         self.token_cache.invalidate_cached_token(token)
         return result
     
-    async def _check_token_blacklist(self, token: str) -> Optional[Dict]:
-        """Check if token is blacklisted in auth service."""
+    async def _is_token_blacklisted_atomic(self, token: str) -> bool:
+        """Atomic blacklist check to prevent race conditions."""
         if not self.settings.enabled:
-            return {"blacklisted": False}
+            return False
         
         try:
             client = await self._get_client()
@@ -238,13 +230,19 @@ class AuthServiceClient:
             )
             
             if response.status_code == 200:
-                return response.json()
-            return {"blacklisted": False}
+                result = response.json()
+                return result.get("blacklisted", False)
+            return False
         except Exception as e:
-            logger.error(f"Blacklist check failed: {e}")
+            logger.error(f"Atomic blacklist check failed: {e}")
             # In case of error, assume token is not blacklisted to avoid false positives
             # The main validation will still happen at the auth service
-            return {"blacklisted": False}
+            return False
+    
+    async def _check_token_blacklist(self, token: str) -> Optional[Dict]:
+        """Legacy blacklist check method for backward compatibility."""
+        is_blacklisted = await self._is_token_blacklisted_atomic(token)
+        return {"blacklisted": is_blacklisted}
     
     async def _attempt_logout(self, token: str, session_id: Optional[str]) -> bool:
         """Attempt logout with error handling."""

@@ -1,0 +1,120 @@
+{
+  "timestamp": "2025-08-24T11:11:52.377342+00:00",
+  "environment": "staging",
+  "services": {
+    "Backend API Health": {
+      "name": "Backend API Health",
+      "url": "https://api.staging.netrasystems.ai/health/",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.148914,
+      "passed": true,
+      "error": null,
+      "body": {
+        "status": "healthy",
+        "service": "netra-ai-platform",
+        "version": "1.0.0",
+        "timestamp": "2025-08-24T11:11:54.421447+00:00"
+      }
+    },
+    "Auth Service Health": {
+      "name": "Auth Service Health",
+      "url": "https://auth.staging.netrasystems.ai/auth/health",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.1405,
+      "passed": true,
+      "error": null,
+      "body": {
+        "status": "healthy",
+        "service": "auth-service",
+        "version": "1.0.0",
+        "timestamp": "2025-08-24T11:11:54.555348Z",
+        "redis_connected": null,
+        "database_connected": true
+      }
+    },
+    "Frontend Health": {
+      "name": "Frontend Health",
+      "url": "https://app.staging.netrasystems.ai/",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.176072,
+      "passed": true,
+      "error": null,
+      "body": "<!DOCTYPE html><!--kPZW9HNX37dh5eWrZZW2T--><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" href=\"/_next/static/media/e4af272ccee01ff0-s.p.woff2\" as=\"font\" crossorigin=\"\" type=\"font/woff2\"/><link rel=\"stylesheet\" href=\"/_next/static/css/6c62a8818c55e6ce.css\" data-precedence=\"next\"/><link rel=\"stylesheet\" href=\"/_next/static/css/5d3a3226c70d8acc.css\" data-precedence=\"next\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack-8c76ad9c2f256287.js\"/><script src=\"/_next/static/chunks/4bd1b696-9d1711a21aa597a4.js\" async=\"\"></script><script src=\"/_next/static/chunks/964-0c585802029d9e72.js\" async=\"\"></script><script src=\"/_next/static/chunks/main-app-fca594b287d6487a.js\" async=\"\"></script><script src=\"/_next/static/chunks/352-e793accbe6e48363.js\" async=\"\"></script><script src=\"/_next/static/chunks/449-07c4e64898dc633b.js\" async=\"\"></script><script src=\"/_next/static/chunks/94-a7c21b3b3f4f3d00.js\" async=\"\"></script><script src=\"/_next/static/chunks/431-0eaa21e09b217437.js\" async=\"\"></script><script src=\"/_next/static/chunks/258-5283665e9fc56e86.js\" async=\"\"></script><script src=\"/_next/static/chunks/10-d8720c5dd117fe79.js\" async=\"\"></script><script src=\"/_next/static/chunks/968-0444a347607e5ccd.js\" async=\"\"></script><script src=\"/_next/static/chunks/app/layout-c142b7a83a321247.js\" async=\"\"></script><script src=\"/_next/static/chunks/app/page-881285e10364c209.js\" async=\"\"></script><meta name=\"next-size-adjust\" content=\"\"/><title>Netra</title><meta name=\"description\" content=\"Autonomous AI agents for business process optimization\"/><script src=\"/_next/static/chunks/polyfills-42372ed130431b0a.js\" noModule=\"\"></script></head><body class=\"__className_e8ce0c\"><div hidden=\"\"><!--$--><!--/$--></div><div>Loading...</div><script src=\"/_next/static/chunks/webpack-8c76ad9c2f256287.js\" id=\"_R_\" async=\"\"></script><script>(self.__next_f=self.__next_f||[]).push([0])</script><script>self.__next_f.push([1,\"1:\\\"$Sreact.fragment\\\"\\n2:I[57398,[\\\"352\\\",\\\"static/chunks/352-e793accbe6e48363.js\\\",\\\"449\\\",\\\"static/chunks/449-07c4e64898dc633b.js\\\",\\\"94\\\",\\\"static/chunks/94-a7c21b3b3f4f3d00.js\\\",\\\"431\\\",\\\"static/chunks/431-0eaa21e09b217437.js\\\",\\\"258\\\",\\\"static/chunks/258-5283665e9fc56e86.js\\\",\\\"10\\\",\\\"static/chunks/10-d8720c5dd117fe79.js\\\",\\\"968\\\",\\\"static/chunks/968-0444a347607e5ccd.js\\\",\\\"177\\\",\\\"static/chunks/app/layout-c142b7a83a321247.js\\\"],\\\"AuthProvider\\\"]\\n3:I[72394,[\\\"352\\\",\\\"static/chunks/352-e793accbe6e48363.js\\\",\\\"449\\\",\\\"static/chunks/449-07c4e64898dc633b.js\\\",\\\"94\\\",\\\"static/chunks/94-a7c21b3b3f4f3d00.js\\\",\\\"431\\\",\\\"static/chunks/431-0eaa21e09b217437.js\\\",\\\"258\\\",\\\"static/chunks/258-5283665e9fc56e86.js\\\",\\\"10\\\",\\\"static/chunks/10-d8720c5dd117fe79.js\\\",\\\"968\\\",\\\"static/chunks/968-0444a347607e5ccd.js\\\",\\\"177\\\",\\\"static/chunks/app/layout-c142b7a83a321247.js\\\"],\\\"WebSocketProvider\\\"]\\n4:I[23425,[\\\"352\\\",\\\"static/chunks/352-e793accbe6e48363.js\\\",\\\"449\\\",\\\"static/chunks/449-07c4e64898dc633b.js\\\",\\\"94\\\",\\\"static/chunks/94-a7c21b3b3f4f3d00.js\\\",\\\"431\\\",\\\"static/chunks/431-0eaa21e09b217437.js\\\",\\\"258\\\",\\\"static/chunks/258-5283665e9fc56e86.js\\\",\\\"10\\\",\\\"static/chunks/10-d8720c5dd117fe79.js\\\",\\\"968\\\",\\\"static/chunks/968-0444a347607e5ccd.js\\\",\\\"177\\\",\\\"static/chunks/app/layout-c142b7a83a321247.js\\\"],\\\"AppWithLayout\\\"]\\n5:I[87555,[],\\\"\\\"]\\n6:I[31295,[],\\\"\\\"]\\n7:I[90894,[],\\\"ClientPageRoot\\\"]\\n8:I[41057,[\\\"352\\\",\\\"static/chunks/352-e793accbe6e48363.js\\\",\\\"449\\\",\\\"static/chunks/449-07c4e64898dc633b.js\\\",\\\"10\\\",\\\"static/chunks/10-d8720c5dd117fe79.js\\\",\\\"974\\\",\\\"static/chunks/app/page-881285e10364c209.js\\\"],\\\"default\\\"]\\nb:I[59665,[],\\\"OutletBoundary\\\"]\\nd:I[74911,[],\\\"AsyncMetadataOutlet\\\"]\\nf:I[59665,[],\\\"ViewportBoundary\\\"]\\n11:I[59665,[],\\\"MetadataBoundary\\\"]\\n12:\\\"$Sreact.suspense\\\"\\n14:I[28393,[],\\\"\\\"]\\n:HL[\\\"/_next/static/media/e4af272ccee01ff0-s.p.woff2\\\",\\\"font\\\",{\\\"crossOrigin\\\":\\\"\\\",\\\"type\\\":\\\"font/woff2\\\"}]\\n:HL[\\\"/_next/static/css/6c62a8818c55e6ce.css\\\",\\\"style\\\"]\\n:HL[\\\"/_next/static/css/5d3a3226c70d8acc.css\\\",\\\"style\\\"]\\n\"])</script><script>self.__next_f.push([1,\"0:{\\\"P\\\":null,\\\"b\\\":\\\"kPZW9HNX37dh5eWrZZW2T\\\",\\\"p\\\":\\\"\\\",\\\"c\\\":[\\\"\\\",\\\"\\\"],\\\"i\\\":false,\\\"f\\\":[[[\\\"\\\",{\\\"children\\\":[\\\"__PAGE__\\\",{}]},\\\"$undefined\\\",\\\"$undefined\\\",true],[\\\"\\\",[\\\"$\\\",\\\"$1\\\",\\\"c\\\",{\\\"children\\\":[[[\\\"$\\\",\\\"link\\\",\\\"0\\\",{\\\"rel\\\":\\\"stylesheet\\\",\\\"href\\\":\\\"/_next/static/css/6c62a8818c55e6ce.css\\\",\\\"precedence\\\":\\\"next\\\",\\\"crossOrigin\\\":\\\"$undefined\\\",\\\"nonce\\\":\\\"$undefined\\\"}],[\\\"$\\\",\\\"link\\\",\\\"1\\\",{\\\"rel\\\":\\\"stylesheet\\\",\\\"href\\\":\\\"/_next/static/css/5d3a3226c70d8acc.css\\\",\\\"precedence\\\":\\\"next\\\",\\\"crossOrigin\\\":\\\"$undefined\\\",\\\"nonce\\\":\\\"$undefined\\\"}]],[\\\"$\\\",\\\"html\\\",null,{\\\"lang\\\":\\\"en\\\",\\\"suppressHydrationWarning\\\":true,\\\"children\\\":[\\\"$\\\",\\\"body\\\",null,{\\\"className\\\":\\\"__className_e8ce0c\\\",\\\"children\\\":[\\\"$\\\",\\\"$L2\\\",null,{\\\"children\\\":[\\\"$\\\",\\\"$L3\\\",null,{\\\"children\\\":[\\\"$\\\",\\\"$L4\\\",null,{\\\"children\\\":[\\\"$\\\",\\\"$L5\\\",null,{\\\"parallelRouterKey\\\":\\\"children\\\",\\\"error\\\":\\\"$undefined\\\",\\\"errorStyles\\\":\\\"$undefined\\\",\\\"errorScripts\\\":\\\"$undefined\\\",\\\"template\\\":[\\\"$\\\",\\\"$L6\\\",null,{}],\\\"templateStyles\\\":\\\"$undefined\\\",\\\"templateScripts\\\":\\\"$undefined\\\",\\\"notFound\\\":[[[\\\"$\\\",\\\"title\\\",null,{\\\"children\\\":\\\"404: This page could not be found.\\\"}],[\\\"$\\\",\\\"div\\\",null,{\\\"style\\\":{\\\"fontFamily\\\":\\\"system-ui,\\\\\\\"Segoe UI\\\\\\\",Roboto,Helvetica,Arial,sans-serif,\\\\\\\"Apple Color Emoji\\\\\\\",\\\\\\\"Segoe UI Emoji\\\\\\\"\\\",\\\"height\\\":\\\"100vh\\\",\\\"textAlign\\\":\\\"center\\\",\\\"display\\\":\\\"flex\\\",\\\"flexDirection\\\":\\\"column\\\",\\\"alignItems\\\":\\\"center\\\",\\\"justifyContent\\\":\\\"center\\\"},\\\"children\\\":[\\\"$\\\",\\\"div\\\",null,{\\\"children\\\":[[\\\"$\\\",\\\"style\\\",null,{\\\"dangerouslySetInnerHTML\\\":{\\\"__html\\\":\\\"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}\\\"}}],[\\\"$\\\",\\\"h1\\\",null,{\\\"className\\\":\\\"next-error-h1\\\",\\\"style\\\":{\\\"display\\\":\\\"inline-block\\\",\\\"margin\\\":\\\"0 20px 0 0\\\",\\\"padding\\\":\\\"0 23px 0 0\\\",\\\"fontSize\\\":24,\\\"fontWeight\\\":500,\\\"verticalAlign\\\":\\\"top\\\",\\\"lineHeight\\\":\\\"49px\\\"},\\\"children\\\":404}],[\\\"$\\\",\\\"div\\\",null,{\\\"style\\\":{\\\"display\\\":\\\"inline-block\\\"},\\\"children\\\":[\\\"$\\\",\\\"h2\\\",null,{\\\"style\\\":{\\\"fontSize\\\":14,\\\"fontWeight\\\":400,\\\"lineHeight\\\":\\\"49px\\\",\\\"margin\\\":0},\\\"children\\\":\\\"This page could not be found.\\\"}]}]]}]}]],[]],\\\"forbidden\\\":\\\"$undefined\\\",\\\"unauthorized\\\":\\\"$undefined\\\"}]}]}]}]}]}]]}],{\\\"children\\\":[\\\"__PAGE__\\\",[\\\"$\\\",\\\"$1\\\",\\\"c\\\",{\\\"children\\\":[[\\\"$\\\",\\\"$L7\\\",null,{\\\"Component\\\":\\\"$8\\\",\\\"searchParams\\\":{},\\\"params\\\":{},\\\"promises\\\":[\\\"$@9\\\",\\\"$@a\\\"]}],null,[\\\"$\\\",\\\"$Lb\\\",null,{\\\"children\\\":[\\\"$Lc\\\",[\\\"$\\\",\\\"$Ld\\\",null,{\\\"promise\\\":\\\"$@e\\\"}]]}]]}],{},null,false]},null,false],[\\\"$\\\",\\\"$1\\\",\\\"h\\\",{\\\"children\\\":[null,[[\\\"$\\\",\\\"$Lf\\\",null,{\\\"children\\\":\\\"$L10\\\"}],[\\\"$\\\",\\\"meta\\\",null,{\\\"name\\\":\\\"next-size-adjust\\\",\\\"content\\\":\\\"\\\"}]],[\\\"$\\\",\\\"$L11\\\",null,{\\\"children\\\":[\\\"$\\\",\\\"div\\\",null,{\\\"hidden\\\":true,\\\"children\\\":[\\\"$\\\",\\\"$12\\\",null,{\\\"fallback\\\":null,\\\"children\\\":\\\"$L13\\\"}]}]}]]}],false]],\\\"m\\\":\\\"$undefined\\\",\\\"G\\\":[\\\"$14\\\",[]],\\\"s\\\":false,\\\"S\\\":true}\\n\"])</script><script>self.__next_f.push([1,\"9:{}\\na:\\\"$0:f:0:1:2:children:1:props:children:0:props:params\\\"\\n\"])</script><script>self.__next_f.push([1,\"10:[[\\\"$\\\",\\\"meta\\\",\\\"0\\\",{\\\"charSet\\\":\\\"utf-8\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"1\\\",{\\\"name\\\":\\\"viewport\\\",\\\"content\\\":\\\"width=device-width, initial-scale=1\\\"}]]\\nc:null\\n\"])</script><script>self.__next_f.push([1,\"e:{\\\"metadata\\\":[[\\\"$\\\",\\\"title\\\",\\\"0\\\",{\\\"children\\\":\\\"Netra\\\"}],[\\\"$\\\",\\\"meta\\\",\\\"1\\\",{\\\"name\\\":\\\"description\\\",\\\"content\\\":\\\"Autonomous AI agents for business process optimization\\\"}]],\\\"error\\\":null,\\\"digest\\\":\\\"$undefined\\\"}\\n\"])</script><script>self.__next_f.push([1,\"13:\\\"$e:metadata\\\"\\n\"])</script></body></html>"
+    }
+  },
+  "endpoints": {
+    "API Threads List": {
+      "name": "API Threads List",
+      "url": "https://api.staging.netrasystems.ai/api/v1/threads",
+      "method": "GET",
+      "status": 404,
+      "response_time": 0.085156,
+      "passed": false,
+      "error": "Unexpected status: 404",
+      "body": "{\"detail\":\"Not Found\"}"
+    },
+    "API Workspaces": {
+      "name": "API Workspaces",
+      "url": "https://api.staging.netrasystems.ai/api/v1/workspaces",
+      "method": "GET",
+      "status": 404,
+      "response_time": 0.082916,
+      "passed": false,
+      "error": "Unexpected status: 404",
+      "body": "{\"detail\":\"Not Found\"}"
+    },
+    "API Agents": {
+      "name": "API Agents",
+      "url": "https://api.staging.netrasystems.ai/api/v1/agents",
+      "method": "GET",
+      "status": 404,
+      "response_time": 0.072306,
+      "passed": false,
+      "error": "Unexpected status: 404",
+      "body": "{\"detail\":\"Not Found\"}"
+    },
+    "OAuth Login Endpoint": {
+      "name": "OAuth Login Endpoint",
+      "url": "https://auth.staging.netrasystems.ai/auth/login",
+      "method": "GET",
+      "status": 302,
+      "response_time": 0.082852,
+      "passed": true,
+      "error": null,
+      "body": null
+    },
+    "OAuth Callback": {
+      "name": "OAuth Callback",
+      "url": "https://auth.staging.netrasystems.ai/auth/callback",
+      "method": "GET",
+      "status": 422,
+      "response_time": 0.083213,
+      "passed": true,
+      "error": null,
+      "body": null
+    },
+    "Token Endpoint": {
+      "name": "Token Endpoint",
+      "url": "https://auth.staging.netrasystems.ai/auth/token",
+      "method": "POST",
+      "status": 404,
+      "response_time": 0.072494,
+      "passed": false,
+      "error": "Unexpected status: 404",
+      "body": "{\"detail\":\"Not Found\"}"
+    },
+    "WebSocket": {
+      "name": "WebSocket Connection",
+      "url": "wss://api.staging.netrasystems.ai/ws",
+      "passed": false,
+      "error": "404, message='Invalid response status', url='wss://api.staging.netrasystems.ai/ws'"
+    }
+  },
+  "total_tests": 10,
+  "passed": 5,
+  "failed": 5,
+  "errors": []
+}

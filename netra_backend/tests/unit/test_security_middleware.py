@@ -20,7 +20,7 @@ from pathlib import Path
 import time
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, Request, Response, status
@@ -245,6 +245,7 @@ class TestSecurityMiddleware:
         for endpoint in expected_endpoints:
             assert endpoint in sensitive
 
+    @pytest.mark.asyncio
     async def test_security_middleware_adds_security_headers(self, middleware, mock_request, mock_response):
         """Test security middleware adds required headers."""
         async def mock_call_next(request):
@@ -258,6 +259,7 @@ class TestSecurityMiddleware:
         for header in expected_headers:
             assert header in response.headers
 
+    @pytest.mark.asyncio
     async def test_security_middleware_adds_custom_headers(self, middleware, mock_request, mock_response):
         """Test middleware adds custom security headers."""
         async def mock_call_next(request):
@@ -269,6 +271,7 @@ class TestSecurityMiddleware:
         assert response.headers["X-Security-Middleware"] == "enabled"
         assert "X-Request-ID" in response.headers
 
+    @pytest.mark.asyncio
     async def test_security_middleware_rate_limiting_normal_endpoint(self, middleware, mock_request):
         """Test rate limiting for normal endpoints."""
         mock_request.url.path = "/api/normal"
@@ -278,6 +281,7 @@ class TestSecurityMiddleware:
         
         assert limit == SecurityConfig.DEFAULT_RATE_LIMIT
 
+    @pytest.mark.asyncio
     async def test_security_middleware_rate_limiting_sensitive_endpoint(self, middleware, mock_request):
         """Test stricter rate limiting for sensitive endpoints."""
         mock_request.url.path = "/api/auth/login"
@@ -320,6 +324,7 @@ class TestSecurityMiddleware:
         # Should not raise exception
         middleware._validate_headers(mock_request)
 
+    @pytest.mark.asyncio
     async def test_security_middleware_handles_post_request_body(self, middleware, mock_request):
         """Test middleware validates POST request bodies."""
         mock_request.method = "POST"
@@ -364,6 +369,7 @@ class TestSecurityMiddleware:
         
         assert is_suspicious is False
 
+    @pytest.mark.asyncio
     async def test_security_middleware_rate_limit_exceeded_raises_429(self, middleware, mock_request):
         """Test rate limit exceeded raises 429 error."""
         # Mock rate limiter to return True (rate limited)
@@ -373,6 +379,7 @@ class TestSecurityMiddleware:
             
             assert exc_info.value.status_code == status.HTTP_429_TOO_MANY_REQUESTS
 
+    @pytest.mark.asyncio
     async def test_security_middleware_error_handling(self, middleware, mock_request):
         """Test middleware handles internal errors gracefully."""
         async def failing_call_next(request):

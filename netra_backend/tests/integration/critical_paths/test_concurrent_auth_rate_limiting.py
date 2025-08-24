@@ -211,6 +211,7 @@ class TestConcurrentAuthRateLimitingL3:
         yield manager
         await manager.cleanup_test_data()
 
+    @pytest.mark.asyncio
     async def test_ip_rate_limiting_enforcement(self, rate_limit_manager):
         """Test IP-based rate limiting under concurrent load."""
         scenario = RateLimitTestScenario("192.168.1.100")
@@ -224,6 +225,7 @@ class TestConcurrentAuthRateLimitingL3:
         assert scenario.success_count == 10  # Only 10 should succeed
         assert scenario.blocked_count == 2   # 2 should be blocked
 
+    @pytest.mark.asyncio
     async def test_user_rate_limiting_enforcement(self, rate_limit_manager):
         """Test user-based rate limiting enforcement."""
         scenario = RateLimitTestScenario("192.168.1.101", "test_user_123")
@@ -237,6 +239,7 @@ class TestConcurrentAuthRateLimitingL3:
         assert scenario.success_count == 20  # Only 20 should succeed
         assert scenario.blocked_count == 2   # 2 should be blocked
 
+    @pytest.mark.asyncio
     async def test_operation_specific_rate_limits(self, rate_limit_manager):
         """Test different rate limits per auth operation."""
         scenario = RateLimitTestScenario("192.168.1.102")
@@ -259,6 +262,7 @@ class TestConcurrentAuthRateLimitingL3:
         assert login_blocked == 2   # 2 login requests blocked
         assert refresh_blocked == 2 # 2 refresh requests blocked
 
+    @pytest.mark.asyncio
     async def test_concurrent_multi_ip_rate_limiting(self, rate_limit_manager):
         """Test rate limiting isolation across different IPs."""
         scenarios = [
@@ -280,6 +284,7 @@ class TestConcurrentAuthRateLimitingL3:
             assert scenario.success_count == 8  # All requests should succeed
             assert scenario.blocked_count == 0  # No blocking at this volume
 
+    @pytest.mark.asyncio
     async def test_rate_limit_reset_after_window(self, rate_limit_manager):
         """Test rate limit reset after time window expires."""
         scenario = RateLimitTestScenario("192.168.1.120")
@@ -304,6 +309,7 @@ class TestConcurrentAuthRateLimitingL3:
         assert scenario.blocked_count == 0  # No blocking after reset
         assert scenario.success_count == 5   # All requests succeed
 
+    @pytest.mark.asyncio
     async def test_proper_error_responses_when_limited(self, rate_limit_manager):
         """Test proper error responses when rate limit exceeded."""
         scenario = RateLimitTestScenario("192.168.1.130")
@@ -323,6 +329,7 @@ class TestConcurrentAuthRateLimitingL3:
             assert result["ip_remaining"] == 0
             assert "operation_remaining" in result
 
+    @pytest.mark.asyncio
     async def test_mixed_operation_concurrent_limiting(self, rate_limit_manager):
         """Test concurrent requests with mixed auth operations."""
         scenario = RateLimitTestScenario("192.168.1.140")

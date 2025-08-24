@@ -7,7 +7,7 @@ from pathlib import Path
 
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 from pydantic import BaseModel, Field, ValidationError

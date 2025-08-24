@@ -19,6 +19,7 @@ from netra_backend.tests.clickhouse.clickhouse_test_fixtures import get_clickhou
 class TestClickHouseErrorHandling:
     """Test error handling and recovery"""
     
+    @pytest.mark.asyncio
     async def test_invalid_query_handling(self):
         """Test handling of invalid queries"""
         config = get_clickhouse_config()
@@ -36,6 +37,7 @@ class TestClickHouseErrorHandling:
         
         await client.disconnect()
 
+    @pytest.mark.asyncio
     async def test_connection_recovery(self):
         """Test connection recovery after disconnect"""
         config = get_clickhouse_config()
@@ -76,6 +78,7 @@ class TestClickHouseErrorHandling:
         
         await client.disconnect()
 
+    @pytest.mark.asyncio
     async def test_permission_error_handling(self):
         """Test handling of permission errors gracefully"""
         config = get_clickhouse_config()
@@ -97,6 +100,7 @@ class TestClickHouseErrorHandling:
         finally:
             await client.disconnect()
 
+    @pytest.mark.asyncio
     async def test_malformed_query_error_handling(self):
         """Test handling of malformed queries"""
         config = get_clickhouse_config()

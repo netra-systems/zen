@@ -31,7 +31,7 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -87,13 +87,14 @@ class TestAdvancedUserManagement:
             await redis_client.close()
 
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_data_cleanup(self, real_db_session, real_redis_session):
         """Clean up test data after each test."""
         test_user_ids = []
         test_emails = []
         test_tokens = []
         
-        def register_cleanup(user_id: str = None, email: str = None, token: str = None):
+        async def register_cleanup(user_id: str = None, email: str = None, token: str = None):
             if user_id:
                 test_user_ids.append(user_id)
             if email:

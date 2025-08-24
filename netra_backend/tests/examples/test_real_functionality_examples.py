@@ -29,7 +29,7 @@ import asyncio
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.db.session import get_db_session as get_database_session
@@ -108,6 +108,7 @@ class TestIntegrationRealComponents:
     
     @pytest.mark.asyncio
     @patch('app.services.external_api.make_request')
+    @pytest.mark.asyncio
     async def test_thread_service_integration(self, mock_api):
         """Integration test with real components, mocked external API only."""
         # Mock ONLY external API
@@ -126,6 +127,7 @@ class TestIntegrationRealComponents:
     
     @pytest.mark.asyncio
     @patch('app.database.database_manager.get_session')
+    @pytest.mark.asyncio
     async def test_websocket_message_flow_integration(self, mock_db):
         """Test WebSocket message handling with real components."""
         # Mock database only
@@ -162,6 +164,7 @@ class TestE2ERealBackend:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @patch('app.agents.external.openai_client.make_request')
+    @pytest.mark.asyncio
     async def test_complete_agent_workflow_e2e(self, mock_openai):
         """E2E test of complete agent workflow with real backend."""
         # Mock ONLY external LLM API
@@ -190,6 +193,7 @@ class TestE2ERealBackend:
     
     @pytest.mark.asyncio
     @pytest.mark.integration  
+    @pytest.mark.asyncio
     async def test_user_thread_creation_e2e(self):
         """E2E test of user creating thread with no external APIs."""
         # No mocking needed - pure internal functionality
@@ -222,6 +226,7 @@ class TestExternalAPIMocking:
     
     @pytest.mark.asyncio
     @patch('app.services.openai_service.OpenAIClient.chat_completion')
+    @pytest.mark.asyncio
     async def test_llm_response_handling(self, mock_openai):
         """Mock external LLM API, test real response handling."""
         # Realistic mock response
@@ -243,6 +248,7 @@ class TestExternalAPIMocking:
     
     @pytest.mark.asyncio
     @patch('app.database.clickhouse.ClickHouseClient.execute')
+    @pytest.mark.asyncio
     async def test_analytics_query_with_mocked_db(self, mock_clickhouse):
         """Mock external ClickHouse, test real analytics logic."""
         # Realistic mock data
@@ -261,6 +267,7 @@ class TestExternalAPIMocking:
     
     @pytest.mark.asyncio
     @patch('httpx.AsyncClient.post')
+    @pytest.mark.asyncio
     async def test_webhook_delivery_with_error_handling(self, mock_http):
         """Test real error handling with mocked HTTP failures."""
         # Mock HTTP failure
@@ -382,20 +389,24 @@ async def setup_test_data() -> Dict[str, Any]:
 @pytest.fixture
 async def real_user():
     """Fixture providing real User instance."""
-    return create_test_user(email="fixture@example.com")
+    yield create_test_user(email="fixture@example.com")
 
 @pytest.fixture
 async def real_thread_with_user():
     """Fixture providing real Thread with real User."""
     user = create_test_user()
     thread = create_test_thread(user.id)
-    return {"user": user, "thread": thread}
+    yield {"user": user, "thread": thread}
 
 @pytest.fixture
 async def database_session():
     """Fixture providing real database session for E2E tests."""
     async with get_database_session() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            if hasattr(session, "close"):
+                await session.close()
         # Cleanup happens automatically with async context manager
 
 # =============================================================================

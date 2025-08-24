@@ -16,7 +16,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from typing import Any, Dict
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -25,6 +25,7 @@ from fastapi import status
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_validation_error_handling(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -47,6 +48,7 @@ async def test_validation_error_handling(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_rate_limit_error_handling(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -72,6 +74,7 @@ async def test_rate_limit_error_handling(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_service_unavailable_error_handling(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -97,6 +100,7 @@ async def test_service_unavailable_error_handling(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_support_options_access(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -116,6 +120,7 @@ async def test_support_options_access(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_support_ticket_creation(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -143,6 +148,7 @@ async def test_support_ticket_creation(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(25)
+@pytest.mark.asyncio
 async def test_error_recovery_with_retry(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -181,6 +187,7 @@ async def test_error_recovery_with_retry(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_error_logging_and_debugging(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -198,6 +205,7 @@ async def test_error_logging_and_debugging(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_graceful_degradation_features(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -222,6 +230,7 @@ async def test_graceful_degradation_features(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(20)
+@pytest.mark.asyncio
 async def test_timeout_error_handling(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]
@@ -253,6 +262,7 @@ async def test_timeout_error_handling(
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(15)
+@pytest.mark.asyncio
 async def test_authentication_error_recovery(
     async_client: httpx.AsyncClient,
     authenticated_user: Dict[str, Any]

@@ -32,7 +32,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import psutil
@@ -73,18 +73,18 @@ def mock_justified(reason):
     return decorator
 
 # NOTE: These classes don't exist in the current implementation
-# from netra_backend.app.websocket_core.enhanced_rate_limiter import (
+# Removed broken import statement
 #     DistributedRateLimiter,
 #     RateLimitConfig,
 # )
-# from netra_backend.app.websocket_core.high_performance_broadcast import (
+# Removed broken import statement
 #     BroadcastPerformanceConfig,
 #     HighPerformanceBroadcaster,
 # )
-# from netra_backend.app.websocket_core.memory_efficient_manager import (
+# Removed broken import statement
 #     MemoryEfficientWebSocketManager,
 # )
-# from netra_backend.app.websocket_core.optimized_message_processor import (
+# Removed broken import statement
 #     MessagePriority,
 #     OptimizedMessageProcessor,
 # )
@@ -545,6 +545,7 @@ class TestHighPerformanceWebSocketStress:
 
         ]
     
+    @pytest.mark.asyncio
     async def test_1000_concurrent_connections_stress(self, high_performance_broadcaster, 
 
                                                     large_user_pool, stress_metrics):
@@ -653,6 +654,7 @@ class TestHighPerformanceWebSocketStress:
 
             await high_performance_broadcaster.remove_connection(websocket, "stress_pool", user.id)
     
+    @pytest.mark.asyncio
     async def test_10k_messages_per_second_throughput(self, high_performance_broadcaster, 
 
                                                      large_user_pool, stress_metrics):
@@ -769,6 +771,7 @@ class TestHighPerformanceWebSocketStress:
 
             await high_performance_broadcaster.remove_connection(websocket, "throughput_pool", user.id)
     
+    @pytest.mark.asyncio
     async def test_broadcast_latency_under_100ms(self, high_performance_broadcaster, 
 
                                                large_user_pool, stress_metrics):
@@ -873,6 +876,7 @@ class TestHighPerformanceWebSocketStress:
 
             await high_performance_broadcaster.remove_connection(websocket, "latency_pool", user.id)
     
+    @pytest.mark.asyncio
     async def test_memory_efficiency_under_load(self, memory_efficient_manager, 
 
                                               large_user_pool, stress_metrics):
@@ -998,6 +1002,7 @@ class TestHighPerformanceWebSocketStress:
 
             await memory_efficient_manager.remove_connection(websocket, user.id)
     
+    @pytest.mark.asyncio
     async def test_enhanced_rate_limiting_under_stress(self, enhanced_rate_limiter, 
 
                                                      large_user_pool, stress_metrics):
@@ -1112,6 +1117,7 @@ class TestHighPerformanceWebSocketStress:
     
     @mock_justified("L3: Comprehensive stress testing with enhanced WebSocket systems")
 
+    @pytest.mark.asyncio
     async def test_comprehensive_stress_scenario(self, high_performance_broadcaster,
 
                                                load_balanced_manager, enhanced_rate_limiter,
@@ -1338,6 +1344,7 @@ class TestHighPerformanceWebSocketStress:
 
 @pytest.mark.stress
 
+@pytest.mark.asyncio
 async def test_stress_test_performance_targets():
 
     """Validate that all performance targets can be met simultaneously."""

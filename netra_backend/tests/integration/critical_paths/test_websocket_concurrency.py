@@ -11,7 +11,7 @@ from pathlib import Path
 import asyncio
 import json
 import time
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import websockets
@@ -26,6 +26,7 @@ class TestWebSocketConcurrencyL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_connections(self):
         """Test handling multiple concurrent WebSocket connections"""
         uri = f"ws://localhost:{settings.WS_PORT}/ws"
@@ -57,6 +58,7 @@ class TestWebSocketConcurrencyL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_message_processing(self):
         """Test concurrent message processing from multiple clients"""
         uri = f"ws://localhost:{settings.WS_PORT}/ws"
@@ -107,6 +109,7 @@ class TestWebSocketConcurrencyL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_connection_limit_enforcement(self):
         """Test maximum connection limit enforcement"""
         ws_service = WebSocketService()
@@ -129,6 +132,7 @@ class TestWebSocketConcurrencyL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_race_condition_in_state_updates(self):
         """Test handling of race conditions in connection state updates"""
         ws_service = WebSocketService()
@@ -152,6 +156,7 @@ class TestWebSocketConcurrencyL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_concurrent_broadcast_handling(self):
         """Test concurrent broadcast message handling"""
         uri = f"ws://localhost:{settings.WS_PORT}/ws"

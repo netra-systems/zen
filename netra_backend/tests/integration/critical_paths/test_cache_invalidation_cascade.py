@@ -182,6 +182,7 @@ class CacheInvalidationTester:
             print(f"[ERROR] Authentication error: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_redis_connection(self) -> bool:
         """Setup Redis connection for cache testing."""
         print("\n[REDIS] STEP 2: Connecting to Redis...")
@@ -202,6 +203,7 @@ class CacheInvalidationTester:
             print(f"[ERROR] Redis connection failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_populate_cache_layers(self) -> bool:
         """Populate all cache layers with test data."""
         print("\n[POPULATE] STEP 3: Populating cache layers...")
@@ -251,6 +253,7 @@ class CacheInvalidationTester:
             print(f"[ERROR] Cache population failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_cache_coherence(self) -> bool:
         """Verify cache coherence across layers."""
         print("\n[COHERENCE] STEP 4: Verifying cache coherence...")
@@ -298,6 +301,7 @@ class CacheInvalidationTester:
             print(f"[ERROR] Coherence check failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_single_key_invalidation(self) -> bool:
         """Test single key invalidation cascade."""
         print("\n[INVALIDATE] STEP 5: Testing single key invalidation...")
@@ -358,6 +362,7 @@ class CacheInvalidationTester:
             print(f"[ERROR] Single key invalidation failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_pattern_invalidation(self) -> bool:
         """Test pattern-based invalidation cascade."""
         print("\n[PATTERN] STEP 6: Testing pattern invalidation...")
@@ -418,6 +423,7 @@ class CacheInvalidationTester:
             print(f"[ERROR] Pattern invalidation failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_ttl_expiration(self) -> bool:
         """Test TTL-based cache expiration."""
         print("\n[TTL] STEP 7: Testing TTL expiration...")
@@ -462,6 +468,7 @@ class CacheInvalidationTester:
             print(f"[ERROR] TTL expiration test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_cache_warmup(self) -> bool:
         """Test cache warmup procedures."""
         print("\n[WARMUP] STEP 8: Testing cache warmup...")
@@ -529,6 +536,7 @@ class CacheInvalidationTester:
             print(f"[ERROR] Cache warmup failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_cache_metrics(self) -> bool:
         """Test cache hit/miss ratio monitoring."""
         print("\n[METRICS] STEP 9: Testing cache metrics...")
@@ -589,6 +597,7 @@ class CacheInvalidationTester:
             print(f"[ERROR] Metrics collection failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_concurrent_invalidation(self) -> bool:
         """Test concurrent invalidation handling."""
         print("\n[CONCURRENT] STEP 10: Testing concurrent invalidation...")
@@ -660,6 +669,7 @@ class CacheInvalidationTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_cache_invalidation_cascade():
     """Test cache invalidation cascade flow."""
     async with CacheInvalidationTester() as tester:

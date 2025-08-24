@@ -155,6 +155,7 @@ class ClickHouseBatchPerformanceManager:
         
         return data
     
+    @pytest.mark.asyncio
     async def test_batch_insertion_performance(self, batch_sizes: List[int]) -> Dict[str, Any]:
         """Test batch insertion performance across different batch sizes."""
         results = {
@@ -223,6 +224,7 @@ class ClickHouseBatchPerformanceManager:
         
         return results
     
+    @pytest.mark.asyncio
     async def test_large_batch_memory_usage(self, large_batch_size: int = 50000) -> Dict[str, Any]:
         """Test memory usage and performance with large batches."""
         results = {
@@ -286,6 +288,7 @@ class ClickHouseBatchPerformanceManager:
         
         return results
     
+    @pytest.mark.asyncio
     async def test_concurrent_batch_insertions(self, concurrent_batches: int = 5) -> Dict[str, Any]:
         """Test concurrent batch insertions for throughput."""
         results = {
@@ -351,6 +354,7 @@ class ClickHouseBatchPerformanceManager:
         
         return results
     
+    @pytest.mark.asyncio
     async def test_data_consistency_after_batch_insert(self, batch_size: int = 10000) -> Dict[str, Any]:
         """Test data consistency and integrity after batch insertion."""
         results = {
@@ -458,6 +462,7 @@ async def batch_manager():
 class TestClickHouseBatchInsertionPerformanceL3:
     """L3 integration tests for ClickHouse batch insertion performance."""
     
+    @pytest.mark.asyncio
     async def test_batch_size_optimization(self, batch_manager):
         """Test optimal batch size for insertion performance."""
         batch_sizes = [100, 1000, 5000, 10000]
@@ -471,6 +476,7 @@ class TestClickHouseBatchInsertionPerformanceL3:
         successful_batches = sum(1 for r in results["batch_results"].values() if r.get("success"))
         assert successful_batches >= len(batch_sizes) * 0.8  # Allow for some failures
     
+    @pytest.mark.asyncio
     async def test_large_batch_memory_efficiency(self, batch_manager):
         """Test memory efficiency with large batch insertions."""
         results = await batch_manager.test_large_batch_memory_usage(25000)
@@ -483,6 +489,7 @@ class TestClickHouseBatchInsertionPerformanceL3:
         assert results["records_per_second"] > 500  # Minimum for large batches
         assert results["total_insertion_time"] < 120  # Max 2 minutes for 25K records
     
+    @pytest.mark.asyncio
     async def test_concurrent_insertion_throughput(self, batch_manager):
         """Test throughput under concurrent batch insertions."""
         results = await batch_manager.test_concurrent_batch_insertions(4)
@@ -492,6 +499,7 @@ class TestClickHouseBatchInsertionPerformanceL3:
         assert results["total_throughput"] > 2000  # Combined throughput requirement
         assert results["average_batch_performance"] > 800  # Individual batch performance
     
+    @pytest.mark.asyncio
     async def test_data_consistency_validation(self, batch_manager):
         """Test data consistency after batch insertion."""
         results = await batch_manager.test_data_consistency_after_batch_insert(5000)
@@ -503,6 +511,7 @@ class TestClickHouseBatchInsertionPerformanceL3:
         for check_name, passed in results["consistency_checks"].items():
             assert passed is True, f"Consistency check failed: {check_name}"
     
+    @pytest.mark.asyncio
     async def test_performance_under_memory_pressure(self, batch_manager):
         """Test performance when inserting memory-intensive data."""
         # Generate memory-intensive test data

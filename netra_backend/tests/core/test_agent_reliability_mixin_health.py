@@ -7,7 +7,7 @@ from pathlib import Path
 
 import time
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -213,6 +213,7 @@ class TestAgentReliabilityMixinHealthStatus:
         assert len(mock_agent.error_history) == 0
         mock_agent.reliability.circuit_breaker.reset.assert_called_once()
     
+    @pytest.mark.asyncio
     async def test_perform_health_check(self, mock_agent):
         """Test performing health check."""
         # Add some test data

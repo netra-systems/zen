@@ -8,6 +8,7 @@ in the staging environment.
 import sys
 from pathlib import Path
 
+import pytest
 # Test framework import - using pytest fixtures instead
 
 import os

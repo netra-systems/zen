@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from sqlalchemy.exc import OperationalError, TimeoutError
@@ -26,6 +26,7 @@ from netra_backend.app.db.session import get_db_session
 class TestDatabaseConnectionPooling:
     """Test database connection pooling behavior."""
 
+    @pytest.mark.asyncio
     async def test_connection_pool_initialization(self):
         """Test that connection pool is properly initialized."""
         if async_engine != None:
@@ -34,6 +35,7 @@ class TestDatabaseConnectionPooling:
         else:
             pytest.skip("Async engine not initialized")
 
+    @pytest.mark.asyncio
     async def test_connection_pool_limits(self):
         """Test connection pool respects max connections."""
         if async_session_factory == None:
@@ -58,6 +60,7 @@ class TestDatabaseConnectionPooling:
             # Sessions auto-close with async context manager
             pass
 
+    @pytest.mark.asyncio
     async def test_session_context_manager(self):
         """Test session context manager functionality."""
         if get_db_session == None:
@@ -71,6 +74,7 @@ class TestDatabaseConnectionPooling:
         except Exception as e:
             pytest.skip(f"Database not available: {e}")
 
+    @pytest.mark.asyncio
     async def test_session_factory_creation(self):
         """Test that session factory creates sessions."""
         if async_session_factory == None:
@@ -82,6 +86,7 @@ class TestDatabaseConnectionPooling:
         except Exception as e:
             pytest.skip(f"Cannot create session: {e}")
 
+    @pytest.mark.asyncio
     async def test_concurrent_sessions(self):
         """Test handling of concurrent database sessions."""
         if async_session_factory == None:
@@ -106,6 +111,7 @@ class TestDatabaseConnectionPooling:
 class TestSessionManagement:
     """Test database session lifecycle management."""
 
+    @pytest.mark.asyncio
     async def test_get_db_session_context_manager(self):
         """Test database session context manager."""
         try:
@@ -117,6 +123,7 @@ class TestSessionManagement:
         except Exception as e:
             pytest.skip(f"Database not available: {e}")
 
+    @pytest.mark.asyncio
     async def test_session_rollback_on_error(self):
         """Test session rollback on exception."""
         try:
@@ -128,6 +135,7 @@ class TestSessionManagement:
             if "Database not available" in str(e):
                 pytest.skip(f"Database not available: {e}")
 
+    @pytest.mark.asyncio
     async def test_async_db_generator(self):
         """Test the async database generator function."""
         try:
@@ -138,6 +146,7 @@ class TestSessionManagement:
         except Exception as e:
             pytest.skip(f"Database not available: {e}")
 
+    @pytest.mark.asyncio
     async def test_database_class(self):
         """Test the Database class functionality."""
         try:
@@ -149,6 +158,7 @@ class TestSessionManagement:
 class TestClickHouseConnection:
     """Test ClickHouse connection management."""
 
+    @pytest.mark.asyncio
     async def test_clickhouse_client_initialization(self):
         """Test ClickHouse client can be initialized."""
         try:
@@ -157,6 +167,7 @@ class TestClickHouseConnection:
         except Exception as e:
             pytest.skip(f"ClickHouse not available: {e}")
 
+    @pytest.mark.asyncio
     async def test_clickhouse_basic_query(self):
         """Test basic ClickHouse query execution."""
         try:
@@ -166,6 +177,7 @@ class TestClickHouseConnection:
         except Exception as e:
             pytest.skip(f"ClickHouse not available: {e}")
 
+    @pytest.mark.asyncio
     async def test_clickhouse_error_handling(self):
         """Test ClickHouse error handling."""
         try:

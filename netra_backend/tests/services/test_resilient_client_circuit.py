@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -19,6 +19,7 @@ class TestResilientHTTPClientCircuit:
     def client(self):
         """Create a ResilientHTTPClient for testing."""
         return ResilientHTTPClient(base_url="https://api.example.com")
+    @pytest.mark.asyncio
     async def test_get_circuit_new(self, client):
         """Test getting new circuit breaker."""
         with patch('app.services.external_api_client.circuit_registry') as mock_registry:
@@ -27,6 +28,7 @@ class TestResilientHTTPClientCircuit:
             
             circuit = await client._get_circuit("test_api")
             verify_new_circuit_creation(circuit, mock_circuit, client, mock_registry)
+    @pytest.mark.asyncio
     async def test_get_circuit_existing(self, client):
         """Test getting existing circuit breaker."""
         mock_circuit = Mock()
@@ -50,6 +52,7 @@ class TestResilientHTTPClientCircuit:
             "url": "/test",
             "fallback": True
         }
+    @pytest.mark.asyncio
     async def test_request_success(self, client):
         """Test successful request execution."""
         mock_circuit = AsyncMock()
@@ -59,6 +62,7 @@ class TestResilientHTTPClientCircuit:
             result = await client._request("GET", "/test", "test_api")
             assert result == {"success": True}
             mock_circuit.call.assert_called_once()
+    @pytest.mark.asyncio
     async def test_request_circuit_open(self, client):
         """Test request when circuit is open."""
         from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError

@@ -22,7 +22,7 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import aiohttp
 import pytest
@@ -575,6 +575,7 @@ class ApiCircuitBreakerManager:
                 "is_fallback": False
             }
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_behavior(self, endpoint: str, 
                                           failure_count: int) -> Dict[str, Any]:
         """Test circuit breaker behavior with controlled failures."""
@@ -674,6 +675,7 @@ async def circuit_breaker_manager():
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_circuit_breaker_opens_on_failures(circuit_breaker_manager):
     """Test circuit breaker opens after failure threshold."""
     endpoint = "/api/v1/agents"
@@ -694,6 +696,7 @@ async def test_circuit_breaker_opens_on_failures(circuit_breaker_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_circuit_breaker_fallback_responses(circuit_breaker_manager):
     """Test fallback responses when circuit is open."""
     endpoint = "/api/v1/users"
@@ -717,6 +720,7 @@ async def test_circuit_breaker_fallback_responses(circuit_breaker_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_circuit_breaker_recovery_half_open(circuit_breaker_manager):
     """Test circuit breaker recovery through half-open state."""
     endpoint = "/api/v1/metrics"
@@ -761,6 +765,7 @@ async def test_circuit_breaker_recovery_half_open(circuit_breaker_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_per_endpoint_circuit_isolation(circuit_breaker_manager):
     """Test that circuit breakers are isolated per endpoint."""
     endpoints = ["/api/v1/users", "/api/v1/agents", "/api/v1/threads"]
@@ -790,6 +795,7 @@ async def test_per_endpoint_circuit_isolation(circuit_breaker_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_circuit_breaker_different_failure_types(circuit_breaker_manager):
     """Test circuit breaker with different types of failures."""
     endpoint = "/api/v1/health"
@@ -825,6 +831,7 @@ async def test_circuit_breaker_different_failure_types(circuit_breaker_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_circuit_breaker_concurrent_requests(circuit_breaker_manager):
     """Test circuit breaker with concurrent requests."""
     endpoint = "/api/v1/threads"
@@ -855,6 +862,7 @@ async def test_circuit_breaker_concurrent_requests(circuit_breaker_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_circuit_breaker_metrics_accuracy(circuit_breaker_manager):
     """Test accuracy of circuit breaker metrics."""
     # Generate test traffic across endpoints
@@ -892,6 +900,7 @@ async def test_circuit_breaker_metrics_accuracy(circuit_breaker_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.L3
+@pytest.mark.asyncio
 async def test_circuit_breaker_performance_requirements(circuit_breaker_manager):
     """Test circuit breaker performance overhead."""
     endpoint = "/api/v1/health"

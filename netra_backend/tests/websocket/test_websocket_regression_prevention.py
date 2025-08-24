@@ -9,7 +9,7 @@ from pathlib import Path
 import sys
 
 from typing import Any, Dict
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -145,6 +145,7 @@ class TestWebSocketMessageFlow:
 
     """Test WebSocket message flow to agent execution."""
     
+    @pytest.mark.asyncio
     async def test_user_message_triggers_agent_execution(self):
 
         """Test that user_message type triggers agent execution."""
@@ -195,6 +196,7 @@ class TestWebSocketMessageFlow:
 
         assert mock_supervisor.run.called
     
+    @pytest.mark.asyncio
     async def test_message_handler_routes_correctly(self):
 
         """Test message handler routing for different message types."""
@@ -215,6 +217,7 @@ class TestWebSocketMessageFlow:
 
         assert hasattr(handler, 'handle_stop_agent')
     
+    @pytest.mark.asyncio
     async def test_websocket_connection_lifecycle(self):
 
         """Test WebSocket connection establishment and message handling."""
@@ -327,7 +330,7 @@ class TestWebSocketBroadcasting:
 
         """Test broadcasting message to specific user."""
         from netra_backend.app.websocket_core.manager import get_websocket_manager as get_unified_manager
-manager = get_unified_manager()
+        manager = get_unified_manager()
         
         with patch.object(manager, 'send_to_user', new_callable=AsyncMock) as mock_send:
 

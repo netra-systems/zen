@@ -9,7 +9,7 @@ from pathlib import Path
 import asyncio
 import os
 import tempfile
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -25,6 +25,7 @@ from netra_backend.tests.validation_formatting_test_helpers import (
 class TestFileUtilsOperations:
     """test_file_utils_operations - Test file operations and cleanup on error"""
     
+    @pytest.mark.asyncio
     async def test_file_operations(self):
         from netra_backend.app.utils.file_utils import FileUtils
         utils = FileUtils()
@@ -35,6 +36,7 @@ class TestFileUtilsOperations:
             await self._test_file_move_operations(utils, tmpdir)
             await self._test_file_deletion(utils, tmpdir)
     
+    @pytest.mark.asyncio
     async def test_cleanup_on_error(self):
         from netra_backend.app.utils.file_utils import FileUtils
         utils = FileUtils()
@@ -87,6 +89,7 @@ class TestFileUtilsOperations:
 class TestCryptoUtilsHashing:
     """test_crypto_utils_hashing - Test hashing algorithms and salt generation"""
     
+    @pytest.mark.asyncio
     async def test_hashing_algorithms(self):
         from netra_backend.app.utils.crypto_utils import CryptoUtils
         utils = CryptoUtils()
@@ -101,6 +104,7 @@ class TestCryptoUtilsHashing:
         self._assert_hash_consistency(utils, data)
         self._assert_different_data_different_hash(utils)
     
+    @pytest.mark.asyncio
     async def test_salt_generation(self):
         from netra_backend.app.utils.crypto_utils import CryptoUtils
         utils = CryptoUtils()
@@ -139,6 +143,7 @@ class TestCryptoUtilsHashing:
 class TestValidationUtilsSchemas:
     """test_validation_utils_schemas - Test schema validation and error messages"""
     
+    @pytest.mark.asyncio
     async def test_schema_validation(self):
         from netra_backend.app.utils.validation_utils import ValidationUtils
         utils = ValidationUtils()
@@ -150,6 +155,7 @@ class TestValidationUtilsSchemas:
         self._assert_missing_required_field(utils, schema)
         self._assert_invalid_type_validation(utils, schema)
     
+    @pytest.mark.asyncio
     async def test_error_messages(self):
         from netra_backend.app.utils.validation_utils import ValidationUtils
         utils = ValidationUtils()

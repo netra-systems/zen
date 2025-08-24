@@ -14,7 +14,7 @@ import tempfile
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -28,6 +28,7 @@ from netra_backend.app.websocket_core.manager import WebSocketManager
 
 @pytest.fixture
 
+@pytest.mark.asyncio
 async def test_database():
 
     """Setup test database for integration testing"""

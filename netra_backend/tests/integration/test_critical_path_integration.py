@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -33,6 +33,7 @@ class MockReliableAgent(AgentReliabilityMixin):
 
 class TestCriticalPathIntegration:
     """Test critical system paths end-to-end."""
+    @pytest.mark.asyncio
     async def test_agent_coordination_with_external_api_call(self):
         """Test complete flow: Agent -> Coordinator -> HTTP Client -> JSON Parsing."""
         # This simulates a typical critical path where an agent makes an external API call
@@ -128,6 +129,7 @@ class TestCriticalPathIntegration:
         assert analysis["recommendations"] == ["Implement auto-scaling", "Use reserved instances"]
         assert final_result["confidence"] == 0.85 and final_result["execution_time"] == 1.2
         assert len(agent.operation_times) == 1 and len(agent.error_history) == 0
+    @pytest.mark.asyncio
     async def test_critical_path_failure_recovery(self):
         """Test failure recovery in critical path integration."""
         # Test what happens when the external API fails but recovery strategies work

@@ -11,7 +11,7 @@ import asyncio
 import uuid
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
@@ -148,6 +148,7 @@ class TestTransactionPerformanceAndScaling:
         for session in sessions:
             session.add.assert_called_once()
             session.flush.assert_called_once()
+    @pytest.mark.asyncio
     async def test_high_concurrency_transactions(self, performance_repository):
         """Test transaction handling under high concurrency"""
         num_concurrent = 50
@@ -159,6 +160,7 @@ class TestTransactionPerformanceAndScaling:
         execution_time = end_time - start_time
         self._assert_concurrency_performance(execution_time, results, num_concurrent)
         self._assert_all_sessions_used(sessions)
+    @pytest.mark.asyncio
     async def test_transaction_deadlock_recovery(self, performance_repository, transaction_manager):
         """Test transaction recovery from deadlock scenarios"""
         session = AsyncMock(spec=AsyncSession)
@@ -171,6 +173,7 @@ class TestTransactionPerformanceAndScaling:
         assert result == None
         assert transaction_manager.deadlock_simulations == 1
         session.rollback.assert_called_once()
+    @pytest.mark.asyncio
     async def test_connection_loss_handling(self, performance_repository, transaction_manager):
         """Test handling of connection loss during transactions"""
         session = AsyncMock(spec=AsyncSession)
@@ -192,6 +195,7 @@ class TestTransactionPerformanceAndScaling:
         session.flush = AsyncMock()
         session.rollback = AsyncMock()
         session.refresh = AsyncMock()
+    @pytest.mark.asyncio
     async def test_stress_test_transaction_volume(self, performance_repository):
         """Test handling of high volume transactions"""
         num_transactions = 100
@@ -212,6 +216,7 @@ class TestTransactionPerformanceAndScaling:
         execution_time = end_time - start_time
         assert execution_time < 5.0  # Should complete within 5 seconds
         assert len(results) == num_transactions
+    @pytest.mark.asyncio
     async def test_transaction_state_tracking(self, performance_repository, transaction_manager):
         """Test transaction state tracking under load"""
         num_concurrent = 20
@@ -228,6 +233,7 @@ class TestTransactionPerformanceAndScaling:
         assert len(transaction_manager.transaction_states) == num_concurrent
         for i in range(num_concurrent):
             assert f'tx_{i}' in transaction_manager.transaction_states
+    @pytest.mark.asyncio
     async def test_memory_efficiency_under_load(self, performance_repository):
         """Test memory efficiency during high concurrent load"""
         num_concurrent = 75

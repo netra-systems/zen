@@ -50,6 +50,7 @@ class APIGatewayTester:
         if self.session:
             await self.session.close()
             
+    @pytest.mark.asyncio
     async def test_gateway_health(self) -> bool:
         """Test gateway health and initialization."""
         print("\n[HEALTH] Testing gateway health...")
@@ -67,6 +68,7 @@ class APIGatewayTester:
             print(f"[ERROR] Gateway health check failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_backend_registration(self) -> bool:
         """Test backend service registration."""
         print("\n[REGISTRATION] Testing backend registration...")
@@ -84,6 +86,7 @@ class APIGatewayTester:
             print(f"[ERROR] Backend registration test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_load_balancing(self) -> bool:
         """Test load balancing distribution."""
         print("\n[LOAD BALANCING] Testing request distribution...")
@@ -127,6 +130,7 @@ class APIGatewayTester:
             print(f"[ERROR] Load balancing test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_circuit_breaker(self) -> bool:
         """Test circuit breaker functionality."""
         print("\n[CIRCUIT BREAKER] Testing circuit breaker...")
@@ -164,6 +168,7 @@ class APIGatewayTester:
             print(f"[ERROR] Circuit breaker test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_rate_limiting(self) -> bool:
         """Test rate limiting per service."""
         print("\n[RATE LIMIT] Testing rate limiting...")
@@ -192,6 +197,7 @@ class APIGatewayTester:
             print(f"[ERROR] Rate limiting test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_request_routing(self) -> bool:
         """Test request routing and forwarding."""
         print("\n[ROUTING] Testing request routing...")
@@ -221,6 +227,7 @@ class APIGatewayTester:
             print(f"[ERROR] Request routing test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_response_caching(self) -> bool:
         """Test response caching."""
         print("\n[CACHING] Testing response caching...")
@@ -258,6 +265,7 @@ class APIGatewayTester:
             print(f"[ERROR] Response caching test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_failover_handling(self) -> bool:
         """Test failover handling."""
         print("\n[FAILOVER] Testing failover handling...")
@@ -292,6 +300,7 @@ class APIGatewayTester:
             print(f"[ERROR] Failover handling test failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_performance_metrics(self) -> bool:
         """Test gateway performance metrics."""
         print("\n[METRICS] Testing performance metrics...")
@@ -352,6 +361,7 @@ class APIGatewayTester:
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l3
+@pytest.mark.asyncio
 async def test_api_gateway_load_distribution():
     """Test API gateway load distribution."""
     async with APIGatewayTester() as tester:

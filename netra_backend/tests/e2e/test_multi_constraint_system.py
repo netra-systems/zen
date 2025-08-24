@@ -33,6 +33,7 @@ def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_d
 class TestSystemWideOptimizationWorkflows:
     """Test system-wide optimization workflows with multiple constraints."""
     
+    @pytest.mark.asyncio
     async def test_holistic_system_optimization(self, multi_constraint_setup):
         """Test holistic system optimization across multiple dimensions."""
         setup = multi_constraint_setup
@@ -40,6 +41,7 @@ class TestSystemWideOptimizationWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_holistic_optimization_results(results)
     
+    @pytest.mark.asyncio
     async def test_infrastructure_application_optimization(self, multi_constraint_setup):
         """Test combined infrastructure and application optimization."""
         setup = multi_constraint_setup
@@ -47,6 +49,7 @@ class TestSystemWideOptimizationWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_infrastructure_app_results(results)
     
+    @pytest.mark.asyncio
     async def test_cross_layer_optimization(self, multi_constraint_setup):
         """Test optimization across multiple system layers."""
         setup = multi_constraint_setup
@@ -57,6 +60,7 @@ class TestSystemWideOptimizationWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_cross_layer_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_resource_constraint_optimization(self, multi_constraint_setup):
         """Test optimization under resource constraints."""
         setup = multi_constraint_setup
@@ -67,6 +71,7 @@ class TestSystemWideOptimizationWorkflows:
         results = await execute_multi_constraint_workflow(setup, state)
         validate_resource_constraint_results(results, state)
     
+    @pytest.mark.asyncio
     async def test_scalability_performance_optimization(self, multi_constraint_setup):
         """Test scalability and performance optimization."""
         setup = multi_constraint_setup

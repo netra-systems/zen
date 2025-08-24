@@ -372,6 +372,7 @@ async def scheduling_accuracy_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_basic_job_scheduling_accuracy_l3(scheduling_accuracy_manager):
     """Test basic job scheduling accuracy with real timing."""
     # Schedule jobs with different delays
@@ -410,6 +411,7 @@ async def test_basic_job_scheduling_accuracy_l3(scheduling_accuracy_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_high_precision_scheduling_l3(scheduling_accuracy_manager):
     """Test high precision scheduling with sub-second accuracy requirements."""
     # Schedule jobs with very precise timing requirements
@@ -450,6 +452,7 @@ async def test_high_precision_scheduling_l3(scheduling_accuracy_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_concurrent_scheduled_jobs_l3(scheduling_accuracy_manager):
     """Test scheduling accuracy under concurrent job load."""
     # Schedule multiple jobs with overlapping execution times
@@ -496,6 +499,7 @@ async def test_concurrent_scheduled_jobs_l3(scheduling_accuracy_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_scheduling_under_system_load_l3(scheduling_accuracy_manager):
     """Test scheduling accuracy under system load conditions."""
     # Create background load while testing scheduling
@@ -556,6 +560,7 @@ async def test_scheduling_under_system_load_l3(scheduling_accuracy_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_scheduling_recovery_after_delays_l3(scheduling_accuracy_manager):
     """Test scheduling system recovery after processing delays."""
     # Schedule initial jobs

@@ -14,7 +14,7 @@ from pathlib import Path
 import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -140,7 +140,7 @@ class TestDataSubAgentConsolidated:
             agent.clickhouse_client.is_healthy.return_value = True
             agent.schema_cache.is_available.return_value = True
             
-            return agent
+            yield agent
     
     @pytest.mark.asyncio
     async def test_data_sub_agent_initialization(self, data_sub_agent):

@@ -36,6 +36,7 @@ def multi_constraint_setup(real_llm_manager, real_websocket_manager, real_tool_d
 class TestMultiConstraintWorkflows:
     """Basic tests for test_multi_constraint_workflows.py functionality."""
     
+    @pytest.mark.asyncio
     async def test_multi_constraint_setup_initialization(self, multi_constraint_setup):
         """Test multi_constraint_setup fixture initialization."""
         assert multi_constraint_setup is not None
@@ -43,6 +44,7 @@ class TestMultiConstraintWorkflows:
         if hasattr(multi_constraint_setup, '__dict__'):
             assert len(vars(multi_constraint_setup)) >= 0
     
+    @pytest.mark.asyncio
     async def test_fixture_integration(self):
         """Test that fixtures can be used together."""
         # This test ensures the file can be imported and fixtures work

@@ -30,17 +30,16 @@ import os
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import psutil
 import pytest
 
 from dev_launcher.config import LauncherConfig
-# from scripts.dev_launcher_health_monitor import  # Should be mocked in tests HealthMonitor
-# from scripts.dev_launcher_launcher import  # Should be mocked in tests DevLauncher
-# from scripts.dev_launcher_service_discovery import  # Should be mocked in tests ServiceDiscovery
-
+# Removed broken import statement
+# Removed broken import statement
+# Removed broken import statement
 class ServiceInfo:
     """Service information container."""
     
@@ -306,7 +305,7 @@ class TestStartupRecovery:
         """Test system retries on transient startup failures."""
         retry_count = 0
         
-        def mock_start_service(service_name):
+        async def mock_start_service(service_name):
             nonlocal retry_count
             retry_count += 1
             if retry_count < 3:  # Fail first 2 attempts

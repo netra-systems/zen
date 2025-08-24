@@ -21,7 +21,7 @@ import time
 import uuid
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -283,6 +283,7 @@ class CircuitBreakerManager:
                 "circuit_state": circuit.state.value
             }
     
+    @pytest.mark.asyncio
     async def test_cascading_failure_prevention(self, service_names: List[str]) -> Dict[str, Any]:
         """Test that circuit breakers prevent cascading failures."""
         try:
@@ -330,6 +331,7 @@ class CircuitBreakerManager:
                 "error": str(e)
             }
     
+    @pytest.mark.asyncio
     async def test_load_based_circuit_behavior(self, breaker_id: str, request_count: int) -> Dict[str, Any]:
         """Test circuit breaker behavior under load."""
         if breaker_id not in self.circuit_breakers:

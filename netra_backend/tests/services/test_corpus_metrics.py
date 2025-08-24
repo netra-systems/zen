@@ -7,7 +7,7 @@ from pathlib import Path
 
 import asyncio
 from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
@@ -26,6 +26,7 @@ class TestCorpusMetricsCollector:
             enable_resource_monitoring=False,  # Disable to avoid system deps
             enable_real_time_updates=True
         )
+    @pytest.mark.asyncio
     async def test_collector_initialization(self, metrics_collector):
         """Test that collector initializes properly"""
         assert metrics_collector is not None
@@ -34,6 +35,7 @@ class TestCorpusMetricsCollector:
         assert metrics_collector.resource_monitor is not None
         assert metrics_collector.exporter is not None
         assert metrics_collector.time_series is not None
+    @pytest.mark.asyncio
     async def test_operation_tracking_context_manager(self, metrics_collector):
         """Test operation tracking with context manager"""
         corpus_id = "test_corpus_123"
@@ -48,6 +50,7 @@ class TestCorpusMetricsCollector:
         success_rate = metrics_collector.core_collector.get_success_rate(corpus_id)
         assert success_rate >= 0.0
         assert success_rate <= 1.0
+    @pytest.mark.asyncio
     async def test_quality_assessment_recording(self, metrics_collector):
         """Test quality assessment recording"""
         corpus_id = "test_corpus_456"
@@ -71,6 +74,7 @@ class TestCorpusMetricsCollector:
         # Check that quality data was recorded (the distribution should have data points)
         distribution = quality_report.get("quality_distribution", {})
         assert distribution.get("mean", 0) > 0  # Should have recorded our 0.85 score
+    @pytest.mark.asyncio
     async def test_metrics_snapshot_generation(self, metrics_collector):
         """Test metrics snapshot generation"""
         corpus_id = "test_corpus_789"
@@ -95,6 +99,7 @@ class TestCorpusMetricsCollector:
         assert snapshot.corpus_id == corpus_id
         assert snapshot.snapshot_time is not None
         assert snapshot.health_status in ["excellent", "good", "fair", "poor"]
+    @pytest.mark.asyncio
     async def test_metrics_export_json(self, metrics_collector):
         """Test metrics export in JSON format"""
         corpus_id = "test_corpus_export"
@@ -119,6 +124,7 @@ class TestCorpusMetricsCollector:
         assert isinstance(exported_data, str)
         assert corpus_id in exported_data
         assert "snapshot_time" in exported_data
+    @pytest.mark.asyncio
     async def test_time_series_data_retrieval(self, metrics_collector):
         """Test time series data retrieval"""
         series_key = "test_series"
@@ -129,6 +135,7 @@ class TestCorpusMetricsCollector:
         )
         
         assert isinstance(time_series_data, list)
+    @pytest.mark.asyncio
     async def test_comprehensive_report_generation(self, metrics_collector):
         """Test comprehensive report generation"""
         corpus_id = "test_corpus_comprehensive"
@@ -145,6 +152,7 @@ class TestCorpusMetricsCollector:
         assert "metrics_snapshot" in report
         assert "quality_analysis" in report
         assert "collector_status" in report
+    @pytest.mark.asyncio
     async def test_collector_status(self, metrics_collector):
         """Test collector status reporting"""
         status = await metrics_collector.get_collector_status()
@@ -155,6 +163,7 @@ class TestCorpusMetricsCollector:
         assert "resource_monitor" in status
         assert "time_series" in status
         assert "redis_available" in status
+    @pytest.mark.asyncio
     async def test_monitoring_lifecycle(self, metrics_collector):
         """Test monitoring start/stop lifecycle"""
         # Test start monitoring
@@ -174,6 +183,7 @@ class TestCorpusMetricsCollector:
 
 class TestCoreMetricsCollector:
     """Test core metrics collector individually"""
+    @pytest.mark.asyncio
     async def test_operation_timing(self):
         """Test operation timing functionality"""
         from netra_backend.app.services.metrics.core_collector import (
@@ -196,6 +206,7 @@ class TestCoreMetricsCollector:
 
 class TestQualityMetricsCollector:
     """Test quality metrics collector individually"""
+    @pytest.mark.asyncio
     async def test_quality_trend_tracking(self):
         """Test quality trend tracking"""
         from netra_backend.app.services.metrics.quality_collector import (
@@ -225,6 +236,7 @@ class TestQualityMetricsCollector:
 
 class TestMetricsExporter:
     """Test metrics exporter functionality"""
+    @pytest.mark.asyncio
     async def test_json_export(self):
         """Test JSON export functionality"""
         from netra_backend.app.schemas.Metrics import CorpusMetric, MetricType
@@ -250,6 +262,7 @@ class TestMetricsExporter:
         assert json_export is not None
         assert "test_corpus" in json_export
         assert "generation_time" in json_export
+    @pytest.mark.asyncio
     async def test_prometheus_export(self):
         """Test Prometheus export functionality"""
         from netra_backend.app.schemas.Metrics import CorpusMetric, MetricType

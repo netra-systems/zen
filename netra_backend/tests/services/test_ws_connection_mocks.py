@@ -12,7 +12,7 @@ import json
 import time
 from datetime import UTC, datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 from fastapi import WebSocket

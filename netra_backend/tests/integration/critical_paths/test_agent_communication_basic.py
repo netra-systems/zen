@@ -27,6 +27,7 @@ from test_framework.test_patterns import L3IntegrationTest
 class TestAgentCommunicationBasic(L3IntegrationTest):
     """Test agent communication patterns from multiple angles."""
     
+    @pytest.mark.asyncio
     async def test_agent_message_routing(self):
         """Test basic agent message routing."""
         user_data = await self.create_test_user("agent1@test.com")
@@ -63,6 +64,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
                 assert message["status"] == "processing"
                 assert message["assigned_agent"] == "analyzer"
                 
+    @pytest.mark.asyncio
     async def test_agent_response_handling(self):
         """Test agent response handling and storage."""
         user_data = await self.create_test_user("agent2@test.com")
@@ -115,6 +117,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             else:
                 pytest.fail("Agent did not respond in time")
                 
+    @pytest.mark.asyncio
     async def test_agent_chain_execution(self):
         """Test chained agent execution."""
         user_data = await self.create_test_user("agent3@test.com")
@@ -171,6 +174,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
             else:
                 pytest.fail("Agent chain did not complete")
                 
+    @pytest.mark.asyncio
     async def test_agent_error_handling(self):
         """Test agent error handling and recovery."""
         user_data = await self.create_test_user("agent4@test.com")
@@ -220,6 +224,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
                 assert "error" in message
                 assert "division by zero" in message["error"].lower()
                 
+    @pytest.mark.asyncio
     async def test_agent_timeout_handling(self):
         """Test agent timeout and fallback."""
         user_data = await self.create_test_user("agent5@test.com")
@@ -267,6 +272,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
                 assert message["status"] in ["timeout", "error"]
                 assert "timeout" in message.get("error", "").lower()
                 
+    @pytest.mark.asyncio
     async def test_agent_concurrent_processing(self):
         """Test concurrent agent processing of multiple messages."""
         user_data = await self.create_test_user("agent6@test.com")
@@ -320,6 +326,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
                     message = await resp.json()
                     assert message["status"] in ["processing", "completed"]
                     
+    @pytest.mark.asyncio
     async def test_agent_priority_queue(self):
         """Test agent message priority handling."""
         user_data = await self.create_test_user("agent7@test.com")
@@ -383,6 +390,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
                 priorities_order = [p for p, _ in completion_times]
                 assert priorities_order[0] >= priorities_order[-1]
                 
+    @pytest.mark.asyncio
     async def test_agent_context_preservation(self):
         """Test agent context preservation across messages."""
         user_data = await self.create_test_user("agent8@test.com")
@@ -444,6 +452,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
                 if message["status"] == "completed":
                     assert "John" in message.get("response", {}).get("content", "")
                     
+    @pytest.mark.asyncio
     async def test_agent_load_balancing(self):
         """Test agent load balancing across multiple instances."""
         user_data = await self.create_test_user("agent9@test.com")
@@ -500,6 +509,7 @@ class TestAgentCommunicationBasic(L3IntegrationTest):
                 min_load = min(agent_assignments.values())
                 assert max_load - min_load <= 5  # Reasonable balance
                 
+    @pytest.mark.asyncio
     async def test_agent_retry_mechanism(self):
         """Test agent retry on transient failures."""
         user_data = await self.create_test_user("agent10@test.com")

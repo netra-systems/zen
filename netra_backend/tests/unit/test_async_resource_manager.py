@@ -14,7 +14,7 @@ from pathlib import Path
 import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -50,7 +50,7 @@ def mock_resource():
 async def cleanup_callback():
     """Mock cleanup callback."""
     callback = AsyncMock()
-    return callback
+    yield callback
 
 # Helper functions for 25-line compliance
 def assert_resource_count(manager, expected):
@@ -305,7 +305,7 @@ class TestThreadPoolExecution:
     @pytest.mark.asyncio
     async def test_run_in_threadpool_with_args(self):
         """Thread pool execution with arguments works."""
-        def task_with_args(x, y):
+        async def task_with_args(x, y):
             return x + y
         
         result = await run_in_threadpool(task_with_args, 5, 3)
@@ -314,7 +314,7 @@ class TestThreadPoolExecution:
     @pytest.mark.asyncio
     async def test_run_in_threadpool_with_kwargs(self):
         """Thread pool execution with keyword arguments works."""
-        def task_with_kwargs(x, y=10):
+        async def task_with_kwargs(x, y=10):
             return x * y
         
         result = await run_in_threadpool(task_with_kwargs, 3, y=4)

@@ -58,17 +58,17 @@ from netra_backend.tests.integration.sso_saml_components import (
 @pytest.fixture
 async def saml_validator():
     """SAML assertion validator fixture"""
-    return SAMLAssertionValidator()
+    yield SAMLAssertionValidator()
 
 @pytest.fixture
 async def token_manager():
     """Enterprise token manager fixture"""
-    return EnterpriseTokenManager()
+    yield EnterpriseTokenManager()
 
 @pytest.fixture
 async def session_manager():
     """Enterprise session manager fixture"""
-    return EnterpriseSessionManager()
+    yield EnterpriseSessionManager()
 
 @pytest.fixture
 async def valid_saml_assertion():
@@ -84,24 +84,29 @@ async def valid_saml_assertion():
             "mfa_verified": True
         }
     }
-    return base64.b64encode(json.dumps(assertion_data).encode()).decode()
+    yield base64.b64encode(json.dumps(assertion_data).encode()).decode()
 
 @pytest.fixture
 async def enterprise_tenant_id():
     """Enterprise tenant ID fixture"""
-    return "enterprise_tenant_12345"
+    yield "enterprise_tenant_12345"
 
 @pytest.fixture
 async def db_session():
     """Database session fixture"""
     async with get_db_session() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            if hasattr(session, "close"):
+                await session.close()
 
 # Core Integration Tests
 @pytest.mark.asyncio
 class TestSSLSAMLIntegration:
     """Critical SSO/SAML integration tests protecting $200K+ MRR"""
 
+    @pytest.mark.asyncio
     async def test_saml_assertion_validation_success(self, saml_validator, valid_saml_assertion):
         """Test SAML assertion validation with valid enterprise assertion"""
         start_time = time.time()
@@ -121,6 +126,7 @@ class TestSSLSAMLIntegration:
         assert "admin" in claims["permissions"]
         assert claims["mfa_verified"] is True
 
+    @pytest.mark.asyncio
     async def test_sso_token_exchange_flow(self, saml_validator, token_manager, valid_saml_assertion, enterprise_tenant_id):
         """Test SSO token exchange with JWT generation"""
         start_time = time.time()
@@ -142,6 +148,7 @@ class TestSSLSAMLIntegration:
         assert token_data["tenant_id"] == enterprise_tenant_id
         assert token_data["auth_method"] == "saml_sso"
 
+    @pytest.mark.asyncio
     async def test_multi_tenant_isolation_during_sso(self, token_manager, saml_validator, valid_saml_assertion):
         """Test tenant isolation prevents cross-tenant access"""
         # Setup two different tenants
@@ -163,6 +170,7 @@ class TestSSLSAMLIntegration:
         assert correct_validation is not None
         assert correct_validation["tenant_id"] == tenant_a
 
+    @pytest.mark.asyncio
     async def test_session_management_post_sso(self, token_manager, session_manager, saml_validator, valid_saml_assertion, enterprise_tenant_id):
         """Test session creation and persistence after SSO"""
         # Complete SSO flow
@@ -184,6 +192,7 @@ class TestSSLSAMLIntegration:
         isolation_valid = await session_manager.validate_session_isolation(session["session_id"], enterprise_tenant_id)
         assert isolation_valid is True
 
+    @pytest.mark.asyncio
     async def test_invalid_saml_assertion_rejection(self, saml_validator):
         """Test rejection of invalid SAML assertions"""
         invalid_assertion = await MockIdPErrorGenerator.create_invalid_assertion()
@@ -191,6 +200,7 @@ class TestSSLSAMLIntegration:
         with pytest.raises(ValueError, match="Invalid issuer"):
             await saml_validator.validate_saml_assertion(invalid_assertion)
 
+    @pytest.mark.asyncio
     async def test_expired_saml_assertion_rejection(self, saml_validator):
         """Test rejection of expired SAML assertions"""
         expired_assertion = await MockIdPErrorGenerator.create_expired_assertion()
@@ -198,6 +208,7 @@ class TestSSLSAMLIntegration:
         with pytest.raises(ValueError, match="Assertion expired"):
             await saml_validator.validate_saml_assertion(expired_assertion)
 
+    @pytest.mark.asyncio
     async def test_sso_performance_under_load(self, saml_validator, token_manager, valid_saml_assertion, enterprise_tenant_id):
         """Test SSO performance with concurrent requests"""
         start_time = time.time()
@@ -218,6 +229,7 @@ class TestSSLSAMLIntegration:
         assert len(results) == 10
         assert all(token is not None for token in results)
 
+    @pytest.mark.asyncio
     async def test_session_cleanup_on_logout(self, session_manager, enterprise_tenant_id):
         """Test proper session cleanup during logout"""
         # Create mock session
@@ -240,6 +252,7 @@ class TestSSLSAMLIntegration:
         # Verify session removed
         assert session_id not in session_manager.active_sessions
 
+    @pytest.mark.asyncio
     async def test_invalid_saml_assertion_rejection(self, saml_validator):
         """Test rejection of invalid SAML assertions"""
         invalid_assertion = await MockIdPErrorGenerator.create_invalid_assertion()
@@ -247,6 +260,7 @@ class TestSSLSAMLIntegration:
         with pytest.raises(ValueError, match="Invalid issuer"):
             await saml_validator.validate_saml_assertion(invalid_assertion)
 
+    @pytest.mark.asyncio
     async def test_expired_saml_assertion_rejection(self, saml_validator):
         """Test rejection of expired SAML assertions"""
         expired_assertion = await MockIdPErrorGenerator.create_expired_assertion()

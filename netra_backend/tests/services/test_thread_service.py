@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 import time
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -59,6 +59,7 @@ class TestThreadService:
 
     @patch('app.services.thread_service.get_unit_of_work')
     @patch('app.services.thread_service.manager')
+    @pytest.mark.asyncio
     async def test_get_or_create_thread_existing(self, mock_manager, mock_get_uow, thread_service, sample_thread):
         """Test getting an existing thread"""
         # Setup mock UnitOfWork
@@ -81,6 +82,7 @@ class TestThreadService:
 
     @patch('app.services.thread_service.get_unit_of_work')
     @patch('app.services.thread_service.manager')
+    @pytest.mark.asyncio
     async def test_create_message_success(self, mock_manager, mock_get_uow, thread_service, sample_message):
         """Test creating a message successfully"""
         # Setup mock UnitOfWork
@@ -101,6 +103,7 @@ class TestThreadService:
         mock_uow.messages.create.assert_called_once()
 
     @patch('app.services.thread_service.get_unit_of_work')
+    @pytest.mark.asyncio
     async def test_get_thread_messages_success(self, mock_get_uow, thread_service):
         """Test retrieving thread messages"""
         # Create test messages
@@ -126,6 +129,7 @@ class TestThreadService:
 
     @patch('app.services.thread_service.get_unit_of_work')
     @patch('app.services.thread_service.manager')
+    @pytest.mark.asyncio
     async def test_create_run_success(self, mock_manager, mock_get_uow, thread_service, sample_run, sample_thread):
         """Test creating a run successfully"""
         # Setup mock UnitOfWork
@@ -150,6 +154,7 @@ class TestThreadService:
         mock_manager.send_message.assert_called_once()
 
     @patch('app.services.thread_service.get_unit_of_work')
+    @pytest.mark.asyncio
     async def test_update_run_status_completed(self, mock_get_uow, thread_service, sample_run):
         """Test updating run status to completed"""
         # Setup mock UnitOfWork
@@ -176,6 +181,7 @@ class TestThreadService:
         mock_uow.runs.update.assert_called_once()
         
     @patch('app.services.thread_service.get_unit_of_work')
+    @pytest.mark.asyncio
     async def test_get_thread_success(self, mock_get_uow, thread_service, sample_thread):
         """Test getting a thread by ID"""
         # Setup mock UnitOfWork
@@ -194,6 +200,7 @@ class TestThreadService:
 
     @patch('app.services.thread_service.get_unit_of_work')
     @patch('app.services.thread_service.manager')
+    @pytest.mark.asyncio
     async def test_delete_thread_success(self, mock_manager, mock_get_uow, thread_service):
         """Test deleting a thread"""
         # Setup mock UnitOfWork

@@ -8,6 +8,7 @@ Validates correct precedence order for configuration:
 4. Defaults
 """
 
+import pytest
 import sys
 from pathlib import Path
 

@@ -9,7 +9,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -93,6 +93,7 @@ class TestDataProcessing:
 
     @pytest.mark.asyncio
 
+    @pytest.mark.asyncio
     async def test_process_data_validation_failure(self):
         """Test data processing with validation failure"""
         mock_llm_manager = Mock()
@@ -111,6 +112,7 @@ class TestDataProcessing:
 
     @pytest.mark.asyncio
 
+    @pytest.mark.asyncio
     async def test_batch_processing(self):
         """Test batch data processing"""
         agent, _, _ = create_test_agent()

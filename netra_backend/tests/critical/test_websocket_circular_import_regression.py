@@ -154,7 +154,7 @@ class TestCircularImportRegression:
     @pytest.mark.asyncio
     async def test_message_flow_without_circular_dependency(self):
         """Test message flow works after circular dependency fix."""
-        from unittest.mock import AsyncMock, Mock, patch
+        from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
         from netra_backend.app.services.agent_service_core import AgentService
         

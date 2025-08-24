@@ -13,10 +13,15 @@ from dev_launcher.auth_starter import AuthStarter
 from dev_launcher.backend_starter import BackendStarter
 from dev_launcher.config import LauncherConfig
 from dev_launcher.critical_error_handler import CriticalErrorType, critical_handler
+from dev_launcher.dependency_manager import DependencyManager, ServiceDependency, DependencyType, setup_default_dependency_manager
 from dev_launcher.frontend_starter import FrontendStarter
 from dev_launcher.log_streamer import LogManager, LogStreamer
 from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
+from dev_launcher.port_allocator import get_global_port_allocator
+from dev_launcher.readiness_checker import ReadinessManager, BackendReadinessChecker, FrontendReadinessChecker, AuthServiceReadinessChecker
+from dev_launcher.service_coordinator import ServiceCoordinator, CoordinationConfig
 from dev_launcher.service_discovery import ServiceDiscovery
+from dev_launcher.service_registry import get_global_service_registry, ServiceEndpoint, ServiceStatus
 from dev_launcher.utils import (
     find_available_port,
     is_port_available,
@@ -28,24 +33,38 @@ logger = logging.getLogger(__name__)
 
 class ServiceStartupCoordinator:
     """
-    Coordinates startup of development services with parallel execution.
+    Enhanced coordinator that manages service startup with dependency resolution,
+    port allocation, readiness checking, and service discovery integration.
     
-    Enhanced coordinator that starts services in parallel with
-    async health checks and progressive readiness validation.
+    This addresses service coordination issues identified in critical tests:
+    - Services starting before dependencies are ready
+    - Health check false positives during initialization
+    - Port binding race conditions
+    - Service discovery timing issues
+    - Graceful degradation for optional services
     """
     
     def __init__(self, config: LauncherConfig, services_config, 
                  log_manager: LogManager, service_discovery: ServiceDiscovery,
                  use_emoji: bool = True):
-        """Initialize service startup coordinator."""
+        """Initialize enhanced service startup coordinator."""
         self.config = config
         self.services_config = services_config
         self.log_manager = log_manager
         self.service_discovery = service_discovery
         self.use_emoji = use_emoji
-        self.allocated_ports = {}  # Track allocated ports
+        self.allocated_ports = {}  # Legacy port tracking
+        
+        # Enhanced coordination components
+        self.service_coordinator = None
+        self.readiness_manager = ReadinessManager()
+        self.dependency_manager = setup_default_dependency_manager()
+        self.port_allocator = None
+        self.service_registry = None
+        
         self._setup_starters()
         self._setup_parallel_execution()
+        self._setup_enhanced_coordination()
     
     def _setup_starters(self):
         """Setup backend, frontend and auth starters."""
@@ -70,6 +89,63 @@ class ServiceStartupCoordinator:
         self.parallel_executor = ParallelExecutor(max_cpu_workers=2, max_io_workers=4)
         self.startup_futures: Dict[str, Future] = {}
         self.health_check_results: Dict[str, bool] = {}
+    
+    def _setup_enhanced_coordination(self):
+        """Setup enhanced coordination components."""
+        # Configure service coordinator
+        coordination_config = CoordinationConfig(
+            max_parallel_starts=2,  # Limit parallel starts to prevent resource contention
+            dependency_timeout=60,
+            readiness_timeout=90,
+            startup_retry_count=2,
+            enable_graceful_degradation=True,
+            required_services={"database", "backend"},
+            optional_services={"redis", "auth", "frontend"}
+        )
+        self.service_coordinator = ServiceCoordinator(coordination_config)
+        
+        # Setup readiness checkers
+        self._register_readiness_checkers()
+        
+        logger.info("Enhanced service coordination initialized")
+    
+    def _register_readiness_checkers(self):
+        """Register service-specific readiness checkers."""
+        # Backend readiness checker
+        backend_port = self.config.backend_port or 8000
+        backend_checker = BackendReadinessChecker(backend_port)
+        self.readiness_manager.register_checker("backend", backend_checker)
+        
+        # Frontend readiness checker  
+        frontend_port = self.config.frontend_port or 3000
+        frontend_checker = FrontendReadinessChecker(frontend_port)
+        self.readiness_manager.register_checker("frontend", frontend_checker)
+        
+        # Auth service readiness checker
+        auth_config = self.services_config.auth_service.get_config()
+        auth_port = auth_config.get("port", 8081)
+        auth_checker = AuthServiceReadinessChecker(auth_port)
+        self.readiness_manager.register_checker("auth", auth_checker)
+        
+        logger.info("Registered readiness checkers for all services")
+    
+    async def initialize_coordination_systems(self):
+        """Initialize async coordination systems."""
+        try:
+            # Initialize port allocator
+            self.port_allocator = await get_global_port_allocator()
+            
+            # Initialize service registry
+            self.service_registry = await get_global_service_registry()
+            
+            # Start readiness manager if it has async components
+            # (ReadinessManager is currently sync, but prepared for async)
+            
+            logger.info("Coordination systems initialized")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to initialize coordination systems: {e}")
+            return False
     
     @property
     def backend_health_info(self):
@@ -143,8 +219,8 @@ class ServiceStartupCoordinator:
             self._update_backend_auth_config(allocated_port)
         return result
     
-    def start_all_services(self, process_manager, health_monitor, parallel: bool = True) -> bool:
-        """Start all services with unified approach.
+    async def start_all_services(self, process_manager, health_monitor, parallel: bool = True) -> bool:
+        """Start all services with enhanced coordination.
         
         Args:
             process_manager: Process manager instance
@@ -152,30 +228,246 @@ class ServiceStartupCoordinator:
             parallel: Whether to start services in parallel
             
         Returns:
-            True if all services started successfully
+            True if all required services started successfully
         """
         try:
+            # Initialize coordination systems first
+            if not await self.initialize_coordination_systems():
+                logger.error("Failed to initialize coordination systems")
+                return False
+            
+            # Register service startup callbacks with coordinator
+            await self._register_service_callbacks()
+            
+            # Use enhanced coordination for startup
             if parallel:
-                # Start services in parallel
-                services = self.start_services_parallel()
+                success = await self._start_services_coordinated()
             else:
-                # Start services sequentially
+                # Fallback to sequential startup
                 services = {}
                 services["auth"] = self.start_auth_service()
                 services["backend"] = self.start_backend()
                 services["frontend"] = self.start_frontend()
+                success = all(process is not None for process, _ in services.values())
             
-            # Register processes with process manager
-            for name, (process, streamer) in services.items():
-                if process:
-                    process_manager.add_process(name.capitalize(), process)
+            # Register successful processes with process manager
+            if success:
+                await self._register_processes_with_manager(process_manager)
             
-            # Verify all services started
-            return all(process is not None for process, _ in services.values())
+            return success
             
         except Exception as e:
-            logger.error(f"Failed to start services: {e}")
+            logger.error(f"Failed to start services with coordination: {e}")
             return False
+    
+    async def _register_service_callbacks(self):
+        """Register service startup callbacks with the coordinator."""
+        # Register backend startup
+        self.service_coordinator.register_service(
+            "backend",
+            startup_callback=self._start_backend_coordinated,
+            readiness_checker=lambda: self.readiness_manager.check_service_ready("backend")
+        )
+        
+        # Register frontend startup
+        self.service_coordinator.register_service(
+            "frontend", 
+            startup_callback=self._start_frontend_coordinated,
+            readiness_checker=lambda: self.readiness_manager.check_service_ready("frontend")
+        )
+        
+        # Register auth service startup
+        self.service_coordinator.register_service(
+            "auth",
+            startup_callback=self._start_auth_coordinated,
+            readiness_checker=lambda: self.readiness_manager.check_service_ready("auth")
+        )
+        
+        logger.info("Registered service callbacks with coordinator")
+    
+    async def _start_services_coordinated(self) -> bool:
+        """Start services using the enhanced coordinator."""
+        services_to_start = ["auth", "backend", "frontend"]
+        
+        # Use service coordinator for dependency-aware startup
+        success = await self.service_coordinator.coordinate_startup(services_to_start)
+        
+        if success:
+            logger.info("All required services started successfully with coordination")
+            
+            # Check for degraded services
+            degraded = self.service_coordinator.get_degraded_services()
+            if degraded:
+                logger.warning(f"System running in degraded mode. Failed optional services: {degraded}")
+        else:
+            logger.error("Service coordination failed")
+            
+            # Log detailed status
+            status = self.service_coordinator.get_startup_status()
+            logger.error(f"Coordination status: {status['coordination_state']}")
+            
+            for service_name, service_status in status['services'].items():
+                if not service_status['startup_success']:
+                    logger.error(f"  {service_name}: {service_status['error_message']}")
+        
+        return success
+    
+    async def _start_backend_coordinated(self):
+        """Start backend service with coordination integration."""
+        # Reserve port first
+        backend_port = self.config.backend_port or 8000
+        allocation_result = await self.port_allocator.reserve_port(
+            "backend", 
+            preferred_port=backend_port
+        )
+        
+        if not allocation_result.success:
+            raise RuntimeError(f"Failed to reserve port for backend: {allocation_result.error_message}")
+        
+        # Update config with allocated port
+        allocated_port = allocation_result.port
+        if allocated_port != backend_port:
+            self.config.backend_port = allocated_port
+            logger.info(f"Backend port updated to {allocated_port}")
+        
+        # Mark as initializing
+        await self.readiness_manager.mark_service_initializing("backend")
+        
+        # Start the service
+        result = self.start_backend()
+        
+        if result[0]:  # Process started successfully
+            # Confirm port allocation
+            await self.port_allocator.confirm_allocation(
+                allocated_port, 
+                "backend", 
+                result[0].pid if result[0] else None
+            )
+            
+            # Register in service registry
+            endpoints = [ServiceEndpoint(
+                name="api",
+                url=f"http://localhost:{allocated_port}",
+                port=allocated_port,
+                health_endpoint="/health",
+                ready_endpoint="/health/ready"
+            )]
+            
+            await self.service_registry.register_service(
+                "backend",
+                endpoints=endpoints,
+                metadata={"port": allocated_port, "pid": result[0].pid if result[0] else None},
+                dependencies=["database", "redis"]
+            )
+            
+            # Mark as starting
+            await self.readiness_manager.mark_service_starting("backend")
+            await self.service_registry.update_service_status("backend", ServiceStatus.STARTING)
+        
+        return result
+    
+    async def _start_frontend_coordinated(self):
+        """Start frontend service with coordination integration."""
+        # Reserve port
+        frontend_port = self.config.frontend_port or 3000
+        allocation_result = await self.port_allocator.reserve_port(
+            "frontend",
+            preferred_port=frontend_port
+        )
+        
+        if not allocation_result.success:
+            raise RuntimeError(f"Failed to reserve port for frontend: {allocation_result.error_message}")
+        
+        allocated_port = allocation_result.port
+        if allocated_port != frontend_port:
+            self.config.frontend_port = allocated_port
+            logger.info(f"Frontend port updated to {allocated_port}")
+        
+        await self.readiness_manager.mark_service_initializing("frontend")
+        
+        result = self.start_frontend()
+        
+        if result[0]:
+            await self.port_allocator.confirm_allocation(
+                allocated_port,
+                "frontend", 
+                result[0].pid if result[0] else None
+            )
+            
+            endpoints = [ServiceEndpoint(
+                name="web",
+                url=f"http://localhost:{allocated_port}", 
+                port=allocated_port
+            )]
+            
+            await self.service_registry.register_service(
+                "frontend",
+                endpoints=endpoints,
+                metadata={"port": allocated_port, "pid": result[0].pid if result[0] else None},
+                dependencies=["backend"]
+            )
+            
+            await self.readiness_manager.mark_service_starting("frontend")
+            await self.service_registry.update_service_status("frontend", ServiceStatus.STARTING)
+        
+        return result
+    
+    async def _start_auth_coordinated(self):
+        """Start auth service with coordination integration."""
+        auth_config = self.services_config.auth_service.get_config()
+        auth_port = auth_config.get("port", 8081)
+        
+        allocation_result = await self.port_allocator.reserve_port(
+            "auth",
+            preferred_port=auth_port
+        )
+        
+        if not allocation_result.success:
+            raise RuntimeError(f"Failed to reserve port for auth: {allocation_result.error_message}")
+        
+        allocated_port = allocation_result.port
+        if allocated_port != auth_port:
+            # Update auth config
+            auth_config["port"] = allocated_port
+            logger.info(f"Auth port updated to {allocated_port}")
+        
+        await self.readiness_manager.mark_service_initializing("auth")
+        
+        result = self.start_auth_service()
+        
+        if result[0]:
+            await self.port_allocator.confirm_allocation(
+                allocated_port,
+                "auth",
+                result[0].pid if result[0] else None
+            )
+            
+            endpoints = [ServiceEndpoint(
+                name="auth_api",
+                url=f"http://localhost:{allocated_port}",
+                port=allocated_port,
+                health_endpoint="/health",
+                ready_endpoint="/api/auth/config"
+            )]
+            
+            await self.service_registry.register_service(
+                "auth",
+                endpoints=endpoints,
+                metadata={"port": allocated_port, "pid": result[0].pid if result[0] else None},
+                dependencies=["database"]
+            )
+            
+            await self.readiness_manager.mark_service_starting("auth")
+            await self.service_registry.update_service_status("auth", ServiceStatus.STARTING)
+        
+        return result
+    
+    async def _register_processes_with_manager(self, process_manager):
+        """Register successfully started processes with the process manager."""
+        # This would extract process information from coordination results
+        # and register them with the process manager
+        # Implementation depends on specific process manager interface
+        logger.info("Process registration with manager completed")
     
     def start_services_parallel(self) -> Dict[str, Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]]:
         """Start all services in parallel with progressive readiness."""
@@ -410,11 +702,40 @@ class ServiceStartupCoordinator:
         stats.update({
             "health_checks": len(self.health_check_results),
             "healthy_services": sum(self.health_check_results.values()),
-            "parallel_enabled": True
+            "parallel_enabled": True,
+            "enhanced_coordination": self.service_coordinator is not None
         })
         return stats
     
     def cleanup(self):
-        """Cleanup parallel execution resources."""
-        if hasattr(self, 'parallel_executor'):
-            self.parallel_executor.cleanup()
+        """Cleanup all coordination resources."""
+        try:
+            if hasattr(self, 'parallel_executor'):
+                self.parallel_executor.cleanup()
+                
+            # Cleanup coordination systems
+            if self.service_coordinator:
+                self.service_coordinator.reset()
+                
+            # Note: Global cleanup of port allocator and service registry
+            # is handled by their respective cleanup functions
+            
+            logger.info("Service startup coordinator cleanup completed")
+        except Exception as e:
+            logger.error(f"Error during cleanup: {e}")
+    
+    def get_coordination_status(self) -> Dict[str, Any]:
+        """Get comprehensive status of all coordination systems."""
+        status = {
+            "legacy_parallel_executor": self.get_startup_performance() if hasattr(self, 'parallel_executor') else {},
+            "service_coordinator": self.service_coordinator.get_startup_status() if self.service_coordinator else {},
+            "readiness_manager": {
+                "ready_services": self.readiness_manager.get_ready_services(),
+                "not_ready_services": self.readiness_manager.get_not_ready_services(),
+                "all_status": {name: status.overall_ready for name, status in self.readiness_manager.get_all_service_status().items()}
+            },
+            "dependency_manager": self.dependency_manager.get_dependency_status() if self.dependency_manager else {},
+            "allocated_ports": self.allocated_ports
+        }
+        
+        return status

@@ -28,7 +28,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 # from app.agents.supervisor_consolidated import SupervisorAgent
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import aiohttp
 import pytest
@@ -612,6 +612,7 @@ class MessagePipelineL4Manager:
 
         }
     
+    @pytest.mark.asyncio
     async def test_throughput_performance(self, duration_seconds: int, target_rps: int) -> Dict[str, Any]:
 
         """Test message pipeline throughput performance."""
@@ -678,6 +679,7 @@ class MessagePipelineL4Manager:
 
         }
     
+    @pytest.mark.asyncio
     async def test_dead_letter_queue_handling(self) -> Dict[str, Any]:
 
         """Test dead letter queue functionality and recovery."""
@@ -753,6 +755,7 @@ class MessagePipelineL4Manager:
 
         }
     
+    @pytest.mark.asyncio
     async def test_websocket_delivery_performance(self, connection_count: int, messages_per_connection: int) -> Dict[str, Any]:
 
         """Test WebSocket message delivery performance."""
@@ -957,6 +960,7 @@ async def pipeline_l4_manager():
 
 @pytest.mark.l4
 
+@pytest.mark.asyncio
 async def test_message_processing_throughput_performance(pipeline_l4_manager):
 
     """Test message processing throughput under load."""
@@ -990,6 +994,7 @@ async def test_message_processing_throughput_performance(pipeline_l4_manager):
 
 @pytest.mark.l4
 
+@pytest.mark.asyncio
 async def test_message_ordering_guarantees(pipeline_l4_manager):
 
     """Test message ordering preservation through the pipeline."""
@@ -1037,6 +1042,7 @@ async def test_message_ordering_guarantees(pipeline_l4_manager):
 
 @pytest.mark.l4
 
+@pytest.mark.asyncio
 async def test_dead_letter_queue_handling(pipeline_l4_manager):
 
     """Test dead letter queue functionality and error recovery."""
@@ -1064,6 +1070,7 @@ async def test_dead_letter_queue_handling(pipeline_l4_manager):
 
 @pytest.mark.l4
 
+@pytest.mark.asyncio
 async def test_websocket_delivery_performance(pipeline_l4_manager):
 
     """Test WebSocket message delivery performance and reliability."""
@@ -1091,6 +1098,7 @@ async def test_websocket_delivery_performance(pipeline_l4_manager):
 
 @pytest.mark.l4
 
+@pytest.mark.asyncio
 async def test_pipeline_performance_under_sustained_load(pipeline_l4_manager):
 
     """Test message pipeline performance under sustained high load."""
@@ -1150,6 +1158,7 @@ async def test_pipeline_performance_under_sustained_load(pipeline_l4_manager):
 
 @pytest.mark.l4
 
+@pytest.mark.asyncio
 async def test_pipeline_sla_compliance_comprehensive(pipeline_l4_manager):
 
     """Test comprehensive pipeline SLA compliance across all requirements."""

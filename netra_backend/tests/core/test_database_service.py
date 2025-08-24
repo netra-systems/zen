@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -36,6 +36,7 @@ class TestDatabaseService:
         """Helper: Verify session error message."""
         assert expected_message in str(exc_info.value)
 
+    @pytest.mark.asyncio
     async def test_get_db_session_no_factory(self):
         """Test getting DB session without factory configured."""
         service = DatabaseService("db-service")
@@ -76,6 +77,7 @@ class TestDatabaseService:
         """Helper: Verify session close was called."""
         mock_session.close.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_get_db_session_success(self):
         """Test successful DB session acquisition."""
         service = DatabaseService("db-service")
@@ -105,6 +107,7 @@ class TestDatabaseService:
         mock_session.rollback.assert_called_once()
         mock_session.close.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_get_db_session_exception(self):
         """Test DB session with exception handling."""
         service = DatabaseService("db-service")

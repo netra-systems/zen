@@ -16,7 +16,7 @@ from pathlib import Path
 
 import asyncio
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import redis

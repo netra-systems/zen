@@ -10,7 +10,7 @@ from pathlib import Path
 
 import asyncio
 import uuid
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -26,6 +26,7 @@ class TestDataConsistencyCrossDBL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_cache_database_consistency(self):
         """Test consistency between cache (Redis) and database (Postgres)"""
         pg_service = PostgresService()
@@ -66,6 +67,7 @@ class TestDataConsistencyCrossDBL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_event_sourcing_consistency(self):
         """Test event sourcing consistency across stores"""
         pg_service = PostgresService()
@@ -118,6 +120,7 @@ class TestDataConsistencyCrossDBL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_distributed_transaction_simulation(self):
         """Test simulated distributed transaction across databases"""
         pg_service = PostgresService()
@@ -149,6 +152,7 @@ class TestDataConsistencyCrossDBL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_eventual_consistency_handling(self):
         """Test handling of eventual consistency"""
         pg_service = PostgresService()
@@ -197,6 +201,7 @@ class TestDataConsistencyCrossDBL3:
     @pytest.mark.asyncio
     @pytest.mark.integration
     @pytest.mark.l3
+    @pytest.mark.asyncio
     async def test_data_reconciliation(self):
         """Test data reconciliation across stores"""
         pg_service = PostgresService()

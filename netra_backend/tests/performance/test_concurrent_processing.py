@@ -26,6 +26,7 @@ from netra_backend.app.services.generation_service import run_content_generation
 class TestConcurrentProcessing:
     """Test concurrent generation requests and resource sharing"""
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_concurrent_generation_requests(self):
         """Test multiple concurrent generation jobs"""
         perf_params = ContentGenParams(
@@ -57,6 +58,7 @@ class TestConcurrentProcessing:
             assert duration < 300  # Under 5 minutes for 5 concurrent jobs
             assert mock_pool.call_count == concurrent_jobs
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_resource_contention_handling(self):
         """Test handling of resource contention"""
         perf_params = ContentGenParams(
@@ -82,6 +84,7 @@ class TestConcurrentProcessing:
                     initializer=mock_pool_class.call_args[1]['initializer']
                 )
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_thread_pool_efficiency(self):
         """Test thread pool utilization efficiency"""
         thread_pool_size = 10
@@ -109,11 +112,12 @@ class TestConcurrentProcessing:
         assert len(results) == task_count
         assert throughput > 100  # Should process >100 tasks/second
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_load_balancing_efficiency(self):
         """Test load balancing across multiple workers"""
         worker_loads = []
         
-        def mock_worker_with_load_tracking(task):
+        async def mock_worker_with_load_tracking(task):
             """Mock worker that tracks load distribution"""
             worker_id = id(task)  # Simulate worker ID
             worker_loads.append(worker_id)
@@ -138,6 +142,7 @@ class TestConcurrentProcessing:
         unique_workers = len(set(worker_loads))
         assert unique_workers >= min(8, len(worker_loads))
     @pytest.mark.performance
+    @pytest.mark.asyncio
     async def test_queue_management_under_load(self):
         """Test queue management under high load"""
         queue_sizes = []

@@ -6,7 +6,7 @@ Tests for supply chain endpoints - app/routes/supply.py
 import sys
 from pathlib import Path
 
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -57,6 +57,7 @@ class TestSupplyRoute:
                 data = response.json()
                 assert "enriched_data" in data or "supplier_id" in data
 
+    @pytest.mark.asyncio
     async def test_supply_validation(self):
         """Test supply chain validation."""
         from netra_backend.app.routes.supply import validate_supply_chain

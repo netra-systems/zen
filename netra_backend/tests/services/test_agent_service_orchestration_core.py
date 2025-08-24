@@ -22,7 +22,7 @@ from pathlib import Path
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from starlette.websockets import WebSocketDisconnect
@@ -44,6 +44,7 @@ from netra_backend.tests.test_agent_service_fixtures import (
 
 class TestAgentServiceOrchestrationCore:
     """Test agent service core orchestration functionality."""
+    @pytest.mark.asyncio
     async def test_agent_service_initialization(self, mock_supervisor):
         """Test agent service initialization with dependencies."""
         service = AgentService(mock_supervisor)
@@ -51,6 +52,7 @@ class TestAgentServiceOrchestrationCore:
         assert service.supervisor is mock_supervisor
         assert service.thread_service != None
         assert service.message_handler != None
+    @pytest.mark.asyncio
     async def test_agent_run_execution_basic(self, agent_service, mock_supervisor):
         """Test basic agent run execution."""
         request_model = create_mock_request_model()
@@ -66,6 +68,7 @@ class TestAgentServiceOrchestrationCore:
         """Verify supervisor was called with correct parameters."""
         expected_args = (request_model.user_request, request_model.id, request_model.user_id, run_id)
         mock_supervisor.run.assert_called_once_with(*expected_args)
+    @pytest.mark.asyncio
     async def test_agent_run_with_model_dump_fallback(self, agent_service, mock_supervisor):
         """Test agent run with model dump fallback when user_request not available."""
         request_model = self._create_model_without_user_request()
@@ -90,6 +93,7 @@ class TestAgentServiceOrchestrationCore:
         """Verify supervisor called with model dump string."""
         expected_args = ("{'query': 'test query'}", request_model.id, request_model.user_id, run_id)
         mock_supervisor.run.assert_called_once_with(*expected_args)
+    @pytest.mark.asyncio
     async def test_websocket_message_handling_start_agent(self, agent_service):
         """Test WebSocket message handling for start_agent."""
         user_id = "user123"
@@ -103,6 +107,7 @@ class TestAgentServiceOrchestrationCore:
         """Verify start_agent handler was called correctly."""
         expected_args = (user_id, {"query": "start analysis"}, None)
         agent_service.message_handler.handle_start_agent.assert_called_once_with(*expected_args)
+    @pytest.mark.asyncio
     async def test_websocket_message_handling_user_message(self, agent_service):
         """Test WebSocket message handling for user_message."""
         user_id = "user456"
@@ -116,6 +121,7 @@ class TestAgentServiceOrchestrationCore:
         """Verify user_message handler was called correctly."""
         expected_args = (user_id, {"content": "Hello agent"}, None)
         agent_service.message_handler.handle_user_message.assert_called_once_with(*expected_args)
+    @pytest.mark.asyncio
     async def test_websocket_message_handling_thread_operations(self, agent_service):
         """Test WebSocket message handling for thread operations."""
         user_id = "user789"
@@ -155,6 +161,7 @@ class TestAgentServiceOrchestrationCore:
         # Just verify the method was called, not specific arguments
         # since the call signature may vary based on implementation
         handler_method.assert_called()
+    @pytest.mark.asyncio
     async def test_websocket_message_handling_stop_agent(self, agent_service):
         """Test WebSocket message handling for stop_agent."""
         user_id = "user999"
@@ -163,6 +170,7 @@ class TestAgentServiceOrchestrationCore:
         await agent_service.handle_websocket_message(user_id, message)
         
         agent_service.message_handler.handle_stop_agent.assert_called_once_with(user_id)
+    @pytest.mark.asyncio
     async def test_websocket_message_handling_unknown_type(self, agent_service):
         """Test WebSocket message handling for unknown message type."""
         user_id = "user_unknown"
@@ -171,6 +179,7 @@ class TestAgentServiceOrchestrationCore:
         await agent_service.handle_websocket_message(user_id, message)
         
         # Should handle gracefully without calling any specific handler
+    @pytest.mark.asyncio
     async def test_websocket_message_handling_json_error(self, agent_service):
         """Test WebSocket message handling with JSON decode error."""
         user_id = "user_json_error"
@@ -182,6 +191,7 @@ class TestAgentServiceOrchestrationCore:
             await agent_service.handle_websocket_message(user_id, invalid_message)
             
             mock_send_error.assert_called_once_with(user_id, "Invalid message format")
+    @pytest.mark.asyncio
     async def test_websocket_disconnect_handling(self, agent_service):
         """Test handling of WebSocket disconnect during message processing."""
         user_id = "user_disconnect"
@@ -192,6 +202,7 @@ class TestAgentServiceOrchestrationCore:
         await agent_service.handle_websocket_message(user_id, message)
         
         # Should handle disconnect gracefully without raising exception
+    @pytest.mark.asyncio
     async def test_concurrent_agent_execution(self, agent_service, mock_supervisor):
         """Test concurrent agent execution without race conditions."""
         num_concurrent = 5
@@ -212,6 +223,7 @@ class TestAgentServiceOrchestrationCore:
         assert len(results) == num_concurrent
         assert all(result['status'] == 'completed' for result in results)
         assert mock_supervisor.run.call_count == num_concurrent
+    @pytest.mark.asyncio
     async def test_message_parsing_string_input(self, agent_service):
         """Test message parsing with string input."""
         json_string = '{"type": "start_agent", "payload": {"query": "test"}}'
@@ -220,6 +232,7 @@ class TestAgentServiceOrchestrationCore:
         
         assert parsed["type"] == "start_agent"
         assert parsed["payload"]["query"] == "test"
+    @pytest.mark.asyncio
     async def test_message_parsing_dict_input(self, agent_service):
         """Test message parsing with dict input."""
         dict_message = {"type": "user_message", "payload": {"content": "hello"}}
@@ -231,6 +244,7 @@ class TestAgentServiceOrchestrationCore:
 
 class TestAgentServiceBasic:
     """Basic agent service tests for core functionality."""
+    @pytest.mark.asyncio
     async def test_run_agent_with_request_model(self):
         """Test basic run method with full RequestModel."""
         mock_supervisor = MagicMock()

@@ -27,7 +27,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import aiohttp
 import asyncpg
@@ -45,6 +45,7 @@ class TestStartupPerformanceTimingValidation:
     """
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_containers(self):
         """Set up containerized services for L3 testing."""
         # Container setup based on test requirements
@@ -76,6 +77,7 @@ class TestStartupPerformanceTimingValidation:
         
         yield containers
     
+    @pytest.mark.asyncio
     async def test_10_second_target_validation(self, test_containers):
         """
         Test 10-second target validation.
@@ -97,6 +99,7 @@ class TestStartupPerformanceTimingValidation:
         duration = time.time() - start_time
         assert duration < 30, f"Test took {duration:.2f}s (max: 30s)"
     
+    @pytest.mark.asyncio
     async def test_load_condition_testing(self, test_containers):
         """
         Test load condition testing.
@@ -106,6 +109,7 @@ class TestStartupPerformanceTimingValidation:
         # Scenario-specific test implementation
         assert True, "Test implementation needed"
     
+    @pytest.mark.asyncio
     async def test_cold_vs_warm_start(self, test_containers):
         """
         Test cold vs warm start.
@@ -121,6 +125,7 @@ class TestStartupPerformanceTimingValidation:
         assert True, "Recovery validation needed"
     
     @pytest.mark.smoke
+    @pytest.mark.asyncio
     async def test_smoke_startup_performance_timing_validation(self, test_containers):
         """
         Quick smoke test for startup performance timing validation.
@@ -143,14 +148,17 @@ class TestStartupPerformanceTimingValidation:
 class TestStartupPerformanceTimingValidationIntegration:
     """Additional integration scenarios."""
     
+    @pytest.mark.asyncio
     async def test_multi_environment_validation(self):
         """Test across DEV and Staging environments."""
         pass
     
+    @pytest.mark.asyncio
     async def test_performance_under_load(self):
         """Test performance with production-like load."""
         pass
     
+    @pytest.mark.asyncio
     async def test_failure_cascade_impact(self):
         """Test impact of failures on dependent systems."""
         pass

@@ -16,7 +16,7 @@ import json
 import uuid
 from datetime import datetime
 from typing import Dict, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from starlette.websockets import WebSocketDisconnect

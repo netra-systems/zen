@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 from decimal import ROUND_HALF_UP, Decimal
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 

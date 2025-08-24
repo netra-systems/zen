@@ -36,6 +36,9 @@ from netra_backend.app.schemas.websocket_models import (
     WebSocketStats,
     WebSocketValidationError,
 )
+from netra_backend.app.websocket_core.rate_limiter import get_rate_limiter, check_connection_rate_limit
+from netra_backend.app.websocket_core.heartbeat_manager import get_heartbeat_manager, register_connection_heartbeat
+from netra_backend.app.websocket_core.message_buffer import get_message_buffer, buffer_user_message, BufferPriority
 
 logger = central_logger.get_logger(__name__)
 
@@ -72,8 +75,15 @@ class WebSocketManager:
         self._initialized = True
     
     async def connect_user(self, user_id: str, websocket: WebSocket, 
-                          thread_id: Optional[str] = None) -> str:
+                          thread_id: Optional[str] = None, client_ip: Optional[str] = None) -> str:
         """Connect user with WebSocket."""
+        # Check rate limits first
+        if client_ip:
+            allowed, backoff_seconds = await check_connection_rate_limit(client_ip)
+            if not allowed:
+                logger.warning(f"Rate limit exceeded for {client_ip}, backoff: {backoff_seconds}s")
+                raise WebSocketDisconnect(code=1013, reason=f"Rate limited, try again in {backoff_seconds:.1f}s")
+        
         connection_id = f"conn_{user_id}_{uuid.uuid4().hex[:8]}"
         
         # Store connection info
@@ -85,13 +95,22 @@ class WebSocketManager:
             "connected_at": datetime.now(timezone.utc),
             "last_activity": datetime.now(timezone.utc),
             "message_count": 0,
-            "is_healthy": True
+            "is_healthy": True,
+            "client_ip": client_ip
         }
         
         # Track user connections
         if user_id not in self.user_connections:
             self.user_connections[user_id] = set()
         self.user_connections[user_id].add(connection_id)
+        
+        # Register for heartbeat monitoring
+        await register_connection_heartbeat(connection_id)
+        
+        # Record rate limit tracking
+        if client_ip:
+            limiter = get_rate_limiter()
+            await limiter.record_connection_attempt(client_ip)
         
         # Update stats
         self.connection_stats["total_connections"] += 1
@@ -151,17 +170,30 @@ class WebSocketManager:
     
     async def send_to_user(self, user_id: str, 
                           message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]],
-                          retry: bool = True) -> bool:
+                          retry: bool = True, priority: BufferPriority = BufferPriority.NORMAL) -> bool:
         """Send message to all user connections."""
         user_conns = self.user_connections.get(user_id, set())
         if not user_conns:
-            logger.warning(f"No connections found for user {user_id}")
+            # Buffer message if no active connections
+            if retry:
+                buffered = await buffer_user_message(user_id, message, priority)
+                if buffered:
+                    logger.debug(f"Buffered message for offline user {user_id}")
+                    return True
+            logger.warning(f"No connections found for user {user_id} and buffering failed")
             return False
         
         success_count = 0
         for conn_id in list(user_conns):  # Copy to avoid modification during iteration
             if await self._send_to_connection(conn_id, message):
                 success_count += 1
+        
+        # If no connections succeeded and retry is enabled, buffer the message
+        if success_count == 0 and retry:
+            buffered = await buffer_user_message(user_id, message, priority)
+            if buffered:
+                logger.debug(f"Buffered message for user {user_id} after connection failures")
+                return True
         
         if success_count > 0:
             self.connection_stats["messages_sent"] += 1

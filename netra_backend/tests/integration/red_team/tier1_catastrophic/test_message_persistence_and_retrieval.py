@@ -103,6 +103,7 @@ class TestMessagePersistenceAndRetrieval:
         return TestClient(app)
 
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_user_and_thread(self, real_database_session):
         """Create a real test user and thread for testing."""
         # Create test user directly in database

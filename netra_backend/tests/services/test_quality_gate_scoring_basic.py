@@ -10,7 +10,7 @@ from pathlib import Path
 import asyncio
 import re
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -31,6 +31,7 @@ class TestCompleteMetricsCalculation:
     def quality_service(self):
         """Create QualityGateService instance"""
         return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
     async def test_calculate_metrics_complete_workflow(self, quality_service):
         """Test complete metrics calculation with all components"""
         content = """
@@ -98,6 +99,7 @@ class TestSpecificityCalculationEdgeCases:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
     async def test_specificity_with_all_indicators(self, quality_service):
         """Test specificity with all positive indicators"""
         content = """
@@ -113,6 +115,7 @@ class TestSpecificityCalculationEdgeCases:
         )
         
         assert score > 0.8  # Should be very high
+    @pytest.mark.asyncio
     async def test_specificity_with_vague_language_penalty(self, quality_service):
         """Test specificity penalty for vague language"""
         content = "You might want to consider optimizing your model perhaps."
@@ -130,6 +133,7 @@ class TestActionabilityEdgeCases:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
     async def test_actionability_with_file_paths(self, quality_service):
         """Test actionability with file paths and URLs"""
         content = """
@@ -144,6 +148,7 @@ class TestActionabilityEdgeCases:
         )
         
         assert score > 0.5  # Should recognize paths and URLs
+    @pytest.mark.asyncio
     async def test_actionability_code_blocks(self, quality_service):
         """Test actionability with code blocks"""
         content = """
@@ -168,6 +173,7 @@ class TestQuantificationPatterns:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
     async def test_quantification_all_patterns(self, quality_service):
         """Test all quantification patterns"""
         content = """
@@ -182,12 +188,14 @@ class TestQuantificationPatterns:
         
         score = await quality_service.metrics_calculator.calculate_quantification(content)
         assert score > 0.9  # Should match all patterns
+    @pytest.mark.asyncio
     async def test_quantification_before_after(self, quality_service):
         """Test before/after comparison bonus"""
         content = "Latency improved from 500ms before optimization to 150ms after."
         
         score = await quality_service.metrics_calculator.calculate_quantification(content)
         assert score > 0.3  # Should get bonus for before/after
+    @pytest.mark.asyncio
     async def test_quantification_metric_names(self, quality_service):
         """Test metric names with values bonus"""
         content = "Achieved throughput of 5000 QPS with latency under 50ms and precision at 0.95."
@@ -201,6 +209,7 @@ class TestRelevanceCalculation:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
     async def test_relevance_technical_terms_matching(self, quality_service):
         """Test relevance with technical term matching"""
         content = "Implement distributed training across multiple GPUs for faster convergence."
@@ -210,6 +219,7 @@ class TestRelevanceCalculation:
         
         score = await quality_service.metrics_calculator.specialized_calculator.calculate_relevance(content, context)
         assert score > 0.5  # Should match technical concepts
+    @pytest.mark.asyncio
     async def test_relevance_empty_request_words(self, quality_service):
         """Test relevance when request has no words"""
         content = "Optimization strategy"
@@ -224,6 +234,7 @@ class TestCompletenessCalculation:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
+    @pytest.mark.asyncio
     async def test_completeness_report_type(self, quality_service):
         """Test completeness for report content type"""
         content = """
@@ -239,6 +250,7 @@ class TestCompletenessCalculation:
             ContentType.REPORT
         )
         assert score == 1.0  # Has all required elements
+    @pytest.mark.asyncio
     async def test_completeness_general_type(self, quality_service):
         """Test completeness for general content type"""
         content = """

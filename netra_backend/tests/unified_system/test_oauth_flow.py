@@ -10,7 +10,7 @@ import sys
 import asyncio
 import json
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import httpx
 import pytest
@@ -136,6 +136,7 @@ class TestOAuthCompleteFlow:
 
     """Test complete OAuth login sequence"""
     
+    @pytest.mark.asyncio
     async def test_complete_oauth_login_flow(self, test_client, mock_auth_client):
 
         """
@@ -223,6 +224,7 @@ class TestTokenGenerationAndValidation:
 
     """Test JWT token lifecycle"""
     
+    @pytest.mark.asyncio
     async def test_token_generation_and_validation(self, mock_security_service):
 
         """
@@ -280,6 +282,7 @@ class TestTokenGenerationAndValidation:
 
         assert validation_result["user_id"] == "test_user"
         
+    @pytest.mark.asyncio
     async def test_token_expiration_handling(self, mock_security_service):
 
         """Test expired token handling"""
@@ -305,6 +308,7 @@ class TestWebSocketAuthentication:
 
     """Test WebSocket auth with JWT"""
     
+    @pytest.mark.asyncio
     async def test_websocket_authentication(self, mock_websocket_manager):
 
         """
@@ -340,6 +344,7 @@ class TestWebSocketAuthentication:
 
         assert auth_result["user_id"] == "test_user"
         
+    @pytest.mark.asyncio
     async def test_websocket_invalid_token_rejection(self, mock_websocket_manager):
 
         """Test WebSocket rejection of invalid tokens"""
@@ -371,6 +376,7 @@ class TestTokenRefreshFlow:
 
     """Test token refresh across services"""
     
+    @pytest.mark.asyncio
     async def test_token_refresh_across_services(self, test_client, mock_security_service):
 
         """
@@ -432,6 +438,7 @@ class TestOAuthErrorScenarios:
 
     """Test OAuth error handling scenarios"""
     
+    @pytest.mark.asyncio
     async def test_oauth_provider_error(self, test_client, mock_auth_client):
 
         """Test OAuth provider error handling"""
@@ -446,6 +453,7 @@ class TestOAuthErrorScenarios:
 
             assert response.status_code in [500, 502, 503]
     
+    @pytest.mark.asyncio
     async def test_invalid_authorization_code(self, test_client):
 
         """Test invalid authorization code handling"""
@@ -463,6 +471,7 @@ class TestOAuthErrorScenarios:
 
             assert response.status_code in [400, 401, 500]
     
+    @pytest.mark.asyncio
     async def test_state_parameter_validation(self, test_client):
 
         """Test CSRF protection via state parameter"""
@@ -477,6 +486,7 @@ class TestCrossServiceTokenValidation:
 
     """Test token validation across different services"""
     
+    @pytest.mark.asyncio
     async def test_auth_service_token_validation(self, mock_auth_client):
 
         """Test token validation through auth service"""
@@ -504,6 +514,7 @@ class TestCrossServiceTokenValidation:
 
             assert validation_result["user_id"] == "test_user"
     
+    @pytest.mark.asyncio
     async def test_backend_service_token_acceptance(self, test_client):
 
         """Test backend service accepts valid tokens from auth service"""
@@ -540,6 +551,7 @@ class TestDevLoginFlow:
 
     """Test development login functionality"""
     
+    @pytest.mark.asyncio
     async def test_dev_login_flow(self, test_client, mock_auth_client):
 
         """Test development mode login flow"""
@@ -597,6 +609,7 @@ class TestOAuthIntegrationFlow:
 
     """Integration tests for complete OAuth flow"""
     
+    @pytest.mark.asyncio
     async def test_end_to_end_oauth_integration(self, test_client):
 
         """

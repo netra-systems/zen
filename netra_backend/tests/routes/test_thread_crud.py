@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 from datetime import datetime
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -62,6 +62,7 @@ class TestThreadCRUD:
             else:
                 assert response.status_code in [404, 422, 401, 403]
     
+    @pytest.mark.asyncio
     async def test_thread_archival(self):
         """Test thread archival functionality."""
         from netra_backend.app.services.thread_service import ThreadService

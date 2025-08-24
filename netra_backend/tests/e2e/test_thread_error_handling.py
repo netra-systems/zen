@@ -10,7 +10,7 @@ from pathlib import Path
 import asyncio
 import uuid
 from typing import Any, Callable, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -30,6 +30,7 @@ from netra_backend.app.services.thread_service import ThreadService
 
 class ThreadDatabaseErrorTests:
     """Tests for database error scenarios in thread operations."""
+    @pytest.mark.asyncio
     async def test_thread_creation_database_error_recovery(self, mock_db_session: AsyncSession):
         """Test thread creation recovery from database errors."""
         service = ThreadService()
@@ -75,6 +76,7 @@ class ThreadDatabaseErrorTests:
         
         assert result == mock_thread
         db_session.rollback.assert_called_once()
+    @pytest.mark.asyncio
     async def test_message_creation_error_handling(self, mock_db_session: AsyncSession):
         """Test message creation error scenarios."""
         service = ThreadService()
@@ -110,6 +112,7 @@ class ThreadDatabaseErrorTests:
 
 class ThreadStateErrorTests:
     """Tests for state persistence error scenarios."""
+    @pytest.mark.asyncio
     async def test_state_persistence_failure_recovery(self, mock_db_session: AsyncSession):
         """Test recovery from state persistence failures."""
         service = ThreadService()
@@ -150,6 +153,7 @@ class ThreadStateErrorTests:
             except NetraException:
                 # Expected behavior - state persistence failure should be handled
                 pass
+    @pytest.mark.asyncio
     async def test_state_recovery_failure_scenarios(self, mock_db_session: AsyncSession):
         """Test state recovery failure scenarios."""
         user_id = "recovery_error_user"
@@ -179,6 +183,7 @@ class ThreadStateErrorTests:
 
 class ThreadConcurrencyErrorTests:
     """Tests for concurrency-related error scenarios."""
+    @pytest.mark.asyncio
     async def test_concurrent_modification_errors(self, mock_db_session: AsyncSession):
         """Test handling of concurrent modification errors."""
         service = ThreadService()
@@ -206,6 +211,7 @@ class ThreadConcurrencyErrorTests:
         # Verify that some operations succeeded despite potential conflicts
         successful_results = [r for r in results if not isinstance(r, Exception)]
         assert len(successful_results) > 0
+    @pytest.mark.asyncio
     async def test_deadlock_prevention_and_recovery(self, mock_db_session: AsyncSession):
         """Test deadlock prevention and recovery mechanisms."""
         service = ThreadService()
@@ -262,6 +268,7 @@ class ThreadConcurrencyErrorTests:
 
 class ThreadResourceErrorTests:
     """Tests for resource-related error scenarios."""
+    @pytest.mark.asyncio
     async def test_memory_exhaustion_scenarios(self, mock_db_session: AsyncSession):
         """Test handling of memory exhaustion scenarios."""
         service = ThreadService()
@@ -311,6 +318,7 @@ class ThreadResourceErrorTests:
             return f"Memory operation for {user_id} completed"
         
         return memory_op
+    @pytest.mark.asyncio
     async def test_connection_pool_exhaustion(self, mock_db_session: AsyncSession):
         """Test handling of connection pool exhaustion."""
         service = ThreadService()
@@ -343,6 +351,7 @@ class ThreadResourceErrorTests:
 
 class ThreadRecoveryTests:
     """Tests for thread operation recovery mechanisms."""
+    @pytest.mark.asyncio
     async def test_automatic_error_recovery(self, mock_db_session: AsyncSession):
         """Test automatic recovery from transient errors."""
         service = ThreadService()
@@ -357,7 +366,7 @@ class ThreadRecoveryTests:
         # Mock intermittent failures
         call_count = 0
         
-        def intermittent_failure(*args, **kwargs):
+        async def intermittent_failure(*args, **kwargs):
             nonlocal call_count
             call_count += 1
             if call_count <= 2:  # Fail first 2 attempts
@@ -378,6 +387,7 @@ class ThreadRecoveryTests:
         except Exception:
             # Transient errors should be handled gracefully
             pass
+    @pytest.mark.asyncio
     async def test_manual_recovery_procedures(self, mock_db_session: AsyncSession):
         """Test manual recovery procedures."""
         service = ThreadService()

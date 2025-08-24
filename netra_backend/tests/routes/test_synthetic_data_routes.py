@@ -6,7 +6,7 @@ Tests for synthetic data creation - app/routes/synthetic_data.py
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -77,6 +77,7 @@ class TestSyntheticDataRoute:
                 result = response.json()
                 assert "valid" in result
 
+    @pytest.mark.asyncio
     async def test_synthetic_data_templates(self):
         """Test synthetic data template management."""
         from netra_backend.app.routes.synthetic_data import _fetch_templates

@@ -176,6 +176,7 @@ class TestCompleteMetricsCalculation:
             "user_request": "optimize system performance",
             "data_source": "production metrics"
         }
+    @pytest.mark.asyncio
     async def test_calculate_metrics_complete_workflow_setup(self, quality_service):
         """Test complete metrics calculation setup"""
         content = self._create_optimization_content()
@@ -189,6 +190,7 @@ class TestCompleteMetricsCalculation:
         
         assert metrics.word_count >= 50
         assert metrics.sentence_count > 3
+    @pytest.mark.asyncio
     async def test_calculate_metrics_complete_workflow_basic(self, quality_service):
         """Test complete metrics calculation basic checks"""
         content = self._create_optimization_content()
@@ -204,6 +206,7 @@ class TestCompleteMetricsCalculation:
         assert metrics.circular_reasoning_detected == False
         assert metrics.specificity_score > 0.5
         assert metrics.actionability_score > 0.4
+    @pytest.mark.asyncio
     async def test_calculate_metrics_complete_workflow_scores(self, quality_service):
         """Test complete metrics calculation score validation"""
         content = self._create_optimization_content()
@@ -219,6 +222,7 @@ class TestCompleteMetricsCalculation:
         assert metrics.relevance_score > 0.3
         assert metrics.completeness_score >= 0.2
         assert metrics.novelty_score > 0
+    @pytest.mark.asyncio
     async def test_calculate_metrics_complete_workflow_final(self, quality_service):
         """Test complete metrics calculation final validation"""
         content = self._create_optimization_content()

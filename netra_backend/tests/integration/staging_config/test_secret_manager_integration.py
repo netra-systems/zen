@@ -8,6 +8,7 @@ and are accessible by the staging services.
 import sys
 from pathlib import Path
 
+import pytest
 # Test framework import - using pytest fixtures instead
 
 import json

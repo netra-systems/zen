@@ -15,7 +15,7 @@ import jwt
 import json
 import time
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 from typing import Dict, Any
 
@@ -52,7 +52,7 @@ except ImportError:
 
 # Mock websocket test helpers
 def create_test_websocket_client():
-    from unittest.mock import Mock
+    from unittest.mock import Mock, AsyncMock, MagicMock
     return Mock()
 
 def generate_test_jwt_token():
@@ -72,12 +72,12 @@ class TestWebSocketAuthenticationIntegration:
     @pytest.fixture
     async def settings(self):
         """Get application settings"""
-        return get_settings()
+        yield get_settings()
     
     @pytest.fixture
     async def auth_service(self, settings):
         """Real auth service instance"""
-        return UserAuthService(settings)
+        yield UserAuthService(settings)
     
     @pytest.fixture
     async def ws_manager(self, settings):
@@ -90,7 +90,7 @@ class TestWebSocketAuthenticationIntegration:
     @pytest.fixture
     async def ws_auth(self, settings, auth_service):
         """Real WebSocket authentication handler"""
-        return WebSocketAuth(settings, auth_service)
+        yield WebSocketAuth(settings, auth_service)
     
     @pytest.mark.asyncio
     async def test_websocket_connection_with_real_jwt_fails(self, ws_manager, ws_auth, settings):

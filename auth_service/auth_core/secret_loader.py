@@ -20,17 +20,17 @@ class AuthSecretLoader:
         CRITICAL: Must match backend service secret loading for token validation consistency.
         
         Priority order:
-        1. Environment-specific Google Secret Manager (staging/production)
-        2. Environment-specific env vars (JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION)
-        3. Primary: JWT_SECRET_KEY (shared with backend service)
-        4. Fallback: JWT_SECRET (auth service legacy)
+        1. Environment-specific env vars (JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION) 
+        2. Environment-specific Google Secret Manager (staging/production)
+        3. PRIMARY: JWT_SECRET_KEY (shared with backend service)
+        4. DEPRECATED: JWT_SECRET (auth service legacy) - only for backward compatibility
         5. Development fallback (only in development)
         """
         env = os.getenv("ENVIRONMENT", "development").lower()
         
-        # Try environment-specific variables first
+        # Try environment-specific variables first (highest priority)
         if env == "staging":
-            # In staging, check for staging-specific secret
+            # In staging, check for staging-specific secret first
             secret = os.getenv("JWT_SECRET_STAGING")
             if secret:
                 logger.info("Using JWT_SECRET_STAGING from environment")
@@ -43,7 +43,7 @@ class AuthSecretLoader:
                 return secret
                 
         elif env == "production":
-            # In production, check for production-specific secret
+            # In production, check for production-specific secret first
             secret = os.getenv("JWT_SECRET_PRODUCTION")
             if secret:
                 logger.info("Using JWT_SECRET_PRODUCTION from environment")
@@ -55,18 +55,18 @@ class AuthSecretLoader:
                 logger.info("Using prod-jwt-secret from Secret Manager")
                 return secret
         
-        # Fall back to generic variables (for all environments)
-        # CRITICAL: Check JWT_SECRET_KEY first to match backend service behavior
+        # CRITICAL: Check JWT_SECRET_KEY as primary fallback for consistency with backend service
+        # This ensures both services use the same secret when environment-specific secrets are not available
         secret = os.getenv("JWT_SECRET_KEY")
         if secret:
             logger.info("Using JWT_SECRET_KEY from environment (shared with backend)")
             return secret
             
-        # CRITICAL FIX: Also check JWT_SECRET for backward compatibility
-        # This ensures auth service works with either JWT_SECRET_KEY or JWT_SECRET
+        # DEPRECATED: Check JWT_SECRET for backward compatibility only
+        # This should only be used when JWT_SECRET_KEY is not available
         secret = os.getenv("JWT_SECRET")
         if secret:
-            logger.info("Using JWT_SECRET from environment (backward compatibility)")
+            logger.warning("Using JWT_SECRET from environment (DEPRECATED - use JWT_SECRET_KEY instead)")
             return secret
         
         # Development fallback only
@@ -74,8 +74,8 @@ class AuthSecretLoader:
             logger.warning("No JWT secret found, using development default")
             return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
         
-        # No fallback in staging/production
-        raise ValueError(f"JWT secret not configured for {env} environment. Set either JWT_SECRET_KEY or JWT_SECRET.")
+        # No fallback in staging/production - require JWT_SECRET_KEY
+        raise ValueError(f"JWT secret not configured for {env} environment. Set JWT_SECRET_KEY (recommended) or JWT_SECRET.")
     
     @staticmethod
     def _load_from_secret_manager(secret_name: str) -> Optional[str]:

@@ -24,7 +24,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -127,7 +127,7 @@ async def health_coordinator(mock_services):
     coordinator.backend_service_url = mock_services.get_http_service_url("backend") or "http://localhost:8000"
     coordinator.frontend_service_url = mock_services.get_http_service_url("frontend") or "http://localhost:3000"
     
-    return coordinator
+    yield coordinator
 
 @pytest.mark.asyncio
 async def test_multi_service_health_checks(health_coordinator):

@@ -16,7 +16,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import psutil
 import pytest
@@ -462,7 +462,7 @@ class TestPerformanceScalabilityL2:
 
                 }
             
-            def _get_improvements(self, analysis):
+            async def _get_improvements(self, analysis):
 
                 improvements = []
 

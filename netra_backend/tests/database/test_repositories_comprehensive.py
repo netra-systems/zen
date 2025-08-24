@@ -12,7 +12,7 @@ import asyncio
 import hashlib
 import json
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy import select
@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class TestThreadRepositoryOperations:
     """test_thread_repository_operations - Test thread CRUD operations and soft delete"""
     
+    @pytest.mark.asyncio
     async def test_thread_crud_operations(self):
         from netra_backend.app.schemas.registry import Thread
         from netra_backend.app.services.database.thread_repository import (
@@ -90,6 +91,7 @@ class TestThreadRepositoryOperations:
             result = await repo.delete(mock_session, "thread123")
             assert result == True
     
+    @pytest.mark.asyncio
     async def test_soft_delete_functionality(self):
         from netra_backend.app.services.database.thread_repository import (
             ThreadRepository,
@@ -142,6 +144,7 @@ class TestThreadRepositoryOperations:
 class TestMessageRepositoryQueries:
     """test_message_repository_queries - Test message queries and pagination"""
     
+    @pytest.mark.asyncio
     async def test_message_pagination(self):
         from netra_backend.app.schemas.registry import Message, MessageType
         from netra_backend.app.services.database.message_repository import (
@@ -178,6 +181,7 @@ class TestMessageRepositoryQueries:
             assert len(page2) == 20
             assert page2[0].id == "msg20"
     
+    @pytest.mark.asyncio
     async def test_complex_message_queries(self):
         from netra_backend.app.schemas.registry import Message, MessageType
         from netra_backend.app.services.database.message_repository import (
@@ -219,6 +223,7 @@ class TestMessageRepositoryQueries:
 class TestUserRepositoryAuth:
     """test_user_repository_auth - Test user authentication and password hashing"""
     
+    @pytest.mark.asyncio
     async def test_password_hashing(self):
         from argon2 import PasswordHasher
         from netra_backend.app.db.models_user import User
@@ -249,6 +254,7 @@ class TestUserRepositoryAuth:
                 assert user.hashed_password == "hashed_password"
                 mock_create_user.assert_called_once_with(mock_session, user_data)
     
+    @pytest.mark.asyncio
     async def test_authentication_flow(self):
         from argon2 import PasswordHasher
         from netra_backend.app.db.models_user import User
@@ -289,6 +295,7 @@ class TestUserRepositoryAuth:
 class TestOptimizationRepositoryStorage:
     """test_optimization_repository_storage - Test optimization storage and versioning"""
     
+    @pytest.mark.asyncio
     async def test_optimization_versioning(self):
         # Create a simple Optimization class for testing
         class Optimization:
@@ -340,6 +347,7 @@ class TestOptimizationRepositoryStorage:
         assert new_version.version == 2
         assert new_version.parent_id == "opt123"
     
+    @pytest.mark.asyncio
     async def test_optimization_history(self):
         # Create a simple Optimization class for testing
         class Optimization:
@@ -366,6 +374,7 @@ class TestOptimizationRepositoryStorage:
 class TestMetricRepositoryAggregation:
     """test_metric_repository_aggregation - Test metric aggregation and time-series queries"""
     
+    @pytest.mark.asyncio
     async def test_metric_aggregation(self):
         # Create a simple Metric class for testing
         class Metric:
@@ -405,6 +414,7 @@ class TestMetricRepositoryAggregation:
             )
             assert max_val == 70.0
     
+    @pytest.mark.asyncio
     async def test_time_series_queries(self):
         # Create a simple Metric class for testing
         class Metric:
@@ -442,6 +452,7 @@ class TestMetricRepositoryAggregation:
 class TestClickHouseConnectionPool:
     """test_clickhouse_connection_pool - Test connection pooling and query timeout"""
     
+    @pytest.mark.asyncio
     async def test_connection_pooling(self):
         # Mock ClickHouseDatabase class since it may not exist
         class MockClickHouseDatabase:
@@ -489,6 +500,7 @@ class TestClickHouseConnectionPool:
         with pytest.raises(asyncio.TimeoutError):
             await db.get_connection()
     
+    @pytest.mark.asyncio
     async def test_query_timeout(self):
         # Mock ClickHouseDatabase with timeout functionality
         class MockClickHouseDatabase:
@@ -513,6 +525,7 @@ class TestClickHouseConnectionPool:
 class TestMigrationRunnerSafety:
     """test_migration_runner_safety - Test migration safety and rollback capability"""
     
+    @pytest.mark.asyncio
     async def test_migration_rollback(self):
         # Mock MigrationRunner with rollback functionality
         class MockMigrationRunner:
@@ -545,6 +558,7 @@ class TestMigrationRunnerSafety:
         # Verify rollback was called
         assert mock_session.rollback.called
     
+    @pytest.mark.asyncio
     async def test_migration_transaction_safety(self):
         # Mock MigrationRunner class since it may not exist
         class MockMigrationRunner:
@@ -585,6 +599,7 @@ class TestMigrationRunnerSafety:
 class TestDatabaseHealthChecks:
     """test_database_health_checks - Test health monitoring and alert thresholds"""
     
+    @pytest.mark.asyncio
     async def test_health_monitoring(self):
         # Mock DatabaseHealthChecker class
         class MockDatabaseHealthChecker:
@@ -617,6 +632,7 @@ class TestDatabaseHealthChecks:
         assert health["status"] == "unhealthy"
         assert "error" in health
     
+    @pytest.mark.asyncio
     async def test_alert_thresholds(self):
         # Mock DatabaseHealthChecker with alert methods
         class MockDatabaseHealthChecker:

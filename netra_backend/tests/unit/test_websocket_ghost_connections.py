@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import WebSocket
@@ -72,6 +72,7 @@ class TestGhostConnectionPrevention:
         conn.last_failure_time = datetime.now(timezone.utc) - timedelta(seconds=90)
         return conn
 
+    @pytest.mark.asyncio
     async def test_close_oldest_connection_success(self, manager, active_connection):
         """Test successful closure of oldest connection."""
         await manager.registry.register_connection("test-user", active_connection)
@@ -86,6 +87,7 @@ class TestGhostConnectionPrevention:
         assert active_connection.state == ConnectionState.CLOSED
         assert len(manager.registry.get_user_connections("test-user")) == 0
 
+    @pytest.mark.asyncio
     async def test_close_oldest_connection_failure_creates_ghost(self, manager, active_connection):
         """Test failed closure creates ghost connection that gets cleaned up."""
         await manager.registry.register_connection("test-user", active_connection)
@@ -101,6 +103,7 @@ class TestGhostConnectionPrevention:
         assert len(manager.registry.get_user_connections("test-user")) == 1  # Still tracked
         assert active_connection.is_ghost_connection()
 
+    @pytest.mark.asyncio
     async def test_close_oldest_connection_exception_creates_ghost(self, manager, active_connection):
         """Test exception during closure creates ghost connection."""
         await manager.registry.register_connection("test-user", active_connection)
@@ -114,6 +117,7 @@ class TestGhostConnectionPrevention:
         assert active_connection.state == ConnectionState.FAILED
         assert active_connection.is_ghost_connection()
 
+    @pytest.mark.asyncio
     async def test_disconnect_atomic_state_management(self, manager, mock_websocket, active_connection):
         """Test atomic state management during disconnection."""
         await manager.registry.register_connection("test-user", active_connection)
@@ -128,6 +132,7 @@ class TestGhostConnectionPrevention:
         assert active_connection.state == ConnectionState.CLOSED
         assert len(manager.registry.get_user_connections("test-user")) == 0
 
+    @pytest.mark.asyncio
     async def test_disconnect_failure_marks_as_failed(self, manager, mock_websocket, active_connection):
         """Test disconnect failure properly marks connection as failed."""
         await manager.registry.register_connection("test-user", active_connection)
@@ -184,6 +189,7 @@ class TestGhostConnectionPrevention:
         failed_connection.failure_count = 5
         assert not failed_connection.should_retry_closure()
 
+    @pytest.mark.asyncio
     async def test_cleanup_ghost_connections(self, manager, failed_connection, stale_closing_connection, active_connection):
         """Test cleanup of ghost connections."""
         connections = [failed_connection, stale_closing_connection, active_connection]
@@ -201,6 +207,7 @@ class TestGhostConnectionPrevention:
         assert stale_closing_connection.state == ConnectionState.CLOSED  # Force cleanup
         assert active_connection.state == ConnectionState.ACTIVE  # Unchanged
 
+    @pytest.mark.asyncio
     async def test_force_cleanup_exhausted_retries(self, manager, failed_connection):
         """Test force cleanup of connection with exhausted retries."""
         failed_connection.failure_count = 5  # Exceed retry limit
@@ -211,6 +218,7 @@ class TestGhostConnectionPrevention:
         # Should be force cleaned up
         assert failed_connection.state == ConnectionState.CLOSED
 
+    @pytest.mark.asyncio
     async def test_ghost_connection_monitoring(self, manager, failed_connection, stale_closing_connection, active_connection):
         """Test ghost connection monitoring capabilities."""
         connections = [failed_connection, stale_closing_connection, active_connection]
@@ -227,6 +235,7 @@ class TestGhostConnectionPrevention:
         assert state_counts[ConnectionState.FAILED.value] == 1
         assert state_counts[ConnectionState.CLOSING.value] == 1
 
+    @pytest.mark.asyncio
     async def test_cleanup_dead_connections_with_ghosts(self, manager, failed_connection):
         """Test that cleanup_dead_connections handles ghost connections."""
         await manager.registry.register_connection("test-user", failed_connection)
@@ -241,6 +250,7 @@ class TestGhostConnectionPrevention:
         # Verify ghost cleanup was called
         assert failed_connection.state == ConnectionState.CLOSED  # Force cleaned
 
+    @pytest.mark.asyncio
     async def test_stats_include_ghost_information(self, manager, failed_connection, active_connection):
         """Test that stats include ghost connection information."""
         await manager.registry.register_connection("test-user", failed_connection)
@@ -254,6 +264,7 @@ class TestGhostConnectionPrevention:
         assert state_counts[ConnectionState.ACTIVE.value] == 1
         assert state_counts[ConnectionState.FAILED.value] == 1
 
+    @pytest.mark.asyncio
     async def test_no_ghost_connections_after_failures_compliance(self, manager, active_connection):
         """Test compliance with 'no ghost connections after failures' requirement."""
         # Simulate 10 random disconnections with failures (reduced for test speed)

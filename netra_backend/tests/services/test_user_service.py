@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -52,6 +52,7 @@ class TestUserService:
             is_superuser=False
         )
         return user
+    @pytest.mark.asyncio
     async def test_create_user(self, mock_db_session, sample_user_data):
         """Test creating a new user with password hashing"""
         # Arrange
@@ -94,6 +95,7 @@ class TestUserService:
         mock_db_session.add.assert_called_once()
         mock_db_session.commit.assert_called_once()
         mock_db_session.refresh.assert_called_once()
+    @pytest.mark.asyncio
     async def test_get_user_by_email(self, mock_db_session, sample_user):
         """Test retrieving a user by email"""
         # Arrange
@@ -120,6 +122,7 @@ class TestUserService:
         call_args = mock_db_session.execute.call_args[0][0]
         # The query should filter by email
         assert "email" in str(call_args)
+    @pytest.mark.asyncio
     async def test_get_user_by_email_not_found(self, mock_db_session):
         """Test retrieving a user by email when user doesn't exist"""
         # Arrange
@@ -138,6 +141,7 @@ class TestUserService:
         
         # Verify the query was executed
         mock_db_session.execute.assert_called_once()
+    @pytest.mark.asyncio
     async def test_update_user(self, mock_db_session, sample_user):
         """Test updating user information"""
         # Arrange
@@ -171,6 +175,7 @@ class TestUserService:
             # Verify database operations
             mock_db_session.commit.assert_called()
             mock_db_session.refresh.assert_called()
+    @pytest.mark.asyncio
     async def test_delete_user(self, mock_db_session, sample_user):
         """Test deleting a user"""
         # Arrange
@@ -190,6 +195,7 @@ class TestUserService:
             # Verify database operations
             mock_db_session.delete.assert_called_once_with(sample_user)
             mock_db_session.commit.assert_called_once()
+    @pytest.mark.asyncio
     async def test_get_user_by_id(self, mock_db_session, sample_user):
         """Test retrieving a user by ID"""
         # Arrange
@@ -212,6 +218,7 @@ class TestUserService:
         
         # Verify the query was executed
         mock_db_session.execute.assert_called_once()
+    @pytest.mark.asyncio
     async def test_get_multiple_users(self, mock_db_session):
         """Test retrieving multiple users with pagination"""
         # Arrange
@@ -246,6 +253,7 @@ class TestUserService:
         
         # Verify the query was executed
         mock_db_session.execute.assert_called_once()
+    @pytest.mark.asyncio
     async def test_password_hashing_security(self):
         """Test that password hashing is secure and consistent"""
         # Arrange
@@ -284,6 +292,7 @@ class TestUserService:
             assert False  # Should have raised exception
         except Exception:
             assert True  # Correctly failed verification
+    @pytest.mark.asyncio
     async def test_create_user_with_duplicate_email(self, mock_db_session, sample_user_data):
         """Test that creating a user with duplicate email handles error appropriately"""
         # Arrange

@@ -21,7 +21,7 @@ import time
 import uuid
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -186,6 +186,7 @@ class AgentCostOptimizationManager:
             "model_used": model
         }
     
+    @pytest.mark.asyncio
     async def test_cost_optimization_effectiveness(self, test_requests: List[str]) -> Dict[str, Any]:
         """Test effectiveness of cost optimization across multiple requests."""
         try:

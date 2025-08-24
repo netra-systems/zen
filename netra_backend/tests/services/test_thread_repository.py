@@ -22,6 +22,7 @@ pytest_plugins = ["netra_backend.tests.helpers.database_repository_fixtures"]
 class TestThreadRepository:
     """Test thread repository specific functionality."""
 
+    @pytest.mark.asyncio
     async def test_get_threads_by_user(self, unit_of_work):
         """Test getting threads by user ID."""
         async with unit_of_work as uow:
@@ -33,6 +34,7 @@ class TestThreadRepository:
             assert len(threads) == 5
             assert all(t.user_id == user_id for t in threads)
 
+    @pytest.mark.asyncio
     async def test_get_active_threads(self, unit_of_work):
         """Test getting active threads."""
         async with unit_of_work as uow:
@@ -57,6 +59,7 @@ class TestThreadRepository:
             assert len(active) == 1
             assert active[0].id == active_thread.id
 
+    @pytest.mark.asyncio
     async def test_archive_thread(self, unit_of_work):
         """Test thread archival."""
         async with unit_of_work as uow:

@@ -11,7 +11,7 @@ import asyncio
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from langchain_core.tools import BaseTool
@@ -175,6 +175,7 @@ class TestAdvancedOrchestration:
         # Should have executed conditional steps
         assert len(result['results']) > 0
 
+    @pytest.mark.asyncio
     async def test_conditional_tool_execution(self, orchestrator):
         """Test conditional tool execution based on context"""
         config = self._create_conditional_execution_config()
@@ -207,6 +208,7 @@ class TestAdvancedOrchestration:
         successful_results = [r for r in result['results'] if not r.startswith('SKIPPED')]
         assert len(successful_results) >= expected_partial_success
 
+    @pytest.mark.asyncio
     async def test_tool_chain_error_handling(self, orchestrator):
         """Test error handling in tool chains"""
         config = self._create_error_handling_config()
@@ -242,6 +244,7 @@ class TestAdvancedOrchestration:
         else:
             assert 'results' in result
 
+    @pytest.mark.asyncio
     async def test_tool_chain_timeout_handling(self, orchestrator):
         """Test timeout handling in tool chains"""
         config = self._create_timeout_test_config()
@@ -289,6 +292,7 @@ class TestAdvancedOrchestration:
         successful_chains = [r for r in results if not isinstance(r, Exception)]
         assert len(successful_chains) >= expected_chains * 0.8  # Allow some tolerance
 
+    @pytest.mark.asyncio
     async def test_concurrent_chain_execution(self, orchestrator):
         """Test concurrent execution of multiple tool chains"""
         chain_configs = self._create_concurrent_chains_config()
@@ -341,6 +345,7 @@ class TestAdvancedOrchestration:
         # Should succeed after retries
         assert not any(r.startswith('SKIPPED') for r in result['results'])
 
+    @pytest.mark.asyncio
     async def test_retry_mechanism_functionality(self, orchestrator):
         """Test retry mechanism for unreliable tools"""
         config = self._create_retry_mechanism_config()
@@ -413,6 +418,7 @@ class TestAdvancedOrchestration:
         assert results['concurrent_time'] > 0
         assert results['performance_ratio'] > 0.5  # Concurrent should be faster or similar
 
+    @pytest.mark.asyncio
     async def test_orchestration_performance_benchmarking(self, orchestrator):
         """Test orchestration performance benchmarking"""
         config = self._create_performance_benchmark_config()

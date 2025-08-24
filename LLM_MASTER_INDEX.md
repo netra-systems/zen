@@ -356,6 +356,7 @@ Services MUST remain 100% independent and communicate only through APIs:
 | **`code_changes.xml`** | Change checklist protocol | BEFORE making changes |
 | **`learnings/index.xml`** | Index of all past issues & solutions | ALWAYS check first |
 | **`anti_regression.xml`** | System stability requirements | Before commits |
+| **`audit.xml`** | Comprehensive audit framework | AFTER every session (MANDATORY) |
 
 ### 🚀 COLD START DOCUMENTATION (Critical for Startup)
 | Document | Purpose | When to Use |
@@ -456,6 +457,7 @@ Services MUST remain 100% independent and communicate only through APIs:
 | **`compliance_reporting.xml`** | Compliance tracking | Architecture compliance |
 | **`test_reporting.xml`** | Test result reporting | Test metrics |
 | **`ai_factory_status_report.xml`** | AI factory status | Factory metrics |
+| **`audit.xml`** | Audit framework & agent orchestration | Post-session, pre-deployment audits |
 
 ### 🔐 Security & Configuration
 | Spec | Purpose | Scope |

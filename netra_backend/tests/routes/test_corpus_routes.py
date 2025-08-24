@@ -73,6 +73,7 @@ class TestCorpusRoute:
             # Document endpoint may not be fully implemented
             assert response.status_code in [404, 422, 500]
     
+    @pytest.mark.asyncio
     async def test_corpus_search(self):
         """Test corpus search functionality."""
         from netra_backend.app.db.models_postgres import User
@@ -103,6 +104,7 @@ class TestCorpusRoute:
             assert result[0]["id"] == "1"
             assert result[0]["score"] == 0.95
     
+    @pytest.mark.asyncio
     async def test_corpus_bulk_operations(self):
         """Test bulk corpus operations."""
         from netra_backend.app.routes.corpus import (

@@ -10,7 +10,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy import JSON, Column, DateTime, String
@@ -23,6 +23,7 @@ from netra_backend.app.services.database.thread_repository import ThreadReposito
 class TestThreadRepositoryOperations:
     """test_thread_repository_operations - Test thread CRUD operations and soft delete"""
     
+    @pytest.mark.asyncio
     async def test_thread_crud_operations(self):
         """Test thread CRUD operations"""
         mock_session = AsyncMock(spec=AsyncSession)
@@ -71,6 +72,7 @@ class TestThreadRepositoryOperations:
             result = await repo.delete(mock_session, "thread123")
             assert result == True
     
+    @pytest.mark.asyncio
     async def test_soft_delete_functionality(self):
         """Test soft delete functionality"""
         mock_session = AsyncMock(spec=AsyncSession)

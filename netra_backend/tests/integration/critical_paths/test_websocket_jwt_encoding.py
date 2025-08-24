@@ -20,7 +20,7 @@ import base64
 import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import jwt
 import pytest
@@ -183,6 +183,7 @@ class TestWebSocketJWTEncodingL3:
 
     """L3 integration tests for WebSocket JWT encoding."""
     
+    @pytest.mark.asyncio
     async def test_valid_jwt_encoding_decoding(self):
 
         """Test 1: Valid JWT token is properly encoded and decoded."""
@@ -242,6 +243,7 @@ class TestWebSocketJWTEncodingL3:
 
                 assert call_args == test_token  # Should be the original token
     
+    @pytest.mark.asyncio
     async def test_invalid_base64_encoding_rejection(self):
 
         """Test 2: Invalid base64 encoded tokens are rejected."""
@@ -265,6 +267,7 @@ class TestWebSocketJWTEncodingL3:
             
             assert "No secure JWT token provided" in str(exc_info.value.detail)
     
+    @pytest.mark.asyncio
     async def test_bearer_prefix_handling(self):
 
         """Test 3: Bearer prefix is properly handled in encoding/decoding."""
@@ -318,6 +321,7 @@ class TestWebSocketJWTEncodingL3:
 
                 assert not call_args.startswith("Bearer ")
     
+    @pytest.mark.asyncio
     async def test_special_characters_in_jwt(self):
 
         """Test 4: JWTs with special characters are properly encoded."""
@@ -368,6 +372,7 @@ class TestWebSocketJWTEncodingL3:
 
                 assert result["user_id"] == "special-user_123.456"
     
+    @pytest.mark.asyncio
     async def test_subprotocol_negotiation_with_jwt_auth(self):
 
         """Test 5: Proper subprotocol negotiation with jwt-auth protocol."""
@@ -429,6 +434,7 @@ class TestWebSocketJWTEncodingL3:
                 
                 assert selected == "jwt-auth"
     
+    @pytest.mark.asyncio
     async def test_malformed_jwt_structure_rejection(self):
 
         """Test 6: Malformed JWT structure (not 3 parts) is rejected."""
@@ -458,6 +464,7 @@ class TestWebSocketJWTEncodingL3:
                 
                 assert "Invalid or expired token" in str(exc_info.value.detail)
     
+    @pytest.mark.asyncio
     async def test_expired_jwt_rejection(self):
 
         """Test 7: Expired JWT tokens are properly rejected."""
@@ -506,6 +513,7 @@ class TestWebSocketJWTEncodingL3:
                 
                 assert "Invalid or expired token" in str(exc_info.value.detail)
     
+    @pytest.mark.asyncio
     async def test_empty_subprotocol_fallback(self):
 
         """Test 8: Empty or missing JWT in subprotocol falls back to header auth."""
@@ -547,6 +555,7 @@ class TestWebSocketJWTEncodingL3:
 
                 assert result["auth_method"] == "header"  # Used header instead of subprotocol
     
+    @pytest.mark.asyncio
     async def test_concurrent_connections_with_encoded_jwt(self):
 
         """Test 9: Multiple concurrent connections with encoded JWTs work correctly."""
@@ -616,6 +625,7 @@ class TestWebSocketJWTEncodingL3:
 
             assert results[i]["auth_method"] == "subprotocol"
     
+    @pytest.mark.asyncio
     async def test_encoding_decoding_roundtrip_integrity(self):
 
         """Test 10: JWT encoding/decoding roundtrip maintains token integrity."""

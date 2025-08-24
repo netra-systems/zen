@@ -16,7 +16,7 @@ Each function ≤15 lines, class ≤200 lines total.
 import asyncio
 from typing import Optional
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -48,9 +48,7 @@ class DatabaseManager:
         if is_pytest:
             # In pytest mode, directly check environment to handle dynamic test env changes
             raw_url = os.environ.get("DATABASE_URL", "")
-            test_collection_mode = os.environ.get('TEST_COLLECTION_MODE')
-            if test_collection_mode == '1' and not raw_url:
-                return "sqlite:///:memory:"
+            # Skip TEST_COLLECTION_MODE check since tests need to process URLs normally during execution
         else:
             # Get from unified configuration - single source of truth for non-test environments
             try:
@@ -198,22 +196,32 @@ class DatabaseManager:
     
     @staticmethod
     def create_application_engine():
-        """Return async SQLAlchemy engine for FastAPI.
+        """Return async SQLAlchemy engine for FastAPI with resilient pool configuration.
+        
+        CRITICAL FIX: Uses AsyncAdaptedQueuePool to prevent asyncio compatibility issues.
         
         Returns:
             Async SQLAlchemy engine configured for application runtime
         """
+        from sqlalchemy.pool import AsyncAdaptedQueuePool, NullPool
+        
         app_url = DatabaseManager.get_application_url_async()
         
+        # Determine appropriate pool class - CRITICAL for asyncio compatibility
+        pool_class = NullPool if "sqlite" in app_url else AsyncAdaptedQueuePool
+        
         connect_args = {}
-        if "/cloudsql/" not in app_url:
-            # Standard connection settings
+        if "/cloudsql/" not in app_url and pool_class != NullPool:
+            # Standard connection settings for PostgreSQL
             connect_args = {
                 "server_settings": {
                     "application_name": "netra_backend_async",
                     "tcp_keepalives_idle": "600",
                     "tcp_keepalives_interval": "30", 
                     "tcp_keepalives_count": "3",
+                    # Add connection limits to prevent startup contention
+                    "lock_timeout": "60s",
+                    "statement_timeout": "120s",
                 }
             }
         
@@ -221,18 +229,27 @@ class DatabaseManager:
         config = get_unified_config()
         sql_echo = config.log_level == "DEBUG"  # Enable SQL echo in DEBUG mode
         
-        return create_async_engine(
-            app_url,
-            echo=sql_echo,
-            pool_pre_ping=True,
-            pool_recycle=3600,
-            # Increased pool sizes to handle concurrent startup operations and health checks
-            pool_size=20,  # Base pool size increased from 10 to 20
-            max_overflow=30,  # Max overflow increased from 20 to 30 (total max: 50 connections)
-            pool_timeout=30,  # Timeout for getting connection from pool
-            pool_reset_on_return='rollback',  # Reset connections properly
-            connect_args=connect_args
-        )
+        engine_args = {
+            "echo": sql_echo,
+            "poolclass": pool_class,  # CRITICAL: Specify pool class explicitly
+            "pool_pre_ping": True,
+            "pool_recycle": 3600,
+            "pool_reset_on_return": 'rollback',  # Reset connections properly
+        }
+        
+        # Add pool sizing only for non-NullPool configurations
+        if pool_class != NullPool:
+            engine_args.update({
+                # Optimized pool sizes for cold start resilience
+                "pool_size": 25,  # Increased base pool size for concurrent startup
+                "max_overflow": 35,  # Higher overflow to handle startup bursts (total max: 60)
+                "pool_timeout": 120,  # Longer timeout for cold start scenarios
+            })
+        
+        if connect_args:
+            engine_args["connect_args"] = connect_args
+        
+        return create_async_engine(app_url, **engine_args)
     
     @staticmethod
     def get_migration_session():
@@ -266,14 +283,22 @@ class DatabaseManager:
         Returns:
             True if using Cloud SQL Unix socket connections
         """
-        # Get from unified configuration - single source of truth
-        try:
-            config = get_unified_config()
-            database_url = config.database_url or ""
-        except Exception:
-            # Fallback for bootstrap
-            import os
+        # Check if we're in pytest mode and should directly read environment
+        import sys
+        import os
+        is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
+        
+        if is_pytest:
+            # In pytest mode, directly check environment to handle dynamic test env changes
             database_url = os.environ.get("DATABASE_URL", "")
+        else:
+            # Get from unified configuration - single source of truth for non-test environments
+            try:
+                config = get_unified_config()
+                database_url = config.database_url or ""
+            except Exception:
+                # Fallback for bootstrap
+                database_url = os.environ.get("DATABASE_URL", "")
         
         return CoreDatabaseManager.is_cloud_sql_connection(database_url)
     
@@ -284,8 +309,17 @@ class DatabaseManager:
         Returns:
             True if running in local development environment
         """
-        config = get_unified_config()
-        return config.environment == "development"
+        # Check if we're in pytest mode and should use direct environment detection
+        import sys
+        is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
+        
+        if is_pytest:
+            # In pytest mode, use direct environment detection
+            return get_current_environment() == "development"
+        else:
+            # Get from unified configuration for non-test environments
+            config = get_unified_config()
+            return config.environment == "development"
     
     @staticmethod
     def is_remote_environment() -> bool:
@@ -561,5 +595,49 @@ class DatabaseManager:
             return "postgresql://postgres:password@localhost:5432/netra"
 
 
-# Export the main class
+    @staticmethod
+    async def initialize_database_with_migration_locks():
+        """Initialize database with migration lock management for cold starts.
+        
+        Returns:
+            Tuple of (engine, session_factory, migration_manager)
+        """
+        from netra_backend.app.db.migration_manager import migration_lock_manager
+        from netra_backend.app.db.connection_pool_manager import get_connection_pool_manager
+        
+        logger.info("Initializing database with migration lock management")
+        
+        # Get connection pool manager
+        pool_manager = await get_connection_pool_manager()
+        
+        # Perform health check first
+        health_status = await pool_manager.health_check()
+        if health_status["status"] != "healthy":
+            logger.warning(f"Database health check warning: {health_status}")
+        
+        # Attempt to acquire migration lock to coordinate startup
+        async with migration_lock_manager.migration_lock_context(timeout=30) as locked:
+            if locked:
+                logger.info("Acquired migration lock - performing initialization")
+                
+                # Test connection with the pool manager
+                try:
+                    async with await pool_manager.get_session() as session:
+                        await session.execute(text("SELECT 1"))
+                        await session.commit()
+                    
+                    logger.info("Database initialization completed successfully")
+                    return pool_manager._engine, pool_manager._session_factory, migration_lock_manager
+                    
+                except Exception as e:
+                    logger.error(f"Database initialization failed: {e}")
+                    raise
+            else:
+                logger.info("Could not acquire migration lock - using existing initialization")
+                # Still return the pool manager components
+                await pool_manager._ensure_initialized()
+                return pool_manager._engine, pool_manager._session_factory, migration_lock_manager
+
+
+# Export the main class and key functions
 __all__ = ["DatabaseManager"]

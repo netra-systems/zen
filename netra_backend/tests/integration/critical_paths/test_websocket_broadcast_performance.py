@@ -23,7 +23,7 @@ import time
 import statistics
 from typing import Dict, Any, List, Tuple
 from datetime import datetime, timezone
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 from concurrent.futures import ThreadPoolExecutor
 
@@ -199,6 +199,7 @@ class TestWebSocketBroadcastPerformanceL3:
 
         return BroadcastPerformanceTracker()
     
+    @pytest.mark.asyncio
     async def test_small_scale_broadcast_baseline(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance baseline with small user count."""
@@ -297,6 +298,7 @@ class TestWebSocketBroadcastPerformanceL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_medium_scale_broadcast_performance(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance with medium user count."""
@@ -407,6 +409,7 @@ class TestWebSocketBroadcastPerformanceL3:
         
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     
+    @pytest.mark.asyncio
     async def test_large_scale_broadcast_performance(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast performance with large user count."""
@@ -552,6 +555,7 @@ class TestWebSocketBroadcastPerformanceL3:
             
             await asyncio.gather(*cleanup_tasks, return_exceptions=True)
     
+    @pytest.mark.asyncio
     async def test_broadcast_latency_measurement(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test broadcast latency with timing measurements."""
@@ -636,6 +640,7 @@ class TestWebSocketBroadcastPerformanceL3:
 
             await websocket_manager.disconnect_user(user.id, websocket)
     
+    @pytest.mark.asyncio
     async def test_concurrent_broadcast_handling(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test handling of concurrent broadcast operations."""
@@ -760,6 +765,7 @@ class TestWebSocketBroadcastPerformanceL3:
     
     @mock_justified("L3: Broadcast performance testing with real Redis infrastructure")
 
+    @pytest.mark.asyncio
     async def test_broadcast_memory_efficiency(self, websocket_manager, redis_client, large_user_pool, performance_tracker):
 
         """Test memory efficiency during broadcast operations."""

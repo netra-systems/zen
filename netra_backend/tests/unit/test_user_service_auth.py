@@ -36,7 +36,7 @@ import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 from argon2.exceptions import InvalidHashError, VerifyMismatchError
@@ -125,6 +125,7 @@ class TestUserServiceAuthentication:
 
     # AUTHENTICATION CORE FUNCTIONALITY TESTS
 
+    @pytest.mark.asyncio
     async def test_valid_token_authentication_success(self, mock_credentials, mock_auth_client, mock_db_session, enterprise_user):
         """Test successful authentication with valid enterprise token."""
         self._setup_valid_auth_flow(mock_auth_client, mock_db_session, enterprise_user)
@@ -135,6 +136,7 @@ class TestUserServiceAuthentication:
         assert result.plan_tier == "enterprise"
         mock_auth_client.assert_called_once_with("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test.token")
 
+    @pytest.mark.asyncio
     async def test_invalid_token_blocks_access(self, mock_credentials, mock_auth_client, mock_db_session):
         """Test security block with invalid/malicious token."""
         mock_auth_client.return_value = {"valid": False}
@@ -144,6 +146,7 @@ class TestUserServiceAuthentication:
         
         self._assert_security_block_401(exc_info)
 
+    @pytest.mark.asyncio
     async def test_malformed_token_handled_securely(self, mock_auth_client, mock_db_session):
         """Test security handling of malformed JWT token."""
         malformed_credentials = Mock(spec=HTTPAuthorizationCredentials)
@@ -155,6 +158,7 @@ class TestUserServiceAuthentication:
         
         self._assert_security_block_401(exc_info)
 
+    @pytest.mark.asyncio
     async def test_sql_injection_in_email_blocked(self, mock_credentials, mock_auth_client, mock_db_session):
         """Test SQL injection prevention in email field."""
         mock_auth_client.return_value = {
@@ -171,6 +175,7 @@ class TestUserServiceAuthentication:
 
     # MULTI-TENANT DATA ISOLATION TESTS
 
+    @pytest.mark.asyncio
     async def test_cross_tenant_access_blocked(self, mock_credentials, mock_auth_client, mock_db_session):
         """Test prevention of cross-tenant data access."""
         # Simulate token with different tenant user_id
@@ -185,6 +190,7 @@ class TestUserServiceAuthentication:
         
         assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
 
+    @pytest.mark.asyncio
     async def test_tenant_isolation_in_user_lookup(self, mock_credentials, mock_auth_client, mock_db_session, enterprise_user):
         """Test user lookup respects tenant boundaries."""
         self._setup_valid_auth_flow(mock_auth_client, mock_db_session, enterprise_user)
@@ -197,6 +203,7 @@ class TestUserServiceAuthentication:
 
     # ROLE-BASED ACCESS CONTROL (RBAC) TESTS
 
+    @pytest.mark.asyncio
     async def test_admin_access_control_success(self, enterprise_user):
         """Test admin role validation for enterprise users."""
         result = await require_admin(enterprise_user)
@@ -204,6 +211,7 @@ class TestUserServiceAuthentication:
         assert result == enterprise_user
         assert result.is_admin is True
 
+    @pytest.mark.asyncio
     async def test_admin_access_blocked_for_free_users(self, free_user):
         """Test admin access blocked for free tier users."""
         with pytest.raises(HTTPException) as exc_info:
@@ -211,6 +219,7 @@ class TestUserServiceAuthentication:
         
         self._assert_access_denied_403(exc_info, "Admin access required")
 
+    @pytest.mark.asyncio
     async def test_developer_permission_validation(self, enterprise_user, free_user):
         """Test developer permission enforcement across tiers."""
         # Enterprise user should have developer access
@@ -221,6 +230,7 @@ class TestUserServiceAuthentication:
         with pytest.raises(HTTPException):
             await require_developer(free_user)
 
+    @pytest.mark.asyncio
     async def test_custom_permission_validation(self, enterprise_user, free_user):
         """Test custom permission validation for different tiers."""
         billing_check = require_permission("billing")
@@ -339,6 +349,7 @@ class TestUserServiceAuthentication:
 
     # BRUTE FORCE AND RATE LIMITING TESTS
 
+    @pytest.mark.asyncio
     async def test_repeated_failed_auth_tracking(self, mock_credentials, mock_auth_client, mock_db_session):
         """Test tracking of repeated failed authentication attempts."""
         mock_auth_client.return_value = {"valid": False}
@@ -362,6 +373,7 @@ class TestUserServiceAuthentication:
 
     # PRIVILEGE ESCALATION PREVENTION TESTS
 
+    @pytest.mark.asyncio
     async def test_privilege_escalation_blocked(self, free_user):
         """Test prevention of privilege escalation attacks."""
         # Attempt to bypass permission checks
@@ -390,6 +402,7 @@ class TestUserServiceAuthentication:
 
     # SECURITY AUDIT AND LOGGING TESTS
 
+    @pytest.mark.asyncio
     async def test_authentication_audit_trail(self, mock_credentials, mock_auth_client, mock_db_session, enterprise_user):
         """Test authentication events generate audit trail."""
         self._setup_valid_auth_flow(mock_auth_client, mock_db_session, enterprise_user)
@@ -422,6 +435,7 @@ class TestUserServiceAuthentication:
 
     # ENTERPRISE SSO INTEGRATION POINTS TESTS
 
+    @pytest.mark.asyncio
     async def test_enterprise_sso_token_validation(self, mock_credentials, mock_auth_client, mock_db_session, enterprise_user):
         """Test enterprise SSO token validation flow."""
         # Simulate SSO token validation

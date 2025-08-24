@@ -12,7 +12,7 @@ import time
 import tracemalloc
 from datetime import UTC, datetime, timezone
 from typing import Any, Dict, List, Tuple
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from fastapi import WebSocket
@@ -53,6 +53,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         return MockConnectionPool(max_connections=50)
     
+    @pytest.mark.asyncio
     async def test_high_volume_connection_handling(self, performance_websocket_manager):
 
         """Test handling high volume of connections"""
@@ -123,6 +124,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
             await websocket_manager.disconnect_user(user_id, websocket)
             
+    @pytest.mark.asyncio
     async def test_connection_pool_utilization(self, connection_pool):
 
         """Test connection pool utilization and efficiency"""
@@ -173,6 +175,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         assert updated_stats['utilization_rate'] < 1.0
         
+    @pytest.mark.asyncio
     async def test_memory_usage_under_load(self, performance_websocket_manager):
 
         """Test memory usage under connection load"""
@@ -249,6 +252,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
             await websocket_manager.disconnect_user(user_id, websocket)
             
+    @pytest.mark.asyncio
     async def test_connection_recovery_after_failure(self, performance_websocket_manager):
 
         """Test connection recovery after failures"""
@@ -301,6 +305,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         assert recovered_conn.connection_id != original_conn.connection_id
         
+    @pytest.mark.asyncio
     async def test_heartbeat_performance_under_load(self, performance_websocket_manager):
 
         """Test heartbeat mechanism performance under load"""
@@ -383,6 +388,7 @@ class TestWebSocketManagerPerformanceAndScaling:
 
         assert remaining_tasks == 0
         
+    @pytest.mark.asyncio
     async def test_broadcast_performance(self, performance_websocket_manager):
 
         """Test broadcast message performance"""

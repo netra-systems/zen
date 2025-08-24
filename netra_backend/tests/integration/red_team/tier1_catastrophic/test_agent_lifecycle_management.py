@@ -42,7 +42,7 @@ class TestAgentService(BaseAgentService):
     
     def __init__(self, db_session=None):
         # Create a mock supervisor for testing
-        from unittest.mock import AsyncMock, Mock
+        from unittest.mock import AsyncMock, MagicMock, Mock
         mock_supervisor = Mock()
         mock_supervisor.run = AsyncMock()
         super().__init__(mock_supervisor)

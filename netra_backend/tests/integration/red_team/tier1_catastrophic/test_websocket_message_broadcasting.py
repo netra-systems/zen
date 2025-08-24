@@ -38,7 +38,7 @@ from netra_backend.app.websocket_core.manager import WebSocketManager as WebSock
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.db.models_user import User
 # AgentRun model - creating mock for tests
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 AgentRun = Mock
 from netra_backend.app.db.session import get_db_session
 
@@ -91,6 +91,7 @@ class TestWebSocketMessageBroadcasting:
         }
 
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_user(self, real_database_session):
         """Create a test user for WebSocket authentication."""
         test_user_id = str(uuid.uuid4())

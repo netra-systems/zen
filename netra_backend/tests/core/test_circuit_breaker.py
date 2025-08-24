@@ -16,7 +16,7 @@ from pathlib import Path
 import asyncio
 import time
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, MagicMock
 
 import pytest
 
@@ -99,6 +99,7 @@ class TestCircuitBreaker:
         assert self.circuit.metrics.successful_calls == 0
         assert self.circuit.metrics.failed_calls == 0
     
+    @pytest.mark.asyncio
     async def test_successful_call(self):
         """Test successful function call."""
         async def success_func():
@@ -111,6 +112,7 @@ class TestCircuitBreaker:
         assert self.circuit.metrics.successful_calls == 1
         assert self.circuit.metrics.total_calls == 1
     
+    @pytest.mark.asyncio
     async def test_failed_call(self):
         """Test failed function call."""
         async def fail_func():
@@ -123,6 +125,7 @@ class TestCircuitBreaker:
         assert self.circuit.metrics.failed_calls == 1
         assert self.circuit.metrics.total_calls == 1
     
+    @pytest.mark.asyncio
     async def test_circuit_opens_after_threshold(self):
         """Test circuit opens after failure threshold."""
         async def fail_func():
@@ -136,6 +139,7 @@ class TestCircuitBreaker:
         assert self.circuit.state == CircuitState.OPEN
         assert self.circuit.metrics.failed_calls == self.config.failure_threshold
     
+    @pytest.mark.asyncio
     async def test_circuit_rejects_when_open(self):
         """Test circuit rejects calls when open."""
         async def fail_func():
@@ -157,6 +161,7 @@ class TestCircuitBreaker:
         
         assert self.circuit.metrics.rejected_calls == 1
     
+    @pytest.mark.asyncio
     async def test_circuit_recovery_to_half_open(self):
         """Test circuit recovery to half-open state."""
         async def fail_func():
@@ -181,6 +186,7 @@ class TestCircuitBreaker:
         assert result == "success"
         assert self.circuit.state == CircuitState.CLOSED  # Should close after success
     
+    @pytest.mark.asyncio
     async def test_half_open_state_behavior(self):
         """Test half-open state behavior."""
         # Manually set circuit to half-open
@@ -199,6 +205,7 @@ class TestCircuitBreaker:
         can_execute = await self.circuit._can_execute()
         assert can_execute is False
     
+    @pytest.mark.asyncio
     async def test_timeout_handling(self):
         """Test timeout handling in circuit breaker."""
         async def slow_func():
@@ -211,9 +218,10 @@ class TestCircuitBreaker:
         assert self.circuit.metrics.timeouts == 1
         assert self.circuit.metrics.failed_calls == 1
     
+    @pytest.mark.asyncio
     async def test_sync_function_call(self):
         """Test calling synchronous functions."""
-        def sync_func():
+        async def sync_func():
             return "sync_result"
         
         result = await self.circuit.call(sync_func)
@@ -243,6 +251,7 @@ class TestCircuitBreaker:
 class TestCircuitBreakerRegistry:
     """Test circuit breaker registry functionality."""
     
+    @pytest.mark.asyncio
     async def test_get_circuit_creates_new(self):
         """Test getting circuit creates new instance."""
         config = CircuitConfig(name="registry_test")
@@ -251,6 +260,7 @@ class TestCircuitBreakerRegistry:
         assert circuit.config.name == "registry_test"
         assert isinstance(circuit, CircuitBreaker)
     
+    @pytest.mark.asyncio
     async def test_get_circuit_returns_existing(self):
         """Test getting existing circuit returns same instance."""
         config = CircuitConfig(name="existing_test")
@@ -259,6 +269,7 @@ class TestCircuitBreakerRegistry:
         
         assert circuit1 is circuit2
     
+    @pytest.mark.asyncio
     async def test_get_all_status(self):
         """Test getting status of all circuits."""
         config1 = CircuitConfig(name="test1")
@@ -275,6 +286,7 @@ class TestCircuitBreakerRegistry:
 class TestCircuitBreakerIntegration:
     """Integration tests for circuit breaker."""
     
+    @pytest.mark.asyncio
     async def test_realistic_failure_recovery_cycle(self):
         """Test realistic failure and recovery cycle."""
         config = CircuitConfig(
@@ -317,11 +329,13 @@ class TestCircuitBreakerIntegration:
         assert result == "Success 3"
         assert circuit.state == CircuitState.CLOSED
     
+    @pytest.mark.asyncio
     async def test_concurrent_calls(self):
         """Test circuit breaker with concurrent calls."""
         config = CircuitConfig(name="concurrent_test", failure_threshold=5)
         circuit = CircuitBreaker(config)
         
+        @pytest.mark.asyncio
         async def test_func(delay: float):
             await asyncio.sleep(delay)
             return f"result_{delay}"
@@ -339,6 +353,7 @@ class TestCircuitBreakerIntegration:
         assert circuit.metrics.successful_calls == 3
         assert circuit.metrics.total_calls == 3
     
+    @pytest.mark.asyncio
     async def test_error_type_tracking(self):
         """Test tracking of different error types."""
         circuit = CircuitBreaker(CircuitConfig(name="error_tracking"))
@@ -364,6 +379,7 @@ class TestCircuitBreakerIntegration:
 class TestCircuitBreakerEdgeCases:
     """Test edge cases and error conditions."""
     
+    @pytest.mark.asyncio
     async def test_recovery_with_immediate_failure(self):
         """Test recovery attempt that immediately fails."""
         config = CircuitConfig(
@@ -392,6 +408,7 @@ class TestCircuitBreakerEdgeCases:
         
         assert circuit.state == CircuitState.OPEN
     
+    @pytest.mark.asyncio
     async def test_multiple_recovery_attempts(self):
         """Test multiple recovery attempts."""
         config = CircuitConfig(
@@ -434,6 +451,7 @@ class TestCircuitBreakerEdgeCases:
         assert result == "Success on attempt 4"
         assert circuit.state == CircuitState.CLOSED
     
+    @pytest.mark.asyncio
     async def test_zero_timeout_edge_case(self):
         """Test edge case with very small timeouts."""
         config = CircuitConfig(

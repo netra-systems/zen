@@ -19,7 +19,7 @@ import asyncio
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -165,10 +165,12 @@ class AgentToolLoadingManager:
         self.db_manager = ConnectionManager()
         await self.db_manager.initialize()
         
+    @pytest.mark.asyncio
     async def test_dynamic_loading(self, tools: List[MockTool]) -> Dict[str, Any]:
         """Test dynamic tool loading capabilities."""
         return await self.tool_loader.load_tools(tools)
         
+    @pytest.mark.asyncio
     async def test_version_compatibility(self, tools: List[MockTool]) -> Dict[str, Any]:
         """Test tool version compatibility checking."""
         compatibility_results = []
@@ -205,6 +207,7 @@ async def tool_loading_manager():
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_basic_tool_loading(tool_loading_manager):
     """Test basic tool loading functionality."""
     manager = tool_loading_manager
@@ -228,6 +231,7 @@ async def test_basic_tool_loading(tool_loading_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_dependency_resolution(tool_loading_manager):
     """Test tool dependency resolution and loading order."""
     manager = tool_loading_manager
@@ -251,6 +255,7 @@ async def test_dependency_resolution(tool_loading_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_tool_validation_failures(tool_loading_manager):
     """Test tool validation and error handling."""
     manager = tool_loading_manager
@@ -270,6 +275,7 @@ async def test_tool_validation_failures(tool_loading_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_circular_dependency_detection(tool_loading_manager):
     """Test circular dependency detection and handling."""
     manager = tool_loading_manager
@@ -288,6 +294,7 @@ async def test_circular_dependency_detection(tool_loading_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_version_compatibility_checking(tool_loading_manager):
     """Test tool version compatibility validation."""
     manager = tool_loading_manager
@@ -312,6 +319,7 @@ async def test_version_compatibility_checking(tool_loading_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_concurrent_tool_loading(tool_loading_manager):
     """Test concurrent tool loading performance."""
     manager = tool_loading_manager
@@ -341,6 +349,7 @@ async def test_concurrent_tool_loading(tool_loading_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_tool_registry_persistence(tool_loading_manager):
     """Test tool registry persistence with Redis."""
     manager = tool_loading_manager
@@ -360,6 +369,7 @@ async def test_tool_registry_persistence(tool_loading_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_tool_loading_circuit_breaker(tool_loading_manager):
     """Test circuit breaker for tool loading failures."""
     manager = tool_loading_manager
@@ -376,6 +386,7 @@ async def test_tool_loading_circuit_breaker(tool_loading_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.l2_integration
+@pytest.mark.asyncio
 async def test_tool_loading_performance_benchmark(tool_loading_manager):
     """Benchmark tool loading performance for capacity planning."""
     manager = tool_loading_manager

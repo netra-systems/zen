@@ -8,6 +8,7 @@ between backend, auth service, and frontend in staging.
 import sys
 from pathlib import Path
 
+import pytest
 # Test framework import - using pytest fixtures instead
 
 import asyncio
@@ -42,6 +43,7 @@ class TestMultiServiceSecrets(StagingConfigTestBase):
         self.assertEqual(decoded['user_id'], test_payload['user_id'],
                         "JWT payload mismatch")
                         
+    @pytest.mark.asyncio
     async def test_service_to_service_auth(self):
         """Test service-to-service authentication."""
         self.skip_if_not_staging()

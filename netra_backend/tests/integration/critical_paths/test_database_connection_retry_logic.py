@@ -141,6 +141,7 @@ class DatabaseConnectionRetryManager:
             ('test_event_2', 'retry_test', 0)
         """)
     
+    @pytest.mark.asyncio
     async def test_exponential_backoff_strategy(self, max_retries: int = 5) -> Dict[str, Any]:
         """Test exponential backoff retry strategy."""
         backoff_result = {
@@ -236,6 +237,7 @@ class DatabaseConnectionRetryManager:
         
         return backoff_result
     
+    @pytest.mark.asyncio
     async def test_connection_pool_recovery(self) -> Dict[str, Any]:
         """Test connection pool recovery after network disruption."""
         recovery_result = {
@@ -305,6 +307,7 @@ class DatabaseConnectionRetryManager:
         
         return recovery_result
     
+    @pytest.mark.asyncio
     async def test_concurrent_retry_scenarios(self, concurrent_operations: int = 5) -> Dict[str, Any]:
         """Test concurrent connection retry scenarios."""
         concurrent_result = {
@@ -384,6 +387,7 @@ class DatabaseConnectionRetryManager:
         
         return concurrent_result
     
+    @pytest.mark.asyncio
     async def test_clickhouse_connection_resilience(self) -> Dict[str, Any]:
         """Test ClickHouse connection resilience and retry logic."""
         resilience_result = {
@@ -457,6 +461,7 @@ class DatabaseConnectionRetryManager:
         
         return resilience_result
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_pattern(self) -> Dict[str, Any]:
         """Test circuit breaker pattern for connection failures."""
         circuit_result = {
@@ -558,6 +563,7 @@ async def retry_manager():
 class TestDatabaseConnectionRetryLogicL3:
     """L3 integration tests for database connection retry logic."""
     
+    @pytest.mark.asyncio
     async def test_exponential_backoff_retry_strategy(self, retry_manager):
         """Test exponential backoff strategy for connection retries."""
         result = await retry_manager.test_exponential_backoff_strategy(4)
@@ -569,6 +575,7 @@ class TestDatabaseConnectionRetryLogicL3:
         if len(result["retry_attempts"]) > 2:
             assert result["backoff_strategy_followed"] is True
     
+    @pytest.mark.asyncio
     async def test_connection_pool_recovery_after_disruption(self, retry_manager):
         """Test connection pool recovery after network disruption."""
         result = await retry_manager.test_connection_pool_recovery()
@@ -578,6 +585,7 @@ class TestDatabaseConnectionRetryLogicL3:
         assert result["recovery_time_seconds"] < 30  # Should recover within 30 seconds
         assert result["connections_restored"] >= 2
     
+    @pytest.mark.asyncio
     async def test_concurrent_retry_handling(self, retry_manager):
         """Test concurrent connection retries maintain system stability."""
         result = await retry_manager.test_concurrent_retry_scenarios(4)
@@ -586,6 +594,7 @@ class TestDatabaseConnectionRetryLogicL3:
         assert result["successful_connections"] >= 3  # Most should succeed
         assert result["retry_efficiency"] > 0.3  # Reasonable retry efficiency
     
+    @pytest.mark.asyncio
     async def test_clickhouse_connection_resilience(self, retry_manager):
         """Test ClickHouse connection resilience and recovery."""
         result = await retry_manager.test_clickhouse_connection_resilience()
@@ -594,6 +603,7 @@ class TestDatabaseConnectionRetryLogicL3:
         assert result["successful_reconnections"] > 0
         assert result["query_success_after_retry"] is True
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_failure_protection(self, retry_manager):
         """Test circuit breaker pattern protects against cascading failures."""
         result = await retry_manager.test_circuit_breaker_pattern()

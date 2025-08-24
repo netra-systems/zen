@@ -8,6 +8,7 @@ and ingress in the staging environment.
 import sys
 from pathlib import Path
 
+import pytest
 # Test framework import - using pytest fixtures instead
 
 import asyncio
@@ -22,6 +23,7 @@ from netra_backend.tests.integration.staging_config.base import StagingConfigTes
 class TestWebSocketLoadBalancer(StagingConfigTestBase):
     """Test WebSocket through load balancer in staging."""
     
+    @pytest.mark.asyncio
     async def test_websocket_connection(self):
         """Test basic WebSocket connection through load balancer."""
         self.skip_if_not_staging()
@@ -49,6 +51,7 @@ class TestWebSocketLoadBalancer(StagingConfigTestBase):
         except Exception as e:
             self.fail(f"WebSocket connection failed: {e}")
             
+    @pytest.mark.asyncio
     async def test_websocket_sticky_sessions(self):
         """Test sticky sessions for WebSocket connections."""
         self.skip_if_not_staging()
@@ -85,6 +88,7 @@ class TestWebSocketLoadBalancer(StagingConfigTestBase):
             if len(set(connection_ids)) > 1:
                 print(f"Warning: Multiple servers hit: {connection_ids}")
                 
+    @pytest.mark.asyncio
     async def test_websocket_reconnection(self):
         """Test WebSocket reconnection after disconnect."""
         self.skip_if_not_staging()
@@ -112,6 +116,7 @@ class TestWebSocketLoadBalancer(StagingConfigTestBase):
         except Exception as e:
             self.fail(f"Reconnection test failed: {e}")
             
+    @pytest.mark.asyncio
     async def test_websocket_max_connections(self):
         """Test WebSocket connection limits."""
         self.skip_if_not_staging()
@@ -149,6 +154,7 @@ class TestWebSocketLoadBalancer(StagingConfigTestBase):
                 except:
                     pass
                     
+    @pytest.mark.asyncio
     async def test_websocket_message_ordering(self):
         """Test message ordering through load balancer."""
         self.skip_if_not_staging()
@@ -182,6 +188,7 @@ class TestWebSocketLoadBalancer(StagingConfigTestBase):
         except Exception as e:
             self.fail(f"Message ordering test failed: {e}")
             
+    @pytest.mark.asyncio
     async def test_websocket_load_balancing(self):
         """Test load distribution across WebSocket servers."""
         self.skip_if_not_staging()
@@ -220,6 +227,7 @@ class TestWebSocketLoadBalancer(StagingConfigTestBase):
         if len(server_distribution) > 1:
             print(f"Load distribution: {server_distribution}")
             
+    @pytest.mark.asyncio
     async def test_websocket_upgrade_headers(self):
         """Test WebSocket upgrade headers through load balancer."""
         self.skip_if_not_staging()

@@ -60,6 +60,89 @@ class MockWebSocketServer:
     async def stop(self):
         pass
 
+class MockHTTPService:
+    """Mock HTTP service for testing."""
+    
+    def __init__(self, base_url: str = "http://localhost:8000"):
+        self.base_url = base_url
+        self.is_running = False
+        self.request_history: List[Dict[str, Any]] = []
+        self.response_map: Dict[str, Dict[str, Any]] = {}
+        
+    async def start(self):
+        """Start the mock HTTP service."""
+        self.is_running = True
+        
+    async def stop(self):
+        """Stop the mock HTTP service."""
+        self.is_running = False
+        
+    def set_response(self, path: str, method: str = "GET", 
+                    status_code: int = 200, response_data: Dict[str, Any] = None):
+        """Set a mock response for a specific endpoint."""
+        key = f"{method.upper()}:{path}"
+        self.response_map[key] = {
+            "status_code": status_code,
+            "data": response_data or {"status": "success"}
+        }
+    
+    async def request(self, method: str, path: str, 
+                     headers: Dict[str, str] = None, 
+                     json_data: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Mock HTTP request."""
+        if not self.is_running:
+            raise ConnectionError("Service is not running")
+        
+        # Record request
+        self.request_history.append({
+            "method": method.upper(),
+            "path": path,
+            "headers": headers or {},
+            "json_data": json_data,
+            "timestamp": time.time() if 'time' in globals() else 0
+        })
+        
+        # Check for predefined response
+        key = f"{method.upper()}:{path}"
+        if key in self.response_map:
+            response = self.response_map[key]
+            if response["status_code"] >= 400:
+                raise Exception(f"HTTP {response['status_code']}: {response.get('data', {})}")
+            return response["data"]
+        
+        # Default successful response
+        return {
+            "status": "success",
+            "method": method,
+            "path": path,
+            "mock": True
+        }
+    
+    async def get(self, path: str, **kwargs) -> Dict[str, Any]:
+        """Mock GET request."""
+        return await self.request("GET", path, **kwargs)
+    
+    async def post(self, path: str, **kwargs) -> Dict[str, Any]:
+        """Mock POST request."""
+        return await self.request("POST", path, **kwargs)
+    
+    async def put(self, path: str, **kwargs) -> Dict[str, Any]:
+        """Mock PUT request."""
+        return await self.request("PUT", path, **kwargs)
+    
+    async def delete(self, path: str, **kwargs) -> Dict[str, Any]:
+        """Mock DELETE request."""
+        return await self.request("DELETE", path, **kwargs)
+    
+    def get_request_count(self) -> int:
+        """Get total number of requests made."""
+        return len(self.request_history)
+    
+    def get_requests_for_path(self, path: str) -> List[Dict[str, Any]]:
+        """Get all requests for a specific path."""
+        return [req for req in self.request_history if req["path"] == path]
+
+
 class ServiceRegistry:
     """Mock service registry for testing."""
     def __init__(self):
@@ -74,18 +157,26 @@ class ServiceRegistry:
     def register_websocket_server(self, name: str, server):
         self._services[f"ws_{name}"] = server
         
+    def register_http_service(self, name: str, service):
+        self._services[f"http_{name}"] = service
+        
     def get_service(self, name: str):
         return self._services.get(name)
         
     async def start_all_services(self):
-        pass
+        for service in self._services.values():
+            if hasattr(service, 'start'):
+                await service.start()
         
     async def stop_all_services(self):
-        pass
+        for service in self._services.values():
+            if hasattr(service, 'stop'):
+                await service.stop()
 
 __all__ = [
     "MockLLMService",
     "MockOAuthProvider", 
     "MockWebSocketServer",
+    "MockHTTPService",
     "ServiceRegistry",
 ]

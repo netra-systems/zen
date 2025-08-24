@@ -11,13 +11,13 @@ from pathlib import Path
 
 import uuid
 from datetime import datetime
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from netra_backend.tests.integration.deployment_config_fixtures import (
     assert_enterprise_success,
-    create_enterprise_customer_config,
+    create_enterprise_deployment_config,
     create_service_startup_config,
     create_validation_rules,
     enterprise_deployment_infrastructure,
@@ -38,7 +38,7 @@ class TestEnterpriseEnvironmentConfig:
 
     async def _create_custom_environment_config(self):
         """Create custom environment configuration for enterprise deployment"""
-        base_config = create_enterprise_customer_config()
+        base_config = create_enterprise_deployment_config()
         base_config["custom_variables"] = {
             "NETRA_ENTERPRISE_MODE": "true",
             "NETRA_COMPLIANCE_LEVEL": "SOC2_TYPE2",

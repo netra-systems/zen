@@ -34,7 +34,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import redis.sentinel
 import httpx
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 from netra_backend.app.schemas.auth_types import (
     Token, SessionInfo, LoginRequest, LoginResponse
@@ -160,10 +160,11 @@ class TestDistributedAuthStateSync:
                 "success": event.success
             })
         
-        return {"record": record_event, "events": events}
+        yield {"record": record_event, "events": events}
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_session_replication_across_regions(
         self, distributed_nodes, replication_monitor
     ):
@@ -256,6 +257,7 @@ class TestDistributedAuthStateSync:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_cache_invalidation_propagation(
         self, distributed_nodes
     ):
@@ -305,6 +307,7 @@ class TestDistributedAuthStateSync:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_concurrent_writes_conflict_resolution(
         self, distributed_nodes, replication_monitor
     ):
@@ -350,6 +353,7 @@ class TestDistributedAuthStateSync:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_network_partition_recovery(
         self, distributed_nodes
     ):
@@ -421,6 +425,7 @@ class TestDistributedAuthStateSync:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
+    @pytest.mark.asyncio
     async def test_distributed_session_expiry(
         self, distributed_nodes
     ):
@@ -454,6 +459,7 @@ class TestDistributedAuthStateSync:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_cross_region_token_validation(
         self, distributed_nodes
     ):
@@ -509,6 +515,7 @@ class TestDistributedAuthStateSync:
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
+    @pytest.mark.asyncio
     async def test_distributed_rate_limiting(
         self, distributed_nodes
     ):

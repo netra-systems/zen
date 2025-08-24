@@ -35,7 +35,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as aioredis
@@ -279,6 +279,7 @@ async def reset_manager(redis_client):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
+@pytest.mark.asyncio
 async def test_token_generation_and_storage(reset_manager):
     """Test password reset token generation and Redis storage."""
     user_id = "test_user_123"
@@ -294,6 +295,7 @@ async def test_token_generation_and_storage(reset_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
+@pytest.mark.asyncio
 async def test_token_validation_and_consumption(reset_manager):
     """Test token validation and one-time use enforcement."""
     user_id = "test_user_456"
@@ -316,6 +318,7 @@ async def test_token_validation_and_consumption(reset_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
+@pytest.mark.asyncio
 async def test_rate_limiting_enforcement(reset_manager):
     """Test rate limiting for password reset requests."""
     email = "spam@example.com"
@@ -335,6 +338,7 @@ async def test_rate_limiting_enforcement(reset_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
+@pytest.mark.asyncio
 async def test_token_expiration_handling(reset_manager):
     """Test token expiration validation."""
     user_id = "test_user_exp"
@@ -358,6 +362,7 @@ async def test_token_expiration_handling(reset_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
+@pytest.mark.asyncio
 async def test_multi_device_token_invalidation(reset_manager):
     """Test invalidation of all user tokens on successful reset."""
     user_id = "test_user_multi"
@@ -382,6 +387,7 @@ async def test_multi_device_token_invalidation(reset_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
+@pytest.mark.asyncio
 async def test_email_service_failure_handling(reset_manager):
     """Test handling of email service failures."""
     reset_manager.email_service.failure_rate = 1.0  # 100% failure
@@ -393,6 +399,7 @@ async def test_email_service_failure_handling(reset_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
+@pytest.mark.asyncio
 async def test_concurrent_token_operations(reset_manager):
     """Test concurrent token generation and validation."""
     user_base = "concurrent_user"
@@ -412,6 +419,7 @@ async def test_concurrent_token_operations(reset_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
+@pytest.mark.asyncio
 async def test_cleanup_expired_tokens_performance(reset_manager):
     """Test expired token cleanup performance."""
     start_time = time.time()
@@ -430,6 +438,7 @@ async def test_cleanup_expired_tokens_performance(reset_manager):
 @pytest.mark.asyncio
 @pytest.mark.integration
 @pytest.mark.l2_realism
+@pytest.mark.asyncio
 async def test_password_reset_flow_metrics(reset_manager):
     """Test comprehensive metrics tracking."""
     initial_metrics = reset_manager.metrics.copy()

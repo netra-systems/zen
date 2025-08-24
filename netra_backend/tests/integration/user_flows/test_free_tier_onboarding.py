@@ -38,10 +38,10 @@ from netra_backend.app.models.user import User
 # UserPlan not yet implemented - using placeholder
 UserPlan = type('UserPlan', (), {'FREE': 'free', 'EARLY': 'early', 'MID': 'mid', 'ENTERPRISE': 'enterprise'})
 # Thread model - creating mock for tests
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 Thread = Mock
 # Message model - creating mock for tests
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 Message = Mock
 from netra_backend.app.services.user_service import UserService as UsageService
 from netra_backend.app.websocket_core.manager import WebSocketManager
@@ -49,7 +49,7 @@ from netra_backend.app.services.agent_service import AgentService as AgentDispat
 
 # UserFlowTestBase - using unittest.TestCase
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, AsyncMock, MagicMock
 UserFlowTestBase = unittest.TestCase
 assert_successful_registration = Mock
 assert_plan_compliance = Mock
@@ -64,6 +64,7 @@ UserJourneyScenarios = Mock()
 
 @pytest.mark.timeout(30)
 
+@pytest.mark.asyncio
 async def test_free_user_registration_with_verification(
 
     async_client: httpx.AsyncClient,
@@ -118,6 +119,7 @@ async def test_free_user_registration_with_verification(
 
 @pytest.mark.timeout(45)
 
+@pytest.mark.asyncio
 async def test_free_user_first_chat_session(
 
     async_client: httpx.AsyncClient,
@@ -162,6 +164,7 @@ async def test_free_user_first_chat_session(
 
 @pytest.mark.timeout(30)
 
+@pytest.mark.asyncio
 async def test_free_tier_usage_limits_enforcement(
 
     async_client: httpx.AsyncClient,
@@ -218,6 +221,7 @@ async def test_free_tier_usage_limits_enforcement(
 
 @pytest.mark.timeout(30)
 
+@pytest.mark.asyncio
 async def test_free_tier_daily_limit_blocking(
 
     async_client: httpx.AsyncClient,
@@ -268,6 +272,7 @@ async def test_free_tier_daily_limit_blocking(
 
 @pytest.mark.timeout(30)
 
+@pytest.mark.asyncio
 async def test_free_tier_feature_restrictions(
 
     async_client: httpx.AsyncClient,
@@ -302,6 +307,7 @@ async def test_free_tier_feature_restrictions(
 
 @pytest.mark.timeout(30)
 
+@pytest.mark.asyncio
 async def test_free_tier_basic_usage_tracking(
 
     async_client: httpx.AsyncClient,
@@ -338,6 +344,7 @@ async def test_free_tier_basic_usage_tracking(
 
 @pytest.mark.timeout(30)
 
+@pytest.mark.asyncio
 async def test_free_tier_basic_analytics_access(
 
     async_client: httpx.AsyncClient,
@@ -382,6 +389,7 @@ async def test_free_tier_basic_analytics_access(
 
 @pytest.mark.timeout(30)
 
+@pytest.mark.asyncio
 async def test_free_tier_limited_export_capability(
 
     async_client: httpx.AsyncClient,
@@ -426,6 +434,7 @@ async def test_free_tier_limited_export_capability(
 
 @pytest.mark.timeout(30)
 
+@pytest.mark.asyncio
 async def test_free_tier_upgrade_prompts(
 
     async_client: httpx.AsyncClient,
@@ -466,6 +475,7 @@ async def test_free_tier_upgrade_prompts(
 
 @pytest.mark.timeout(30)
 
+@pytest.mark.asyncio
 async def test_free_tier_error_handling(
 
     async_client: httpx.AsyncClient,

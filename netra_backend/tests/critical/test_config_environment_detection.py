@@ -15,7 +15,7 @@ from pathlib import Path
 
 import os
 from typing import Dict, Type
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 import pytest
 

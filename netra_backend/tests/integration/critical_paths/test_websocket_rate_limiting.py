@@ -35,7 +35,7 @@ import time
 import uuid
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as aioredis
@@ -974,6 +974,7 @@ async def rate_limit_manager(redis_client):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_basic_rate_limiting_enforcement(rate_limit_manager):
 
     """Test basic rate limiting enforcement for WebSocket messages."""
@@ -1010,6 +1011,7 @@ async def test_basic_rate_limiting_enforcement(rate_limit_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_rate_limit_exceeded_handling(rate_limit_manager):
 
     """Test handling when rate limits are exceeded."""
@@ -1058,6 +1060,7 @@ async def test_rate_limit_exceeded_handling(rate_limit_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_tier_based_rate_limits(rate_limit_manager):
 
     """Test different rate limits for different user tiers."""
@@ -1112,6 +1115,7 @@ async def test_tier_based_rate_limits(rate_limit_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_message_throttling_and_queuing(rate_limit_manager):
 
     """Test message throttling and queue management."""
@@ -1158,6 +1162,7 @@ async def test_message_throttling_and_queuing(rate_limit_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_priority_message_handling(rate_limit_manager):
 
     """Test priority message handling bypasses normal throttling."""
@@ -1202,6 +1207,7 @@ async def test_priority_message_handling(rate_limit_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_backpressure_detection(rate_limit_manager):
 
     """Test backpressure detection and notification."""
@@ -1244,6 +1250,7 @@ async def test_backpressure_detection(rate_limit_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_concurrent_client_rate_limiting(rate_limit_manager):
 
     """Test rate limiting with multiple concurrent clients."""
@@ -1306,6 +1313,7 @@ async def test_concurrent_client_rate_limiting(rate_limit_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_custom_rate_limit_adjustment(rate_limit_manager):
 
     """Test custom rate limit adjustment for premium clients."""
@@ -1341,6 +1349,7 @@ async def test_custom_rate_limit_adjustment(rate_limit_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_rate_limit_recovery(rate_limit_manager):
 
     """Test rate limit recovery after time window."""
@@ -1382,6 +1391,7 @@ async def test_rate_limit_recovery(rate_limit_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_load_test_simulation(rate_limit_manager):
 
     """Test load testing simulation for rate limiting validation."""
@@ -1428,6 +1438,7 @@ async def test_load_test_simulation(rate_limit_manager):
 
 @pytest.mark.l2_realism
 
+@pytest.mark.asyncio
 async def test_comprehensive_metrics_tracking(rate_limit_manager):
 
     """Test comprehensive metrics tracking across rate limiting components."""

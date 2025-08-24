@@ -21,7 +21,7 @@ import asyncio
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -76,6 +76,7 @@ class TestCompensationEngineCore:
             "user_id": "user-789"
         }
 
+    @pytest.mark.asyncio
     async def test_transaction_rollback_compensation_success(self, engine, mock_db_handler, mock_transaction_context, compensation_data):
         """Test successful database transaction rollback compensation."""
         engine.register_handler(mock_db_handler)
@@ -90,6 +91,7 @@ class TestCompensationEngineCore:
         assert action.state == CompensationState.COMPLETED
         mock_db_handler.execute_compensation.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_transaction_rollback_compensation_failure(self, engine, mock_db_handler, mock_transaction_context, compensation_data):
         """Test failed database transaction rollback compensation."""
         mock_db_handler.execute_compensation.return_value = False
@@ -104,6 +106,7 @@ class TestCompensationEngineCore:
         action = engine.active_compensations[action_id]
         assert action.state == CompensationState.FAILED
 
+    @pytest.mark.asyncio
     async def test_transaction_rollback_database_connection_error(self, engine, mock_db_handler, mock_transaction_context, compensation_data):
         """Test compensation handles database connection errors."""
         mock_db_handler.execute_compensation.side_effect = Exception("Database connection failed")
@@ -142,6 +145,7 @@ class TestCompensationEngineCore:
         final_priorities = [h.get_priority() for h in engine.handlers]
         assert final_priorities == sorted(final_priorities)
 
+    @pytest.mark.asyncio
     async def test_concurrent_compensation_execution_race_condition(self, engine, mock_transaction_context, compensation_data):
         """Test concurrent compensation execution handles race conditions."""
         handlers = [self._create_handler_with_priority(i) for i in range(3)]
@@ -159,6 +163,7 @@ class TestCompensationEngineCore:
         successful_results = [r for r in results if r is True]
         assert len(successful_results) >= 3  # At least some should succeed
 
+    @pytest.mark.asyncio
     async def test_compensation_action_lifecycle_state_transitions(self, engine, mock_db_handler, mock_transaction_context, compensation_data):
         """Test compensation action state transitions throughout lifecycle."""
         engine.register_handler(mock_db_handler)
@@ -214,6 +219,7 @@ class TestCompensationEngineCore:
         assert pending_action in engine.active_compensations
         assert executing_action in engine.active_compensations
 
+    @pytest.mark.asyncio
     async def test_memory_leak_prevention_with_many_compensations(self, engine, mock_db_handler, mock_transaction_context, compensation_data):
         """Test memory leak prevention with large number of compensations."""
         engine.register_handler(mock_db_handler)
@@ -232,6 +238,7 @@ class TestCompensationEngineCore:
         assert cleaned_count == initial_count
         assert len(engine.active_compensations) == 0
 
+    @pytest.mark.asyncio
     async def test_find_compatible_handler_selects_first_compatible(self, engine, mock_transaction_context):
         """Test compatible handler selection chooses first available."""
         incompatible_handler = self._create_incompatible_handler()
@@ -243,6 +250,7 @@ class TestCompensationEngineCore:
         
         assert selected_handler == compatible_handler
 
+    @pytest.mark.asyncio
     async def test_find_compatible_handler_returns_none_when_no_matches(self, engine, mock_transaction_context):
         """Test compatible handler selection returns None when no handlers match."""
         incompatible_handler1 = self._create_incompatible_handler()
@@ -254,6 +262,7 @@ class TestCompensationEngineCore:
         
         assert selected_handler is None
 
+    @pytest.mark.asyncio
     async def test_compensation_action_creation_with_no_handler_returns_empty_id(self, engine, mock_transaction_context, compensation_data):
         """Test compensation action creation without compatible handler."""
         # No handlers registered
@@ -276,6 +285,7 @@ class TestCompensationEngineCore:
         assert pending_action in action_ids
         assert executing_action in action_ids
 
+    @pytest.mark.asyncio
     async def test_execute_nonexistent_compensation_returns_false(self, engine):
         """Test executing non-existent compensation returns False."""
         fake_action_id = str(uuid.uuid4())
@@ -284,6 +294,7 @@ class TestCompensationEngineCore:
         
         assert success is False
 
+    @pytest.mark.asyncio
     async def test_compensation_metadata_preservation(self, engine, mock_db_handler, mock_transaction_context, compensation_data):
         """Test compensation action preserves metadata throughout lifecycle."""
         engine.register_handler(mock_db_handler)

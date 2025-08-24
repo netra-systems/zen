@@ -11,7 +11,7 @@ from pathlib import Path
 
 import json
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.schemas import CorpusCreate
@@ -25,6 +25,7 @@ from netra_backend.app.services.corpus_service import (
 class TestCorpusLifecycle:
     """Test complete corpus lifecycle from creation to deletion"""
     
+    @pytest.mark.asyncio
     async def test_corpus_creation_workflow(self):
         """Test 1: Verify complete corpus creation workflow"""
         service = CorpusService()
@@ -44,6 +45,7 @@ class TestCorpusLifecycle:
             # Verify corpus attributes
             _assert_corpus_created_correctly(corpus)
 
+    @pytest.mark.asyncio
     async def test_corpus_status_transitions(self):
         """Test 2: Verify corpus status transitions"""
         service = CorpusService()
@@ -70,6 +72,7 @@ class TestCorpusLifecycle:
             calls = db.query().filter().update.call_args_list
             assert {"status": CorpusStatus.FAILED.value} in [call[0][0] for call in calls]
 
+    @pytest.mark.asyncio
     async def test_corpus_deletion_workflow(self):
         """Test 3: Verify complete corpus deletion workflow"""
         service = CorpusService()
@@ -94,6 +97,7 @@ class TestCorpusLifecycle:
 class TestWorkloadTypesCoverage:
     """Test coverage of all workload types"""
     
+    @pytest.mark.asyncio
     async def test_all_workload_types_supported(self):
         """Test 4: Verify all workload types are supported"""
         service = CorpusService()
@@ -110,6 +114,7 @@ class TestWorkloadTypesCoverage:
             result = service._validate_records(records)
             assert result["valid"], f"Workload type {workload_type} should be valid"
 
+    @pytest.mark.asyncio
     async def test_workload_distribution_tracking(self):
         """Test 5: Verify workload distribution is tracked correctly"""
         service = CorpusService()

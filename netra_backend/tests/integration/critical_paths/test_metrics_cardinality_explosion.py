@@ -26,7 +26,7 @@ from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
@@ -347,6 +347,7 @@ class CardinalityProtectionValidator:
         
         return base_cost + series_cost + ingestion_cost
     
+    @pytest.mark.asyncio
     async def test_cardinality_protection_actions(self, analysis: CardinalityAnalysis) -> Dict[str, Any]:
         """Test cardinality protection actions and their effectiveness."""
         protection_results = {

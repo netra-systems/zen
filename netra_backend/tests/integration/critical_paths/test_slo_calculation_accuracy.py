@@ -25,7 +25,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -550,6 +550,7 @@ class SLOCalculationValidator:
             error_budget_utilization=error_budget_utilization
         )
     
+    @pytest.mark.asyncio
     async def test_slo_calculation_accuracy(self, known_sli_values: Dict[str, float]) -> Dict[str, Any]:
         """Test SLO calculation accuracy against known SLI values."""
         accuracy_results = {
@@ -617,6 +618,7 @@ class SLOCalculationValidator:
         
         return accuracy_results
     
+    @pytest.mark.asyncio
     async def test_error_budget_tracking(self, sli_data: List[SLIDataPoint]) -> Dict[str, Any]:
         """Test error budget tracking and burn rate calculations."""
         error_budget_results = {

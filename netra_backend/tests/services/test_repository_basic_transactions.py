@@ -9,7 +9,7 @@ from pathlib import Path
 import asyncio
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, call, patch
 
 import pytest
 from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
@@ -54,6 +54,7 @@ class TestDatabaseRepositoryTransactions:
     def transaction_manager(self):
         """Create transaction test manager"""
         return TransactionTestManager()
+    @pytest.mark.asyncio
     async def test_successful_transaction_commit(self, mock_session, mock_repository):
         """Test successful transaction commit"""
         # Setup
@@ -75,6 +76,7 @@ class TestDatabaseRepositoryTransactions:
         # Check operation was logged
         assert len(mock_repository.operation_log) == 1
         assert mock_repository.operation_log[0][0] == 'create'
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_integrity_error(self, mock_session, mock_repository):
         """Test transaction rollback on integrity constraint violation"""
         # Setup - simulate integrity error
@@ -88,6 +90,7 @@ class TestDatabaseRepositoryTransactions:
         mock_session.add.assert_called_once()
         mock_session.flush.assert_called_once()
         # Rollback is not called since exception is caught and None is returned in our mock
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_sql_error(self, mock_session, mock_repository):
         """Test transaction rollback on SQL error"""
         # Setup - simulate SQL error
@@ -99,6 +102,7 @@ class TestDatabaseRepositoryTransactions:
         # Assert
         assert result == None
         mock_session.flush.assert_called_once()
+    @pytest.mark.asyncio
     async def test_transaction_rollback_on_unexpected_error(self, mock_session, mock_repository):
         """Test transaction rollback on unexpected error"""
         # Setup - simulate unexpected error
@@ -110,6 +114,7 @@ class TestDatabaseRepositoryTransactions:
         # Assert
         assert result == None
         mock_session.add.assert_called_once()
+    @pytest.mark.asyncio
     async def test_concurrent_transaction_isolation(self, mock_repository):
         """Test transaction isolation under concurrent operations"""
         # Create separate mock sessions for concurrent operations
@@ -143,6 +148,7 @@ class TestDatabaseRepositoryTransactions:
         session2.add.assert_called_once()
         session1.flush.assert_called_once()
         session2.flush.assert_called_once()
+    @pytest.mark.asyncio
     async def test_transaction_timeout_handling(self, mock_session, mock_repository):
         """Test handling of transaction timeouts"""
         # Setup - simulate long-running transaction
@@ -158,6 +164,7 @@ class TestDatabaseRepositoryTransactions:
                 mock_repository.create(mock_session, name='Slow Entity'),
                 timeout=0.5  # 500ms timeout
             )
+    @pytest.mark.asyncio
     async def test_nested_transaction_handling(self, mock_repository):
         """Test nested transaction handling"""
         outer_session = AsyncMock(spec=AsyncSession)
@@ -194,6 +201,7 @@ class TestDatabaseRepositoryTransactions:
         # Outer session should have flushed successfully (not rolled back)
         outer_session.flush.assert_called()
         outer_session.rollback.assert_not_called()
+    @pytest.mark.asyncio
     async def test_batch_operation_transaction_consistency(self, mock_session, mock_repository):
         """Test transaction consistency in batch operations"""
         # Setup batch data
@@ -235,6 +243,7 @@ class TestDatabaseRepositoryTransactions:
         assert len(successful_results) == 2  # First two succeed
         assert len(failed_results) == 3   # Third, fourth, and fifth all fail
         assert flush_calls[0] == 5  # All flush calls attempted, but 3rd, 4th, 5th failed
+    @pytest.mark.asyncio
     async def test_deadlock_detection_and_retry(self, mock_session, mock_repository, transaction_manager):
         """Test deadlock detection and retry mechanism"""
         # Setup deadlock simulation
@@ -277,6 +286,7 @@ class TestDatabaseRepositoryTransactions:
         assert mock_session.flush.call_count == 3
         # BaseRepository.create catches SQLAlchemyError and raises DatabaseError
         assert result is not None  # Should eventually succeed
+    @pytest.mark.asyncio
     async def test_connection_recovery_handling(self, mock_repository, transaction_manager):
         """Test connection recovery handling"""
         # Create session that loses connection

@@ -27,6 +27,7 @@ from test_framework.test_patterns import L3IntegrationTest
 class TestThreadManagementBasic(L3IntegrationTest):
     """Test thread management basic operations from multiple angles."""
     
+    @pytest.mark.asyncio
     async def test_create_thread_basic(self):
         """Test basic thread creation flow."""
         user_data = await self.create_test_user("thread1@test.com")
@@ -59,6 +60,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 assert "created_at" in data
                 assert "updated_at" in data
                 
+    @pytest.mark.asyncio
     async def test_retrieve_thread_by_id(self):
         """Test retrieving a thread by its ID."""
         user_data = await self.create_test_user("thread2@test.com")
@@ -88,6 +90,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 assert retrieved_thread["id"] == thread_id
                 assert retrieved_thread["title"] == thread_data["title"]
                 
+    @pytest.mark.asyncio
     async def test_update_thread_properties(self):
         """Test updating thread properties."""
         user_data = await self.create_test_user("thread3@test.com")
@@ -129,6 +132,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 assert updated_thread["metadata"]["updated"] is True
                 assert updated_thread["updated_at"] > thread["updated_at"]
                 
+    @pytest.mark.asyncio
     async def test_delete_thread(self):
         """Test thread deletion."""
         user_data = await self.create_test_user("thread4@test.com")
@@ -161,6 +165,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             ) as resp:
                 assert resp.status == 404
                 
+    @pytest.mark.asyncio
     async def test_list_user_threads(self):
         """Test listing threads for a user."""
         user_data = await self.create_test_user("thread5@test.com")
@@ -196,6 +201,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 for title in thread_titles:
                     assert title in listed_titles
                     
+    @pytest.mark.asyncio
     async def test_thread_pagination(self):
         """Test thread listing pagination."""
         user_data = await self.create_test_user("thread6@test.com")
@@ -238,6 +244,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 page2_ids = {t["id"] for t in page2["threads"]}
                 assert len(page1_ids & page2_ids) == 0
                 
+    @pytest.mark.asyncio
     async def test_thread_search_by_title(self):
         """Test searching threads by title."""
         user_data = await self.create_test_user("thread7@test.com")
@@ -272,6 +279,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
                 for thread in data["threads"]:
                     assert "Python" in thread["title"]
                     
+    @pytest.mark.asyncio
     async def test_thread_concurrent_creation(self):
         """Test concurrent thread creation by same user."""
         user_data = await self.create_test_user("thread8@test.com")
@@ -306,6 +314,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             
             assert len(thread_ids) == 10  # All unique IDs
             
+    @pytest.mark.asyncio
     async def test_thread_access_control(self):
         """Test thread access control between users."""
         user1_data = await self.create_test_user("thread9a@test.com")
@@ -349,6 +358,7 @@ class TestThreadManagementBasic(L3IntegrationTest):
             ) as resp:
                 assert resp.status in [403, 404]
                 
+    @pytest.mark.asyncio
     async def test_thread_soft_delete(self):
         """Test that threads are soft-deleted, not hard-deleted."""
         user_data = await self.create_test_user("thread10@test.com")

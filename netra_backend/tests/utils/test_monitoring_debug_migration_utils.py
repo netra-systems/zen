@@ -9,7 +9,7 @@ from pathlib import Path
 import asyncio
 import time
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -26,6 +26,7 @@ from netra_backend.tests.rate_retry_monitoring_test_helpers import (
 class TestMonitoringUtilsMetrics:
     """test_monitoring_utils_metrics - Test metric collection and aggregation"""
     
+    @pytest.mark.asyncio
     async def test_metric_collection(self):
         from netra_backend.app.utils.monitoring_utils import MonitoringUtils
         utils = MonitoringUtils()
@@ -36,6 +37,7 @@ class TestMonitoringUtilsMetrics:
         
         self._assert_histogram_metrics(utils)
     
+    @pytest.mark.asyncio
     async def test_metric_aggregation(self):
         from netra_backend.app.utils.monitoring_utils import MonitoringUtils
         utils = MonitoringUtils()
@@ -75,6 +77,7 @@ class TestMonitoringUtilsMetrics:
 class TestDebugUtilsProfiling:
     """test_debug_utils_profiling - Test profiling utilities and performance metrics"""
     
+    @pytest.mark.asyncio
     async def test_profiling_utilities(self):
         from netra_backend.app.utils.debug_utils import DebugUtils
         utils = DebugUtils()
@@ -82,6 +85,7 @@ class TestDebugUtilsProfiling:
         await self._test_function_profiling(utils)
         self._test_memory_profiling(utils)
     
+    @pytest.mark.asyncio
     async def test_performance_metrics(self):
         from netra_backend.app.utils.debug_utils import DebugUtils
         utils = DebugUtils()
@@ -145,6 +149,7 @@ class TestDebugUtilsProfiling:
 class TestMigrationUtilsScripts:
     """test_migration_utils_scripts - Test migration utilities and data transformation"""
     
+    @pytest.mark.asyncio
     async def test_migration_utilities(self):
         from netra_backend.app.utils.migration_utils import MigrationUtils
         utils = MigrationUtils()
@@ -156,6 +161,7 @@ class TestMigrationUtilsScripts:
         
         self._test_data_migration(utils, migration_plan)
     
+    @pytest.mark.asyncio
     async def test_data_transformation(self):
         from netra_backend.app.utils.migration_utils import MigrationUtils
         utils = MigrationUtils()

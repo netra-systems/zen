@@ -7,7 +7,7 @@ COMPLIANCE: 450-line max file, 25-line max functions
 import sys
 from pathlib import Path
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -70,11 +70,13 @@ class TestServiceRegistration:
 class TestMonitoringLifecycle:
     """Test monitoring lifecycle management."""
     
+    @pytest.mark.asyncio
     async def test_start_monitoring_unregistered_service(self, health_monitor: StagedHealthMonitor) -> None:
         """Test starting monitoring for unregistered service."""
         with pytest.raises(ValueError, match="Service .* not registered"):
             await health_monitor.start_monitoring("unregistered_service")
 
+    @pytest.mark.asyncio
     async def test_start_monitoring_registered_service(self, health_monitor: StagedHealthMonitor,
                                                       mock_service_config: ServiceConfig) -> None:
         """Test starting monitoring for registered service."""
@@ -90,6 +92,7 @@ class TestMonitoringLifecycle:
             assert "test_service" in health_monitor._monitoring_tasks
             mock_create_task.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_stop_monitoring(self, health_monitor: StagedHealthMonitor) -> None:
         """Test stopping all monitoring tasks."""
         mock_task1 = Mock()

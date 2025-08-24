@@ -79,6 +79,7 @@ class TestUnifiedToolRegistryManagement:
         assert orchestrator is not None
         assert hasattr(orchestrator, 'execute_chain')
     
+    @pytest.mark.asyncio
     async def test_tool_chain_execution(self, sample_tools):
         """Test execution of tool chains"""
         orchestrator = ToolOrchestrator()

@@ -35,6 +35,7 @@ class TestHeartbeatLogger:
         logger = HeartbeatLogger(interval_seconds=3.0)
         assert logger.interval_seconds == 3.0
         assert len(logger._active_tasks) == 0
+    @pytest.mark.asyncio
     async def test_start_heartbeat_creates_task(self):
         """Test that starting heartbeat creates an async task."""
         logger = HeartbeatLogger()
@@ -43,6 +44,7 @@ class TestHeartbeatLogger:
         assert correlation_id in logger._active_tasks
         assert correlation_id in logger._start_times
         assert correlation_id in logger._agent_names
+    @pytest.mark.asyncio
     async def test_stop_heartbeat_cleans_up(self):
         """Test that stopping heartbeat cleans up resources."""
         logger = HeartbeatLogger()
@@ -51,6 +53,7 @@ class TestHeartbeatLogger:
         logger.stop_heartbeat(correlation_id)
         assert correlation_id not in logger._active_tasks
         assert correlation_id not in logger._start_times
+    @pytest.mark.asyncio
     async def test_heartbeat_logging_flow(self):
         """Test complete heartbeat logging flow."""
         with patch('app.llm.observability.logger') as mock_logger:
@@ -62,6 +65,7 @@ class TestHeartbeatLogger:
             logger.stop_heartbeat(correlation_id)
             
             assert mock_logger.info.called
+    @pytest.mark.asyncio
     async def test_get_active_operations(self):
         """Test getting active operations information."""
         logger = HeartbeatLogger()
@@ -105,6 +109,7 @@ class TestHeartbeatLogger:
 
 class TestHeartbeatIntegration:
     """Test cases for heartbeat integration with LLM operations."""
+    @pytest.mark.asyncio
     async def test_heartbeat_with_app_config(self):
         """Test heartbeat logger with app configuration."""
         from netra_backend.app.core.config import get_config
@@ -121,6 +126,7 @@ class TestHeartbeatIntegration:
         correlation_id = generate_llm_correlation_id()
         assert isinstance(correlation_id, str)
         assert len(correlation_id) > 0
+    @pytest.mark.asyncio
     async def test_heartbeat_task_cancellation(self):
         """Test that heartbeat tasks are properly cancelled."""
         logger = HeartbeatLogger(interval_seconds=0.1)
@@ -156,6 +162,7 @@ class TestHeartbeatIntegration:
 class TestSupervisorHeartbeatScenarios:
     """Test heartbeat logging for supervisor-specific scenarios."""
     
+    @pytest.mark.asyncio
     async def test_supervisor_agent_coordination_heartbeat(self):
         """Test heartbeat during supervisor agent coordination."""
         with patch('app.llm.observability.logger') as mock_logger:
@@ -170,6 +177,7 @@ class TestSupervisorHeartbeatScenarios:
             logged_msg = mock_logger.info.call_args[0][0]
             assert "supervisor_coordinator" in logged_msg
 
+    @pytest.mark.asyncio
     async def test_heartbeat_during_pipeline_execution(self):
         """Test heartbeat continues during long pipeline operations."""
         with patch('app.llm.observability.logger') as mock_logger:
@@ -184,6 +192,7 @@ class TestSupervisorHeartbeatScenarios:
             # Should have multiple heartbeat logs
             assert mock_logger.info.call_count >= 2
 
+    @pytest.mark.asyncio
     async def test_concurrent_supervisor_agents_heartbeat(self):
         """Test heartbeat for multiple concurrent supervisor agents."""
         with patch('app.llm.observability.logger') as mock_logger:
@@ -209,6 +218,7 @@ class TestSupervisorHeartbeatScenarios:
             for agent in agents:
                 assert any(agent in msg for msg in logged_messages)
 
+    @pytest.mark.asyncio
     async def test_supervisor_error_recovery_heartbeat(self):
         """Test heartbeat continues during supervisor error recovery."""
         logger = HeartbeatLogger(interval_seconds=0.1)
@@ -224,6 +234,7 @@ class TestSupervisorHeartbeatScenarios:
         
         logger.stop_heartbeat(correlation_id)
 
+    @pytest.mark.asyncio
     async def test_supervisor_state_checkpoint_heartbeat(self):
         """Test heartbeat during supervisor state checkpointing."""
         with patch('app.llm.observability.logger') as mock_logger:
@@ -253,6 +264,7 @@ class TestSupervisorHeartbeatScenarios:
         expected = "LLM heartbeat: supervisor_main - test-id - elapsed: 3.7s - status: processing"
         assert message == expected
 
+    @pytest.mark.asyncio
     async def test_supervisor_long_operation_heartbeat_persistence(self):
         """Test heartbeat persists through long supervisor operations."""
         with patch('app.llm.observability.logger') as mock_logger:
@@ -275,6 +287,7 @@ class TestSupervisorHeartbeatScenarios:
                 logged_data = call[0][0]
                 assert correlation_id in logged_data
 
+    @pytest.mark.asyncio
     async def test_supervisor_agent_handoff_heartbeat_tracking(self):
         """Test heartbeat tracking during supervisor agent handoffs."""
         logger = HeartbeatLogger()

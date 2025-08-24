@@ -92,6 +92,7 @@ class TestWebSocketTypeSafetyMain:
         
         print("Validation error handling tests passed!")
     
+    @pytest.mark.asyncio
     async def test_websocket_send_functionality(self):
         """Test WebSocket send functionality."""
         print("Testing WebSocket send functionality...")

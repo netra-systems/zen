@@ -43,11 +43,15 @@ def main():
         "GCP Staging": {
             "base_url": "https://",
             "services": {
-                "auth": "netra-auth-service-cpbplcdz7q-uc.a.run.app",
-                "backend": "netra-backend-staging-cpbplcdz7q-uc.a.run.app",
-                "frontend": "netra-frontend-staging-cpbplcdz7q-uc.a.run.app"
+                "auth": "auth.staging.netrasystems.ai",
+                "backend": "api.staging.netrasystems.ai",
+                "frontend": "app.staging.netrasystems.ai"
             },
             "uris": [
+                "https://auth.staging.netrasystems.ai/auth/google/callback",
+                "https://api.staging.netrasystems.ai/api/auth/google/callback",
+                "https://app.staging.netrasystems.ai/auth/callback",
+                # Legacy Cloud Run URLs (can be removed after migration)
                 "https://netra-auth-service-cpbplcdz7q-uc.a.run.app/auth/google/callback",
                 "https://netra-backend-staging-cpbplcdz7q-uc.a.run.app/api/auth/google/callback",
                 "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app/auth/callback",

@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.tests.integration.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -477,6 +477,7 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
         except Exception as e:
             return {"exists": False, "error": str(e)}
     
+    @pytest.mark.asyncio
     async def test_oauth_endpoints_accessibility(self) -> Dict[str, Any]:
         """Test OAuth endpoints accessibility in staging environment."""
         endpoints_to_test = [
@@ -595,6 +596,7 @@ async def oauth_url_consistency_l4_suite():
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_oauth_staging_url_consistency_comprehensive_l4(oauth_url_consistency_l4_suite):
     """L4 Test: Comprehensive OAuth URL consistency across all services in staging.
     
@@ -629,6 +631,7 @@ async def test_oauth_staging_url_consistency_comprehensive_l4(oauth_url_consiste
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_auth_client_config_fallback_url_l4(oauth_url_consistency_l4_suite):
     """L4 Test: Specific validation of auth_client_config.py fallback configuration.
     
@@ -661,6 +664,7 @@ async def test_auth_client_config_fallback_url_l4(oauth_url_consistency_l4_suite
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_oauth_redirect_uri_validation_l4(oauth_url_consistency_l4_suite):
     """L4 Test: Validate OAuth redirect URIs follow correct staging subdomain pattern."""
     await oauth_url_consistency_l4_suite.initialize_l4_environment()
@@ -685,6 +689,7 @@ async def test_oauth_redirect_uri_validation_l4(oauth_url_consistency_l4_suite):
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_staging_oauth_endpoints_accessibility_l4(oauth_url_consistency_l4_suite):
     """L4 Test: Validate that staging OAuth endpoints are accessible.
     
@@ -711,6 +716,7 @@ async def test_staging_oauth_endpoints_accessibility_l4(oauth_url_consistency_l4
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_oauth_audit_performance_and_coverage_l4(oauth_url_consistency_l4_suite):
     """L4 Test: Validate OAuth URL audit performance and coverage requirements."""
     await oauth_url_consistency_l4_suite.initialize_l4_environment()
@@ -734,6 +740,7 @@ async def test_oauth_audit_performance_and_coverage_l4(oauth_url_consistency_l4_
 @pytest.mark.asyncio
 @pytest.mark.staging
 @pytest.mark.l4
+@pytest.mark.asyncio
 async def test_oauth_url_pattern_analysis_l4(oauth_url_consistency_l4_suite):
     """L4 Test: Analyze OAuth URL patterns to identify systematic issues."""
     await oauth_url_consistency_l4_suite.initialize_l4_environment()

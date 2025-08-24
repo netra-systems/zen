@@ -18,11 +18,14 @@
     "GCP Staging": {
       "base_url": "https://",
       "services": {
-        "auth": "netra-auth-service-cpbplcdz7q-uc.a.run.app",
-        "backend": "netra-backend-staging-cpbplcdz7q-uc.a.run.app",
-        "frontend": "netra-frontend-staging-cpbplcdz7q-uc.a.run.app"
+        "auth": "auth.staging.netrasystems.ai",
+        "backend": "api.staging.netrasystems.ai",
+        "frontend": "app.staging.netrasystems.ai"
       },
       "uris": [
+        "https://auth.staging.netrasystems.ai/auth/google/callback",
+        "https://api.staging.netrasystems.ai/api/auth/google/callback",
+        "https://app.staging.netrasystems.ai/auth/callback",
         "https://netra-auth-service-cpbplcdz7q-uc.a.run.app/auth/google/callback",
         "https://netra-backend-staging-cpbplcdz7q-uc.a.run.app/api/auth/google/callback",
         "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app/auth/callback"
@@ -44,8 +47,11 @@
     }
   },
   "staging_urls": {
-    "auth_service": "https://netra-auth-service-cpbplcdz7q-uc.a.run.app",
-    "backend": "https://netra-backend-staging-cpbplcdz7q-uc.a.run.app",
-    "frontend": "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app"
+    "auth_service": "https://auth.staging.netrasystems.ai",
+    "backend": "https://api.staging.netrasystems.ai",
+    "frontend": "https://app.staging.netrasystems.ai",
+    "legacy_auth": "https://netra-auth-service-cpbplcdz7q-uc.a.run.app",
+    "legacy_backend": "https://netra-backend-staging-cpbplcdz7q-uc.a.run.app",
+    "legacy_frontend": "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app"
   }
 }

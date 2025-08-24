@@ -11,7 +11,7 @@ import sys
 import json
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import pytest
 
@@ -37,6 +37,7 @@ class TestCorpusQueries:
 
     """Test corpus-related queries for correctness"""
 
+    @pytest.mark.asyncio
     async def test_create_corpus_table_schema(self):
 
         """Test 1: Verify corpus table schema is valid SQL"""
@@ -61,6 +62,7 @@ class TestCorpusQueries:
 
         assert "ORDER BY (created_at, workload_type)" in schema
 
+    @pytest.mark.asyncio
     async def test_corpus_insert_query_structure(self):
 
         """Test 2: Verify INSERT query structure for corpus"""
@@ -101,6 +103,7 @@ class TestCorpusQueries:
 
             assert "VALUES" in query
 
+    @pytest.mark.asyncio
     async def test_corpus_statistics_query(self):
 
         """Test 3: Verify corpus statistics query correctness"""
@@ -160,6 +163,7 @@ class TestCorpusQueries:
 
             assert "GROUP BY workload_type" in dist_query
 
+    @pytest.mark.asyncio
     async def test_corpus_content_retrieval_query(self):
 
         """Test 4: Verify corpus content retrieval with filters"""
@@ -206,6 +210,7 @@ class TestCorpusQueries:
 
             assert "LIMIT 50 OFFSET 100" in query
 
+    @pytest.mark.asyncio
     async def test_clone_corpus_copy_query(self):
 
         """Test 5: Verify corpus cloning query"""
@@ -501,6 +506,7 @@ class TestGenerationServiceQueries:
 
     """Test generation service queries"""
 
+    @pytest.mark.asyncio
     async def test_get_corpus_from_clickhouse_query(self):
 
         """Test 14: Verify corpus loading query from generation service"""
@@ -538,6 +544,7 @@ class TestGenerationServiceQueries:
 
             }
 
+    @pytest.mark.asyncio
     async def test_save_corpus_to_clickhouse_batch_insert(self):
         """Test 15: Verify batch insert for corpus saving"""
         
@@ -575,6 +582,7 @@ class TestTableInitializationQueries:
 
     """Test table initialization queries"""
 
+    @pytest.mark.asyncio
     async def test_initialize_clickhouse_tables(self):
 
         """Test 16: Verify all tables are created on initialization"""
@@ -612,6 +620,7 @@ class TestTableInitializationQueries:
 
                 mock_instance.execute_query.assert_called_with("SHOW TABLES")
 
+    @pytest.mark.asyncio
     async def test_verify_workload_events_table(self):
 
         """Test 17: Verify workload_events table verification"""

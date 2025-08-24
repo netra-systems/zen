@@ -4,6 +4,7 @@ Handles database engine creation, connection management, and initialization.
 Focused module adhering to 25-line function limit and modular architecture.
 """
 
+import asyncio
 from contextlib import contextmanager
 from typing import Generator, Optional
 

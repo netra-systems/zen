@@ -8,7 +8,7 @@ import sys
 import asyncio
 import json
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import pytest
@@ -147,6 +147,7 @@ class TestWebSocketFixtures:
 
     """Test WebSocket fixtures functionality."""
     
+    @pytest.mark.asyncio
     async def test_mock_websocket_creation(self, mock_websocket):
 
         """Test mock WebSocket fixture creation."""
@@ -161,6 +162,7 @@ class TestWebSocketFixtures:
 
         assert len(mock_websocket.messages_received) == 0
     
+    @pytest.mark.asyncio
     async def test_connection_manager_fixture(self, connection_manager):
 
         """Test connection manager fixture."""
@@ -169,6 +171,7 @@ class TestWebSocketFixtures:
 
         assert hasattr(connection_manager, 'add_connection') or hasattr(connection_manager, 'connect')
     
+    @pytest.mark.asyncio
     async def test_ws_manager_fixture(self, ws_manager):
 
         """Test WebSocket manager fixture."""
@@ -177,6 +180,7 @@ class TestWebSocketFixtures:
 
         assert hasattr(ws_manager, 'handle_message') or hasattr(ws_manager, 'send_message')
     
+    @pytest.mark.asyncio
     async def test_sample_message_fixture(self, sample_message):
 
         """Test sample message fixture."""
@@ -191,6 +195,7 @@ class TestWebSocketFixtures:
 
         assert "user_id" in sample_message
     
+    @pytest.mark.asyncio
     async def test_error_prone_websocket_fixture(self, error_prone_websocket):
 
         """Test error-prone WebSocket fixture."""
@@ -207,6 +212,7 @@ class TestWebSocketFixtureIntegration:
 
     """Test integration between WebSocket fixtures."""
     
+    @pytest.mark.asyncio
     async def test_websocket_message_flow(self, mock_websocket, sample_message):
 
         """Test message flow using fixtures."""
@@ -224,6 +230,7 @@ class TestWebSocketFixtureIntegration:
 
         assert mock_websocket.messages_sent[0] == sample_message
     
+    @pytest.mark.asyncio
     async def test_websocket_lifecycle_with_fixtures(self, mock_websocket):
 
         """Test WebSocket lifecycle using fixtures."""
@@ -245,6 +252,7 @@ class TestWebSocketFixtureIntegration:
 
         assert mock_websocket.closed
     
+    @pytest.mark.asyncio
     async def test_fixture_integration(self):
 
         """Test that fixtures can be used together."""

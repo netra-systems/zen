@@ -32,6 +32,7 @@ def latency_optimization_setup(real_llm_manager, real_websocket_manager, real_to
 class TestLatencyOptimizationEdgeCases:
     """Test edge cases in latency optimization workflows."""
     
+    @pytest.mark.asyncio
     async def test_impossible_latency_targets(self, latency_optimization_setup):
         """Test handling of impossible latency targets."""
         setup = latency_optimization_setup
@@ -39,6 +40,7 @@ class TestLatencyOptimizationEdgeCases:
         results = await execute_latency_workflow(setup, state)
         validate_impossible_target_handling(results)
     
+    @pytest.mark.asyncio
     async def test_already_optimized_system(self, latency_optimization_setup):
         """Test handling of already well-optimized systems."""
         setup = latency_optimization_setup
@@ -49,6 +51,7 @@ class TestLatencyOptimizationEdgeCases:
 class TestIntegrationValidation:
     """Test integration between latency optimization agents."""
     
+    @pytest.mark.asyncio
     async def test_data_flow_between_agents(self, latency_optimization_setup):
         """Test proper data flow between optimization agents."""
         setup = latency_optimization_setup
@@ -56,6 +59,7 @@ class TestIntegrationValidation:
         results = await execute_latency_workflow(setup, state)
         validate_agent_data_flow(results, state)
     
+    @pytest.mark.asyncio
     async def test_state_consistency_maintenance(self, latency_optimization_setup):
         """Test state consistency throughout workflow."""
         setup = latency_optimization_setup

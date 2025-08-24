@@ -13,7 +13,7 @@ import asyncio
 import json
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from netra_backend.app.schemas import User
@@ -23,7 +23,7 @@ from netra_backend.app.services.agent_service_core import AgentService
 
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.websocket_core.unified.telemetry_manager import TelemetryManager
+from netra_backend.app.core.health.telemetry_manager import TelemetryManager
 from test_framework.mock_utils import mock_justified
 
 @pytest.mark.asyncio
@@ -33,7 +33,7 @@ class TestFirstMessageErrorRecovery:
     @pytest.fixture
     async def circuit_breaker(self):
         """Create circuit breaker for testing."""
-        return CircuitBreaker(
+        yield CircuitBreaker(
             failure_threshold=3,
             recovery_timeout=5.0,
             half_open_requests=1
@@ -42,7 +42,7 @@ class TestFirstMessageErrorRecovery:
     @pytest.fixture
     async def telemetry_manager(self):
         """Create telemetry manager for error tracking."""
-        return TelemetryManager()
+        yield TelemetryManager()
     
     @pytest.fixture
     async def message_handler(self):
@@ -56,9 +56,10 @@ class TestFirstMessageErrorRecovery:
         thread_service.create_message = AsyncMock()
         
         handler = MessageHandlerService(mock_supervisor, thread_service)
-        return handler
+        yield handler
     
     @pytest.fixture
+    @pytest.mark.asyncio
     async def test_user(self):
         """Create test user for error recovery testing."""
         return User(
@@ -69,6 +70,7 @@ class TestFirstMessageErrorRecovery:
             created_at=datetime.now(timezone.utc)
         )
     
+    @pytest.mark.asyncio
     async def test_transient_failure_with_retry(
         self, message_handler, test_user
     ):
@@ -109,6 +111,7 @@ class TestFirstMessageErrorRecovery:
         assert result["status"] == "success"
         assert call_count == 3
     
+    @pytest.mark.asyncio
     async def test_circuit_breaker_activation(
         self, circuit_breaker, message_handler, test_user
     ):
@@ -146,6 +149,7 @@ class TestFirstMessageErrorRecovery:
         assert circuit_breaker.is_open()
         assert failure_count >= 3
     
+    @pytest.mark.asyncio
     async def test_state_preservation_during_failure(
         self, message_handler, test_user
     ):
@@ -194,6 +198,7 @@ class TestFirstMessageErrorRecovery:
         assert preserved_state["content"] == "Important first message"
         assert preserved_state["attempt"] == 2
     
+    @pytest.mark.asyncio
     async def test_graceful_degradation(
         self, message_handler, telemetry_manager, test_user
     ):
@@ -241,6 +246,7 @@ class TestFirstMessageErrorRecovery:
         assert result["status"] == "degraded"
         assert "Limited functionality" in result["response"]
     
+    @pytest.mark.asyncio
     async def test_user_notification_on_recovery(
         self, message_handler, test_user
     ):
@@ -294,6 +300,7 @@ class TestFirstMessageErrorRecovery:
         assert call_args[0] == test_user.id
         assert call_args[1]["type"] == "recovery_notification"
     
+    @pytest.mark.asyncio
     async def test_timeout_handling(self, message_handler, test_user):
         """Test timeout handling for first message."""
         
@@ -329,6 +336,7 @@ class TestFirstMessageErrorRecovery:
         assert result["status"] == "timeout"
         assert "taking longer" in result["message"]
     
+    @pytest.mark.asyncio
     async def test_error_telemetry_collection(
         self, telemetry_manager, message_handler, test_user
     ):

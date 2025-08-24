@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -137,7 +137,7 @@ class TestProductionToolInternalExecution:
         """Test _try_corpus_tools with create operation."""
         tool = self._setup_corpus_create_test()
         with patch('app.services.corpus.corpus_service.create_corpus') as mock_service:
-            from unittest.mock import Mock
+            from unittest.mock import Mock, AsyncMock, MagicMock
             mock_corpus = Mock()
             mock_corpus.id = "test_corpus_123"
             mock_corpus.name = "test_corpus"

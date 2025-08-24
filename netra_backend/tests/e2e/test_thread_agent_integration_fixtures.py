@@ -9,7 +9,7 @@ import asyncio
 import json
 import uuid
 from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -115,6 +115,7 @@ def mock_run():
     return run
 
 @pytest.fixture
+@pytest.mark.asyncio
 async def test_session():
     """Create test database session."""
     session = AsyncMock(spec=AsyncSession)
@@ -137,6 +138,7 @@ async def test_session():
 class TestThreadAgentIntegrationFixtures:
     """Test thread-agent integration fixtures."""
     
+    @pytest.mark.asyncio
     async def test_mock_supervisor_agent_fixture(self, mock_supervisor_agent):
         """Test mock supervisor agent fixture."""
         assert mock_supervisor_agent is not None
@@ -148,6 +150,7 @@ class TestThreadAgentIntegrationFixtures:
         result = await mock_supervisor_agent.process_request("test request")
         assert result["status"] == "success"
     
+    @pytest.mark.asyncio
     async def test_mock_data_sub_agent_fixture(self, mock_data_sub_agent):
         """Test mock data sub-agent fixture."""
         assert mock_data_sub_agent is not None
@@ -159,6 +162,7 @@ class TestThreadAgentIntegrationFixtures:
         analysis = await mock_data_sub_agent.analyze_data({"test": "data"})
         assert analysis["analysis"] == "complete"
     
+    @pytest.mark.asyncio
     async def test_thread_service_fixture(self, thread_service):
         """Test thread service fixture."""
         assert thread_service is not None
@@ -171,6 +175,7 @@ class TestThreadAgentIntegrationFixtures:
         assert "id" in thread
         assert thread["title"] == "Test Thread"
     
+    @pytest.mark.asyncio
     async def test_agent_service_fixture(self, agent_service):
         """Test agent service fixture."""
         assert agent_service is not None
@@ -182,6 +187,7 @@ class TestThreadAgentIntegrationFixtures:
         agent = await agent_service.create_agent({"type": "test_agent"})
         assert "agent_id" in agent
     
+    @pytest.mark.asyncio
     async def test_mock_database_objects(self, mock_thread, mock_message, mock_run):
         """Test mock database object fixtures."""
         # Test thread
@@ -201,6 +207,7 @@ class TestThreadAgentIntegrationFixtures:
         assert hasattr(mock_run, 'id')
         assert hasattr(mock_run, 'status')
     
+    @pytest.mark.asyncio
     async def test_test_session_fixture(self, test_session):
         """Test database session fixture."""
         assert test_session is not None
@@ -211,6 +218,7 @@ class TestThreadAgentIntegrationFixtures:
 class TestThreadAgentIntegration:
     """Test thread-agent integration functionality."""
     
+    @pytest.mark.asyncio
     async def test_agent_thread_communication(self, mock_supervisor_agent, thread_service):
         """Test communication between agents and threads."""
         # Create a thread
@@ -228,6 +236,7 @@ class TestThreadAgentIntegration:
         assert message is not None
         assert "id" in message
     
+    @pytest.mark.asyncio
     async def test_agent_delegation_workflow(self, mock_supervisor_agent, mock_data_sub_agent):
         """Test agent delegation workflow."""
         # Supervisor processes initial request
@@ -244,6 +253,7 @@ class TestThreadAgentIntegration:
         analysis = await mock_data_sub_agent.analyze_data({"data": "test_data"})
         assert analysis["analysis"] == "complete"
     
+    @pytest.mark.asyncio
     async def test_fixture_integration(self):
         """Test that fixtures can be used together."""
         # This test ensures the file can be imported and fixtures work

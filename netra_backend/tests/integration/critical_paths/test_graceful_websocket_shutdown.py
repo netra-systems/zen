@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -1146,6 +1146,7 @@ class TestGracefulWebSocketShutdown:
         
         return websocket
     
+    @pytest.mark.asyncio
     async def test_basic_graceful_shutdown(self, shutdown_manager, test_users):
 
         """Test basic graceful shutdown functionality."""
@@ -1198,6 +1199,7 @@ class TestGracefulWebSocketShutdown:
 
         assert metrics["graceful_close_rate"] > 0 or metrics["force_close_rate"] > 0
     
+    @pytest.mark.asyncio
     async def test_message_preservation_during_shutdown(self, shutdown_manager, test_users):
 
         """Test message preservation during graceful shutdown."""
@@ -1242,6 +1244,7 @@ class TestGracefulWebSocketShutdown:
 
         assert metrics["message_preservation_rate"] >= 80  # Should preserve most messages
     
+    @pytest.mark.asyncio
     async def test_force_close_timeout(self, shutdown_manager, test_users):
 
         """Test force close when graceful drain times out."""
@@ -1280,6 +1283,7 @@ class TestGracefulWebSocketShutdown:
 
         assert metrics["force_closed_connections"] > 0
     
+    @pytest.mark.asyncio
     async def test_multiple_connections_shutdown(self, shutdown_manager, test_users):
 
         """Test shutdown with multiple connections."""
@@ -1324,6 +1328,7 @@ class TestGracefulWebSocketShutdown:
 
         assert metrics["gracefully_closed_connections"] + metrics["force_closed_connections"] == len(test_users)
     
+    @pytest.mark.asyncio
     async def test_shutdown_status_monitoring(self, shutdown_manager, test_users):
 
         """Test shutdown status monitoring."""
@@ -1372,6 +1377,7 @@ class TestGracefulWebSocketShutdown:
 
         assert final_status["phase"] == ShutdownPhase.STOPPED.value
     
+    @pytest.mark.asyncio
     async def test_drain_strategies(self, shutdown_manager, drain_handler, test_users):
 
         """Test different connection drain strategies."""
@@ -1409,6 +1415,7 @@ class TestGracefulWebSocketShutdown:
 
             assert len(websocket.messages_sent) > 0
     
+    @pytest.mark.asyncio
     async def test_coordinated_shutdown(self, shutdown_coordinator, test_users):
 
         """Test coordinated shutdown across multiple services."""
@@ -1466,6 +1473,7 @@ class TestGracefulWebSocketShutdown:
 
         assert final_status["total_services"] == 3
     
+    @pytest.mark.asyncio
     async def test_state_persistence_during_shutdown(self, shutdown_manager, test_users):
 
         """Test state persistence during shutdown."""
@@ -1528,6 +1536,7 @@ class TestGracefulWebSocketShutdown:
     
     @mock_justified("L2: Graceful shutdown with real internal components")
 
+    @pytest.mark.asyncio
     async def test_websocket_integration_with_shutdown(self, shutdown_manager, test_users):
 
         """Test WebSocket integration with graceful shutdown."""
@@ -1569,7 +1578,7 @@ class TestGracefulWebSocketShutdown:
 
         cleanup_called = []
         
-        def cleanup_callback(phase):
+        async def cleanup_callback(phase):
 
             cleanup_called.append(phase)
         
@@ -1629,6 +1638,7 @@ class TestGracefulWebSocketShutdown:
 
         assert metrics["message_preservation_rate"] >= 70  # Should preserve most messages
     
+    @pytest.mark.asyncio
     async def test_shutdown_performance_benchmarks(self, shutdown_manager, test_users):
 
         """Test shutdown performance with many connections."""

@@ -6,7 +6,7 @@ from pathlib import Path
 # Test framework import - using pytest fixtures instead
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -28,6 +28,7 @@ class MockReliableAgent(AgentReliabilityMixin):
 
 class TestSystemResilience:
     """Test system resilience under various failure conditions."""
+    @pytest.mark.asyncio
     async def test_cascading_failure_prevention(self):
         """Test system behavior under cascading failure conditions."""
         # Simulate scenario where multiple components are failing simultaneously
@@ -71,6 +72,7 @@ class TestSystemResilience:
             mock_emergency_instance.execute_emergency_fallback.assert_called_once_with(
                 "FailingAgent", "test_operation", "general"
             )
+    @pytest.mark.asyncio
     async def test_concurrent_component_failures(self):
         """Test system behavior when multiple components fail concurrently."""
         # Simulate multiple agents failing at the same time

@@ -6,7 +6,7 @@ Tests for cache invalidation and metrics - app/routes/llm_cache.py
 import sys
 from pathlib import Path
 
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
@@ -44,6 +44,7 @@ class TestLLMCacheRoute:
                 result = response.json()
                 assert "cleared" in result or "message" in result
 
+    @pytest.mark.asyncio
     async def test_selective_cache_invalidation(self):
         """Test selective cache invalidation."""
         from netra_backend.app.routes.llm_cache import clear_cache_pattern

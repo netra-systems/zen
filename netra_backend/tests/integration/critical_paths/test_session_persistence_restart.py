@@ -23,7 +23,7 @@ import uuid
 import subprocess
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -31,7 +31,7 @@ from sqlalchemy.orm import sessionmaker
 
 # JWT service replaced with auth_integration
 from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 JWTService = AsyncMock
 # Session manager replaced with mock
@@ -464,6 +464,7 @@ class SessionPersistenceManager:
         
         return verification_summary
     
+    @pytest.mark.asyncio
     async def test_session_recovery_after_restart(self, restart_services: List[str], 
 
                                                  restart_type: str = "graceful") -> Dict[str, Any]:
@@ -802,6 +803,7 @@ class TestSessionPersistenceRestartL3:
 
         await manager.cleanup()
     
+    @pytest.mark.asyncio
     async def test_redis_graceful_restart_session_persistence(self, persistence_manager):
 
         """Test session persistence through graceful Redis restart."""
@@ -856,6 +858,7 @@ class TestSessionPersistenceRestartL3:
         
         logger.info(f"Graceful restart test: {recovery_result['recovery_rate']:.1%} recovery rate")
     
+    @pytest.mark.asyncio
     async def test_redis_crash_restart_session_recovery(self, persistence_manager):
 
         """Test session recovery after Redis crash restart."""
@@ -909,6 +912,7 @@ class TestSessionPersistenceRestartL3:
         
         logger.info(f"Crash restart test: {recovery_result['recovery_rate']:.1%} recovery rate")
     
+    @pytest.mark.asyncio
     async def test_websocket_reconnection_after_restart(self, persistence_manager):
 
         """Test WebSocket reconnection capability after service restart."""
@@ -971,6 +975,7 @@ class TestSessionPersistenceRestartL3:
         
         logger.info("WebSocket reconnection after restart verified successfully")
     
+    @pytest.mark.asyncio
     async def test_concurrent_sessions_restart_resilience(self, persistence_manager):
 
         """Test multiple concurrent sessions surviving restart."""
@@ -1058,6 +1063,7 @@ class TestSessionPersistenceRestartL3:
 
                    f"for {session_count} sessions")
     
+    @pytest.mark.asyncio
     async def test_session_state_data_persistence(self, persistence_manager):
 
         """Test that complex session state data persists through restart."""
@@ -1180,6 +1186,7 @@ class TestSessionPersistenceRestartL3:
         
         logger.info("Complex session state data persistence verified successfully")
     
+    @pytest.mark.asyncio
     async def test_restart_performance_impact(self, persistence_manager):
 
         """Test performance impact of service restart on session operations."""

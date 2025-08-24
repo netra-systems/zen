@@ -234,12 +234,12 @@ class TestAuthWebSocketIntegration:
         for user_id, ws in users:
             # Check user is connected
             assert user_id in manager.user_connections
-            connections = manager.user_connections[user_id]
-            # connections is a set of connection_ids
-            assert len(connections) == 1
-            # The connection ID should be in active connections
-            conn_id = list(connections)[0]
-            assert conn_id in manager.active_connections
+            connection_ids = manager.user_connections[user_id]
+            # connection_ids is a set of connection_ids
+            assert len(connection_ids) == 1
+            # The connection ID should be in connections dict
+            conn_id = list(connection_ids)[0]
+            assert conn_id in manager.connections
         
         # Cleanup
         for user_id, ws in users:
@@ -259,15 +259,16 @@ class TestCoreServiceCommunication:
         )
         
         # Mock auth service validation
-        with patch('auth_service.auth_core.core.jwt_handler.JWTHandler.verify_token') as mock_verify:
+        with patch('auth_service.auth_core.core.jwt_handler.JWTHandler.validate_token') as mock_verify:
             mock_verify.return_value = {
                 "sub": "test_user_9",
                 "email": "test9@example.com",
-                "permissions": ["read", "write"]
+                "permissions": ["read", "write"],
+                "valid": True
             }
             
             # Backend makes request with token
-            result = await mock_verify(token)
+            result = mock_verify(token, token_type="access")
             
             # Verify validation occurred
             assert mock_verify.called

@@ -5,7 +5,7 @@ from pathlib import Path
 
 # Test framework import - using pytest fixtures instead
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -58,6 +58,7 @@ class TestCRUDService:
         mock_session.commit.assert_called_once()
         mock_session.refresh.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_create_entity(self, crud_service):
         """Test creating an entity."""
         mock_data = {"name": "test", "value": 123}
@@ -81,6 +82,7 @@ class TestCRUDService:
         """Helper: Verify get by ID call."""
         mock_session.get.assert_called_once_with(MockModel, entity_id)
 
+    @pytest.mark.asyncio
     async def test_get_by_id_found(self, crud_service):
         """Test getting entity by ID when found."""
         entity_id = 1
@@ -96,6 +98,7 @@ class TestCRUDService:
                 assert result == mock_entity
                 self._verify_get_by_id_call(mock_session, entity_id)
 
+    @pytest.mark.asyncio
     async def test_get_by_id_not_found(self, crud_service):
         """Test getting entity by ID when not found."""
         entity_id = 999
@@ -124,6 +127,7 @@ class TestCRUDService:
         mock_session.commit.assert_called_once()
         mock_session.refresh.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_update_entity_success(self, crud_service):
         """Test updating an existing entity."""
         entity_id = 1
@@ -141,6 +145,7 @@ class TestCRUDService:
                 assert result == mock_entity
                 assert mock_entity.name == "updated"  # Field should be updated
 
+    @pytest.mark.asyncio
     async def test_update_entity_not_found(self, crud_service):
         """Test updating non-existent entity."""
         entity_id = 999
@@ -164,6 +169,7 @@ class TestCRUDService:
         mock_session.delete.assert_called_once_with(entity)
         mock_session.commit.assert_called_once()
 
+    @pytest.mark.asyncio
     async def test_delete_entity_success(self, crud_service):
         """Test deleting an existing entity."""
         entity_id = 1
@@ -178,6 +184,7 @@ class TestCRUDService:
             assert result == True
             self._verify_delete_calls(mock_session, mock_entity)
 
+    @pytest.mark.asyncio
     async def test_delete_entity_not_found(self, crud_service):
         """Test deleting non-existent entity."""
         entity_id = 999
@@ -194,6 +201,7 @@ class TestCRUDService:
         """Helper: Setup exists check mock."""
         mock_session.get = AsyncMock(return_value=entity)
 
+    @pytest.mark.asyncio
     async def test_exists_true(self, crud_service):
         """Test entity exists check when entity exists."""
         entity_id = 1
@@ -207,6 +215,7 @@ class TestCRUDService:
             
             assert result == True
 
+    @pytest.mark.asyncio
     async def test_exists_false(self, crud_service):
         """Test entity exists check when entity doesn't exist."""
         entity_id = 999
