@@ -9,9 +9,13 @@ from netra_backend.app.core.exceptions_websocket import WebSocketError
 from netra_backend.app.core.websocket_recovery_manager import WebSocketRecoveryManager
 from netra_backend.app.error_handling.example_message_errors import RecoveryStrategy
 
+# Create alias for backward compatibility
+ErrorRecoveryHandler = WebSocketRecoveryManager
+
 # Re-export for backward compatibility
 __all__ = [
     'WebSocketError',
     'WebSocketRecoveryManager',
     'RecoveryStrategy',
+    'ErrorRecoveryHandler',  # Alias for WebSocketRecoveryManager
 ]
