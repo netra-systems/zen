@@ -180,7 +180,8 @@ class TestPortConflictResolution(unittest.TestCase):
         sock.listen(1)
         return sock
 
-    @patch('dev_launcher.service_discovery_system.service_discovery')
+    @patch('dev_launcher.port_utils.find_available_port')
+    @patch('dev_launcher.port_utils.is_port_available')
     def test_port_conflict_auto_reallocation(self, mock_is_available, mock_find_port):
         """Test automatic port reallocation when preferred ports are in use."""
         # Simulate preferred ports being unavailable

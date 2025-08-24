@@ -165,7 +165,7 @@ async def test_isolated_test_environment():
 class TestSystemResilience:
     """Test suite for system resilience and fallback mechanisms."""
     
-    async def test_1_llm_provider_failover_resilience(self, isolated_test_environment:
+    async def test_1_llm_provider_failover_resilience(self, test_isolated_test_environment,
                                                       failure_simulator, resilience_metrics):
         """
         Test 1: LLM Provider Failover Resilience
@@ -243,7 +243,7 @@ class TestSystemResilience:
         finally:
             metrics.end_time = time.time()
     
-    async def test_2_rate_limit_handling_and_backoff(self, isolated_test_environment:
+    async def test_2_rate_limit_handling_and_backoff(self, test_isolated_test_environment,
                                                      failure_simulator, resilience_metrics):
         """
         Test 2: Rate Limit Recovery and Backoff
@@ -304,7 +304,7 @@ class TestSystemResilience:
         finally:
             metrics.end_time = time.time()
     
-    async def test_3_database_connectivity_loss_and_cache_fallback(self, isolated_test_environment:
+    async def test_3_database_connectivity_loss_and_cache_fallback(self, test_isolated_test_environment,
                                                                    failure_simulator, resilience_metrics):
         """
         Test 3: Database Connectivity Loss and Cache Fallback
@@ -395,7 +395,7 @@ class TestSystemResilience:
         finally:
             metrics.end_time = time.time()
     
-    async def test_4_circuit_breaker_pattern_validation(self, isolated_test_environment:
+    async def test_4_circuit_breaker_pattern_validation(self, test_isolated_test_environment,
                                                         failure_simulator, resilience_metrics):
         """
         Test 4: Circuit Breaker Pattern Validation
@@ -485,7 +485,7 @@ class TestSystemResilience:
         finally:
             metrics.end_time = time.time()
     
-    async def test_5_multi_service_graceful_degradation(self, isolated_test_environment:
+    async def test_5_multi_service_graceful_degradation(self, test_isolated_test_environment,
                                                         failure_simulator, resilience_metrics):
         """
         Test 5: Multi-Service Graceful Degradation
@@ -615,7 +615,7 @@ class TestSystemResilience:
             metrics.end_time = time.time()
 
 @pytest.mark.asyncio
-async def test_resilience_suite_integration(isolated_test_environment, failure_simulator, resilience_metrics):
+async def test_resilience_suite_integration(test_isolated_test_environment, failure_simulator, resilience_metrics):
     """
     Integration test validating all resilience mechanisms work together.
     

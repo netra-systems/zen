@@ -14,7 +14,12 @@ import { MessageInput } from '@/components/chat/MessageInput';
 import { 
   setupMessageInputMocks, 
   mockHooks,
-  measurePerformance 
+  measurePerformance,
+  mockUseTextareaResize,
+  mockUseMessageHistory,
+  mockUseMessageSending,
+  mockUseUnifiedChatStore,
+  mockUseAuthStore
 } from './shared-test-setup';
 
 describe('MessageInput - Core Functionality', () => {
@@ -97,7 +102,7 @@ describe('MessageInput - Core Functionality', () => {
     });
 
     it('updates rows based on content', () => {
-      mockHooks.mockUseTextareaResize.mockReturnValue({ rows: 3 });
+      mockUseTextareaResize.mockReturnValue({ rows: 3 });
       
       render(<MessageInput />);
       
@@ -111,12 +116,12 @@ describe('MessageInput - Core Functionality', () => {
       const mockHandleSend = jest.fn();
       const mockAddToHistory = jest.fn();
       
-      mockHooks.mockUseMessageSending.mockReturnValue({
+      mockUseMessageSending.mockReturnValue({
         isSending: false,
         handleSend: mockHandleSend
       });
       
-      mockHooks.mockUseMessageHistory.mockReturnValue({
+      mockUseMessageHistory.mockReturnValue({
         messageHistory: [],
         addToHistory: mockAddToHistory,
         navigateHistory: jest.fn(() => '')
@@ -157,12 +162,12 @@ describe('MessageInput - Core Functionality', () => {
       const mockHandleSend = jest.fn();
       const mockAddToHistory = jest.fn();
       
-      mockHooks.mockUseMessageSending.mockReturnValue({
+      mockUseMessageSending.mockReturnValue({
         isSending: false,
         handleSend: mockHandleSend
       });
       
-      mockHooks.mockUseMessageHistory.mockReturnValue({
+      mockUseMessageHistory.mockReturnValue({
         messageHistory: [],
         addToHistory: mockAddToHistory,
         navigateHistory: jest.fn(() => '')
@@ -240,7 +245,7 @@ describe('MessageInput - Core Functionality', () => {
 
   describe('Auto-resize Behavior', () => {
     it('adjusts height based on content', () => {
-      mockHooks.mockUseTextareaResize.mockReturnValue({ rows: 4 });
+      mockUseTextareaResize.mockReturnValue({ rows: 4 });
       
       render(<MessageInput />);
       
@@ -254,7 +259,7 @@ describe('MessageInput - Core Functionality', () => {
     });
 
     it('respects maximum height limit', () => {
-      mockHooks.mockUseTextareaResize.mockReturnValue({ rows: 5 });
+      mockUseTextareaResize.mockReturnValue({ rows: 5 });
       
       render(<MessageInput />);
       
@@ -280,7 +285,7 @@ describe('MessageInput - Core Functionality', () => {
     });
 
     it('disables input when processing', () => {
-      mockHooks.mockUseUnifiedChatStore.mockReturnValue({
+      mockUseUnifiedChatStore.mockReturnValue({
         activeThreadId: 'thread-1',
         isProcessing: true
       });
@@ -292,7 +297,7 @@ describe('MessageInput - Core Functionality', () => {
     });
 
     it('disables input when not authenticated', () => {
-      mockHooks.mockUseAuthStore.mockReturnValue({
+      mockUseAuthStore.mockReturnValue({
         isAuthenticated: false
       });
       

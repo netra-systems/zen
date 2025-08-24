@@ -1,8 +1,6 @@
-import os
 import redis.asyncio as redis
 
-from netra_backend.app.config import get_config
-settings = get_config()
+from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
 
 
@@ -13,8 +11,7 @@ class RedisManager:
 
     def _is_redis_disabled_by_flag(self) -> bool:
         """Check if Redis is disabled by operational flag."""
-        from netra_backend.app.core.configuration import unified_config_manager
-        config = unified_config_manager.get_config()
+        config = get_unified_config()
         disabled = getattr(config, 'disable_redis', False)
         if disabled:
             logger.info("Redis is disabled by configuration")
@@ -22,9 +19,8 @@ class RedisManager:
         return False
 
     def _get_redis_mode(self) -> str:
-        """Get Redis mode from environment."""
-        from netra_backend.app.core.configuration import unified_config_manager
-        config = unified_config_manager.get_config()
+        """Get Redis mode from configuration."""
+        config = get_unified_config()
         return getattr(config, 'redis_mode', 'shared').lower()
 
     def _handle_redis_mode(self, redis_mode: str):
@@ -39,8 +35,9 @@ class RedisManager:
 
     def _check_development_redis(self) -> bool:
         """Check Redis availability in development mode."""
-        if settings.environment == "development":
-            enabled = settings.dev_mode_redis_enabled
+        config = get_unified_config()
+        if config.environment == "development":
+            enabled = config.dev_mode_redis_enabled
             if not enabled:
                 logger.info("Redis is disabled in development configuration")
             return enabled
@@ -62,8 +59,8 @@ class RedisManager:
 
     def _create_redis_client(self):
         """Create Redis client with configuration."""
-        # FIX: Support local fallback when remote Redis fails
-        redis_mode = os.environ.get("REDIS_MODE", "shared").lower()
+        config = get_unified_config()
+        redis_mode = config.redis_mode.lower()
         
         if redis_mode == "local":
             # Use local Redis configuration as fallback
@@ -75,9 +72,9 @@ class RedisManager:
         else:
             # Use configured Redis settings
             return redis.Redis(
-                host=settings.redis.host, port=settings.redis.port,
-                decode_responses=True, username=settings.redis.username,
-                password=settings.redis.password, socket_connect_timeout=10, socket_timeout=5
+                host=config.redis.host, port=config.redis.port,
+                decode_responses=True, username=config.redis.username,
+                password=config.redis.password, socket_connect_timeout=10, socket_timeout=5
             )
 
     async def _test_redis_connection(self):
@@ -105,10 +102,12 @@ class RedisManager:
             await self._test_redis_connection()
         except Exception as e:
             # FIX: Try local fallback if remote Redis fails
-            redis_mode = os.environ.get("REDIS_MODE", "shared").lower()
+            config = get_unified_config()
+            redis_mode = config.redis_mode.lower()
             if redis_mode != "local":
                 logger.warning(f"Remote Redis failed: {e}. Attempting local fallback...")
-                os.environ["REDIS_MODE"] = "local"
+                # Temporarily modify config for local fallback
+                config.redis_mode = "local"
                 try:
                     self.redis_client = self._create_redis_client()
                     await self._test_redis_connection()
@@ -116,6 +115,8 @@ class RedisManager:
                     return
                 except Exception as fallback_error:
                     logger.error(f"Local Redis fallback also failed: {fallback_error}")
+                    # Restore original mode
+                    config.redis_mode = redis_mode
             
             self._handle_connection_error(e)
 

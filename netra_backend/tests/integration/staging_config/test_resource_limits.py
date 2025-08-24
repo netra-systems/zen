@@ -18,7 +18,7 @@ from typing import Dict, List
 import httpx
 import psutil
 
-from netra_backend.tests.integration.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 class TestResourceLimits(StagingConfigTestBase):
     """Test resource limits in staging."""

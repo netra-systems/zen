@@ -17,21 +17,19 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import AsyncAdaptedQueuePool, NullPool, QueuePool
 
-from netra_backend.app.db.postgres_config import DatabaseConfig
 from netra_backend.app.db.postgres_events import (
     setup_async_engine_events,
     setup_sync_engine_events,
 )
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.configuration.base import get_unified_config
 
 
 # Import settings lazily to avoid circular dependency
 def get_settings():
     """Get settings lazily to avoid circular import."""
-    from netra_backend.app.config import get_config
-    settings = get_config()
-    return settings
+    return get_unified_config()
 
 logger = central_logger.get_logger(__name__)
 
@@ -46,23 +44,26 @@ class Database:
     def _get_pool_size(self, pool_class) -> int:
         """Get pool size based on pool class with resilient defaults."""
         # Increase pool size for better resilience
-        base_size = DatabaseConfig.POOL_SIZE if pool_class == QueuePool else 0
+        config = get_unified_config()
+        base_size = config.db_pool_size if pool_class == QueuePool else 0
         return max(base_size, 10) if pool_class == QueuePool else 0
 
     def _get_max_overflow(self, pool_class) -> int:
         """Get max overflow based on pool class with resilient defaults."""
         # Increase overflow for better resilience
-        base_overflow = DatabaseConfig.MAX_OVERFLOW if pool_class == QueuePool else 0
+        config = get_unified_config()
+        base_overflow = config.db_max_overflow if pool_class == QueuePool else 0
         return max(base_overflow, 20) if pool_class == QueuePool else 0
 
     def _create_engine(self, db_url: str, pool_class):
         """Create database engine with resilient pooling configuration."""
+        config = get_unified_config()
         return create_engine(
-            db_url, echo=DatabaseConfig.ECHO, echo_pool=DatabaseConfig.ECHO_POOL,
+            db_url, echo=config.db_echo, echo_pool=config.db_echo_pool,
             poolclass=pool_class, pool_size=self._get_pool_size(pool_class),
             max_overflow=self._get_max_overflow(pool_class), 
-            pool_timeout=max(DatabaseConfig.POOL_TIMEOUT, 60),  # Increased timeout for resilience
-            pool_recycle=DatabaseConfig.POOL_RECYCLE, 
+            pool_timeout=max(config.db_pool_timeout, 60),  # Increased timeout for resilience
+            pool_recycle=config.db_pool_recycle, 
             pool_pre_ping=True,  # Always enable pre-ping for resilience
             # Additional resilience settings
             pool_reset_on_return='rollback',  # Reset connections safely
@@ -170,24 +171,27 @@ def _get_pool_class_for_async(async_db_url: str):
 
 def _get_base_engine_args(pool_class):
     """Get base engine arguments for all pool types."""
+    config = get_unified_config()
     return {
-        "echo": DatabaseConfig.ECHO,
-        "echo_pool": DatabaseConfig.ECHO_POOL,
+        "echo": config.db_echo,
+        "echo_pool": config.db_echo_pool,
         "poolclass": pool_class,
     }
 
 def _get_pool_sizing_args():
     """Get pool sizing arguments with resilient defaults."""
+    config = get_unified_config()
     return {
-        "pool_size": max(DatabaseConfig.POOL_SIZE, 10),  # Minimum 10 for resilience
-        "max_overflow": max(DatabaseConfig.MAX_OVERFLOW, 20),  # Minimum 20 for resilience
+        "pool_size": max(config.db_pool_size, 10),  # Minimum 10 for resilience
+        "max_overflow": max(config.db_max_overflow, 20),  # Minimum 20 for resilience
     }
 
 def _get_pool_timing_args():
     """Get pool timing arguments with resilient defaults."""
+    config = get_unified_config()
     return {
-        "pool_timeout": max(DatabaseConfig.POOL_TIMEOUT, 60),  # Minimum 60s for resilience
-        "pool_recycle": DatabaseConfig.POOL_RECYCLE,
+        "pool_timeout": max(config.db_pool_timeout, 60),  # Minimum 60s for resilience
+        "pool_recycle": config.db_pool_recycle,
         "pool_pre_ping": True,  # Always enable for resilience
         "pool_reset_on_return": "rollback",  # Safe connection reset
     }

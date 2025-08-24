@@ -48,8 +48,8 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         # Verify dynamic ports is enabled by default
         self.assertTrue(config.dynamic_ports)
         self.assertFalse(config.backend_reload)  # Should be disabled by default
-        self.assertTrue(config.frontend_reload)   # Frontend reload enabled
-        self.assertTrue(config.load_secrets)      # Secrets loading enabled by default
+        self.assertFalse(config.frontend_reload)  # Frontend reload disabled by default for performance
+        self.assertFalse(config.load_secrets)     # Local-only secrets by default (no GCP)
     
     @patch('dev_launcher.config.find_project_root')
     @patch('pathlib.Path.exists')

@@ -17,7 +17,7 @@ from typing import Dict, Optional
 import httpx
 import jwt
 
-from netra_backend.tests.integration.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 class TestMultiServiceSecrets(StagingConfigTestBase):
     """Test multi-service secret sharing in staging."""

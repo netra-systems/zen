@@ -17,7 +17,7 @@ from typing import Dict, List
 
 import httpx
 
-from netra_backend.tests.integration.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 class TestObservabilityPipeline(StagingConfigTestBase):
     """Test observability pipeline in staging."""

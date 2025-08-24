@@ -1422,21 +1422,8 @@ class DevLauncher:
     async def _validate_databases_with_resilience(self) -> bool:
         """Validate database connections with network resilience and enhanced error handling."""
         try:
-            # Create startup barrier for database initialization to prevent race conditions
-            barrier_created = self.race_condition_manager.create_barrier(
-                "database_validation", required_participants={"database_validator"}, timeout_seconds=30
-            )
-            if not barrier_created:
-                logger.warning("Failed to create database validation barrier")
-                return await self._validate_databases()  # Fallback to standard validation
-                
-            # Wait for the barrier to be ready
-            barrier_ready = self.race_condition_manager.wait_for_barrier(
-                "database_validation", "database_validator", timeout=30
-            )
-            if not barrier_ready:
-                logger.warning("Database validation barrier timed out")
-                return await self._validate_databases()  # Fallback to standard validation
+            # Skip barrier system for database validation - it's causing timeouts
+            # The database validation is a single-threaded operation that doesn't need barriers
                 
             # Use network resilient client for database checks
             db_policy = RetryPolicy(
@@ -1454,8 +1441,7 @@ class DevLauncher:
             for db_service in db_services:
                 success, error = await self.network_client.resilient_database_check(
                     db_service,
-                    retry_policy=db_policy,
-                    allow_degradation=True
+                    retry_policy=db_policy
                 )
                 
                 if success:
@@ -1471,19 +1457,13 @@ class DevLauncher:
             
             if failed_connections:
                 self._print("⚠️", "RESILIENCE", f"{len(failed_connections)} database service(s) failed - using fallback validation")
-                # Complete barrier before fallback
-                self.race_condition_manager.complete_barrier("database_validation", "database_validator")
                 # Fallback to standard validation for failed services
                 return await self._validate_databases()
             
-            # Complete barrier before success return
-            self.race_condition_manager.complete_barrier("database_validation", "database_validator")
             return len(successful_connections) > 0  # Success if at least one DB is available
                 
         except Exception as e:
             logger.error(f"Resilient database validation failed: {e}")
-            # Complete barrier before fallback
-            self.race_condition_manager.complete_barrier("database_validation", "database_validator")
             # Fallback to standard validation
             return await self._validate_databases()
     

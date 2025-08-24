@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>Staging Deployment Root Cause Analysis and Fixes</title>
+        <date>2025-08-24</date>
+        <severity>CRITICAL</severity>
+        <category>deployment,configuration,initialization</category>
+        <affected_services>backend,auth,all</affected_services>
+    </metadata>
+    
+    <issue_summary>
+        Multiple staging deployment failures caused by configuration and import errors.
+        Used Five Whys root cause analysis to identify and fix underlying issues.
+    </issue_summary>
+    
+    <root_causes>
+        <issue id="1" severity="CRITICAL">
+            <description>Circular dependency between logging filter and configuration loading</description>
+            <location>netra_backend/app/core/logging_context.py:197-200</location>
+            <root_cause>
+                ContextFilter._is_production() method was loading full configuration manager,
+                which tried to initialize logging, creating infinite recursion
+            </root_cause>
+            <fix>
+                Read ENVIRONMENT variable directly from os.environ instead of loading config
+            </fix>
+        </issue>
+        
+        <issue id="2" severity="CRITICAL">
+            <description>Auth service missing required secrets in deployment configuration</description>
+            <location>scripts/deploy_to_gcp.py:593-598</location>
+            <root_cause>
+                JWT_SECRET_KEY secret name mismatch (jwt-secret-staging vs jwt-secret-key-staging),
+                missing Cloud SQL instance configurations
+            </root_cause>
+            <fix>
+                1. Fixed secret name to jwt-secret-key-staging
+                2. Added both Cloud SQL instances: staging-shared-postgres and netra-postgres
+                3. Added JWT_SECRET fallback for compatibility
+            </fix>
+        </issue>
+        
+        <issue id="3" severity="CRITICAL">
+            <description>DatabaseConfig undefined error in postgres_core.py</description>
+            <location>netra_backend/app/db/postgres_core.py:175-191</location>
+            <root_cause>
+                Legacy DatabaseConfig references not updated after migration to unified configuration
+            </root_cause>
+            <fix>
+                Replaced all DatabaseConfig.* references with get_unified_config() calls
+            </fix>
+        </issue>
+        
+        <issue id="4" severity="HIGH">
+            <description>Missing ANTHROPIC_API_KEY secret in deployment</description>
+            <location>scripts/deploy_to_gcp.py:765-767</location>
+            <root_cause>
+                Secret not defined in deployment script secrets list
+            </root_cause>
+            <fix>
+                Added anthropic-api-key-staging to secrets configuration
+            </fix>
+        </issue>
+    </root_causes>
+    
+    <prevention_measures>
+        <measure>
+            Always use direct environment variable access in logging filters to avoid circular dependencies
+        </measure>
+        <measure>
+            Ensure all Cloud SQL instances are properly configured in deployment scripts
+        </measure>
+        <measure>
+            Maintain consistency between secret names in deployment scripts and application code
+        </measure>
+        <measure>
+            Complete migration from legacy classes to unified configuration system
+        </measure>
+        <measure>
+            Add deployment validation tests to catch configuration mismatches
+        </measure>
+    </prevention_measures>
+    
+    <testing_recommendations>
+        <test>Run staging deployment test after any configuration changes</test>
+        <test>Verify all secrets are accessible in deployed environment</test>
+        <test>Test circular dependency prevention in logging system</test>
+        <test>Validate database configuration loading in all environments</test>
+    </testing_recommendations>
+    
+    <five_whys_analysis>
+        <why level="1">Services failed to start in staging</why>
+        <why level="2">Configuration loading and initialization errors</why>
+        <why level="3">Missing environment variables and circular dependencies</why>
+        <why level="4">Incomplete migration to unified configuration system</why>
+        <why level="5">Lack of staging-specific integration tests and validation</why>
+    </five_whys_analysis>
+    
+    <resolution_status>RESOLVED</resolution_status>
+    <deployment_status>SUCCESSFUL</deployment_status>
+</learning>

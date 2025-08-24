@@ -912,25 +912,82 @@ class TestProtocolEdgeCases(BaseIntegrationTest):
     
     def _cors_origin_matches(self, origin: str, pattern: str) -> bool:
         """Check if origin matches CORS pattern."""
-        # Handle exact match
+        # Parse both origin and pattern
+        origin_parsed = urllib.parse.urlparse(origin)
+        
+        # Handle exact match first
         if origin == pattern:
             return True
         
-        # Handle wildcard subdomain
-        if pattern.startswith('*.'):
-            domain_pattern = pattern[2:]  # Remove *.
-            origin_parsed = urllib.parse.urlparse(origin)
-            if origin_parsed.hostname and origin_parsed.hostname.endswith(domain_pattern):
-                return True
+        # Normalize URLs by handling implicit ports
+        origin_normalized = self._normalize_cors_origin(origin_parsed)
         
-        # Handle protocol wildcard
+        # Handle wildcard subdomain (e.g., *.staging.netrasystems.ai or https://*.staging.netrasystems.ai)
+        if pattern.startswith('*.') or '://*.' in pattern:
+            # Extract the scheme and base domain from the pattern
+            if '://' in pattern:
+                # Pattern like "https://*.staging.netrasystems.ai"
+                wildcard_scheme = pattern.split('://')[0]
+                domain_part = pattern.split('://', 1)[1][2:]  # Remove "*." after the scheme
+                base_domain = domain_part.split('/')[0]  # Remove any path
+            else:
+                # Pattern like "*.staging.netrasystems.ai" (no scheme)
+                wildcard_scheme = origin_parsed.scheme  # Use origin's scheme
+                domain_part = pattern[2:]  # Remove "*."
+                base_domain = domain_part.split('/')[0]  # Remove any path
+            
+            # Check if protocols match and hostname matches the wildcard pattern
+            if origin_parsed.scheme == wildcard_scheme:
+                if origin_parsed.hostname and origin_parsed.hostname.endswith('.' + base_domain):
+                    return True
+        
+        # Handle protocol wildcard (e.g., *://app.staging.netrasystems.ai)
         if pattern.startswith('*://'):
             pattern_without_protocol = pattern[4:]
-            origin_without_protocol = origin.split('://', 1)[1] if '://' in origin else origin
-            if pattern_without_protocol == origin_without_protocol:
+            pattern_parsed = urllib.parse.urlparse('dummy://' + pattern_without_protocol)
+            pattern_normalized = self._normalize_cors_origin(pattern_parsed, ignore_scheme=True)
+            
+            if self._origins_match_ignoring_scheme(origin_normalized, pattern_normalized):
                 return True
         
+        # Handle implicit port matching (443 for https, 80 for http)
+        pattern_parsed = urllib.parse.urlparse(pattern)
+        pattern_normalized = self._normalize_cors_origin(pattern_parsed)
+        
+        if origin_normalized == pattern_normalized:
+            return True
+        
         return False
+    
+    def _normalize_cors_origin(self, parsed_url: urllib.parse.ParseResult, ignore_scheme: bool = False) -> str:
+        """Normalize a parsed URL for CORS matching by handling implicit ports."""
+        scheme = parsed_url.scheme if not ignore_scheme else 'dummy'
+        hostname = parsed_url.hostname or ''
+        port = parsed_url.port
+        path = parsed_url.path or ''
+        
+        # Handle implicit ports
+        if port is None:
+            if parsed_url.scheme == 'https':
+                port = 443
+            elif parsed_url.scheme == 'http':
+                port = 80
+        
+        # Build normalized netloc
+        if port and ((parsed_url.scheme == 'https' and port != 443) or 
+                    (parsed_url.scheme == 'http' and port != 80)):
+            netloc = f"{hostname}:{port}"
+        else:
+            netloc = hostname
+        
+        return f"{scheme}://{netloc}{path}".rstrip('/')
+    
+    def _origins_match_ignoring_scheme(self, origin1: str, origin2: str) -> bool:
+        """Check if two normalized origins match, ignoring the scheme."""
+        # Remove scheme from both
+        origin1_without_scheme = origin1.split('://', 1)[1] if '://' in origin1 else origin1
+        origin2_without_scheme = origin2.split('://', 1)[1] if '://' in origin2 else origin2
+        return origin1_without_scheme == origin2_without_scheme
     
     def _simulate_mixed_content_detection(self, page_protocol: str, asset_urls: List[str], asset_type: str) -> Dict[str, Any]:
         """Simulate browser mixed content detection."""

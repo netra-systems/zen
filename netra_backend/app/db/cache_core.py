@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.db.cache_config import CacheMetrics, QueryCacheConfig
+from netra_backend.app.db.cache_config import CacheMetrics
 from netra_backend.app.db.cache_retrieval import CacheInvalidation, CacheRetrieval
 from netra_backend.app.db.cache_storage import CacheMetricsBuilder, CacheStorage
 from netra_backend.app.db.cache_strategies import (
@@ -17,6 +17,7 @@ from netra_backend.app.db.cache_strategies import (
 )
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.core.configuration.base import get_unified_config
 
 logger = central_logger.get_logger(__name__)
 
@@ -24,13 +25,31 @@ logger = central_logger.get_logger(__name__)
 class QueryCache:
     """Intelligent database query cache."""
     
-    def __init__(self, config: Optional[QueryCacheConfig] = None):
+    def __init__(self, config: Optional[Any] = None):
         """Initialize query cache."""
-        self.config = config or QueryCacheConfig()
+        # Use unified config for cache settings
+        unified_config = get_unified_config()
+        self.config = self._build_cache_config(unified_config)
         self.redis = redis_manager
         self.metrics = CacheMetrics()
         self.pattern_tracker = QueryPatternTracker()
         self.task_manager = CacheTaskManager()
+    
+    def _build_cache_config(self, config):
+        """Build cache configuration from unified config."""
+        # Create a simple config object with attributes from unified config
+        class CacheConfig:
+            enabled = config.cache_enabled
+            default_ttl = config.cache_default_ttl
+            max_cache_size = config.cache_max_size
+            cache_prefix = config.cache_prefix
+            metrics_enabled = config.cache_metrics_enabled
+            frequent_query_threshold = config.cache_frequent_query_threshold
+            frequent_query_ttl_multiplier = config.cache_frequent_query_ttl_multiplier
+            slow_query_threshold = config.cache_slow_query_threshold
+            slow_query_ttl_multiplier = config.cache_slow_query_ttl_multiplier
+            strategy = config.cache_strategy
+        return CacheConfig()
 
     async def start(self) -> None:
         """Start background tasks."""

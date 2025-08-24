@@ -155,30 +155,9 @@ class ContextFilter:
     """Filters log records based on environment and context."""
     
     def __init__(self):
-        self._environment = None  # Will be lazy-loaded
+        # No longer storing environment to avoid circular dependencies
+        # Environment is read directly from os.environ when needed
         self._noisy_modules = {"uvicorn.access", "uvicorn.error", "watchfiles"}
-        self._config_loaded = False
-        self._loading_config = False  # Recursion guard
-    
-    def _load_config(self):
-        """Lazy load configuration to avoid circular imports."""
-        if not self._config_loaded and not self._loading_config:
-            self._loading_config = True  # Set guard
-            try:
-                from netra_backend.app.core.configuration import unified_config_manager
-                config = unified_config_manager.get_config()
-                self._environment = getattr(config, 'environment', 'development')
-            except (ImportError, RecursionError):
-                # Fallback if configuration is not available or circular import
-                from netra_backend.app.core.configuration.base import get_unified_config
-                try:
-                    self._environment = get_unified_config().environment
-                except:
-                    # Ultimate fallback
-                    self._environment = "development"
-            finally:
-                self._config_loaded = True
-                self._loading_config = False  # Clear guard
     
     def should_log(self, record) -> bool:
         """Determine if a message should be logged."""
@@ -196,8 +175,11 @@ class ContextFilter:
     
     def _is_production(self) -> bool:
         """Check if running in production environment."""
-        self._load_config()
-        return self._environment == "production"
+        # Read environment directly to avoid circular dependency
+        # This prevents loading the full configuration during logging initialization
+        import os
+        environment = os.getenv('ENVIRONMENT', 'development').lower()
+        return environment == 'production'
     
     def _should_log_in_production(self, record) -> bool:
         """Determine if should log in production environment."""

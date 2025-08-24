@@ -32,19 +32,20 @@ class TestLauncherConfig(unittest.TestCase):
         self.assertEqual(config.frontend_port, 3000)
         self.assertTrue(config.dynamic_ports)  # Changed: now default is True
         self.assertFalse(config.backend_reload)  # Changed: now default is False
-        self.assertTrue(config.load_secrets)
+        self.assertFalse(config.load_secrets)  # Changed: now default is False (local-only)
         self.assertFalse(config.no_browser)
         self.assertFalse(config.verbose)
     
     def test_config_validation_invalid_ports(self):
-        """Test port validation with invalid values."""
-        with self.assertRaises(ValueError) as cm:
-            LauncherConfig(backend_port=70000)
-        self.assertIn("Invalid backend port", str(cm.exception))
+        """Test port validation with invalid values - now auto-resolves instead of raising."""
+        # With enable_port_conflict_resolution=True by default, invalid ports are auto-resolved
+        config = LauncherConfig(backend_port=70000)
+        # Should auto-resolve to None (dynamic allocation)
+        self.assertIsNone(config.backend_port)
         
-        with self.assertRaises(ValueError) as cm:
-            LauncherConfig(frontend_port=0)
-        self.assertIn("Invalid frontend port", str(cm.exception))
+        config = LauncherConfig(frontend_port=0)
+        # Should auto-resolve to default port
+        self.assertEqual(config.frontend_port, 3000)
     
     def disabled_test_config_validation_missing_dirs(self):
         """Test validation when required directories are missing."""

@@ -18,7 +18,7 @@ import os
 from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
-from netra_backend.tests.integration.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 class TestEnvironmentPrecedence(StagingConfigTestBase):
     """Test environment variable precedence in staging."""

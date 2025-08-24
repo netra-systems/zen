@@ -13,7 +13,6 @@ SSL parameter management, and environment detection.
 Each function ≤15 lines, class ≤200 lines total.
 """
 
-import os
 import asyncio
 from typing import Optional
 
@@ -39,24 +38,21 @@ class DatabaseManager:
         Returns:
             Clean database URL with driver prefixes stripped but SSL params preserved for non-Cloud SQL
         """
-        # First check direct environment variable (for tests that patch os.environ)
-        raw_url = os.environ.get("DATABASE_URL", "")
-        
-        # Skip configuration loading during test collection to prevent hanging
-        # Only apply during actual test collection phase, not during test execution
-        # Only apply when DATABASE_URL is completely missing (not just empty)
-        test_collection_mode = os.environ.get('TEST_COLLECTION_MODE')
-        database_url_missing = 'DATABASE_URL' not in os.environ
-        if test_collection_mode == '1' and database_url_missing:
-            return "sqlite:///:memory:"
-        
-        # If not found, try unified config
-        if not raw_url:
-            try:
-                config = get_unified_config()
-                raw_url = config.database_url or ""
-            except Exception:
-                pass  # Will use default URL below
+        # Get from unified configuration - single source of truth
+        try:
+            config = get_unified_config()
+            raw_url = config.database_url or ""
+            
+            # Check test collection mode from config
+            if config.environment == "testing" and not raw_url:
+                return "sqlite:///:memory:"
+        except Exception:
+            # Fallback for bootstrap or when config not available
+            import os
+            raw_url = os.environ.get("DATABASE_URL", "")
+            test_collection_mode = os.environ.get('TEST_COLLECTION_MODE')
+            if test_collection_mode == '1' and not raw_url:
+                return "sqlite:///:memory:"
         
         if not raw_url:
             return DatabaseManager._get_default_database_url()
@@ -171,9 +167,9 @@ class DatabaseManager:
         """
         migration_url = DatabaseManager.get_migration_url_sync_format()
         
-        # Check SQL_ECHO environment variable directly since unified config doesn't support it
-        import os
-        sql_echo = os.environ.get("SQL_ECHO", "false").lower() in ("true", "1", "yes", "on")
+        # Get SQL echo setting from unified config
+        config = get_unified_config()
+        sql_echo = config.log_level == "DEBUG"  # Enable SQL echo in DEBUG mode
         
         return create_engine(
             migration_url,
@@ -208,9 +204,9 @@ class DatabaseManager:
                 }
             }
         
-        # Check SQL_ECHO environment variable directly since unified config doesn't support it
-        import os
-        sql_echo = os.environ.get("SQL_ECHO", "false").lower() in ("true", "1", "yes", "on")
+        # Get SQL echo setting from unified config
+        config = get_unified_config()
+        sql_echo = config.log_level == "DEBUG"  # Enable SQL echo in DEBUG mode
         
         return create_async_engine(
             app_url,
@@ -257,16 +253,14 @@ class DatabaseManager:
         Returns:
             True if using Cloud SQL Unix socket connections
         """
-        # First check direct environment variable (for tests that patch os.environ)
-        database_url = os.environ.get("DATABASE_URL", "")
-        
-        # If not found, try unified config
-        if not database_url:
-            try:
-                config = get_unified_config()
-                database_url = config.database_url or ""
-            except Exception:
-                pass  # Will return False below
+        # Get from unified configuration - single source of truth
+        try:
+            config = get_unified_config()
+            database_url = config.database_url or ""
+        except Exception:
+            # Fallback for bootstrap
+            import os
+            database_url = os.environ.get("DATABASE_URL", "")
         
         return CoreDatabaseManager.is_cloud_sql_connection(database_url)
     
@@ -277,8 +271,8 @@ class DatabaseManager:
         Returns:
             True if running in local development environment
         """
-        current_env = get_current_environment()
-        return current_env == "development"
+        config = get_unified_config()
+        return config.environment == "development"
     
     @staticmethod
     def is_remote_environment() -> bool:
@@ -478,8 +472,9 @@ class DatabaseManager:
         Returns:
             True if running in test environment
         """
-        current_env = get_current_environment()
-        is_test_mode = os.environ.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+        config = get_unified_config()
+        current_env = config.environment
+        is_test_mode = config.environment == "testing"
         
         # Check if we're in a pytest environment
         import sys

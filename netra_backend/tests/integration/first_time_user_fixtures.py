@@ -476,6 +476,93 @@ async def assert_export_response(
     return export
 
 # ============================================================================
+# FIRST TIME USER FIXTURES CLASS
+# ============================================================================
+
+class FirstTimeUserFixtures:
+    """Centralized fixtures and utilities for first-time user integration tests."""
+    
+    @staticmethod
+    async def create_comprehensive_test_env():
+        """Create comprehensive test environment for first-time user tests."""
+        from netra_backend.app.db.database_manager import get_session_for_testing
+        
+        session = await get_session_for_testing()
+        redis_mock = MagicMock()
+        
+        return {
+            "session": session,
+            "redis": redis_mock,
+            "websocket_manager": MagicMock(),
+            "agent_service": MagicMock(),
+            "user_service": MagicMock()
+        }
+    
+    @staticmethod
+    def init_payment_integration():
+        """Initialize payment integration system mock."""
+        payment_system = MagicMock()
+        payment_system.validate_payment_method = AsyncMock()
+        payment_system.setup_subscription = AsyncMock()
+        payment_system.process_payment = AsyncMock()
+        return payment_system
+    
+    @staticmethod
+    def init_llm_optimization():
+        """Initialize LLM optimization system mock."""
+        llm_system = MagicMock()
+        llm_system.demonstrate_optimization = AsyncMock()
+        llm_system.calculate_cost_savings = AsyncMock()
+        llm_system.optimize_workload = AsyncMock()
+        return llm_system
+    
+    @staticmethod
+    def init_api_integration():
+        """Initialize API integration system mock."""
+        api_system = MagicMock()
+        api_system.validate_api_keys = AsyncMock()
+        api_system.test_connection = AsyncMock()
+        api_system.configure_routing = AsyncMock()
+        return api_system
+    
+    @staticmethod
+    async def create_demo_ready_user(setup):
+        """Create user ready for demo."""
+        from netra_backend.app.db.models_user import User
+        
+        user = User(
+            id=str(uuid.uuid4()),
+            email="demo@company.com",
+            plan_tier="free",
+            demo_eligible=True
+        )
+        setup["session"].add(user)
+        await setup["session"].commit()
+        return user
+    
+    @staticmethod
+    async def create_converting_user(setup):
+        """Create user in conversion flow."""
+        from netra_backend.app.db.models_user import User
+        
+        user = User(
+            id=str(uuid.uuid4()),
+            email="converting@company.com",
+            plan_tier="free",
+            conversion_ready=True
+        )
+        setup["session"].add(user)
+        await setup["session"].commit()
+        return user
+    
+    @staticmethod
+    async def cleanup_test(setup):
+        """Clean up test environment."""
+        if setup.get("session"):
+            await setup["session"].rollback()
+            await setup["session"].close()
+
+# ============================================================================
 # MOCK DATA PROVIDERS
 # ============================================================================
 

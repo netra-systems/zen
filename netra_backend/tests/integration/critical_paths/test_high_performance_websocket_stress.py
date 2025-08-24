@@ -65,6 +65,13 @@ class MessagePriority(Enum):
 class OptimizedMessageProcessor:
     pass
 
+# Mock decorator for missing test framework utils
+def mock_justified(reason):
+    """Mock decorator for justified mocking."""
+    def decorator(func):
+        return func
+    return decorator
+
 # NOTE: These classes don't exist in the current implementation
 # from netra_backend.app.websocket_core.enhanced_rate_limiter import (
 #     DistributedRateLimiter,

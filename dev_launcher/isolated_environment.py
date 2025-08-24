@@ -411,10 +411,15 @@ class IsolatedEnvironment:
                     key = key.strip()
                     value = value.strip('\'"').strip()
                     
-                    # OS environment variables always have priority over file-based configs
-                    # regardless of override_existing setting
+                    # OS environment variables (current, not just original) always have priority 
+                    # over file-based configs regardless of override_existing setting
+                    # But only skip if the variable was set externally (not by a previous load_from_file)
                     if not self._isolation_enabled and key in os.environ:
-                        continue
+                        # Check if this was set by us (via load_from_file) or externally
+                        source = self._variable_sources.get(key, "")
+                        if not source.startswith("file:"):
+                            # This was set externally (OS env, not from a file), skip it
+                            continue
                     
                     # Skip if exists and not overriding (for non-OS env vars)
                     if not override_existing and self.get(key) is not None:

@@ -14,7 +14,7 @@ import json
 import os
 from typing import Dict, List
 
-from netra_backend.tests.integration.base import StagingConfigTestBase
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 
 class TestSecretManagerIntegration(StagingConfigTestBase):
     """Test Secret Manager integration in staging."""
