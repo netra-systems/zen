@@ -109,7 +109,7 @@ class TestStagingConfigurationManager:
         
         assert config is not None
         assert config.database_url is not None
-        assert config.environment in [\'staging\', \'testing\']
+        assert config.environment in ['staging', 'testing']
     
     async def test_configuration_integrity_validation(self):
         """Test configuration integrity passes all validation checks."""

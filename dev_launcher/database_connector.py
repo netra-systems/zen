@@ -223,6 +223,18 @@ class DatabaseConnector:
         except Exception:
             return url
     
+    def _normalize_postgres_url(self, url: str) -> str:
+        """Normalize PostgreSQL URL format for asyncpg compatibility."""
+        if not url:
+            return url
+        # Convert postgres:// to postgresql://
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://")
+        # Strip async driver prefixes for asyncpg
+        url = url.replace("postgresql+asyncpg://", "postgresql://")
+        url = url.replace("postgres+asyncpg://", "postgresql://")
+        return url
+    
     async def validate_all_connections(self) -> bool:
         """
         Validate all database connections before service startup.
@@ -445,12 +457,7 @@ class DatabaseConnector:
         """Connect to standard TCP PostgreSQL."""
         import asyncpg
         # Fix URL format - asyncpg expects 'postgresql://' not 'postgresql+asyncpg://'
-        clean_url = CoreDatabaseManager.normalize_postgres_url(connection.url)
-        
-        # For local connections, use CoreDatabaseManager to handle SSL parameters
-        if 'localhost' in clean_url or '127.0.0.1' in clean_url or 'host.docker.internal' in clean_url:
-            # Use CoreDatabaseManager for consistent SSL parameter handling
-            clean_url = CoreDatabaseManager.convert_ssl_params_for_asyncpg(clean_url)
+        clean_url = self._normalize_postgres_url(connection.url)
         
         return await asyncio.wait_for(
             asyncpg.connect(clean_url),

@@ -179,7 +179,6 @@ class RealOAuthFlowTester:
             # Patch Google API calls only (not internal service calls)
             # Mock: Component isolation for testing without external dependencies
             with unittest.mock.patch('httpx.AsyncClient.post', side_effect=mock_google_token_exchange), \
-                 # Mock: Component isolation for testing without external dependencies
                  unittest.mock.patch('httpx.AsyncClient.get', side_effect=mock_google_user_info):
                 
                 response = await real_client.get(
