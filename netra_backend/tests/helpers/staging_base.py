@@ -2,14 +2,15 @@
 
 import os
 from typing import Optional
+from dev_launcher.isolated_environment import get_env
 
 def get_staging_url() -> str:
     """Get staging URL."""
-    return os.getenv("STAGING_URL", "https://staging.netrasystems.ai")
+    return get_env().get("STAGING_URL", "https://staging.netrasystems.ai")
 
 def get_staging_api_key() -> Optional[str]:
     """Get staging API key."""
-    return os.getenv("STAGING_API_KEY")
+    return get_env().get("STAGING_API_KEY")
 
 class StagingTestBase:
     """Base class for staging tests."""

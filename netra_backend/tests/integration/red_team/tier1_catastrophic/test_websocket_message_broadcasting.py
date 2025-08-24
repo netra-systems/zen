@@ -40,7 +40,7 @@ from netra_backend.app.db.models_user import User
 # AgentRun model - creating mock for tests
 from unittest.mock import Mock, AsyncMock, MagicMock
 AgentRun = Mock
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.database import get_db_session
 
 
 class TestWebSocketMessageBroadcasting:

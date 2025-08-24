@@ -236,7 +236,7 @@ class TestImplementationConsistency:
 
     def test_clickhouse_integration_configured(self):
         """Verify ClickHouse integration is configured"""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         
         assert get_clickhouse_client != None
 

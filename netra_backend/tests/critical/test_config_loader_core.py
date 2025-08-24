@@ -465,8 +465,8 @@ class TestSecretApplicationLogic:
 class TestCloudRunEnvironmentDetection:
     """Business Value: Ensures proper Cloud Run deployment environment detection"""
     
-@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
-        def test_k_service_staging_detection(self):
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    def test_k_service_staging_detection(self):
         """Test staging detection via K_SERVICE environment variable"""
         # Arrange - Mock K_SERVICE with staging
         with patch.dict(os.environ, {"K_SERVICE": "netra-backend-staging"}):

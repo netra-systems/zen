@@ -113,6 +113,7 @@ class WebSocketTestHelpers:
     @staticmethod
     async def create_mock_websocket_connection(user_id: str) -> MagicMock:
         """Create mock WebSocket connection for testing."""
+        # Mock: WebSocket connection isolation for unit testing without real network connections
         mock_websocket = MagicMock()
         mock_websocket.user_id = user_id
         mock_websocket.send_text = AsyncMock()
@@ -195,6 +196,7 @@ class DatabaseTestHelpers:
     @staticmethod
     async def create_test_database_session() -> MagicMock:
         """Create mock database session for testing."""
+        # Mock: Database session isolation for transaction testing without real database dependency
         mock_session = MagicMock()
         mock_session.execute = AsyncMock()
         mock_session.commit = AsyncMock()

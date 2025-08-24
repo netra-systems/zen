@@ -32,7 +32,7 @@ from testcontainers.clickhouse import ClickHouseContainer
 from testcontainers.postgres import PostgresContainer
 
 # import asyncio_clickhouse  # Module not available
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.logging_config import central_logger

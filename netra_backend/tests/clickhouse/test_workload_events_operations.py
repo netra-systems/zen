@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 from netra_backend.app.logging_config import central_logger as logger
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.tests.clickhouse.clickhouse_test_fixtures import (
     build_workload_insert_query,
     check_table_insert_permission,

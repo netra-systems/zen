@@ -29,7 +29,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 from netra_backend.app.schemas.UserPlan import PlanTier, PlanUsageSummary, UsageRecord

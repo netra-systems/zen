@@ -40,7 +40,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from urllib.parse import parse_qs, urlparse
 
@@ -163,13 +163,11 @@ class OAuthJWTWebSocketTestManager:
             # Real WebSocket test client
             self.ws_test_client = TestClient(backend_app)
             
-            # Real Redis connection for L3 testing
+            # Real Redis connection for L3 testing - defer initialization
+            # to avoid event loop mismatch issues
             import os
-            redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-            self.redis_client = aioredis.from_url(redis_url)
-            
-            # Test Redis connection
-            await self.redis_client.ping()
+            self._redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+            self.redis_client = None
             
             logger.info("L3 OAuth→JWT→WebSocket services initialized with real connections")
             
@@ -177,6 +175,28 @@ class OAuthJWTWebSocketTestManager:
             logger.error(f"L3 service initialization failed: {e}")
             # For CI/CD environments where Redis may not be available
             await self._fallback_to_mock_redis()
+    
+    async def _ensure_redis_client(self):
+        """Lazily initialize Redis client in the current event loop context."""
+        if self.redis_client is None:
+            try:
+                # Initialize Redis client in the current event loop
+                self.redis_client = aioredis.from_url(
+                    self._redis_url,
+                    retry_on_timeout=True,
+                    socket_keepalive=True,
+                    socket_keepalive_options={},
+                    health_check_interval=30,
+                    decode_responses=False  # Keep binary responses for consistency
+                )
+                
+                # Test connection
+                await self.redis_client.ping()
+                logger.info("Redis client initialized in current event loop")
+                
+            except Exception as e:
+                logger.warning(f"Redis connection failed, falling back to mock: {e}")
+                await self._fallback_to_mock_redis()
             
     @mock_justified("Redis unavailable in test environment")
     async def _fallback_to_mock_redis(self):
@@ -278,10 +298,13 @@ class OAuthJWTWebSocketTestManager:
             }
 
     async def persist_session_redis(self, session_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Persist session in Redis using real Redis client."""
+        """Persist session in Redis using real Redis client with proper event loop handling."""
         redis_start = time.time()
         
         try:
+            # Ensure Redis client is initialized in the current event loop
+            await self._ensure_redis_client()
+            
             session_key = f"session:{session_data['session_id']}"
             session_json = json.dumps({
                 **session_data,
@@ -289,14 +312,14 @@ class OAuthJWTWebSocketTestManager:
                 "expires_at": session_data["expires_at"].isoformat() if isinstance(session_data.get("expires_at"), datetime) else str(session_data.get("expires_at"))
             }, default=str)
             
-            # Store with expiration
+            # Store with expiration - use explicit await without creating new tasks
             await self.redis_client.setex(
                 session_key, 
-                timedelta(hours=24).total_seconds(),
+                int(timedelta(hours=24).total_seconds()),
                 session_json
             )
             
-            # Verify persistence
+            # Verify persistence - direct await without task creation
             stored_session = await self.redis_client.get(session_key)
             redis_time = time.time() - redis_start
             
@@ -452,21 +475,31 @@ class OAuthJWTWebSocketTestManager:
         return error_tests
 
     async def cleanup(self):
-        """Clean up test resources."""
+        """Clean up test resources with proper async handling."""
         try:
             # Close WebSocket connections
             for websocket in self.test_connections:
                 if not websocket.closed:
                     await websocket.close()
             
-            # Clean up Redis sessions
-            for session_id in self.test_sessions:
-                session_key = f"session:{session_id}"
-                await self.redis_client.delete(session_key)
+            # Clean up Redis sessions with proper async handling
+            if self.redis_client and self.test_sessions:
+                for session_id in self.test_sessions:
+                    session_key = f"session:{session_id}"
+                    try:
+                        await self.redis_client.delete(session_key)
+                    except Exception as session_cleanup_error:
+                        logger.warning(f"Failed to delete session {session_key}: {session_cleanup_error}")
             
-            # Close Redis connection
+            # Close Redis connection with proper async handling
             if self.redis_client:
-                await self.redis_client.close()
+                try:
+                    # Ensure connection is properly closed in the same event loop
+                    await self.redis_client.aclose()
+                except Exception as redis_close_error:
+                    logger.warning(f"Redis connection close error: {redis_close_error}")
+                finally:
+                    self.redis_client = None
             
             # Shutdown services
             if self.oauth_service:
@@ -523,8 +556,8 @@ async def test_complete_oauth_jwt_websocket_flow(oauth_jwt_ws_manager):
         "user_id": user_id,
         "user_email": user_email,
         "access_token": access_token,
-        "created_at": datetime.utcnow(),
-        "expires_at": datetime.utcnow() + timedelta(hours=24)
+        "created_at": datetime.now(timezone.utc),
+        "expires_at": datetime.now(timezone.utc) + timedelta(hours=24)
     }
     
     redis_result = await manager.persist_session_redis(session_data)

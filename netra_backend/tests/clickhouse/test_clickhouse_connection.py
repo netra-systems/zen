@@ -81,7 +81,7 @@ class TestClickHouseIntegration:
     @pytest.mark.asyncio
     async def test_full_initialization_flow(self):
         """Test the full ClickHouse initialization flow"""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
         
         # Run initialization
@@ -92,7 +92,7 @@ class TestClickHouseIntegration:
 
     async def _verify_expected_tables(self):
         """Verify expected tables exist after initialization"""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             tables_result = await client.execute_query("SHOW TABLES")

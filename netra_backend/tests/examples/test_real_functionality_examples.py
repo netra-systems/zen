@@ -32,7 +32,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from netra_backend.app.db.session import get_db_session as get_database_session
+from netra_backend.app.database import get_db_session as get_database_session
 from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.agents.base_agent import BaseSubAgent

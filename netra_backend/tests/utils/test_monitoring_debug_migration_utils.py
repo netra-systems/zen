@@ -13,12 +13,12 @@ from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.tests.debug_migration_test_helpers import (
+from netra_backend.tests.helpers.debug_migration_test_helpers import (
     DebugTestHelpers,
     MigrationTestHelpers,
 )
 
-from netra_backend.tests.rate_retry_monitoring_test_helpers import (
+from netra_backend.tests.helpers.rate_retry_monitoring_test_helpers import (
     MonitoringTestHelpers,
 )
 

@@ -352,11 +352,25 @@ class TestIntegrationScenarios:
                 mock_security.assert_called_once()
                 mock_request.assert_called_once()
 
-    def test_app_creation_with_minimal_config(self):
-        """App can be created with minimal configuration."""
-        with patch('netra_backend.app.core.app_factory.import_all_route_modules', return_value={}):
-            with patch('netra_backend.app.core.app_factory.get_all_route_configurations', return_value={}):
-                with patch('netra_backend.app.core.middleware_setup.setup_cors_middleware'):
-                    with patch('netra_backend.app.core.middleware_setup.setup_session_middleware'):
-                        app = create_app()
-                        assert app is not None
+    def test_app_startup_shutdown_lifecycle(self, minimal_app):
+        """App startup and shutdown lifecycle works correctly."""
+        startup_called = False
+        shutdown_called = False
+        
+        @minimal_app.on_event("startup")
+        def startup_event():
+            nonlocal startup_called
+            startup_called = True
+        
+        @minimal_app.on_event("shutdown")
+        def shutdown_event():
+            nonlocal shutdown_called
+            shutdown_called = True
+        
+        # Test client should trigger startup/shutdown
+        with TestClient(minimal_app):
+            pass
+        
+        # Events should have been called
+        assert startup_called
+        assert shutdown_called

@@ -186,14 +186,13 @@ class TestUtilityFunctions:
         
         with patch('dev_launcher.service_config.load_or_create_config') as mock_load:
             mock_config = Mock(spec=ServicesConfiguration)
-
-        mock_config.db_pool_size = 10
-        mock_config.db_max_overflow = 20
-        mock_config.db_pool_timeout = 60
-        mock_config.db_pool_recycle = 3600
-        mock_config.db_echo = False
-        mock_config.db_echo_pool = False
-        mock_config.environment = 'testing'
+            mock_config.db_pool_size = 10
+            mock_config.db_max_overflow = 20
+            mock_config.db_pool_timeout = 60
+            mock_config.db_pool_recycle = 3600
+            mock_config.db_echo = False
+            mock_config.db_echo_pool = False
+            mock_config.environment = 'testing'
 
             mock_load.return_value = mock_config
             

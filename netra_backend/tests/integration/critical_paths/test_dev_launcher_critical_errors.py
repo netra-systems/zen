@@ -25,7 +25,7 @@ from contextlib import asynccontextmanager
 from netra_backend.app.services.startup_fixes_integration import StartupFixesIntegration
 from netra_backend.app.services.background_task_manager import BackgroundTaskManager
 from netra_backend.app.startup_module import _schedule_background_optimizations
-from netra_backend.app.db.clickhouse import get_clickhouse_client, get_clickhouse_config
+from netra_backend.app.database import get_clickhouse_client, get_clickhouse_config
 from netra_backend.app.logging_config import central_logger
 
 

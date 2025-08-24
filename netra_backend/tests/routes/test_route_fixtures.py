@@ -45,7 +45,7 @@ class MockDependencyManager:
         # Ensure database is initialized first - but handle session factory properly
         import netra_backend.app.db.session as session_module
         from netra_backend.app.db.postgres import get_async_db, initialize_postgres
-        from netra_backend.app.db.session import get_db_session
+        from netra_backend.app.database import get_db_session
         from netra_backend.app.dependencies import get_db_dependency, get_llm_manager
         
         # Mock the session factory to avoid the RuntimeError

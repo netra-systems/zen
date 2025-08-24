@@ -19,7 +19,7 @@ import pytest
 
 from netra_backend.app.agents.data_sub_agent.analysis_engine import AnalysisEngine
 from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.models_clickhouse import get_content_corpus_schema
 
 from netra_backend.app.services.corpus_service import CorpusService

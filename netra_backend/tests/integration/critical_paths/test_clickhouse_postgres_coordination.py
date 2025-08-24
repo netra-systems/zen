@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 
 from netra_backend.app.db.postgres import get_postgres_session, initialize_postgres
 from netra_backend.app.logging_config import central_logger

@@ -184,8 +184,8 @@ class TestOAuthStagingRedirectFlow:
                 assert "localhost:3000" not in sent_redirect_uri, \
                     "Token exchange redirect_uri should not contain localhost:3000"
     
-@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
-        def test_all_oauth_endpoints_use_staging_urls(self):
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    def test_all_oauth_endpoints_use_staging_urls(self):
         """Comprehensive test that all OAuth-related endpoints use staging URLs"""
         # This test should FAIL if any OAuth endpoint uses localhost:3000
         

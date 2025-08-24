@@ -41,8 +41,8 @@ class TestConfigurationBootstrap:
             assert config.database_url == 'postgresql://localhost/testdb'
             assert config.redis_url == 'redis://localhost:6379'
     
-@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
-        def test_staging_environment_bootstrap(self):
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    def test_staging_environment_bootstrap(self):
         """Test staging environment bootstrap with GCP settings."""
         with patch.dict('os.environ', {
             'ENVIRONMENT': 'staging',

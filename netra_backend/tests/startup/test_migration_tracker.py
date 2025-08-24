@@ -365,14 +365,58 @@ class TestStateModification:
                 await migration_tracker.enable_auto_run()
                 assert state.auto_run_enabled is True
 
-class TestFailureRecording:
-    """Test failure recording functionality."""
+@pytest.mark.l3
+class TestRealFailureRecording:
+    """Test real failure recording functionality."""
+    
     @pytest.mark.asyncio
-    async def test_record_failure(self, migration_tracker: MigrationTracker) -> None:
-        """Test failure recording."""
+    async def test_record_failure_real_persistence(self, migration_tracker: MigrationTracker,
+                                                   temp_state_path: Path) -> None:
+        """Test failure recording with real file persistence."""
+        temp_state_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Create initial state
+        state = MigrationState(current_version="v1")
+        
+        # Record failure
+        await migration_tracker._record_failure(state, "test_migration", "Connection timeout")
+        
+        # Verify failure was recorded in state
+        assert len(state.failed_migrations) == 1
+        failure = state.failed_migrations[0]
+        assert failure.migration_id == "test_migration"
+        assert failure.error_message == "Connection timeout"
+        assert isinstance(failure.timestamp, datetime)
+    
+    @pytest.mark.asyncio
+    async def test_multiple_failure_recording(self, migration_tracker: MigrationTracker,
+                                             temp_state_path: Path) -> None:
+        """Test recording multiple failures over time."""
+        temp_state_path.parent.mkdir(parents=True, exist_ok=True)
+        
         state = MigrationState()
         
-        with patch.object(migration_tracker, '_save_state'):
-            await migration_tracker._record_failure(state, "test_migration", "test error")
-            assert len(state.failed_migrations) == 1
-            assert state.failed_migrations[0].migration_id == "test_migration"
+        # Record multiple failures
+        failures = [
+            ("migration_001", "Database connection failed"),
+            ("migration_002", "Syntax error in migration"),
+            ("migration_003", "Permission denied")
+        ]
+        
+        for migration_id, error_msg in failures:
+            await migration_tracker._record_failure(state, migration_id, error_msg)
+        
+        # Verify all failures recorded
+        assert len(state.failed_migrations) == 3
+        
+        # Verify failure details
+        recorded_ids = [f.migration_id for f in state.failed_migrations]
+        assert "migration_001" in recorded_ids
+        assert "migration_002" in recorded_ids
+        assert "migration_003" in recorded_ids
+        
+        # Verify timestamps are set and recent
+        for failure in state.failed_migrations:
+            assert isinstance(failure.timestamp, datetime)
+            time_diff = datetime.now() - failure.timestamp
+            assert time_diff.total_seconds() < 60  # Less than 60 seconds ago

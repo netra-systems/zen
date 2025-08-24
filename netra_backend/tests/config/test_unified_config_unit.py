@@ -57,20 +57,17 @@ class TestUnifiedConfigManager:
     def test_config_summary_generation(self):
         """Test configuration summary includes all key metrics."""
         manager = UnifiedConfigManager()
-        with patch.object(manager, 'get_config') as mock_config:
-            mock_config.return_value = Mock(
-
-        mock_config.db_pool_size = 10
-        mock_config.db_max_overflow = 20
-        mock_config.db_pool_timeout = 60
-        mock_config.db_pool_recycle = 3600
-        mock_config.db_echo = False
-        mock_config.db_echo_pool = False
-        mock_config.environment = 'testing'
-
-                database_url='postgresql://test',
-                environment='development'
-            )
+        with patch.object(manager, 'get_config') as mock_get_config:
+            mock_config = Mock()
+            mock_config.db_pool_size = 10
+            mock_config.db_max_overflow = 20
+            mock_config.db_pool_timeout = 60
+            mock_config.db_pool_recycle = 3600
+            mock_config.db_echo = False
+            mock_config.db_echo_pool = False
+            mock_config.environment = 'testing'
+            mock_get_config.return_value = mock_config
+            
             summary = manager.get_config_summary()
             
             assert 'environment' in summary

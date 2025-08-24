@@ -45,7 +45,7 @@ from netra_backend.app.auth_integration.auth import (
 )
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.database import get_db_session
 
 class RealAuthServiceTestFixture:
     """Manages real auth service connections for testing"""

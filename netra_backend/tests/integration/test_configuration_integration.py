@@ -128,7 +128,7 @@ class TestConfigurationIntegration:
             config = get_config()
             
             # Verify staging-specific settings
-            assert config.environment in [\'staging\', \'testing\']
+            assert config.environment in ['staging', 'testing']
             assert config.debug is False, "Debug should be disabled in staging"
             assert "staging" in config.database_url
             assert "staging" in config.redis_url

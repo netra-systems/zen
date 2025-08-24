@@ -111,8 +111,8 @@ class TestStagingStartup(StagingConfigTestBase):
 
             os.environ.update(original_env)
             
-@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
-        def test_startup_with_staging_config(self):
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    def test_startup_with_staging_config(self):
 
         """Test application starts with staging configuration."""
 

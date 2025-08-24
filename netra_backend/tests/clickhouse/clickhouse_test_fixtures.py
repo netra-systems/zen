@@ -12,7 +12,7 @@ from typing import Any, Dict, List
 import pytest
 
 from netra_backend.app.config import get_config
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_init import (
     create_workload_events_table_if_missing,

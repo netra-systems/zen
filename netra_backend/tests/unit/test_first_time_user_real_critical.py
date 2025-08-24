@@ -39,7 +39,7 @@ from netra_backend.app.auth_integration.auth import (
     verify_password,
 )
 from netra_backend.app.db.models_postgres import Secret, ToolUsageLog, User
-from netra_backend.app.db.session import get_db_session, session_manager
+from netra_backend.app.database import get_db_session, session_manager
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 from netra_backend.app.schemas.registry import UserCreate
 from netra_backend.app.services.cost_calculator import CostCalculatorService, CostTier

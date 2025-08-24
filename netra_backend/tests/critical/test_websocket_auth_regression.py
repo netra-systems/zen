@@ -7,10 +7,18 @@ Ensures all auth failures are loud and properly propagated.
 import asyncio
 import json
 import time
+import uuid
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import WebSocket
+from fastapi.testclient import TestClient
+from starlette.exceptions import WebSocketException
+from starlette.websockets import WebSocketState
+
+from auth_service.auth_core.core.jwt_handler import JWTHandler
+from auth_service.main import app as auth_app
+from netra_backend.app.main import app as backend_app
 from netra_backend.app.routes.utils.websocket_helpers import (
     authenticate_websocket_user,
     decode_token_payload,
@@ -18,7 +26,6 @@ from netra_backend.app.routes.utils.websocket_helpers import (
     parse_json_message,
     check_connection_alive,
 )
-from starlette.websockets import WebSocketState
 
 class TestAuthenticationErrorPropagation:
     """Suite 1: Verify all authentication errors are raised and logged."""
@@ -183,6 +190,23 @@ class TestUserLookupFailures:
 
 class TestWebSocketMessageHandling:
     """Suite 3: Verify message processing failures are explicit."""
+    
+    def setup_method(self):
+        """Setup real test clients and services for each test."""
+        self.backend_client = TestClient(backend_app)
+        self.auth_client = TestClient(auth_app)
+        self.jwt_handler = JWTHandler()
+    
+    def _create_valid_test_token(self, user_id: str = None) -> str:
+        """Create valid JWT token for WebSocket testing."""
+        if user_id is None:
+            user_id = f"test-user-{uuid.uuid4().hex[:8]}"
+        
+        return self.jwt_handler.create_access_token(
+            user_id=user_id,
+            email=f"{user_id}@example.com",
+            permissions=["read", "write"]
+        )
     
     @pytest.mark.asyncio
     async def test_malformed_json_logs_and_responds_error(self):

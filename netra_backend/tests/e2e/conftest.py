@@ -5,6 +5,7 @@ import asyncio
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.containers_utils import TestcontainerHelper
+from dev_launcher.isolated_environment import get_env
 
 # Basic test setup fixtures
 @pytest.fixture
@@ -65,7 +66,7 @@ def setup_database_mocking(mock_database_factory):
     """Auto-setup database mocking for all E2E tests."""
     # Skip during collection mode to avoid heavy imports
     import os
-    if os.environ.get("TEST_COLLECTION_MODE"):
+    if get_env().get("TEST_COLLECTION_MODE"):
         yield
         return
         
@@ -126,9 +127,9 @@ def real_llm_config():
     """Configuration for real LLM testing."""
     import os
     return {
-        "enabled": os.environ.get("ENABLE_REAL_LLM_TESTING") == "true",
-        "timeout": float(os.environ.get("LLM_TEST_TIMEOUT", "30.0")),
-        "max_retries": int(os.environ.get("LLM_TEST_RETRIES", "3"))
+        "enabled": get_env().get("ENABLE_REAL_LLM_TESTING") == "true",
+        "timeout": float(get_env().get("LLM_TEST_TIMEOUT", "30.0")),
+        "max_retries": int(get_env().get("LLM_TEST_RETRIES", "3"))
     }
 
 # Container management for L3/L4 testing

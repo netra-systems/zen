@@ -34,7 +34,7 @@ import pytest
 
 from netra_backend.app.core.configuration.database import DatabaseConfigManager
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.postgres_core import async_engine, async_session_factory
 
 logger = logging.getLogger(__name__)

@@ -29,7 +29,7 @@ from testcontainers.clickhouse import ClickHouseContainer
 
 # import asyncio_clickhouse  # Module not available
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.logging_config import central_logger
 

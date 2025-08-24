@@ -44,7 +44,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.database import get_db_session
 
 # Define execution context and result for L4 real testing
 @dataclass

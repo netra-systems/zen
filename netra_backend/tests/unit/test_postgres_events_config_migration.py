@@ -12,7 +12,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from pathlib import Path
 
 # Add netra_backend to path for imports
-sys.path.insert(0, str(Path(__file__).parents[2]))
 
 
 class TestPostgresEventsDatabaseConfigMigration:

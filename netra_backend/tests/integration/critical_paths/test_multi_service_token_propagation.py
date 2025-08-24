@@ -40,7 +40,7 @@ from sqlalchemy import select
 
 from netra_backend.app.db.models_postgres import User
 
-from netra_backend.app.db.postgres import get_postgres_db
+from netra_backend.app.database import get_postgres_db
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.agent_service import get_agent_service
 

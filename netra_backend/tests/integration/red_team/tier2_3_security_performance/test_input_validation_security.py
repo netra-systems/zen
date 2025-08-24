@@ -36,7 +36,7 @@ from sqlalchemy.orm import sessionmaker
 # Real service imports - NO MOCKS
 from netra_backend.app.main import app
 from netra_backend.app.core.config import get_unified_config
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.database import get_db_session
 from netra_backend.app.services.user_auth_service import UserAuthService
 
 # Mock models for testing

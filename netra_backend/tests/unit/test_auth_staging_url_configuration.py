@@ -43,8 +43,8 @@ class TestAuthStagingURLConfiguration:
         os.environ.clear()
         os.environ.update(self.original_env)
     
-@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
-        def test_auth_config_returns_correct_staging_urls(self):
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    def test_auth_config_returns_correct_staging_urls(self):
         """Test that auth config endpoint returns correct staging URLs, not localhost:3000"""
         # This test should FAIL if auth service returns localhost:3000 in staging
         

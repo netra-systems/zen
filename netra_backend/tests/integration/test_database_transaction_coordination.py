@@ -37,7 +37,7 @@ import pytest
 from docker.errors import DockerException
 from netra_backend.app.logging_config import central_logger
 
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.database import get_clickhouse_client
 from netra_backend.app.db.postgres import get_postgres_session, initialize_postgres
 from netra_backend.app.services.transaction_manager import TransactionManager
 
@@ -194,16 +194,15 @@ class DatabaseTransactionCoordinatorL3:
         # Initialize with test URLs
         with patch('app.core.configuration.get_configuration') as mock_config:
             mock_config.return_value.DATABASE_URL = postgres_url
-
-        mock_config.db_pool_size = 10
-        mock_config.db_max_overflow = 20
-        mock_config.db_pool_timeout = 60
-        mock_config.db_pool_recycle = 3600
-        mock_config.db_echo = False
-        mock_config.db_echo_pool = False
-        mock_config.environment = 'testing'
-
             mock_config.return_value.CLICKHOUSE_URL = clickhouse_url
+
+            mock_config.db_pool_size = 10
+            mock_config.db_max_overflow = 20
+            mock_config.db_pool_timeout = 60
+            mock_config.db_pool_recycle = 3600
+            mock_config.db_echo = False
+            mock_config.db_echo_pool = False
+            mock_config.environment = 'testing'
             
             await initialize_postgres()
             self.transaction_manager = TransactionManager()

@@ -119,7 +119,7 @@ class TestAgentService(BaseAgentService):
         }
 
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent as SupervisorAgent
-from netra_backend.app.db.session import get_db_session
+from netra_backend.app.database import get_db_session
 
 # Agent models for testing
 from sqlalchemy import Column, String, DateTime, JSON, Integer

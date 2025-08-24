@@ -57,8 +57,8 @@ class TestStagingStartupConfigurationValidation:
         return AppConfig()
     
     @mock_justified("Environment variables are external system state not available in test")
-@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
-        def test_all_required_staging_environment_variables_present(self, staging_env_vars):
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    def test_all_required_staging_environment_variables_present(self, staging_env_vars):
         """Test that all required environment variables are present in staging."""
         required_staging_vars = [
             "ENVIRONMENT",
