@@ -1,17 +1,3 @@
-# Use backend-specific isolated environment
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
 """Environment Constants Module
 
 Single source of truth for all environment-related constants and utilities.
@@ -34,9 +20,10 @@ Business Value: Platform/Internal - Deployment Stability - Prevents deployment
 errors and ensures consistent environment handling across all services.
 """
 
-import os
 from enum import Enum
 from typing import Any, Dict, List, Optional
+
+from netra_backend.app.core.isolated_environment import get_env
 
 # Import unified config for non-bootstrap functionality
 try:

@@ -1,20 +1,3 @@
-# Environment access: Development vs Production
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-    _has_isolated_env = True
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    _has_isolated_env = False
-    
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
 """Unified, optimized logging system for Netra backend with security and performance improvements.
 
 Main logger interface providing:
@@ -26,10 +9,10 @@ Main logger interface providing:
 
 import asyncio
 import logging
-import os
 from typing import Any, Dict, Optional
 
 from loguru import logger
+from netra_backend.app.core.isolated_environment import get_env
 
 from netra_backend.app.core.logging_context import (
     ExecutionTimeDecorator,

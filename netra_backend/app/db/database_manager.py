@@ -1,19 +1,3 @@
-# Conditional import of environment management
-try:
-    from netra_backend.app.core.isolated_environment import get_env
-    _env_available = True
-except ImportError:
-    # Production fallback if isolated_environment module unavailable
-    import os
-    def get_env():
-        """Fallback environment accessor for production."""
-        class FallbackEnv:
-            def get(self, key, default=None):
-                return os.environ.get(key, default)
-            def set(self, key, value, source="production"):
-                os.environ[key] = value
-        return FallbackEnv()
-    _env_available = False
 """Unified Database Manager - Handles Sync and Async Connections
 
 Business Value Justification (BVJ):
@@ -38,6 +22,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.exc import OperationalError, DisconnectionError
 
+from netra_backend.app.core.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
