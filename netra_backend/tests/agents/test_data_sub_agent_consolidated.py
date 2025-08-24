@@ -14,7 +14,7 @@ from pathlib import Path
 import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 

@@ -213,19 +213,13 @@ class TestAsyncAwaitChain:
         manager.send_error = AsyncMock()
         
         # Mock: Component isolation for testing without external dependencies
-        with patch('app.routes.websockets.manager', manager), \
-             # Mock: Component isolation for testing without external dependencies
-             patch('app.routes.websockets.receive_message_with_timeout',
-                   # Mock: Async component isolation for testing without real async operations
-                   new=AsyncMock(return_value='{"type": "test"}')), \
-             # Mock: Component isolation for testing without external dependencies
-             patch('app.routes.websockets.handle_pong_message',
-                   # Mock: Async component isolation for testing without real async operations
-                   new=AsyncMock(return_value=False)), \
-             # Mock: Component isolation for testing without external dependencies
-             patch('app.routes.websockets.process_agent_message',
-                   # Mock: Generic component isolation for controlled unit testing
-                   new=AsyncMock()):
+        with patch('app.routes.websockets.manager', manager) as mock_manager, \
+             patch('app.routes.websockets.receive_message_with_timeout', 
+                   new=AsyncMock(return_value='{"type": "test"}')) as mock_receive, \
+             patch('app.routes.websockets.handle_pong_message', 
+                   new=AsyncMock(return_value=False)) as mock_pong, \
+             patch('app.routes.websockets.process_agent_message', 
+                   new=AsyncMock()) as mock_process:
             
             # Should not raise any coroutine-related errors
             await _process_single_message("test_user", websocket, agent_service)
@@ -245,7 +239,6 @@ class TestAsyncAwaitChain:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.routes.websockets.manager', manager), \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.routes.websockets.receive_message_with_timeout',
                    return_value=fake_receive()):  # Returns coroutine, not awaited
             
