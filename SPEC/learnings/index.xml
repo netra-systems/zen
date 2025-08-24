@@ -403,6 +403,14 @@
             <critical-takeaway>Conversation state persistence across sessions and system restarts critical for user experience.</critical-takeaway>
         </category>
         
+        <category name="Staging Deployment Errors 2025" path="SPEC/learnings/staging_deployment_errors_2025.xml" keywords="Staging, Deployment, Five Whys, PostgreSQL, ClickHouse, SSL, asyncpg, Cloud SQL, Authentication">
+            <critical-takeaway>Cloud SQL Unix socket connections MUST have NO SSL parameters (no sslmode, no ssl) for asyncpg driver.</critical-takeaway>
+            <critical-takeaway>Services MUST NOT default to localhost in staging/production - use empty strings or fail fast.</critical-takeaway>
+            <critical-takeaway>Database URL format differs: psycopg2 uses sslmode=require, asyncpg uses ssl=require.</critical-takeaway>
+            <critical-takeaway>Pre-deployment credential validation would prevent 80% of staging deployment failures.</critical-takeaway>
+            <critical-takeaway>ClickHouse configuration must be explicit in staging - never fallback to localhost:8123.</critical-takeaway>
+        </category>
+        
         <category name="E2E Test Infrastructure Fixes" path="SPEC/learnings/e2e_test_fixes.xml" keywords="E2E, Test Fixes, Syntax Errors, Import Errors, Test Infrastructure, Automated Fixing, AST, Absolute Imports">
             <critical-takeaway>CRITICAL: ALL Python files MUST use absolute imports - NO EXCEPTIONS. Relative imports are the #1 cause of test infrastructure failures.</critical-takeaway>
             <critical-takeaway>ALL async test functions MUST have @pytest.mark.asyncio decorator or tests will hang/timeout.</critical-takeaway>

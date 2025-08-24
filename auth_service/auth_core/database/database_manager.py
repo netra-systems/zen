@@ -25,24 +25,36 @@ class AuthDatabaseManager:
     @staticmethod
     def convert_database_url(url: str) -> str:
         """Convert between database URL formats if needed"""
+        import re
+        
         if not url:
             return url
             
         # Handle psycopg2 to asyncpg conversion
-        if url.startswith("postgresql://"):
+        if url.startswith("postgresql://") or url.startswith("postgres://"):
             # Parse the URL
             parsed = urlparse(url)
             
             # Convert query parameters
             query_params = []
+            
+            # Special handling for Cloud SQL Unix socket connections
+            is_cloud_sql = "/cloudsql/" in url
+            
             if parsed.query:
                 for param in parsed.query.split('&'):
                     if '=' in param:
                         key, value = param.split('=', 1)
-                        # Convert sslmode to ssl for asyncpg
-                        if key == 'sslmode' and value == 'require':
-                            query_params.append('ssl=require')
-                        elif key != 'sslmode':  # Skip other sslmode values
+                        
+                        # For Cloud SQL, remove all SSL parameters
+                        if is_cloud_sql and key in ['sslmode', 'ssl']:
+                            continue  # Skip SSL parameters for Cloud SQL
+                        # For non-Cloud SQL, convert sslmode to ssl
+                        elif not is_cloud_sql and key == 'sslmode':
+                            if value == 'require':
+                                query_params.append('ssl=require')
+                            # Skip other sslmode values
+                        else:
                             query_params.append(param)
                     else:
                         query_params.append(param)
@@ -121,6 +133,8 @@ class AuthDatabaseManager:
         Returns:
             Database URL compatible with asyncpg driver
         """
+        import re
+        
         # Get DATABASE_URL from environment
         database_url = os.getenv("DATABASE_URL")
         if not database_url:
@@ -135,14 +149,20 @@ class AuthDatabaseManager:
             database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
         
         # Handle SSL parameters for asyncpg
-        # Skip SSL conversion for Cloud SQL Unix sockets
-        if "/cloudsql/" not in database_url:
-            # Convert sslmode=require to ssl=require for asyncpg
+        # CRITICAL: For Cloud SQL Unix socket connections, remove ALL SSL parameters
+        if "/cloudsql/" in database_url:
+            # Remove both sslmode and ssl parameters - asyncpg doesn't need them for Unix sockets
+            database_url = re.sub(r'[&?]sslmode=[^&]*', '', database_url)
+            database_url = re.sub(r'[&?]ssl=[^&]*', '', database_url)
+            # Clean up any double ampersands or trailing ampersands
+            database_url = re.sub(r'&&+', '&', database_url)
+            database_url = re.sub(r'[&?]$', '', database_url)
+        else:
+            # For non-Cloud SQL connections, convert sslmode to ssl
             if "sslmode=require" in database_url:
                 database_url = database_url.replace("sslmode=require", "ssl=require")
             elif "sslmode=" in database_url:
                 # Remove other sslmode parameters that asyncpg doesn't understand
-                import re
                 database_url = re.sub(r'[&?]sslmode=[^&]*', '', database_url)
         
         logger.debug(f"Converted async database URL: {database_url[:20]}...")

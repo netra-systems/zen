@@ -1,327 +1,313 @@
 <?xml version='1.0' encoding='utf-8'?>
-<learnings>
+<learnings category="environment-loading">
   <metadata>
-    <category>Environment Loading</category>
-    <version>1.0</version>
-    <last_updated>2025-01-17</last_updated>
-    <last_edited>2025-08-21T08:47:29.249655</last_edited>
-    <legacy_status is_legacy="true" identified_date="2025-08-21T08:47:29.249655">
-      <reasons>
-        <reason>Content contains: old</reason>
-      </reasons>
-    </legacy_status>
+    <last_edited>2025-08-24T00:00:00.000000</last_edited>
   </metadata>
-  <learning id="simplified-single-source-loading">
-    <date>2025-01-17</date>
-    <category>Environment Loading</category>
-    <title>Simplified Single-Source Environment Loading</title>
+  <meta>
+    <title>Environment Loading and Isolation Patterns</title>
+    <created>2025-08-24</created>
+    <criticality>HIGH</criticality>
+    <tags>environment, secrets, isolation, development, testing, security</tags>
+  </meta>
+  
+  <critical_issue id="ENV-LOAD-001">
+    <title>Development Environment Isolation for Predictable Testing</title>
     <problem>
-      <description>Environment loader was too complex with multiple file sources</description>
-      <symptoms>
-        <symptom>Loading from .env, .env.development, .env.development.local</symptom>
-        <symptom>Confusing precedence rules</symptom>
-        <symptom>System could overwrite user configurations</symptom>
-        <symptom>All secrets fetched from remote even if available locally</symptom>
-      </symptoms>
-      <impact>
-        <item>User confusion about which file takes precedence</item>
-        <item>Loss of user control over configurations</item>
-        <item>Unnecessary remote API calls</item>
-        <item>Complex debugging when values come from multiple sources</item>
-      </impact>
+      Dev launcher loaded OS environment variables with highest priority, causing conflicts
+      and unpredictable behavior in development and testing. Tests could not properly
+      isolate their environment, leading to race conditions and cross-test pollution.
+    </problem>
+    <root_causes>
+      <cause>LocalSecretManager._build_fallback_chain() loaded OS environment with highest priority always</cause>
+      <cause>No isolation mode to skip OS environment loading in development</cause>
+      <cause>Tests and development scenarios shared same environment loading logic as production</cause>
+      <cause>No way for tests to prevent OS environment pollution from previous runs</cause>
+    </root_causes>
+    <solution>
+      <summary>Implemented isolation_mode parameter with environment-based auto-detection</summary>
+      <implementation>
+        <step>Added isolation_mode parameter to LocalSecretManager constructor</step>
+        <step>Modified _build_fallback_chain to conditionally skip OS environment loading</step>
+        <step>Added isolation_mode parameter to SecretLoader with auto-detection</step>
+        <step>Updated launcher to detect development mode and enable isolation by default</step>
+        <step>Created comprehensive test suite test_environment_isolation.py</step>
+      </implementation>
+      <priority_orders>
+        <production>OS env → .env.local → .env → .secrets → GSM → defaults</production>
+        <development_isolation>.env.local → .env → .secrets → GSM → defaults (NO OS env)</development_isolation>
+      </priority_orders>
+    </solution>
+    <files_modified>
+      <file>dev_launcher/local_secrets.py:28-100</file>
+      <file>dev_launcher/secret_loader.py:36-75</file>
+      <file>dev_launcher/launcher.py:126-142</file>
+      <file>dev_launcher/tests/test_environment_isolation.py (new)</file>
+      <file>dev_launcher/tests/test_env_loading_regression.py:79-325 (updated)</file>
+    </files_modified>
+  </critical_issue>
+  
+  <critical_issue id="ENV-LOAD-002">
+    <title>Auto-Detection Logic for Environment Isolation</title>
+    <problem>
+      Need automatic detection of when to enable isolation mode without requiring
+      explicit configuration in every development scenario.
     </problem>
     <solution>
-      <description>Simplified to single .env file with optional remote fallback</description>
-      <implementation>
-        <step>Load ONLY from user-controlled .env file</step>
-        <step>Never auto-generate or modify .env file</step>
-        <step>Use remote secrets only for missing variables</step>
-        <step>Clear priority: OS &gt; .env &gt; Remote &gt; Defaults</step>
-      </implementation>
-      <code_changes>
-        <file>dev_launcher/env_file_loader.py</file>
-        <file>dev_launcher/secret_loader.py</file>
-      </code_changes>
+      <summary>Auto-detect development mode based on ENVIRONMENT variable</summary>
+      <logic>
+        <condition>ENVIRONMENT=development → isolation_mode=True</condition>
+        <condition>ENVIRONMENT=production → isolation_mode=False</condition>
+        <condition>ENVIRONMENT=staging → isolation_mode=False</condition>
+        <condition>Missing/unknown ENVIRONMENT → default to development (isolation_mode=True)</condition>
+      </logic>
+      <override>Allow explicit isolation_mode parameter to override auto-detection</override>
     </solution>
-    <result>
-      <outcome>Cleaner, simpler environment loading</outcome>
-      <benefits>
-        <benefit>User maintains full control of .env file</benefit>
-        <benefit>Clear, predictable priority order</benefit>
-        <benefit>Reduced remote API calls</benefit>
-        <benefit>Better observability of variable sources</benefit>
-      </benefits>
-    </result>
-    <prevention>
-      <practice>Keep loading logic simple - one primary source</practice>
-      <practice>Make user files strictly user-controlled</practice>
-      <practice>Use remote services only as fallback</practice>
-      <practice>Provide clear logging of sources</practice>
-    </prevention>
-    <related>
-      <spec>SPEC/environment_loading.xml</spec>
-      <doc>docs/ENVIRONMENT_LOADER.md</doc>
-    </related>
-  </learning>
-  <learning id="env-file-user-control">
-    <date>2025-01-17</date>
-    <category>Environment Loading</category>
-    <title>User Control Over Environment Files</title>
+  </critical_issue>
+  
+  <critical_issue id="ENV-LOAD-003">
+    <title>Clear Logging for Environment Isolation Status</title>
     <problem>
-      <description>System could overwrite or auto-generate user .env files</description>
-      <symptoms>
-        <symptom>.env files being modified by system</symptom>
-        <symptom>User changes being overwritten</symptom>
-        <symptom>Auto-generated markers in files</symptom>
-      </symptoms>
-      <impact>
-        <item>Loss of user configuration</item>
-        <item>Confusion about file ownership</item>
-        <item>Difficulty maintaining local development settings</item>
-      </impact>
+      Users and developers need clear visibility into whether isolation mode is active
+      and what environment loading priority is being used.
     </problem>
     <solution>
-      <description>Made .env files strictly user-controlled</description>
-      <implementation>
-        <step>Never modify existing .env files</step>
-        <step>Detect and warn about auto-generated files</step>
-        <step>Provide help for creating .env files</step>
-        <step>Support copying from .env.example or .env.local</step>
-      </implementation>
+      <summary>Enhanced logging to clearly indicate isolation mode status</summary>
+      <log_examples>
+        <isolation_enabled>[LOCAL SECRETS] Loading with fallback chain... (Isolation mode: ENABLED (development/testing))</isolation_enabled>
+        <isolation_disabled>[LOCAL SECRETS] Loading with fallback chain... (Isolation mode: DISABLED (production))</isolation_disabled>
+        <skipped_os>[ISOLATION] Skipping system environment variables (isolation mode enabled)</skipped_os>
+        <priority_summary>Priority: .env.local > .env > Google Secrets > Defaults (ISOLATION MODE)</priority_summary>
+      </log_examples>
     </solution>
-    <result>
-      <outcome>Users maintain full control of their environment</outcome>
-      <benefits>
-        <benefit>No unexpected configuration changes</benefit>
-        <benefit>Clear ownership of .env file</benefit>
-        <benefit>Predictable local development</benefit>
-      </benefits>
-    </result>
-    <prevention>
-      <practice>Never programmatically modify user configuration files</practice>
-      <practice>Provide templates but let users create actual files</practice>
-      <practice>Validate that user files are user-controlled</practice>
-    </prevention>
-  </learning>
-  <learning id="remote-fallback-optimization">
-    <date>2025-01-17</date>
-    <category>Environment Loading</category>
-    <title>Optimized Remote Secret Fallback</title>
-    <problem>
-      <description>All secrets fetched from remote even when available locally</description>
-      <symptoms>
-        <symptom>Slow startup due to remote API calls</symptom>
-        <symptom>Unnecessary network dependencies</symptom>
-        <symptom>Fetching secrets already in .env file</symptom>
-      </symptoms>
-      <impact>
-        <item>Slower application startup</item>
-        <item>Unnecessary cloud API usage</item>
-        <item>Requires network for local development</item>
-      </impact>
-    </problem>
-    <solution>
-      <description>Fetch only missing secrets from remote</description>
+  </critical_issue>
+  
+  <best_practices>
+    <practice id="BP-ENV-001">
+      <title>Environment Loading Priority Design</title>
+      <description>
+        Design environment loading with different priorities for different contexts:
+        - Production: System security priority (OS env wins)
+        - Development: Predictability priority (files win, no OS env pollution)
+        - Testing: Isolation priority (only controlled sources)
+      </description>
       <implementation>
-        <step>Check what's already loaded from .env and OS</step>
-        <step>Identify missing required secrets</step>
-        <step>Fetch ONLY missing secrets from Google Secret Manager</step>
-        <step>Make remote fallback optional via parameter</step>
+        <production>OS env → .env.local → .env → remote secrets → defaults</production>
+        <development>.env.local → .env → remote secrets → defaults (isolated)</development>
       </implementation>
-    </solution>
-    <result>
-      <outcome>Efficient secret loading with minimal remote calls</outcome>
-      <benefits>
-        <benefit>Faster startup times</benefit>
-        <benefit>Reduced API usage and costs</benefit>
-        <benefit>Works offline when all secrets in .env</benefit>
-        <benefit>Optional complete offline mode</benefit>
-      </benefits>
-    </result>
-    <prevention>
-      <practice>Always check local sources first</practice>
-      <practice>Only fetch what's missing from remote</practice>
-      <practice>Make remote dependencies optional</practice>
-      <practice>Cache remote results when appropriate</practice>
-    </prevention>
-  </learning>
-  <learning id="observability-in-loading">
-    <date>2025-01-17</date>
-    <category>Environment Loading</category>
-    <title>Comprehensive Loading Observability</title>
-    <problem>
-      <description>Unclear where environment variables were coming from</description>
-      <symptoms>
-        <symptom>Difficult to debug configuration issues</symptom>
-        <symptom>Unknown source of variable values</symptom>
-        <symptom>No visibility into loading process</symptom>
-      </symptoms>
-      <impact>
-        <item>Hard to troubleshoot configuration problems</item>
-        <item>Confusion about value precedence</item>
-        <item>Time wasted debugging</item>
-      </impact>
-    </problem>
-    <solution>
-      <description>Added comprehensive logging and tracking</description>
+    </practice>
+    
+    <practice id="BP-ENV-002">
+      <title>Test Environment Isolation</title>
+      <description>
+        Tests should run in isolation mode by default to prevent:
+        - Cross-test environment pollution
+        - Dependency on developer's local OS environment
+        - Race conditions from previous test runs
+        - Unpredictable behavior due to system state
+      </description>
       <implementation>
-        <step>Log each step of loading process</step>
-        <step>Track and display source of each variable</step>
-        <step>Show summary statistics by source</step>
-        <step>Mask sensitive values in logs</step>
-        <step>Organize variables by category</step>
+        <rule>All test environments should default to isolation_mode=True</rule>
+        <rule>Tests should only depend on .env files they create</rule>
+        <rule>Tests should not assume OS environment variables are available</rule>
       </implementation>
-    </solution>
-    <result>
-      <outcome>Full visibility into environment loading</outcome>
-      <benefits>
-        <benefit>Easy to see where each value comes from</benefit>
-        <benefit>Clear understanding of precedence</benefit>
-        <benefit>Quick identification of missing variables</benefit>
-        <benefit>Safe logging with masked values</benefit>
-      </benefits>
-    </result>
-    <prevention>
-      <practice>Always provide detailed logging for configuration</practice>
-      <practice>Track source of each configuration value</practice>
-      <practice>Mask sensitive values in all logs</practice>
-      <practice>Provide summary statistics for overview</practice>
-    </prevention>
-  </learning>
-  <learning id="config-placeholder-replacement-paradox">
-    <date>2025-08-18</date>
-    <category>Environment Loading</category>
-    <title>Configuration Placeholder Replacement Paradox - Inheritance Issue</title>
-    <problem>
-      <description>PARADOX: Configuration had placeholder replacement code that never executed due to inheritance model</description>
-      <symptoms>
-        <symptom>ClickHouse connection failing with "clickhouse_host_url_placeholder"</symptom>
-        <symptom>Redis connection failing with placeholder values</symptom>
-        <symptom>Environment variables present in .env but not used</symptom>
-        <symptom>Previous fix attempts failed despite appearing correct</symptom>
-      </symptoms>
-      <root_cause>
-        <item>AppConfig parent class defines clickhouse_native with placeholder defaults</item>
-        <item>DevelopmentConfig.__init__ checked "if 'clickhouse_native' not in data"</item>
-        <item>This condition was ALWAYS False because parent class already set the attribute</item>
-        <item>Environment variable loading code was NEVER executed</item>
-        <item>Additionally, UnifiedConfigManager creates config with no arguments</item>
-        <item>Service modes weren't being set in data dict, only enabled flags</item>
-      </root_cause>
-      <impact>
-        <item>Services unable to start due to invalid connection strings</item>
-        <item>Development environment broken despite correct .env file</item>
-        <item>Multiple fix attempts failed due to misunderstanding root cause</item>
-        <item>SSL errors when trying to use HTTPS with local HTTP-only services</item>
-      </impact>
-    </problem>
-    <solution>
-      <description>Fixed inheritance paradox by ALWAYS overriding configs and setting all mode fields</description>
-      <implementation>
-        <step>Removed conditional checks - ALWAYS override clickhouse/redis configs</step>
-        <step>Handle empty data dict when called from UnifiedConfigManager</step>
-        <step>Set mode fields (clickhouse_mode, redis_mode) not just enabled flags</step>
-        <step>Ensure environment variables are loaded BEFORE parent init</step>
-      </implementation>
-      <code_changes>
-        <file>app/configuration/schemas.py - DevelopmentConfig.__init__ - removed conditionals</file>
-        <file>app/configuration/schemas.py - _configure_service_flags - added mode field setting</file>
-      </code_changes>
-    </solution>
-    <result>
-      <outcome>Configuration properly loads from environment variables</outcome>
-      <benefits>
-        <benefit>Services connect to correct hosts specified in .env</benefit>
-        <benefit>Local mode uses HTTP, shared mode uses HTTPS correctly</benefit>
-        <benefit>Development environment works with local Docker services</benefit>
-        <benefit>Clear precedence: env vars override default placeholders</benefit>
-      </benefits>
-    </result>
-    <prevention>
-      <practice>NEVER conditionally check for field existence when overriding parent defaults</practice>
-      <practice>ALWAYS override configuration values unconditionally in child classes</practice>
-      <practice>Set ALL related fields (modes AND flags) when configuring services</practice>
-      <practice>Test with actual UnifiedConfigManager flow, not just direct instantiation</practice>
-      <practice>Ensure .env is loaded into os.environ before config creation</practice>
-      <practice>Watch for inheritance paradoxes where parent defaults prevent child overrides</practice>
-    </prevention>
-    <related>
-      <spec>SPEC/configuration.xml</spec>
-      <file>app/configuration/schemas.py</file>
-      <file>app/core/configuration/base.py</file>
-      <file>app/db/clickhouse.py</file>
-    </related>
-  </learning>
-  <learning id="dev-launcher-env-loading-regression">
-    <date>2025-08-23</date>
-    <category>Environment Loading</category>
-    <title>Dev Launcher Environment Loading Regression - Duplicate Loading and Priority Issues</title>
-    <problem>
-      <description>Dev launcher had duplicate environment loading with incorrect priority order</description>
-      <symptoms>
-        <symptom>Environment variables not loading from local .env file properly</symptom>
-        <symptom>Secrets loaded twice - once by launcher, once by SecretLoader</symptom>
-        <symptom>Wrong priority order - .env could override system environment</symptom>
-        <symptom>Inconsistent priority chains between launcher and SecretLoader</symptom>
-        <symptom>.secrets file not included in LocalSecretManager fallback chain</symptom>
-      </symptoms>
-      <root_cause>
-        <item>Launcher had _load_env_file() loading .env and .secrets in __init__</item>
-        <item>SecretLoader also loaded .env and .env.local files separately</item>
-        <item>Launcher priority: System > .env > .secrets (but loaded .env AFTER system)</item>
-        <item>SecretLoader priority: OS > .env.local > .env > defaults (.secrets missing)</item>
-        <item>This created duplicate loading and confusion about actual priority</item>
-      </root_cause>
-      <impact>
-        <item>Environment variables from .env not being used correctly</item>
-        <item>System environment variables could be overridden incorrectly</item>
-        <item>Duplicate file I/O operations slowing startup</item>
-        <item>Confusion about which loading mechanism had authority</item>
-        <item>Critical secrets potentially loaded with wrong values</item>
-      </impact>
-    </problem>
-    <solution>
-      <description>Unified environment loading through SecretLoader with correct priority order</description>
-      <implementation>
-        <step>Removed _load_env_file() method from launcher completely</step>
-        <step>Made SecretLoader the single source of truth for all env loading</step>
-        <step>Added .secrets file support to LocalSecretManager fallback chain</step>
-        <step>Fixed priority order: OS env > .env.local > .env > .secrets</step>
-        <step>Load local secrets early in launcher initialization</step>
-        <step>Prevent duplicate loading by tracking _secrets_loaded state</step>
-      </implementation>
-      <code_changes>
-        <file>dev_launcher/launcher.py - removed _load_env_file(), added _load_local_secrets_early()</file>
-        <file>dev_launcher/local_secrets.py - added .secrets file to fallback chain</file>
-        <file>dev_launcher/local_secrets.py - expanded _is_relevant_env_var patterns</file>
-      </code_changes>
-    </solution>
-    <result>
-      <outcome>Unified, correct environment loading with proper priority</outcome>
-      <benefits>
-        <benefit>System environment variables always have highest priority</benefit>
-        <benefit>No duplicate file loading - improved startup performance</benefit>
-        <benefit>Clear single source of truth for environment loading</benefit>
-        <benefit>Consistent priority order across all loading paths</benefit>
-        <benefit>Support for .secrets file as lowest-priority fallback</benefit>
-        <benefit>Proper loading order for variable interpolation</benefit>
-      </benefits>
-    </result>
-    <prevention>
-      <practice>Have ONE authoritative environment loading mechanism</practice>
-      <practice>ALWAYS respect system environment as highest priority</practice>
-      <practice>Load environment files in correct order for interpolation</practice>
-      <practice>Track loading state to prevent duplicate operations</practice>
-      <practice>Test with actual OS environment variables set</practice>
-      <practice>Document and enforce consistent priority chain</practice>
-      <practice>Create comprehensive tests for all priority scenarios</practice>
-    </prevention>
-    <related>
-      <spec>SPEC/environment_loading.xml</spec>
-      <file>dev_launcher/launcher.py</file>
-      <file>dev_launcher/local_secrets.py</file>
-      <file>dev_launcher/secret_loader.py</file>
-      <test>dev_launcher/tests/test_env_loading_regression.py</test>
-    </related>
-  </learning>
+    </practice>
+    
+    <practice id="BP-ENV-003">
+      <title>Development Mode Security</title>
+      <description>
+        Isolation mode in development prevents accidental security issues:
+        - No production secrets leaking from OS environment
+        - Clear separation between development and production config
+        - Predictable behavior for all developers regardless of their system setup
+      </description>
+    </practice>
+  </best_practices>
+  
+  <implementation_patterns>
+    <pattern id="PAT-001">
+      <title>Conditional Environment Loading</title>
+      <code_example>
+        <python>
+# LocalSecretManager pattern
+def _build_fallback_chain(self) -> Dict[str, Tuple[str, str]]:
+    secrets = {}
+    
+    # Load .env files first (always)
+    secrets.update(self._load_env_files())
+    
+    # Only load OS environment in non-isolation mode
+    if not self.isolation_mode:
+        os_secrets = self._capture_os_environment()
+        secrets.update(os_secrets)  # OS env wins
+        logger.info(f"[OS] Found {len(os_secrets)} in OS environment")
+    else:
+        logger.info("[ISOLATION] Skipping system environment variables")
+    
+    return secrets
+        </python>
+      </code_example>
+    </pattern>
+    
+    <pattern id="PAT-002">
+      <title>Auto-Detection with Override</title>
+      <code_example>
+        <python>
+# SecretLoader pattern  
+def __init__(self, isolation_mode: Optional[bool] = None):
+    # Auto-detect if not explicitly set
+    if isolation_mode is None:
+        environment = os.environ.get('ENVIRONMENT', 'development').lower()
+        self.isolation_mode = environment == 'development'
+    else:
+        self.isolation_mode = isolation_mode
+        </python>
+      </code_example>
+    </pattern>
+  </implementation_patterns>
+  
+  <test_patterns>
+    <pattern id="TEST-001">
+      <title>Isolation Mode Testing</title>
+      <description>Test that isolation mode properly prevents OS environment loading</description>
+      <code_example>
+        <python>
+def test_isolation_mode_skips_os_environment():
+    # Set OS environment that should be ignored
+    os.environ['TEST_VAR'] = 'from_os_should_be_ignored'
+    
+    # Create .env file with different value
+    env_file = test_path / '.env'
+    env_file.write_text('TEST_VAR=from_env_file')
+    
+    # Load with isolation mode
+    manager = LocalSecretManager(test_path, isolation_mode=True)
+    secrets, _ = manager.load_secrets_with_fallback(set(['TEST_VAR']))
+    
+    # Should get env file value, not OS value
+    assert secrets['TEST_VAR'] == 'from_env_file'
+        </python>
+      </code_example>
+    </pattern>
+    
+    <pattern id="TEST-002">
+      <title>Production Mode Testing</title>
+      <description>Test that production mode preserves OS environment priority</description>
+      <code_example>
+        <python>
+def test_production_mode_preserves_os_priority():
+    # Set environment to production
+    os.environ['ENVIRONMENT'] = 'production'
+    os.environ['TEST_VAR'] = 'from_os_should_win'
+    
+    # Create .env file
+    env_file = test_path / '.env'
+    env_file.write_text('TEST_VAR=from_env_file')
+    
+    # Load without explicit isolation mode (auto-detects production)
+    loader = SecretLoader(project_root=test_path)
+    loader.load_all_secrets()
+    
+    # OS environment should win
+    assert os.environ['TEST_VAR'] == 'from_os_should_win'
+        </python>
+      </code_example>
+    </pattern>
+  </test_patterns>
+  
+  <regression_prevention>
+    <test id="REGTEST-001">
+      <name>Environment Isolation Comprehensive Test Suite</name>
+      <file>dev_launcher/tests/test_environment_isolation.py</file>
+      <coverage>
+        <item>OS environment skipping in isolation mode</item>
+        <item>OS environment loading in production mode</item>
+        <item>Auto-detection based on ENVIRONMENT variable</item>
+        <item>Priority order correctness in both modes</item>
+        <item>Logging clarity for isolation status</item>
+        <item>Backwards compatibility</item>
+        <item>Test environment pollution prevention</item>
+      </coverage>
+    </test>
+    
+    <test id="REGTEST-002">
+      <name>Updated Regression Tests</name>
+      <file>dev_launcher/tests/test_env_loading_regression.py</file>
+      <updates>
+        <item>Updated to test production mode explicitly</item>
+        <item>Added ENVIRONMENT=production to critical tests</item>
+        <item>Verified system environment priority in production</item>
+      </updates>
+    </test>
+  </regression_prevention>
+  
+  <monitoring>
+    <metric id="METRIC-001">
+      <name>Environment Mode Usage</name>
+      <description>Track usage of isolation vs production mode</description>
+      <implementation>Log isolation_mode status at startup</implementation>
+    </metric>
+    
+    <alert id="ALERT-001">
+      <name>Unexpected Environment Loading Mode</name>
+      <description>Alert if production services are running in isolation mode</description>
+      <trigger>isolation_mode=True when ENVIRONMENT=production</trigger>
+    </alert>
+  </monitoring>
+  
+  <common_pitfalls>
+    <pitfall id="PIT-001">
+      <description>Assuming OS environment is always loaded</description>
+      <reason>Isolation mode skips OS environment for predictability</reason>
+      <solution>Check isolation_mode status or use explicit production environment</solution>
+    </pitfall>
+    
+    <pitfall id="PIT-002">
+      <description>Tests depending on developer's OS environment</description>
+      <reason>Tests should be reproducible across all development environments</reason>
+      <solution>Tests should only depend on .env files they create</solution>
+    </pitfall>
+    
+    <pitfall id="PIT-003">
+      <description>Not logging isolation mode status clearly</description>
+      <reason>Developers need to understand which loading mode is active</reason>
+      <solution>Always log isolation mode status and priority order</solution>
+    </pitfall>
+  </common_pitfalls>
+  
+  <security_considerations>
+    <consideration id="SEC-001">
+      <title>Production Secrets Isolation</title>
+      <description>
+        Isolation mode prevents production secrets from accidentally being loaded
+        from developer's OS environment during development and testing.
+      </description>
+      <implementation>Development mode only loads from controlled .env files</implementation>
+    </consideration>
+    
+    <consideration id="SEC-002">
+      <title>System Environment Priority in Production</title>
+      <description>
+        Production mode preserves OS environment highest priority for security,
+        allowing system administrators to override any file-based configuration.
+      </description>
+      <implementation>Production mode loads OS env → .env.local → .env → defaults</implementation>
+    </consideration>
+  </security_considerations>
+  
+  <action_items>
+    <item priority="HIGH">
+      <description>Verify all test suites use isolation mode appropriately</description>
+      <command>grep -r "isolation_mode" --include="*.py" tests/</command>
+    </item>
+    
+    <item priority="MEDIUM">
+      <description>Add environment loading documentation for developers</description>
+      <location>docs/development/environment-loading.md</location>
+    </item>
+    
+    <item priority="LOW">
+      <description>Consider adding config validation for isolation mode</description>
+      <description>Warn if production environment is using isolation mode</description>
+    </item>
+  </action_items>
 </learnings>

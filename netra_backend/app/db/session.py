@@ -73,12 +73,13 @@ async def _get_validated_session() -> AsyncIterator[AsyncSession]:
     async with session_manager.get_session() as session:
         yield session
 
-@asynccontextmanager
+@asynccontextmanager  
 async def get_db_session() -> AsyncIterator[AsyncSession]:
     """Provide a transactional scope around a series of operations.
     
-    This function maintains backward compatibility while using the improved
-    session management from postgres.py.
+    REDIRECTED: This function now delegates to the single source of truth
+    in netra_backend.app.database to eliminate duplication.
     """
-    async with _get_validated_session() as session:
+    from netra_backend.app.database import get_db
+    async for session in get_db():
         yield session

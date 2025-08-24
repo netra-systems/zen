@@ -174,18 +174,29 @@ class LogFormatter:
     
     def get_console_format(self) -> str:
         """Get human-readable format string for console output."""
-        base_format = self._get_base_console_format()
-        if self._has_context():
-            return base_format + " | <dim>{extra}</dim>"
-        return base_format
+        # Use preprocessor to add color to messages
+        return self._get_preprocessed_format()
     
-    def _get_base_console_format(self) -> str:
-        """Get the base console format string."""
+    def _get_preprocessed_format(self) -> str:
+        """Get format string with message preprocessing."""
         return (
             "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
             "<level>{level: <8}</level> | "
             "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
-            "<level>{message}</level>"
+            "{extra[colored_message]}"
+        )
+    
+    def _get_base_console_format(self) -> str:
+        """Get the base console format string with proper color mapping."""
+        return self._get_color_formatted_template()
+    
+    def _get_color_formatted_template(self) -> str:
+        """Get format template with proper level-based color mapping."""
+        return (
+            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
+            "{extra[colored_message]}"
         )
     
     def _has_context(self) -> bool:
@@ -197,6 +208,31 @@ class LogFormatter:
         if enable_json:
             return self.json_formatter
         return "{time} | {level} | {name}:{function}:{line} | {message}"
+
+
+def _color_message_preprocessor(record):
+    """Preprocess log record to add proper colors based on level."""
+    level = record["level"].name
+    message = record["message"]
+    
+    # Map log levels to appropriate colors (not error red for info)
+    color_map = {
+        "TRACE": "<dim>{}</dim>",
+        "DEBUG": "<dim>{}</dim>", 
+        "INFO": "<white>{}</white>",  # Info should be white, not red
+        "SUCCESS": "<green>{}</green>",
+        "WARNING": "<yellow>{}</yellow>",
+        "ERROR": "<red>{}</red>",
+        "CRITICAL": "<red><bold>{}</bold></red>"
+    }
+    
+    color_template = color_map.get(level, "<white>{}</white>")
+    colored_message = color_template.format(message)
+    
+    # Add colored message to extra data
+    if "extra" not in record:
+        record["extra"] = {}
+    record["extra"]["colored_message"] = colored_message
 
 
 class LogHandlerConfig:
@@ -227,7 +263,7 @@ class LogHandlerConfig:
         )
     
     def _add_readable_console_handler(self, should_log_func):
-        """Add human-readable console handler."""
+        """Add human-readable console handler with proper color mapping."""
         logger.add(
             sys.stderr,
             format=self.formatter.get_console_format(),
@@ -237,6 +273,8 @@ class LogHandlerConfig:
             backtrace=True,
             diagnose=False
         )
+        # Add preprocessor for message coloring
+        logger.configure(patcher=_color_message_preprocessor)
     
     def add_file_handler(self, file_path: str, should_log_func):
         """Add file handler with rotation."""

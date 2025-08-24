@@ -221,33 +221,9 @@ if not os.environ.get("TEST_COLLECTION_MODE"):
         if not loop.is_closed():
             loop.close()
 
-    # Database fixture only if SQLAlchemy is available
-    if AsyncSession and create_async_engine:
-        @pytest.fixture(scope="function")
-        async def db_session():
-            """Create async database session for tests."""
-            # Use in-memory SQLite for tests
-            engine = create_async_engine(
-                "sqlite+aiosqlite:///:memory:",
-                poolclass=StaticPool,
-                echo=False,
-            )
-            
-            # Create tables
-            from netra_backend.app.models import Base
-            async with engine.begin() as conn:
-                await conn.run_sync(Base.metadata.create_all)
-            
-            # Create session
-            async_session_maker = async_sessionmaker(
-                engine, class_=AsyncSession, expire_on_commit=False
-            )
-            
-            async with async_session_maker() as session:
-                yield session
-                await session.rollback()
-            
-            await engine.dispose()
+    # Database fixture delegates to single source of truth from test_framework
+    # REMOVED: Duplicate db_session implementation 
+    # Use test_framework.fixtures.database_fixtures.test_db_session instead
 
     # Test client fixture only if FastAPI is available
     if TestClient:

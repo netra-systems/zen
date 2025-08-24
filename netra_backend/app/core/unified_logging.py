@@ -50,6 +50,13 @@ class UnifiedLogger:
         # Return cached config if already loaded
         if self._config_loaded and self._config is not None:
             return self._config
+        
+        # Check if secrets are still loading to prevent premature initialization
+        if os.environ.get('NETRA_SECRETS_LOADING') == 'true':
+            # Use fallback config during secret loading phase
+            loaded_config = self._get_fallback_config()
+            # Don't cache during loading phase
+            return loaded_config
             
         try:
             # Avoid circular import during module initialization

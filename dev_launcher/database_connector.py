@@ -512,15 +512,45 @@ class DatabaseConnector:
         return None
     
     async def _execute_clickhouse_ping(self, base_url: str, auth) -> bool:
-        """Execute ClickHouse ping request."""
+        """Execute ClickHouse ping request with proper error handling for code 194."""
         import aiohttp
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"{base_url}/ping",
-                auth=auth,
-                timeout=aiohttp.ClientTimeout(total=self.retry_config.timeout)
-            ) as response:
-                return response.status == 200
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    f"{base_url}/ping",
+                    auth=auth,
+                    timeout=aiohttp.ClientTimeout(total=self.retry_config.timeout)
+                ) as response:
+                    if response.status == 200:
+                        return True
+                    elif response.status == 401:
+                        # Authentication failed - handle gracefully
+                        logger.info("ClickHouse authentication failed - check credentials")
+                        return False
+                    else:
+                        logger.debug(f"ClickHouse ping failed with status {response.status}")
+                        return False
+        except aiohttp.ClientError as e:
+            return self._handle_clickhouse_connection_error(e)
+        except Exception as e:
+            return self._handle_clickhouse_connection_error(e)
+    
+    def _handle_clickhouse_connection_error(self, error: Exception) -> bool:
+        """Handle ClickHouse connection errors with specific handling for code 194."""
+        error_str = str(error)
+        error_lower = error_str.lower()
+        
+        # Handle specific ClickHouse error codes and authentication issues
+        if any(indicator in error_lower for indicator in ["194", "password incorrect", "authentication", "auth failed"]):
+            logger.info(f"ClickHouse authentication issue detected: {error_str}")
+            logger.info("ClickHouse will fall back to mock/local mode - continuing startup")
+            return False
+        elif "timeout" in error_lower or "connection" in error_lower:
+            logger.debug(f"ClickHouse connection timeout/network issue: {error_str}")
+            return False
+        else:
+            logger.debug(f"ClickHouse connection error: {error_str}")
+            return False
     
     async def _test_redis_connection(self, connection: DatabaseConnection) -> bool:
         """Test Redis connection."""

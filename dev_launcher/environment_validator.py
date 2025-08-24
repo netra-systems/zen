@@ -29,21 +29,36 @@ class ValidationResult:
     errors: List[str]
     warnings: List[str]
     missing_optional: List[str]
+    fallback_applied: List[str] = None  # Track variables that used fallbacks
+    suggestions: List[str] = None  # Automated suggestions for fixes
+    
+    def __post_init__(self):
+        if self.fallback_applied is None:
+            self.fallback_applied = []
+        if self.suggestions is None:
+            self.suggestions = []
 
 
 class EnvironmentValidator:
     """
-    Comprehensive environment variable validation.
+    Comprehensive environment variable validation with intelligent fallbacks.
     
-    Validates all required environment variables for startup
-    with clear error messages and suggestions.
+    Validates all required environment variables for startup with:
+    - Clear error messages and suggestions
+    - Automatic fallback value generation
+    - Smart defaults based on environment context
+    - Recovery mechanisms for common misconfigurations
     """
     
-    def __init__(self):
+    def __init__(self, enable_fallbacks: bool = True, development_mode: bool = True):
         """Initialize environment validator."""
         self.required_vars = self._get_required_variables()
         self.optional_vars = self._get_optional_variables()
         self.validation_rules = self._get_validation_rules()
+        self.enable_fallbacks = enable_fallbacks
+        self.development_mode = development_mode
+        self.fallback_values = self._get_fallback_values()
+        self.applied_fallbacks = []
     
     def _get_required_variables(self) -> Dict[str, str]:
         """Get required environment variables with descriptions."""
@@ -372,3 +387,70 @@ class EnvironmentValidator:
             suggestions.append("Generate secure secret keys using: python -c \"import secrets; print(secrets.token_urlsafe(32))\"")
         
         return suggestions
+    
+    def _get_fallback_values(self) -> Dict[str, callable]:
+        """Get fallback value generators for required variables."""
+        return {
+            "DATABASE_URL": self._generate_database_url_fallback,
+            "JWT_SECRET_KEY": self._generate_jwt_secret_fallback,
+            "SECRET_KEY": self._generate_secret_key_fallback,
+            "ENVIRONMENT": lambda: "development" if self.development_mode else "production",
+        }
+    
+    def _generate_database_url_fallback(self) -> str:
+        """Generate a fallback database URL for development."""
+        if self.development_mode:
+            return "sqlite:///./netra_dev.db"
+        return None
+    
+    def _generate_jwt_secret_fallback(self) -> str:
+        """Generate a secure JWT secret key."""
+        import secrets
+        return secrets.token_urlsafe(64)
+    
+    def _generate_secret_key_fallback(self) -> str:
+        """Generate a secure application secret key."""
+        import secrets
+        return secrets.token_urlsafe(32)
+    
+    def validate_with_fallbacks(self) -> ValidationResult:
+        """Enhanced validation with fallback application."""
+        errors = []
+        warnings = []
+        missing_optional = []
+        fallback_applied = []
+        
+        # Check required variables with fallbacks
+        for var_name, description in self.required_vars.items():
+            if not os.environ.get(var_name):
+                if self.enable_fallbacks and var_name in self.fallback_values:
+                    try:
+                        fallback_value = self.fallback_values[var_name]()
+                        if fallback_value:
+                            os.environ[var_name] = fallback_value
+                            fallback_applied.append(var_name)
+                            logger.info(f"Applied fallback for {var_name}")
+                        else:
+                            errors.append(f"Missing required environment variable: {var_name} ({description})")
+                    except Exception as e:
+                        logger.warning(f"Failed to generate fallback for {var_name}: {e}")
+                        errors.append(f"Missing required environment variable: {var_name} ({description})")
+                else:
+                    errors.append(f"Missing required environment variable: {var_name} ({description})")
+        
+        # Check optional variables
+        missing_optional.extend(self._check_optional_variables())
+        
+        # Validate formats
+        format_errors, format_warnings = self._validate_variable_formats()
+        errors.extend(format_errors)
+        warnings.extend(format_warnings)
+        
+        # Check consistency
+        consistency_errors = self._check_environment_consistency()
+        errors.extend(consistency_errors)
+        
+        is_valid = len(errors) == 0
+        suggestions = self.get_fix_suggestions(ValidationResult(is_valid, errors, warnings, missing_optional))
+        
+        return ValidationResult(is_valid, errors, warnings, missing_optional, fallback_applied, suggestions)

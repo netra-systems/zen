@@ -21,23 +21,29 @@ from dev_launcher.cache_manager import CacheManager
 from dev_launcher.config import LauncherConfig
 from dev_launcher.critical_error_handler import CriticalError, critical_handler
 from dev_launcher.database_connector import DatabaseConnector
+from dev_launcher.database_initialization import DatabaseInitializer, DatabaseHealthChecker
 from dev_launcher.environment_checker import EnvironmentChecker
+from dev_launcher.environment_manager import get_environment_manager
 from dev_launcher.environment_validator import EnvironmentValidator
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.health_registration import HealthRegistrationHelper
 from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
 from dev_launcher.log_streamer import LogManager, setup_logging
 from dev_launcher.migration_runner import MigrationRunner
+from dev_launcher.network_resilience import NetworkResilientClient, RetryPolicy
 from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
 from dev_launcher.process_manager import ProcessManager
+from dev_launcher.race_condition_manager import RaceConditionManager, ResourceType
 from dev_launcher.secret_loader import SecretLoader
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.service_startup import ServiceStartupCoordinator
+from dev_launcher.signal_handler import SignalHandler
 from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
 from dev_launcher.startup_validator import StartupValidator
 from dev_launcher.summary_display import SummaryDisplay
 from dev_launcher.utils import check_emoji_support, print_with_emoji
 from dev_launcher.websocket_validator import WebSocketValidator
+from dev_launcher.windows_process_manager import WindowsProcessManager
 
 logger = logging.getLogger(__name__)
 
@@ -58,13 +64,12 @@ class DevLauncher:
         # Initialize Docker service discovery attributes
         self._docker_discovery_report = {}
         self._running_docker_services = {}
-        # NOTE: Removed _load_env_file() here to avoid duplicate loading
-        # SecretLoader will handle all env loading with correct priority
+        # SecretLoader handles all environment loading with correct priority order
         self._setup_startup_mode()  # Setup startup mode and filtering
         self._setup_new_cache_system()  # Setup new cache and optimizer
         self._setup_managers()
+        self._setup_helpers()  # Setup helpers first to get env_manager
         self._setup_components()
-        self._setup_helpers()
         self._setup_logging()
         self._setup_signal_handlers()
         self.startup_time = time.time()
@@ -100,20 +105,35 @@ class DevLauncher:
         self.process_manager = ProcessManager(health_monitor=self.health_monitor)
         self.log_manager = LogManager()
         self.service_discovery = ServiceDiscovery(self.config.project_root)
+        
+        # Initialize edge case handling managers
+        self.race_condition_manager = RaceConditionManager()
+        self.signal_handler = SignalHandler()
+        
+        # Initialize Windows-specific process manager if on Windows
+        if sys.platform == "win32":
+            self.windows_process_manager = WindowsProcessManager()
+        else:
+            self.windows_process_manager = None
     
     def _setup_components(self):
         """Setup component instances."""
         self.environment_checker = EnvironmentChecker(self.config.project_root, self.use_emoji)
         self.config.set_emoji_support(self.use_emoji)
+        
+        # Initialize network resilience client early
+        self.network_client = NetworkResilientClient(self.use_emoji)
+        
         self.secret_loader = self._create_secret_loader()
         self._secrets_loaded = False  # Track if secrets have been loaded
         
-        # Load local env files immediately (critical for initialization)
-        # This ensures environment is set up before other components initialize
-        self._load_local_secrets_early()
+        # Note: Local secrets loading moved to after helpers setup to ensure env_manager is available
         
         self.service_startup = self._create_service_startup()
         self.summary_display = SummaryDisplay(self.config, self.service_discovery, self.use_emoji)
+        
+        # Load local secrets now that env_manager is available
+        self._load_local_secrets_early()
     
     def _setup_helpers(self):
         """Setup helper instances."""
@@ -121,16 +141,32 @@ class DevLauncher:
         self.startup_validator = StartupValidator(self.use_emoji)
         self.migration_runner = MigrationRunner(self.config.project_root, self.use_emoji)
         self.database_connector = DatabaseConnector(self.use_emoji)
+        self.database_initializer = DatabaseInitializer(self.config.project_root, self.use_emoji)
+        self.database_health_checker = DatabaseHealthChecker(self.use_emoji)
         self.websocket_validator = WebSocketValidator(self.use_emoji)
         self.environment_validator = EnvironmentValidator()
+        
+        # Get environment manager with matching isolation mode
+        environment = os.environ.get('ENVIRONMENT', 'development').lower()
+        isolation_mode = environment == 'development'
+        self.env_manager = get_environment_manager(isolation_mode=isolation_mode)
     
     def _create_secret_loader(self) -> SecretLoader:
-        """Create secret loader instance."""
+        """Create secret loader instance with isolation mode detection."""
+        # Detect development mode and enable isolation by default
+        environment = os.environ.get('ENVIRONMENT', 'development').lower()
+        isolation_mode = environment == 'development'
+        
+        if self.config.verbose:
+            isolation_status = "ENABLED" if isolation_mode else "DISABLED"
+            logger.info(f"[LAUNCHER] Environment isolation: {isolation_status} (ENVIRONMENT={environment})")
+        
         return SecretLoader(
             project_id=self.config.project_id,
             verbose=self.config.verbose,
             project_root=self.config.project_root,
-            load_secrets=self.config.load_secrets
+            load_secrets=self.config.load_secrets,
+            isolation_mode=isolation_mode
         )
     
     def _create_service_startup(self) -> ServiceStartupCoordinator:
@@ -146,30 +182,41 @@ class DevLauncher:
         self.config.log_verbose_config()
     
     def _setup_signal_handlers(self):
-        """Setup signal handlers for graceful shutdown."""
-        if sys.platform == "win32":
-            # Windows signal handling
-            signal.signal(signal.SIGINT, self._signal_handler)
-            signal.signal(signal.SIGTERM, self._signal_handler)
-            signal.signal(signal.SIGBREAK, self._signal_handler)
-        else:
-            # Unix signal handling  
-            signal.signal(signal.SIGINT, self._signal_handler)
-            signal.signal(signal.SIGTERM, self._signal_handler)
+        """Setup signal handlers for graceful shutdown using the comprehensive SignalHandler."""
+        # Register cleanup handlers with the signal handler
+        self.signal_handler.register_cleanup_handler(
+            name="dev_launcher_cleanup",
+            handler=self._graceful_shutdown,
+            priority=1,
+            timeout=30,
+            critical=True
+        )
         
-        # Register cleanup on exit
+        # Register emergency cleanup as fallback
+        self.signal_handler.register_cleanup_handler(
+            name="emergency_cleanup",
+            handler=self.emergency_cleanup,
+            priority=10,  # Lower priority (runs later)
+            timeout=15,
+            critical=True
+        )
+        
+        # Signal handling is already initialized in SignalHandler constructor
+        # Register legacy cleanup on exit for compatibility
         atexit.register(self._ensure_cleanup)
-        logger.info("Signal handlers registered for graceful shutdown")
+        logger.info("Comprehensive signal handlers registered for graceful shutdown")
     
     def _signal_handler(self, signum, frame):
-        """Handle shutdown signals gracefully."""
+        """Legacy signal handler - delegates to comprehensive SignalHandler."""
         if self._shutting_down:
             return  # Already shutting down
         
         self._shutting_down = True
         signal_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
-        self._print("\n🛑", "SHUTDOWN", f"Received {signal_name}, shutting down gracefully...")
-        self._graceful_shutdown()
+        self._print("\n🛑", "SHUTDOWN", f"Received {signal_name}, initiating comprehensive shutdown...")
+        
+        # Use the comprehensive signal handler
+        self.signal_handler.initiate_shutdown(signal_name)
         sys.exit(0)
     
     def _ensure_cleanup(self):
@@ -424,7 +471,42 @@ class DevLauncher:
         return False
     
     def _force_free_port_windows(self, port: int, attempt: int) -> bool:
-        """Force free port on Windows with enhanced process handling."""
+        """Force free port on Windows using the WindowsProcessManager for enhanced process handling."""
+        if self.windows_process_manager:
+            try:
+                # Use the enhanced Windows process manager
+                port_users = self.windows_process_manager.get_port_users(port)
+                if not port_users:
+                    return True  # No processes using the port
+                
+                killed_count = 0
+                for pid, process_name in port_users:
+                    try:
+                        # Try graceful termination first on first attempt
+                        force = attempt > 0
+                        if self.windows_process_manager.terminate_process_tree(process_name, force=force):
+                            killed_count += 1
+                            logger.debug(f"Terminated process {process_name} (PID {pid}) using port {port}")
+                    except Exception as e:
+                        logger.warning(f"Failed to terminate process {process_name} (PID {pid}): {e}")
+                
+                # Cleanup any zombie processes
+                zombies_cleaned = self.windows_process_manager.cleanup_zombie_processes()
+                if zombies_cleaned > 0:
+                    logger.debug(f"Cleaned up {zombies_cleaned} zombie processes")
+                
+                return killed_count > 0
+                
+            except Exception as e:
+                logger.error(f"Enhanced Windows port cleanup failed for port {port}: {e}")
+                # Fallback to legacy method
+                return self._legacy_force_free_port_windows(port, attempt)
+        else:
+            # Fallback to legacy method
+            return self._legacy_force_free_port_windows(port, attempt)
+    
+    def _legacy_force_free_port_windows(self, port: int, attempt: int) -> bool:
+        """Legacy Windows port cleanup method."""
         try:
             import subprocess
             
@@ -478,7 +560,7 @@ class DevLauncher:
             return killed_count > 0
             
         except Exception as e:
-            logger.error(f"Windows port cleanup failed for port {port}: {e}")
+            logger.error(f"Legacy Windows port cleanup failed for port {port}: {e}")
             return False
     
     def _force_free_port_darwin(self, port: int, attempt: int) -> bool:
@@ -670,7 +752,7 @@ class DevLauncher:
         self._validate_critical_env_vars()
     
     def _set_env_var_defaults(self):
-        """Set default values for critical environment variables."""
+        """Set default values for critical environment variables using EnvironmentManager."""
         defaults = {
             "BACKEND_PORT": "8000",
             "FRONTEND_PORT": "3000", 
@@ -682,9 +764,9 @@ class DevLauncher:
         }
         
         for var, default_value in defaults.items():
-            if not os.environ.get(var):
-                os.environ[var] = default_value
-                self._print("ℹ️", "DEFAULT", f"Set {var}={default_value}")
+            if not self.env_manager.has_variable(var):
+                if self.env_manager.set_environment(var, default_value, source="launcher_defaults"):
+                    self._print("ℹ️", "DEFAULT", f"Set {var}={default_value}")
         
         # Generate cross-service auth token if not present
         self._ensure_cross_service_auth_token()
@@ -723,13 +805,17 @@ class DevLauncher:
                 logger.warning("Token may have low entropy, but proceeding (this is extremely rare)")
             
             self.service_discovery.set_cross_service_auth_token(token)
-            os.environ['CROSS_SERVICE_AUTH_TOKEN'] = token
+            # Use environment manager to set token
+            self.env_manager.set_environment('CROSS_SERVICE_AUTH_TOKEN', token, 
+                                           source="launcher_auth_token", allow_override=True)
             self._print("🔑", "TOKEN", f"Generated secure cross-service auth token ({len(token)} chars)")
             
             # Log token characteristics for debugging (without revealing token)
             logger.debug(f"Token entropy check: unique chars={len(set(token))}, length={len(token)}")
         else:
-            os.environ['CROSS_SERVICE_AUTH_TOKEN'] = existing_token
+            # Use environment manager to set existing token
+            self.env_manager.set_environment('CROSS_SERVICE_AUTH_TOKEN', existing_token, 
+                                           source="launcher_auth_token", allow_override=True)
             self._print("🔑", "TOKEN", f"Using existing cross-service auth token ({len(existing_token)} chars)")
     
     def _validate_critical_env_vars(self):
@@ -737,7 +823,7 @@ class DevLauncher:
         required_vars = ["DATABASE_URL", "JWT_SECRET_KEY"]
         
         for var in required_vars:
-            value = os.environ.get(var)
+            value = self.env_manager.get_environment(var)
             if not value:
                 critical_handler.check_env_var(var, value)
     
@@ -898,6 +984,12 @@ class DevLauncher:
     async def _validate_databases(self) -> bool:
         """Validate database connections before service startup with proper mock mode detection."""
         try:
+            # Step 1: Initialize databases for cold start
+            self._print("🔧", "DATABASE", "Initializing databases for cold start...")
+            init_success = await self.database_initializer.initialize_databases()
+            if not init_success:
+                self._print("⚠️", "DATABASE", "Database initialization had issues, continuing...")
+            
             # Check if all database services are in mock mode with enhanced detection
             if hasattr(self.config, 'services_config') and self.config.services_config:
                 services_config = self.config.services_config
@@ -943,14 +1035,21 @@ class DevLauncher:
             else:
                 self._print("🔍", "DATABASE", "No service config found, attempting full database validation")
             
-            # Perform actual validation with timeout and error handling
+            # Step 2: Perform connection validation with timeout and error handling
             validation_result = await asyncio.wait_for(
                 self.database_connector.validate_all_connections(),
                 timeout=25  # 25 second timeout for database validation
             )
             
+            # Step 3: Check database readiness
             if validation_result:
-                self._print("✅", "DATABASE", "Database connections validated successfully")
+                readiness_status = await self.database_health_checker.check_database_readiness()
+                ready_dbs = [db for db, ready in readiness_status.items() if ready]
+                
+                if ready_dbs:
+                    self._print("✅", "DATABASE", f"Database connections validated and ready: {', '.join(ready_dbs)}")
+                else:
+                    self._print("⚠️", "DATABASE", "Connections validated but readiness check failed - continuing")
             else:
                 self._print("⚠️", "DATABASE", "Some database connections failed - continuing with available services")
                 # Don't fail startup for database connection issues in development
@@ -995,35 +1094,64 @@ class DevLauncher:
     
     
     def _load_local_secrets_early(self):
-        """Load local secrets early for initialization.
+        """Load local secrets early for initialization with race condition prevention.
         
         This method loads only local env files early in the initialization 
         process to ensure environment is properly set up before other 
-        components are created.
+        components are created. This prevents race conditions where backend
+        components try to access environment variables before they're loaded.
         """
         if not self._secrets_loaded:
-            # Load with local-only mode (no GCP)
-            self.secret_loader.local_first = True
-            self.secret_loader.load_secrets = False  # Ensure no GCP loading
-            self.secret_loader.load_all_secrets()
-            self._secrets_loaded = True
+            # Prevent environment race condition using the race condition manager
+            if self.race_condition_manager.prevent_environment_race_condition("launcher_secret_loader"):
+                # Use temporary flag with environment manager
+                with self.env_manager.set_temporary_flag('NETRA_SECRETS_LOADING', 'true', 'launcher_early_load'):
+                    # Load with local-only mode (no GCP)
+                    self.secret_loader.local_first = True
+                    self.secret_loader.load_secrets = False  # Ensure no GCP loading
+                    self.secret_loader.load_all_secrets()
+                    self._secrets_loaded = True
+            else:
+                logger.warning("Race condition detected during early secret loading, retrying...")
+                time.sleep(0.1)  # Brief delay and retry
+                self._load_local_secrets_early()
     
     def load_secrets(self) -> bool:
-        """Load secrets if configured.
+        """Load secrets if configured with race condition prevention.
         
         This method handles GCP secret loading if enabled.
         Local secrets are already loaded in _load_local_secrets_early.
         """
-        if self._secrets_loaded and not self.config.load_secrets:
-            # Already loaded local secrets, no GCP needed
-            self._print("🔒", "SECRETS", "Local secrets loaded (GCP disabled)")
-            return True
+        # Prevent race condition using the race condition manager
+        lock_acquired = self.race_condition_manager.acquire_resource_lock(
+            ResourceType.ENVIRONMENT_VARS, "main_secrets", "launcher", timeout=10
+        )
+        if not lock_acquired:
+            self._print("⚠️", "SECRETS", "Failed to acquire secret loading lock")
+            return False
         
-        if not self.config.load_secrets:
-            self._print("🔒", "SECRETS", "Secret loading disabled (--no-secrets flag)")
-            return True
-        
-        return self._load_secrets_with_debug()
+        try:
+            # Prevent race condition - ensure environment loading is complete
+            if self.env_manager.has_variable('NETRA_SECRETS_LOADING'):
+                self._print("⏳", "SECRETS", "Waiting for environment loading to complete...")
+                # Brief wait to ensure loading completes
+                time.sleep(0.1)
+            
+            if self._secrets_loaded and not self.config.load_secrets:
+                # Already loaded local secrets, no GCP needed
+                self._print("🔒", "SECRETS", "Local secrets loaded (GCP disabled)")
+                return True
+            
+            if not self.config.load_secrets:
+                self._print("🔒", "SECRETS", "Secret loading disabled (--no-secrets flag)")
+                return True
+            
+            return self._load_secrets_with_debug()
+        finally:
+            # Always release the resource lock
+            self.race_condition_manager.release_resource_lock(
+                ResourceType.ENVIRONMENT_VARS, "main_secrets", "launcher"
+            )
     
     def _load_secrets_with_debug(self) -> bool:
         """Load secrets with debug information.
@@ -1143,11 +1271,11 @@ class DevLauncher:
             # Steps 1-3: Already done in pre-checks, log completion
             self._print("✅", "STEP 1-3", "Pre-checks completed (cache, environment, secrets)")
             
-            # Step 4: Database validation with timeout
-            self._print("🔄", "STEP 4", "Validating database connections...")
+            # Step 4: Database validation with timeout and network resilience
+            self._print("🔄", "STEP 4", "Validating database connections with network resilience...")
             if not await self._execute_step_with_timeout(
                 "Step 4: Database Validation",
-                self._validate_databases,
+                self._validate_databases_with_resilience,
                 step_timeouts[4]
             ):
                 self._print("❌", "ERROR", "Database validation failed or timed out")
@@ -1257,6 +1385,60 @@ class DevLauncher:
             logger.error(f"Startup sequence failed: {e}")
             return False
     
+    async def _validate_databases_with_resilience(self) -> bool:
+        """Validate database connections with network resilience and enhanced error handling."""
+        try:
+            # Create startup barrier for database initialization to prevent race conditions
+            with self.race_condition_manager.create_barrier(
+                "database_validation", required_participants=1, timeout=30
+            ) as barrier_ready:
+                if not barrier_ready:
+                    logger.warning("Failed to create database validation barrier")
+                    return await self._validate_databases()  # Fallback to standard validation
+                
+                # Use network resilient client for database checks
+                db_policy = RetryPolicy(
+                    max_attempts=5,
+                    initial_delay=2.0,
+                    max_delay=10.0,
+                    timeout_per_attempt=15.0
+                )
+                
+                # Check individual database services with resilience
+                db_services = ['postgres', 'redis', 'clickhouse']
+                successful_connections = []
+                failed_connections = []
+                
+                for db_service in db_services:
+                    success, error = await self.network_client.resilient_database_check(
+                        db_service,
+                        retry_policy=db_policy,
+                        allow_degradation=True
+                    )
+                    
+                    if success:
+                        successful_connections.append(db_service)
+                        self._print("✅", "DB-RESILIENT", f"{db_service.capitalize()} connection validated")
+                    else:
+                        failed_connections.append((db_service, error))
+                        self._print("⚠️", "DB-RESILIENT", f"{db_service.capitalize()} connection failed: {error}")
+                
+                # Report resilience results
+                if successful_connections:
+                    self._print("✅", "RESILIENCE", f"Connected to {len(successful_connections)} database service(s)")
+                
+                if failed_connections:
+                    self._print("⚠️", "RESILIENCE", f"{len(failed_connections)} database service(s) failed - using fallback validation")
+                    # Fallback to standard validation for failed services
+                    return await self._validate_databases()
+                
+                return len(successful_connections) > 0  # Success if at least one DB is available
+                
+        except Exception as e:
+            logger.error(f"Resilient database validation failed: {e}")
+            # Fallback to standard validation
+            return await self._validate_databases()
+    
     def _perform_docker_service_discovery(self):
         """Perform Docker service discovery to identify reusable containers."""
         try:
@@ -1297,70 +1479,130 @@ class DevLauncher:
             self._running_docker_services = {}
     
     def _wait_for_backend_readiness(self, timeout: int = 30) -> bool:
-        """Wait for backend /health/ready endpoint per SPEC step 8."""
-        import requests
-        start_time = time.time()
+        """Wait for backend /health/ready endpoint per SPEC step 8 with resilient networking."""
         backend_port = self.config.backend_port or 8000
         ready_url = f"http://localhost:{backend_port}/health/ready"
         
-        while (time.time() - start_time) < timeout:
-            try:
-                response = requests.get(ready_url, timeout=5)
-                if response.status_code == 200:
-                    self._print("✅", "READY", "Backend is ready")
-                    # Mark service as ready in health monitor
-                    self.health_monitor.mark_service_ready("Backend")
-                    return True
-            except Exception as e:
-                logger.debug(f"Backend readiness check: {e}")
-            
-            time.sleep(1)
+        # Use resilient network client with custom retry policy for health checks
+        health_policy = RetryPolicy(
+            max_attempts=timeout // 3,  # Check every ~3 seconds
+            initial_delay=1.0,
+            max_delay=5.0,
+            timeout_per_attempt=5.0
+        )
         
-        return False
+        async def check_readiness():
+            success, result = await self.network_client.resilient_http_request(
+                ready_url,
+                operation_type="health_check",
+                retry_policy=health_policy,
+                allow_degradation=False
+            )
+            return success
+        
+        try:
+            # Run async check
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            ready = loop.run_until_complete(check_readiness())
+            loop.close()
+            
+            if ready:
+                self._print("✅", "READY", "Backend is ready")
+                # Mark service as ready in health monitor
+                self.health_monitor.mark_service_ready("Backend")
+                return True
+            else:
+                self._print("⚠️", "WARNING", f"Backend not ready at {ready_url} after {timeout}s")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Backend readiness check failed: {e}")
+            return False
     
     def _verify_auth_system(self, timeout: int = 15) -> bool:
-        """Verify auth system /api/auth/config per SPEC step 9."""
-        import requests
-        start_time = time.time()
+        """Verify auth system /api/auth/config per SPEC step 9 with resilient networking."""
         auth_port = 8081  # Auth service port
         auth_config_url = f"http://localhost:{auth_port}/api/auth/config"
         
-        while (time.time() - start_time) < timeout:
-            try:
-                response = requests.get(auth_config_url, timeout=5)
-                if response.status_code in [200, 404]:  # 404 is acceptable
-                    self._print("✅", "READY", "Auth system verified")
-                    # Mark service as ready in health monitor
-                    self.health_monitor.mark_service_ready("Auth")
-                    return True
-            except Exception as e:
-                logger.debug(f"Auth verification: {e}")
-            
-            time.sleep(1)
+        # Use resilient network client
+        auth_policy = RetryPolicy(
+            max_attempts=timeout // 2,  # Check every ~2 seconds
+            initial_delay=1.0,
+            max_delay=3.0,
+            timeout_per_attempt=5.0
+        )
         
-        return False
+        async def verify_auth():
+            success, result = await self.network_client.resilient_http_request(
+                auth_config_url,
+                operation_type="service_check",
+                retry_policy=auth_policy,
+                allow_degradation=True  # Auth is not critical for basic functionality
+            )
+            return success
+        
+        try:
+            # Run async check
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            verified = loop.run_until_complete(verify_auth())
+            loop.close()
+            
+            if verified:
+                self._print("✅", "READY", "Auth system verified")
+                # Mark service as ready in health monitor
+                self.health_monitor.mark_service_ready("Auth")
+                return True
+            else:
+                self._print("⚠️", "WARNING", f"Auth system not accessible at {auth_config_url}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Auth verification failed: {e}")
+            return False
     
     def _wait_for_frontend_readiness(self, timeout: int = 90) -> bool:
-        """Wait for frontend readiness per SPEC step 11 (90s grace period)."""
-        import requests
-        start_time = time.time()
+        """Wait for frontend readiness per SPEC step 11 (90s grace period) with resilient networking."""
         frontend_port = self.config.frontend_port or 3000
         frontend_url = f"http://localhost:{frontend_port}"
         
-        while (time.time() - start_time) < timeout:
-            try:
-                response = requests.get(frontend_url, timeout=5)
-                if response.status_code in [200, 404]:  # Frontend can return 404
-                    self._print("✅", "READY", "Frontend is ready")
-                    # Mark service as ready in health monitor
-                    self.health_monitor.mark_service_ready("Frontend")
-                    return True
-            except Exception as e:
-                logger.debug(f"Frontend readiness check: {e}")
-            
-            time.sleep(2)  # Longer interval for frontend
+        # Frontend can take longer to build, so use more generous retry policy
+        frontend_policy = RetryPolicy(
+            max_attempts=timeout // 5,  # Check every ~5 seconds
+            initial_delay=2.0,
+            max_delay=10.0,
+            timeout_per_attempt=8.0
+        )
         
-        return False
+        async def check_frontend():
+            success, result = await self.network_client.resilient_http_request(
+                frontend_url,
+                operation_type="service_check",
+                retry_policy=frontend_policy,
+                allow_degradation=True  # Frontend failure doesn't break backend
+            )
+            return success
+        
+        try:
+            # Run async check
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            ready = loop.run_until_complete(check_frontend())
+            loop.close()
+            
+            if ready:
+                self._print("✅", "READY", "Frontend is ready")
+                # Mark service as ready in health monitor
+                self.health_monitor.mark_service_ready("Frontend")
+                return True
+            else:
+                self._print("⚠️", "DEGRADED", f"Frontend not ready at {frontend_url} - backend services still available")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Frontend readiness check failed: {e}")
+            return False
     
     def _start_health_monitoring_after_readiness(self):
         """Start health monitoring only after all services are ready per SPEC step 13.
@@ -1693,6 +1935,10 @@ class DevLauncher:
             return
         
         self._emergency_cleanup_running = True
+        
+        # Use the comprehensive signal handler for emergency coordination
+        if hasattr(self, 'signal_handler') and self.signal_handler:
+            self.signal_handler.force_shutdown("emergency_cleanup_initiated")
         
         if self._shutting_down:
             return  # Already shutting down normally

@@ -9,7 +9,6 @@
  */
 
 import React from 'react';
-import { runEventQueueTests } from '@/lib/event-queue.test';
 import { websocketDebugger } from '@/services/websocketDebugger';
 import { logger } from '@/utils/debug-logger';
 
@@ -23,9 +22,15 @@ const handleTestExecution = async (
 ): Promise<void> => {
   setIsRunningTests(true);
   try {
-    const results = await runEventQueueTests();
-    setTestResults(results);
-    logger.debug('Event Queue Test Results:', results);
+    // Only import test module in development
+    if (process.env.NODE_ENV === 'development') {
+      const { runEventQueueTests } = await import('@/lib/event-queue.test');
+      const results = await runEventQueueTests();
+      setTestResults(results);
+      logger.debug('Event Queue Test Results:', results);
+    } else {
+      setTestResults({ error: 'Tests only available in development mode' });
+    }
   } catch (error) {
     handleTestError(error, setTestResults);
   } finally {

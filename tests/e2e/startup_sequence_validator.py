@@ -13,7 +13,7 @@ from typing import Any, Dict, List
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.e2e.mock_services_manager import (
+from test_framework.mocks import (
     MockDatabaseConnections,
     MockE2EServiceOrchestrator,
     MockHttpClient,

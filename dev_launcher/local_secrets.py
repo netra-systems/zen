@@ -20,21 +20,31 @@ class LocalSecretManager:
     Local secret manager with fallback chain and interpolation.
     
     Orchestrates secret loading from multiple sources with intelligent
-    fallback chain: OS env → .env.local → .env → defaults
+    fallback chain: 
+    - isolation_mode=False: OS env → .env.local → .env → defaults (production)
+    - isolation_mode=True: .env.local → .env → defaults (development/testing)
     """
     
-    def __init__(self, project_root: Path, verbose: bool = False):
-        """Initialize local secret manager."""
+    def __init__(self, project_root: Path, verbose: bool = False, isolation_mode: bool = False):
+        """Initialize local secret manager.
+        
+        Args:
+            project_root: Root directory of the project
+            verbose: Enable verbose logging
+            isolation_mode: When True, skip OS environment loading (for development/testing)
+        """
         self.project_root = project_root
         self.verbose = verbose
+        self.isolation_mode = isolation_mode
         self.env_parser = EnvParser(verbose)
         self.validator = SecretValidator()
     
     def load_secrets_with_fallback(
         self, required_keys: Set[str]
     ) -> Tuple[Dict[str, str], SecretValidationResult]:
-        """Load secrets using fallback chain: OS -> .env.local -> .env."""
-        logger.info("\n[LOCAL SECRETS] Loading with fallback chain...")
+        """Load secrets using fallback chain with optional isolation mode."""
+        isolation_status = "ENABLED (development/testing)" if self.isolation_mode else "DISABLED (production)"
+        logger.info(f"\n[LOCAL SECRETS] Loading with fallback chain... (Isolation mode: {isolation_status})")
         
         # Step 1: Build fallback chain
         secrets_with_sources = self._build_fallback_chain()
@@ -51,13 +61,11 @@ class LocalSecretManager:
         return resolved_secrets, validation
     
     def _build_fallback_chain(self) -> Dict[str, Tuple[str, str]]:
-        """Build secret fallback chain with source tracking.
+        """Build secret fallback chain with source tracking and optional isolation.
         
-        Priority order (lowest to highest):
-        1. .secrets file (lowest priority - legacy/fallback)
-        2. .env file (base configuration)
-        3. .env.local (local overrides)
-        4. OS environment (highest priority - always wins)
+        Priority order:
+        - isolation_mode=False: .secrets → .env → .env.local → OS env (production)
+        - isolation_mode=True: .secrets → .env → .env.local (development/testing)
         """
         secrets = {}
         
@@ -82,10 +90,13 @@ class LocalSecretManager:
             secrets.update(local_secrets)
             logger.info(f"  [LOCAL] Loaded {len(local_secrets)} from .env.local")
         
-        # Layer 4: OS environment (highest priority - always wins)
-        os_secrets = self._capture_os_environment()
-        secrets.update(os_secrets)
-        logger.info(f"  [OS] Found {len(os_secrets)} in OS environment")
+        # Layer 4: OS environment (highest priority - only in production mode)
+        if not self.isolation_mode:
+            os_secrets = self._capture_os_environment()
+            secrets.update(os_secrets)
+            logger.info(f"  [OS] Found {len(os_secrets)} in OS environment")
+        else:
+            logger.info("  [ISOLATION] Skipping system environment variables (isolation mode enabled)")
         
         return secrets
     

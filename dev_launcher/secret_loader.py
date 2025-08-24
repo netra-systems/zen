@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Dict, Optional, Set
 
 from dev_launcher.cache_manager import CacheManager
+from dev_launcher.environment_manager import get_environment_manager
 from dev_launcher.google_secret_manager import GoogleSecretManager
 from dev_launcher.local_secrets import LocalSecretManager
 from dev_launcher.secret_cache import SecretCache
@@ -21,10 +22,13 @@ logger = logging.getLogger(__name__)
 
 class SecretLoader:
     """
-    Local-first secret loader with intelligent caching.
+    Local-first secret loader with intelligent caching and isolation mode.
     
-    Priority: OS env → .env.local → .env → GSM (optional) → defaults
-    Features: 24-hour caching, sub-100ms validation, ${VAR} interpolation
+    Priority:
+    - isolation_mode=False: OS env → .env.local → .env → GSM (optional) → defaults (production)
+    - isolation_mode=True: .env.local → .env → GSM (optional) → defaults (development/testing)
+    
+    Features: 24-hour caching, sub-100ms validation, ${VAR} interpolation, environment isolation
     """
     
     def __init__(self, 
@@ -32,8 +36,18 @@ class SecretLoader:
                  verbose: bool = False,
                  project_root: Optional[Path] = None,
                  load_secrets: bool = False,
-                 local_first: bool = True):
-        """Initialize the secret loader."""
+                 local_first: bool = True,
+                 isolation_mode: Optional[bool] = None):
+        """Initialize the secret loader.
+        
+        Args:
+            project_id: Google Cloud project ID for secret loading
+            verbose: Enable verbose logging
+            project_root: Project root directory
+            load_secrets: Enable Google Secret Manager loading
+            local_first: Prioritize local secrets over remote
+            isolation_mode: When True, skip OS environment loading (auto-detected if None)
+        """
         self.project_id = SecretConfig.determine_project_id(project_id)
         self.verbose = verbose
         self.project_root = project_root or Path.cwd()
@@ -41,12 +55,31 @@ class SecretLoader:
         self.local_first = local_first
         self.loaded_secrets: Dict[str, str] = {}
         self._fast_mode = False
+        
+        # Auto-detect isolation mode based on environment if not explicitly set
+        if isolation_mode is None:
+            environment = os.environ.get('ENVIRONMENT', 'development').lower()
+            self.isolation_mode = environment == 'development'
+            if self.verbose:
+                logger.info(f"[ISOLATION] Auto-detected mode: {self.isolation_mode} (environment: {environment})")
+        else:
+            self.isolation_mode = isolation_mode
+            if self.verbose:
+                logger.info(f"[ISOLATION] Explicit mode: {self.isolation_mode}")
+        
+        # Get environment manager with matching isolation mode
+        self.env_manager = get_environment_manager(isolation_mode=self.isolation_mode)
+        
         self._setup_components()
     
     def _setup_components(self):
         """Setup internal components."""
         self.cache_manager = CacheManager(self.project_root)
-        self.local_secret_manager = LocalSecretManager(self.project_root, self.verbose)
+        self.local_secret_manager = LocalSecretManager(
+            self.project_root, 
+            self.verbose, 
+            isolation_mode=self.isolation_mode
+        )
         self.secret_cache = SecretCache(self.project_root, self.cache_manager)
         if self.load_secrets:
             self.google_manager = GoogleSecretManager(self.project_id, self.verbose)
@@ -136,12 +169,15 @@ class SecretLoader:
         logger.warning("  3. Use --load-secrets flag for GSM fallback")
     
     def _set_environment_from_secrets(self, secrets: Dict[str, str]):
-        """Set environment variables from secret dictionary."""
+        """Set environment variables from secret dictionary using EnvironmentManager."""
         logger.info(f"\n[ENVIRONMENT] Setting {len(secrets)} environment variables...")
         
         for key, value in secrets.items():
-            os.environ[key] = value
-            self.loaded_secrets[key] = value
+            # Use environment manager to prevent conflicts
+            if self.env_manager.set_environment(key, value, source="secret_loader"):
+                self.loaded_secrets[key] = value
+            else:
+                logger.warning(f"Failed to set {key} due to conflict prevention")
     
     def _cache_secrets_if_valid(self, secrets: Dict[str, str], validation_result):
         """Cache secrets if validation passed."""
@@ -165,7 +201,11 @@ class SecretLoader:
         logger.info("[SUMMARY] Local-First Secret Loading Complete")
         logger.info("=" * 70)
         logger.info(f"Total secrets loaded: {len(self.loaded_secrets)}")
-        logger.info("Priority: OS Environment > .env.local > .env > Google Secrets > Defaults")
+        if self.isolation_mode:
+            logger.info("Priority: .env.local > .env > Google Secrets > Defaults (ISOLATION MODE)")
+            logger.info("[ISOLATION] OS environment variables were ignored for predictable development")
+        else:
+            logger.info("Priority: OS Environment > .env.local > .env > Google Secrets > Defaults (PRODUCTION MODE)")
         logger.info("[TIP] Create a .env file for local development")
         logger.info("[TIP] Use 'cp .env.example .env' to start from example")
         logger.info("=" * 70)

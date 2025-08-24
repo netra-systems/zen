@@ -364,6 +364,114 @@ async def websocket_health_check():
     }
 
 
+@router.websocket("/ws/test")
+async def websocket_test_endpoint(websocket: WebSocket):
+    """
+    Simple WebSocket test endpoint - NO AUTHENTICATION REQUIRED.
+    
+    This endpoint is for E2E testing and basic connectivity verification.
+    It accepts connections without JWT authentication and handles basic messages.
+    """
+    connection_id: Optional[str] = None
+    
+    try:
+        # Accept WebSocket connection without authentication
+        await websocket.accept()
+        logger.info("Test WebSocket connection accepted (no auth)")
+        
+        # Generate a simple connection ID
+        connection_id = f"test_{int(time.time())}"
+        
+        # Send welcome message
+        welcome_msg = {
+            "type": "connection_established",
+            "connection_id": connection_id,
+            "server_time": datetime.now(timezone.utc).isoformat(),
+            "message": "Test WebSocket connected successfully"
+        }
+        await websocket.send_json(welcome_msg)
+        
+        logger.info(f"Test WebSocket ready: {connection_id}")
+        
+        # Simple message handling loop
+        while True:
+            try:
+                # Receive message with timeout
+                raw_message = await asyncio.wait_for(
+                    websocket.receive_text(),
+                    timeout=30.0
+                )
+                
+                logger.info(f"Test WebSocket received: {raw_message}")
+                
+                # Parse message
+                try:
+                    message_data = json.loads(raw_message)
+                except json.JSONDecodeError as e:
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": f"Invalid JSON: {str(e)}"
+                    })
+                    continue
+                
+                # Handle different message types
+                msg_type = message_data.get("type", "unknown")
+                
+                if msg_type == "ping":
+                    # Respond to ping with pong
+                    await websocket.send_json({
+                        "type": "pong",
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    })
+                elif msg_type == "echo":
+                    # Echo the message back
+                    await websocket.send_json({
+                        "type": "echo_response",
+                        "original": message_data,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    })
+                else:
+                    # Send generic acknowledgment
+                    await websocket.send_json({
+                        "type": "ack",
+                        "received_type": msg_type,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    })
+                
+            except asyncio.TimeoutError:
+                # Send heartbeat
+                await websocket.send_json({
+                    "type": "heartbeat",
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                })
+                continue
+                
+            except WebSocketDisconnect:
+                break
+                
+            except Exception as e:
+                logger.error(f"Test WebSocket message error: {e}")
+                await websocket.send_json({
+                    "type": "error",
+                    "message": str(e)
+                })
+                
+    except WebSocketDisconnect as e:
+        logger.info(f"Test WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
+    
+    except Exception as e:
+        logger.error(f"Test WebSocket error: {e}", exc_info=True)
+        if websocket.application_state != WebSocketState.DISCONNECTED:
+            try:
+                await websocket.close(code=1011, reason="Internal error")
+            except:
+                pass
+    
+    finally:
+        if connection_id:
+            logger.info(f"Test WebSocket cleanup completed: {connection_id}")
+
+
 @router.get("/ws/stats")
 async def websocket_detailed_stats():
     """Detailed WebSocket statistics (for development/monitoring)."""

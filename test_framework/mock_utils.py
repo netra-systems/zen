@@ -1,10 +1,16 @@
 """
 Mock utilities for test compliance with CLAUDE.md and testing.xml.
 All mocks must be justified per testing.xml rule: mock-justification-required.
+
+This module provides mock justification decorators. All actual mock implementations
+are consolidated in test_framework.mocks package per SSOT requirements.
 """
 
 from functools import wraps
 from typing import Any, Callable
+
+# Re-export all centralized mocks for backward compatibility
+from test_framework.mocks import *
 
 
 def mock_justified(reason: str) -> Callable:

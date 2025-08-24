@@ -152,17 +152,17 @@ class LogFilter:
     
     def _filter_minimal(self, message: str, level: str) -> bool:
         """Filter for minimal mode - only essentials."""
-        # Show errors, warnings, and success
-        if level in ["ERROR", "CRITICAL", "WARNING", "SUCCESS"]:
-            return True
-            
-        # Hide all noise patterns
+        # Hide all noise patterns first (regardless of level)
         for pattern in NOISE_PATTERNS:
             if re.search(pattern, message, re.IGNORECASE):
                 return False
         
-        # Show key startup messages only
-        if level in ["DEBUG", "INFO"]:
+        # Show errors, warnings, success, and info (if not noise)
+        if level in ["ERROR", "CRITICAL", "WARNING", "SUCCESS", "INFO"]:
+            return True
+        
+        # For debug messages, only show key startup messages
+        if level == "DEBUG":
             message_lower = message.lower()
             return any(keyword in message_lower for keyword in KEY_STARTUP_MESSAGES)
             

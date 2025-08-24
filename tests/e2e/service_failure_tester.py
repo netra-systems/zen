@@ -5,7 +5,7 @@ Modular design: <300 lines, 25-line functions max
 """
 
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
-from tests.e2e.mock_services_manager import MockHttpClient, MockTimeoutException
+from test_framework.mocks import MockHttpClient, MockTimeoutException
 from typing import Any, Dict
 
 class ServiceFailureScenarioTester:

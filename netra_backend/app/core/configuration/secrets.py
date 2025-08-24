@@ -39,6 +39,8 @@ class SecretManager:
         self._secret_mappings = self._load_secret_mappings()
         self._secret_cache = {}
         self._cache_timestamp = None
+        self._initialized = False
+        self._populating_secrets = False  # Guard against recursive calls
     
     def _get_environment(self) -> str:
         """Get current environment for secret management.
@@ -154,10 +156,22 @@ class SecretManager:
     
     def populate_secrets(self, config: AppConfig) -> None:
         """Populate all secrets in configuration object."""
-        self._load_secrets_from_sources()
-        self._apply_secrets_to_config(config)
-        self._validate_required_secrets()
-        self._logger.info(f"Populated secrets for {self._environment}")
+        # Prevent recursive calls that cause infinite logging loops
+        if self._populating_secrets:
+            return
+        
+        self._populating_secrets = True
+        try:
+            self._load_secrets_from_sources()
+            self._apply_secrets_to_config(config)
+            self._validate_required_secrets()
+            
+            # Only log once when first populated
+            if not self._initialized:
+                self._logger.info(f"Populated secrets for {self._environment}")
+                self._initialized = True
+        finally:
+            self._populating_secrets = False
     
     def _load_secrets_from_sources(self) -> None:
         """Load secrets from all available sources."""
@@ -246,7 +260,11 @@ class SecretManager:
         missing_secrets = self._get_missing_required_secrets()
         if missing_secrets:
             error_msg = f"Required secrets missing: {missing_secrets}"
-            self._logger.error(error_msg)
+            
+            # Only log error once, not repeatedly
+            if not self._initialized:
+                self._logger.error(error_msg)
+                
             if self._environment == "production":
                 raise ConfigurationError(error_msg)
     

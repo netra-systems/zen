@@ -131,12 +131,15 @@ class UnifiedPostgresDB:
 unified_db = UnifiedPostgresDB()
 
 
-# Single FastAPI dependency for all environments
-async def get_db():
-    """Universal database session dependency for FastAPI"""
-    async with unified_db.get_session() as session:
-        yield session
+# REMOVED: get_db() duplicate implementation
+# Use netra_backend.app.database.get_db() for single source of truth
 
+# Backward compatibility redirects to single source of truth
+async def get_db():
+    """REDIRECTED: Delegates to single source of truth in netra_backend.app.database"""
+    from netra_backend.app.database import get_db as _get_db
+    async for session in _get_db():
+        yield session
 
 # Backward compatibility alias
 get_async_db = get_db

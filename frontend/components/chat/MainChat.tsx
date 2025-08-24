@@ -22,10 +22,15 @@ const executeTestRun = async (
 ): Promise<void> => {
   setIsRunningTests(true);
   try {
-    const { runEventQueueTests } = await import('@/lib/event-queue.test');
-    const results = await runEventQueueTests();
-    setTestResults(results);
-    logger.debug('Event Queue Test Results:', results);
+    // Only import test module in development
+    if (process.env.NODE_ENV === 'development') {
+      const { runEventQueueTests } = await import('@/lib/event-queue.test');
+      const results = await runEventQueueTests();
+      setTestResults(results);
+      logger.debug('Event Queue Test Results:', results);
+    } else {
+      setTestResults({ error: 'Tests only available in development mode' });
+    }
   } catch (error) {
     handleTestExecutionError(error, setTestResults);
   } finally {
