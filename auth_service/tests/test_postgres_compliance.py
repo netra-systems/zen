@@ -16,7 +16,7 @@ from sqlalchemy import event
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 from sqlalchemy.pool import NullPool, AsyncAdaptedQueuePool
 
-from netra_backend.app.db.database_manager import DatabaseManager as AuthDatabaseManager
+from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from auth_service.auth_core.database.connection_events import (
     setup_auth_async_engine_events,
     AuthDatabaseConfig,
