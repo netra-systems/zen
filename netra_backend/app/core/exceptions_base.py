@@ -22,6 +22,11 @@ class ErrorDetails(BaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
 
+class WebSocketValidationError(Exception):
+    """WebSocket validation error exception."""
+    pass
+
+
 class NetraException(Exception):
     """Base exception class for all Netra application exceptions."""
     

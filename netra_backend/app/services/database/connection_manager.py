@@ -371,10 +371,9 @@ def get_connection_manager() -> ConnectionManager:
     return connection_manager
 
 
-async def get_db_session(connection_name: Optional[str] = None):
-    """Convenience function to get database session."""
-    async with connection_manager.get_session(connection_name) as session:
-        yield session
+# REMOVED: get_db_session duplicate
+# Use netra_backend.app.database.get_db() for single source of truth
+# Connection manager should be used directly if specific connection needed
 
 
 # Common database configurations for easy setup

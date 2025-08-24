@@ -14,9 +14,8 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real components, No mock i
 
 from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
 from netra_backend.app.schemas.websocket_models import BroadcastResult, WebSocketStats
-from netra_backend.app.websocket.unified import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.connection import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.connection_info import ConnectionInfo
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 import asyncio
@@ -24,9 +23,9 @@ import json
 import pytest
 import time
 
-from netra_backend.app.websocket.connection import (
-    ConnectionManager,
-    get_connection_manager,
+from netra_backend.app.websocket_core.manager import (
+    WebSocketManager as ConnectionManager,
+    get_websocket_manager,
 )
 
 # Note: ResponseStreamingVerifier import removed - not needed for this test

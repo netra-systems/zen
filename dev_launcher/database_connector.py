@@ -28,6 +28,7 @@ from netra_backend.app.core.network_constants import (
     NetworkEnvironmentHelper,
     ServicePorts,
 )
+from dev_launcher.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -108,18 +109,16 @@ class DatabaseConnector:
         # Load .env file if it exists
         env_file = project_root / '.env'
         if env_file.exists():
-            with open(env_file, 'r') as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith('#') and '=' in line:
-                        key, value = line.split('=', 1)
-                        key = key.strip()
-                        value = value.strip('"\'').strip()
-                        # Only set if not already in environment
-                        if key not in os.environ:
-                            os.environ[key] = value
-                            if key == "DATABASE_URL":
-                                logger.debug(f"Loaded DATABASE_URL from .env file")
+            env_manager = get_env()
+            loaded_count, errors = env_manager.load_from_file(
+                env_file, 
+                source="database_connector_.env",
+                override_existing=False
+            )
+            if loaded_count > 0:
+                logger.debug(f"Loaded {loaded_count} variables from .env file")
+            if errors:
+                logger.warning(f"Errors loading .env file: {errors}")
     
     def _discover_database_connections(self) -> None:
         """Discover database connections from environment variables."""
@@ -131,7 +130,8 @@ class DatabaseConnector:
     
     def _discover_postgres_connection(self) -> None:
         """Discover PostgreSQL connection."""
-        postgres_url = os.environ.get(DatabaseConstants.DATABASE_URL)
+        env_manager = get_env()
+        postgres_url = env_manager.get(DatabaseConstants.DATABASE_URL)
         if postgres_url:
             self._add_connection("main_postgres", DatabaseType.POSTGRESQL, postgres_url)
     
@@ -153,12 +153,13 @@ class DatabaseConnector:
     
     def _construct_clickhouse_url_from_env(self) -> Optional[str]:
         """Construct ClickHouse URL from environment variables."""
-        host = os.environ.get("CLICKHOUSE_HOST", HostConstants.LOCALHOST)
+        env_manager = get_env()
+        host = env_manager.get("CLICKHOUSE_HOST", HostConstants.LOCALHOST)
         # Force port 8123 for HTTP connections in dev launcher
-        port = os.environ.get("CLICKHOUSE_HTTP_PORT", "8123")
-        user = os.environ.get("CLICKHOUSE_USER", DatabaseConstants.CLICKHOUSE_DEFAULT_USER)
-        password = os.environ.get("CLICKHOUSE_PASSWORD", "")
-        database = os.environ.get("CLICKHOUSE_DB", DatabaseConstants.CLICKHOUSE_DEFAULT_DB)
+        port = env_manager.get("CLICKHOUSE_HTTP_PORT", "8123")
+        user = env_manager.get("CLICKHOUSE_USER", DatabaseConstants.CLICKHOUSE_DEFAULT_USER)
+        password = env_manager.get("CLICKHOUSE_PASSWORD", "")
+        database = env_manager.get("CLICKHOUSE_DB", DatabaseConstants.CLICKHOUSE_DEFAULT_DB)
         
         # Ensure we use port 8123 for HTTP
         http_port = 8123 if port == "8123" or not port else int(port)
@@ -172,16 +173,19 @@ class DatabaseConnector:
     
     def _build_redis_url(self) -> Optional[str]:
         """Build Redis URL from environment variables."""
-        if os.environ.get(DatabaseConstants.REDIS_URL):
-            return os.environ[DatabaseConstants.REDIS_URL]
+        env_manager = get_env()
+        redis_url = env_manager.get(DatabaseConstants.REDIS_URL)
+        if redis_url:
+            return redis_url
         return self._construct_redis_url_from_env()
     
     def _construct_redis_url_from_env(self) -> Optional[str]:
         """Construct Redis URL from environment variables."""
-        host = os.environ.get("REDIS_HOST", HostConstants.LOCALHOST)
-        port = os.environ.get("REDIS_PORT", str(ServicePorts.REDIS_DEFAULT))
-        password = os.environ.get("REDIS_PASSWORD", "")
-        db = os.environ.get("REDIS_DB", str(DatabaseConstants.REDIS_DEFAULT_DB))
+        env_manager = get_env()
+        host = env_manager.get("REDIS_HOST", HostConstants.LOCALHOST)
+        port = env_manager.get("REDIS_PORT", str(ServicePorts.REDIS_DEFAULT))
+        password = env_manager.get("REDIS_PASSWORD", "")
+        db = env_manager.get("REDIS_DB", str(DatabaseConstants.REDIS_DEFAULT_DB))
         
         return DatabaseConstants.build_redis_url(
             host=host,
@@ -512,15 +516,45 @@ class DatabaseConnector:
         return None
     
     async def _execute_clickhouse_ping(self, base_url: str, auth) -> bool:
-        """Execute ClickHouse ping request."""
+        """Execute ClickHouse ping request with proper error handling for code 194."""
         import aiohttp
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"{base_url}/ping",
-                auth=auth,
-                timeout=aiohttp.ClientTimeout(total=self.retry_config.timeout)
-            ) as response:
-                return response.status == 200
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    f"{base_url}/ping",
+                    auth=auth,
+                    timeout=aiohttp.ClientTimeout(total=self.retry_config.timeout)
+                ) as response:
+                    if response.status == 200:
+                        return True
+                    elif response.status == 401:
+                        # Authentication failed - handle gracefully
+                        logger.info("ClickHouse authentication failed - check credentials")
+                        return False
+                    else:
+                        logger.debug(f"ClickHouse ping failed with status {response.status}")
+                        return False
+        except aiohttp.ClientError as e:
+            return self._handle_clickhouse_connection_error(e)
+        except Exception as e:
+            return self._handle_clickhouse_connection_error(e)
+    
+    def _handle_clickhouse_connection_error(self, error: Exception) -> bool:
+        """Handle ClickHouse connection errors with specific handling for code 194."""
+        error_str = str(error)
+        error_lower = error_str.lower()
+        
+        # Handle specific ClickHouse error codes and authentication issues
+        if any(indicator in error_lower for indicator in ["194", "password incorrect", "authentication", "auth failed"]):
+            logger.info(f"ClickHouse authentication issue detected: {error_str}")
+            logger.info("ClickHouse will fall back to mock/local mode - continuing startup")
+            return False
+        elif "timeout" in error_lower or "connection" in error_lower:
+            logger.debug(f"ClickHouse connection timeout/network issue: {error_str}")
+            return False
+        else:
+            logger.debug(f"ClickHouse connection error: {error_str}")
+            return False
     
     async def _test_redis_connection(self, connection: DatabaseConnection) -> bool:
         """Test Redis connection."""

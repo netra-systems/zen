@@ -11,7 +11,7 @@ BVJ:
 # Set testing environment
 
 from datetime import datetime, timezone
-from netra_backend.app.websocket_core.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
 from typing import Any, Callable, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import asyncio

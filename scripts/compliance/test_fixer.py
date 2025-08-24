@@ -49,7 +49,7 @@ class TestFixer:
                                 lines[j] = '        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher\n'
                                 lines.insert(j + 1, '        tool_dispatcher = ToolDispatcher(llm_manager)\n')
                             elif 'websocket_manager = Mock()' in lines[j]:
-                                lines[j] = '        from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager\n'
+                                lines[j] = '        from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager\n'
                                 lines.insert(j + 1, '        websocket_manager = UnifiedWebSocketManager()\n')
                         j += 1
                     break

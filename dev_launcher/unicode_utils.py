@@ -4,6 +4,7 @@ Unicode output utilities for cross-platform compatibility.
 
 import os
 import sys
+from dev_launcher.isolated_environment import get_env
 
 
 def safe_print(text: str, fallback_text: str = None):
@@ -47,7 +48,8 @@ def setup_unicode_console():
                 sys.stderr.reconfigure(encoding='utf-8')
                 
             # Set environment variable for better Unicode support
-            os.environ['PYTHONIOENCODING'] = 'utf-8'
+            env_manager = get_env()
+            env_manager.set('PYTHONIOENCODING', 'utf-8', 'unicode_utils')
         except Exception:
             # If we can't set up UTF-8, we'll fall back to ASCII in safe_print
             pass

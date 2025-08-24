@@ -11,7 +11,7 @@ L4 Realism: Real LLM calls, real Redis cache, real database operations in stagin
 Performance Requirements: p99 < 500ms for billing calculations, 99.9% accuracy under load
 """
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

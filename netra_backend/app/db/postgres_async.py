@@ -158,11 +158,8 @@ class AsyncPostgresManager:
 async_db = AsyncPostgresManager()
 
 
-# FastAPI dependency
-async def get_db_session():
-    """Dependency for FastAPI routes in local development"""
-    async with async_db.get_session() as session:
-        yield session
+# REMOVED: get_db_session duplicate
+# Use netra_backend.app.database.get_db() instead for single source of truth
 
 
 # Utility functions for initialization

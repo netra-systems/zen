@@ -4,9 +4,10 @@ Loads from single .env file only with strict user control.
 """
 
 import logging
-import os
 from pathlib import Path
 from typing import Dict, Optional, Set, Tuple
+
+from dev_launcher.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -88,10 +89,12 @@ class EnvFileLoader:
         """Capture existing OS environment variables."""
         logger.info("\n[ENV CHECK] Checking OS environment variables...")
         existing_env = {}
+        env = get_env()
         found_count = 0
         for key in relevant_keys:
-            if key in os.environ:
-                existing_env[key] = (os.environ[key], "os_environment")
+            value = env.get(key)
+            if value is not None:
+                existing_env[key] = (value, "isolated_environment")
                 found_count += 1
                 if self.verbose:
                     logger.debug(f"  Found: {key}")

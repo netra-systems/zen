@@ -38,7 +38,7 @@ from netra_backend.app.routes.websocket import (
     db_pool,
 
 )
-from netra_backend.app.websocket_core.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
 
 class TestDatabaseConnectionPooling:
 

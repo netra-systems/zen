@@ -8,7 +8,7 @@ Requirements: 3 WebSocket connections, message broadcast, tab closure resilience
 Compliance: <300 lines, <8 lines per function, real connections only, <5s execution
 """
 
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
 from test_framework.http_client import ClientConfig, ConnectionState
 from tests.e2e.real_websocket_client import RealWebSocketClient
 from tests.e2e.jwt_token_helpers import JWTTestHelper
@@ -17,6 +17,14 @@ import asyncio
 import pytest
 import time
 import uuid
+
+
+# Backward compatibility alias
+
+# Backward compatibility alias
+UnifiedWebSocketManager = WebSocketManager
+
+WebSocketManager = WebSocketManager
 
 class MultiTabWebSocketManager:
 

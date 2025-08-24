@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Dict, Optional, Tuple
 
 from dev_launcher.config import LauncherConfig, resolve_path
+from dev_launcher.isolated_environment import get_env
 from dev_launcher.log_streamer import Colors, LogManager, LogStreamer
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.utils import (
@@ -46,13 +47,41 @@ class FrontendStarter:
         print_with_emoji(emoji, text, message, self.use_emoji)
     
     def start_frontend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
-        """Start the frontend server."""
+        """Start the frontend server with proper error handling and environment loading wait."""
+        # Wait for environment loading to complete before starting frontend
+        self._wait_for_environment_loading()
+        
         self._print("🚀", "FRONTEND", "Starting frontend server...")
         startup_params = self._prepare_frontend_startup()
         if not startup_params:
+            # Only show detailed errors after environment is fully loaded
+            self._handle_frontend_preparation_failure()
             return None, None
         backend_info, port, frontend_path = startup_params
         return self._start_frontend_process(backend_info, port, frontend_path)
+    
+    def _handle_frontend_preparation_failure(self):
+        """Handle frontend preparation failure with appropriate error messages."""
+        import os
+        from dev_launcher.config import resolve_path
+        
+        # Only show errors if environment loading is complete
+        env = get_env()
+        if env.get('NETRA_SECRETS_LOADING') == 'true':
+            logger.debug("Frontend preparation failed during environment loading - deferring error display")
+            return
+        
+        # Check specific failure reasons and provide helpful messages
+        backend_info = self.service_discovery.read_backend_info()
+        frontend_path = resolve_path("frontend", root=self.config.project_root)
+        
+        if not backend_info:
+            self._print("❌", "ERROR", "Backend service not available - ensure backend is running")
+            logger.info("Hint: Start backend service first or check service discovery")
+        
+        if not frontend_path or not frontend_path.exists():
+            self._print("❌", "ERROR", f"Frontend directory not found: {frontend_path}")
+            logger.info("Hint: Ensure you're running from the project root directory")
     
     def _prepare_frontend_startup(self) -> Optional[Tuple[Dict, int, Path]]:
         """Prepare frontend startup parameters."""
@@ -65,11 +94,32 @@ class FrontendStarter:
             return None
         return backend_info, port, frontend_path
     
+    def _wait_for_environment_loading(self) -> None:
+        """Wait for environment loading to complete to prevent premature error display."""
+        import os
+        import time
+        
+        # Check if environment is still being loaded
+        max_wait = 5.0  # Maximum wait time in seconds
+        wait_interval = 0.1
+        waited = 0.0
+        
+        env = get_env()
+        while env.get('NETRA_SECRETS_LOADING') == 'true' and waited < max_wait:
+            time.sleep(wait_interval)
+            waited += wait_interval
+            
+        if waited > 0:
+            logger.debug(f"Waited {waited:.1f}s for environment loading to complete")
+    
     def _get_backend_info(self) -> Optional[Dict]:
-        """Get backend service discovery info."""
+        """Get backend service discovery info with grace period for initialization."""
         backend_info = self.service_discovery.read_backend_info()
         if not backend_info:
-            self._print("❌", "ERROR", "Backend service discovery not found")
+            # Don't immediately error - backend may still be starting up
+            # This prevents premature error display during system initialization
+            logger.debug("Backend service discovery not found - backend may still be initializing")
+            return None
         return backend_info
     
     def _determine_frontend_port(self) -> int:
@@ -91,10 +141,11 @@ class FrontendStarter:
         return port
     
     def _get_frontend_path(self) -> Optional[Path]:
-        """Get frontend path."""
+        """Get frontend path with graceful error handling."""
         frontend_path = resolve_path("frontend", root=self.config.project_root)
         if not frontend_path or not frontend_path.exists():
-            self._print("❌", "ERROR", "Frontend directory not found")
+            # Use debug logging instead of immediate error to prevent premature display
+            logger.debug(f"Frontend directory not found at expected path: {frontend_path}")
             return None
         return frontend_path
     

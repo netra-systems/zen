@@ -22,7 +22,7 @@ from netra_backend.app.websocket_core.unified.message_handlers import (
     MessageHandler,
     MessageProcessor,
 )
-from netra_backend.app.websocket_core.unified.types import WebSocketValidationError
+from netra_backend.app.core.exceptions_base import WebSocketValidationError
 
 class TestWebSocketMessageValidation:
     """Tests for message structure validation and field extraction."""

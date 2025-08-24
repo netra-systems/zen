@@ -20,7 +20,7 @@ from fastapi import WebSocket
 
 from netra_backend.app.websocket_core_info import ConnectionInfo, ConnectionState
 
-from netra_backend.app.websocket_core import WebSocketManager as ConnectionManager
+from netra_backend.app.websocket_core import WebSocketManager
 
 class TestGhostConnectionPrevention:
     """Test suite for ghost connection prevention and cleanup."""

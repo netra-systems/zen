@@ -6,7 +6,7 @@ Main scheduler service using modular components
 import asyncio
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.background import BackgroundTaskManager
+from netra_backend.app.services.background_task_manager import BackgroundTaskManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.redis_manager import RedisManager

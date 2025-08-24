@@ -162,8 +162,8 @@ class TestWebSocketMetricsRegression:
         
         Direct test of the fixed method to ensure it handles all edge cases.
         """
-        from netra_backend.app.websocket_core.connection_manager import (
-            ConnectionManager,
+        from netra_backend.app.websocket_core import (
+    WebSocketManager as ConnectionManager,
         )
         
         manager = ConnectionManager()

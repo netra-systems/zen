@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning_document>
+    <title>Environment Variable Conflict Prevention and Management</title>
+    <summary>
+        Comprehensive solution to prevent environment variable conflicts between dev launcher components.
+        Implements centralized EnvironmentManager with isolation mode, conflict prevention, and proper cleanup.
+    </summary>
+    
+    <problem_statement>
+        <description>
+            Multiple dev launcher components were setting and resetting environment variables causing conflicts:
+            - Secret loader setting ALL loaded secrets to os.environ
+            - Auth starter setting AUTH_SERVICE_PORT and AUTH_SERVICE_URL
+            - Service startup setting the SAME AUTH_SERVICE_PORT/URL (duplicate!)
+            - Database connector setting database connection vars
+            - Launcher setting defaults, CROSS_SERVICE_AUTH_TOKEN, NETRA_SECRETS_LOADING
+            - Environment validator setting fallback values
+        </description>
+        
+        <issues>
+            <issue>Race conditions where values get overwritten</issue>
+            <issue>Duplicate setting of the same variables</issue>
+            <issue>Temporary flags being set/deleted causing timing issues</issue>
+            <issue>Environment pollution in tests</issue>
+            <issue>Unpredictable environment state</issue>
+        </issues>
+    </problem_statement>
+    
+    <solution>
+        <approach>Centralized EnvironmentManager Pattern</approach>
+        
+        <implementation>
+            <component name="EnvironmentManager" file="dev_launcher/environment_manager.py">
+                <description>Singleton environment manager that prevents conflicts and provides isolation</description>
+                <features>
+                    <feature>Conflict prevention: First setter wins unless explicit override allowed</feature>
+                    <feature>Source tracking: Knows which component set each variable</feature>
+                    <feature>Isolation mode: In development, variables don't pollute os.environ</feature>
+                    <feature>Thread-safe: Safe for concurrent access</feature>
+                    <feature>Temporary flags: Context manager for flags that auto-cleanup</feature>
+                </features>
+                
+                <key_methods>
+                    <method>set_environment(key, value, source, allow_override=False) -> bool</method>
+                    <method>get_environment(key, default=None) -> Optional[str]</method>
+                    <method>has_variable(key) -> bool</method>
+                    <method>set_temporary_flag(key, value, source) -> TemporaryFlag</method>
+                    <method>bulk_set_environment(variables, source) -> Dict[str, bool]</method>
+                    <method>get_conflicts_report() -> Dict[str, Any]</method>
+                </key_methods>
+            </component>
+            
+            <component name="Updated Components">
+                <update file="dev_launcher/secret_loader.py">
+                    <change>Uses EnvironmentManager instead of direct os.environ setting</change>
+                    <pattern>self.env_manager.set_environment(key, value, source="secret_loader")</pattern>
+                </update>
+                
+                <update file="dev_launcher/auth_starter.py">
+                    <change>Uses EnvironmentManager with allow_override for AUTH_SERVICE_* vars</change>
+                    <pattern>self.env_manager.set_environment(key, value, source="auth_starter", allow_override=True)</pattern>
+                </update>
+                
+                <update file="dev_launcher/service_startup.py">
+                    <change>Removed duplicate AUTH_SERVICE setting (auth_starter handles it)</change>
+                    <pattern>Commented out duplicate environment variable setting</pattern>
+                </update>
+                
+                <update file="dev_launcher/launcher.py">
+                    <change>Uses temporary flag context manager for NETRA_SECRETS_LOADING</change>
+                    <pattern>with self.env_manager.set_temporary_flag(key, value, source):</pattern>
+                </update>
+            </component>
+        </implementation>
+        
+        <isolation_mode>
+            <description>
+                In development mode (ENVIRONMENT=development), the manager uses isolation mode:
+                - Variables stored internally but NOT set in os.environ
+                - Prevents test pollution of global environment  
+                - Components can still access variables through the manager
+                - Production mode sets variables in os.environ normally
+            </description>
+            
+            <auto_detection>
+                Based on ENVIRONMENT variable:
+                - development -> isolation_mode=True
+                - production -> isolation_mode=False
+            </auto_detection>
+        </isolation_mode>
+    </solution>
+    
+    <testing>
+        <comprehensive_coverage>
+            <test_file name="test_environment_conflicts.py" tests="23">
+                <description>Unit tests for EnvironmentManager functionality</description>
+                <coverage>
+                    <area>Conflict prevention</area>
+                    <area>Isolation mode</area>
+                    <area>Temporary flags</area>
+                    <area>Thread safety</area>
+                    <area>Bulk operations</area>
+                    <area>Source tracking</area>
+                </coverage>
+            </test_file>
+            
+            <test_file name="test_env_loading_regression.py" tests="8">
+                <description>Integration tests simulating real dev launcher scenarios</description>
+                <coverage>
+                    <area>AUTH_SERVICE_PORT conflict prevention</area>
+                    <area>NETRA_SECRETS_LOADING temporary flag cleanup</area>
+                    <area>Environment isolation in development vs production</area>
+                    <area>Component precedence and conflict tracking</area>
+                </coverage>
+            </test_file>
+        </comprehensive_coverage>
+        
+        <test_results>All 31 tests pass, verifying the solution works correctly</test_results>
+    </testing>
+    
+    <results>
+        <problems_fixed>
+            <fix>No more duplicate AUTH_SERVICE_PORT setting</fix>
+            <fix>Race conditions eliminated with context managers</fix>
+            <fix>Environment isolation in tests</fix>
+            <fix>Conflict tracking and reporting</fix>
+            <fix>Source tracking for debugging</fix>
+            <fix>Thread safety for concurrent access</fix>
+        </problems_fixed>
+        
+        <backward_compatibility>
+            <item>Production unchanged: variables still set in os.environ normally</item>
+            <item>Component interfaces preserved: can still access variables as before</item>
+            <item>Fallback behavior: graceful degradation if manager unavailable</item>
+        </backward_compatibility>
+        
+        <performance>
+            <item>Minimal overhead: O(1) operations with targeted thread locks</item>
+            <item>Singleton pattern: single instance shared across components</item>
+            <item>Lazy evaluation: manager created when first accessed</item>
+        </performance>
+    </results>
+    
+    <critical_takeaways>
+        <takeaway>Environment variable conflicts MUST be prevented through centralized management</takeaway>
+        <takeaway>Temporary flags require proper cleanup using context managers</takeaway>
+        <takeaway>Development isolation prevents test pollution of global environment</takeaway>
+        <takeaway>Source tracking is essential for debugging environment variable issues</takeaway>
+        <takeaway>Thread safety is critical when multiple components access environment concurrently</takeaway>
+        <takeaway>Conflict reporting enables proactive identification of component integration issues</takeaway>
+        <takeaway>Singleton pattern ensures consistent environment state across all components</takeaway>
+        <takeaway>Allow override mechanism provides controlled precedence handling</takeaway>
+    </critical_takeaways>
+    
+    <usage_patterns>
+        <pattern name="Basic Variable Setting">
+            <code>
+                manager = get_environment_manager()
+                if manager.set_environment("VAR", "value", source="component"):
+                    print("Set successfully")
+                else:
+                    print("Conflict prevented")
+            </code>
+        </pattern>
+        
+        <pattern name="Temporary Flag">
+            <code>
+                with manager.set_temporary_flag("LOADING", "true", source="loader"):
+                    # Flag available during block
+                    do_work()
+                # Flag automatically removed
+            </code>
+        </pattern>
+        
+        <pattern name="Conflict Monitoring">
+            <code>
+                conflicts = manager.get_conflicts_report()
+                if conflicts['total_conflicts'] > 0:
+                    logger.warning(f"Prevented {conflicts['total_conflicts']} conflicts")
+            </code>
+        </pattern>
+    </usage_patterns>
+    
+    <monitoring>
+        <status_reporting>
+            The EnvironmentManager provides detailed status information including:
+            - Total variables managed
+            - Variables by source component
+            - Conflicts prevented
+            - Isolation mode status
+        </status_reporting>
+        
+        <debugging>
+            Each variable tracks its source component, making it easy to identify
+            which component set conflicting values during development.
+        </debugging>
+    </monitoring>
+    
+    <related_files>
+        <file>dev_launcher/environment_manager.py</file>
+        <file>dev_launcher/secret_loader.py</file>
+        <file>dev_launcher/auth_starter.py</file>
+        <file>dev_launcher/service_startup.py</file>
+        <file>dev_launcher/launcher.py</file>
+        <file>dev_launcher/tests/test_environment_conflicts.py</file>
+        <file>dev_launcher/tests/test_env_loading_regression.py</file>
+        <file>ENVIRONMENT_CONFLICT_SOLUTION.md</file>
+    </related_files>
+</learning_document>

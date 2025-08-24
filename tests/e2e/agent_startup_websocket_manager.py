@@ -16,7 +16,7 @@ Architecture:
 - Mock connections for testing reliability
 """
 
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from tests.e2e.agent_startup_user_manager import TestUser
 from typing import Any, Callable, Dict, Optional
 import asyncio

@@ -90,13 +90,7 @@ def initialize_test_database():
     except:
         pass
 
-@pytest.fixture
-async def auth_db():
-    """Mock auth database for testing"""
-    from auth_service.auth_core.database.connection import auth_db
-    await auth_db.initialize()
-    yield auth_db
-    await auth_db.close()
+# REMOVED: Duplicate auth_db fixture - use initialized_test_db or test_db_session instead
 
 @pytest.fixture(scope="function")
 def initialized_test_db():
@@ -152,35 +146,9 @@ def test_user_data():
         "provider": "google"
     }
 
-@pytest_asyncio.fixture(scope="function")
-async def test_db_session():
-    """Create async database session for tests with fresh tables"""
-    from auth_service.auth_core.database.connection import auth_db
-    from auth_service.auth_core.database.models import Base
-    
-    # Force a fresh database connection for each test
-    if auth_db._initialized:
-        await auth_db.close()
-        auth_db._initialized = False
-    
-    # Initialize database
-    await auth_db.initialize()
-    
-    # Explicitly create all tables
-    async with auth_db.engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    
-    # Create session directly without auto-commit context manager
-    session = auth_db.async_session_maker()
-    try:
-        yield session
-    finally:
-        # Clean rollback to prevent any pending transactions
-        try:
-            await session.rollback()
-        except:
-            pass
-        await session.close()
+# REMOVED: Duplicate test_db_session fixture
+# Use test_framework.fixtures.database_fixtures.test_db_session instead
+# or create auth-specific session if needed using auth_db.get_session()
 
 @pytest.fixture
 def clean_environment():

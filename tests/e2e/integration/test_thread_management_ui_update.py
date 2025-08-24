@@ -12,19 +12,27 @@ Coverage: Thread lifecycle, UI synchronization, concurrent operations, message h
 from datetime import datetime, timezone
 from netra_backend.app.db.models_postgres import Message, Thread
 from netra_backend.app.db.session import get_db_session
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 import asyncio
 import pytest
 import time
 
-from netra_backend.app.websocket.message_types import (
+from netra_backend.app.schemas.websocket_message_types import (
     ThreadCreatedMessage,
     ThreadUpdatedMessage,
 )
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
+
+
+# Backward compatibility alias
+
+# Backward compatibility alias
+UnifiedWebSocketManager = WebSocketManager
+
+WebSocketManager = WebSocketManager
 
 class ThreadUIStateTracker:
 

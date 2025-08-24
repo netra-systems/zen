@@ -7,10 +7,10 @@ for database, LLM, and WebSocket services.
 from typing import Any, Dict, List, Set
 
 from netra_backend.app.core.degradation_types import (
-from netra_backend.app.websocket_core import get_websocket_manager
     DegradationLevel,
     DegradationStrategy,
 )
+from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -222,8 +222,7 @@ class WebSocketDegradationStrategy(DegradationStrategy):
     
     async def _test_websocket_health(self) -> bool:
         """Test WebSocket manager health."""
-                    manager as websocket_manager,
-        )
+        from netra_backend.app.websocket_core.manager import websocket_manager
         if websocket_manager and hasattr(websocket_manager, 'core'):
             stats = websocket_manager.get_stats()
             return stats.total_errors < 10  # Configurable threshold

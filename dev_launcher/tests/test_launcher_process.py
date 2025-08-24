@@ -336,11 +336,11 @@ class TestResourceManagement(unittest.TestCase):
     
     def _test_signal_handler_setup(self, manager):
         """Test signal handler setup if available."""
-        if hasattr(manager, 'setup_signal_handlers'):
-            with patch('signal.signal') as mock_signal:
-                manager.setup_signal_handlers()
-                if sys.platform != "win32":
-                    mock_signal.assert_called()
+        # SignalHandler is now initialized automatically in constructor
+        # Check if signal handler exists instead
+        if hasattr(manager, 'signal_handler'):
+            self.assertIsNotNone(manager.signal_handler)
+            self.assertTrue(hasattr(manager.signal_handler, '_setup_signal_handlers'))
 
 
 if __name__ == '__main__':

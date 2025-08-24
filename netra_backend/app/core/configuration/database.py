@@ -229,8 +229,14 @@ class DatabaseConfigManager:
         # FIX: Support both CLICKHOUSE_PASSWORD and CLICKHOUSE_DEFAULT_PASSWORD for backward compatibility
         password = os.environ.get("CLICKHOUSE_PASSWORD") or os.environ.get("CLICKHOUSE_DEFAULT_PASSWORD", "")
         
+        # Don't default to localhost in staging/production
+        default_host = "localhost"
+        if self._environment in ["staging", "production"]:
+            # In staging/production, require explicit CLICKHOUSE_HOST
+            default_host = ""
+        
         config = {
-            "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
+            "host": os.environ.get("CLICKHOUSE_HOST", default_host),
             "port": os.environ.get("CLICKHOUSE_HTTP_PORT", default_port),
             "user": os.environ.get("CLICKHOUSE_USER", "default"),
             "password": password,
@@ -276,9 +282,19 @@ class DatabaseConfigManager:
         """
         # CONFIG BOOTSTRAP: Direct env access for ClickHouse URL
         clickhouse_url = os.environ.get("CLICKHOUSE_URL")
-        if not clickhouse_url and hasattr(config, 'clickhouse_native'):
-            clickhouse_url = self._build_clickhouse_url(config.clickhouse_native)
-        if clickhouse_url:
+        
+        # For staging/production, require explicit ClickHouse URL
+        if not clickhouse_url:
+            if self._environment in ["staging", "production"]:
+                # Don't default to localhost in staging/production
+                self._logger.warning(f"CLICKHOUSE_URL not configured for {self._environment} environment")
+                # Set to empty string to prevent localhost fallback
+                config.clickhouse_url = ""
+            elif hasattr(config, 'clickhouse_native'):
+                # Only build URL from config in dev/test environments
+                clickhouse_url = self._build_clickhouse_url(config.clickhouse_native)
+                config.clickhouse_url = clickhouse_url
+        else:
             config.clickhouse_url = clickhouse_url
     
     def _build_clickhouse_url(self, ch_config) -> str:

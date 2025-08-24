@@ -27,7 +27,7 @@ import pytest
 
 from netra_backend.app.websocket_core.reconnection_types import ReconnectionConfig
 
-from netra_backend.app.websocket_core.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
 from netra_backend.tests.integration.websocket_recovery_fixtures import (
 
     MockWebSocket,

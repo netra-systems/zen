@@ -3,7 +3,6 @@ Utility functions for the dev launcher.
 """
 
 import logging
-import os
 import socket
 import subprocess
 import sys
@@ -13,6 +12,8 @@ import urllib.request
 import webbrowser
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
+
+from dev_launcher.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,8 @@ def check_emoji_support() -> bool:
         if sys.platform == "win32":
             # Windows Terminal and VS Code terminal support emojis
             # But for safety, disable by default on Windows unless in known good terminals
-            return bool(os.environ.get('WT_SESSION') or os.environ.get('TERM_PROGRAM') == 'vscode')
+            env = get_env()
+            return bool(env.get('WT_SESSION') or env.get('TERM_PROGRAM') == 'vscode')
         
         return True
     except (UnicodeEncodeError, AttributeError):
@@ -326,14 +328,15 @@ def create_process_env(base_env: Optional[Dict[str, str]] = None, **kwargs) -> D
     Create environment variables for a subprocess.
     
     Args:
-        base_env: Base environment to start with (defaults to os.environ)
+        base_env: Base environment to start with (defaults to isolated environment)
         **kwargs: Additional environment variables to add
     
     Returns:
         Complete environment dictionary
     """
     if base_env is None:
-        env = os.environ.copy()
+        isolated_env = get_env()
+        env = isolated_env.get_subprocess_env()
     else:
         env = base_env.copy()
     

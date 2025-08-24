@@ -30,7 +30,7 @@ import pytest
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.db.postgres import Database as PostgresDatabase
 from netra_backend.app.services.generation_service import save_corpus_to_clickhouse
-from netra_backend.app.websocket_core.performance_monitor import PerformanceMonitor
+from netra_backend.app.monitoring.system_monitor import SystemPerformanceMonitor as PerformanceMonitor
 
 class PerformanceTestMetrics:
     """Tracks performance test metrics and baselines."""

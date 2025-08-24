@@ -58,7 +58,7 @@ except ImportError:
         def simulate_message(self, message):
             return message
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket.connection_manager import get_connection_manager
+from netra_backend.app.websocket_core.manager import get_websocket_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -67,7 +67,7 @@ class WebSocketAuthTester:
     """Real WebSocket connection tester with auth validation."""
     
     def __init__(self):
-        self.connection_manager = get_connection_manager()
+        self.connection_manager = get_websocket_manager()
         self.test_users: Dict[str, str] = {}
         self.active_connections: List[MockWebSocket] = []
         self.auth_results: List[Dict[str, Any]] = []

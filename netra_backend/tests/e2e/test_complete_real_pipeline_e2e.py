@@ -9,7 +9,7 @@ Maximum 300 lines, functions ≤8 lines.
 import sys
 from pathlib import Path
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 from typing import Dict, List
 import asyncio
 import os

@@ -51,8 +51,16 @@ from netra_backend.app.schemas.websocket_models import (
     StartAgentPayload,
     WebSocketMessage,
 )
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 # from netra_backend.app.websocket.unified.messaging import UnifiedMessagingService  # UnifiedMessagingService doesn't exist
+
+
+# Backward compatibility alias
+
+# Backward compatibility alias
+UnifiedWebSocketManager = WebSocketManager
+
+WebSocketManager = WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -152,7 +160,7 @@ async def failing_llm_manager():
 @pytest.fixture
 async def failing_websocket_manager():
     """WebSocket manager configured to expose failures"""
-    manager = AsyncMock(spec=UnifiedWebSocketManager)
+    manager = AsyncMock(spec=WebSocketManager)
     
     async def mock_send_message(user_id: str, message: Any):
         if "websocket_fail" in str(message):

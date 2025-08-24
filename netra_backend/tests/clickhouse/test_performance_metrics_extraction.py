@@ -3,7 +3,7 @@ Performance Metrics Extraction Tests
 Test performance metrics extraction from ClickHouse
 """
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

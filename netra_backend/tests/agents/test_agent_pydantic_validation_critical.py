@@ -3,7 +3,7 @@
 This addresses CRITICAL validation errors where LLM returns strings instead of dicts.
 """
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

@@ -39,6 +39,8 @@ class SecretManager:
         self._secret_mappings = self._load_secret_mappings()
         self._secret_cache = {}
         self._cache_timestamp = None
+        self._initialized = False
+        self._populating_secrets = False  # Guard against recursive calls
     
     def _get_environment(self) -> str:
         """Get current environment for secret management.
@@ -59,7 +61,7 @@ class SecretManager:
     
     def _get_llm_secret_mappings(self) -> Dict[str, dict]:
         """Get LLM-related secret mappings."""
-        return {"gemini-api-key": self._get_gemini_api_key_mapping()}
+        return {"GEMINI_API_KEY": self._get_gemini_api_key_mapping()}
     
     def _get_gemini_api_key_mapping(self) -> Dict[str, Any]:
         """Get Gemini API key mapping configuration."""
@@ -73,7 +75,7 @@ class SecretManager:
         """Get OAuth-related secret mappings."""
         google_client_id = self._get_google_client_id_mapping()
         google_client_secret = self._get_google_client_secret_mapping()
-        return {"google-client-id": google_client_id, "google-client-secret": google_client_secret}
+        return {"GOOGLE_CLIENT_ID": google_client_id, "GOOGLE_CLIENT_SECRET": google_client_secret}
     
     def _get_google_client_id_mapping(self) -> Dict[str, Any]:
         """Get Google Client ID mapping."""
@@ -99,9 +101,9 @@ class SecretManager:
         fernet_mapping = self._get_fernet_secret_mapping()
         service_mapping = self._get_service_secret_mapping()
         return {
-            "jwt-secret-key": jwt_mapping, 
-            "fernet-key": fernet_mapping,
-            "service-secret": service_mapping
+            "JWT_SECRET_KEY": jwt_mapping, 
+            "FERNET_KEY": fernet_mapping,
+            "SERVICE_SECRET": service_mapping
         }
     
     def _get_jwt_secret_mapping(self) -> Dict[str, Any]:
@@ -132,7 +134,7 @@ class SecretManager:
         """Get database-related secret mappings."""
         clickhouse_mapping = self._get_clickhouse_password_mapping()
         redis_mapping = self._get_redis_password_mapping()
-        return {"clickhouse-default-password": clickhouse_mapping, "redis-default": redis_mapping}
+        return {"CLICKHOUSE_DEFAULT_PASSWORD": clickhouse_mapping, "REDIS_PASSWORD": redis_mapping}
     
     def _get_clickhouse_password_mapping(self) -> Dict[str, Any]:
         """Get ClickHouse password mapping."""
@@ -154,10 +156,22 @@ class SecretManager:
     
     def populate_secrets(self, config: AppConfig) -> None:
         """Populate all secrets in configuration object."""
-        self._load_secrets_from_sources()
-        self._apply_secrets_to_config(config)
-        self._validate_required_secrets()
-        self._logger.info(f"Populated secrets for {self._environment}")
+        # Prevent recursive calls that cause infinite logging loops
+        if self._populating_secrets:
+            return
+        
+        self._populating_secrets = True
+        try:
+            self._load_secrets_from_sources()
+            self._apply_secrets_to_config(config)
+            self._validate_required_secrets()
+            
+            # Only log once when first populated
+            if not self._initialized:
+                self._logger.info(f"Populated secrets for {self._environment}")
+                self._initialized = True
+        finally:
+            self._populating_secrets = False
     
     def _load_secrets_from_sources(self) -> None:
         """Load secrets from all available sources."""
@@ -246,7 +260,11 @@ class SecretManager:
         missing_secrets = self._get_missing_required_secrets()
         if missing_secrets:
             error_msg = f"Required secrets missing: {missing_secrets}"
-            self._logger.error(error_msg)
+            
+            # Only log error once, not repeatedly
+            if not self._initialized:
+                self._logger.error(error_msg)
+                
             if self._environment == "production":
                 raise ConfigurationError(error_msg)
     
@@ -259,16 +277,20 @@ class SecretManager:
         return missing
     
     def _get_environment_variable_mapping(self) -> Dict[str, str]:
-        """Get mapping of secret names to environment variables."""
+        """Get mapping of secret names to environment variables.
+        
+        NOTE: For local development, secret names match environment variable names.
+        This ensures direct mapping without transformation.
+        """
         return {
-            "gemini-api-key": "GEMINI_API_KEY",
-            "google-client-id": "GOOGLE_CLIENT_ID", 
-            "google-client-secret": "GOOGLE_CLIENT_SECRET",
-            "jwt-secret-key": "JWT_SECRET_KEY",
-            "fernet-key": "FERNET_KEY",
-            "service-secret": "SERVICE_SECRET",
-            "clickhouse-default-password": "CLICKHOUSE_PASSWORD",
-            "redis-default": "REDIS_PASSWORD"
+            "GEMINI_API_KEY": "GEMINI_API_KEY",
+            "GOOGLE_CLIENT_ID": "GOOGLE_CLIENT_ID", 
+            "GOOGLE_CLIENT_SECRET": "GOOGLE_CLIENT_SECRET",
+            "JWT_SECRET_KEY": "JWT_SECRET_KEY",
+            "FERNET_KEY": "FERNET_KEY",
+            "SERVICE_SECRET": "SERVICE_SECRET",
+            "CLICKHOUSE_DEFAULT_PASSWORD": "CLICKHOUSE_DEFAULT_PASSWORD",
+            "REDIS_PASSWORD": "REDIS_PASSWORD"
         }
     
     def _is_gcp_available(self) -> bool:
@@ -415,9 +437,9 @@ class SecretManager:
     def _check_secret_format(self, secret_name: str, value: str) -> List[str]:
         """Check secret format requirements."""
         issues = []
-        if secret_name == "jwt-secret-key" and len(value) < 32:
+        if secret_name == "JWT_SECRET_KEY" and len(value) < 32:
             issues.append("JWT secret key too short (minimum 32 characters)")
-        elif secret_name == "fernet-key" and len(value) != 44:
+        elif secret_name == "FERNET_KEY" and len(value) != 44:
             issues.append("Fernet key invalid format (must be 44 characters)")
         return issues
     

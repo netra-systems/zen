@@ -20,8 +20,6 @@ from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.services.demo_service import DemoService
-    get_manager as get_websocket_manager,
-)
 
 class CriticalUserJourneyHelpers:
     """Core helper methods for critical user journey validation (≤8 lines each)"""

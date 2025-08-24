@@ -3,10 +3,9 @@ from typing import TYPE_CHECKING, Annotated, AsyncGenerator
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.db.postgres import get_async_db as _get_async_db
+# Import from the single source of truth for database sessions
+from netra_backend.app.database import get_db
 
-# Re-export for backward compatibility
-get_async_db = _get_async_db
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
@@ -28,10 +27,12 @@ def _validate_session_type(session) -> None:
         raise RuntimeError(f"Expected AsyncSession, got {type(session)}")
     logger.debug(f"Dependency injected session type: {type(session).__name__}")
 
-
 async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
-    """Wrapper for database dependency with validation."""
-    async with _get_async_db() as session:
+    """Wrapper for database dependency with validation.
+    
+    Uses the single source of truth from netra_backend.app.database.
+    """
+    async for session in get_db():
         _validate_session_type(session)
         yield session
 
@@ -40,8 +41,14 @@ DbDep = Annotated[AsyncSession, Depends(get_db_dependency)]
 def get_llm_manager(request: Request) -> LLMManager:
     return request.app.state.llm_manager
 
-async def get_db_session(request: Request) -> AsyncSession:
-    async with request.app.state.db_session_factory() as session:
+# Legacy compatibility - DEPRECATED: use get_db_dependency() instead
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+    """DEPRECATED: Legacy compatibility function for get_db_session.
+    
+    This function is deprecated. Use get_db_dependency() or DbDep type annotation instead.
+    Kept for backward compatibility with existing routes.
+    """
+    async for session in get_db_dependency():
         yield session
 
 def get_security_service(request: Request) -> SecurityService:

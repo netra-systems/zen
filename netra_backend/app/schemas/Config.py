@@ -34,23 +34,22 @@ class SecretReference(BaseModel):
     name: str
     target_field: str
     target_models: Optional[List[str]] = None
-    # LEGACY: Direct env access - should migrate to unified config
-    project_id: str = Field(default_factory=lambda: SecretReference._get_project_id_from_config())
+    # Fixed: Use direct env fallback to prevent recursion during config initialization
+    project_id: str = Field(default_factory=lambda: SecretReference._get_project_id_safe())
     version: str = "latest"
     
     @staticmethod
-    def _get_project_id_from_config() -> str:
-        """Get project ID from unified config with fallback to environment variables."""
-        try:
-            from netra_backend.app.core.configuration.base import get_unified_config
-            config = get_unified_config()
-            return config.secrets.gcp_project_id or "304612253870"
-        except:
-            # Ultimate fallback to environment variables
-            import os
-            return os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
-                                 os.environ.get("SECRET_MANAGER_PROJECT_ID", 
-                                 "701982941522" if os.environ.get("ENVIRONMENT", "").lower() == "staging" else "304612253870"))
+    def _get_project_id_safe() -> str:
+        """Get project ID safely without causing recursion during config initialization.
+        
+        CRITICAL: This method CANNOT call get_unified_config() during configuration
+        initialization as it would cause infinite recursion. Use direct env access.
+        """
+        import os
+        # Direct environment access to prevent recursion during config loading
+        return os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
+                             os.environ.get("SECRET_MANAGER_PROJECT_ID", 
+                             "701982941522" if os.environ.get("ENVIRONMENT", "").lower() == "staging" else "304612253870"))
 
 
 SECRET_CONFIG: List[SecretReference] = [
@@ -414,47 +413,32 @@ class DevelopmentConfig(AppConfig):
         super().__init__(**data)
     
     def _load_database_url_from_unified_config(self, data: dict) -> None:
-        """Load database URL from unified config with fallback.
+        """Load database URL from environment with fallback.
         
-        Migrated from direct env access to unified configuration.
+        CRITICAL: Cannot use get_unified_config() during config initialization 
+        as it would cause infinite recursion. Use direct env access.
         """
-        try:
-            from netra_backend.app.core.configuration.base import get_unified_config
-            config = get_unified_config()
-            if config.database.url:
-                data['database_url'] = config.database.url
-            elif 'database_url' not in data or data.get('database_url') is None:
-                data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
-        except:
-            # Fallback to direct env access if unified config not available
-            import os
-            env_db_url = os.environ.get('DATABASE_URL')
-            if env_db_url:
-                data['database_url'] = env_db_url
-            elif 'database_url' not in data or data.get('database_url') is None:
-                data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
+        # Direct env access to prevent recursion during config loading
+        import os
+        env_db_url = os.environ.get('DATABASE_URL')
+        if env_db_url:
+            data['database_url'] = env_db_url
+        elif 'database_url' not in data or data.get('database_url') is None:
+            data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
     
     def _get_service_modes_from_unified_config(self) -> dict:
-        """Get service modes from unified config with fallback.
+        """Get service modes from environment with fallback.
         
-        Migrated from direct env access to unified configuration.
+        CRITICAL: Cannot use get_unified_config() during config initialization 
+        as it would cause infinite recursion. Use direct env access.
         """
-        try:
-            from netra_backend.app.core.configuration.base import get_unified_config
-            config = get_unified_config()
-            return {
-                'redis': config.services.redis_mode.lower(),
-                'clickhouse': config.services.clickhouse_mode.lower(),
-                'llm': config.services.llm_mode.lower()
-            }
-        except:
-            # Fallback to direct env access if unified config not available
-            import os
-            return {
-                'redis': os.environ.get("REDIS_MODE", "shared").lower(),
-                'clickhouse': os.environ.get("CLICKHOUSE_MODE", "shared").lower(),
-                'llm': os.environ.get("LLM_MODE", "shared").lower()
-            }
+        # Direct env access to prevent recursion during config loading
+        import os
+        return {
+            'redis': os.environ.get("REDIS_MODE", "shared").lower(),
+            'clickhouse': os.environ.get("CLICKHOUSE_MODE", "shared").lower(),
+            'llm': os.environ.get("LLM_MODE", "shared").lower()
+        }
     
     def _configure_service_flags(self, data: dict, service_modes: dict) -> None:
         """Configure service enabled flags based on modes."""
@@ -497,20 +481,15 @@ class StagingConfig(AppConfig):
         super().__init__(**data)
     
     def _load_database_url_from_unified_config_staging(self, data: dict) -> None:
-        """Load database URL from unified config for staging with fallback.
+        """Load database URL from environment for staging with fallback.
         
-        Migrated from direct env access to unified configuration.
+        CRITICAL: Cannot use get_unified_config() during config initialization 
+        as it would cause infinite recursion. Use direct env access.
         """
-        try:
-            from netra_backend.app.core.configuration.base import get_unified_config
-            config = get_unified_config()
-            if 'database_url' not in data and config.database.url:
-                data['database_url'] = config.database.url
-        except:
-            # Fallback to direct env access if unified config not available
-            import os
-            if 'database_url' not in data and os.environ.get('DATABASE_URL'):
-                data['database_url'] = os.environ.get('DATABASE_URL')
+        # Direct env access to prevent recursion during config loading
+        import os
+        if 'database_url' not in data and os.environ.get('DATABASE_URL'):
+            data['database_url'] = os.environ.get('DATABASE_URL')
 
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""

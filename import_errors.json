@@ -1,0 +1,323 @@
+{
+  "netra_backend.app.websocket_core.unified.message_handlers": [
+    "",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\websocket\\test_performance_monitor_coverage.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\websocket\\test_performance_monitor_coverage.py"
+  ],
+  "netra_backend.app.websocket_core.unified.manager": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_cost_optimization_workflows.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_cost_optimization_workflows.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_kv_cache_audit.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_kv_cache_audit.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_model_effectiveness_workflows.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_model_effectiveness_workflows.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_websocket_integration_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_websocket_integration_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_websocket_integration_fixtures.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_websocket_integration_fixtures.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_websocket_integration_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\e2e\\test_websocket_integration_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_service_failover_complete_l4.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_service_failover_complete_l4.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_websocket_state_persistence.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_websocket_state_persistence.py"
+  ],
+  "netra_backend.app.core.user_service": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_service_initialization_health_l4.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_service_initialization_health_l4.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_session_lifecycle_complete_l4.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_session_lifecycle_complete_l4.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_session_persistence.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_session_persistence.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_token_lifecycle.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_token_lifecycle.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_token_validation_cross_service.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_auth_token_validation_cross_service.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_circuit_breaker_cascade.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_circuit_breaker_cascade.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_cross_service_auth_propagation_complete_l4.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_cross_service_auth_propagation_complete_l4.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_existing_user_login_flow.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_existing_user_login_flow.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_high_performance_websocket_stress.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_high_performance_websocket_stress.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_redis_websocket_state_sync.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_redis_websocket_state_sync.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_websocket_jwt_encoding.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_websocket_jwt_encoding.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_database_migration_failure_recovery.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_database_migration_failure_recovery.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_thread_crud_operations_data_consistency.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_thread_crud_operations_data_consistency.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_user_state_synchronization.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_user_state_synchronization.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_websocket_authentication_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_websocket_authentication_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier2_3_security_performance\\test_input_validation_security.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier2_3_security_performance\\test_input_validation_security.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier2_major_failures\\test_background_job_processing.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier2_major_failures\\test_background_job_processing.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier4_user_management\\test_user_role_propagation.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier4_user_management\\test_user_role_propagation.py",
+    "",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_first_message_error_recovery.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_first_message_error_recovery.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_websocket_connection_recovery.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_websocket_connection_recovery.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\security\\test_service_secret_fallback_vulnerability.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\security\\test_service_secret_fallback_vulnerability.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\websocket\\test_secure_websocket.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\websocket\\test_secure_websocket.py"
+  ],
+  "netra_backend.app.websocket_core.unified.job_queue": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_new_user_registration_flow.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\critical_paths\\test_new_user_registration_flow.py"
+  ],
+  "netra_backend.app.clickhouse.clickhouse_manager": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_cross_service_auth_token_validation.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_cross_service_auth_token_validation.py"
+  ],
+  "test_framework.fixtures.real_services": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_oauth_database_consistency.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\red_team\\tier1_catastrophic\\test_oauth_database_consistency.py"
+  ],
+  "netra_backend.app.services.storage": [
+    ""
+  ],
+  "test_framework.base": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_cors_configuration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_cors_configuration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_database_migrations.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_database_migrations.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_environment_precedence.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_environment_precedence.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_health_checks.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_health_checks.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_llm_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_llm_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_multi_service_secrets.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_multi_service_secrets.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_observability_pipeline.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_observability_pipeline.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_redis_lifecycle.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_redis_lifecycle.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_resource_limits.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_resource_limits.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_secret_manager_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_secret_manager_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_staging_startup.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_staging_startup.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_websocket_load_balancer.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\staging_config\\test_websocket_load_balancer.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_background_jobs_redis_queue.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_background_jobs_redis_queue.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_database_migration_rollback.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_database_migration_rollback.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_transaction_coordination_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_transaction_coordination_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_user_onboarding_flow.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_user_onboarding_flow.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_user_registration_flow.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_user_registration_flow.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_user_tier_management.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_user_tier_management.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_user_websocket_lifecycle.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_user_websocket_lifecycle.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_websocket_auth_token_refresh.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_websocket_auth_token_refresh.py"
+  ],
+  "background_jobs.job_manager": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_circuit_breaker_service_failures.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_circuit_breaker_service_failures.py"
+  ],
+  "netra_backend.app.services.http_client": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_critical_auth_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_critical_auth_integration.py"
+  ],
+  "netra_backend.app.monitoring.tracing": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_enterprise_domain_network.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_enterprise_domain_network.py"
+  ],
+  "test_framework.fixtures.deployment": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_enterprise_environment_config.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_enterprise_environment_config.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_enterprise_resource_health.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_enterprise_resource_health.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_error_handling_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_error_handling_integration.py"
+  ],
+  "netra_backend.app.websocket_core.unified.circuit_breaker": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_first_time_user_advanced.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_first_time_user_advanced.py"
+  ],
+  "test_unified_first_time_user": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_first_time_user_onboarding.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_first_time_user_onboarding.py"
+  ],
+  "caching.cache_strategies": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_auth_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_auth_core.py"
+  ],
+  "test_framework.fixtures.message_flow": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_auth_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_auth_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_errors_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_errors_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_errors_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_errors_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_performance_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_performance_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_performance_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_performance_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_routing_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_routing_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_routing_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_message_flow_routing_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_metrics_pipeline_prometheus.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_metrics_pipeline_prometheus.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_unified_message_flow_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_unified_message_flow_core.py"
+  ],
+  "netra_backend.app.monitoring.metrics_exporter": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_multi_tenant_isolation.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_multi_tenant_isolation.py"
+  ],
+  "netra_backend.app.services.multi_tenant": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_payment_gateway_sandbox.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_payment_gateway_sandbox.py"
+  ],
+  "payments.gateway_manager": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_rate_limiting_backpressure.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_rate_limiting_backpressure.py"
+  ],
+  "netra_backend.app.services.discovery": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_sla_compliance_monitoring.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_sla_compliance_monitoring.py"
+  ],
+  "test_framework.fixtures.auth": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_sso_saml_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_sso_saml_integration.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_supervisor_observability.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_supervisor_observability.py"
+  ],
+  "test_framework.mocks.websocket": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_unified_message_flow_fixtures.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_unified_message_flow_fixtures.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_unified_message_flow_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_unified_message_flow_helpers.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_user_flows_main.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\integration\\test_user_flows_main.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\llm\\test_structured_generation.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\llm\\test_structured_generation.py"
+  ],
+  "test_framework.mocks.llm": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\performance\\test_performance_batching.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\performance\\test_performance_batching.py"
+  ],
+  "test_framework.performance": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_admin_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_admin_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_route_fixtures.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_route_fixtures.py"
+  ],
+  "test_framework.fixtures.routes": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_agent_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_agent_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_cache_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_cache_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_config_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_config_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_corpus_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_corpus_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_llm_cache_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_llm_cache_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_quality_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_quality_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_supply_management.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_supply_management.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_supply_research.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_supply_research.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_supply_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_supply_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_synthetic_data_management.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_synthetic_data_management.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_synthetic_data_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_synthetic_data_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_thread_crud.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_thread_crud.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_thread_messaging.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_thread_messaging.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_threads_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_threads_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_utilities.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_utilities.py"
+  ],
+  "test_framework.utils": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_mcp_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_mcp_routes.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_synthetic_data_generation.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_synthetic_data_generation.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_thread_analytics.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\routes\\test_thread_analytics.py",
+    "",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_websocket_bidirectional_types.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_websocket_bidirectional_types.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\utils\\test_file_crypto_validation_utils.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\utils\\test_file_crypto_validation_utils.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\utils\\test_formatting_math_network_utils.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\utils\\test_formatting_math_network_utils.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\utils\\test_monitoring_debug_migration_utils.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\utils\\test_monitoring_debug_migration_utils.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\utils\\test_pagination_rate_retry_utils.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\utils\\test_pagination_rate_retry_utils.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\validation\\test_websocket_message_validation.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\validation\\test_websocket_message_validation.py"
+  ],
+  "test_framework.fixtures.config": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\startup\\test_error_aggregator.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\startup\\test_error_aggregator.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_health_monitor_adaptive.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_health_monitor_adaptive.py"
+  ],
+  "netra_backend.app.core.error_handler": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\startup\\test_migration_tracker.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\startup\\test_migration_tracker.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\startup\\test_staged_health_monitor_index.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\startup\\test_staged_health_monitor_index.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_compression_auth.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_compression_auth.py"
+  ],
+  "test_framework.fixtures.health": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\startup\\test_startup_status_manager.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\startup\\test_startup_status_manager.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_mcp_integration_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_mcp_integration_core.py"
+  ],
+  "test_framework.fixtures.compression": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_config_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_config_core.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_websocket_type_safety.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_websocket_type_safety.py"
+  ],
+  "netra_backend.app.services.mcp_integration": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_mcp_integration_fixtures.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_mcp_integration_fixtures.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_mcp_integration_services.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_mcp_integration_services.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_performance_batching.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_performance_batching.py"
+  ],
+  "test_framework.fixtures.websocket_types": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_websocket_production_realistic.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\tests\\test_websocket_production_realistic.py",
+    ""
+  ],
+  "playwright": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\e2e\\test_model_processing_comprehensive.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\e2e\\test_model_processing_comprehensive.py"
+  ],
+  "test_framework.setup_test_path": [
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\e2e\\test_user_message_agent_pipeline.py",
+    "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\e2e\\test_user_message_agent_pipeline.py"
+  ]
+}

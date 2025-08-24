@@ -18,6 +18,7 @@ class DatabaseHealthChecker:
         self.last_check_time = None
         self.health_status = {"status": "unknown"}
         self.check_history = []
+        self._db_checkers = {}  # For dependency injection in testing
     
     def _get_default_databases(self, databases: List[str]) -> List[str]:
         """Get default database list if none provided."""
@@ -124,6 +125,13 @@ class DatabaseHealthChecker:
         """Check health of a single database"""
         response_time = await self._calculate_response_time()
         
+        # Allow injection of database checker functions for testing
+        if hasattr(self, '_db_checkers') and db_name in self._db_checkers:
+            try:
+                return await self._db_checkers[db_name](response_time)
+            except Exception as e:
+                return {"status": "error", "error": str(e), "response_time_ms": response_time}
+        
         if db_name == "postgres":
             return self._get_postgres_health_response(response_time)
         elif db_name == "clickhouse":
@@ -140,6 +148,10 @@ class DatabaseHealthChecker:
     def get_check_history(self) -> List[Dict]:
         """Get recent health check history"""
         return self.check_history
+    
+    def set_database_checker(self, db_name: str, checker_func):
+        """Set custom database checker function for testing purposes"""
+        self._db_checkers[db_name] = checker_func
     
     async def check_connection_pools(self) -> Dict:
         """Check database connection pool status"""

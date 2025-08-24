@@ -15,14 +15,22 @@ from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.services.user_service import user_service
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
+WebSocketManager = WebSocketManager  # Alias for backward compatibility
 from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock
 import asyncio
 import jwt
 import pytest
 import time
+
+
+# Backward compatibility alias
+
+# Backward compatibility alias
+UnifiedWebSocketManager = WebSocketManager
+
+WebSocketManager = WebSocketManager
 
 class JWTTokenManager:
 

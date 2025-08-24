@@ -15,10 +15,8 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from netra_backend.app.monitoring.performance_monitor import (
-    MetricsCollector,
-    PerformanceAlertManager,
-    PerformanceMonitor,
+from netra_backend.app.monitoring.system_monitor import (
+    SystemPerformanceMonitor as PerformanceMonitor,
 )
 
 from netra_backend.app.core.performance_optimization_manager import (

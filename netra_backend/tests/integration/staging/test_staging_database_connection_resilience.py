@@ -32,12 +32,6 @@ MockConnectionPool = Mock
 async_session_mock = AsyncMock
 connection_pool = Mock
 transaction_session_mock = AsyncMock
-    DatabaseErrorSimulator,
-    MockConnectionPool,
-    async_session_mock,
-    connection_pool,
-    transaction_session_mock,
-)
 
 # Individual test methods will use @pytest.mark.asyncio decorator
 from test_framework.mock_utils import mock_justified

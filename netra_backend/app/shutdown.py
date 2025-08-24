@@ -9,8 +9,8 @@ from fastapi import FastAPI
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
-from netra_backend.app.websocket_core import get_unified_manager
-websocket_manager = get_unified_manager()
+from netra_backend.app.websocket_core import get_websocket_manager
+websocket_manager = get_websocket_manager()
 from netra_backend.app.utils.multiprocessing_cleanup import cleanup_multiprocessing
 from netra_backend.app.services.background_task_manager import background_task_manager
 

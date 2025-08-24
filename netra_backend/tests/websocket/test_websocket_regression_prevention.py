@@ -84,7 +84,7 @@ class TestAgentRegistration:
         """Create real components for testing."""
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         from netra_backend.app.llm.llm_manager import LLMManager
-        from netra_backend.app.websocket_core.unified.manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.manager import WebSocketManager as UnifiedWebSocketManager
         
         llm_manager = LLMManager()
 

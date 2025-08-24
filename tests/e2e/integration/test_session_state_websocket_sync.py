@@ -14,14 +14,22 @@ from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.schemas.websocket_message_types import WebSocketConnectionState
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from tests.e2e.integration.config import TEST_CONFIG
 from typing import Any, Dict, List, Optional
 import asyncio
 import json
 import pytest
 import time
+
+
+# Backward compatibility alias
+
+# Backward compatibility alias
+UnifiedWebSocketManager = WebSocketManager
+
+WebSocketManager = WebSocketManager
 
 class SessionStateManager:
 

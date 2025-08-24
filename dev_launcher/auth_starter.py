@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 from dev_launcher.config import LauncherConfig, resolve_path
+from dev_launcher.isolated_environment import get_env
 from dev_launcher.log_streamer import Colors, LogManager, LogStreamer
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.utils import (
@@ -42,6 +43,7 @@ class AuthStarter:
         self.service_discovery = service_discovery
         self.use_emoji = use_emoji
         self.auth_health_info = None
+        self.env_manager = get_env()
     
     def _print(self, emoji: str, text: str, message: str):
         """Print with emoji support."""
@@ -204,10 +206,11 @@ class AuthStarter:
             # Write service discovery info
             self._write_auth_discovery(port)
             
-            # Update backend environment to use correct auth port
-            import os
-            os.environ["AUTH_SERVICE_PORT"] = str(port)
-            os.environ["AUTH_SERVICE_URL"] = f"http://localhost:{port}"
+            # Update backend environment to use correct auth port using environment manager
+            self.env_manager.set("AUTH_SERVICE_PORT", str(port), 
+                                           source="auth_starter", force=True)
+            self.env_manager.set("AUTH_SERVICE_URL", f"http://localhost:{port}", 
+                                           source="auth_starter", force=True)
             
             self._print("✅", "AUTH", f"Auth service started on port {port}")
             return process, streamer

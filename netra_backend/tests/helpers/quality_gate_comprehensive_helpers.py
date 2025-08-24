@@ -24,7 +24,7 @@ from netra_backend.tests.helpers.metrics_helpers import (
     create_high_hallucination_metrics,
     create_prompt_adjustment_metrics,
 )
-from netra_backend.tests.helpers.mock_helpers import (
+from test_framework.mocks import (
     create_metrics_storage_error,
     setup_quality_service_with_large_cache,
     setup_quality_service_with_redis_error,

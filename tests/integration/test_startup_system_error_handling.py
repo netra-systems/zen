@@ -16,7 +16,7 @@ from dev_launcher.database_connector import (
     DatabaseConnector,
     DatabaseType,
 )
-from dev_launcher.environment_validator import EnvironmentValidator, ValidationResult
+from dev_launcher.isolated_environment import EnvironmentValidator, ValidationResult
 from dev_launcher.launcher import DevLauncher
 from netra_backend.app.core.network_constants import (
     DatabaseConstants,

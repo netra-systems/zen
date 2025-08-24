@@ -13,7 +13,7 @@ Uses REAL agent components with NO MOCKS as required by unified system testing.
 Follows CLAUDE.md patterns for async testing and agent integration.
 """
 
-from netra_backend.app.websocket_core.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys

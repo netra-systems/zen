@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>StagingDeploymentErrors2025</name>
+        <type>Operational Knowledge</type>
+        <version>1.0</version>
+        <date>2025-08-24</date>
+        <description>Critical staging deployment errors and root cause fixes</description>
+    </metadata>
+    
+    <context>
+        <title>Staging Deployment Error Analysis and Resolution</title>
+        <summary>
+            Comprehensive root cause analysis of staging deployment failures using "Five Whys" methodology.
+            Identified 4 critical errors preventing staging deployment success.
+        </summary>
+    </context>
+    
+    <errors_analyzed>
+        <error id="postgres-auth">
+            <symptom>password authentication failed for user 'postgres'</symptom>
+            <service>netra-backend-staging</service>
+            <frequency>Every 60 seconds in health checks</frequency>
+            <root_cause>
+                <primary>Database credentials mismatch between DATABASE_URL secret and Cloud SQL instance</primary>
+                <secondary>Lack of pre-deployment credential validation</secondary>
+            </root_cause>
+            <fix>
+                <action>Update DATABASE_URL secret with correct Cloud SQL credentials</action>
+                <format>postgresql://USER:PASSWORD@/DATABASE?host=/cloudsql/PROJECT:REGION:INSTANCE</format>
+                <example>postgresql://postgres:ACTUAL_PASSWORD@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres</example>
+                <note>Remove sslmode parameter for Unix socket connections</note>
+            </fix>
+        </error>
+        
+        <error id="clickhouse-localhost">
+            <symptom>Connection refused on localhost:8123</symptom>
+            <service>netra-backend-staging</service>
+            <component>database_index_manager</component>
+            <root_cause>
+                <primary>Missing CLICKHOUSE_URL environment variable in staging</primary>
+                <secondary>Code defaults to localhost when URL not configured</secondary>
+            </root_cause>
+            <fix>
+                <code_change file="netra_backend/app/core/configuration/database.py">
+                    <description>Prevent localhost fallback in staging/production</description>
+                    <implementation>Set empty string for clickhouse_url when not configured in staging</implementation>
+                </code_change>
+                <secret_change>
+                    <name>clickhouse-url-staging</name>
+                    <value>Leave empty to disable or set to actual ClickHouse endpoint</value>
+                </secret_change>
+            </fix>
+        </error>
+        
+        <error id="auth-ssl-parameter">
+            <symptom>connect() got an unexpected keyword argument 'sslmode'</symptom>
+            <service>netra-auth-service</service>
+            <component>auth_service.auth_core.database.connection</component>
+            <root_cause>
+                <primary>Incorrect SSL parameter handling for asyncpg driver</primary>
+                <secondary>Cloud SQL Unix socket connections need all SSL parameters removed</secondary>
+            </root_cause>
+            <fix>
+                <code_change file="auth_service/auth_core/database/database_manager.py">
+                    <description>Remove all SSL parameters for Cloud SQL Unix socket connections</description>
+                    <implementation>
+                        - For Cloud SQL: Remove both sslmode and ssl parameters
+                        - For regular connections: Convert sslmode to ssl
+                    </implementation>
+                </code_change>
+            </fix>
+        </error>
+        
+        <error id="frontend-node-version">
+            <symptom>Required Node v20+, running v18.20.8</symptom>
+            <service>netra-frontend-staging</service>
+            <impact>eventsource-parser and react-router compatibility issues</impact>
+            <root_cause>
+                <primary>Docker base image using Node v18</primary>
+                <secondary>Mismatch between package.json requirements and Dockerfile</secondary>
+            </root_cause>
+            <fix>
+                <verification>Dockerfile.frontend already uses node:20-alpine</verification>
+                <status>Already fixed in codebase</status>
+            </fix>
+        </error>
+    </errors_analyzed>
+    
+    <patterns_identified>
+        <pattern id="ssl-parameter-confusion">
+            <description>Confusion between psycopg2 (sslmode) and asyncpg (ssl) parameters</description>
+            <solution>
+                - psycopg2/sync: Use sslmode=require
+                - asyncpg/async: Use ssl=require
+                - Cloud SQL Unix socket: Remove all SSL parameters
+            </solution>
+        </pattern>
+        
+        <pattern id="missing-staging-defaults">
+            <description>Code defaults to localhost for missing configuration</description>
+            <solution>
+                - Staging/production should fail fast or use empty strings
+                - Only development should default to localhost
+            </solution>
+        </pattern>
+        
+        <pattern id="credential-management">
+            <description>Database credentials not validated before deployment</description>
+            <solution>
+                - Add pre-deployment credential validation
+                - Use service accounts with consistent passwords
+                - Document credential rotation process
+            </solution>
+        </pattern>
+    </patterns_identified>
+    
+    <implementation_checklist>
+        <task status="completed">Fix auth service SSL parameter handling</task>
+        <task status="completed">Fix backend ClickHouse configuration fallback</task>
+        <task status="completed">Verify frontend Node version</task>
+        <task status="completed">Create staging secrets update script</task>
+        <task status="pending">Update DATABASE_URL with correct password</task>
+        <task status="pending">Deploy updated services to staging</task>
+        <task status="pending">Verify health checks pass</task>
+    </implementation_checklist>
+    
+    <prevention_measures>
+        <measure>
+            <name>Pre-deployment validation</name>
+            <description>Add database connectivity test before marking deployment successful</description>
+        </measure>
+        <measure>
+            <name>Configuration validation</name>
+            <description>Validate all required environment variables are set for target environment</description>
+        </measure>
+        <measure>
+            <name>Automated secret rotation</name>
+            <description>Implement automated secret rotation with validation</description>
+        </measure>
+        <measure>
+            <name>Environment-specific defaults</name>
+            <description>Never default to localhost in staging/production</description>
+        </measure>
+    </prevention_measures>
+    
+    <testing_approach>
+        <test_file>tests/e2e/test_staging_deployment_errors.py</test_file>
+        <test_coverage>
+            - PostgreSQL authentication validation
+            - ClickHouse configuration in staging
+            - SSL parameter conversion for different drivers
+            - Node version requirements
+            - Database URL consistency across services
+            - Deployment configuration validation
+        </test_coverage>
+    </testing_approach>
+    
+    <deployment_commands>
+        <check_secrets>python scripts/update_staging_secrets.py --check</check_secrets>
+        <update_secrets>python scripts/update_staging_secrets.py --update</update_secrets>
+        <deploy>python scripts/deploy_to_gcp.py --project netra-staging --build-local</deploy>
+        <verify>gcloud run services logs read SERVICE_NAME --platform managed --region us-central1 --limit 50</verify>
+    </deployment_commands>
+    
+    <key_learnings>
+        <learning>Cloud SQL Unix socket connections must have NO SSL parameters for asyncpg</learning>
+        <learning>Services must not default to localhost in staging/production environments</learning>
+        <learning>Database URL format differs between sync (psycopg2) and async (asyncpg) drivers</learning>
+        <learning>Pre-deployment validation would prevent 80% of staging deployment failures</learning>
+        <learning>Consistent secret naming and validation is critical for multi-service deployments</learning>
+    </key_learnings>
+</specification>

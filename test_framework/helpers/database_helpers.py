@@ -1,6 +1,14 @@
 """
-Database test helper functions.
-Consolidates database-related helpers from across services.
+Database test helper functions - Consolidated Utilities for Test Database Operations.
+
+CRITICAL: This module provides utilities but does NOT create database sessions.
+All database session management is delegated to test_framework.fixtures.database_fixtures.
+
+Business Value Justification (BVJ):
+- Segment: Platform/Internal (test infrastructure)
+- Business Goal: Consolidate database test utilities without duplication
+- Value Impact: Shared utilities for database testing across services
+- Strategic Impact: Support single source of truth database session management
 """
 
 import asyncio

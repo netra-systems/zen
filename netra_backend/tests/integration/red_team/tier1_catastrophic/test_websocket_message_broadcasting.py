@@ -34,7 +34,7 @@ from sqlalchemy.orm import sessionmaker
 from netra_backend.app.main import app
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.websocket_core import UnifiedWebSocketManager as IWebSocketService
-from netra_backend.app.websocket_core.connection_manager import ConnectionManager as WebSocketConnectionManager
+from netra_backend.app.websocket_core import WebSocketManager as WebSocketConnectionManager
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.db.models_user import User
 # AgentRun model - creating mock for tests

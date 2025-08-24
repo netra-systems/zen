@@ -17,7 +17,7 @@ Architecture:
 """
 
 from dataclasses import dataclass
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 from tests.e2e.load_test_utilities import SystemResourceMonitor
 from typing import Any, Dict, List
 import asyncio

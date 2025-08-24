@@ -7,7 +7,7 @@ Business Value: Ensures precise usage metrics collection for billing,
 preventing revenue loss and customer disputes.
 """
 
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
 from netra_backend.tests.test_utils import setup_test_path
 from pathlib import Path
 import sys

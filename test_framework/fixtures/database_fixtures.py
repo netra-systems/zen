@@ -1,8 +1,17 @@
 """
-Database-related test fixtures.
-Consolidates database fixtures from across services.
+Database-related test fixtures - Single Source of Truth for Test Database Sessions.
+
+CRITICAL: This is the ONLY location where shared test database sessions should be defined.
+Service-specific implementations should be removed and delegated to this module.
+
+Business Value Justification (BVJ):
+- Segment: Platform/Internal (test infrastructure)
+- Business Goal: Eliminate duplicate test database session management
+- Value Impact: Consistent test database handling across all services
+- Strategic Impact: Single source of truth for test database patterns
 """
 
+import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
@@ -10,7 +19,7 @@ from unittest.mock import AsyncMock, MagicMock
 import os
 if not os.environ.get("TEST_COLLECTION_MODE"):
     try:
-        from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+        from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
         from sqlalchemy.pool import StaticPool
         SQLALCHEMY_AVAILABLE = True
     except ImportError:
@@ -21,7 +30,11 @@ else:
 
 @pytest.fixture
 async def test_db_session():
-    """Create async database session for tests with fresh tables"""
+    """SINGLE SOURCE OF TRUTH for test database sessions across all services.
+    
+    Creates async database session for tests with fresh tables.
+    All services should use this fixture instead of creating their own.
+    """
     if not SQLALCHEMY_AVAILABLE:
         # Return mock session if SQLAlchemy not available
         mock_session = AsyncMock()
@@ -42,7 +55,6 @@ async def test_db_session():
     )
     
     # Create session
-    from sqlalchemy.ext.asyncio import async_sessionmaker
     async_session_maker = async_sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
     )
@@ -52,6 +64,32 @@ async def test_db_session():
         await session.rollback()
     
     await engine.dispose()
+
+
+@pytest.fixture
+async def netra_backend_db_session():
+    """Test database session specifically for netra_backend service.
+    
+    Delegates to the service's single source of truth implementation.
+    """
+    from netra_backend.app.database import get_db
+    async for session in get_db():
+        yield session
+
+
+@pytest.fixture  
+async def auth_service_db_session():
+    """Test database session specifically for auth_service.
+    
+    Delegates to the service's single source of truth implementation.
+    """
+    from auth_service.auth_core.database.connection import auth_db
+    # Initialize if not already initialized
+    if not auth_db._initialized:
+        await auth_db.initialize()
+    
+    async with auth_db.get_session() as session:
+        yield session
 
 @pytest.fixture
 def mock_postgres_connection():

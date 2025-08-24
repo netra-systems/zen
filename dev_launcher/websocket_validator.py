@@ -14,8 +14,9 @@ Business Value Justification:
 import asyncio
 import json
 import logging
-import os
 import time
+
+from dev_launcher.isolated_environment import get_env
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
@@ -68,14 +69,15 @@ class WebSocketValidator:
     def _discover_websocket_endpoints(self) -> None:
         """Discover WebSocket endpoints from environment variables."""
         # Backend WebSocket endpoint (regular JSON format) - always required
-        backend_port = int(os.environ.get("BACKEND_PORT", "8000"))
+        env = get_env()
+        backend_port = int(env.get("BACKEND_PORT", "8000"))
         self._add_endpoint("main_ws", "localhost", backend_port, "/ws", required=True)
         
         # MCP WebSocket endpoint (JSON-RPC format) - optional, may not be available in all configurations
         self._add_endpoint("mcp_ws", "localhost", backend_port, "/api/mcp/ws", required=False)
         
         # Additional WebSocket endpoints can be discovered here
-        websocket_port = int(os.environ.get("WEBSOCKET_PORT", backend_port))
+        websocket_port = int(env.get("WEBSOCKET_PORT", backend_port))
         if websocket_port != backend_port:
             self._add_endpoint("dedicated_ws", "localhost", websocket_port, "/ws", required=True)
         

@@ -18,7 +18,7 @@ Business Value Justification (BVJ):
 from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.websocket.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch

@@ -284,11 +284,13 @@ class ServiceStartupCoordinator:
         return allocated_port
     
     def _update_backend_auth_config(self, auth_port: int):
-        """Update backend environment with auth service port."""
-        import os
-        os.environ["AUTH_SERVICE_PORT"] = str(auth_port)
-        os.environ["AUTH_SERVICE_URL"] = f"http://localhost:{auth_port}"
-        logger.debug(f"Updated backend config: AUTH_SERVICE_PORT={auth_port}")
+        """Update backend environment with auth service port.
+        
+        NOTE: This method is now redundant as auth_starter.py handles
+        setting AUTH_SERVICE_PORT/URL directly via EnvironmentManager.
+        Keeping for backward compatibility but no longer sets duplicates.
+        """
+        logger.debug(f"Auth port {auth_port} configuration handled by auth_starter")
     
     def get_allocated_ports(self) -> Dict[str, int]:
         """Get all allocated service ports."""

@@ -4,11 +4,12 @@ Log filtering system for clean startup output.
 Consolidated log filtering based on startup mode as per spec v2.0.
 """
 
-import os
 import re
 import time
 from enum import Enum
 from typing import Any, Dict, Optional, Set
+
+from dev_launcher.isolated_environment import get_env
 
 try:
     from .filter_patterns import (
@@ -152,17 +153,17 @@ class LogFilter:
     
     def _filter_minimal(self, message: str, level: str) -> bool:
         """Filter for minimal mode - only essentials."""
-        # Show errors, warnings, and success
-        if level in ["ERROR", "CRITICAL", "WARNING", "SUCCESS"]:
-            return True
-            
-        # Hide all noise patterns
+        # Hide all noise patterns first (regardless of level)
         for pattern in NOISE_PATTERNS:
             if re.search(pattern, message, re.IGNORECASE):
                 return False
         
-        # Show key startup messages only
-        if level in ["DEBUG", "INFO"]:
+        # Show errors, warnings, success, and info (if not noise)
+        if level in ["ERROR", "CRITICAL", "WARNING", "SUCCESS", "INFO"]:
+            return True
+        
+        # For debug messages, only show key startup messages
+        if level == "DEBUG":
             message_lower = message.lower()
             return any(keyword in message_lower for keyword in KEY_STARTUP_MESSAGES)
             
@@ -234,7 +235,8 @@ class LogFilter:
     @classmethod
     def from_env(cls) -> 'LogFilter':
         """Create log filter from environment variable."""
-        mode_str = os.environ.get("NETRA_STARTUP_MODE", "minimal").lower()
+        env = get_env()
+        mode_str = env.get("NETRA_STARTUP_MODE", "minimal").lower()
         try:
             mode = StartupMode(mode_str)
         except ValueError:

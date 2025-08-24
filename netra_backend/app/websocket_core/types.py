@@ -13,6 +13,7 @@ Consolidated types from 20+ files into single module.
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
+import time
 from pydantic import BaseModel, Field
 
 
@@ -303,8 +304,6 @@ def is_jsonrpc_message(message: Dict[str, Any]) -> bool:
 
 def convert_jsonrpc_to_websocket_message(jsonrpc_msg: Dict[str, Any]) -> WebSocketMessage:
     """Convert JSON-RPC message to WebSocket message format."""
-    import time
-    
     if "method" in jsonrpc_msg:
         msg_type = MessageType.JSONRPC_REQUEST
     elif "result" in jsonrpc_msg or "error" in jsonrpc_msg:
@@ -317,3 +316,58 @@ def convert_jsonrpc_to_websocket_message(jsonrpc_msg: Dict[str, Any]) -> WebSock
         payload=jsonrpc_msg,
         timestamp=time.time()
     )
+
+
+# Batch Message Processing Types
+
+class MessageState(str, Enum):
+    """Message processing states for batch operations."""
+    PENDING = "pending"
+    SENDING = "sending"
+    SENT = "sent"
+    FAILED = "failed"
+
+
+class BatchingStrategy(str, Enum):
+    """Batching strategy options."""
+    SIZE_BASED = "size_based"
+    TIME_BASED = "time_based"
+    ADAPTIVE = "adaptive"
+    PRIORITY_BASED = "priority_based"
+
+
+class BatchConfig(BaseModel):
+    """Configuration for batch message processing."""
+    max_batch_size: int = 10
+    max_wait_time: float = 0.1
+    strategy: BatchingStrategy = BatchingStrategy.ADAPTIVE
+    enable_compression: bool = False
+    retry_attempts: int = 3
+    retry_delay_seconds: float = 0.5
+    priority_threshold: int = 100
+
+
+class PendingMessage(BaseModel):
+    """A message pending in the batch queue."""
+    content: Dict[str, Any]
+    connection_id: str
+    user_id: str
+    thread_id: Optional[str] = None
+    priority: int = 0
+    created_at: float = Field(default_factory=time.time)
+    state: MessageState = MessageState.PENDING
+    retry_count: int = 0
+    max_retries: int = 3
+    last_retry_time: float = Field(default_factory=time.time)
+    message_id: Optional[str] = None
+
+
+class MessageBatch(BaseModel):
+    """A batch of messages ready for sending."""
+    messages: List[PendingMessage]
+    connection_id: str
+    user_id: str
+    batch_id: str
+    created_at: float = Field(default_factory=time.time)
+    total_size_bytes: int = 0
+    compression_enabled: bool = False

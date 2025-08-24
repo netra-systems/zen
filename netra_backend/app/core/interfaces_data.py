@@ -276,7 +276,7 @@ class CoreClickHouseOperations:
         """Send WebSocket notification for corpus events."""
         try:
             from netra_backend.app.websocket_core import get_unified_manager
-manager = get_unified_manager()
+            manager = get_unified_manager()
             
             if event_type == "created":
                 payload = {

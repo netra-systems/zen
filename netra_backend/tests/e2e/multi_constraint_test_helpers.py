@@ -7,7 +7,7 @@ Maximum 300 lines, functions ≤8 lines.
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
     ActionsToMeetGoalsSubAgent,
 )
-from netra_backend.app.websocket_core.connection_manager import ConnectionManager as WebSocketManager
+from netra_backend.app.websocket_core import WebSocketManager as WebSocketManager
 from typing import Dict, List
 import uuid
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
