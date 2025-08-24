@@ -206,7 +206,7 @@ with ThreadPoolExecutor(max_workers=3) as executor:
 
 ### Report Location
 
-Reports are saved to `test_reports/unified_test_report.json` with timestamped results for historical tracking.
+Reports are saved to `tests/test_reports/unified_test_report.json` with timestamped results for historical tracking.
 
 ## Error Handling
 
@@ -362,7 +362,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-reports
-          path: test_reports/
+          path: tests/test_reports/
 ```
 
 ### Docker Integration
@@ -377,7 +377,7 @@ WORKDIR /app
 RUN pip install -r requirements.txt
 RUN python run_unified_tests.py
 
-# Results available in /app/test_reports/
+# Results available in /app/tests/test_reports/
 ```
 
 ## Success Criteria ✅

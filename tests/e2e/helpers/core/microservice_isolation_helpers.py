@@ -92,7 +92,7 @@ class MicroserviceIsolationValidator:
                     "requirements.txt", 
                     "auth_core/__init__.py"
                 ],
-                dockerfile_name="Dockerfile.auth"
+                dockerfile_name="deployment/docker/Dockerfile.auth"
             ),
             "main_backend": MicroserviceSpec(
                 name="main_backend",
@@ -114,7 +114,7 @@ class MicroserviceIsolationValidator:
                     "main.py",
                     "core/__init__.py"
                 ],
-                dockerfile_name="Dockerfile.backend"
+                dockerfile_name="deployment/docker/Dockerfile.backend"
             ),
             "frontend": MicroserviceSpec(
                 name="frontend",
@@ -140,7 +140,7 @@ class MicroserviceIsolationValidator:
                     "package.json",
                     "next.config.ts"
                 ],
-                dockerfile_name="Dockerfile.frontend"
+                dockerfile_name="deployment/docker/Dockerfile.frontend"
             )
         }
 
