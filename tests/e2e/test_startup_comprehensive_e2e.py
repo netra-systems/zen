@@ -28,6 +28,8 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
+from test_framework.environment_markers import env, env_requires, env_safe, all_envs
+
 import aiohttp
 import psutil
 import pytest
@@ -268,6 +270,17 @@ def startup_tester():
     tester.cleanup()
 
 
+@env("test", "dev", "staging", "prod")
+@env_requires(
+    services=["health_endpoints"],
+    features=["basic_connectivity"],
+    data=[]
+)
+@env_safe(
+    operations=["read_only", "health_check"],
+    impact="none",
+    rollback=True
+)
 class TestStartupComprehensiveE2E:
     """Comprehensive E2E tests for system startup."""
     

@@ -4,6 +4,7 @@ import pytest
 import asyncio
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
+from test_framework.containers_utils import TestcontainerHelper
 
 # Basic test setup fixtures
 @pytest.fixture
@@ -129,3 +130,11 @@ def real_llm_config():
         "timeout": float(os.environ.get("LLM_TEST_TIMEOUT", "30.0")),
         "max_retries": int(os.environ.get("LLM_TEST_RETRIES", "3"))
     }
+
+# Container management for L3/L4 testing
+@pytest.fixture
+def container_helper():
+    """Provide containerized services for L3/L4 testing."""
+    helper = TestcontainerHelper()
+    yield helper
+    helper.stop_all_containers()

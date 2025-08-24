@@ -48,6 +48,9 @@ from test_framework.auto_splitter import TestSplitter, SplittingStrategy
 from test_framework.fail_fast_strategies import FailFastStrategy, FailFastMode
 from test_framework.config.category_config import CategoryConfigLoader
 
+# Environment-aware testing imports
+from test_framework.environment_markers import TestEnvironment, filter_tests_by_environment
+
 
 class UnifiedTestRunner:
     """Modern test runner with category-based execution and progress tracking."""
@@ -166,9 +169,16 @@ class UnifiedTestRunner:
     
     def _configure_environment(self, args: argparse.Namespace):
         """Configure test environment based on arguments."""
-        if args.env == "dev":
+        if args.env == "dev" or args.real_services:
             configure_dev_environment()
-        elif args.real_llm:
+            # Enable real services for frontend tests
+            if args.real_services:
+                os.environ['USE_REAL_SERVICES'] = 'true'
+                os.environ['BACKEND_URL'] = os.getenv('BACKEND_URL', 'http://localhost:8000')
+                os.environ['AUTH_SERVICE_URL'] = os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081')
+                os.environ['WEBSOCKET_URL'] = os.getenv('WEBSOCKET_URL', 'ws://localhost:8000')
+        
+        if args.real_llm:
             configure_real_llm(
                 model="gemini-2.5-flash",
                 timeout=60,
@@ -382,6 +392,9 @@ class UnifiedTestRunner:
                 "errors": f"Service '{service}' not configured"
             }
         
+        # Set environment for test execution
+        self._set_test_environment(args)
+        
         # Build test command
         if service == "frontend":
             cmd = self._build_frontend_command(category_name, args)
@@ -445,6 +458,16 @@ class UnifiedTestRunner:
         if category_name in category_markers:
             cmd_parts.extend(category_markers[category_name])
         
+        # Add environment-specific filtering
+        if hasattr(args, 'env') and args.env:
+            # Add environment marker to filter tests
+            env_marker = f'env={args.env}'
+            if category_name in category_markers:
+                # Combine with existing marker
+                cmd_parts[-1] = f'"{cmd_parts[-1][1:-1]} and {env_marker}"'
+            else:
+                cmd_parts.extend(["-m", f'"{env_marker}"'])
+        
         # Add coverage options
         if not args.no_coverage:
             cmd_parts.extend([
@@ -473,14 +496,29 @@ class UnifiedTestRunner:
     
     def _build_frontend_command(self, category_name: str, args: argparse.Namespace) -> str:
         """Build test command for frontend."""
+        # Determine which Jest setup to use
+        if args.real_services or args.env in ['dev', 'staging']:
+            setup_file = "jest.setup.real.js"
+            # Set environment variables for real service testing
+            os.environ['USE_REAL_SERVICES'] = 'true'
+            if args.env == 'dev':
+                os.environ['USE_DOCKER_SERVICES'] = 'true'
+            if args.real_llm:
+                os.environ['USE_REAL_LLM'] = 'true'
+        else:
+            setup_file = "jest.setup.js"
+            os.environ.pop('USE_REAL_SERVICES', None)
+            os.environ.pop('USE_DOCKER_SERVICES', None)
+            os.environ.pop('USE_REAL_LLM', None)
+        
         category_commands = {
-            "unit": "npm test -- --testPathPattern=unit",
-            "integration": "npm test -- --testPathPattern=integration",
-            "e2e": "npm test -- --testPathPattern=e2e",
-            "frontend": "npm test"
+            "unit": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}' --testPathPattern=unit",
+            "integration": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}' --testPathPattern=integration",
+            "e2e": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}' --testPathPattern=e2e",
+            "frontend": f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}'"
         }
         
-        base_command = category_commands.get(category_name, "npm test")
+        base_command = category_commands.get(category_name, f"npm test -- --setupFilesAfterEnv='<rootDir>/{setup_file}'")
         
         # Add additional flags
         if args.no_coverage:
@@ -489,8 +527,42 @@ class UnifiedTestRunner:
             base_command += " --bail"
         if args.verbose:
             base_command += " --verbose"
+        if hasattr(args, 'max_workers') and args.max_workers:
+            base_command += f" --maxWorkers={args.max_workers}"
         
         return base_command
+    
+    def _set_test_environment(self, args: argparse.Namespace):
+        """Set environment variables for test execution."""
+        # Set TEST_ENV for environment-aware testing
+        if hasattr(args, 'env'):
+            os.environ['TEST_ENV'] = args.env
+        
+        # Set production protection
+        if hasattr(args, 'allow_prod') and args.allow_prod:
+            os.environ['ALLOW_PROD_TESTS'] = 'true'
+        else:
+            os.environ.pop('ALLOW_PROD_TESTS', None)
+        
+        # Map env to existing env var patterns
+        env_mapping = {
+            'test': 'local',
+            'dev': 'dev',
+            'staging': 'staging',
+            'prod': 'prod'
+        }
+        
+        if hasattr(args, 'env'):
+            mapped_env = env_mapping.get(args.env, args.env)
+            os.environ['ENVIRONMENT'] = mapped_env
+            
+            # Set specific flags based on environment
+            if args.env == 'test':
+                os.environ['TEST_MODE'] = 'mock'
+                os.environ['USE_TEST_DATABASE'] = 'true'
+            elif args.env in ['dev', 'staging', 'prod']:
+                os.environ['TEST_MODE'] = 'real'
+                os.environ.pop('USE_TEST_DATABASE', None)
     
     def _extract_test_counts_from_result(self, result: Dict) -> Dict[str, int]:
         """Extract test counts from execution result."""
@@ -602,15 +674,39 @@ def main():
     # Environment configuration
     parser.add_argument(
         "--env",
-        choices=["local", "dev", "staging", "prod"],
-        default="local",
-        help="Environment to test against (default: local)"
+        choices=["test", "dev", "staging", "prod"],
+        default="test",
+        help="Environment to test against (default: test)"
+    )
+    
+    parser.add_argument(
+        "--exclude-env",
+        choices=["test", "dev", "staging", "prod"],
+        help="Exclude tests for specific environment"
+    )
+    
+    parser.add_argument(
+        "--allow-prod",
+        action="store_true",
+        help="Allow production tests to run (requires explicit flag)"
     )
     
     parser.add_argument(
         "--real-llm",
         action="store_true",
         help="Use real LLM instead of mocks"
+    )
+    
+    parser.add_argument(
+        "--real-services",
+        action="store_true",
+        help="Use real backend services (Docker or local) for frontend tests"
+    )
+    
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        help="Maximum number of worker processes for Jest (frontend tests)"
     )
     
     # Coverage options

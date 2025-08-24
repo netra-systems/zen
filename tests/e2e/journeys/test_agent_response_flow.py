@@ -23,6 +23,7 @@ import time
 from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 
+from test_framework.environment_markers import env, env_requires, dev_and_staging
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -172,6 +173,12 @@ class AgentResponseFlowTester:
             return {"status": "error_handled", "error": str(e)[:100]}
 
 
+@env("dev", "staging") 
+@env_requires(
+    services=["llm_manager", "quality_gate_service", "websocket_manager"],
+    features=["agent_processing", "response_streaming", "quality_validation"],
+    data=["test_agents", "mock_llm_responses"]
+)
 class TestAgentResponseFlow:
     """E2E tests for agent response flow."""
     
@@ -292,6 +299,12 @@ class TestAgentResponseFlow:
         assert len(response_tester.response_history) == response_count
 
 
+@env("staging")
+@env_requires(
+    services=["llm_manager", "quality_gate_service"],
+    features=["enterprise_quality_standards", "real_llm_integration"],
+    data=["enterprise_test_data"]
+)
 @pytest.mark.critical
 class TestCriticalResponseFlows:
     """Critical response flow scenarios."""

@@ -5,9 +5,8 @@
 Manages all DATABASE_URL, CLICKHOUSE_URL, POSTGRES_URL references.
 Eliminates inconsistencies across 110+ files.
 
-**CONFIGURATION MANAGER**: This module is part of the configuration system
-and requires direct os.environ access for loading database configuration.
-Application code should use the unified configuration system instead.
+**UPDATED**: This module now uses IsolatedEnvironment for unified environment management.
+Follows SPEC/unified_environment_management.xml for consistent environment access.
 
 Business Value: Prevents $12K MRR loss from database configuration errors.
 Enterprise customers require 100% database reliability.
@@ -15,14 +14,15 @@ Enterprise customers require 100% database reliability.
 Each function ≤8 lines, file ≤300 lines.
 """
 
-import os
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urlunparse
 
+from dev_launcher.isolated_environment import get_env
 from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.exceptions_config import ConfigurationError
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.Config import AppConfig
+from shared.database.core_database_manager import CoreDatabaseManager
 
 
 # Global set to track logged messages across all instances
@@ -39,6 +39,7 @@ class DatabaseConfigManager:
     def __init__(self):
         """Initialize database configuration manager."""
         self._logger = logger
+        self._env = get_env()  # Use IsolatedEnvironment for all env access
         self._environment = self._get_environment()
         self._validation_rules = self._load_validation_rules()
         self._connection_templates = self._load_connection_templates()
@@ -109,14 +110,14 @@ class DatabaseConfigManager:
     def _get_postgres_url(self) -> Optional[str]:
         """Get PostgreSQL URL from environment or defaults.
         
-        CONFIG MANAGER: Direct env access required for database URL loading.
+        Uses IsolatedEnvironment for unified environment management.
         """
         # Return cached URL if available
         if self._postgres_url_cache is not None:
             return self._postgres_url_cache
             
-        # CONFIG BOOTSTRAP: Direct env access for database URL configuration
-        url = os.environ.get("DATABASE_URL")
+        # Use IsolatedEnvironment for database URL configuration
+        url = self._env.get("DATABASE_URL")
         if url:
             # Normalize the URL to add driver if missing
             url = self._normalize_postgres_url(url)
@@ -144,21 +145,18 @@ class DatabaseConfigManager:
         return url
     
     def _normalize_postgres_url(self, url: str) -> str:
-        """Normalize PostgreSQL URL to add driver if missing.
+        """Normalize PostgreSQL URL using shared CoreDatabaseManager.
         
-        Converts simple postgresql:// URLs to postgresql+asyncpg:// for async support.
+        Uses the canonical URL normalization from CoreDatabaseManager.
         """
-        parsed = urlparse(url)
+        normalized = CoreDatabaseManager.normalize_postgres_url(url)
         
-        # If URL uses basic postgresql:// scheme, add asyncpg driver
-        if parsed.scheme == "postgresql" or parsed.scheme == "postgres":
-            # Replace scheme with postgresql+asyncpg for async operations
-            normalized = url.replace(f"{parsed.scheme}://", "postgresql+asyncpg://")
-            self._logger.debug(f"Normalized URL scheme from {parsed.scheme} to postgresql+asyncpg")
-            return normalized
+        # Add async driver for application use
+        if normalized.startswith("postgresql://"):
+            normalized = normalized.replace("postgresql://", "postgresql+asyncpg://")
+            self._logger.debug(f"Added asyncpg driver for application use")
         
-        # URL already has a driver specified or is not PostgreSQL
-        return url
+        return normalized
     
     def _get_default_postgres_url(self) -> str:
         """Get default PostgreSQL URL for environment."""
@@ -176,8 +174,8 @@ class DatabaseConfigManager:
         if not any(parsed.scheme.startswith(scheme) for scheme in ["postgresql", "postgres"]):
             return  # Skip validation for non-PostgreSQL URLs
         
-        # Skip validation for Cloud SQL Unix socket connections (like auth service)
-        if "/cloudsql/" in url:
+        # Use CoreDatabaseManager to detect Cloud SQL connections
+        if CoreDatabaseManager.is_cloud_sql_connection(url):
             # Only log this message once globally to prevent log spam
             log_key = "cloudsql_socket_detected"
             if log_key not in _GLOBAL_LOGGED_MESSAGES:
@@ -227,7 +225,7 @@ class DatabaseConfigManager:
         default_port = "8123"  # Always use HTTP port for dev launcher
         
         # FIX: Support both CLICKHOUSE_PASSWORD and CLICKHOUSE_DEFAULT_PASSWORD for backward compatibility
-        password = os.environ.get("CLICKHOUSE_PASSWORD") or os.environ.get("CLICKHOUSE_DEFAULT_PASSWORD", "")
+        password = self._env.get("CLICKHOUSE_PASSWORD") or self._env.get("CLICKHOUSE_DEFAULT_PASSWORD", "")
         
         # Log warning if no password is set in non-dev environments
         if not password and self._environment not in ["development", "testing"]:
@@ -243,11 +241,11 @@ class DatabaseConfigManager:
             default_host = ""
         
         config = {
-            "host": os.environ.get("CLICKHOUSE_HOST", default_host),
-            "port": os.environ.get("CLICKHOUSE_HTTP_PORT", default_port),
-            "user": os.environ.get("CLICKHOUSE_USER", "default"),
+            "host": self._env.get("CLICKHOUSE_HOST", default_host),
+            "port": self._env.get("CLICKHOUSE_HTTP_PORT", default_port),
+            "user": self._env.get("CLICKHOUSE_USER", "default"),
             "password": password,
-            "database": os.environ.get("CLICKHOUSE_DB", "default")
+            "database": self._env.get("CLICKHOUSE_DB", "default")
         }
         # Cache the configuration
         self._clickhouse_config_cache = config
@@ -261,12 +259,12 @@ class DatabaseConfigManager:
     def _apply_to_clickhouse_native(self, config: AppConfig, ch_config: Dict[str, str]) -> None:
         """Apply configuration to ClickHouse native connection.
         
-        CONFIG MANAGER: Direct env access for native port configuration.
+        Uses IsolatedEnvironment for native port configuration.
         """
         if hasattr(config, 'clickhouse_native'):
             config.clickhouse_native.host = ch_config["host"]
-            # CONFIG BOOTSTRAP: Direct env access for native port
-            config.clickhouse_native.port = int(os.environ.get("CLICKHOUSE_NATIVE_PORT", "9000"))
+            # Use IsolatedEnvironment for native port
+            config.clickhouse_native.port = int(self._env.get("CLICKHOUSE_NATIVE_PORT", "9000"))
             config.clickhouse_native.user = ch_config["user"]
             config.clickhouse_native.password = ch_config["password"]
             config.clickhouse_native.database = ch_config["database"]
@@ -285,10 +283,10 @@ class DatabaseConfigManager:
     def _set_clickhouse_url(self, config: AppConfig) -> None:
         """Set unified ClickHouse URL for external integrations.
         
-        CONFIG MANAGER: Direct env access for ClickHouse URL configuration.
+        Uses IsolatedEnvironment for ClickHouse URL configuration.
         """
-        # CONFIG BOOTSTRAP: Direct env access for ClickHouse URL
-        clickhouse_url = os.environ.get("CLICKHOUSE_URL")
+        # Use IsolatedEnvironment for ClickHouse URL
+        clickhouse_url = self._env.get("CLICKHOUSE_URL")
         
         # For staging/production, require explicit ClickHouse URL
         if not clickhouse_url:
@@ -314,14 +312,14 @@ class DatabaseConfigManager:
     def _get_redis_url(self) -> Optional[str]:
         """Get Redis URL from environment.
         
-        CONFIG MANAGER: Direct env access required for Redis URL loading.
+        Uses IsolatedEnvironment for Redis URL loading.
         """
         # Return cached URL if available
         if self._redis_url_cache is not None:
             return self._redis_url_cache
             
-        # CONFIG BOOTSTRAP: Direct env access for Redis URL
-        url = os.environ.get("REDIS_URL")
+        # Use IsolatedEnvironment for Redis URL
+        url = self._env.get("REDIS_URL")
         # Cache the URL
         self._redis_url_cache = url
         return url
@@ -391,13 +389,13 @@ class DatabaseConfigManager:
     def get_database_summary(self) -> Dict[str, str]:
         """Get database configuration summary for monitoring.
         
-        CONFIG MANAGER: Direct env access for database summary.
+        Uses IsolatedEnvironment for database summary.
         """
-        # CONFIG BOOTSTRAP: Direct env access for configuration summary
+        # Use IsolatedEnvironment for configuration summary
         return {
-            "postgres_configured": bool(os.environ.get("DATABASE_URL")),
-            "clickhouse_configured": bool(os.environ.get("CLICKHOUSE_HOST")),
-            "redis_configured": bool(os.environ.get("REDIS_URL")),
+            "postgres_configured": bool(self._env.get("DATABASE_URL")),
+            "clickhouse_configured": bool(self._env.get("CLICKHOUSE_HOST")),
+            "redis_configured": bool(self._env.get("REDIS_URL")),
             "environment": self._environment,
             "ssl_required": str(self._validation_rules.get(self._environment, {}).get("require_ssl", False))
         }

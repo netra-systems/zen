@@ -196,39 +196,17 @@ class AuthDatabaseManager:
     
     @staticmethod
     def _normalize_postgres_url(url: str) -> str:
-        """Normalize PostgreSQL URL format for consistency.
-        
-        Args:
-            url: Database URL to normalize
-            
-        Returns:
-            Normalized PostgreSQL URL
-        """
+        """Normalize PostgreSQL URL using shared CoreDatabaseManager."""
         return CoreDatabaseManager.normalize_postgres_url(url)
     
     @staticmethod
     def _convert_sslmode_to_ssl(url: str) -> str:
-        """Convert sslmode parameter to ssl parameter for asyncpg.
-        
-        Args:
-            url: Database URL with sslmode parameter
-            
-        Returns:
-            URL with ssl parameter for asyncpg compatibility
-        """
+        """Convert sslmode parameter using shared CoreDatabaseManager."""
         return CoreDatabaseManager.convert_ssl_params_for_asyncpg(url)
     
     @staticmethod
     def _normalize_database_url(url: str) -> str:
-        """Normalize database URL for auth service compatibility.
-        
-        Args:
-            url: Database URL to normalize
-            
-        Returns:
-            URL normalized for auth service with SSL parameters handled
-        """
-        # Use the same logic as get_auth_database_url_async
+        """Normalize database URL using shared CoreDatabaseManager."""
         resolved_url = CoreDatabaseManager.resolve_ssl_parameter_conflicts(url, "asyncpg")
         return CoreDatabaseManager.format_url_for_async_driver(resolved_url)
     

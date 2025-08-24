@@ -25,6 +25,11 @@ from unittest.mock import Mock, mock_open, patch, AsyncMock, MagicMock
 
 import pytest
 
+# Environment-aware testing imports
+from test_framework.environment_markers import (
+    env, env_requires, test_only, dev_and_staging
+)
+
 from netra_backend.app.config import get_config, reload_config, validate_configuration
 
 from netra_backend.app.core.configuration.base import config_manager, get_unified_config
@@ -61,6 +66,7 @@ class TestConfigurationIntegration:
             "LOG_LEVEL": "INFO"
         }
 
+    @env("test", "dev")  # Integration test that can run in test and dev environments
     @pytest.mark.asyncio
     async def test_configuration_loading_from_environment(self, base_environment_config):
         """
@@ -105,6 +111,8 @@ class TestConfigurationIntegration:
         if hasattr(config, 'log_level'):
             assert config.log_level.upper() in valid_levels
 
+    @env("dev", "staging")  # Tests staging-specific config, needs real environment
+    @env_requires(features=["staging_configuration"])
     @pytest.mark.asyncio
     async def test_environment_specific_configurations(self, staging_environment_config):
         """

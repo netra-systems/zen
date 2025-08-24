@@ -36,6 +36,11 @@ import httpx
 import psutil
 import pytest
 
+# Environment-aware testing imports
+from test_framework.environment_markers import (
+    env, env_requires, dev_and_staging, all_envs, env_safe
+)
+
 from dev_launcher.config import LauncherConfig
 # Removed broken import statement
 # Removed broken import statement
@@ -74,6 +79,8 @@ class TestSystemStartup:
             ServiceInfo("frontend", 3000, "/api/health")
         ]
     
+    @dev_and_staging  # E2E test requiring real services
+    @env_requires(services=["postgres", "redis"], features=["service_discovery"])
     @pytest.mark.asyncio
     async def test_dev_launcher_starts_all_services(self, launcher_config):
         """Test that dev launcher starts all required services."""

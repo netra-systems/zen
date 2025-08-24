@@ -35,6 +35,8 @@ class DatabaseManager:
     def get_base_database_url() -> str:
         """Get clean base URL without driver-specific elements.
         
+        Uses CoreDatabaseManager for consistent URL normalization.
+        
         Returns:
             Clean database URL with driver prefixes stripped but SSL params preserved for non-Cloud SQL
         """
@@ -68,27 +70,15 @@ class DatabaseManager:
         if not raw_url:
             return DatabaseManager._get_default_database_url()
         
-        # Local URL processing (avoiding shared module import issues during tests)
-        # Step 1: Strip async driver prefixes and normalize postgres->postgresql
-        clean_url = raw_url
-        clean_url = clean_url.replace("postgresql+asyncpg://", "postgresql://")
-        clean_url = clean_url.replace("postgres+asyncpg://", "postgresql://")
-        clean_url = clean_url.replace("postgres://", "postgresql://")
+        # Use shared CoreDatabaseManager for consistent URL normalization
+        normalized = CoreDatabaseManager.normalize_postgres_url(raw_url)
         
-        # Step 2: Handle SSL parameters - only strip for Cloud SQL connections
-        is_cloud_sql = "/cloudsql/" in clean_url
-            
-        if is_cloud_sql:
-            # For Cloud SQL, remove all SSL parameters
-            import re
-            clean_url = re.sub(r'[&?]sslmode=[^&]*', '', clean_url)
-            clean_url = re.sub(r'[&?]ssl=[^&]*', '', clean_url)
-            # Clean up any double ampersands or trailing ampersands/question marks
-            clean_url = re.sub(r'&&+', '&', clean_url)
-            clean_url = re.sub(r'[&?]$', '', clean_url)
+        # Handle SSL parameters - remove them for Cloud SQL connections
+        if CoreDatabaseManager.is_cloud_sql_connection(normalized):
+            # For Cloud SQL, remove SSL parameters using the shared manager
+            normalized = CoreDatabaseManager.convert_ssl_params_for_asyncpg(normalized)
         
-        # For non-Cloud SQL connections, preserve SSL parameters as-is in the base URL
-        return clean_url
+        return normalized
     
     @staticmethod
     def get_migration_url_sync_format() -> str:
@@ -451,79 +441,42 @@ class DatabaseManager:
             return "postgresql://postgres:password@localhost:5432/netra"
     
     # AUTH SERVICE COMPATIBILITY METHODS
-    # These methods provide auth service compatibility without duplication
+    # These methods provide auth service compatibility while using CoreDatabaseManager
     
     @staticmethod
     def get_auth_database_url_async() -> str:
-        """Get async URL for auth service application (asyncpg).
-        Alias for get_application_url_async() for auth service compatibility.
-        
-        Returns:
-            Database URL compatible with asyncpg driver for auth service
-        """
+        """Get async URL for auth service - delegates to application URL."""
         return DatabaseManager.get_application_url_async()
     
     @staticmethod
     def get_auth_database_url() -> str:
-        """Get base URL for auth service compatibility.
-        Alias for get_base_database_url() for auth service compatibility.
-        
-        Returns:
-            Clean database URL for auth service
-        """
+        """Get base URL for auth service - delegates to base URL."""
         return DatabaseManager.get_base_database_url()
     
     @staticmethod
     def get_auth_database_url_sync() -> str:
-        """Get sync URL for auth service migrations.
-        Alias for get_migration_url_sync_format() for auth service compatibility.
-        
-        Returns:
-            Database URL compatible with synchronous drivers for auth service
-        """
+        """Get sync URL for auth service - delegates to migration URL."""
         return DatabaseManager.get_migration_url_sync_format()
     
     @staticmethod
     def validate_auth_url(url: str = None) -> bool:
-        """Confirm async driver compatibility for auth service.
-        Alias for validate_application_url() for auth service compatibility.
-        
-        Args:
-            url: Optional URL to validate, uses auth URL if None
-            
-        Returns:
-            True if URL is async-compatible
-        """
+        """Validate auth URL - delegates to application URL validation."""
         target_url = url or DatabaseManager.get_auth_database_url_async()
         return DatabaseManager.validate_application_url(target_url)
     
     @staticmethod
     def validate_sync_url(url: str = None) -> bool:
-        """Confirm sync driver compatibility for auth service.
-        Alias for validate_migration_url_sync_format() for auth service compatibility.
-        
-        Args:
-            url: Optional URL to validate, uses migration URL if None
-            
-        Returns:
-            True if URL is sync-compatible
-        """
+        """Validate sync URL - delegates to migration URL validation."""
         target_url = url or DatabaseManager.get_auth_database_url_sync()
         return DatabaseManager.validate_migration_url_sync_format(target_url)
     
     @staticmethod
     def is_test_environment() -> bool:
-        """Detect if running in test environment.
-        Auth service compatibility method.
-        
-        Returns:
-            True if running in test environment
-        """
+        """Detect test environment - uses unified config."""
         config = get_unified_config()
         current_env = config.environment
         is_test_mode = config.environment == "testing"
         
-        # Check if we're in a pytest environment
         import sys
         is_pytest = 'pytest' in sys.modules or 'pytest' in ' '.join(sys.argv)
         
@@ -531,68 +484,29 @@ class DatabaseManager:
     
     @staticmethod
     def create_auth_application_engine():
-        """Return async SQLAlchemy engine for auth service.
-        Alias for create_application_engine() for auth service compatibility.
-        
-        Returns:
-            Async SQLAlchemy engine configured for auth service runtime
-        """
+        """Create auth engine - delegates to application engine."""
         return DatabaseManager.create_application_engine()
     
     @staticmethod
     def get_auth_application_session():
-        """Return async session factory for auth service runtime.
-        Alias for get_application_session() for auth service compatibility.
-        
-        Returns:
-            Async session factory for auth service operations
-        """
+        """Get auth session - delegates to application session."""
         return DatabaseManager.get_application_session()
     
     @staticmethod
     def _normalize_postgres_url(url: str) -> str:
-        """Normalize PostgreSQL URL format for consistency.
-        Auth service compatibility method.
-        
-        Args:
-            url: Database URL to normalize
-            
-        Returns:
-            Normalized PostgreSQL URL
-        """
+        """Normalize URL - delegates to CoreDatabaseManager."""
         return CoreDatabaseManager.normalize_postgres_url(url)
     
     @staticmethod
     def _convert_sslmode_to_ssl(url: str) -> str:
-        """Convert sslmode parameter to ssl parameter for asyncpg.
-        Auth service compatibility method.
-        
-        Args:
-            url: Database URL with sslmode parameter
-            
-        Returns:
-            URL with ssl parameter for asyncpg compatibility
-        """
+        """Convert SSL params - delegates to CoreDatabaseManager."""
         return CoreDatabaseManager.convert_ssl_params_for_asyncpg(url)
     
     @staticmethod
     def _get_default_auth_url() -> str:
-        """Get default database URL for auth service.
-        Auth service compatibility method.
-        
-        Returns:
-            Default database URL for auth service based on environment
-        """
+        """Get default auth URL - delegates to CoreDatabaseManager."""
         current_env = get_current_environment()
-        
-        if current_env == "development":
-            return "postgresql://postgres:password@localhost:5432/netra"
-        elif current_env in ["testing", "test"]:
-            return "sqlite:///:memory:"
-        else:
-            # Staging/production should always have DATABASE_URL set
-            logger.warning(f"No DATABASE_URL found for auth service in {current_env} environment")
-            return "postgresql://postgres:password@localhost:5432/netra"
+        return CoreDatabaseManager.get_default_url_for_environment(current_env)
 
 
     @staticmethod

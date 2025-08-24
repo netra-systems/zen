@@ -20,8 +20,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+from test_framework.environment_markers import env, staging_only, env_requires
 
 
+@env("staging")  # Critical staging-specific issues need real staging environment
+@env_requires(services=["auth_service", "postgres"], features=["cloud_sql_configured"])
 class TestAuthDatabaseInitialization:
     """Test database initialization issues found in staging."""
     
@@ -93,6 +96,7 @@ class TestAuthDatabaseInitialization:
                         pytest.fail(f"Method not found error: {e}")
 
 
+@env("staging")  # Environment detection specifically for staging
 class TestEnvironmentModeDetection:
     """Test environment mode detection issues."""
     
@@ -150,6 +154,7 @@ class TestEnvironmentModeDetection:
                 f"Should not show 'development mode' when ENVIRONMENT=staging"
 
 
+@env("staging")  # Service naming validation for staging deployment
 class TestServiceNaming:
     """Test service naming configuration issues."""
     
@@ -206,6 +211,7 @@ class TestServiceNaming:
                 f"Expected 'auth-service' in response, got: {response.json()}"
 
 
+@env("staging")  # Configuration validation for staging environment
 class TestSimilarConfigurationIssues:
     """Test similar configuration issues that might occur."""
     

@@ -32,6 +32,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from auth_service.auth_core.models.auth_models import AuthProvider
+from test_framework.environment_markers import env, dev_and_staging, env_requires
 
 # Add auth service to path
 auth_service_dir = Path(__file__).parent.parent.parent
@@ -77,6 +78,8 @@ def oauth_code():
     return "mock_auth_code_123"
 
 
+@env("dev", "staging")  # Google OAuth needs real Google endpoints in dev/staging
+@env_requires(services=["auth_service"], features=["google_oauth_configured"])
 class TestGoogleOAuthFlow:
     """Test complete Google OAuth flow"""
     

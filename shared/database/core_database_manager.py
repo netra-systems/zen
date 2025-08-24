@@ -53,6 +53,7 @@ class CoreDatabaseManager:
         
         # Strip async driver prefixes for base URL
         url = url.replace("postgresql+asyncpg://", "postgresql://")
+        url = url.replace("postgres+asyncpg://", "postgresql://")
         
         return url
     

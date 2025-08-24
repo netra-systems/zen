@@ -14,8 +14,10 @@ import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
 from netra_backend.app.db.database_manager import DatabaseManager as AuthDatabaseManager
+from test_framework.environment_markers import env
 
 
+@env("test", "dev")  # Database manager tests can run locally with mocked connections
 class TestAuthDatabaseManager:
     """Test suite for auth service database manager."""
     

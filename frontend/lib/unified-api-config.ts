@@ -1,0 +1,274 @@
+/**
+ * Unified API Configuration System
+ * Crystal clear environment detection and URL configuration
+ * No localhost references in production/staging
+ */
+
+import { logger } from '@/lib/logger';
+
+export type Environment = 'development' | 'test' | 'staging' | 'production';
+
+interface UnifiedApiConfig {
+  environment: Environment;
+  urls: {
+    api: string;
+    websocket: string;
+    auth: string;
+    frontend: string;
+  };
+  endpoints: {
+    // Backend API endpoints
+    health: string;
+    ready: string;
+    threads: string;
+    websocket: string;
+    
+    // Auth service endpoints
+    authConfig: string;
+    authLogin: string;
+    authLogout: string;
+    authCallback: string;
+    authToken: string;
+    authRefresh: string;
+    authValidate: string;
+    authSession: string;
+    authMe: string;
+  };
+  features: {
+    useHttps: boolean;
+    useWebSocketSecure: boolean;
+    corsEnabled: boolean;
+    dynamicDiscovery: boolean;
+  };
+}
+
+/**
+ * Detect current environment with clear precedence
+ * 1. NEXT_PUBLIC_ENVIRONMENT (explicit)
+ * 2. NODE_ENV mapping
+ * 3. Default to development
+ */
+function detectEnvironment(): Environment {
+  // Explicit environment variable takes precedence
+  const explicitEnv = process.env.NEXT_PUBLIC_ENVIRONMENT;
+  if (explicitEnv === 'production' || explicitEnv === 'staging' || explicitEnv === 'test' || explicitEnv === 'development') {
+    logger.info(`Environment detected from NEXT_PUBLIC_ENVIRONMENT: ${explicitEnv}`);
+    return explicitEnv as Environment;
+  }
+  
+  // Fallback to NODE_ENV
+  const nodeEnv = process.env.NODE_ENV;
+  if (nodeEnv === 'production') {
+    // Production NODE_ENV without explicit environment defaults to staging for safety
+    logger.warn('NODE_ENV=production but NEXT_PUBLIC_ENVIRONMENT not set, defaulting to staging');
+    return 'staging';
+  }
+  
+  if (nodeEnv === 'test') {
+    return 'test';
+  }
+  
+  // Default to development
+  return 'development';
+}
+
+/**
+ * Get environment-specific configuration
+ * NO localhost references in staging/production
+ */
+function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
+  switch (env) {
+    case 'production':
+      return {
+        environment: 'production',
+        urls: {
+          api: 'https://api.netrasystems.ai',
+          websocket: 'wss://api.netrasystems.ai',
+          auth: 'https://auth.netrasystems.ai',
+          frontend: 'https://app.netrasystems.ai',
+        },
+        endpoints: {
+          // Backend endpoints - direct API calls, no rewrites
+          health: 'https://api.netrasystems.ai/health',
+          ready: 'https://api.netrasystems.ai/health/ready',
+          threads: 'https://api.netrasystems.ai/api/v1/threads',
+          websocket: 'wss://api.netrasystems.ai/ws',
+          
+          // Auth service endpoints
+          authConfig: 'https://auth.netrasystems.ai/auth/config',
+          authLogin: 'https://auth.netrasystems.ai/auth/login',
+          authLogout: 'https://auth.netrasystems.ai/auth/logout',
+          authCallback: 'https://auth.netrasystems.ai/auth/callback',
+          authToken: 'https://auth.netrasystems.ai/auth/token',
+          authRefresh: 'https://auth.netrasystems.ai/auth/refresh',
+          authValidate: 'https://auth.netrasystems.ai/auth/validate',
+          authSession: 'https://auth.netrasystems.ai/auth/session',
+          authMe: 'https://auth.netrasystems.ai/auth/me',
+        },
+        features: {
+          useHttps: true,
+          useWebSocketSecure: true,
+          corsEnabled: true,
+          dynamicDiscovery: false,
+        },
+      };
+      
+    case 'staging':
+      return {
+        environment: 'staging',
+        urls: {
+          api: 'https://api.staging.netrasystems.ai',
+          websocket: 'wss://api.staging.netrasystems.ai',
+          auth: 'https://auth.staging.netrasystems.ai',
+          frontend: 'https://app.staging.netrasystems.ai',
+        },
+        endpoints: {
+          // Backend endpoints - direct API calls, no rewrites
+          health: 'https://api.staging.netrasystems.ai/health',
+          ready: 'https://api.staging.netrasystems.ai/health/ready',
+          threads: 'https://api.staging.netrasystems.ai/api/v1/threads',
+          websocket: 'wss://api.staging.netrasystems.ai/ws',
+          
+          // Auth service endpoints
+          authConfig: 'https://auth.staging.netrasystems.ai/auth/config',
+          authLogin: 'https://auth.staging.netrasystems.ai/auth/login',
+          authLogout: 'https://auth.staging.netrasystems.ai/auth/logout',
+          authCallback: 'https://auth.staging.netrasystems.ai/auth/callback',
+          authToken: 'https://auth.staging.netrasystems.ai/auth/token',
+          authRefresh: 'https://auth.staging.netrasystems.ai/auth/refresh',
+          authValidate: 'https://auth.staging.netrasystems.ai/auth/validate',
+          authSession: 'https://auth.staging.netrasystems.ai/auth/session',
+          authMe: 'https://auth.staging.netrasystems.ai/auth/me',
+        },
+        features: {
+          useHttps: true,
+          useWebSocketSecure: true,
+          corsEnabled: true,
+          dynamicDiscovery: false,
+        },
+      };
+      
+    case 'test':
+      return {
+        environment: 'test',
+        urls: {
+          api: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+          websocket: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000',
+          auth: process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081',
+          frontend: process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000',
+        },
+        endpoints: {
+          // Test environment uses localhost with potential overrides
+          health: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/health`,
+          ready: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/health/ready`,
+          threads: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/threads`,
+          websocket: `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'}/ws`,
+          
+          authConfig: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/config`,
+          authLogin: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/login`,
+          authLogout: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/logout`,
+          authCallback: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/callback`,
+          authToken: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/token`,
+          authRefresh: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/refresh`,
+          authValidate: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate`,
+          authSession: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/session`,
+          authMe: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/me`,
+        },
+        features: {
+          useHttps: false,
+          useWebSocketSecure: false,
+          corsEnabled: false,
+          dynamicDiscovery: false,
+        },
+      };
+      
+    case 'development':
+    default:
+      return {
+        environment: 'development',
+        urls: {
+          api: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+          websocket: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000',
+          auth: process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081',
+          frontend: process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000',
+        },
+        endpoints: {
+          // Development uses proxied paths for local Next.js rewrites
+          health: '/health',
+          ready: '/health/ready',
+          threads: '/api/v1/threads',
+          websocket: `${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'}/ws`,
+          
+          // Auth endpoints use direct URLs even in development
+          authConfig: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/config`,
+          authLogin: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/login`,
+          authLogout: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/logout`,
+          authCallback: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/callback`,
+          authToken: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/token`,
+          authRefresh: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/refresh`,
+          authValidate: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/validate`,
+          authSession: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/session`,
+          authMe: `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081'}/auth/me`,
+        },
+        features: {
+          useHttps: false,
+          useWebSocketSecure: false,
+          corsEnabled: false,
+          dynamicDiscovery: true,
+        },
+      };
+  }
+}
+
+/**
+ * Get the unified API configuration
+ * This is the single source of truth for all API URLs
+ */
+export function getUnifiedApiConfig(): UnifiedApiConfig {
+  const environment = detectEnvironment();
+  const config = getEnvironmentConfig(environment);
+  
+  // Log configuration for debugging
+  logger.info('Unified API Configuration:', {
+    environment: config.environment,
+    urls: config.urls,
+    features: config.features,
+  });
+  
+  return config;
+}
+
+/**
+ * Helper to get OAuth redirect URI based on environment
+ */
+export function getOAuthRedirectUri(): string {
+  const config = getUnifiedApiConfig();
+  return `${config.urls.frontend}/auth/callback`;
+}
+
+/**
+ * Helper to check if we're in a secure environment
+ */
+export function isSecureEnvironment(): boolean {
+  const config = getUnifiedApiConfig();
+  return config.features.useHttps;
+}
+
+/**
+ * Helper to get WebSocket URL with proper protocol
+ */
+export function getWebSocketUrl(): string {
+  const config = getUnifiedApiConfig();
+  return config.endpoints.websocket;
+}
+
+/**
+ * Export singleton instance
+ */
+export const unifiedApiConfig = getUnifiedApiConfig();
+
+// Export environment detection for other modules
+export { detectEnvironment };
+
+// Type exports
+export type { UnifiedApiConfig };

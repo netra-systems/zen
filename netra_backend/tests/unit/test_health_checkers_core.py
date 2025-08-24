@@ -14,6 +14,8 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
+# Environment-aware testing imports
+from test_framework.environment_markers import test_only, env
 from test_framework.decorators import mock_justified
 from netra_backend.app.core.health_checkers import (
     check_clickhouse_health,
@@ -55,6 +57,7 @@ class TestHealthCheckersCore:
         mock_manager.get_client = AsyncMock(return_value=mock_client)
         return mock_manager, mock_client
     
+    @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking database manager to isolate health check logic. Real database connectivity tested in L3 integration tests.", "L1")
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
     @pytest.mark.asyncio
@@ -74,6 +77,7 @@ class TestHealthCheckersCore:
         assert result.details["component_name"] == "postgres"
         assert result.details["success"] is True
     
+    @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking database manager to test error handling paths. Real database testing in L3 integration tests.", "L1")
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
     @pytest.mark.asyncio
@@ -93,6 +97,7 @@ class TestHealthCheckersCore:
         error_msg = result.details["error_message"]
         assert "Connection failed" in error_msg or "Database engine not initialized" in error_msg
     
+    @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking database manager to test connection failure scenarios. Real connectivity tested in L3 integration tests.", "L1")
     @patch('netra_backend.app.core.unified.db_connection_manager.db_manager')
     @pytest.mark.asyncio
@@ -110,6 +115,7 @@ class TestHealthCheckersCore:
         error_msg = result.details["error_message"]
         assert "Connection failed" in error_msg or "Database engine not initialized" in error_msg
     
+    @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking ClickHouse client and environment detection to isolate health check logic. Real ClickHouse tested in L3 integration tests.", "L1")
     @patch('netra_backend.app.db.clickhouse.get_clickhouse_client')
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
@@ -128,6 +134,7 @@ class TestHealthCheckersCore:
         assert result.details["success"] is True
         mock_clickhouse_client.execute.assert_called_once_with("SELECT 1")
     
+    @test_only  # Unit test with mocked dependencies
     @mock_justified("L1 Unit Test: Mocking environment detection to test disabled ClickHouse scenario. Real environment testing in L3 integration tests.", "L1")
     @patch('netra_backend.app.core.health_checkers._is_development_mode')
     @patch('netra_backend.app.core.health_checkers._is_clickhouse_disabled')

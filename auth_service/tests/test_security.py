@@ -18,6 +18,7 @@ from auth_service.auth_core.models.auth_models import (
 )
 from auth_service.auth_core.routes.auth_routes import router as auth_router
 from auth_service.auth_core.services.auth_service import AuthService
+from test_framework.environment_markers import env, env_safe
 
 
 @pytest.fixture
@@ -103,6 +104,8 @@ def security_test_payloads():
     }
 
 
+@env("test", "dev")  # Security tests should NEVER run in production
+@env_safe(operations=["read_only"], impact="none", rollback=True)
 class TestSQLInjectionPrevention:
     """Test SQL injection prevention across all endpoints"""
     
@@ -225,6 +228,7 @@ class TestSQLInjectionPrevention:
             assert response.status_code in [400, 401, 422]
 
 
+@env("test", "dev")  # XSS prevention tests - never run in production
 class TestXSSPrevention:
     """Test XSS prevention in user data handling"""
     
@@ -310,6 +314,7 @@ class TestXSSPrevention:
                 assert "javascript:" not in response_text
 
 
+@env("test", "dev")  # CSRF protection tests - never run in production
 class TestCSRFProtection:
     """Test CSRF protection and security headers"""
     
@@ -373,6 +378,7 @@ class TestCSRFProtection:
         assert response.status_code == 200
 
 
+@env("test", "dev")  # Input validation tests - safe for test and dev only
 class TestInputValidation:
     """Test comprehensive input validation"""
     
@@ -451,6 +457,7 @@ class TestInputValidation:
         assert response.status_code in [400, 413, 422]
 
 
+@env("test", "dev")  # Security logging tests - never run in production
 class TestSecurityLogging:
     """Test security event logging and audit trail"""
     
@@ -551,6 +558,7 @@ class TestSecurityLogging:
             assert isinstance(client_info, dict)
 
 
+@env("test", "dev")  # Token security tests - never run in production
 class TestTokenSecurity:
     """Test JWT token security measures"""
     
@@ -609,6 +617,7 @@ class TestTokenSecurity:
             assert response.status_code in [400, 401, 422]
 
 
+@env("test", "dev")  # Rate limiting tests - never run in production
 class TestRateLimiting:
     """Test rate limiting and abuse prevention"""
     

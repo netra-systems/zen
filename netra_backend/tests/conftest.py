@@ -105,6 +105,13 @@ if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
 
         os.environ["FERNET_KEY"] = "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw="
 
+        # Set test values for all required secrets from SecretManager
+        os.environ["GOOGLE_CLIENT_ID"] = "test-google-client-id-for-integration-testing"
+        
+        os.environ["GOOGLE_CLIENT_SECRET"] = "test-google-client-secret-for-integration-testing"
+        
+        os.environ["CLICKHOUSE_DEFAULT_PASSWORD"] = "test-clickhouse-password-for-integration-testing"
+
         os.environ["ENVIRONMENT"] = "testing"
 
         os.environ["LOG_LEVEL"] = "ERROR"

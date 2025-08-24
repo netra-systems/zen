@@ -1,10 +1,13 @@
 """
 Auth Service Configuration
 Handles environment variable loading with staging/production awareness
+
+**UPDATED**: Now uses IsolatedEnvironment for unified environment management.
+Follows SPEC/unified_environment_management.xml for consistent environment access.
 """
 import logging
-import os
 
+from dev_launcher.isolated_environment import get_env
 from auth_service.auth_core.secret_loader import AuthSecretLoader
 
 logger = logging.getLogger(__name__)
@@ -13,13 +16,14 @@ class AuthConfig:
     """Centralized configuration for auth service"""
     
     # Class-level attributes for settings compatibility
-    ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower()
-    LOG_ASYNC_CHECKOUT = os.getenv("LOG_ASYNC_CHECKOUT", "false").lower() == "true"
+    _env = get_env()  # Use IsolatedEnvironment singleton
+    ENVIRONMENT = _env.get("ENVIRONMENT", "development").lower()
+    LOG_ASYNC_CHECKOUT = _env.get("LOG_ASYNC_CHECKOUT", "false").lower() == "true"
     
     @staticmethod
     def get_environment() -> str:
         """Get current environment"""
-        env = os.getenv("ENVIRONMENT", "development").lower()
+        env = get_env().get("ENVIRONMENT", "development").lower()
         if env in ["staging", "production", "development", "test"]:
             return env
         return "development"
@@ -52,11 +56,12 @@ class AuthConfig:
     @staticmethod
     def get_service_secret() -> str:
         """Get service secret for enhanced JWT security (distinct from JWT secret)"""
-        service_secret = os.getenv("SERVICE_SECRET", "")
+        env_manager = get_env()
+        service_secret = env_manager.get("SERVICE_SECRET", "")
         if not service_secret:
             env = AuthConfig.get_environment()
             # Check for test mode conditions
-            fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+            fast_test_mode = env_manager.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
             if env in ["staging", "production"] and not (env == "test" or fast_test_mode):
                 raise ValueError("SERVICE_SECRET must be set in production/staging")
             logger.warning("Using default service secret for development")
@@ -70,7 +75,7 @@ class AuthConfig:
         if len(service_secret) < 32:
             env = AuthConfig.get_environment()
             # Check for test mode conditions
-            fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+            fast_test_mode = get_env().get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
             if env in ["staging", "production"] and not (env == "test" or fast_test_mode):
                 raise ValueError("SERVICE_SECRET must be at least 32 characters in production")
         
@@ -79,11 +84,12 @@ class AuthConfig:
     @staticmethod
     def get_service_id() -> str:
         """Get service instance ID for enhanced JWT security"""
-        service_id = os.getenv("SERVICE_ID", "")
+        env_manager = get_env()
+        service_id = env_manager.get("SERVICE_ID", "")
         if not service_id:
             env = AuthConfig.get_environment()
             # Check for test mode conditions
-            fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+            fast_test_mode = env_manager.get("AUTH_FAST_TEST_MODE", "false").lower() == "true"
             if env in ["staging", "production"] and not (env == "test" or fast_test_mode):
                 raise ValueError("SERVICE_ID must be set in production/staging")
             logger.warning("Using default service ID for development")
@@ -95,25 +101,25 @@ class AuthConfig:
     def get_jwt_algorithm() -> str:
         """Get JWT algorithm"""
         # @marked: JWT algorithm configuration for token generation
-        return os.getenv("JWT_ALGORITHM", "HS256")
+        return get_env().get("JWT_ALGORITHM", "HS256")
     
     @staticmethod
     def get_jwt_access_expiry_minutes() -> int:
         """Get JWT access token expiry in minutes"""
         # @marked: JWT access token expiry configuration
-        return int(os.getenv("JWT_ACCESS_EXPIRY_MINUTES", "15"))
+        return int(get_env().get("JWT_ACCESS_EXPIRY_MINUTES", "15"))
     
     @staticmethod
     def get_jwt_refresh_expiry_days() -> int:
         """Get JWT refresh token expiry in days"""
         # @marked: JWT refresh token expiry configuration
-        return int(os.getenv("JWT_REFRESH_EXPIRY_DAYS", "7"))
+        return int(get_env().get("JWT_REFRESH_EXPIRY_DAYS", "7"))
     
     @staticmethod
     def get_jwt_service_expiry_minutes() -> int:
         """Get JWT service token expiry in minutes"""
         # @marked: JWT service token expiry configuration
-        return int(os.getenv("JWT_SERVICE_EXPIRY_MINUTES", "60"))
+        return int(get_env().get("JWT_SERVICE_EXPIRY_MINUTES", "60"))
     
     @staticmethod
     def get_frontend_url() -> str:
@@ -125,7 +131,7 @@ class AuthConfig:
         elif env == "production":
             return "https://netrasystems.ai"
         
-        return os.getenv("FRONTEND_URL", "http://localhost:3000")
+        return get_env().get("FRONTEND_URL", "http://localhost:3000")
     
     @staticmethod
     def get_auth_service_url() -> str:
@@ -137,14 +143,14 @@ class AuthConfig:
         elif env == "production":
             return "https://auth.netrasystems.ai"
         
-        return os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
+        return get_env().get("AUTH_SERVICE_URL", "http://localhost:8081")
     
     @staticmethod
     def get_database_url() -> str:
         """Get database URL for auth service"""
         # Use the same DATABASE_URL as the main application
         # @marked: Database URL for auth service data persistence
-        database_url = os.getenv("DATABASE_URL", "")
+        database_url = get_env().get("DATABASE_URL", "")
         
         if not database_url:
             logger.warning("No database URL configured, will use in-memory SQLite")
@@ -159,7 +165,7 @@ class AuthConfig:
     @staticmethod
     def get_raw_database_url() -> str:
         """Get raw database URL from environment without normalization"""
-        return os.getenv("DATABASE_URL", "")
+        return get_env().get("DATABASE_URL", "")
     
     @staticmethod
     def get_redis_url() -> str:
@@ -179,19 +185,19 @@ class AuthConfig:
             # Fallback for unknown environments
             default_redis_url = "redis://redis:6379/1"
         
-        return os.getenv("REDIS_URL", default_redis_url)
+        return get_env().get("REDIS_URL", default_redis_url)
     
     @staticmethod
     def get_session_ttl_hours() -> int:
         """Get session TTL in hours"""
         # @marked: Session TTL configuration for session expiry
-        return int(os.getenv("SESSION_TTL_HOURS", "24"))
+        return int(get_env().get("SESSION_TTL_HOURS", "24"))
     
     @staticmethod
     def is_redis_disabled() -> bool:
         """Check if Redis is explicitly disabled"""
         # @marked: Redis disable flag for testing/development
-        return os.getenv("REDIS_DISABLED", "false").lower() == "true"
+        return get_env().get("REDIS_DISABLED", "false").lower() == "true"
     
     @staticmethod
     def log_configuration():

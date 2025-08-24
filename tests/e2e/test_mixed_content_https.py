@@ -21,8 +21,15 @@ from typing import Dict, List, Tuple, Any
 from unittest.mock import patch, MagicMock
 import pytest
 from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.environment_markers import env, env_requires, dev_and_staging
 
 
+@env("dev", "staging")
+@env_requires(
+    services=["frontend", "backend", "auth_service"],
+    features=["https_configured", "cors_configured", "ssl_enabled"],
+    data=["staging_domain_config", "ssl_certificates"]
+)
 class TestMixedContentHTTPS(BaseIntegrationTest):
     """Test suite for mixed content and HTTPS protocol enforcement issues."""
     

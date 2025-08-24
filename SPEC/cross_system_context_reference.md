@@ -25,7 +25,7 @@ The platform consists of exactly THREE backend services plus frontend:
 │  │   Frontend   │  │   Backend    │  │ Auth Service │      │
 │  │  (Next.js)   │  │  (FastAPI)   │  │  (FastAPI)   │      │
 │  │              │  │              │  │              │      │
-│  │ Port: 3000   │  │ Port: 8000   │  │ Port: 8080   │      │
+│  │ Port:Dynamic │  │ Port:Dynamic │  │ Port:Dynamic │      │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘      │
 │         │                  │                  │              │
 │         └──────────────────┴──────────────────┘              │
@@ -40,7 +40,7 @@ The platform consists of exactly THREE backend services plus frontend:
 #### Service Details:
 
 **1. Main Backend Service (`/netra_backend/app/`)**
-- **Port**: 8000 (dev), 8888 (staging/prod)
+- **Port**: Dynamic (discovered via `.service_discovery/` in dev, environment variables in staging/prod)
 - **Purpose**: Core business logic, AI orchestration, agent management
 - **Technology**: Python 3.11, FastAPI, SQLAlchemy, Pydantic
 - **Database**: PostgreSQL (primary), ClickHouse (analytics), Redis (cache)
@@ -52,7 +52,7 @@ The platform consists of exactly THREE backend services plus frontend:
   - Cost tracking and analytics
 
 **2. Auth Service (`/auth_service/`)**
-- **Port**: 8080 (all environments)
+- **Port**: Dynamic (discovered via `.service_discovery/` in dev, environment variables in staging/prod)
 - **Purpose**: Centralized authentication and authorization
 - **Technology**: Python 3.11, FastAPI, JWT
 - **Database**: PostgreSQL (separate auth_users table)
@@ -64,7 +64,7 @@ The platform consists of exactly THREE backend services plus frontend:
   - No user registration (OAuth-first design)
 
 **3. Frontend (`/frontend/`)**
-- **Port**: 3000
+- **Port**: Dynamic (discovered via `.service_discovery/` in dev, no static default assumed)
 - **Purpose**: Web application UI
 - **Technology**: Next.js 15, React 19, TypeScript, TailwindCSS
 - **State Management**: Zustand
@@ -132,23 +132,60 @@ User Message → Backend → Supervisor Agent → Sub-Agents
 
 **Characteristics**:
 - **Service Discovery**: Dynamic ports via JSON files in `.service_discovery/`
-- **Database**: Local PostgreSQL on port 5433 (not 5432!)
-- **Redis**: Local Redis on port 6379
-- **ClickHouse**: Docker container on port 8123
+  - Frontend: Finds available port (search begins at configurable start point)
+  - Backend: Finds available port (search begins at configurable start point)
+  - Auth Service: Finds available port (search begins at configurable start point)
+  - Ports written to `.service_discovery/{service}_config.json`
+- **Database**: Local PostgreSQL (port configured in environment variables)
+- **Redis**: Local Redis (port configured in environment variables)
+- **ClickHouse**: Docker container (port configured in environment variables)
 - **Authentication**: Dev login available at /auth/dev/login
 - **LLM Mode**: Mock mode available for testing
 - **Hot Reload**: All services support hot reload
-- **CORS**: Allows localhost with any port (dynamic)
+- **CORS**: Dynamically configured to allow discovered service ports
 - **SSL**: Not required
 - **Environment Isolation**: Uses IsolatedEnvironment class
 - **Secrets**: Loaded from `.env` file
 
 **Critical Assumptions**:
 - All services run on same machine
+- Ports are dynamically allocated (no hardcoded assumptions)
+- Service discovery via `.service_discovery/` directory
 - No SSL/TLS requirements
 - Mock LLM responses acceptable
 - Database migrations run automatically
 - Test data seeded on startup
+
+**Dynamic Port Discovery Example**:
+```python
+# Dev launcher finds available ports
+def find_available_port(start_port: int) -> int:
+    """Find next available port starting from start_port"""
+    import socket
+    for port in range(start_port, start_port + 100):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('localhost', port))
+                return port
+        except OSError:
+            continue
+    raise RuntimeError(f"No available ports found starting from {start_port}")
+
+# Service discovery files
+# .service_discovery/frontend_config.json
+{
+    "host": "localhost",
+    "port": 3001,  # Dynamically discovered
+    "url": "http://localhost:3001"
+}
+
+# Services read discovery files at startup
+import json
+def get_backend_url():
+    with open('.service_discovery/backend_config.json') as f:
+        config = json.load(f)
+    return config['url']  # No hardcoded ports!
+```
 
 ### 3.2 Staging Environment
 **Deploy**: `python scripts/deploy_to_gcp.py --project netra-staging --build-local`
@@ -456,9 +493,11 @@ python scripts/check_architecture_compliance.py
 ### Service URLs by Environment
 | Service | Development | Staging | Production |
 |---------|------------|---------|------------|
-| Frontend | http://localhost:3000 | https://staging.netrasystems.ai | https://app.netrasystems.ai |
-| Backend | http://localhost:8000 | https://api.staging.netrasystems.ai | https://api.netrasystems.ai |
-| Auth | http://localhost:8080 | https://auth.staging.netrasystems.ai | https://auth.netrasystems.ai |
+| Frontend | http://localhost:{dynamic_port} | https://staging.netrasystems.ai | https://app.netrasystems.ai |
+| Backend | http://localhost:{dynamic_port} | https://api.staging.netrasystems.ai | https://api.netrasystems.ai |
+| Auth | http://localhost:{dynamic_port} | https://auth.staging.netrasystems.ai | https://auth.netrasystems.ai |
+
+**Note**: In development, ports are dynamically discovered at startup. Check `.service_discovery/` directory for actual ports.
 
 ---
 

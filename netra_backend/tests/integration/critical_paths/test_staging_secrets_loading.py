@@ -24,6 +24,11 @@ import pytest
 from unittest.mock import patch, MagicMock, call
 from typing import Dict, Any, Optional
 
+# Environment-aware testing imports
+from test_framework.environment_markers import (
+    env, env_requires, staging_only, dev_and_staging
+)
+
 # Absolute imports only
 from netra_backend.app.core.configuration.base import (
     ActualSecretManager, 
@@ -52,6 +57,8 @@ class TestStagingSecretsLoading:
         if hasattr(config_manager.get_config, 'cache_clear'):
             config_manager.get_config.cache_clear()
     
+    @staging_only  # Critical staging-specific secret loading test
+    @env_requires(features=["secret_manager", "staging_configuration"])
     def test_actual_secret_manager_is_placeholder(self):
         """Test that ActualSecretManager doesn't load secrets (BUG).
         
@@ -87,8 +94,10 @@ class TestStagingSecretsLoading:
             "should have loaded multiple secrets for staging environment"
         )
     
-@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
-        def test_staging_config_secret_loading_failure(self):
+    @staging_only  # Critical staging configuration test
+    @env_requires(features=["secret_manager", "staging_configuration"])
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    def test_staging_config_secret_loading_failure(self):
         """Test that staging configuration fails to load secrets properly.
         
         This test demonstrates the configuration bug where secrets aren't
@@ -121,6 +130,8 @@ class TestStagingSecretsLoading:
                 f"This indicates secret loading pipeline failure."
             )
     
+    @env("staging")  # Test production config behavior in staging environment
+    @env_requires(features=["secret_manager", "production_config"])
     def test_production_config_secret_loading_failure(self):
         """Test that production configuration also fails to load secrets.
         

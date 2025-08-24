@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <spec>
   <metadata>
-    <last_edited>2025-08-23T10:00:00.000000</last_edited>
+    <last_edited>2025-08-24T12:00:00.000000</last_edited>
   </metadata>
   <meta>
     <title>Unified Test Runner Specification</title>
     <category>testing</category>
     <created>2025-08-18</created>
-    <updated>2025-08-23</updated>
+    <updated>2025-08-24</updated>
     <cross_references>
       <ref>CLAUDE.md#unified-test-runner</ref>
       <ref>TESTING.md</ref>

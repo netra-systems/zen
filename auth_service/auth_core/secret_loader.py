@@ -2,10 +2,14 @@
 Secret loader for auth service.
 Handles loading secrets from environment variables and Google Secret Manager.
 Ensures consistency with main backend service.
+
+**UPDATED**: Now uses IsolatedEnvironment for unified environment management.
+Follows SPEC/unified_environment_management.xml for consistent environment access.
 """
 import logging
-import os
 from typing import Optional
+
+from dev_launcher.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -26,12 +30,13 @@ class AuthSecretLoader:
         4. DEPRECATED: JWT_SECRET (auth service legacy) - only for backward compatibility
         5. Development fallback (only in development)
         """
-        env = os.getenv("ENVIRONMENT", "development").lower()
+        env_manager = get_env()
+        env = env_manager.get("ENVIRONMENT", "development").lower()
         
         # Try environment-specific variables first (highest priority)
         if env == "staging":
             # In staging, check for staging-specific secret first
-            secret = os.getenv("JWT_SECRET_STAGING")
+            secret = env_manager.get("JWT_SECRET_STAGING")
             if secret:
                 logger.info("Using JWT_SECRET_STAGING from environment")
                 return secret
@@ -44,7 +49,7 @@ class AuthSecretLoader:
                 
         elif env == "production":
             # In production, check for production-specific secret first
-            secret = os.getenv("JWT_SECRET_PRODUCTION")
+            secret = env_manager.get("JWT_SECRET_PRODUCTION")
             if secret:
                 logger.info("Using JWT_SECRET_PRODUCTION from environment")
                 return secret
@@ -57,14 +62,14 @@ class AuthSecretLoader:
         
         # CRITICAL: Check JWT_SECRET_KEY as primary fallback for consistency with backend service
         # This ensures both services use the same secret when environment-specific secrets are not available
-        secret = os.getenv("JWT_SECRET_KEY")
+        secret = env_manager.get("JWT_SECRET_KEY")
         if secret:
             logger.info("Using JWT_SECRET_KEY from environment (shared with backend)")
             return secret
             
         # DEPRECATED: Check JWT_SECRET for backward compatibility only
         # This should only be used when JWT_SECRET_KEY is not available
-        secret = os.getenv("JWT_SECRET")
+        secret = env_manager.get("JWT_SECRET")
         if secret:
             logger.warning("Using JWT_SECRET from environment (DEPRECATED - use JWT_SECRET_KEY instead)")
             return secret
@@ -85,7 +90,7 @@ class AuthSecretLoader:
         """
         try:
             # Check if running in GCP environment
-            project_id = os.getenv("GCP_PROJECT_ID")
+            project_id = get_env().get("GCP_PROJECT_ID")
             if not project_id:
                 return None
             
@@ -113,23 +118,25 @@ class AuthSecretLoader:
     @staticmethod
     def get_google_client_id() -> str:
         """Get Google OAuth client ID with proper fallback chain."""
-        env = os.getenv("ENVIRONMENT", "development").lower()
+        env_manager = get_env()
+        env = env_manager.get("ENVIRONMENT", "development").lower()
         
+        env_manager = get_env()
         # Environment-specific
         if env == "staging":
             # First check staging-specific env var
-            client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID_STAGING")
+            client_id = env_manager.get("GOOGLE_OAUTH_CLIENT_ID_STAGING")
             if client_id:
                 logger.info("Using GOOGLE_OAUTH_CLIENT_ID_STAGING from environment")
                 return client_id
         elif env == "production":
-            client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION")
+            client_id = env_manager.get("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION")
             if client_id:
                 logger.info("Using GOOGLE_OAUTH_CLIENT_ID_PRODUCTION from environment")
                 return client_id
         
         # Generic fallback - this is what Cloud Run sets from secrets
-        client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+        client_id = env_manager.get("GOOGLE_CLIENT_ID", "")
         if client_id:
             logger.info("Using GOOGLE_CLIENT_ID from environment")
         else:
@@ -139,23 +146,24 @@ class AuthSecretLoader:
     @staticmethod
     def get_google_client_secret() -> str:
         """Get Google OAuth client secret with proper fallback chain."""
-        env = os.getenv("ENVIRONMENT", "development").lower()
+        env_manager = get_env()
+        env = env_manager.get("ENVIRONMENT", "development").lower()
         
         # Environment-specific
         if env == "staging":
             # First check staging-specific env var
-            secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_STAGING")
+            secret = env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING")
             if secret:
                 logger.info("Using GOOGLE_OAUTH_CLIENT_SECRET_STAGING from environment")
                 return secret
         elif env == "production":
-            secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION")
+            secret = env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION")
             if secret:
                 logger.info("Using GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION from environment")
                 return secret
         
         # Generic fallback - this is what Cloud Run sets from secrets
-        secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
+        secret = env_manager.get("GOOGLE_CLIENT_SECRET", "")
         if secret:
             logger.info("Using GOOGLE_CLIENT_SECRET from environment")
         else:
@@ -169,7 +177,8 @@ class AuthSecretLoader:
         Returns:
             Database URL normalized for auth service compatibility
         """
-        env = os.getenv("ENVIRONMENT", "development").lower()
+        env_manager = get_env()
+        env = env_manager.get("ENVIRONMENT", "development").lower()
         
         # First try to load from Secret Manager in staging/production
         if env in ["staging", "production"]:
@@ -182,7 +191,7 @@ class AuthSecretLoader:
                 return AuthDatabaseManager._normalize_database_url(secret_url)
         
         # Fall back to environment variable
-        database_url = os.getenv("DATABASE_URL", "")
+        database_url = env_manager.get("DATABASE_URL", "")
         if not database_url:
             logger.warning("No database URL found in secrets or environment")
             return ""

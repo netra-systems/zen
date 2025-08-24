@@ -27,8 +27,10 @@ from unittest.mock import MagicMock, patch
 import jwt
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
+from test_framework.environment_markers import env
 
 
+@env("test", "dev")  # JWT generation tests can run locally with mocked keys or in dev
 class TestJWTTokenGeneration(unittest.TestCase):
     """Test JWT token generation with various claims"""
     

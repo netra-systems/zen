@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import pytest
 
+from test_framework.environment_markers import env, env_requires, staging_only
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
 from tests.e2e.service_manager import RealServicesManager
 from tests.e2e.test_environment_config import TestEnvironmentType
@@ -489,6 +490,12 @@ class StagingE2ETestSuite:
         return summary
 
 
+@env("staging")
+@env_requires(
+    services=["auth_service", "backend", "frontend", "websocket", "postgres", "redis"],
+    features=["oauth_configured", "ssl_enabled", "cors_configured"],
+    data=["staging_test_tenant"]
+)
 @pytest.mark.staging
 @pytest.mark.e2e
 class TestStagingE2E:

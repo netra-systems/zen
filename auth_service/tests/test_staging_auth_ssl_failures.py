@@ -23,8 +23,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from test_framework import setup_test_path
 setup_test_path()
+from test_framework.environment_markers import env, staging_only, env_requires
 
 
+@env("staging")  # SSL parameter issues need real staging environment with Cloud SQL
+@env_requires(services=["postgres"], features=["cloud_sql_configured", "ssl_enabled"])
 class TestAuthServiceSSLParameterFailures:
     """Test suite reproducing auth service SSL parameter failures."""
     
@@ -186,6 +189,7 @@ class TestAuthServiceSSLParameterFailures:
                 ]), f"Expected SSL-related error, got: {e}"
 
 
+@env("staging")  # Configuration consistency needs staging environment
 class TestAuthServiceConfigurationConsistency:
     """Test suite for auth service configuration consistency issues."""
     
@@ -251,6 +255,8 @@ class TestAuthServiceConfigurationConsistency:
                     f"URL compatibility issues: {compatibility_issues}"
 
 
+@env("staging")  # Deployment-specific tests need staging environment
+@env_requires(features=["cloud_run_deployment", "secret_manager_configured"])
 class TestAuthServiceDeploymentSpecificIssues:
     """Test suite for auth service deployment-specific SSL issues."""
     

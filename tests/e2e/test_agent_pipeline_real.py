@@ -40,6 +40,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import pytest_asyncio
 
+from test_framework.environment_markers import env, env_requires, dev_and_staging
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -58,6 +59,12 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+@env("dev", "staging")
+@env_requires(
+    services=["llm_service", "supervisor_agent", "websocket_manager", "postgres", "redis"],
+    features=["real_llm_integration", "agent_orchestration", "quality_gates"],
+    data=["test_users", "agent_test_data"]
+)
 @pytest.mark.asyncio
 class TestAgentPipelineReal:
     """CRITICAL Test: Real Agent Message Processing Pipeline."""

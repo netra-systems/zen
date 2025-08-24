@@ -1,16 +1,16 @@
 """Configuration schemas and data models.
 
-**DEPRECATION NOTICE**: This file is legacy and should be migrated
-to use the unified configuration system. For new code, use:
-from netra_backend.app.core.configuration import unified_config_manager
+**UPDATED**: This file has been migrated to use IsolatedEnvironment
+for unified environment management. Follows SPEC/unified_environment_management.xml.
 
-This file contains direct os.environ access that should be replaced
-with the centralized configuration management.
+For new code, use:
+from netra_backend.app.core.configuration import unified_config_manager
 """
 
-import os
 from enum import Enum
 from typing import Any, Dict, List, Optional
+
+from dev_launcher.isolated_environment import get_env
 
 from pydantic import BaseModel, Field, validator
 
@@ -42,14 +42,13 @@ class SecretReference(BaseModel):
     def _get_project_id_safe() -> str:
         """Get project ID safely without causing recursion during config initialization.
         
-        CRITICAL: This method CANNOT call get_unified_config() during configuration
-        initialization as it would cause infinite recursion. Use direct env access.
+        Uses IsolatedEnvironment for consistent environment access.
         """
-        import os
-        # Direct environment access to prevent recursion during config loading
-        return os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
-                             os.environ.get("SECRET_MANAGER_PROJECT_ID", 
-                             "701982941522" if os.environ.get("ENVIRONMENT", "").lower() == "staging" else "304612253870"))
+        env = get_env()
+        # Use IsolatedEnvironment for project ID loading
+        return env.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
+                       env.get("SECRET_MANAGER_PROJECT_ID", 
+                       "701982941522" if env.get("ENVIRONMENT", "").lower() == "staging" else "304612253870"))
 
 
 SECRET_CONFIG: List[SecretReference] = [
@@ -463,12 +462,11 @@ class DevelopmentConfig(AppConfig):
     def _load_database_url_from_unified_config(self, data: dict) -> None:
         """Load database URL from environment with fallback.
         
-        CRITICAL: Cannot use get_unified_config() during config initialization 
-        as it would cause infinite recursion. Use direct env access.
+        Uses IsolatedEnvironment for consistent environment access.
         """
-        # Direct env access to prevent recursion during config loading
-        import os
-        env_db_url = os.environ.get('DATABASE_URL')
+        # Use IsolatedEnvironment for database URL loading
+        env = get_env()
+        env_db_url = env.get('DATABASE_URL')
         if env_db_url:
             data['database_url'] = env_db_url
         elif 'database_url' not in data or data.get('database_url') is None:
@@ -477,15 +475,14 @@ class DevelopmentConfig(AppConfig):
     def _get_service_modes_from_unified_config(self) -> dict:
         """Get service modes from environment with fallback.
         
-        CRITICAL: Cannot use get_unified_config() during config initialization 
-        as it would cause infinite recursion. Use direct env access.
+        Uses IsolatedEnvironment for consistent environment access.
         """
-        # Direct env access to prevent recursion during config loading
-        import os
+        # Use IsolatedEnvironment for service mode configuration
+        env = get_env()
         return {
-            'redis': os.environ.get("REDIS_MODE", "shared").lower(),
-            'clickhouse': os.environ.get("CLICKHOUSE_MODE", "shared").lower(),
-            'llm': os.environ.get("LLM_MODE", "shared").lower()
+            'redis': env.get("REDIS_MODE", "shared").lower(),
+            'clickhouse': env.get("CLICKHOUSE_MODE", "shared").lower(),
+            'llm': env.get("LLM_MODE", "shared").lower()
         }
     
     def _configure_service_flags(self, data: dict, service_modes: dict) -> None:
@@ -531,13 +528,12 @@ class StagingConfig(AppConfig):
     def _load_database_url_from_unified_config_staging(self, data: dict) -> None:
         """Load database URL from environment for staging with fallback.
         
-        CRITICAL: Cannot use get_unified_config() during config initialization 
-        as it would cause infinite recursion. Use direct env access.
+        Uses IsolatedEnvironment for consistent environment access.
         """
-        # Direct env access to prevent recursion during config loading
-        import os
-        if 'database_url' not in data and os.environ.get('DATABASE_URL'):
-            data['database_url'] = os.environ.get('DATABASE_URL')
+        # Use IsolatedEnvironment for staging database URL
+        env = get_env()
+        if 'database_url' not in data and env.get('DATABASE_URL'):
+            data['database_url'] = env.get('DATABASE_URL')
 
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""

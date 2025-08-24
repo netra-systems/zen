@@ -20,14 +20,30 @@ This guide covers everything you need to know about testing in the Netra Apex pl
 
 ## Quick Start
 
+### 🎯 Recommended Defaults
+
+```bash
+# DEFAULT for development (fast feedback)
+python unified_test_runner.py --level integration --no-coverage --fast-fail
+
+# Pre-commit validation (<30s)
+python unified_test_runner.py --level smoke --fast-fail
+
+# Agent changes
+python unified_test_runner.py --level agents --real-llm --fast-fail
+
+# Before releases
+python unified_test_runner.py --level integration --real-llm --env staging
+```
+
 ### Run Your First Test
 
 ```bash
 # Run smoke tests (fastest, <30s)
-python unified_test_runner.py --level smoke
+python unified_test_runner.py --level smoke --fast-fail
 
 # Run all tests for a specific service
-python unified_test_runner.py --service backend
+python unified_test_runner.py --service backend --fast-fail
 
 # Run with coverage report
 python unified_test_runner.py --coverage
@@ -40,11 +56,11 @@ python unified_test_runner.py --real-llm
 
 | What You Want | Command |
 |--------------|---------|
-| Quick pre-commit check | `python unified_test_runner.py --level smoke` |
-| Test backend changes | `python unified_test_runner.py --service backend --level unit` |
-| Test frontend changes | `python unified_test_runner.py --service frontend` |
-| Full validation before merge | `python unified_test_runner.py --level integration` |
-| Test with real services | `python unified_test_runner.py --real-llm --env staging` |
+| **Quick pre-commit check** | `python unified_test_runner.py --level smoke --fast-fail` |
+| **Test backend changes** | `python unified_test_runner.py --service backend --level unit --fast-fail --no-coverage` |
+| **Test frontend changes** | `python unified_test_runner.py --service frontend --fast-fail` |
+| **Full validation before merge** | `python unified_test_runner.py --level integration --no-coverage --fast-fail` |
+| **Test with real services** | `python unified_test_runner.py --real-llm --env staging` |
 
 ## Test Architecture
 
@@ -247,16 +263,43 @@ python unified_test_runner.py --env staging
 python unified_test_runner.py --env staging --real-llm --level integration
 ```
 
+### ⚡ Speed Optimizations
+
+Maximize test execution speed with these options:
+
+```bash
+# RECOMMENDED: Fast-fail with no coverage
+python unified_test_runner.py --level integration --fast-fail --no-coverage
+
+# Stop after first failure (saves time)
+python unified_test_runner.py --fast-fail
+
+# Stop after N failures
+python unified_test_runner.py --max-failures 5
+
+# Skip coverage collection (30-50% faster)
+python unified_test_runner.py --no-coverage
+
+# Suppress warnings for cleaner output
+python unified_test_runner.py --no-warnings
+
+# CI mode (combines optimizations)
+python unified_test_runner.py --ci
+```
+
 ### Parallel Execution
 
 Speed up test execution with parallelization:
 
 ```bash
-# Auto-detect optimal workers
+# Auto-detect optimal workers (default)
 python unified_test_runner.py --parallel
 
 # Specify worker count
 python unified_test_runner.py --parallel --workers 8
+
+# Run serially for debugging
+python unified_test_runner.py --parallel 1
 ```
 
 ### Coverage Reports
@@ -590,5 +633,5 @@ The Netra Apex testing infrastructure provides:
 
 ---
 
-*Last Updated: August 21, 2025*  
-*Version: 1.0*
+*Last Updated: August 24, 2025*  
+*Version: 1.1*

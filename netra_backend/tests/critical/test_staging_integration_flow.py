@@ -20,6 +20,11 @@ from unittest.mock import AsyncMock, MagicMock, MagicMock, patch
 
 import aiohttp
 import pytest
+
+# Environment-aware testing imports
+from test_framework.environment_markers import (
+    env, env_requires, env_safe, staging_only, dev_and_staging
+)
 from netra_backend.app.main import create_app
 
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
@@ -61,6 +66,8 @@ async def mock_external_services():
 class TestStagingStartupFlow:
     """Test staging application startup flow."""
     
+    @env("staging")
+    @env_requires(services=["postgres", "redis", "clickhouse"])
     @pytest.mark.asyncio
     async def test_staging_config_loads_correctly(self, staging_environment):
         """Test staging configuration loads without errors."""
@@ -69,6 +76,8 @@ class TestStagingStartupFlow:
         assert config.environment in [\'staging\', \'testing\']
         assert config.database_url.startswith("postgresql://")
     
+    @env("staging")
+    @env_requires(services=["postgres", "redis", "clickhouse"])
     @pytest.mark.asyncio
     async def test_staging_startup_checks_run(self, staging_environment, mock_external_services):
         """Test startup checks execute in staging."""
@@ -77,6 +86,8 @@ class TestStagingStartupFlow:
         assert "environment" in results
         assert results["environment"]["status"] == "healthy"
     
+    @env("staging")
+    @env_requires(services=["postgres", "redis", "clickhouse"])
     @pytest.mark.asyncio
     async def test_staging_app_initialization(self, staging_environment, mock_external_services):
         """Test FastAPI app initializes for staging."""
@@ -87,18 +98,21 @@ class TestStagingStartupFlow:
 class TestStagingHealthEndpoints:
     """Test staging health check endpoints."""
     
+    @env("dev", "staging")
     @pytest.mark.asyncio
     async def test_health_endpoint_response(self, staging_environment):
         """Test /health endpoint returns correct status."""
         from netra_backend.app.routes.health import router
         assert router is not None
     
+    @env("dev", "staging")
     @pytest.mark.asyncio
     async def test_readiness_endpoint_response(self, staging_environment):
         """Test /ready endpoint for staging readiness."""
         from netra_backend.app.routes.health import router
         assert router is not None
     
+    @env("dev", "staging")
     @pytest.mark.asyncio
     async def test_liveness_endpoint_response(self, staging_environment):
         """Test /live endpoint for staging liveness."""
@@ -108,16 +122,22 @@ class TestStagingHealthEndpoints:
 class TestStagingDatabaseConnectivity:
     """Test staging database connectivity."""
     
+    @env("staging")
+    @env_requires(services=["postgres"])
     @pytest.mark.asyncio
     async def test_postgres_connection_staging(self, staging_environment, mock_external_services):
         """Test PostgreSQL connection for staging."""
         mock_external_services["postgres"].assert_called()
     
+    @env("staging")
+    @env_requires(services=["redis"])
     @pytest.mark.asyncio
     async def test_redis_connection_staging(self, staging_environment, mock_external_services):
         """Test Redis connection for staging."""
         mock_external_services["redis"].assert_called()
     
+    @env("staging")
+    @env_requires(services=["clickhouse"])
     @pytest.mark.asyncio
     async def test_clickhouse_connection_staging(self, staging_environment, mock_external_services):
         """Test ClickHouse connection for staging."""

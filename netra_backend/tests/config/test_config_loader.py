@@ -29,6 +29,11 @@ from typing import Any, Dict, Optional
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+
+# Environment-aware testing imports
+from test_framework.environment_markers import (
+    env, test_only, dev_and_staging
+)
 from netra_backend.app.core.configuration.loader import (
     ConfigurationLoader,
 )
@@ -89,8 +94,8 @@ class TestCloudEnvironmentDetection:
         # Assert
         assert result == "production"
 
-@patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
-        def test_detect_cloud_run_environment_staging_pattern(self, clean_environment):
+    @patch.dict('os.environ', {'ENVIRONMENT': 'staging', 'TESTING': '0'})
+    def test_detect_cloud_run_environment_staging_pattern(self, clean_environment):
         """Test Cloud Run staging environment detection"""
         # Arrange
         os.environ['K_SERVICE'] = 'netra-backend-staging'

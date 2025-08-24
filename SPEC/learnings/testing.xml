@@ -1974,6 +1974,95 @@
             </prevention>
         </learning>
         
+        <learning id="pytest-asyncio-configuration-tradeoffs" date="2025-08-24" severity="MEDIUM">
+            <title>Pytest Asyncio Configuration: Decorators vs Auto-mode</title>
+            <problem>
+                Codebase has 10,833 @pytest.mark.asyncio decorators across 1,401 files
+                Mixed configuration approach with some services using asyncio_mode=auto
+                Decorators add significant boilerplate and maintenance burden
+                Easy to forget decorator on new async tests causing cryptic errors
+            </problem>
+            <solution>
+                Recommend using asyncio_mode=auto configuration approach:
+                - Zero boilerplate for async test functions
+                - Automatic detection of async def test_* functions
+                - Consistent handling across entire test suite
+                - Eliminates "forgot decorator" class of errors
+                - Compatible with existing decorators (no breaking changes)
+            </solution>
+            <tradeoff_analysis>
+                EXPLICIT DECORATORS (@pytest.mark.asyncio):
+                Advantages:
+                - Explicit intent clear in code
+                - Better IDE support in some editors
+                - Selective control over sync/async tests
+                - No configuration file dependency
+                
+                Disadvantages:
+                - 10,833+ decorators create significant noise
+                - Maintenance burden on every async test
+                - Missing decorator causes runtime failures
+                - Inconsistency risk across large codebase
+                
+                AUTO-MODE CONFIGURATION (asyncio_mode=auto):
+                Advantages:
+                - Zero boilerplate reduces code noise
+                - Tests focus on logic not infrastructure
+                - Consistent handling uniformly
+                - Lower maintenance overhead
+                
+                Disadvantages:
+                - Hidden behavior not immediately obvious
+                - Requires proper pytest.ini configuration
+                - Slight overhead checking all test functions
+                - Less granular control per test
+            </tradeoff_analysis>
+            <justification>
+                Scale Factor: 10,833 decorators is excessive boilerplate
+                Error Prevention: Auto-mode eliminates common test failures
+                Team Preference: Multiple configs already use auto-mode
+                Business Value: Developer velocity increases without boilerplate
+                CLAUDE.md Alignment: Supports "Lean Development" and "Clarity"
+                Migration Path: Incremental removal, decorators harmless with auto
+            </justification>
+            <implementation_strategy>
+                1. Ensure all pytest.ini files have asyncio_mode=auto
+                2. Gradually remove decorators during regular maintenance
+                3. Update testing documentation for new standard
+                4. No immediate mass removal needed - coexistence is safe
+            </implementation_strategy>
+            <configuration_examples>
+                Root pytest.ini:
+                addopts = --asyncio-mode=auto
+                asyncio_default_fixture_loop_scope = function
+                
+                Service pytest.ini:
+                asyncio_mode = auto
+                asyncio_default_fixture_loop_scope = session
+                
+                Auth service pytest.ini:
+                asyncio_mode = auto
+            </configuration_examples>
+            <files_affected>
+                <file>pytest.ini</file>
+                <file>netra_backend/pytest.ini</file>
+                <file>auth_service/pytest.ini</file>
+                <file>1,401 test files with decorators (gradual update)</file>
+            </files_affected>
+            <verification>
+                All services configured with asyncio_mode=auto
+                Tests run successfully without decorators
+                No performance degradation observed
+                Developer experience improved
+            </verification>
+            <best_practice>
+                Use asyncio_mode=auto for all new projects
+                Remove decorators opportunistically during edits
+                Document configuration in test setup guides
+                Ensure pytest.ini consistency across services
+            </best_practice>
+        </learning>
+        
         <learning id="circular-import-detection-and-resolution" date="2025-08-23" severity="HIGH">  
             <title>Circular Import Detection and Resolution Patterns</title>
             <problem>

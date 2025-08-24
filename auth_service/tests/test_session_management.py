@@ -16,8 +16,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from auth_service.auth_core.core.session_manager import SessionManager
 from auth_service.auth_core.database.connection import auth_db
 from auth_service.auth_core.database.models import AuthSession, AuthUser
+from test_framework.environment_markers import env
 
 
+@env("test", "dev")  # Session tests can use mocked Redis and database
 class TestSessionCreation:
     """Test session creation after login"""
     
