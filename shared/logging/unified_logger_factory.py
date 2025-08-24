@@ -11,8 +11,6 @@ import sys
 import os
 from pathlib import Path
 
-from dev_launcher.isolated_environment import get_env
-
 
 class UnifiedLoggerFactory:
     """
@@ -47,17 +45,17 @@ class UnifiedLoggerFactory:
     @classmethod
     def _get_base_config(cls) -> Dict[str, Any]:
         """Get base logging configuration from environment."""
-        env = get_env()
+        # Use os.environ directly to avoid circular import
         
         # Determine environment-specific log level
-        log_level_str = env.get('LOG_LEVEL', 'INFO').upper()
+        log_level_str = os.environ.get('LOG_LEVEL', 'INFO').upper()
         try:
             log_level = getattr(logging, log_level_str)
         except AttributeError:
             log_level = logging.INFO
         
         # Determine if we're in a service that needs file logging
-        enable_file_logging = env.get('ENABLE_FILE_LOGGING', 'false').lower() == 'true'
+        enable_file_logging = os.environ.get('ENABLE_FILE_LOGGING', 'false').lower() == 'true'
         
         # Get service name from environment or infer from process
         service_name = cls._infer_service_name()
@@ -72,9 +70,8 @@ class UnifiedLoggerFactory:
     @classmethod
     def _infer_service_name(cls) -> str:
         """Infer service name from the current process/environment."""
-        # Check for explicit service name
-        env = get_env()
-        service_name = env.get('SERVICE_NAME')
+        # Check for explicit service name using os.environ to avoid circular import
+        service_name = os.environ.get('SERVICE_NAME')
         if service_name:
             return service_name
             
