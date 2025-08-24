@@ -33,7 +33,7 @@ AsyncSessionLocal = async_session_factory
 
 # Import resilience features
 try:
-    from .postgres_resilience import (
+    from netra_backend.app.db.postgres_resilience import (
         PostgresResilienceError,
         ReadOnlyModeError,
         postgres_resilience,

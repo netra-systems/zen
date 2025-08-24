@@ -313,7 +313,7 @@ async def get_websocket_service_discovery():
         "status": "success",
         "websocket_config": {
             "endpoints": {
-                "websocket": "/ws/enhanced"
+                "websocket": "/ws"
             },
             "features": {
                 "json_first": True,
@@ -337,7 +337,7 @@ async def get_websocket_service_discovery():
 
 async def authenticate_websocket_with_database(session_info: Dict[str, str]) -> str:
     """Authenticate WebSocket with database session for tests."""
-    from netra_backend.app.db.database_manager import get_async_db
+    from netra_backend.app.db.postgres_session import get_async_db
     from netra_backend.app.services.security_service import SecurityService
     
     async with get_async_db() as session:

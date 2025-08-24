@@ -14,6 +14,15 @@ import pytest
 from netra_backend.tests.test_websocket_bidirectional_types import (
     TestWebSocketBidirectionalTypes,
 )
+# Import the actual factory functions from websocket_core.types
+from netra_backend.app.websocket_core.types import (
+    create_standard_message,
+    create_error_message,
+    create_server_message,
+    MessageType,
+    WebSocketMessage,
+)
+
 # Non-existent modules commented out:
 # from netra_backend.tests.test_websocket_client_to_server_types import (
 #     TestClientMessageBatchValidation,
@@ -22,12 +31,6 @@ from netra_backend.tests.test_websocket_bidirectional_types import (
 # from netra_backend.tests.test_websocket_server_to_client_types import (
 #     TestServerMessageBatchValidation,
 #     TestServerToClientMessageTypes,
-# )
-
-# Import from the focused modules (if they exist)
-# from netra_backend.tests.test_websocket_type_safety_factory import (
-#     WebSocketMessageFactory,
-#     WebSocketTestDataFactory,
 # )
 
 class TestWebSocketTypeSafetyMain:
@@ -116,49 +119,49 @@ class TestWebSocketMessageValidationEdgeCases:
         """Test message size limits."""
         # Test very large payload
         large_payload = {"data": "x" * 10000}  # 10KB payload
-        message = WebSocketMessageFactory.create_client_message(
-            "user_message",
+        message = create_standard_message(
+            MessageType.USER_MESSAGE,
             {
                 "content": large_payload["data"],
                 "thread_id": "thread123"
             }
         )
         
-        assert len(message["payload"]["content"]) == 10000
-        assert message["type"] == "user_message"
+        assert len(message.payload["content"]) == 10000
+        assert message.type == MessageType.USER_MESSAGE
     
     def test_special_characters_in_messages(self):
         """Test special characters in message fields."""
         special_chars = "!@#$%^&*()_+-=[]{}|;':\",./<>?"
         unicode_chars = "🚀✨🔥💯🎉"
         
-        message = WebSocketMessageFactory.create_client_message(
-            "user_message",
+        message = create_standard_message(
+            MessageType.USER_MESSAGE,
             {
                 "content": f"Test with special chars: {special_chars} and unicode: {unicode_chars}",
                 "thread_id": "thread123"
             }
         )
         
-        assert special_chars in message["payload"]["content"]
-        assert unicode_chars in message["payload"]["content"]
+        assert special_chars in message.payload["content"]
+        assert unicode_chars in message.payload["content"]
     
     def test_empty_and_null_values(self):
         """Test handling of empty and null values."""
         # Test empty string content
-        message = WebSocketMessageFactory.create_client_message(
-            "user_message",
+        message = create_standard_message(
+            MessageType.USER_MESSAGE,
             {
                 "content": "",
                 "thread_id": "thread123"
             }
         )
         
-        assert message["payload"]["content"] == ""
+        assert message.payload["content"] == ""
         
         # Test with None values in optional fields
-        message = WebSocketMessageFactory.create_client_message(
-            "start_agent",
+        message = create_standard_message(
+            MessageType.START_AGENT,
             {
                 "query": "Test query",
                 "user_id": "user123",
@@ -166,20 +169,20 @@ class TestWebSocketMessageValidationEdgeCases:
             }
         )
         
-        assert message["payload"]["context"] is None
+        assert message.payload["context"] is None
     
     def test_numeric_string_conversion(self):
         """Test numeric values in string fields."""
-        message = WebSocketMessageFactory.create_client_message(
-            "user_message",
+        message = create_standard_message(
+            MessageType.USER_MESSAGE,
             {
                 "content": "123456",  # Numeric content as string
                 "thread_id": "thread_456"  # Numeric thread ID as string
             }
         )
         
-        assert message["payload"]["content"] == "123456"
-        assert message["payload"]["thread_id"] == "thread_456"
+        assert message.payload["content"] == "123456"
+        assert message.payload["thread_id"] == "thread_456"
 
 # Message validation tests are now in dedicated modules
 # Import from websocket/ subdirectory for specific test types

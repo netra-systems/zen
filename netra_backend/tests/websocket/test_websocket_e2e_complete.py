@@ -51,7 +51,7 @@ class WebSocketE2EClient:
     async def connect_with_auth(self, user_id: str = "test_user") -> str:
         """Connect with JWT authentication."""
         token = self.jwt_helper.create_test_user_token(user_id, f"{user_id}@test.com")
-        url = f"ws://localhost:8001/ws/enhanced?token={token}"
+        url = f"ws://localhost:8001/ws?token={token}"
         self.websocket = await websockets.connect(url)
         self.connected = True
         asyncio.create_task(self._listen_messages())
@@ -131,14 +131,14 @@ class TestWebSocketAuthenticationFlow:
     async def test_connection_rejected_invalid_jwt(self):
         """Test connection rejected with invalid JWT."""
         with pytest.raises(Exception):
-            ws = await websockets.connect("ws://localhost:8001/ws/enhanced?token=invalid")
+            ws = await websockets.connect("ws://localhost:8001/ws?token=invalid")
             await ws.close()
             
     @pytest.mark.asyncio
     async def test_connection_rejected_missing_jwt(self):
         """Test connection rejected without JWT."""  
         with pytest.raises(Exception):
-            ws = await websockets.connect("ws://localhost:8001/ws/enhanced")
+            ws = await websockets.connect("ws://localhost:8001/ws")
             await ws.close()
 
 @pytest.mark.asyncio
@@ -290,7 +290,7 @@ class TestServiceDiscovery:
         ws_config = config["websocket_config"]
         assert ws_config["features"]["json_first"] is True
         assert ws_config["features"]["auth_required"] is True
-        assert "/ws/enhanced" in ws_config["endpoints"]["websocket"]
+        assert "/ws" in ws_config["endpoints"]["websocket"]
 
 @pytest.mark.asyncio 
 class TestErrorHandlingAndLogging:
@@ -306,7 +306,7 @@ class TestErrorHandlingAndLogging:
             mock_logger.get_logger.return_value = mock_log
             
             try:
-                await websockets.connect("ws://localhost:8001/ws/enhanced?token=bad_token")
+                await websockets.connect("ws://localhost:8001/ws?token=bad_token")
             except Exception:
                 pass
             

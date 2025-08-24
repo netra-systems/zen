@@ -471,7 +471,8 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
 
 def setup_session_middleware(app: FastAPI) -> None:
     """Setup session middleware."""
-    from netra_backend.app.clients.auth_client import auth_client
+    from netra_backend.app.clients.auth_client_core import AuthServiceClient
+    auth_client = AuthServiceClient()
     current_environment = auth_client.detect_environment()
     session_config = _determine_session_config(current_environment)
     _log_session_config(session_config, current_environment)

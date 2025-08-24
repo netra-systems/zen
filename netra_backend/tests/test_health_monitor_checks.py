@@ -249,10 +249,8 @@ class TestBackendHealthChecks:
         """Test MCP (Model Context Protocol) integration health."""
         dependency_checker = DependencyHealthChecker("llm")
         
-        with patch('netra_backend.app.llm.llm_manager.llm_manager') as mock_llm:
-            # Arrange
-            mock_llm.is_healthy.return_value = True
-            
+        # Mock the _check_llm_connectivity method directly to avoid import issues
+        with patch.object(dependency_checker, '_check_llm_connectivity', return_value=True):
             # Act
             result = await dependency_checker.check_health()
             
