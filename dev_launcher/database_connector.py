@@ -29,7 +29,6 @@ from netra_backend.app.core.network_constants import (
     ServicePorts,
 )
 from dev_launcher.isolated_environment import get_env
-from shared.database.core_database_manager import CoreDatabaseManager
 
 logger = logging.getLogger(__name__)
 

@@ -448,3 +448,17 @@ def retry_http_request(func: Callable, max_attempts: int = 3, base_delay: float 
 auth_retry_handler = UnifiedRetryHandler("auth_service")
 backend_retry_handler = UnifiedRetryHandler("netra_backend")
 launcher_retry_handler = UnifiedRetryHandler("dev_launcher")
+default_retry_handler = UnifiedRetryHandler("default")
+
+
+# Backoff strategy functions
+def exponential_backoff(attempt: int, base_delay: float = 1.0, multiplier: float = 2.0, max_delay: float = 60.0) -> float:
+    """Calculate exponential backoff delay."""
+    delay = base_delay * (multiplier ** (attempt - 1))
+    return min(delay, max_delay)
+
+
+def linear_backoff(attempt: int, base_delay: float = 1.0, increment: float = 1.0, max_delay: float = 60.0) -> float:
+    """Calculate linear backoff delay."""
+    delay = base_delay + (increment * (attempt - 1))
+    return min(delay, max_delay)

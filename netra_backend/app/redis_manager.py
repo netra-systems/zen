@@ -1,6 +1,5 @@
-# DEPRECATED: Use shared.database.unified_redis_manager instead
-# This file is kept for backward compatibility but new code should use:
-# from shared.database.unified_redis_manager import backend_redis_manager
+# Redis Manager for netra_backend service
+# Provides Redis connectivity and operations for the backend service
 
 import redis.asyncio as redis
 
@@ -345,9 +344,8 @@ class RedisManager:
                 return []
         return []
 
-# Legacy instance - NEW CODE SHOULD USE shared.database.unified_redis_manager.backend_redis_manager
+# Main instance for netra_backend service
 redis_manager = RedisManager()
 
-# Recommended: Use the unified manager for new code
-from shared.database.unified_redis_manager import backend_redis_manager
-unified_redis_manager = backend_redis_manager
+# Export for compatibility
+unified_redis_manager = redis_manager

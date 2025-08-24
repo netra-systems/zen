@@ -26,7 +26,6 @@ from sqlalchemy.exc import OperationalError, DisconnectionError
 from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger as logger
-from shared.database.core_database_manager import CoreDatabaseManager
 
 
 class DatabaseManager:
@@ -71,13 +70,23 @@ class DatabaseManager:
         if not raw_url:
             return DatabaseManager._get_default_database_url()
         
-        # Use shared CoreDatabaseManager for consistent URL normalization
-        normalized = CoreDatabaseManager.normalize_postgres_url(raw_url)
+        # Normalize URL by removing driver-specific prefixes
+        normalized = raw_url
+        if raw_url.startswith("postgresql+"):
+            normalized = "postgresql://" + raw_url[len("postgresql+"):].split("://", 1)[-1]
         
         # Handle SSL parameters - remove them for Cloud SQL connections
-        if CoreDatabaseManager.is_cloud_sql_connection(normalized):
-            # For Cloud SQL, remove SSL parameters using the shared manager
-            normalized = CoreDatabaseManager.convert_ssl_params_for_asyncpg(normalized)
+        if "/cloudsql/" in normalized or "@/cloudsql/" in normalized:
+            # For Cloud SQL, remove SSL parameters
+            from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+            parsed = urlparse(normalized)
+            query_params = parse_qs(parsed.query)
+            # Remove SSL-related parameters for Cloud SQL
+            ssl_params = ['sslmode', 'sslcert', 'sslkey', 'sslrootcert', 'ssl']
+            for param in ssl_params:
+                query_params.pop(param, None)
+            new_query = urlencode(query_params, doseq=True)
+            normalized = urlunparse(parsed._replace(query=new_query))
         
         return normalized
     
@@ -89,7 +98,12 @@ class DatabaseManager:
             Database URL compatible with synchronous drivers
         """
         base_url = DatabaseManager.get_base_database_url()
-        return CoreDatabaseManager.format_url_for_sync_driver(base_url)
+        # For sync driver, ensure postgresql:// prefix
+        if base_url.startswith("sqlite"):
+            return base_url
+        if not base_url.startswith("postgresql://"):
+            base_url = "postgresql://" + base_url.split("://", 1)[-1]
+        return base_url
     
     @staticmethod
     def get_application_url_async() -> str:
@@ -99,7 +113,12 @@ class DatabaseManager:
             Database URL compatible with asyncpg driver
         """
         base_url = DatabaseManager.get_base_database_url()
-        return CoreDatabaseManager.format_url_for_async_driver(base_url)
+        # For async driver, ensure postgresql+asyncpg:// prefix
+        if base_url.startswith("sqlite"):
+            return base_url.replace("sqlite://", "sqlite+aiosqlite://")
+        if not base_url.startswith("postgresql+asyncpg://"):
+            base_url = "postgresql+asyncpg://" + base_url.split("://", 1)[-1]
+        return base_url
     
     @staticmethod
     def validate_base_url() -> bool:

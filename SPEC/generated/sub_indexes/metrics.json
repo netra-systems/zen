@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-08-24T08:13:16.308722",
+    "generated_at": "2025-08-24T09:35:31.718301",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 164
   },
@@ -128,14 +128,14 @@
       "value": "assertion_count",
       "category": "metrics",
       "locations": [
-        "scripts/validate_agent_tests.py:302"
+        "scripts/validate_agent_tests.py:301"
       ]
     },
     "async_test_count": {
       "value": "async_test_count",
       "category": "metrics",
       "locations": [
-        "scripts/validate_agent_tests.py:300"
+        "scripts/validate_agent_tests.py:299"
       ]
     },
     "blocked_ips_count": {
@@ -594,7 +594,7 @@
       "value": "log_count",
       "category": "metrics",
       "locations": [
-        "scripts/audit_oauth_gcp_logs.py:518"
+        "scripts/audit_oauth_gcp_logs.py:517"
       ]
     },
     "low_confidence_count": {
@@ -710,7 +710,7 @@
         "netra_backend/app/services/metrics/core_collector_helpers.py:77",
         "netra_backend/app/services/quality_monitoring/analytics.py:68",
         "netra_backend/app/services/quality_monitoring/service.py:113",
-        "scripts/seed_staging_data.py:315"
+        "scripts/seed_staging_data.py:313"
       ]
     },
     "metric_type,\n                toStartOfHour(timestamp) as hour,\n                avg(value) as avg_value,\n                max(value) as max_value,\n                min(value) as min_value,\n                count() as sample_count": {
@@ -949,8 +949,8 @@
         "netra_backend/app/agents/admin_tool_dispatcher/corpus_tool_handlers.py:132",
         "netra_backend/app/agents/admin_tool_dispatcher/corpus_validators.py:28",
         "netra_backend/app/agents/admin_tool_dispatcher/corpus_validators.py:30",
-        "scripts/demo_real_llm_testing.py:85",
-        "scripts/demo_real_llm_testing.py:156"
+        "scripts/demo_real_llm_testing.py:83",
+        "scripts/demo_real_llm_testing.py:154"
       ]
     },
     "recovery_count": {
@@ -985,9 +985,9 @@
         "netra_backend/app/agents/data_sub_agent/cost_optimizer.py:156",
         "netra_backend/app/services/mcp_service.py:307",
         "netra_backend/app/services/mcp_service.py:339",
-        "scripts/seed_staging_data.py:207",
-        "scripts/seed_staging_data.py:276",
-        "scripts/seed_staging_data.py:278"
+        "scripts/seed_staging_data.py:205",
+        "scripts/seed_staging_data.py:274",
+        "scripts/seed_staging_data.py:276"
       ]
     },
     "requests_count": {
@@ -1033,7 +1033,7 @@
       "value": "rotation_enabled_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/core/configuration/secrets.py:518"
+        "netra_backend/app/core/configuration/secrets.py:527"
       ]
     },
     "routes_count": {
@@ -1078,7 +1078,7 @@
       "value": "settings_count",
       "category": "metrics",
       "locations": [
-        "scripts/environment_validator.py:231"
+        "scripts/environment_validator.py:230"
       ]
     },
     "silenced_count": {
@@ -1139,12 +1139,12 @@
         "netra_backend/app/services/api_gateway/circuit_breaker.py:157",
         "netra_backend/app/services/database/rollback_manager_core.py:171",
         "netra_backend/app/services/database/rollback_manager_execution.py:44",
-        "scripts/benchmark_optimization.py:131",
-        "scripts/benchmark_optimization.py:142",
-        "scripts/benchmark_optimization.py:153",
-        "scripts/benchmark_optimization.py:179",
-        "scripts/benchmark_optimization.py:179",
-        "scripts/benchmark_optimization.py:180"
+        "scripts/benchmark_optimization.py:129",
+        "scripts/benchmark_optimization.py:140",
+        "scripts/benchmark_optimization.py:151",
+        "scripts/benchmark_optimization.py:177",
+        "scripts/benchmark_optimization.py:177",
+        "scripts/benchmark_optimization.py:178"
       ]
     },
     "suppression_rules_count": {
@@ -1165,7 +1165,7 @@
       "value": "tables_count",
       "category": "metrics",
       "locations": [
-        "scripts/environment_validator.py:176"
+        "scripts/environment_validator.py:175"
       ]
     },
     "target_count": {
@@ -1187,11 +1187,11 @@
       "category": "metrics",
       "locations": [
         "netra_backend/app/db/connection_pool_manager.py:273",
-        "netra_backend/app/db/database_manager.py:221",
+        "netra_backend/app/db/database_manager.py:212",
         "netra_backend/app/db/postgres_async.py:74",
         "netra_backend/app/db/postgres_cloud.py:102",
-        "netra_backend/app/db/postgres_core.py:229",
-        "netra_backend/app/db/postgres_core.py:458",
+        "netra_backend/app/db/postgres_core.py:230",
+        "netra_backend/app/db/postgres_core.py:459",
         "netra_backend/app/services/database/connection_manager.py:127",
         "auth_service/auth_core/database/connection.py:155",
         "auth_service/auth_core/database/connection.py:167"
@@ -1201,16 +1201,16 @@
       "value": "test_count",
       "category": "metrics",
       "locations": [
-        "scripts/benchmark_optimization.py:130",
-        "scripts/benchmark_optimization.py:141",
-        "scripts/benchmark_optimization.py:152",
+        "scripts/benchmark_optimization.py:128",
+        "scripts/benchmark_optimization.py:139",
+        "scripts/benchmark_optimization.py:150",
+        "scripts/benchmark_optimization.py:176",
+        "scripts/benchmark_optimization.py:176",
         "scripts/benchmark_optimization.py:178",
-        "scripts/benchmark_optimization.py:178",
-        "scripts/benchmark_optimization.py:180",
-        "scripts/benchmark_optimization.py:195",
-        "scripts/benchmark_optimization.py:218",
-        "scripts/benchmark_optimization.py:241",
-        "scripts/benchmark_optimization.py:297"
+        "scripts/benchmark_optimization.py:193",
+        "scripts/benchmark_optimization.py:216",
+        "scripts/benchmark_optimization.py:239",
+        "scripts/benchmark_optimization.py:295"
       ]
     },
     "test_request_count": {
