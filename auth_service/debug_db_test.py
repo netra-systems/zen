@@ -11,7 +11,6 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ["JWT_SECRET"] = "test_jwt_secret_key_that_is_long_enough_for_testing_purposes"
 
 # Add current directory to path
-sys.path.insert(0, os.path.dirname(__file__))
 
 async def test_database_setup():
     """Test database initialization and table creation"""

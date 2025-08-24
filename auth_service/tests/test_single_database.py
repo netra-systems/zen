@@ -11,7 +11,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # Add auth_service to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 @pytest.mark.asyncio
 async def test_no_main_db_sync_module():
@@ -47,7 +46,6 @@ async def test_single_database_initialization():
             # Add auth_service directory to path for imports
             auth_service_path = Path(__file__).parent.parent
             if str(auth_service_path) not in sys.path:
-                sys.path.insert(0, str(auth_service_path))
             
             from main import lifespan
             

@@ -19,7 +19,6 @@ from pathlib import Path
 import asyncpg
 
 # Setup test path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from test_framework import setup_test_path
 setup_test_path()

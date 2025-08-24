@@ -36,7 +36,6 @@ from test_framework.environment_markers import env, dev_and_staging, env_require
 
 # Add auth service to path
 auth_service_dir = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(auth_service_dir))
 from auth_service.main import app
 
 # Test client

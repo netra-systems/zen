@@ -57,9 +57,9 @@ def get_redis_client():
         logger.warning(f"Redis connection failed for security features: {e}")
         return None
 
-# Initialize with Redis client that matches session manager
-oauth_security = OAuthSecurityManager(auth_service.session_manager.redis_client)
-oauth_cleanup_manager = OAuthStateCleanupManager(auth_service.session_manager.redis_client)
+# Initialize OAuth managers (they will use unified Redis manager internally)
+oauth_security = OAuthSecurityManager()
+oauth_cleanup_manager = OAuthStateCleanupManager()
 session_fixation_protector = SessionFixationProtector(auth_service.session_manager)
 
 def get_client_info(request: Request) -> dict:

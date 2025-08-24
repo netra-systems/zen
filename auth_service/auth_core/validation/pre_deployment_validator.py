@@ -28,7 +28,6 @@ from urllib.parse import urlparse, parse_qs
 logger = logging.getLogger(__name__)
 
 # Add parent directory to Python path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.secret_loader import AuthSecretLoader

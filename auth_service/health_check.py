@@ -2,48 +2,56 @@
 """
 Health check script for Auth Service
 Used by orchestrators and load balancers to determine service health
+
+Maintains service independence by implementing its own health check logic.
 """
 import sys
+import os
 import urllib.request
 import urllib.error
 import json
-import os
+import time
+from typing import Tuple
 
 
-def check_health(port=None):
-    """Check if the auth service is healthy"""
+def check_health(port=None) -> bool:
+    """Check if the auth service is healthy."""
     if port is None:
-        port = os.getenv('PORT', '8080')
-    
-    health_url = f"http://localhost:{port}/health"
+        port = int(os.getenv('PORT', '8080'))
     
     try:
-        with urllib.request.urlopen(health_url, timeout=5) as response:
+        url = f"http://localhost:{port}/health"
+        req = urllib.request.Request(url)
+        req.add_header('User-Agent', 'auth-health-checker/1.0')
+        
+        with urllib.request.urlopen(req, timeout=5) as response:
             if response.status == 200:
                 data = json.loads(response.read())
-                if data.get('status') == 'healthy':
-                    return True
-    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, TimeoutError):
-        pass
+                return data.get('status') == 'healthy'
+    except (urllib.error.URLError, json.JSONDecodeError, KeyError) as e:
+        print(f"Health check failed: {e}")
+        return False
     
     return False
 
 
-def check_readiness(port=None):
-    """Check if the auth service is ready to serve requests"""
+def check_readiness(port=None) -> bool:
+    """Check if the auth service is ready to serve requests."""
     if port is None:
-        port = os.getenv('PORT', '8080')
-    
-    ready_url = f"http://localhost:{port}/health/ready"
+        port = int(os.getenv('PORT', '8080'))
     
     try:
-        with urllib.request.urlopen(ready_url, timeout=5) as response:
+        url = f"http://localhost:{port}/readiness"
+        req = urllib.request.Request(url)
+        req.add_header('User-Agent', 'auth-health-checker/1.0')
+        
+        with urllib.request.urlopen(req, timeout=5) as response:
             if response.status == 200:
                 data = json.loads(response.read())
-                if data.get('status') == 'ready':
-                    return True
-    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, TimeoutError):
-        pass
+                return data.get('ready', False)
+    except (urllib.error.URLError, json.JSONDecodeError, KeyError) as e:
+        print(f"Readiness check failed: {e}")
+        return False
     
     return False
 

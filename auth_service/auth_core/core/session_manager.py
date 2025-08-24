@@ -11,8 +11,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
-import redis
-
+from shared.database.unified_redis_manager import auth_redis_manager
 from auth_service.auth_core.config import AuthConfig
 
 logger = logging.getLogger(__name__)
@@ -21,18 +20,16 @@ class SessionManager:
     """Single Source of Truth for session management"""
     
     def __init__(self):
-        # In containerized environments, Redis should connect to a Redis service, not localhost
-        # For staging/production, Redis is disabled by environment check
-        self.redis_url = AuthConfig.get_redis_url()
+        # Use unified Redis manager for all Redis operations
+        self.redis_manager = auth_redis_manager
         self.session_ttl = AuthConfig.get_session_ttl_hours()
-        self.redis_client = None
         
         # Initialize fallback mode BEFORE attempting Redis connection
         self._fallback_mode = False
         self._memory_sessions = {}
         
         # Try to connect to Redis if enabled
-        self.redis_enabled = self._should_enable_redis()
+        self.redis_enabled = self.redis_manager.enabled
         if self.redis_enabled:
             self._connect_redis()
         else:
@@ -42,40 +39,19 @@ class SessionManager:
         self.used_refresh_tokens = set()
         self._session_locks = {}
             
-    def _should_enable_redis(self) -> bool:
-        """Determine if Redis should be enabled based on environment"""
-        env = AuthConfig.get_environment()
-        redis_disabled = AuthConfig.is_redis_disabled()
-        
-        # Disable Redis in staging or if explicitly disabled
-        if env == "staging" or redis_disabled:
-            return False
-        return True
+    @property
+    def redis_client(self):
+        """Get Redis client from unified manager."""
+        return self.redis_manager.get_client()
         
     def _connect_redis(self):
-        """Establish Redis connection with retry logic"""
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                self.redis_client = redis.from_url(
-                    self.redis_url,
-                    decode_responses=True,
-                    socket_connect_timeout=5,
-                    socket_timeout=5,
-                    retry_on_timeout=True,
-                    health_check_interval=30
-                )
-                self.redis_client.ping()
-                logger.info("Redis connected for session management")
-                self._fallback_mode = False
-                return
-            except Exception as e:
-                logger.error(f"Redis connection attempt {attempt + 1} failed: {e}")
-                if attempt == max_retries - 1:
-                    self.redis_client = None
-                    self._enable_fallback_mode()
-                else:
-                    time.sleep(1 * (attempt + 1))  # Exponential backoff
+        """Establish Redis connection using unified manager."""
+        if self.redis_manager.connect():
+            logger.info("Redis connected for session management")
+            self._fallback_mode = False
+        else:
+            logger.warning("Redis connection failed - using fallback mode")
+            self._enable_fallback_mode()
     
     def create_session(self, user_id: str, user_data: Dict, session_id: Optional[str] = None) -> str:
         """Create new session and return session ID"""

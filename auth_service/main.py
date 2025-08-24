@@ -9,7 +9,6 @@ import asyncio
 from pathlib import Path
 
 # Add parent directory to Python path for auth_service imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import logging
 from contextlib import asynccontextmanager
@@ -35,13 +34,14 @@ else:
 
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.routes.auth_routes import router as auth_router
+from shared.logging import get_logger, configure_service_logging
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Configure unified logging for auth service
+configure_service_logging({
+    'service_name': 'auth-service',
+    'enable_file_logging': True
+})
+logger = get_logger(__name__)
 
 # Global shutdown event for graceful shutdown
 shutdown_event = asyncio.Event()
