@@ -20,7 +20,6 @@ class TestFallbackCoordinator:
         """Create a fresh FallbackCoordinator instance for testing."""
         # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
             # Create mock instances
@@ -146,10 +145,8 @@ class TestFallbackCoordinator:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler, \
-             # Mock: Component isolation for testing without external dependencies
-             patch('app.core.fallback_coordinator.CircuitBreaker'), \
-             # Mock: Component isolation for testing without external dependencies
-             patch('app.core.fallback_coordinator.AgentFallbackStatus'):
+             patch('app.core.fallback_coordinator.CircuitBreaker') as mock_circuit_breaker, \
+             patch('app.core.fallback_coordinator.AgentFallbackStatus') as mock_status:
             
             coordinator.register_agent("TestAgent", custom_config)
             
@@ -301,10 +298,8 @@ class TestFallbackCoordinator:
         
         # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler, \
-             # Mock: Component isolation for testing without external dependencies
-             patch('app.core.fallback_coordinator.CircuitBreaker'), \
-             # Mock: Component isolation for testing without external dependencies
-             patch('app.core.fallback_coordinator.AgentFallbackStatus'):
+             patch('app.core.fallback_coordinator.CircuitBreaker') as mock_circuit_breaker, \
+             patch('app.core.fallback_coordinator.AgentFallbackStatus') as mock_status:
             
             handlers = []
             for agent in agents:

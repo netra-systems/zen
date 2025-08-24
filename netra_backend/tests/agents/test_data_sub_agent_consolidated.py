@@ -129,15 +129,11 @@ class TestDataSubAgentConsolidated:
     @pytest.fixture
     async def data_sub_agent(self, mock_llm_manager, mock_tool_dispatcher, mock_websocket_manager):
         """Create DataSubAgent instance for testing."""
-        # Mock: ClickHouse external database isolation for unit testing performance
+        # Mock: Component isolation for testing without external dependencies
         with patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.ClickHouseClient') as mock_ch, \
-             # Mock: Component isolation for testing without external dependencies
              patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.SchemaCache') as mock_sc, \
-             # Mock: Component isolation for testing without external dependencies
              patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.PerformanceAnalyzer') as mock_pa, \
-             # Mock: Component isolation for testing without external dependencies
              patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.LLMCostOptimizer') as mock_co, \
-             # Mock: Component isolation for testing without external dependencies
              patch('netra_backend.app.agents.data_sub_agent.data_sub_agent.DataValidator') as mock_dv:
             
             agent = DataSubAgent(

@@ -74,9 +74,7 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
     ) -> None:
         """Modernized execute using focused execution manager."""
         context = self._create_execution_context(state, run_id, stream_updates)
-        await self.execution_manager.execute_with_fallback(
-            context, self.legacy_compat
-        )
+        await self.execution_manager.execute_with_fallback(context)
 
     def _create_execution_context(
         self, state: DeepAgentState, 
@@ -97,8 +95,7 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
             "agent": self.name,
             "execution": self.execution_manager.get_health_status(),
             "monitoring": self.monitoring_service.get_health_status(),
-            "llm": self.llm_handler.get_health_status(),
-            "legacy": self.legacy_compat.get_health_status()
+            "llm": self.llm_handler.get_health_status()
         }
 
     def get_performance_metrics(self) -> dict:

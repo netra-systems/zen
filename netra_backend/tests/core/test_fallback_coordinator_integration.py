@@ -21,7 +21,6 @@ class TestFallbackCoordinatorExecution:
         """Create a fresh FallbackCoordinator instance for testing."""
         # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
             # Create mock instances
@@ -274,11 +273,8 @@ class TestFallbackCoordinatorIntegration:
         """Create coordinator with full mock setup."""
         # Mock: Component isolation for testing without external dependencies
         with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.CircuitBreaker') as mock_cb_class, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_class, \
-             # Mock: Component isolation for testing without external dependencies
              patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_class:
             
             coordinator = FallbackCoordinator()

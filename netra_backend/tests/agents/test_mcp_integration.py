@@ -13,7 +13,7 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-from mcp_client import MCPTool
+from netra_backend.app.mcp_client import MCPTool
 
 from netra_backend.app.agents.mcp_integration.context_manager import (
     MCPAgentContext,

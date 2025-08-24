@@ -112,16 +112,10 @@ class ActionsAgentExecutionManager:
         await monitoring_service.send_completion_update(context)
 
     async def execute_with_fallback(
-        self, context: ExecutionContext, legacy_compat
+        self, context: ExecutionContext
     ) -> None:
-        """Execute with modern pattern and fallback support."""
-        try:
-            await self._execute_with_modern_pattern(context)
-        except Exception as e:
-            logger.warning(f"Modern execution failed, using legacy fallback: {e}")
-            await legacy_compat.execute_fallback_workflow(
-                context.state, context.run_id, context.stream_updates
-            )
+        """Execute with modern pattern."""
+        await self._execute_with_modern_pattern(context)
 
     async def _execute_with_modern_pattern(self, context: ExecutionContext) -> None:
         """Execute using modern execution pattern."""
