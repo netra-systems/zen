@@ -120,3 +120,4 @@ terraform-gcp/staging.tfplan
 .service_discovery/auth.json
 project_dump.txt
 config/netra-staging-7a1059b7cf26.json
+test_reports/
