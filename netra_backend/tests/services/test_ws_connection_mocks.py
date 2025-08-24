@@ -30,6 +30,7 @@ class MockWebSocket:
         self.user_id = user_id or self._generate_user_id()
 
         self.state = WebSocketState.CONNECTED
+        self.application_state = WebSocketState.CONNECTED  # Add for manager compatibility
 
         self.sent_messages = []
 
@@ -74,6 +75,7 @@ class MockWebSocket:
             raise Exception("Mock accept failure")
 
         self.state = WebSocketState.CONNECTED
+        self.application_state = WebSocketState.CONNECTED
         
     async def send_text(self, data: str):
 
@@ -130,6 +132,7 @@ class MockWebSocket:
         """Set WebSocket to closed state"""
 
         self.state = WebSocketState.DISCONNECTED
+        self.application_state = WebSocketState.DISCONNECTED
 
         self.close_code = code
 

@@ -173,7 +173,7 @@ class TestWebSocketAuthValidation:
         token = auth_tester.create_valid_token(user_id)
         
         # Mock auth service to return valid response for testing
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
                 "user_id": user_id,
@@ -197,7 +197,7 @@ class TestWebSocketAuthValidation:
         token = auth_tester.create_valid_token(user_id)
         
         # Mock auth service to return invalid response
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": False,
                 "error": "Invalid token signature"
@@ -220,7 +220,7 @@ class TestWebSocketAuthValidation:
         expired_token = auth_tester.create_expired_token(user_id)
         
         # Mock auth service to return expired token response
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": False,
                 "error": "Token expired"
@@ -268,7 +268,7 @@ class TestWebSocketAuthValidation:
         # Step 1: Test initial valid token
         initial_token = auth_tester.create_valid_token(user_id, exp_minutes=60)
         
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
                 "user_id": user_id,
@@ -280,7 +280,7 @@ class TestWebSocketAuthValidation:
         # Step 2: Test refreshed token
         refreshed_token = auth_tester.create_valid_token(user_id, exp_minutes=120)
         
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
                 "user_id": user_id,
@@ -300,7 +300,7 @@ class TestWebSocketAuthValidation:
         tokens = [auth_tester.create_valid_token(uid) for uid in user_ids]
         
         # Mock successful validation for all
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {"valid": True, "user_id": "test"}
             
             # Execute concurrent connection attempts
@@ -336,7 +336,7 @@ class TestWebSocketAuthValidation:
                 else:
                     token = auth_tester.create_valid_token("test_user")
                 
-                with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+                with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
                     if scenario == "valid":
                         mock_validate.return_value = {"valid": True, "user_id": "test_user"}
                     else:
@@ -364,7 +364,7 @@ class TestWebSocketAuthCompliance:
         user_id = "perf_test_user"
         token = tester.create_valid_token(user_id)
         
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {"valid": True, "user_id": user_id}
             
             start_time = time.time()
@@ -389,7 +389,7 @@ class TestWebSocketAuthCompliance:
         
         results = {}
         for token, scenario_name in scenarios:
-            with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+            with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
                 if scenario_name == "valid_token":
                     mock_validate.return_value = {"valid": True, "user_id": "test"}
                     expected = True
@@ -417,7 +417,7 @@ class TestWebSocketAuthCompliance:
         # Test integration with auth service
         token = tester.create_valid_token("integration_test")
         
-        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True, 
                 "user_id": "integration_test",

@@ -9,6 +9,15 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 
 ## 📍 COMMONLY CONFUSED FILES & LOCATIONS
 
+### 🏗️ UNIFIED ARCHITECTURE COMPONENTS (Critical Infrastructure)
+| Component | Location | Purpose | Key Specs |
+|-----------|----------|---------|-----------|
+| **Unified Environment** | `/dev_launcher/isolated_environment.py` | Central environment management | [`SPEC/unified_environment_management.xml`](SPEC/unified_environment_management.xml) |
+| **Database Connectivity** | `/shared/database/core_database_manager.py` | SSL resolution & driver compatibility | [`SPEC/database_connectivity_architecture.xml`](SPEC/database_connectivity_architecture.xml) |
+| **Test Infrastructure** | `/test_framework/` | Unified test utilities | [`SPEC/test_infrastructure_architecture.xml`](SPEC/test_infrastructure_architecture.xml) |
+| **Import Management** | Various scripts | Absolute imports enforcement | [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) |
+| **Deployment System** | `/scripts/deploy_to_gcp.py` | Official deployment script | [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) |
+
 ### Configuration Files (Unified System - CRITICAL CHANGE)
 | File | Location | Purpose | Common Confusion |
 |------|----------|---------|------------------|
@@ -129,6 +138,105 @@ python -m test_framework.bad_test_reporter --reset
 # Disable detection for a run
 python unified_test_runner.py --service backend --no-bad-test-detection
 ```
+
+---
+
+## 🎯 UNIFIED SYSTEM ARCHITECTURE
+
+### Core Architecture Principles
+The Netra Apex platform operates as a **unified, coherent system** with three independent microservices that communicate through well-defined APIs:
+
+```mermaid
+graph TB
+    subgraph "Frontend Service"
+        FE[Next.js App<br/>Port 3000]
+    end
+    
+    subgraph "Backend Service"
+        BE[FastAPI App<br/>Port 8000]
+        WS[WebSocket Handler]
+        AG[Agent System]
+    end
+    
+    subgraph "Auth Service"
+        AS[Auth API<br/>Port 8080]
+        JWT[JWT Manager]
+    end
+    
+    subgraph "Data Layer"
+        PG[(PostgreSQL)]
+        CH[(ClickHouse)]
+        RD[(Redis)]
+    end
+    
+    FE -->|REST API| BE
+    FE -->|WebSocket| WS
+    BE -->|Auth API| AS
+    AS -->|JWT Validation| JWT
+    BE --> PG
+    BE --> CH
+    BE --> RD
+    AS --> PG
+```
+
+### Environment Management Architecture
+**ALL environment access goes through IsolatedEnvironment:**
+
+```python
+# CORRECT - Unified environment management
+from dev_launcher.isolated_environment import get_env
+env = get_env()
+database_url = env.get("DATABASE_URL")
+
+# INCORRECT - Direct os.environ access
+import os
+database_url = os.environ.get("DATABASE_URL")  # FORBIDDEN
+```
+
+### Database Connectivity Architecture
+**Automatic SSL parameter resolution across drivers:**
+
+```python
+# CoreDatabaseManager handles driver incompatibilities transparently
+from shared.database.core_database_manager import CoreDatabaseManager
+
+manager = CoreDatabaseManager()
+# Automatically converts between asyncpg (ssl=) and psycopg2 (sslmode=)
+url = manager.resolve_ssl_parameter_conflicts(database_url, for_async=True)
+```
+
+### Import Management Architecture
+**Zero tolerance for relative imports:**
+
+```python
+# CORRECT - Absolute imports only
+from netra_backend.app.services.user_service import UserService
+from auth_service.auth_core.models import User
+from test_framework.fixtures import create_test_user
+
+# INCORRECT - Relative imports FORBIDDEN
+from ..services.user_service import UserService  # NEVER
+from .models import User  # NEVER
+```
+
+### Service Communication Patterns
+Services MUST remain 100% independent and communicate only through APIs:
+
+| Pattern | Description | Example |
+|---------|-------------|---------|
+| **REST APIs** | Service-to-service HTTP calls | Backend → Auth Service |
+| **WebSocket** | Real-time bidirectional | Frontend ↔ Backend |
+| **Shared Interfaces** | Common types in `/shared/` | Database managers |
+| **Message Queue** | Async communication (future) | Event processing |
+
+### Deployment Architecture
+**Multi-environment deployment pipeline:**
+
+| Environment | Command | Characteristics |
+|-------------|---------|-----------------|
+| **Development** | `python scripts/dev_launcher.py` | Local, hot-reload, isolated env |
+| **Staging** | `python scripts/deploy_to_gcp.py --project netra-staging --build-local` | Cloud Run, SSL, OAuth |
+| **Production** | `python scripts/deploy_to_gcp.py --project netra-production --run-checks` | Multi-region, auto-scale |
 
 ---
 
@@ -453,12 +561,32 @@ python unified_test_runner.py --service backend --no-bad-test-detection
 | **`swimlane.xml`** | Process flows | Workflow lanes |
 | **`Status.xml`** | Status tracking | System status |
 
+### 🔴 CRITICAL ARCHITECTURE UPDATES (2025-08-24)
+
+#### Unified System Changes
+1. **Environment Management**: ALL services now use `IsolatedEnvironment` - no direct `os.environ` access
+2. **Database Connectivity**: `CoreDatabaseManager` handles SSL parameter conflicts automatically
+3. **Import Management**: ZERO tolerance for relative imports - enforced by pre-commit hooks
+4. **Test Infrastructure**: Unified test runner with service boundaries strictly enforced
+5. **Deployment**: Single official script `deploy_to_gcp.py` - no alternative scripts allowed
+
+#### Critical Specifications Added
+| Spec | Purpose | Priority |
+|------|---------|----------|
+| `unified_environment_management.xml` | Environment isolation | CRITICAL |
+| `database_connectivity_architecture.xml` | SSL resolution | CRITICAL |
+| `test_infrastructure_architecture.xml` | Test organization | CRITICAL |
+| `import_management_architecture.xml` | Import enforcement | CRITICAL |
+| `deployment_architecture.xml` | Deployment pipeline | CRITICAL |
+
 ### Critical Update Reminders
 - **ALWAYS** check `learnings/index.xml` before any task
 - **NEVER** violate the 300/8 rule from `conventions.xml`
 - **MANDATORY** shared auth integration per `shared_auth_integration.xml`
 - **VALIDATE** string literals using the index system
 - **ENFORCE** type safety per `type_safety.xml`
+- **USE** `IsolatedEnvironment` for ALL environment access
+- **MAINTAIN** absolute imports - relative imports cause test failures
 
 ---
 

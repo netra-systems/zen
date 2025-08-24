@@ -131,7 +131,7 @@ class TestAgentPipelineReal:
         routing_results = {}
         
         for message_type, message in routing_messages.items():
-            with patch('app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
+            with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
                 mock_llm.return_value = f"Processed {message_type} request successfully"
                 start_time = time.time()
                 await session["client"].send_message(message)
@@ -145,7 +145,7 @@ class TestAgentPipelineReal:
         """Test agent processing with real execution pipeline."""
         processing_message = AgentMessageFactory.create_optimization_analysis_message(session["user_id"])
         
-        with patch('app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = "Analysis complete: 25% cost reduction identified in ML workloads"
             start_time = time.time()
             await session["client"].send_message(processing_message)
@@ -164,7 +164,7 @@ class TestAgentPipelineReal:
         streaming_message = AgentMessageFactory.create_complex_analysis_message(session["user_id"])
         stream_tracker = ResponseStreamTracker()
         
-        with patch('app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = "Streaming analysis results with detailed optimization recommendations"
             await stream_tracker.start_tracking(session["client"])
             await session["client"].send_message(streaming_message)
@@ -176,7 +176,7 @@ class TestAgentPipelineReal:
         """Test coordination between multiple agents."""
         coordination_message = AgentMessageFactory.create_multi_agent_message(session["user_id"])
         
-        with patch('app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.return_value = "Multi-agent coordination: data analysis and optimization complete"
             start_time = time.time()
             await session["client"].send_message(coordination_message)
@@ -194,7 +194,7 @@ class TestAgentPipelineReal:
         """Test error handling and recovery in pipeline."""
         error_message = AgentMessageFactory.create_error_prone_message(session["user_id"])
         
-        with patch('app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm') as mock_llm:
             mock_llm.side_effect = [Exception("LLM timeout"), "Fallback response successful"]
             start_time = time.time()
             await session["client"].send_message(error_message)

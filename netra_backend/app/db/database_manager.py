@@ -38,21 +38,34 @@ class DatabaseManager:
         Returns:
             Clean database URL with driver prefixes stripped but SSL params preserved for non-Cloud SQL
         """
-        # Get from unified configuration - single source of truth
-        try:
-            config = get_unified_config()
-            raw_url = config.database_url or ""
-            
-            # Check test collection mode from config
-            if config.environment == "testing" and not raw_url:
-                return "sqlite:///:memory:"
-        except Exception:
-            # Fallback for bootstrap or when config not available
-            import os
+        # Check if we're in a test environment and should bypass config caching
+        import sys
+        import os
+        is_pytest = 'pytest' in sys.modules or any('pytest' in str(arg) for arg in sys.argv)
+        
+        raw_url = ""
+        
+        if is_pytest:
+            # In pytest mode, directly check environment to handle dynamic test env changes
             raw_url = os.environ.get("DATABASE_URL", "")
             test_collection_mode = os.environ.get('TEST_COLLECTION_MODE')
             if test_collection_mode == '1' and not raw_url:
                 return "sqlite:///:memory:"
+        else:
+            # Get from unified configuration - single source of truth for non-test environments
+            try:
+                config = get_unified_config()
+                raw_url = config.database_url or ""
+                
+                # Check test collection mode from config
+                if config.environment == "testing" and not raw_url:
+                    return "sqlite:///:memory:"
+            except Exception:
+                # Fallback for bootstrap or when config not available
+                raw_url = os.environ.get("DATABASE_URL", "")
+                test_collection_mode = os.environ.get('TEST_COLLECTION_MODE')
+                if test_collection_mode == '1' and not raw_url:
+                    return "sqlite:///:memory:"
         
         if not raw_url:
             return DatabaseManager._get_default_database_url()

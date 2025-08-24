@@ -145,7 +145,7 @@ class TestMessagePipelineCore:
     
     async def _test_agent_processing(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """Test agent processing with deterministic mock."""
-        with patch('app.services.agent_service_factory.get_agent_service') as mock_service:
+        with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
             mock_agent = AsyncMock()
             mock_agent.process_message.return_value = {
                 "response": f"Processed: {message['content']}",
@@ -194,7 +194,7 @@ class TestMessagePipelineTypes:
         message_id = f"test_{message_type}_{int(time.time())}"
         pipeline_tester.start_timing(message_id)
         
-        with patch('app.services.agent_service_factory.get_agent_service') as mock_service:
+        with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
             mock_agent = AsyncMock()
             mock_response = f"Mock {message_type} response for: {message['content']}"
             mock_agent.process_message.return_value = {"response": mock_response}
@@ -250,7 +250,7 @@ class TestPipelinePerformance:
         # Simulate processing delay based on index
         await asyncio.sleep(index * 0.01)
         
-        with patch('app.services.agent_service_factory.get_agent_service') as mock_service:
+        with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
             mock_agent = AsyncMock()
             mock_agent.process_message.return_value = {
                 "response": f"Processed concurrent message {index}"
@@ -280,7 +280,7 @@ class TestPipelineErrorHandling:
         await websocket.send_json(recovery_message)
         
         # Test agent error handling
-        with patch('app.services.agent_service_factory.get_agent_service') as mock_service:
+        with patch('netra_backend.app.services.agent_service_factory.get_agent_service') as mock_service:
             mock_agent = AsyncMock()
             mock_agent.process_message.side_effect = Exception("Mock agent error")
             mock_service.return_value = mock_agent

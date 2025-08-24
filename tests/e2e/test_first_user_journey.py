@@ -94,7 +94,7 @@ class TestFirstUserJourney:
         user_data = self._create_test_user_data()
         user_id = str(uuid.uuid4())
         
-        with patch('app.services.user_service.CRUDUser') as mock_user_service:
+        with patch('netra_backend.app.services.user_service.CRUDUser') as mock_user_service:
             created_user = User(id=user_id, email=user_data["email"], name=user_data["name"], is_active=True)
             mock_user_service.return_value.create_user.return_value = created_user
             
@@ -110,7 +110,7 @@ class TestFirstUserJourney:
         user_data = self._create_test_user_data()
         verification_token = f"verify_{uuid.uuid4().hex}"
         
-        with patch('app.services.email_service.EmailService') as mock_email_service:
+        with patch('netra_backend.app.services.email_service.EmailService') as mock_email_service:
             mock_email_service.return_value.send_verification = AsyncMock(return_value=True)
             mock_email_service.return_value.verify_token = AsyncMock(return_value=True)
             
@@ -123,8 +123,8 @@ class TestFirstUserJourney:
         user_data = self._create_test_user_data()
         user_id = str(uuid.uuid4())
         
-        with patch('app.clients.auth_client.auth_client') as mock_auth_client, \
-             patch('app.db.repositories.user_repository') as mock_backend_repo:
+        with patch('netra_backend.app.clients.auth_client.auth_client') as mock_auth_client, \
+             patch('netra_backend.app.db.repositories.user_repository') as mock_backend_repo:
             
             mock_auth_client.create_user.return_value = {"id": user_id, **user_data}
             mock_backend_repo.create.return_value = User(id=user_id, **user_data)
@@ -138,7 +138,7 @@ class TestFirstUserJourney:
         user_id = str(uuid.uuid4())
         free_plan = self._create_free_user_plan(user_id)
         
-        with patch('app.services.user_service.CRUDUser') as mock_user_service:
+        with patch('netra_backend.app.services.user_service.CRUDUser') as mock_user_service:
             mock_user_service.return_value.get_user_plan.return_value = free_plan
             plan = await mock_user_service.return_value.get_user_plan(user_id)
             assert await self._check_free_tier_limits(plan)
@@ -167,7 +167,7 @@ class TestFirstUserJourney:
         mock_websocket = MagicMock()
         mock_websocket.headers = {"authorization": f"Bearer {auth_token}"}
         
-        with patch('app.auth_dependencies.verify_token') as mock_verify:
+        with patch('netra_backend.app.auth_dependencies.verify_token') as mock_verify:
             mock_verify.return_value = {"user_id": user_id, "verified": True}
             mock_websocket_manager.connect.return_value = True
             

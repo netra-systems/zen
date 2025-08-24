@@ -194,7 +194,7 @@ class TestAgentBillingFlow:
         """Execute agent request with mocked LLM response."""
         expected_tokens = request["expected_cost"]["tokens"]
         
-        with patch('app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.call_llm') as mock_llm:
             mock_llm.return_value = AgentBillingTestUtils.create_mock_llm_response(expected_tokens)
             
             response = await AgentBillingTestUtils.send_agent_request(

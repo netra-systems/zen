@@ -82,7 +82,7 @@ class TestAgentMessageFlowImplementation:
 
     # """Create SecureWebSocketManager with mocked dependencies."""
 
-    # with patch('app.routes.websocket_unified.get_websocket_cors_handler') as mock_cors:
+    # with patch('netra_backend.app.routes.websocket_unified.get_websocket_cors_handler') as mock_cors:
 
     # mock_cors.return_value.allowed_origins = []
 
@@ -139,9 +139,9 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock agent service creation with LLMManager
 
-    # with patch('app.services.agent_service_factory._create_supervisor_agent') as mock_create, \n             patch('app.services.agent_service_core.AgentService') as mock_service_cls, \n             patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # with patch('netra_backend.app.services.agent_service_factory._create_supervisor_agent') as mock_create, \n             patch('netra_backend.app.services.agent_service_core.AgentService') as mock_service_cls, \n             patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
 
-    # patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
     # # Setup LLMManager mock
 
     # mock_llm = AsyncMock()
@@ -218,7 +218,7 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock LLMManager for connection handling
 
-    # with patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # with patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
 
     # mock_llm = AsyncMock()
 
@@ -252,7 +252,7 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock LLMManager
 
-    # with patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # with patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
 
     # mock_llm = AsyncMock()
 
@@ -304,11 +304,11 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock agent service to raise exception
 
-    # with patch('app.routes.websocket_unified._create_supervisor_agent') as mock_create, \
+    # with patch('netra_backend.app.routes.websocket_unified._create_supervisor_agent') as mock_create, \
 
-    # patch('app.services.agent_service_core.AgentService') as mock_service_cls, \
+    # patch('netra_backend.app.services.agent_service_core.AgentService') as mock_service_cls, \
 
-    # patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
             
     # # Setup LLMManager mock
 
@@ -449,11 +449,11 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock the complete agent pipeline
 
-    # with patch('app.services.agent_service_factory._create_supervisor_agent') as mock_create, \
+    # with patch('netra_backend.app.services.agent_service_factory._create_supervisor_agent') as mock_create, \
 
-    # patch('app.services.agent_service_core.AgentService') as mock_service_cls, \
+    # patch('netra_backend.app.services.agent_service_core.AgentService') as mock_service_cls, \
 
-    # patch('app.llm.llm_manager.LLMManager') as mock_llm:
+    # patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm:
             
     # # Set up mocks
 
@@ -508,7 +508,7 @@ class TestAgentMessageFlowImplementation:
         
     # # Mock LLMManager
 
-    # with patch('app.llm.llm_manager.LLMManager') as mock_llm_cls:
+    # with patch('netra_backend.app.llm.llm_manager.LLMManager') as mock_llm_cls:
 
     # mock_llm = AsyncMock()
 

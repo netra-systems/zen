@@ -279,7 +279,7 @@ python unified_test_runner.py
 *   **BEFORE RELEASES (Includes Staging Validation):** `python unified_test_runner.py --level integration --real-llm --env staging`
 
 ### 6.3. Deployment (GCP Staging)
-→ See [`SPEC/gcp_deployment.xml`](SPEC/gcp_deployment.xml) for comprehensive guidelines.
+→ See [`SPEC/gcp_deployment.xml`](SPEC/gcp_deployment.xml) and [`SPEC/deployment_architecture.xml`](SPEC/deployment_architecture.xml) for comprehensive guidelines.
 
 **CRITICAL: Use ONLY the official deployment script - Do NOT create new deployment scripts**
 

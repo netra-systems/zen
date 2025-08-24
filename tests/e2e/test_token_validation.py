@@ -187,7 +187,7 @@ class TestTokenRevocation(TestTokenValidationFlow):
         token = await self._generate_test_token(valid_token_payload)
         
         # Simulate token revocation (placeholder - would be Redis blacklist)
-        with patch('app.services.security_service.is_token_revoked', return_value=True):
+        with patch('netra_backend.app.services.security_service.is_token_revoked', return_value=True):
             result = await self._make_auth_request("/validate", token)
             # Would expect 401 if revocation is implemented
             assert result["status"] in [200, 401]
@@ -230,7 +230,7 @@ class TestAgentContextExtraction(TestTokenValidationFlow):
         token = await self._generate_test_token(valid_token_payload)
         
         # Mock agent service to verify context extraction
-        with patch('app.services.agent_service.process_message') as mock_process:
+        with patch('netra_backend.app.services.agent_service.process_message') as mock_process:
             mock_process.return_value = AsyncMock()
             
             async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -255,7 +255,7 @@ class TestAgentContextExtraction(TestTokenValidationFlow):
         payload["permissions"] = ["read", "write", "admin"]
         token = await self._generate_test_token(payload)
         
-        with patch('app.agents.supervisor_consolidated.SupervisorAgent.execute') as mock_execute:
+        with patch('netra_backend.app.agents.supervisor_consolidated.SupervisorAgent.execute') as mock_execute:
             mock_execute.return_value = {"response": "Admin action completed"}
             
             async with httpx.AsyncClient(follow_redirects=True) as client:

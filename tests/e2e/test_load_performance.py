@@ -176,7 +176,7 @@ class GracefulDegradationTester:
     async def _test_degradation_level(self, load_type: str, 
                                     user_count: int) -> Dict[str, Any]:
         """Test degradation at specific load level"""
-        with patch('app.config.FEATURE_FLAGS') as mock_flags:
+        with patch('netra_backend.app.config.FEATURE_FLAGS') as mock_flags:
             mock_flags.GRACEFUL_DEGRADATION = True
             
             result = await self.simulator.simulate_concurrent_users(user_count)

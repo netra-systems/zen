@@ -99,10 +99,13 @@ async def test_database_url_configuration():
     test_db_url = "postgresql://test:test@localhost:5432/test_db"
     os.environ['DATABASE_URL'] = test_db_url
     
-    # Get database URL from config
-    db_url = AuthConfig.get_database_url()
+    # Get raw database URL from config (should be unchanged)
+    raw_db_url = AuthConfig.get_raw_database_url()
+    assert raw_db_url == test_db_url, "Should use raw DATABASE_URL from environment"
     
-    assert db_url == test_db_url, "Should use DATABASE_URL from environment"
+    # Get normalized database URL (should be converted for asyncpg)
+    normalized_db_url = AuthConfig.get_database_url()
+    assert normalized_db_url == "postgresql+asyncpg://test:test@localhost:5432/test_db", "Should normalize URL for asyncpg"
     
     # Clean up
     del os.environ['DATABASE_URL']

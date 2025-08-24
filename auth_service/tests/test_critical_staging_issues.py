@@ -218,7 +218,10 @@ class TestSimilarConfigurationIssues:
     
     def test_redis_configuration_in_staging(self):
         """Test Redis configuration in staging environment."""
-        with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
+        with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=False):
+            # Clear REDIS_URL to test default staging behavior
+            if 'REDIS_URL' in os.environ:
+                del os.environ['REDIS_URL']
             redis_url = AuthConfig.get_redis_url()
             # In staging, should not default to localhost
             assert "localhost" not in redis_url, \

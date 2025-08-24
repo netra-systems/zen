@@ -3,9 +3,10 @@
     <metadata>
         <name>Core System Architecture</name>
         <type>Core.SystemArchitecture</type>
-        <version>2.0</version>
-        <description>Core architectural principles and system coherence requirements</description>
+        <version>3.0</version>
+        <description>Core architectural principles, unified system patterns, and inter-service communication architecture</description>
         <created>2025-08-24</created>
+        <updated>2025-08-24</updated>
     </metadata>
 
     <core_principles>
@@ -86,6 +87,85 @@
             </component>
         </shared_components>
     </system_architecture>
+
+    <inter_service_communication>
+        <principle>
+            Services MUST remain 100% independent. No direct code imports between services.
+            All communication through well-defined APIs and shared interfaces.
+        </principle>
+        
+        <communication_patterns>
+            <pattern name="REST API">
+                <description>Synchronous service-to-service HTTP calls</description>
+                <examples>
+                    <example>Backend → Auth Service: User validation</example>
+                    <example>Frontend → Backend: Data fetching</example>
+                </examples>
+                <implementation>
+                    <backend>FastAPI with httpx client</backend>
+                    <auth>FastAPI endpoints</auth>
+                    <frontend>Next.js API routes with fetch</frontend>
+                </implementation>
+            </pattern>
+            
+            <pattern name="WebSocket">
+                <description>Real-time bidirectional communication</description>
+                <examples>
+                    <example>Frontend ↔ Backend: Live AI responses</example>
+                    <example>Agent system updates</example>
+                </examples>
+                <implementation>
+                    <backend>FastAPI WebSocket with connection manager</backend>
+                    <frontend>React hooks with reconnection logic</frontend>
+                </implementation>
+            </pattern>
+            
+            <pattern name="Shared Interfaces">
+                <description>Common types and utilities in /shared directory</description>
+                <examples>
+                    <example>CoreDatabaseManager for SSL resolution</example>
+                    <example>IsolatedEnvironment for env management</example>
+                </examples>
+                <rules>
+                    <rule>Interfaces only, no business logic</rule>
+                    <rule>Version compatibility required</rule>
+                </rules>
+            </pattern>
+        </communication_patterns>
+        
+        <service_contracts>
+            <contract service="Auth Service">
+                <endpoint>/api/auth/validate</endpoint>
+                <method>POST</method>
+                <request>{"token": "jwt_token"}</request>
+                <response>{"valid": true, "user_id": "uuid", "permissions": []}</response>
+            </contract>
+            
+            <contract service="Backend">
+                <endpoint>/api/v1/threads</endpoint>
+                <method>GET</method>
+                <auth>Bearer token required</auth>
+                <response>{"threads": [], "total": 0}</response>
+            </contract>
+            
+            <contract service="WebSocket">
+                <endpoint>/ws</endpoint>
+                <protocol>WebSocket</protocol>
+                <auth>Token in query params or headers</auth>
+                <messages>
+                    <message>{"type": "chat", "content": "..."}</message>
+                    <message>{"type": "status", "state": "processing"}</message>
+                </messages>
+            </contract>
+        </service_contracts>
+        
+        <forbidden_patterns>
+            <pattern>Direct database sharing between services</pattern>
+            <pattern>Cross-service code imports</pattern>
+            <pattern>Shared state without proper synchronization</pattern>
+            <pattern>Bypassing service APIs for internal access</pattern>
+        </forbidden_patterns>
+    </inter_service_communication>
 
     <configuration_management>
         <unified_config>
@@ -295,4 +375,89 @@
             <check>Metrics and logging operational</check>
         </operations>
     </compliance_checklist>
+
+    <critical_architecture_patterns>
+        <pattern name="Import Management">
+            <description>Zero tolerance for relative imports across entire codebase</description>
+            <enforcement>
+                <tool>Pre-commit hooks</tool>
+                <tool>CI/CD validation</tool>
+                <script>python scripts/fix_all_import_issues.py --absolute-only</script>
+            </enforcement>
+            <rationale>
+                Relative imports are the #1 cause of test infrastructure failures.
+                Absolute imports ensure consistent module resolution across all environments.
+            </rationale>
+        </pattern>
+        
+        <pattern name="Environment Isolation">
+            <description>Complete isolation of environment variables in development and testing</description>
+            <implementation>
+                <component>IsolatedEnvironment class</component>
+                <benefits>
+                    <benefit>Prevents os.environ pollution</benefit>
+                    <benefit>Enables predictable testing</benefit>
+                    <benefit>Source tracking for debugging</benefit>
+                </benefits>
+            </implementation>
+        </pattern>
+        
+        <pattern name="Database URL Normalization">
+            <description>Automatic resolution of driver-specific SSL parameters</description>
+            <problem>asyncpg uses 'ssl=' while psycopg2 uses 'sslmode='</problem>
+            <solution>CoreDatabaseManager.resolve_ssl_parameter_conflicts()</solution>
+            <rules>
+                <rule>Convert parameters based on target driver</rule>
+                <rule>Remove ALL SSL params for Unix sockets</rule>
+                <rule>Maintain other URL components unchanged</rule>
+            </rules>
+        </pattern>
+        
+        <pattern name="Service Boundaries">
+            <description>Strict enforcement of microservice independence</description>
+            <boundaries>
+                <boundary>No cross-service imports</boundary>
+                <boundary>Separate test directories per service</boundary>
+                <boundary>Independent deployment units</boundary>
+                <boundary>Service-specific configuration</boundary>
+            </boundaries>
+        </pattern>
+    </critical_architecture_patterns>
+
+    <architecture_evolution>
+        <phase name="Current State">
+            <description>Three-service architecture with unified infrastructure</description>
+            <services>Backend, Auth, Frontend</services>
+            <infrastructure>Unified config, test framework, deployment</infrastructure>
+        </phase>
+        
+        <phase name="Near Term">
+            <description>Enhanced observability and monitoring</description>
+            <additions>
+                <addition>Distributed tracing with OpenTelemetry</addition>
+                <addition>Service mesh for inter-service communication</addition>
+                <addition>Advanced circuit breakers</addition>
+            </additions>
+        </phase>
+        
+        <phase name="Future">
+            <description>Event-driven architecture with message queues</description>
+            <additions>
+                <addition>Event sourcing for audit trails</addition>
+                <addition>CQRS for read/write separation</addition>
+                <addition>Multi-region deployment</addition>
+            </additions>
+        </phase>
+    </architecture_evolution>
+
+    <reference_specifications>
+        <spec>unified_environment_management.xml - Environment isolation patterns</spec>
+        <spec>database_connectivity_architecture.xml - Database connection management</spec>
+        <spec>test_infrastructure_architecture.xml - Testing patterns and organization</spec>
+        <spec>import_management_architecture.xml - Import rules and enforcement</spec>
+        <spec>deployment_architecture.xml - Multi-environment deployment</spec>
+        <spec>independent_services.xml - Service independence requirements</spec>
+        <spec>type_safety.xml - Type safety and SSOT enforcement</spec>
+        <spec>conventions.xml - Code quality standards</spec>
+    </reference_specifications>
 </specification>
