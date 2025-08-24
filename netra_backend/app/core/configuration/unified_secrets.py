@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Unified Secret Management Module
 
 Provides a unified interface for all secret management operations.
@@ -94,7 +95,7 @@ class UnifiedSecretManager:
         # CONFIG BOOTSTRAP: Direct env access for secret loading
         secrets = {}
         for key in secret_keys:
-            value = os.environ.get(key)
+            value = get_env().get(key)
             if value:
                 secrets[key] = value
                 self._logger.debug(f"Loaded secret from env: {key}")
@@ -131,8 +132,8 @@ class UnifiedSecretManager:
             bool: True if GCP is available
         """
         # CONFIG BOOTSTRAP: Direct env access for GCP detection
-        return bool(os.environ.get("GOOGLE_CLOUD_PROJECT")) or \
-               bool(os.environ.get("GCP_PROJECT"))
+        return bool(get_env().get("GOOGLE_CLOUD_PROJECT")) or \
+               bool(get_env().get("GCP_PROJECT"))
     
     def _is_aws_available(self) -> bool:
         """Check if AWS is available.
@@ -143,8 +144,8 @@ class UnifiedSecretManager:
             bool: True if AWS is available
         """
         # CONFIG BOOTSTRAP: Direct env access for AWS detection
-        return bool(os.environ.get("AWS_REGION")) or \
-               bool(os.environ.get("AWS_DEFAULT_REGION"))
+        return bool(get_env().get("AWS_REGION")) or \
+               bool(get_env().get("AWS_DEFAULT_REGION"))
     
     def get_secret(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """Get a specific secret value.
@@ -162,7 +163,7 @@ class UnifiedSecretManager:
             
         # CONFIG BOOTSTRAP: Direct env access for secret retrieval
         # Try environment variable
-        env_value = os.environ.get(key)
+        env_value = get_env().get(key)
         if env_value:
             self._cache[key] = env_value
             return env_value
@@ -188,7 +189,7 @@ class UnifiedSecretManager:
         Returns:
             bool: True if successful
         """
-        if os.environ.get("ENVIRONMENT", "").lower() == "production":
+        if get_env().get("ENVIRONMENT", "").lower() == "production":
             self._logger.error("Cannot set secrets in production")
             return False
             
@@ -227,10 +228,10 @@ class UnifiedSecretManager:
         """
         # CONFIG BOOTSTRAP: Direct env access for database credentials
         return {
-            "host": os.environ.get("DATABASE_HOST", "localhost"),
-            "port": int(os.environ.get("DATABASE_PORT", "5432")),
-            "database": os.environ.get("DATABASE_NAME", "netra"),
-            "username": os.environ.get("DATABASE_USER", "postgres"),
+            "host": get_env().get("DATABASE_HOST", "localhost"),
+            "port": int(get_env().get("DATABASE_PORT", "5432")),
+            "database": get_env().get("DATABASE_NAME", "netra"),
+            "username": get_env().get("DATABASE_USER", "postgres"),
             "password": self.get_secret("DATABASE_PASSWORD", "")
         }
     
@@ -244,9 +245,9 @@ class UnifiedSecretManager:
         """
         # CONFIG BOOTSTRAP: Direct env access for Redis credentials
         return {
-            "host": os.environ.get("REDIS_HOST", "localhost"),
-            "port": int(os.environ.get("REDIS_PORT", "6379")),
-            "db": int(os.environ.get("REDIS_DB", "0")),
+            "host": get_env().get("REDIS_HOST", "localhost"),
+            "port": int(get_env().get("REDIS_PORT", "6379")),
+            "db": int(get_env().get("REDIS_DB", "0")),
             "password": self.get_secret("REDIS_PASSWORD", "")
         }
     
@@ -259,11 +260,11 @@ class UnifiedSecretManager:
             Dict with LLM credentials
         """
         # CONFIG BOOTSTRAP: Direct env access for LLM credentials
-        provider = os.environ.get("LLM_PROVIDER", "openai")
+        provider = get_env().get("LLM_PROVIDER", "openai")
         
         credentials = {
             "provider": provider,
-            "model": os.environ.get("LLM_MODEL", "gpt-4")
+            "model": get_env().get("LLM_MODEL", "gpt-4")
         }
         
         # Get provider-specific API key
@@ -330,7 +331,7 @@ class UnifiedSecretManager:
         issues = []
         
         # Check for required secrets based on environment
-        if os.environ.get("ENVIRONMENT", "").lower() == "production":
+        if get_env().get("ENVIRONMENT", "").lower() == "production":
             required_secrets = ["JWT_SECRET_KEY", "DATABASE_PASSWORD"]
             if not self.validate_required_secrets(required_secrets):
                 issues.append("Missing required production secrets")

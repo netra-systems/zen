@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """External Services Configuration Management
 
 **CRITICAL: Unified Service Configuration Management**
@@ -59,10 +60,10 @@ class ServiceConfigManager:
         """
         # CONFIG BOOTSTRAP: Direct env access for service mode configuration
         return {
-            "llm": os.environ.get(EnvironmentVariables.LLM_MODE, "shared").lower(),
-            "redis": os.environ.get(EnvironmentVariables.REDIS_MODE, "shared").lower(),
-            "clickhouse": os.environ.get(EnvironmentVariables.CLICKHOUSE_MODE, "shared").lower(),
-            "auth": os.environ.get(EnvironmentVariables.AUTH_MODE, "shared").lower()
+            "llm": get_env().get(EnvironmentVariables.LLM_MODE, "shared").lower(),
+            "redis": get_env().get(EnvironmentVariables.REDIS_MODE, "shared").lower(),
+            "clickhouse": get_env().get(EnvironmentVariables.CLICKHOUSE_MODE, "shared").lower(),
+            "auth": get_env().get(EnvironmentVariables.AUTH_MODE, "shared").lower()
         }
     
     def _load_service_defaults(self) -> Dict[str, dict]:
@@ -152,8 +153,8 @@ class ServiceConfigManager:
         """
         # CONFIG BOOTSTRAP: Direct env access for URL configuration
         defaults = self._service_defaults.get(self._environment, {})
-        config.frontend_url = os.environ.get("FRONTEND_URL", defaults.get("frontend_url"))
-        config.api_base_url = os.environ.get("API_BASE_URL", self._get_api_base_url())
+        config.frontend_url = get_env().get("FRONTEND_URL", defaults.get("frontend_url"))
+        config.api_base_url = get_env().get("API_BASE_URL", self._get_api_base_url())
     
     def _populate_oauth_config(self, config: AppConfig) -> None:
         """Populate OAuth configuration."""
@@ -167,7 +168,7 @@ class ServiceConfigManager:
         CONFIG MANAGER: Direct env access for CORS configuration loading.
         """
         # CONFIG BOOTSTRAP: Direct env access for CORS configuration
-        cors_origins_env = os.environ.get("CORS_ORIGINS")
+        cors_origins_env = get_env().get("CORS_ORIGINS")
         if cors_origins_env:
             # Store as string for consistency with schema
             config.cors_origins = cors_origins_env
@@ -178,7 +179,7 @@ class ServiceConfigManager:
         CONFIG MANAGER: Direct env access for API key configuration loading.
         """
         # CONFIG BOOTSTRAP: Direct env access for API key loading
-        return os.environ.get("GEMINI_API_KEY") or os.environ.get("LLM_API_KEY")
+        return get_env().get("GEMINI_API_KEY") or get_env().get("LLM_API_KEY")
     
     def _set_llm_api_keys(self, config: AppConfig, api_key: str) -> None:
         """Set API key for all LLM configurations."""
@@ -194,7 +195,7 @@ class ServiceConfigManager:
         """
         # CONFIG BOOTSTRAP: Direct env access for LLM settings
         config.llm_cache_enabled = self._get_bool_env("LLM_CACHE_ENABLED", True)
-        config.llm_cache_ttl = int(os.environ.get("LLM_CACHE_TTL", "3600"))
+        config.llm_cache_ttl = int(get_env().get("LLM_CACHE_TTL", "3600"))
         config.llm_heartbeat_enabled = self._get_bool_env("LLM_HEARTBEAT_ENABLED", True)
         config.llm_data_logging_enabled = self._get_bool_env("LLM_DATA_LOGGING_ENABLED", True)
     
@@ -265,7 +266,7 @@ class ServiceConfigManager:
         CONFIG MANAGER: Direct env access for boolean configuration parsing.
         """
         # CONFIG BOOTSTRAP: Direct env access for boolean parsing
-        value = os.environ.get(env_var, str(default)).lower()
+        value = get_env().get(env_var, str(default)).lower()
         return value in ["true", "1", "yes", "on"]
     
     def _parse_cors_origins(self, cors_origins_env: str) -> List[str]:
@@ -332,28 +333,28 @@ class ServiceConfigManager:
         """
         # CONFIG BOOTSTRAP: Direct env access for configuration population
         # Environment detection variables
-        config.pytest_current_test = os.environ.get("PYTEST_CURRENT_TEST")
-        config.testing = os.environ.get("TESTING")
-        config.environment = os.environ.get("ENVIRONMENT", config.environment)
+        config.pytest_current_test = get_env().get("PYTEST_CURRENT_TEST")
+        config.testing = get_env().get("TESTING")
+        config.environment = get_env().get("ENVIRONMENT", config.environment)
         
         # Auth service configuration
-        config.auth_service_url = os.environ.get("AUTH_SERVICE_URL", config.auth_service_url)
-        config.auth_service_enabled = os.environ.get("AUTH_SERVICE_ENABLED", config.auth_service_enabled)
-        config.auth_fast_test_mode = os.environ.get("AUTH_FAST_TEST_MODE", config.auth_fast_test_mode)
-        config.auth_cache_ttl_seconds = os.environ.get("AUTH_CACHE_TTL_SECONDS", config.auth_cache_ttl_seconds)
-        config.service_id = os.environ.get("SERVICE_ID", config.service_id)
-        config.service_secret = os.environ.get("SERVICE_SECRET", config.service_secret)
+        config.auth_service_url = get_env().get("AUTH_SERVICE_URL", config.auth_service_url)
+        config.auth_service_enabled = get_env().get("AUTH_SERVICE_ENABLED", config.auth_service_enabled)
+        config.auth_fast_test_mode = get_env().get("AUTH_FAST_TEST_MODE", config.auth_fast_test_mode)
+        config.auth_cache_ttl_seconds = get_env().get("AUTH_CACHE_TTL_SECONDS", config.auth_cache_ttl_seconds)
+        config.service_id = get_env().get("SERVICE_ID", config.service_id)
+        config.service_secret = get_env().get("SERVICE_SECRET", config.service_secret)
         
         # Cloud Run environment variables
-        config.k_service = os.environ.get("K_SERVICE")
-        config.k_revision = os.environ.get("K_REVISION")
+        config.k_service = get_env().get("K_SERVICE")
+        config.k_revision = get_env().get("K_REVISION")
         
         # PR environment variables
-        config.pr_number = os.environ.get("PR_NUMBER")
+        config.pr_number = get_env().get("PR_NUMBER")
         
         # OAuth client ID fallback variables
-        config.google_client_id = os.environ.get("GOOGLE_CLIENT_ID")
-        config.google_oauth_client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+        config.google_client_id = get_env().get("GOOGLE_CLIENT_ID")
+        config.google_oauth_client_id = get_env().get("GOOGLE_OAUTH_CLIENT_ID")
 
     def get_service_summary(self) -> Dict[str, Any]:
         """Get service configuration summary for monitoring."""
@@ -361,6 +362,6 @@ class ServiceConfigManager:
             "environment": self._environment,
             "service_modes": self._service_modes,
             "llm_configured": bool(self._get_llm_api_key()),
-            "oauth_configured": bool(os.environ.get("GOOGLE_CLIENT_ID")),  # CONFIG BOOTSTRAP
+            "oauth_configured": bool(get_env().get("GOOGLE_CLIENT_ID")),  # CONFIG BOOTSTRAP
             "enabled_services": self.get_enabled_services_count()
         }

@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Unified Configuration Management System
 
 Enterprise-grade configuration management for Netra Apex.
@@ -67,7 +68,7 @@ def reload_configuration():
 def get_environment():
     """Get environment."""
     import os
-    return os.environ.get("ENVIRONMENT", "development")
+    return get_env().get("ENVIRONMENT", "development")
 
 def is_production():
     """Check if production environment."""
@@ -84,7 +85,7 @@ def load_secrets():
 def get_secret(key: str):
     """Get secret by key."""
     import os
-    return os.environ.get(key)
+    return get_env().get(key)
 
 # Placeholder classes for compatibility
 class ConfigurationLoader:

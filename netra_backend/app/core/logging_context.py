@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """Logging context management and correlation IDs for the unified logging system.
 
 This module handles:
@@ -178,7 +179,7 @@ class ContextFilter:
         # Read environment directly to avoid circular dependency
         # This prevents loading the full configuration during logging initialization
         import os
-        environment = os.getenv('ENVIRONMENT', 'development').lower()
+        environment = get_env().get('ENVIRONMENT', 'development').lower()
         return environment == 'production'
     
     def _should_log_in_production(self, record) -> bool:

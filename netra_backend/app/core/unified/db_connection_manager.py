@@ -347,3 +347,7 @@ def get_sync_db(name: str = "default") -> Generator[Session, None, None]:
     """Convenience function to get sync database session."""
     with db_manager.get_sync_session(name) as session:
         yield session
+
+def get_db_manager() -> UnifiedDatabaseManager:
+    """Get the global database manager instance."""
+    return db_manager

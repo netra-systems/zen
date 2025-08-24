@@ -116,7 +116,7 @@ def _check_clickhouse_disabled_status() -> Optional[HealthCheckResult]:
 
 async def _execute_clickhouse_query() -> None:
     """Execute test query on ClickHouse database."""
-    from netra_backend.app.db.clickhouse import get_clickhouse_client
+    from netra_backend.app.database import get_clickhouse_client
     async with get_clickhouse_client() as client:
         await client.execute("SELECT 1")
 

@@ -123,7 +123,7 @@ class CoreClickHouseOperations:
     
     async def _execute_schema_query(self, table_name: str) -> Dict[str, Any]:
         """Execute schema query safely."""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             query = "DESCRIBE TABLE {}"
@@ -147,7 +147,7 @@ class CoreClickHouseOperations:
     
     async def _execute_data_query(self, query: str) -> List[Dict[str, Any]]:
         """Execute data query and return formatted results."""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         from netra_backend.app.db.clickhouse_init import (
             create_workload_events_table_if_missing,
         )
@@ -201,21 +201,21 @@ class CoreClickHouseOperations:
     
     async def _execute_table_creation(self, table_name: str, query: str):
         """Execute table creation in ClickHouse."""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             await client.execute(query)
     
     async def _execute_table_deletion(self, table_name: str):
         """Execute table deletion in ClickHouse."""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             await client.execute(f"DROP TABLE IF EXISTS {table_name}")
     
     async def _execute_table_exists_check(self, table_name: str) -> bool:
         """Execute table existence check."""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             query = f"EXISTS TABLE {table_name}"
@@ -224,14 +224,14 @@ class CoreClickHouseOperations:
     
     async def _execute_table_optimization(self, table_name: str):
         """Execute table optimization."""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             await client.execute(f"OPTIMIZE TABLE {table_name}")
     
     async def _execute_table_size_query(self, table_name: str) -> Dict:
         """Execute table size query."""
-        from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.database import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
             query = f"""

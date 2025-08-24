@@ -1,3 +1,4 @@
+from dev_launcher.isolated_environment import get_env
 """
 Central health check configuration.
 Provides unified configuration for all health checks across the platform.
@@ -37,7 +38,7 @@ class HealthConfiguration:
     
     def __post_init__(self):
         """Initialize default configurations based on environment."""
-        environment = os.getenv('ENVIRONMENT', 'development')
+        environment = get_env().get('ENVIRONMENT', 'development')
         
         # Default development overrides
         if not self.development_mode_overrides:
@@ -133,7 +134,7 @@ class HealthConfiguration:
     def is_component_enabled(self, component_name: str, environment: Optional[str] = None) -> bool:
         """Check if a component is enabled in the current environment."""
         if not environment:
-            environment = os.getenv('ENVIRONMENT', 'development')
+            environment = get_env().get('ENVIRONMENT', 'development')
         
         # Check environment-specific overrides
         overrides = None
