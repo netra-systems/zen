@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Fix websocket import issues across the codebase"""
+"""Fix websocket unified import issues"""
 
 import os
 import re
 
-def fix_websocket_imports(directory):
+def fix_unified_imports(directory):
     count = 0
     for root, dirs, files in os.walk(directory):
         # Skip .git and __pycache__ directories
@@ -17,10 +17,10 @@ def fix_websocket_imports(directory):
                     with open(filepath, 'r', encoding='utf-8') as f:
                         content = f.read()
                     
-                    # Replace the import pattern
+                    # Replace the unified import pattern
                     new_content = re.sub(
-                        r'from netra_backend\.app\.websocket\.',
-                        'from netra_backend.app.websocket_core.',
+                        r'from netra_backend\.app\.websocket_core\.unified import',
+                        'from netra_backend.app.websocket_core import',
                         content
                     )
                     
@@ -37,5 +37,5 @@ def fix_websocket_imports(directory):
 if __name__ == '__main__':
     # Fix all files in netra_backend
     os.chdir('netra_backend')
-    count = fix_websocket_imports('.')
+    count = fix_unified_imports('.')
     print(f'\nTotal files fixed: {count}')
