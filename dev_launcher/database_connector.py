@@ -136,29 +136,10 @@ class DatabaseConnector:
         # Use DatabaseURLBuilder for proper URL construction
         builder = DatabaseURLBuilder(env_manager.get_all())
         
-        # Check different URL patterns in order of preference
-        postgres_url = None
+        # Get the appropriate URL for the environment (async URL for asyncpg)
+        postgres_url = builder.get_url_for_environment(sync=False)
         
-        # First check if we have a direct DATABASE_URL
-        if env_manager.get(DatabaseConstants.DATABASE_URL):
-            postgres_url = env_manager.get(DatabaseConstants.DATABASE_URL)
-        # Check Cloud SQL configuration
-        elif builder.cloud_sql.is_cloud_sql:
-            # Use async URL for dev launcher (asyncpg)
-            postgres_url = builder.cloud_sql.async_url
-        # Check TCP configuration
-        elif builder.tcp.has_config:
-            # Check if we need SSL based on environment
-            if builder.environment in ['staging', 'production']:
-                postgres_url = builder.tcp.async_url_with_ssl
-            else:
-                postgres_url = builder.tcp.async_url
-        # Fall back to development defaults
-        elif builder.development.default_url:
-            postgres_url = builder.development.default_url
-        
-        if postgres_url:
-            self._add_connection("main_postgres", DatabaseType.POSTGRESQL, postgres_url)
+        self._add_connection("main_postgres", DatabaseType.POSTGRESQL, postgres_url)
     
     def _discover_clickhouse_connection(self) -> None:
         """Discover ClickHouse connection."""

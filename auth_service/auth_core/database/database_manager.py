@@ -292,3 +292,136 @@ class AuthDatabaseManager:
         except Exception as e:
             logger.error(f"Staging validation failed with error: {e}")
             return False
+    
+    @staticmethod
+    def get_base_database_url() -> str:
+        """Get base PostgreSQL URL without driver prefixes.
+        
+        Returns:
+            Clean PostgreSQL URL without asyncpg/psycopg2 drivers
+        """
+        database_url = os.getenv("DATABASE_URL", "")
+        if not database_url:
+            return AuthDatabaseManager._get_default_auth_url()
+        
+        # Normalize and clean the URL
+        normalized = AuthDatabaseManager._normalize_postgres_url(database_url)
+        
+        # Remove driver prefixes to get base URL
+        if "postgresql+asyncpg://" in normalized:
+            normalized = normalized.replace("postgresql+asyncpg://", "postgresql://")
+        elif "postgresql+psycopg2://" in normalized:
+            normalized = normalized.replace("postgresql+psycopg2://", "postgresql://")
+        elif "postgresql+psycopg://" in normalized:
+            normalized = normalized.replace("postgresql+psycopg://", "postgresql://")
+            
+        return normalized
+    
+    @staticmethod
+    def get_migration_url_sync_format() -> str:
+        """Get synchronous URL for migrations (Alembic).
+        
+        Returns:
+            Database URL compatible with psycopg2 driver
+        """
+        base_url = AuthDatabaseManager.get_base_database_url()
+        
+        # Ensure it uses synchronous driver format (plain postgresql://)
+        # psycopg2 uses sslmode= parameter
+        return base_url
+    
+    @staticmethod
+    def validate_base_url() -> bool:
+        """Validate base database URL is clean.
+        
+        Returns:
+            True if base URL is properly formatted
+        """
+        base_url = AuthDatabaseManager.get_base_database_url()
+        
+        # Should not contain driver prefixes
+        if "+asyncpg" in base_url or "+psycopg" in base_url:
+            return False
+            
+        # Should be valid PostgreSQL URL
+        return base_url.startswith("postgresql://") or base_url.startswith("sqlite://")
+    
+    @staticmethod
+    def validate_migration_url_sync_format(url: str = None) -> bool:
+        """Validate migration URL is synchronous.
+        
+        Args:
+            url: Optional URL to validate, uses migration URL if None
+            
+        Returns:
+            True if URL is compatible with synchronous drivers
+        """
+        if url is None:
+            url = AuthDatabaseManager.get_migration_url_sync_format()
+        
+        # Should not contain async drivers
+        if "+asyncpg" in url:
+            return False
+            
+        # Should be PostgreSQL URL
+        return url.startswith("postgresql://")
+    
+    @staticmethod
+    def is_local_development() -> bool:
+        """Check if running in local development environment.
+        
+        Returns:
+            True if running in local development
+        """
+        try:
+            from shared.database.core_database_manager import CoreDatabaseManager
+            environment = CoreDatabaseManager.get_environment_type()
+            return environment == "development"
+        except ImportError:
+            # Fallback check
+            environment = os.getenv("ENVIRONMENT", "development").lower()
+            return environment == "development"
+    
+    @staticmethod
+    def is_remote_environment() -> bool:
+        """Check if running in remote environment (staging/production).
+        
+        Returns:
+            True if running in staging or production
+        """
+        try:
+            from shared.database.core_database_manager import CoreDatabaseManager
+            environment = CoreDatabaseManager.get_environment_type()
+            return environment in ["staging", "production"]
+        except ImportError:
+            # Fallback check
+            environment = os.getenv("ENVIRONMENT", "development").lower()
+            return environment in ["staging", "production"]
+    
+    @staticmethod
+    def get_pool_status(engine) -> dict:
+        """Get database connection pool status.
+        
+        Args:
+            engine: SQLAlchemy engine
+            
+        Returns:
+            Dictionary with pool statistics
+        """
+        if not engine or not hasattr(engine, 'pool'):
+            return {
+                "pool_size": 0,
+                "checked_in": 0,
+                "checked_out": 0,
+                "overflow": 0,
+                "invalid": 0
+            }
+        
+        pool = engine.pool
+        return {
+            "pool_size": getattr(pool, 'size', lambda: 0)(),
+            "checked_in": getattr(pool, 'checkedin', lambda: 0)(),
+            "checked_out": getattr(pool, 'checkedout', lambda: 0)(),
+            "overflow": getattr(pool, 'overflow', lambda: 0)(),
+            "invalid": getattr(pool, 'invalid', lambda: 0)()
+        }

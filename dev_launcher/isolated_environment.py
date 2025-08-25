@@ -863,7 +863,27 @@ class IsolatedEnvironment:
     
     def _generate_database_url_fallback(self) -> str:
         """Generate a fallback database URL for development."""
-        return "sqlite:///./netra_dev.db"
+        try:
+            # Import DatabaseURLBuilder to construct PostgreSQL URLs from components
+            from shared.database_url_builder import DatabaseURLBuilder
+            
+            # Use DatabaseURLBuilder to construct URL from environment variables
+            builder = DatabaseURLBuilder(self.get_all())
+            
+            # Get the appropriate URL for the environment
+            postgres_url = builder.get_url_for_environment(sync=False)
+            
+            if postgres_url:
+                logger.info(f"Generated PostgreSQL fallback URL using DatabaseURLBuilder")
+                return postgres_url
+            else:
+                logger.warning("DatabaseURLBuilder could not generate URL, falling back to development default")
+                return builder.development.default_url
+                
+        except Exception as e:
+            logger.warning(f"Failed to use DatabaseURLBuilder for fallback: {e}")
+            # Fallback to the development default if DatabaseURLBuilder fails
+            return "postgresql+asyncpg://postgres:postgres@localhost:5432/netra_dev"
     
     def _generate_jwt_secret_fallback(self) -> str:
         """Generate a secure JWT secret key."""

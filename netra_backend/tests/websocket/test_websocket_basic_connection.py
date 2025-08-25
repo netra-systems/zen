@@ -21,10 +21,7 @@ import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed
 
-from test_framework.test_patterns import BaseTest
-
-
-class TestWebSocketBasicConnection(BaseTest):
+class TestWebSocketBasicConnection:
     """Test basic WebSocket connectivity using the unauthenticated test endpoint."""
     
     @pytest.mark.asyncio

@@ -303,20 +303,62 @@ class CrossSystemEnvironmentAlignmentTester:
         }
         
         try:
-            # Check database URLs
+            # Check database configuration (both URL and component-based)
             services_with_db = ["auth_service", "netra_backend"]
             
             for service in services_with_db:
+                # First try DATABASE_URL
                 db_url = await self._get_service_config_value(service, "DATABASE_URL")
-                if db_url:
+                
+                # If no DATABASE_URL, check for PostgreSQL component configuration
+                if not db_url:
+                    # Check if PostgreSQL components are configured
+                    pg_host = await self._get_service_config_value(service, "POSTGRES_HOST")
+                    pg_port = await self._get_service_config_value(service, "POSTGRES_PORT")
+                    pg_db = await self._get_service_config_value(service, "POSTGRES_DB")
+                    pg_user = await self._get_service_config_value(service, "POSTGRES_USER")
+                    pg_password = await self._get_service_config_value(service, "POSTGRES_PASSWORD")
+                    
+                    # If PostgreSQL components are present, construct equivalent URL for comparison
+                    if pg_host and pg_port and pg_db and pg_user:
+                        # Construct URL for consistency checking (password is optional for URL format)
+                        password_part = f":{pg_password}" if pg_password else ""
+                        db_url = f"postgresql://{pg_user}{password_part}@{pg_host}:{pg_port}/{pg_db}"
+                        
+                        results["database_configs"][service] = {
+                            "url": db_url,
+                            "config_method": "components",
+                            "components": {
+                                "host": pg_host,
+                                "port": pg_port,
+                                "database": pg_db,
+                                "user": pg_user,
+                                "has_password": bool(pg_password)
+                            },
+                            "has_ssl_params": False,  # SSL params would be in separate variables
+                            "has_unix_socket": "/cloudsql/" in pg_host if pg_host else False,
+                            "driver_compatible": True
+                        }
+                        
+                        # Check for SSL parameter conflicts in component-based config
+                        ssl_mode = await self._get_service_config_value(service, "POSTGRES_SSLMODE")
+                        if ssl_mode and "/cloudsql/" in pg_host:
+                            results["ssl_parameter_conflicts"].append({
+                                "service": service,
+                                "issue": "SSL parameters not compatible with Unix socket connections"
+                            })
+                            results["database_configs"][service]["driver_compatible"] = False
+                            
+                elif db_url:
                     results["database_configs"][service] = {
                         "url": db_url,
+                        "config_method": "url",
                         "has_ssl_params": "ssl" in db_url.lower(),
                         "has_unix_socket": "/cloudsql/" in db_url,
                         "driver_compatible": True
                     }
                     
-                    # Check for SSL parameter conflicts
+                    # Check for SSL parameter conflicts in URL-based config
                     if "sslmode=" in db_url and "/cloudsql/" in db_url:
                         results["ssl_parameter_conflicts"].append({
                             "service": service,
@@ -325,15 +367,44 @@ class CrossSystemEnvironmentAlignmentTester:
                         results["database_configs"][service]["driver_compatible"] = False
                         
             # Check consistency between services
-            db_urls = [config["url"] for config in results["database_configs"].values()]
-            unique_urls = set(db_urls)
+            db_configs = results["database_configs"]
             
-            if len(unique_urls) > 1:
-                results["consistency_issues"].append("Database URLs differ between services")
-            elif len(unique_urls) == 0:
-                results["consistency_issues"].append("No database URLs configured")
+            if len(db_configs) == 0:
+                results["consistency_issues"].append("No database configuration found in any service")
+            elif len(db_configs) == 1:
+                # Only one service configured - this might be acceptable in some test setups
+                configured_service = list(db_configs.keys())[0]
+                results["consistency_issues"].append(
+                    f"Database configured only for {configured_service}, missing for other services"
+                )
             else:
-                results["properly_configured"] = len(results["ssl_parameter_conflicts"]) == 0
+                # Multiple services configured - check for consistency
+                urls = [config["url"] for config in db_configs.values()]
+                unique_urls = set(urls)
+                
+                if len(unique_urls) > 1:
+                    results["consistency_issues"].append("Database URLs differ between services")
+                else:
+                    # URLs match - check configuration methods are compatible
+                    config_methods = set(config.get("config_method", "unknown") for config in db_configs.values())
+                    if len(config_methods) > 1:
+                        results["consistency_issues"].append(
+                            f"Services use different database configuration methods: {config_methods}"
+                        )
+            
+            # Determine if configuration is properly set up
+            has_any_config = len(db_configs) > 0
+            has_ssl_conflicts = len(results["ssl_parameter_conflicts"]) > 0
+            has_critical_issues = any(
+                "No database configuration found" in issue 
+                for issue in results["consistency_issues"]
+            )
+            
+            results["properly_configured"] = (
+                has_any_config and 
+                not has_ssl_conflicts and 
+                not has_critical_issues
+            )
                 
         except Exception as e:
             logger.error(f"Error testing database config consistency: {e}")
@@ -470,13 +541,30 @@ class TestCrossSystemEnvironmentAlignment:
             # Some consistency issues might be warnings, others are critical
             critical_issues = [
                 issue for issue in consistency_issues 
-                if "No database URLs configured" in issue
+                if ("No database configuration found" in issue or 
+                    ("Database configured only for" in issue and environment_tester.get_current_environment() != "development"))
             ]
             
-            assert len(critical_issues) == 0, (
-                f"Critical database configuration issues: {critical_issues}. "
-                f"Database URLs must be configured for backend services."
-            )
+            # In development/testing, it's acceptable to have partial database configuration
+            # as services might be running in different modes
+            current_env = environment_tester.get_current_environment()
+            if current_env == "development":
+                # Only fail on complete absence of database config in development
+                total_absence_issues = [
+                    issue for issue in consistency_issues 
+                    if "No database configuration found" in issue
+                ]
+                
+                assert len(total_absence_issues) == 0, (
+                    f"Critical database configuration issues: {total_absence_issues}. "
+                    f"At least one service must have database configuration in development."
+                )
+            else:
+                # Production/staging requires all services to have consistent database config
+                assert len(critical_issues) == 0, (
+                    f"Critical database configuration issues: {critical_issues}. "
+                    f"Database configuration must be consistent across all backend services."
+                )
             
             if consistency_issues:
                 logger.warning(f"Database configuration consistency warnings: {consistency_issues}")

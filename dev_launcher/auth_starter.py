@@ -151,34 +151,24 @@ class AuthStarter:
             env["REDIS_URL"] = f"redis://{redis_config['host']}:{redis_config['port']}/{redis_config.get('db', 0)}"
         
         # Add PostgreSQL configuration using DatabaseURLBuilder
-        if "DATABASE_URL" not in env:
-            # Use DatabaseURLBuilder for proper URL construction
-            builder = DatabaseURLBuilder(env)
-            
-            # Check different URL patterns in order of preference
-            database_url = None
-            
-            # Check Cloud SQL configuration
-            if builder.cloud_sql.is_cloud_sql:
-                # Use sync URL for auth service (uses psycopg2)
-                database_url = builder.cloud_sql.sync_url
-            # Check TCP configuration
-            elif builder.tcp.has_config:
-                # Check if we need SSL based on environment
-                if builder.environment in ['staging', 'production']:
-                    database_url = builder.tcp.sync_url_with_ssl
-                else:
-                    database_url = builder.tcp.sync_url
-            # Fall back to development defaults
-            elif builder.development.default_url:
-                database_url = builder.development.default_url
-            else:
-                # Final fallback: construct from config if builder doesn't have URLs
-                postgres_config = self.services_config.postgres.get_config()
-                database_url = f"postgresql://{postgres_config['user']}:{postgres_config['password']}@{postgres_config['host']}:{postgres_config['port']}/{postgres_config['database']}"
-            
-            if database_url:
-                env["DATABASE_URL"] = database_url
+        # Use DatabaseURLBuilder for proper URL construction
+        builder = DatabaseURLBuilder(env)
+        
+        # Get the appropriate URL for auth service (sync URL for psycopg2)
+        database_url = builder.get_url_for_environment(sync=True)
+        
+        # If no URL from builder, try to construct from services config
+        if not database_url:
+            postgres_config = self.services_config.postgres.get_config()
+            if postgres_config.get('host') and postgres_config.get('database'):
+                database_url = f"postgresql://{postgres_config.get('user', 'postgres')}:{postgres_config.get('password', 'postgres')}@{postgres_config['host']}:{postgres_config.get('port', '5432')}/{postgres_config['database']}"
+        
+        # Set DATABASE_URL if we have one
+        if database_url:
+            env["DATABASE_URL"] = database_url
+        else:
+            # Use a development default if nothing else is available
+            env["DATABASE_URL"] = builder.development.default_sync_url
         
         # Add service discovery path
         env["SERVICE_DISCOVERY_PATH"] = str(self.config.project_root / ".service_discovery")
