@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <learning id="database-url-centralization" date="2025-08-24">
+    <title>Centralized Database URL Builder</title>
+    <category>Database,Configuration,Architecture</category>
+    <insight>
+      Centralized all database URL construction logic into a single, comprehensive
+      DatabaseURLBuilder class that handles all possible environment and configuration
+      combinations.
+    </insight>
+    
+    <problem>
+      Database URL construction logic was scattered across multiple services with:
+      - Duplicate URL parsing and construction code in auth_service and netra_backend
+      - Inconsistent handling of Cloud SQL, TCP, SSL, and different environments
+      - Complex conditional logic repeated in multiple places
+      - Difficult to maintain and prone to configuration errors
+      - No clear way to see all possible URL patterns
+    </problem>
+    
+    <solution>
+      Created shared/database_url_builder.py with DatabaseURLBuilder class that:
+      1. Provides clear, organized access to all URL patterns via sub-builders:
+         - cloud_sql.async_url / cloud_sql.sync_url
+         - tcp.async_url / tcp.sync_url / tcp.async_url_with_ssl
+         - development.default_url / development.auto_url
+         - test.memory_url / test.postgres_url
+         - docker.compose_url
+         - staging.auto_url / production.auto_url
+      
+      2. Handles all environment-specific logic in one place:
+         - Staging/Production automatically add SSL for TCP connections
+         - Cloud SQL Unix socket detection and formatting
+         - Test environment can use memory or PostgreSQL
+         - Development has sensible defaults
+      
+      3. Provides comprehensive validation:
+         - Required variables per environment
+         - Cloud SQL format validation
+         - Empty string detection
+      
+      4. Includes safe logging utilities:
+         - mask_url_for_logging() - masks credentials while preserving structure
+         - get_safe_log_message() - formatted log message with context
+         - debug_info() - detailed configuration status
+    </solution>
+    
+    <implementation>
+      ```python
+      # Usage in any service:
+      from shared.database_url_builder import DatabaseURLBuilder
+      
+      # Build from environment variables
+      env_vars = {
+          "ENVIRONMENT": "staging",
+          "POSTGRES_HOST": "/cloudsql/project:region:instance",
+          "POSTGRES_USER": "user",
+          "POSTGRES_PASSWORD": "pass",
+          "POSTGRES_DB": "db"
+      }
+      
+      builder = DatabaseURLBuilder(env_vars)
+      
+      # Validate configuration
+      is_valid, error_msg = builder.validate()
+      if not is_valid:
+          raise ConfigurationError(error_msg)
+      
+      # Get appropriate URL for environment
+      url = builder.get_url_for_environment(sync=False)  # async URL
+      sync_url = builder.get_url_for_environment(sync=True)  # for Alembic
+      
+      # Safe logging
+      logger.info(builder.get_safe_log_message())
+      # Output: "Database URL (staging/Cloud SQL): postgresql+asyncpg://***@/db?host=/cloudsql/..."
+      
+      # Direct access to specific URLs
+      if builder.cloud_sql.is_cloud_sql:
+          url = builder.cloud_sql.async_url
+      elif builder.tcp.has_config:
+          url = builder.tcp.async_url_with_ssl
+      ```
+    </implementation>
+    
+    <benefits>
+      1. **Single Source of Truth**: All URL patterns in one place
+      2. **Clear Organization**: Sub-builders make it obvious what URLs are available
+      3. **Type Safety**: Proper return types and validation
+      4. **Testability**: Easy to test all combinations
+      5. **Maintainability**: Changes to URL patterns only need one update
+      6. **Security**: Built-in credential masking for logs
+      7. **Flexibility**: Can access specific URLs or use auto-selection
+    </benefits>
+    
+    <patterns>
+      - Builder pattern with sub-builders for organization
+      - Properties for lazy evaluation
+      - Validation separate from construction
+      - Environment-aware auto-selection
+      - Safe logging utilities built-in
+    </patterns>
+    
+    <references>
+      - shared/database_url_builder.py - The centralized builder
+      - auth_service/auth_core/config.py - Updated to use builder
+      - netra_backend/app/core/configuration/database.py - Updated to use builder
+      - test_database_url_builder.py - Comprehensive test coverage
+    </references>
+    
+    <tags>database, configuration, url-construction, centralization, builder-pattern</tags>
+  </learning>
+</learnings>
