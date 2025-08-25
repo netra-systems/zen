@@ -71,10 +71,7 @@ def _get_secret_mappings() -> dict[str, str]:
         "posthog-api-key": "POSTHOG_API_KEY",
         
         # Database Passwords
-        "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
-        "clickhouse-development-password": "CLICKHOUSE_DEVELOPMENT_PASSWORD",
-        "clickhouse-staging-password": "CLICKHOUSE_STAGING_PASSWORD",
-        "clickhouse-production-password": "CLICKHOUSE_PRODUCTION_PASSWORD",
+        "clickhouse-password": "CLICKHOUSE_PASSWORD",
         "postgres-password": "POSTGRES_PASSWORD",
         "postgres-staging-password": "POSTGRES_STAGING_PASSWORD",
         "postgres-production-password": "POSTGRES_PRODUCTION_PASSWORD",
@@ -131,31 +128,6 @@ def _get_static_config() -> dict[str, str]:
         "PYTHONUNBUFFERED": "1"
     }
     
-    # Environment-specific configuration
-    if environment == "staging":
-        config.update({
-            "CLICKHOUSE_HOST": "clickhouse-staging.netra.io",
-            "CLICKHOUSE_PORT": "8443",
-            "POSTGRES_HOST": "postgres-staging.netra.io",
-            "POSTGRES_PORT": "5432",
-            "REDIS_HOST": "redis-staging.netra.io"
-        })
-    elif environment == "production":
-        config.update({
-            "CLICKHOUSE_HOST": "clickhouse.netra.io",
-            "CLICKHOUSE_PORT": "8443",
-            "POSTGRES_HOST": "postgres.netra.io",
-            "POSTGRES_PORT": "5432",
-            "REDIS_HOST": "redis.netra.io"
-        })
-    else:  # development
-        config.update({
-            "CLICKHOUSE_HOST": "localhost",
-            "CLICKHOUSE_PORT": "8123",
-            "POSTGRES_HOST": "localhost",
-            "POSTGRES_PORT": "5432"
-        })
-    
     return config
 
 def _fetch_all_secrets(client: secretmanager.SecretManagerServiceClient, project_id: str, mappings: dict[str, str]) -> dict[str, str]:
@@ -191,7 +163,7 @@ def _write_env_sections(f, env_vars: dict[str, str]) -> None:
         ("\n# Google OAuth Configuration\n", ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]),
         ("\n# API Keys - LLM Providers\n", ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GROQ_API_KEY", "REPLICATE_API_KEY", "PERPLEXITY_API_KEY", "NETRA_API_KEY"]),
         ("\n# Monitoring & Analytics\n", ["LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY", "SENTRY_DSN", "MIXPANEL_TOKEN", "POSTHOG_API_KEY"]),
-        ("\n# ClickHouse Configuration\n", ["CLICKHOUSE_HOST", "CLICKHOUSE_PORT", "CLICKHOUSE_USER", "CLICKHOUSE_DB", "CLICKHOUSE_DEFAULT_PASSWORD", "CLICKHOUSE_DEVELOPMENT_PASSWORD", "CLICKHOUSE_STAGING_PASSWORD", "CLICKHOUSE_PRODUCTION_PASSWORD"]),
+        ("\n# ClickHouse Configuration\n", ["CLICKHOUSE_HOST", "CLICKHOUSE_PORT", "CLICKHOUSE_USER", "CLICKHOUSE_DB", "CLICKHOUSE_PASSWORD"]),
         ("\n# PostgreSQL Configuration\n", ["POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_USER", "POSTGRES_DB", "POSTGRES_PASSWORD", "POSTGRES_STAGING_PASSWORD", "POSTGRES_PRODUCTION_PASSWORD"]),
         ("\n# Redis Configuration\n", ["REDIS_HOST", "REDIS_PORT", "REDIS_DB", "REDIS_PASSWORD", "REDIS_STAGING_PASSWORD", "REDIS_PRODUCTION_PASSWORD"]),
         ("\n# Security Keys\n", ["JWT_SECRET_KEY", "FERNET_KEY", "ENCRYPTION_KEY", "SESSION_SECRET_KEY"]),

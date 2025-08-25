@@ -210,7 +210,7 @@ class UnifiedTestRunner:
             'JWT_SECRET_KEY': 'test-jwt-secret-key-for-integration-testing-must-be-32-chars-minimum',
             'SERVICE_SECRET': 'test-service-secret-for-cross-service-auth-32-chars-minimum-length',
             'FERNET_KEY': 'iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=',
-            'CLICKHOUSE_DEFAULT_PASSWORD': 'test-clickhouse-password-for-integration-testing'
+            'CLICKHOUSE_PASSWORD': 'test-clickhouse-password-for-integration-testing'
         }
         
         # Only set if not already present (don't override existing values)

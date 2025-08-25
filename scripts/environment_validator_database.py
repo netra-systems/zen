@@ -82,7 +82,7 @@ class DatabaseValidator:
             "host": host,
             "port": int(os.getenv("CLICKHOUSE_PORT", "8443")),
             "user": os.getenv("CLICKHOUSE_USER", "default"),
-            "password": os.getenv("CLICKHOUSE_DEFAULT_PASSWORD", ""),
+            "password": os.getenv("CLICKHOUSE_PASSWORD", ""),
             "database": os.getenv("CLICKHOUSE_DB", "default"),
             "secure": "localhost" not in host  # Use HTTPS for cloud instances
         }
