@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ssot_remediation_plan>
+    <metadata>
+        <title>SSOT Violation Remediation Plan</title>
+        <date>2025-08-25</date>
+        <priority>CRITICAL</priority>
+        <estimated_effort>3-4 weeks</estimated_effort>
+        <risk_level>HIGH</risk_level>
+    </metadata>
+    
+    <guiding_principles>
+        <principle>Minimal disruption to working systems</principle>
+        <principle>Incremental, testable changes</principle>
+        <principle>Maintain backward compatibility during transition</principle>
+        <principle>Complete atomic refactors per CLAUDE.md 2.1</principle>
+    </guiding_principles>
+    
+    <phase_1_circuit_breaker_consolidation>
+        <priority>1</priority>
+        <duration>1 week</duration>
+        <objective>Establish single canonical circuit breaker implementation per SSOT principle</objective>
+        
+        <steps>
+            <step order="1">
+                <action>Analyze and document all circuit breaker variations</action>
+                <deliverable>Circuit breaker feature matrix comparing all implementations</deliverable>
+                <effort>4 hours</effort>
+            </step>
+            
+            <step order="2">
+                <action>Create unified circuit breaker in netra_backend/app/core/resilience/circuit_breaker.py</action>
+                <implementation>
+                    <merge_from>
+                        <source>netra_backend/app/core/circuit_breaker_core.py - base functionality</source>
+                        <source>netra_backend/app/services/circuit_breaker.py - sliding window</source>
+                        <source>netra_backend/app/core/adaptive_circuit_breaker_core.py - adaptive features</source>
+                    </merge_from>
+                    <features>
+                        <feature>Core state management (CLOSED, OPEN, HALF_OPEN)</feature>
+                        <feature>Sliding window error rate calculation</feature>
+                        <feature>Adaptive thresholds based on environment</feature>
+                        <feature>Async and sync execution support</feature>
+                        <feature>Comprehensive metrics collection</feature>
+                        <feature>Pluggable fallback strategies</feature>
+                    </features>
+                </implementation>
+                <effort>8 hours</effort>
+            </step>
+            
+            <step order="3">
+                <action>Create specialized wrappers for domain-specific needs</action>
+                <wrappers>
+                    <wrapper>DatabaseCircuitBreaker extends UnifiedCircuitBreaker</wrapper>
+                    <wrapper>LLMCircuitBreaker extends UnifiedCircuitBreaker</wrapper>
+                    <wrapper>AuthCircuitBreaker extends UnifiedCircuitBreaker</wrapper>
+                    <wrapper>AgentCircuitBreaker extends UnifiedCircuitBreaker</wrapper>
+                </wrappers>
+                <effort>4 hours</effort>
+            </step>
+            
+            <step order="4">
+                <action>Migrate all usages to unified implementation</action>
+                <migration_order>
+                    <migrate>core modules first</migrate>
+                    <migrate>services layer</migrate>
+                    <migrate>agents and specialized components</migrate>
+                    <migrate>database and external clients</migrate>
+                </migration_order>
+                <effort>16 hours</effort>
+            </step>
+            
+            <step order="5">
+                <action>Delete all legacy circuit breaker implementations</action>
+                <validation>Run full test suite after each deletion</validation>
+                <effort>4 hours</effort>
+            </step>
+        </steps>
+        
+        <testing_strategy>
+            <test>Unit tests for unified circuit breaker</test>
+            <test>Integration tests for each wrapper</test>
+            <test>E2E tests for failure scenarios</test>
+            <test>Load tests to verify performance</test>
+        </testing_strategy>
+    </phase_1_circuit_breaker_consolidation>
+    
+    <phase_2_environment_configuration_unification>
+        <priority>2</priority>
+        <duration>3 days</duration>
+        <objective>Unify 8+ environment detection implementations</objective>
+        
+        <steps>
+            <step order="1">
+                <action>Designate netra_backend/app/core/environment_constants.py as SSOT</action>
+                <rationale>Already has comprehensive detection logic and is imported widely</rationale>
+                <effort>1 hour</effort>
+            </step>
+            
+            <step order="2">
+                <action>Update configuration/environment.py to delegate to environment_constants</action>
+                <changes>
+                    <change>Replace EnvironmentDetector class with import from environment_constants</change>
+                    <change>Keep ConfigEnvironment class for config-specific logic</change>
+                    <change>Maintain backward compatibility with deprecation warnings</change>
+                </changes>
+                <effort>4 hours</effort>
+            </step>
+            
+            <step order="3">
+                <action>Consolidate IsolatedEnvironment usage</action>
+                <approach>Ensure all environment access goes through IsolatedEnvironment.get_env()</approach>
+                <effort>4 hours</effort>
+            </step>
+            
+            <step order="4">
+                <action>Update all imports to use unified source</action>
+                <script>python scripts/fix_all_import_issues.py --fix-environment-imports</script>
+                <effort>4 hours</effort>
+            </step>
+            
+            <step order="5">
+                <action>Delete redundant implementations</action>
+                <delete>
+                    <file>netra_backend/app/core/configuration/environment_detector.py (after migration)</file>
+                    <file>netra_backend/app/cloud_environment_detector.py (if redundant)</file>
+                </delete>
+                <effort>2 hours</effort>
+            </step>
+        </steps>
+    </phase_2_environment_configuration_unification>
+    
+    <phase_3_retry_resilience_consolidation>
+        <priority>3</priority>
+        <duration>4 days</duration>
+        <objective>Unify 10+ retry mechanism implementations</objective>
+        
+        <steps>
+            <step order="1">
+                <action>Enhance netra_backend/app/core/resilience/unified_retry_handler.py</action>
+                <enhancements>
+                    <enhancement>Add all retry strategies from various implementations</enhancement>
+                    <enhancement>Support both decorator and context manager patterns</enhancement>
+                    <enhancement>Include domain-specific configurations</enhancement>
+                </enhancements>
+                <effort>8 hours</effort>
+            </step>
+            
+            <step order="2">
+                <action>Create domain-specific retry policies</action>
+                <policies>
+                    <policy>DATABASE_RETRY_POLICY for database operations</policy>
+                    <policy>LLM_RETRY_POLICY for LLM calls</policy>
+                    <policy>AGENT_RETRY_POLICY for agent operations</policy>
+                    <policy>API_RETRY_POLICY for external APIs</policy>
+                </policies>
+                <effort>4 hours</effort>
+            </step>
+            
+            <step order="3">
+                <action>Migrate all retry usages</action>
+                <migration>
+                    <replace>@retry decorators with @unified_retry</replace>
+                    <replace>Custom retry loops with UnifiedRetryHandler</replace>
+                    <replace>Component-specific retry with policy-based retry</replace>
+                </migration>
+                <effort>12 hours</effort>
+            </step>
+            
+            <step order="4">
+                <action>Delete legacy retry implementations</action>
+                <effort>4 hours</effort>
+            </step>
+        </steps>
+    </phase_3_retry_resilience_consolidation>
+    
+    <phase_4_validation_and_cleanup>
+        <priority>4</priority>
+        <duration>2 days</duration>
+        <objective>Validate changes and ensure system stability</objective>
+        
+        <steps>
+            <step order="1">
+                <action>Run comprehensive test suite</action>
+                <command>python unified_test_runner.py --level integration --real-llm</command>
+            </step>
+            
+            <step order="2">
+                <action>Update architecture compliance</action>
+                <command>python scripts/check_architecture_compliance.py</command>
+            </step>
+            
+            <step order="3">
+                <action>Update documentation and specs</action>
+                <updates>
+                    <update>SPEC/resilience_architecture.xml</update>
+                    <update>SPEC/environment_management.xml</update>
+                    <update>LLM_MASTER_INDEX.md</update>
+                </updates>
+            </step>
+            
+            <step order="4">
+                <action>Deploy to staging for validation</action>
+                <command>python scripts/deploy_to_gcp.py --project netra-staging --run-checks</command>
+            </step>
+        </steps>
+    </phase_4_validation_and_cleanup>
+    
+    <success_criteria>
+        <criterion>All tests passing with unified implementations</criterion>
+        <criterion>No duplicate circuit breaker classes in backend service</criterion>
+        <criterion>Single environment detection source</criterion>
+        <criterion>Unified retry mechanism across all components</criterion>
+        <criterion>Architecture compliance score > 90%</criterion>
+        <criterion>Staging environment stable with changes</criterion>
+    </success_criteria>
+    
+    <rollback_plan>
+        <trigger>Critical failures in staging or test suite</trigger>
+        <steps>
+            <step>Git revert to previous commit</step>
+            <step>Restore legacy implementations temporarily</step>
+            <step>Add compatibility shims if needed</step>
+            <step>Incremental migration with feature flags</step>
+        </steps>
+    </rollback_plan>
+    
+    <business_value_justification>
+        <segment>Platform/Internal</segment>
+        <goal>System Stability and Development Velocity</goal>
+        <impact>
+            <metric name="bug_reduction">40% fewer consistency bugs</metric>
+            <metric name="development_velocity">30% faster feature development</metric>
+            <metric name="testing_time">50% reduction in test complexity</metric>
+            <metric name="onboarding">2 week reduction for new engineers</metric>
+        </impact>
+        <roi>3-4 week investment prevents 6+ months of accumulated tech debt</roi>
+    </business_value_justification>
+</ssot_remediation_plan>
