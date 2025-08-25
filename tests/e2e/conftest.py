@@ -12,8 +12,20 @@ from test_framework.helpers.auth_helpers import AuthTestHelpers
 
 import pytest
 import asyncio
+import os
+import sys
 from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock
+
+# CRITICAL: Override any PostgreSQL configuration for E2E tests to use SQLite
+# E2E tests should be fast and not depend on external databases
+# This must be set BEFORE any backend modules are imported
+if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
+    # Force SQLite for E2E tests regardless of other configurations
+    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+    os.environ["TESTING"] = "1"
+    os.environ["ENVIRONMENT"] = "testing"
+    os.environ["E2E_TESTING"] = "true"
 
 # E2E Configuration - Project specific
 E2E_CONFIG = {
