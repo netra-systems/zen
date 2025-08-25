@@ -235,12 +235,9 @@ class DatabaseConnector:
         """
         if not url:
             return url
-        # Use DatabaseURLBuilder for consistent normalization
+        # Use centralized format_for_asyncpg_driver method for consistent handling
         from shared.database_url_builder import DatabaseURLBuilder
-        normalized = DatabaseURLBuilder.normalize_postgres_url(url)
-        # Strip async driver prefixes for asyncpg (asyncpg expects plain postgresql://)
-        normalized = normalized.replace("postgresql+asyncpg://", "postgresql://")
-        return normalized
+        return DatabaseURLBuilder.format_for_asyncpg_driver(url)
     
     async def validate_all_connections(self) -> bool:
         """
@@ -457,8 +454,10 @@ class DatabaseConnector:
     async def _connect_cloud_sql(self, connection: DatabaseConnection) -> object:
         """Connect to Cloud SQL PostgreSQL."""
         import asyncpg
+        # Normalize URL for asyncpg (remove SQLAlchemy driver prefixes)
+        clean_url = self._normalize_postgres_url(connection.url)
         return await asyncio.wait_for(
-            asyncpg.connect(connection.url),
+            asyncpg.connect(clean_url),
             timeout=self.retry_config.timeout
         )
     
@@ -484,8 +483,8 @@ class DatabaseConnector:
             import psycopg2
             from psycopg2 import OperationalError
             
-            # Convert asyncpg URL to psycopg2 format
-            url = connection.url.replace("postgresql+asyncpg://", "postgresql://")
+            # Convert URL to psycopg2 format using centralized normalization
+            url = self._normalize_postgres_url(connection.url)
             
             conn = psycopg2.connect(url)
             cursor = conn.cursor()

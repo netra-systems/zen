@@ -702,6 +702,33 @@ class DatabaseURLBuilder:
         return url
     
     @staticmethod
+    def format_for_asyncpg_driver(url: str) -> str:
+        """
+        Format URL specifically for asyncpg driver usage.
+        
+        AsyncPG expects plain 'postgresql://' URLs without SQLAlchemy driver prefixes.
+        This method strips any driver prefixes and ensures compatibility.
+        
+        Args:
+            url: Database URL that may contain SQLAlchemy driver prefixes
+            
+        Returns:
+            Clean PostgreSQL URL suitable for asyncpg.connect()
+        """
+        if not url:
+            return url
+        
+        # Strip all known SQLAlchemy driver prefixes
+        import re
+        clean_url = re.sub(r'postgresql\+[^:]+://', 'postgresql://', url)
+        
+        # Also handle postgres:// -> postgresql:// normalization
+        if clean_url.startswith("postgres://"):
+            clean_url = clean_url.replace("postgres://", "postgresql://", 1)
+        
+        return clean_url
+    
+    @staticmethod
     def validate_url_for_driver(url: str, driver: str) -> tuple[bool, str]:
         """
         Validate that a URL is correctly formatted for a specific driver.

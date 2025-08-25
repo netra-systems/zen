@@ -574,7 +574,6 @@ class StartupManager:
             setup_multiprocessing_env, validate_database_environment,
             run_database_migrations, setup_database_connections
         )
-        from netra_backend.app.db.database_initializer import DatabaseInitializer
         from netra_backend.app.logging_config import central_logger
         
         logger = central_logger.get_logger(__name__)
@@ -588,11 +587,8 @@ class StartupManager:
         # Run migrations
         run_database_migrations(logger)
         
-        # Initialize database connections using DatabaseInitializer
-        db_initializer = DatabaseInitializer()
-        await db_initializer.initialize_postgresql()
-        
         # Setup database connections in FastAPI app
+        # This already initializes postgres and ensures tables exist
         await setup_database_connections(app)
         
         logger.info("Database initialization completed successfully")

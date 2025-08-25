@@ -136,8 +136,19 @@ class DatabaseInitializer:
     async def _ensure_database_exists(self, parsed_url) -> bool:
         """Ensure the target database exists."""
         try:
-            # Connect to postgres database to check if target database exists
-            postgres_url = f"postgresql://{parsed_url.username}:{parsed_url.password}@{parsed_url.hostname}:{parsed_url.port}/postgres"
+            # Use DatabaseURLBuilder to construct postgres database URL
+            env = get_env()
+            builder_env = env.get_all().copy()
+            
+            # Override database name to 'postgres' for checking if target DB exists
+            builder_env['POSTGRES_DB'] = 'postgres'
+            builder_env['POSTGRES_HOST'] = parsed_url.hostname
+            builder_env['POSTGRES_PORT'] = str(parsed_url.port or '5432')
+            builder_env['POSTGRES_USER'] = parsed_url.username
+            builder_env['POSTGRES_PASSWORD'] = parsed_url.password
+            
+            builder = DatabaseURLBuilder(builder_env)
+            postgres_url = builder.tcp.sync_url or builder.development.default_sync_url
             
             conn = psycopg2.connect(postgres_url)
             conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
