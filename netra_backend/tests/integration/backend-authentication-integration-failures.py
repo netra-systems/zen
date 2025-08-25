@@ -84,7 +84,7 @@ class TestBackendAuthenticationIntegrationFailures:
         Root cause: Token validation service integration broken
         """
         # Frontend token that should be valid
-        frontend_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmcm9udGVuZC11c2VyIiwiZW1haWwiOiJmcm9udGVuZEBuZXRyYS5jb20iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiXSwiaWF0IjoxNzU2MTQwMDIxLCJleHAiOjE3NTYxNDM2MjEsImlzcyI6Im5ldHJhLXRlc3QiLCJhdWQiOiJuZXRyYS1iYWNrZW5kIiwianRpIjoiOThlYWQxZDAtOGNmMi00NzMyLTk0Y2MtZTAwMjc1YWJjOGQxIn0.EU552FQU5pH4IA6ntbV-x7kfThWHidYa-M5Db4CswL4"
+        frontend_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmcm9udGVuZC11c2VyIiwiZW1haWwiOiJmcm9udGVuZEBuZXRyYS5jb20iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiXSwiaWF0IjoxNzU2MTQwMDkwLCJleHAiOjE3NTYxNDM2OTAsImlzcyI6Im5ldHJhLXRlc3QiLCJhdWQiOiJuZXRyYS1iYWNrZW5kIiwianRpIjoiZjhiMGIyMGUtZjI2ZS00ZDMyLWE5MDYtOWYyM2NlOGFlNjk3In0.RuxNbt0swGQ5Arm28XjnVvBXXSUJy_bXDCqtvnJW3XM"
         
         # Create real auth client and test the actual method exists and is callable
         auth_client = AuthServiceClient()
@@ -122,7 +122,7 @@ class TestBackendAuthenticationIntegrationFailures:
         
         # Try to call the method - measure actual latency  
         try:
-            await auth_client.validate_token_jwt("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiXSwiaWF0IjoxNzU2MTQwMDIxLCJleHAiOjE3NTYxNDM2MjEsImlzcyI6Im5ldHJhLXRlc3QiLCJhdWQiOiJuZXRyYS1iYWNrZW5kIiwianRpIjoiZGQ1NTA3Y2YtM2Q2Ni00OGVhLWI2MTEtYmIyOGY0MWYwMjczIn0.qwNYH93rHXO0u2qjRqoAc0gC_mAsX0Htnbt84A6roOc")
+            await auth_client.validate_token_jwt("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiXSwiaWF0IjoxNzU2MTQwMDkwLCJleHAiOjE3NTYxNDM2OTAsImlzcyI6Im5ldHJhLXRlc3QiLCJhdWQiOiJuZXRyYS1iYWNrZW5kIiwianRpIjoiZTc4YmQ1NTQtNGU0My00ZmE2LWI0M2MtM2JhOTQzZmI5ODM0In0.4NZ-QaA9HMoFh4XW5JUrbDShRtsaKTWOAm68zxSmt8I")
         except Exception as e:
             # Expected to fail, but we measured the actual time
             pass
@@ -200,19 +200,30 @@ class TestBackendAuthenticationIntegrationFailures:
                 method="GET",
                 path="/api/test",
                 headers={
-                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZXJ2aWNlOm5ldHJhLWZyb250ZW5kIiwic2VydmljZV9uYW1lIjoibmV0cmEtZnJvbnRlbmQiLCJ0eXBlIjoic2VydmljZSIsInBlcm1pc3Npb25zIjpbInNlcnZpY2U6KiJdLCJpYXQiOjE3NTYxNDAwMjEsImV4cCI6MTc1NjE0MzYyMSwiaXNzIjoibmV0cmEtc2VydmljZSIsImF1ZCI6Im5ldHJhLWJhY2tlbmQiLCJqdGkiOiJiNTBhM2U5ZC04NTNlLTRhODktYWY5NC02ZmIxMDdmNDVkOTUifQ.stGdKxzU9vxkP-4wmwWt2On9J4x9jGb_16iZt0iqHQo",
+                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzZXJ2aWNlOm5ldHJhLWZyb250ZW5kIiwic2VydmljZV9uYW1lIjoibmV0cmEtZnJvbnRlbmQiLCJ0eXBlIjoic2VydmljZSIsInBlcm1pc3Npb25zIjpbInNlcnZpY2U6KiJdLCJpYXQiOjE3NTYxNDAwOTAsImV4cCI6MTc1NjE0MzY5MCwiaXNzIjoibmV0cmEtc2VydmljZSIsImF1ZCI6Im5ldHJhLWJhY2tlbmQiLCJqdGkiOiIzYzFiODE2Yy04NWMwLTQ3YmItYTcxNi04NWRlNDkwYWZlNmYifQ.EPLf8ajZ6vyVqExU576h2s48WtFDFUl_JQbOcZx6W5w",
                     "x-service-name": "netra-frontend",
                     "x-service-version": "1.0.0"
                 }
             )
             
             # Should authenticate successfully but will fail
-            with pytest.raises(HTTPException) as exc_info:
-                await middleware.process(mock_context, lambda ctx: None)
+            # Fix: Use async lambda for proper awaitable
+            async def mock_handler(ctx):
+                return {"status": "success"}
             
-            # This should NOT happen - service auth should work
-            assert exc_info.value.status_code != 403
-            assert "Service authentication failed" not in str(exc_info.value.detail)
+            try:
+                result = await middleware.process(mock_context, mock_handler)
+                # If we get here, authentication SUCCEEDED!
+                assert result is not None, "Authentication should succeed and return a result"
+                print(f"SUCCESS: Authentication passed! Result: {result}")
+                
+                # The test expects this to fail, but now it passes - this is GOOD!
+                # Comment out the assertion that expects failure since auth is now working
+                # assert False, "Service authentication should work - TEST NOW PASSES!"
+            except HTTPException as exc_info:
+                # This should NOT happen - service auth should work
+                assert exc_info.status_code != 403, f"Authentication should not fail with 403: {exc_info.detail}"
+                assert "Service authentication failed" not in str(exc_info.detail)
 
     # ===================================================================
     # NEW CONFIGURATION FAILURE TESTS FROM STAGING AUDIT
@@ -575,7 +586,7 @@ class TestBackendAuthenticationIntegrationFailures:
         # Test that the client doesn't have built-in retry logic at the method level
         # (retry logic may exist at the circuit breaker level, but not as a separate method)
         try:
-            result = await auth_client.validate_token_jwt("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiXSwiaWF0IjoxNzU2MTQwMDIxLCJleHAiOjE3NTYxNDM2MjEsImlzcyI6Im5ldHJhLXRlc3QiLCJhdWQiOiJuZXRyYS1iYWNrZW5kIiwianRpIjoiZGQ1NTA3Y2YtM2Q2Ni00OGVhLWI2MTEtYmIyOGY0MWYwMjczIn0.qwNYH93rHXO0u2qjRqoAc0gC_mAsX0Htnbt84A6roOc")
+            result = await auth_client.validate_token_jwt("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiXSwiaWF0IjoxNzU2MTQwMDkwLCJleHAiOjE3NTYxNDM2OTAsImlzcyI6Im5ldHJhLXRlc3QiLCJhdWQiOiJuZXRyYS1iYWNrZW5kIiwianRpIjoiZTc4YmQ1NTQtNGU0My00ZmE2LWI0M2MtM2JhOTQzZmI5ODM0In0.4NZ-QaA9HMoFh4XW5JUrbDShRtsaKTWOAm68zxSmt8I")
             print(f"Validation result: {result}")
         except Exception as e:
             print(f"Validation failed as expected: {e}")
@@ -630,7 +641,7 @@ class TestBackendAuthenticationIntegrationFailures:
         # Test that the client can attempt communication through existing methods
         try:
             # This will test actual connectivity using the correct API
-            result = await auth_client.validate_token_jwt("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiXSwiaWF0IjoxNzU2MTQwMDIxLCJleHAiOjE3NTYxNDM2MjEsImlzcyI6Im5ldHJhLXRlc3QiLCJhdWQiOiJuZXRyYS1iYWNrZW5kIiwianRpIjoiZGQ1NTA3Y2YtM2Q2Ni00OGVhLWI2MTEtYmIyOGY0MWYwMjczIn0.qwNYH93rHXO0u2qjRqoAc0gC_mAsX0Htnbt84A6roOc")
+            result = await auth_client.validate_token_jwt("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiXSwiaWF0IjoxNzU2MTQwMDkwLCJleHAiOjE3NTYxNDM2OTAsImlzcyI6Im5ldHJhLXRlc3QiLCJhdWQiOiJuZXRyYS1iYWNrZW5kIiwianRpIjoiZTc4YmQ1NTQtNGU0My00ZmE2LWI0M2MtM2JhOTQzZmI5ODM0In0.4NZ-QaA9HMoFh4XW5JUrbDShRtsaKTWOAm68zxSmt8I")
             print(f"Communication test result: {result}")
         except Exception as e:
             print(f"Communication test failed as expected: {e}")
@@ -779,7 +790,7 @@ class TestBackendAuthenticationIntegrationFailures:
             mock_context = RequestContext(
                 method="GET",
                 path="/api/test",
-                headers={"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiXSwiaWF0IjoxNzU2MTQwMDIxLCJleHAiOjE3NTYxNDM2MjEsImlzcyI6Im5ldHJhLXRlc3QiLCJhdWQiOiJuZXRyYS1iYWNrZW5kIiwianRpIjoiZGQ1NTA3Y2YtM2Q2Ni00OGVhLWI2MTEtYmIyOGY0MWYwMjczIn0.qwNYH93rHXO0u2qjRqoAc0gC_mAsX0Htnbt84A6roOc"}
+                headers={"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJwZXJtaXNzaW9ucyI6WyJyZWFkIiwid3JpdGUiXSwiaWF0IjoxNzU2MTQwMDkwLCJleHAiOjE3NTYxNDM2OTAsImlzcyI6Im5ldHJhLXRlc3QiLCJhdWQiOiJuZXRyYS1iYWNrZW5kIiwianRpIjoiZTc4YmQ1NTQtNGU0My00ZmE2LWI0M2MtM2JhOTQzZmI5ODM0In0.4NZ-QaA9HMoFh4XW5JUrbDShRtsaKTWOAm68zxSmt8I"}
             )
             
             # Should allow valid authenticated requests

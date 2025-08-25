@@ -9,9 +9,9 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions_database import DatabaseError, RecordNotFoundError
-from app.db.models_postgres import Thread, Message, Run, Assistant
-from app.services.thread_service import ThreadService
+from netra_backend.app.core.exceptions_database import DatabaseError, RecordNotFoundError
+from netra_backend.app.db.models_postgres import Thread, Message, Run, Assistant
+from netra_backend.app.services.thread_service import ThreadService
 
 
 class TestThreadServiceComprehensive:
@@ -272,7 +272,7 @@ class TestThreadServiceComprehensive:
     @pytest.mark.asyncio
     async def test_error_handling_in_database_operations(self, thread_service):
         """Test error handling wrapper function"""
-        from app.services.thread_service import _handle_database_error
+        from netra_backend.app.services.thread_service import _handle_database_error
         
         operation = "test_operation"
         context = {"user_id": "test_user"}
