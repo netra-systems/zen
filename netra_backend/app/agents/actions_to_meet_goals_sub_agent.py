@@ -77,7 +77,7 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
         self.execution_engine = BaseExecutionEngine(
             self.reliability_manager, self.monitor
         )
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
 
     def _create_reliability_manager(self) -> ReliabilityManager:
         """Create configured reliability manager."""

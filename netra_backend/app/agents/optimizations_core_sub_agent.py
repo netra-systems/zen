@@ -57,7 +57,7 @@ class OptimizationsCoreSubAgent(BaseExecutionInterface, AgentExecutionMixin, Bas
         circuit_config = self._create_circuit_breaker_config()
         retry_config = self._create_retry_config()
         self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
         self.monitor = ExecutionMonitor()
     
     def _create_circuit_breaker_config(self) -> CircuitBreakerConfig:

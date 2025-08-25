@@ -6,16 +6,12 @@ Split into focused components under 450-line limit.
 """
 
 from netra_backend.app.agents.supply_researcher.agent import SupplyResearcherAgent
-from netra_backend.app.agents.supply_researcher.data_extractor import (
-    SupplyDataExtractor,
-)
+from netra_backend.app.agents.supply_researcher.data_extractor import SupplyDataExtractor
 # SINGLE SOURCE OF TRUTH: Use consolidated DatabaseManager
 from netra_backend.app.db.database_manager import SupplyDatabaseManager
 from netra_backend.app.agents.supply_researcher.models import ResearchType
 from netra_backend.app.agents.supply_researcher.parsers import SupplyRequestParser
-from netra_backend.app.agents.supply_researcher.research_engine import (
-    SupplyResearchEngine,
-)
+from netra_backend.app.agents.supply_researcher.research_engine import SupplyResearchEngine
 
 __all__ = [
     "SupplyResearcherAgent",

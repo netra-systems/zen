@@ -38,7 +38,7 @@ class TriageExecutor:
     def _init_modern_components(self, agent: 'TriageSubAgent') -> None:
         """Initialize modern execution components."""
         self.monitor = getattr(agent, 'monitor', ExecutionMonitor())
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
         self.reliability_manager = getattr(agent, 'reliability_manager', None)
     
     def _init_helper_classes(self) -> None:

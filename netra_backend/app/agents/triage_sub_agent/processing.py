@@ -42,7 +42,7 @@ class TriageProcessor:
     def _init_modern_components(self, agent: 'TriageSubAgent') -> None:
         """Initialize modern execution monitoring components."""
         self.monitor = getattr(agent, 'monitor', ExecutionMonitor()) if agent else ExecutionMonitor()
-        self.error_handler = ExecutionErrorHandler()
+        self.error_handler = ExecutionErrorHandler
         self.processing_monitor = TriageProcessingMonitor(self.monitor)
         self.error_helper = TriageProcessingErrorHelper()
     

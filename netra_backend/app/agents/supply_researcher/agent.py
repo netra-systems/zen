@@ -237,7 +237,7 @@ class SupplyResearcherAgent(BaseSubAgent):
         """Process research results and update database"""
         supply_items, confidence = self._extract_and_score_data(research_result, parsed_request)
         update_result = await self._update_database_if_confident(supply_items, confidence, research_session)
-        self._finalize_research_session(research_session)
+        await self._finalize_research_session(research_session)
         return self._build_final_result(parsed_request, confidence, update_result, research_result)
     
     def _extract_and_score_data(self, research_result: Dict[str, Any], parsed_request: Dict[str, Any]) -> tuple:
@@ -254,11 +254,11 @@ class SupplyResearcherAgent(BaseSubAgent):
             research_session.processed_data = json.dumps(supply_items, default=str)
         return update_result
     
-    def _finalize_research_session(self, research_session: ResearchSession) -> None:
+    async def _finalize_research_session(self, research_session: ResearchSession) -> None:
         """Finalize research session status"""
         research_session.status = "completed"
         research_session.completed_at = datetime.now(UTC)
-        self.db.commit()
+        await self.db.commit()
     
     def _build_final_result(self, parsed_request: Dict[str, Any], confidence: float, 
                            update_result: Dict[str, Any], research_result: Dict[str, Any]) -> Dict[str, Any]:
