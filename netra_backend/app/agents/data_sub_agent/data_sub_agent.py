@@ -9,7 +9,7 @@ BVJ: Enterprise | Performance Fee Capture | $10K+ monthly revenue per customer
 
 import asyncio
 import time
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
@@ -73,7 +73,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         self.data_validator = DataValidator()
     
     @agent_type_safe
-    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> TypedAgentResult:
+    async def execute(self, state: Optional[DeepAgentState], run_id: str = "", stream_updates: bool = False) -> TypedAgentResult:
         """Execute data analysis workflow."""
         start_time = time.time()
         
@@ -158,11 +158,11 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             "recommendations": ", ".join(analysis_result.get("recommendations", [])),
         }
         
-        # Flatten cost savings data
-        cost_savings = analysis_result.get("cost_savings", {})
+        # Flatten cost savings data - handle both "cost_savings" and "savings_potential" keys
+        cost_savings = analysis_result.get("cost_savings", analysis_result.get("savings_potential", {}))
         if cost_savings:
-            insights["cost_savings_percentage"] = cost_savings.get("percentage", 0.0)
-            insights["cost_savings_amount_cents"] = cost_savings.get("amount_cents", 0.0)
+            insights["cost_savings_percentage"] = cost_savings.get("percentage", cost_savings.get("savings_percentage", 0.0))
+            insights["cost_savings_amount_cents"] = cost_savings.get("amount_cents", cost_savings.get("total_savings_cents", 0.0))
         
         # Flatten performance metrics
         metrics = analysis_result.get("metrics", {})
@@ -226,7 +226,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             state = self._context_to_state(context)
             
             # Execute main logic
-            result = await self.execute(state, context.stream_updates)
+            result = await self.execute(state, context.run_id, context.stream_updates)
             
             return ExecutionResult(
                 success=result.success,
@@ -267,7 +267,7 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
                 "cost_optimizer": "active",
                 "data_validator": "active"
             },
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
     
     async def cleanup(self) -> None:
