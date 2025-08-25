@@ -7,6 +7,9 @@ import os
 import sys
 import pytest
 from unittest.mock import patch, MagicMock, Mock, AsyncMock
+
+# Set JWT secret before imports to prevent initialization error
+os.environ.setdefault("JWT_SECRET_KEY", "test-staging-jwt-secret-key-for-configuration-testing")
 import asyncio
 import signal
 import jwt
@@ -38,6 +41,7 @@ class TestAuthStagingURLConfiguration:
         os.environ["ENVIRONMENT"] = "staging"
         os.environ["FRONTEND_URL"] = "https://app.staging.netrasystems.ai"
         os.environ["AUTH_SERVICE_URL"] = "https://auth.staging.netrasystems.ai"
+        os.environ["JWT_SECRET_KEY"] = "test-staging-jwt-secret-key-for-configuration-testing"
         yield
         # Restore original environment
         os.environ.clear()
@@ -178,6 +182,8 @@ class TestDatabasePasswordAuthentication:
             with pytest.raises(asyncpg.InvalidPasswordError, 
                             match="password authentication failed"):
                 url = AuthDatabaseManager.get_auth_database_url_async()
+                # Convert from asyncpg format to standard postgresql format for asyncpg.connect
+                url = url.replace('postgresql+asyncpg://', 'postgresql://')
                 # This should fail with authentication error
                 conn = await asyncpg.connect(url)
                 await conn.close()

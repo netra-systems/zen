@@ -210,7 +210,7 @@ class TestWebSocketJWTEncodingL3:
             manager = SecureWebSocketManager(db_session)
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
 
@@ -293,7 +293,7 @@ class TestWebSocketJWTEncodingL3:
             manager = SecureWebSocketManager(db_session)
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
 
@@ -355,7 +355,7 @@ class TestWebSocketJWTEncodingL3:
             manager = SecureWebSocketManager(db_session)
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
 
@@ -397,7 +397,7 @@ class TestWebSocketJWTEncodingL3:
             manager = SecureWebSocketManager(db_session)
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
 
@@ -459,7 +459,7 @@ class TestWebSocketJWTEncodingL3:
             manager = SecureWebSocketManager(db_session)
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {"valid": False}
                 
@@ -508,7 +508,7 @@ class TestWebSocketJWTEncodingL3:
             manager = SecureWebSocketManager(db_session)
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
                 # Auth service would reject expired token
 
                 mock_validate.return_value = {"valid": False, "error": "Token expired"}
@@ -540,7 +540,7 @@ class TestWebSocketJWTEncodingL3:
             manager = SecureWebSocketManager(db_session)
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
 
@@ -595,7 +595,7 @@ class TestWebSocketJWTEncodingL3:
                 manager = SecureWebSocketManager(db_session)
                 
                 # Mock: Component isolation for testing without external dependencies
-                with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+                with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
 
                     mock_validate.return_value = {
 
@@ -712,7 +712,7 @@ class TestWebSocketJWTEncodingL3:
             manager = SecureWebSocketManager(db_session)
             
             # Mock: Component isolation for testing without external dependencies
-            with patch('netra_backend.app.clients.auth_client.auth_client.validate_token') as mock_validate:
+            with patch('netra_backend.app.clients.auth_client_core.auth_client.validate_token') as mock_validate:
 
                 mock_validate.return_value = {
 
