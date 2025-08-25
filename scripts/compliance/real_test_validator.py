@@ -329,6 +329,7 @@ def main():
     # Add scripts directory to path for standalone execution
     script_dir = os.path.dirname(os.path.abspath(__file__))
     if script_dir not in sys.path:
+        sys.path.insert(0, script_dir)
     
     root_path = sys.argv[1] if len(sys.argv) > 1 else "."
     
