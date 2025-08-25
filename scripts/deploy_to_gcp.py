@@ -587,7 +587,7 @@ CMD ["npm", "start"]
             # Backend needs connections to databases and all required secrets
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
             ])
         elif service.name == "auth":
             # Auth service needs database, JWT secrets, OAuth credentials, and enhanced security
@@ -765,6 +765,8 @@ CMD ["npm", "start"]
             "redis-url-staging": "redis://default:REPLACE_WITH_REDIS_PASSWORD@10.128.0.3:6379/0",
             "clickhouse-host-staging": "clickhouse.staging.netrasystems.ai",
             "clickhouse-port-staging": "8123",
+            "clickhouse-user-staging": "default",
+            "clickhouse-db-staging": "default",
             "clickhouse-default-password-staging": "REPLACE_WITH_CLICKHOUSE_PASSWORD",
             # Additional required secrets for comprehensive staging support
             "gemini-api-key-staging": os.getenv("GEMINI_API_KEY", "REPLACE_WITH_REAL_GEMINI_KEY"),
