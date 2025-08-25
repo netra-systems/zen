@@ -306,10 +306,15 @@ class NetworkResilientClient:
         """Check PostgreSQL connectivity."""
         try:
             import asyncpg
+            from shared.database_url_builder import DatabaseURLBuilder
+            
+            # Use centralized URL normalization for asyncpg compatibility
+            # AsyncPG expects plain 'postgresql://' URLs without SQLAlchemy driver prefixes
+            clean_url = DatabaseURLBuilder.format_for_asyncpg_driver(database_url)
             
             # Parse connection parameters
             conn = await asyncio.wait_for(
-                asyncpg.connect(database_url),
+                asyncpg.connect(clean_url),
                 timeout=timeout
             )
             

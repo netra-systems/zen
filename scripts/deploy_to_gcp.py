@@ -198,6 +198,13 @@ class GCPDeployer:
         """Validate deployment configuration and environment variables."""
         print("\n🔍 Validating deployment configuration...")
         
+        # CRITICAL: OAuth validation BEFORE deployment
+        print("🔐 Validating OAuth configuration before deployment...")
+        oauth_validation_success = self._validate_oauth_configuration()
+        if not oauth_validation_success:
+            print("🚨🚨🚨 DEPLOYMENT ABORTED - OAuth validation failed! 🚨🚨🚨")
+            return False
+        
         # Required environment variables for staging deployment
         required_env_vars = [
             "GOOGLE_CLIENT_ID",
@@ -599,13 +606,14 @@ CMD ["npm", "start"]
             # Backend needs connections to databases and all required secrets from GSM
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,SECRET_KEY=secret-key-staging:latest,OPENAI_API_KEY=openai-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,CLICKHOUSE_USER=clickhouse-user-staging:latest,CLICKHOUSE_DB=clickhouse-db-staging:latest,CLICKHOUSE_PASSWORD=clickhouse-password-staging:latest,REDIS_URL=redis-url-staging:latest,CLICKHOUSE_HOST=clickhouse-host-staging:latest,CLICKHOUSE_PORT=clickhouse-port-staging:latest,CLICKHOUSE_URL=clickhouse-url-staging:latest,REDIS_PASSWORD=redis-password-staging:latest,ANTHROPIC_API_KEY=anthropic-api-key-staging:latest"
             ])
         elif service.name == "auth":
             # Auth service needs database, JWT secrets, OAuth credentials from GSM only
+            # CRITICAL FIX: Use correct OAuth environment variable names expected by auth service
             cmd.extend([
                 "--add-cloudsql-instances", f"{self.project_id}:us-central1:staging-shared-postgres,{self.project_id}:us-central1:netra-postgres",
-                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,JWT_SECRET=jwt-secret-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest"
+                "--set-secrets", "POSTGRES_HOST=postgres-host-staging:latest,POSTGRES_PORT=postgres-port-staging:latest,POSTGRES_DB=postgres-db-staging:latest,POSTGRES_USER=postgres-user-staging:latest,POSTGRES_PASSWORD=postgres-password-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,JWT_SECRET=jwt-secret-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-client-secret-staging:latest,SERVICE_SECRET=service-secret-staging:latest,SERVICE_ID=service-id-staging:latest,OAUTH_HMAC_SECRET=oauth-hmac-secret-staging:latest,REDIS_URL=redis-url-staging:latest"
             ])
         
         try:
@@ -966,6 +974,57 @@ CMD ["npm", "start"]
                 print(f"  ⚠️ Could not delete {service.cloud_run_name}")
                 
         return True
+    
+    def _validate_oauth_configuration(self) -> bool:
+        """Validate OAuth configuration before deployment to prevent broken authentication."""
+        try:
+            from scripts.validate_oauth_deployment import OAuthDeploymentValidator
+            
+            # Determine environment for validation
+            if self.project_id == "netra-production":
+                environment = "production"
+            elif self.project_id == "netra-staging":
+                environment = "staging" 
+            else:
+                environment = "development"
+            
+            print(f"Validating OAuth configuration for {environment} environment...")
+            
+            # Run OAuth validation
+            validator = OAuthDeploymentValidator(environment)
+            success, report = validator.validate_all()
+            
+            # Print validation report
+            print("\n" + "="*60)
+            print("OAUTH VALIDATION REPORT")
+            print("="*60)
+            print(report)
+            print("="*60)
+            
+            if not success:
+                print("\n🚨🚨🚨 CRITICAL OAUTH VALIDATION FAILURE 🚨🚨🚨")
+                print("Deployment cannot proceed - OAuth authentication will be broken!")
+                print("Please fix OAuth configuration issues before deploying.")
+                return False
+            
+            print("\n✅ OAuth validation passed - deployment may proceed")
+            return True
+            
+        except ImportError as e:
+            print(f"⚠️  Could not import OAuth validator: {e}")
+            print("Proceeding with deployment (validation skipped)")
+            return True
+        except Exception as e:
+            print(f"🚨 OAuth validation error: {e}")
+            print("This may indicate a critical OAuth configuration problem.")
+            
+            # In staging/production, fail on validation errors
+            if self.project_id in ["netra-staging", "netra-production"]:
+                print("🚨 Failing deployment due to OAuth validation error in staging/production")
+                return False
+            else:
+                print("⚠️  Proceeding with deployment (development environment)")
+                return True
 
 
 def main():

@@ -11,6 +11,7 @@ import time
 from typing import Dict, List, Optional, Tuple
 
 from dev_launcher.container_discovery import ContainerDiscovery
+from dev_launcher.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +28,7 @@ class DockerServiceManager:
         self.container_configs = self._get_container_configs()
         self.running_containers: List[str] = []
         self.container_discovery = ContainerDiscovery()
+        self.env = get_env()
     
     def start_redis_container(self) -> Tuple[bool, str]:
         """
@@ -151,16 +153,20 @@ class DockerServiceManager:
             # Remove existing container if exists
             self._remove_container_if_exists(container_name)
             
+            # Get PostgreSQL password from environment
+            postgres_password = self.env.get("POSTGRES_PASSWORD", "DTprdt5KoQXlEG4Gh9lF")
+            postgres_db = self.env.get("POSTGRES_DB", "netra_dev")
+            postgres_user = self.env.get("POSTGRES_USER", "postgres")
+            
             # Start PostgreSQL container
             cmd = [
                 "docker", "run", "-d",
                 "--name", container_name,
                 "-p", "5433:5432",  # Use 5433 to match config
                 "--restart", "unless-stopped",
-                "-e", "POSTGRES_DB=netra_dev",
-                "-e", "POSTGRES_USER=postgres",
-                "-e", "POSTGRES_PASSWORD=",  # Empty password for dev
-                "-e", "POSTGRES_HOST_AUTH_METHOD=trust",
+                "-e", f"POSTGRES_DB={postgres_db}",
+                "-e", f"POSTGRES_USER={postgres_user}",
+                "-e", f"POSTGRES_PASSWORD={postgres_password}",
                 "-v", "netra_dev_postgres_data:/var/lib/postgresql/data",
                 "postgres:15-alpine"
             ]
