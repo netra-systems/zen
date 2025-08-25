@@ -66,6 +66,15 @@
             <critical-takeaway>Silent "staging mode" fallback hides critical database issues - prefer fail-fast behavior for database connectivity problems.</critical-takeaway>
             <critical-takeaway>Pre-deployment validation must include database existence and connectivity tests with actual environment credentials.</critical-takeaway>
         </category>
+        
+        <category name="AsyncPG URL Normalization [CRITICAL]" path="SPEC/learnings/asyncpg_url_normalization.xml" keywords="AsyncPG, PostgreSQL, URL, SQLAlchemy, Driver, Normalization, Connection">
+            <critical-takeaway>CRITICAL: asyncpg.connect() requires plain 'postgresql://' URLs - SQLAlchemy prefixes like 'postgresql+asyncpg://' cause "invalid DSN" errors.</critical-takeaway>
+            <critical-takeaway>ALWAYS use DatabaseURLBuilder.format_for_asyncpg_driver() before passing URLs to asyncpg.connect().</critical-takeaway>
+            <critical-takeaway>NEVER use inline string replacements for driver prefix normalization - use centralized methods.</critical-takeaway>
+            <critical-takeaway>Different PostgreSQL drivers have different URL requirements - asyncpg is strict, psycopg2 is flexible.</critical-takeaway>
+            <critical-takeaway>Test database connections with actual environment URLs including ports and special characters.</critical-takeaway>
+            <critical-takeaway>Dev launcher failures with "Database connection failed after 5 attempts" often indicate URL format issues.</critical-takeaway>
+        </category>
 
         <category name="API Versioning Anti-Pattern [RESOLVED]" path="SPEC/learnings/api_versioning_antipattern.xml" keywords="API, v1, versioning, URLs, paths, REST">
             <critical-takeaway>RESOLVED 2025-08-25: All v1 references have been removed from all services.</critical-takeaway>
@@ -401,6 +410,16 @@
 
         <category name="Startup" path="SPEC/learnings/startup.xml" keywords="Initialization, Boot, Config">
             <critical-takeaway>Startup errors often cascade - fix configuration first, then secrets, then connections.</critical-takeaway>
+            <critical-takeaway>Database initialization must happen ONCE - avoid duplicate calls to prevent infinite loops (database_initialization_duplication.xml).</critical-takeaway>
+        </category>
+        
+        <category name="Database Initialization Duplication" path="SPEC/learnings/database_initialization_duplication.xml" keywords="Database, Initialization, Duplication, Infinite Loop, Startup Manager, Connection Pool">
+            <critical-takeaway>CRITICAL: Database initialization must occur exactly ONCE during startup - duplicate calls cause infinite loops and connection pool exhaustion.</critical-takeaway>
+            <critical-takeaway>StartupManager._initialize_database() should only call setup_database_connections(), NOT both DatabaseInitializer.initialize_postgresql() AND setup_database_connections().</critical-takeaway>
+            <critical-takeaway>setup_database_connections() already handles all necessary initialization including initialize_postgres() and _ensure_database_tables_exist().</critical-takeaway>
+            <critical-takeaway>Follow SSOT principle: each initialization step should have ONE canonical implementation path.</critical-takeaway>
+            <critical-takeaway>Monitor connection pool metrics during startup to detect excessive connection attempts.</critical-takeaway>
+            <critical-takeaway>Add explicit tests for initialization call counts to prevent regression.</critical-takeaway>
         </category>
         
         <category name="No Silent Fallbacks" path="SPEC/learnings/no_silent_fallbacks.xml" keywords="Fallback, Default, Mock, Configuration, Database URL, Secrets, Loud Failure">
