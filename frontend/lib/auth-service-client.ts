@@ -61,29 +61,84 @@ export class AuthServiceClient {
       });
       
       if (!response.ok) {
+        // Check for OAuth configuration errors
+        let errorDetail: any;
+        try {
+          errorDetail = await response.json();
+        } catch {
+          errorDetail = { message: `HTTP ${response.status}: Failed to fetch auth configuration` };
+        }
+        
+        // CRITICAL: Log OAuth configuration failures loudly
+        if (errorDetail.error === 'AUTH_CONFIG_FAILURE' || errorDetail.error === 'OAUTH_CONFIGURATION_BROKEN') {
+          logger.error('🚨🚨🚨 CRITICAL OAUTH CONFIGURATION ERROR IN FRONTEND 🚨🚨🚨');
+          logger.error(`Environment: ${this.environment}`);
+          logger.error(`Auth service returned OAuth configuration error:`, errorDetail);
+          
+          // Throw specific error that can be caught by UI components
+          throw new Error(`OAUTH_CONFIG_ERROR: ${errorDetail.user_message || errorDetail.message}`);
+        }
+        
         // Don't throw immediately for 403 errors in staging - this is expected
         if (response.status === 403 && this.environment === 'staging') {
           logger.info('Auth service returned 403 - authentication required for staging');
         } else {
-          throw new Error(`HTTP ${response.status}: Failed to fetch auth configuration`);
+          throw new Error(errorDetail.message || `HTTP ${response.status}: Failed to fetch auth configuration`);
         }
       }
       
       const config = await response.json();
+      
+      // CRITICAL: Validate OAuth configuration received from auth service
+      if (!config.google_client_id && this.environment !== 'development') {
+        logger.error('🚨🚨🚨 CRITICAL: Auth service returned empty Google Client ID 🚨🚨🚨');
+        logger.error(`Environment: ${this.environment}`);
+        logger.error(`This will cause OAuth login to fail completely`);
+        
+        // Don't fail silently - throw an error
+        throw new Error('OAUTH_CONFIG_ERROR: Google Client ID is missing from auth service configuration');
+      }
+      
+      // Check for placeholder values
+      if (config.google_client_id && (config.google_client_id.startsWith('REPLACE_') || config.google_client_id.length < 50)) {
+        logger.error('🚨🚨🚨 CRITICAL: Auth service returned placeholder Google Client ID 🚨🚨🚨');
+        logger.error(`Environment: ${this.environment}`);
+        logger.error(`Client ID: ${config.google_client_id.substring(0, 20)}...`);
+        logger.error(`This will cause OAuth login to fail completely`);
+        
+        throw new Error('OAUTH_CONFIG_ERROR: Google Client ID appears to be a placeholder value');
+      }
+      
       logger.info('Auth configuration fetched successfully', { 
         oauth_enabled: config.oauth_enabled,
-        environment: this.environment 
+        environment: this.environment,
+        has_client_id: !!config.google_client_id
       });
       return config;
     } catch (error) {
+      // CRITICAL: Check if this is an OAuth configuration error
+      if (error instanceof Error && error.message.includes('OAUTH_CONFIG_ERROR')) {
+        logger.error('🚨🚨🚨 OAUTH CONFIGURATION ERROR - NOT FALLING BACK 🚨🚨🚨');
+        throw error; // Don't fall back for OAuth config errors, let the UI handle it
+      }
+      
       logger.warn('Auth service unavailable, using offline configuration:', error);
       
       // For staging/production, still try to provide a working config
       if (this.environment === 'staging' || this.environment === 'production') {
+        const fallbackClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+        
+        // CRITICAL: Warn about fallback configuration
+        if (!fallbackClientId) {
+          logger.error('🚨🚨🚨 CRITICAL: No fallback Google Client ID available 🚨🚨🚨');
+          logger.error(`Environment: ${this.environment}`);
+          logger.error(`Both auth service and NEXT_PUBLIC_GOOGLE_CLIENT_ID are unavailable`);
+        }
+        
         return {
           development_mode: false,
-          google_client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-          oauth_enabled: true,
+          google_client_id: fallbackClientId,
+          oauth_enabled: !!fallbackClientId,
           offline_mode: false
         };
       }

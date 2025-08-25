@@ -115,6 +115,86 @@ async def lifespan(app: FastAPI):
     # @marked: Port must be read from environment for container deployment
     logger.info(f"Port: {get_env().get('PORT', '8080')}")
     
+    # CRITICAL OAUTH VALIDATION - FAIL FAST IF OAUTH IS BROKEN
+    env = AuthConfig.get_environment()
+    if env in ["staging", "production"]:
+        logger.info("🔐 VALIDATING CRITICAL OAUTH CONFIGURATION...")
+        oauth_validation_errors = []
+        
+        # Check Google Client ID
+        google_client_id = AuthConfig.get_google_client_id()
+        if not google_client_id:
+            oauth_validation_errors.append("GOOGLE_CLIENT_ID is not configured")
+            logger.error("❌ CRITICAL: GOOGLE_CLIENT_ID is missing!")
+        elif google_client_id.startswith("REPLACE_") or len(google_client_id) < 50:
+            oauth_validation_errors.append(f"GOOGLE_CLIENT_ID appears invalid: {google_client_id[:20]}...")
+            logger.error(f"❌ CRITICAL: GOOGLE_CLIENT_ID looks like a placeholder: {google_client_id[:20]}...")
+        else:
+            logger.info(f"✅ GOOGLE_CLIENT_ID configured: {google_client_id[:20]}...")
+        
+        # Check Google Client Secret
+        google_client_secret = AuthConfig.get_google_client_secret()
+        if not google_client_secret:
+            oauth_validation_errors.append("GOOGLE_CLIENT_SECRET is not configured")
+            logger.error("❌ CRITICAL: GOOGLE_CLIENT_SECRET is missing!")
+        elif google_client_secret.startswith("REPLACE_") or len(google_client_secret) < 20:
+            oauth_validation_errors.append(f"GOOGLE_CLIENT_SECRET appears invalid")
+            logger.error(f"❌ CRITICAL: GOOGLE_CLIENT_SECRET looks like a placeholder")
+        else:
+            logger.info("✅ GOOGLE_CLIENT_SECRET configured")
+        
+        # Check environment variables that were actually loaded
+        env_manager = get_env()
+        checked_env_vars = {
+            "GOOGLE_CLIENT_ID": env_manager.get("GOOGLE_CLIENT_ID"),
+            "GOOGLE_CLIENT_SECRET": env_manager.get("GOOGLE_CLIENT_SECRET"),
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": env_manager.get("GOOGLE_OAUTH_CLIENT_ID_STAGING"),
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": env_manager.get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING"),
+            "ENVIRONMENT": env_manager.get("ENVIRONMENT")
+        }
+        
+        logger.info("🔍 OAuth Environment Variables Status:")
+        for var_name, var_value in checked_env_vars.items():
+            if var_value:
+                if "SECRET" in var_name:
+                    logger.info(f"  {var_name}: [CONFIGURED - {len(var_value)} chars]")
+                else:
+                    logger.info(f"  {var_name}: {var_value[:50]}{'...' if len(var_value) > 50 else ''}")
+            else:
+                logger.warning(f"  {var_name}: [NOT SET]")
+        
+        # FAIL FAST if OAuth is broken in staging/production
+        if oauth_validation_errors:
+            error_message = f"""
+🚨🚨🚨 CRITICAL OAUTH CONFIGURATION FAILURE 🚨🚨🚨
+
+Environment: {env}
+Auth Service CANNOT START due to missing/invalid OAuth configuration!
+
+Errors found:
+{chr(10).join(f"  - {error}" for error in oauth_validation_errors)}
+
+Environment variables checked:
+{chr(10).join(f"  - {var}: {'SET' if val else 'MISSING'}" for var, val in checked_env_vars.items())}
+
+This is a FATAL ERROR in {env} environment. 
+OAuth functionality will be completely broken without proper configuration.
+
+Required actions:
+1. Set proper GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Google Secret Manager
+2. Ensure Cloud Run deployment has access to the secrets
+3. Verify OAuth credentials are valid in Google Cloud Console
+
+Auth Service startup ABORTED.
+🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+"""
+            logger.error(error_message)
+            raise RuntimeError(f"OAuth configuration validation failed in {env}: {', '.join(oauth_validation_errors)}")
+        
+        logger.info("✅ OAuth configuration validation PASSED")
+    else:
+        logger.info(f"Skipping OAuth validation in {env} environment")
+    
     # Log Redis configuration status
     from auth_service.auth_core.routes.auth_routes import auth_service
     redis_enabled = auth_service.session_manager.redis_enabled

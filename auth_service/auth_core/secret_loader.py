@@ -191,24 +191,35 @@ class AuthSecretLoader:
         postgres_password = env_manager.get("POSTGRES_PASSWORD")
         
         if postgres_host and postgres_user and postgres_db:
-            # Construct URL from individual variables
-            port_part = f":{postgres_port}" if postgres_port else ":5432"
-            pass_part = f":{postgres_password}" if postgres_password else ""
+            # Use DatabaseURLBuilder for proper URL construction
+            from shared.database_url_builder import DatabaseURLBuilder
             
-            # Check for Cloud SQL Unix socket (staging/production)
-            if "/cloudsql/" in postgres_host:
-                # Unix socket format for Cloud SQL
-                database_url = f"postgresql+asyncpg://{postgres_user}{pass_part}@/{postgres_db}?host={postgres_host}"
+            # Create env vars dict for builder
+            env_vars = env_manager.get_all().copy()
+            env_vars['POSTGRES_HOST'] = postgres_host
+            env_vars['POSTGRES_PORT'] = postgres_port or '5432'
+            env_vars['POSTGRES_DB'] = postgres_db
+            env_vars['POSTGRES_USER'] = postgres_user
+            if postgres_password:
+                env_vars['POSTGRES_PASSWORD'] = postgres_password
+            env_vars['ENVIRONMENT'] = env
+            
+            # Use builder to construct proper URL
+            builder = DatabaseURLBuilder(env_vars)
+            
+            # Check for Cloud SQL
+            if builder.cloud_sql.is_cloud_sql:
+                database_url = builder.cloud_sql.async_url
             else:
-                # Standard TCP connection
-                database_url = f"postgresql+asyncpg://{postgres_user}{pass_part}@{postgres_host}{port_part}/{postgres_db}"
-                
-                # Add SSL mode for staging/production
+                # Use TCP with SSL for staging/production
                 if env in ["staging", "production"]:
-                    database_url += "?sslmode=require" if "?" not in database_url else "&sslmode=require"
+                    database_url = builder.tcp.async_url_with_ssl
+                else:
+                    database_url = builder.tcp.async_url
             
-            logger.info(f"Constructed database URL from individual PostgreSQL variables")
-            return database_url
+            if database_url:
+                logger.info(f"Constructed database URL from individual PostgreSQL variables using DatabaseURLBuilder")
+                return database_url
         
         # Try to load from Secret Manager in staging/production (legacy support)
         if env in ["staging", "production"]:

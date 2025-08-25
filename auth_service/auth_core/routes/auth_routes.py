@@ -79,6 +79,36 @@ async def get_auth_config(request: Request):
         env = _detect_environment()
         dev_mode = env == "development"
         
+        # CRITICAL: Validate OAuth configuration for frontend
+        google_client_id = AuthConfig.get_google_client_id()
+        google_client_secret = AuthConfig.get_google_client_secret()
+        
+        # LOUD warning for missing OAuth configuration
+        oauth_warnings = []
+        if not google_client_id:
+            oauth_warnings.append("GOOGLE_CLIENT_ID is not configured")
+        elif google_client_id.startswith("REPLACE_") or len(google_client_id) < 50:
+            oauth_warnings.append(f"GOOGLE_CLIENT_ID appears to be a placeholder")
+            
+        if not google_client_secret:
+            oauth_warnings.append("GOOGLE_CLIENT_SECRET is not configured")
+        elif google_client_secret.startswith("REPLACE_") or len(google_client_secret) < 20:
+            oauth_warnings.append("GOOGLE_CLIENT_SECRET appears to be a placeholder")
+        
+        if oauth_warnings and env in ["staging", "production"]:
+            logger.error(f"""
+🚨🚨🚨 CRITICAL OAUTH CONFIGURATION WARNING 🚨🚨🚨
+Environment: {env}
+Frontend OAuth configuration may be broken!
+
+Warnings:
+{chr(10).join(f"  - {warning}" for warning in oauth_warnings)}
+
+This will cause frontend authentication to show errors.
+Users will see 'OAuth Configuration Broken' in the UI.
+🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+""")
+        
         # Build endpoints
         endpoints = AuthEndpoints(
             login=f"{auth_url}/auth/login",
@@ -94,7 +124,7 @@ async def get_auth_config(request: Request):
         
         # Build response
         return AuthConfigResponse(
-            google_client_id=AuthConfig.get_google_client_id(),
+            google_client_id=google_client_id,
             endpoints=endpoints,
             development_mode=dev_mode,
             authorized_javascript_origins=[frontend_url],
@@ -105,7 +135,29 @@ async def get_auth_config(request: Request):
         )
     except Exception as e:
         logger.error(f"Auth config endpoint failed: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve auth configuration: {str(e)}")
+        
+        # CRITICAL: Return detailed error information for debugging
+        env = _detect_environment()
+        if env in ["staging", "production"]:
+            logger.error(f"""
+🚨🚨🚨 CRITICAL AUTH CONFIG ERROR 🚨🚨🚨
+Environment: {env}
+Auth config endpoint completely failed!
+
+This will cause complete authentication breakdown.
+Frontend will not be able to configure OAuth.
+🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+""")
+        
+        raise HTTPException(
+            status_code=500, 
+            detail={
+                "error": "AUTH_CONFIG_FAILURE",
+                "message": f"Failed to retrieve auth configuration: {str(e)}",
+                "environment": env,
+                "user_message": "Authentication configuration is unavailable - Please contact system administrator"
+            }
+        )
 
 @router.get("/login")
 async def initiate_oauth_login(
@@ -116,11 +168,61 @@ async def initiate_oauth_login(
     """Initiate OAuth login flow with proper CSRF protection"""
     from fastapi.responses import RedirectResponse
     try:
-        # Get OAuth configuration
+        # CRITICAL OAuth Configuration Validation
         google_client_id = AuthConfig.get_google_client_id()
+        google_client_secret = AuthConfig.get_google_client_secret()
+        env = AuthConfig.get_environment()
+        
+        # LOUD error reporting for missing OAuth configuration
+        oauth_errors = []
         if not google_client_id:
-            logger.error("OAuth not configured - GOOGLE_CLIENT_ID is not set")
-            raise HTTPException(status_code=500, detail="OAuth not configured")
+            oauth_errors.append("GOOGLE_CLIENT_ID is not configured")
+        elif google_client_id.startswith("REPLACE_") or len(google_client_id) < 50:
+            oauth_errors.append(f"GOOGLE_CLIENT_ID appears to be a placeholder: {google_client_id[:20]}...")
+            
+        if not google_client_secret:
+            oauth_errors.append("GOOGLE_CLIENT_SECRET is not configured")
+        elif google_client_secret.startswith("REPLACE_") or len(google_client_secret) < 20:
+            oauth_errors.append("GOOGLE_CLIENT_SECRET appears to be a placeholder")
+        
+        if oauth_errors:
+            error_details = {
+                "environment": env,
+                "errors": oauth_errors,
+                "checked_vars": {
+                    "GOOGLE_CLIENT_ID": "SET" if google_client_id else "MISSING",
+                    "GOOGLE_CLIENT_SECRET": "SET" if google_client_secret else "MISSING",
+                    "GOOGLE_OAUTH_CLIENT_ID_STAGING": "SET" if get_env().get("GOOGLE_OAUTH_CLIENT_ID_STAGING") else "MISSING",
+                    "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "SET" if get_env().get("GOOGLE_OAUTH_CLIENT_SECRET_STAGING") else "MISSING"
+                }
+            }
+            
+            logger.error(f"""
+🚨🚨🚨 CRITICAL OAUTH CONFIGURATION ERROR 🚨🚨🚨
+Environment: {env}
+OAuth login CANNOT proceed due to configuration errors!
+
+Errors:
+{chr(10).join(f"  - {error}" for error in oauth_errors)}
+
+Environment Variables Status:
+{chr(10).join(f"  - {var}: {status}" for var, status in error_details["checked_vars"].items())}
+
+This will cause authentication to FAIL completely.
+Users will see 'OAuth Configuration Broken' errors.
+🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+""")
+            
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": "OAUTH_CONFIGURATION_BROKEN", 
+                    "message": "OAuth configuration is missing or invalid. Authentication cannot proceed.",
+                    "environment": env,
+                    "errors": oauth_errors,
+                    "user_message": "OAuth Configuration Error - Please contact system administrator"
+                }
+            )
         
         # Generate secure state parameter
         state = oauth_security.generate_state_parameter()
