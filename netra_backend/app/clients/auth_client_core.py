@@ -18,6 +18,7 @@ from netra_backend.app.clients.auth_client_config import (
     OAuthConfig,
     OAuthConfigGenerator,
 )
+from netra_backend.app.core.environment_constants import get_current_environment, Environment
 from netra_backend.app.core.tracing import TracingManager
 from enum import Enum
 
@@ -74,7 +75,7 @@ class AuthServiceClient:
         """Check if auth service is enabled."""
         if not self.settings.enabled:
             logger.error("Auth service is required for token validation")
-            return {"valid": False}
+            return {"valid": False, "error": "auth_service_disabled"}
         return None
     
     async def _try_cached_token(self, token: str) -> Optional[Dict]:
@@ -102,9 +103,24 @@ class AuthServiceClient:
         return result
     
     async def _handle_validation_error(self, token: str, error: Exception) -> Optional[Dict]:
-        """Handle validation error and fallback."""
+        """Handle validation error with detailed error information."""
         logger.error(f"Token validation failed: {error}")
-        return await self._local_validate(token)
+        
+        # Provide specific error information for debugging
+        error_type = type(error).__name__
+        error_msg = str(error)
+        
+        # Check if this is a connection/service error
+        if any(conn_err in error_msg.lower() for conn_err in ['connection', 'timeout', 'network', 'unreachable']):
+            return {"valid": False, "error": "auth_service_unreachable", "details": error_msg}
+        
+        # For other errors, try local fallback
+        fallback_result = await self._local_validate(token)
+        if fallback_result and not fallback_result.get("valid", False):
+            fallback_result["error"] = f"validation_failed_{error_type.lower()}"
+            fallback_result["details"] = error_msg
+        
+        return fallback_result
     
     async def _try_validation_steps(self, token: str) -> Optional[Dict]:
         """Try validation with cache and circuit breaker."""
@@ -402,8 +418,12 @@ class AuthServiceClient:
     
     async def _local_validate(self, token: str) -> Optional[Dict]:
         """NO LOCAL VALIDATION - Auth service required."""
-        logger.error("Auth service is required for token validation")
-        return {"valid": False}
+        logger.error("Auth service is required for token validation - no local fallback available")
+        return {
+            "valid": False, 
+            "error": "auth_service_required",
+            "details": "Local token validation not supported - auth service required"
+        }
     
     async def close(self):
         """Close HTTP client."""
@@ -412,7 +432,13 @@ class AuthServiceClient:
     
     def detect_environment(self):
         """Detect current environment from environment variables."""
-        return self.environment_detector.detect_environment()
+        env_str = get_current_environment()
+        # Convert string to Environment enum for backward compatibility
+        for env in Environment:
+            if env.value == env_str:
+                return env
+        # Default to development if unknown
+        return Environment.DEVELOPMENT
     
     def get_oauth_config(self) -> OAuthConfig:
         """Get OAuth configuration for current environment."""

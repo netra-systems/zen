@@ -28,7 +28,7 @@ class ServicePriority(Enum):
 
 
 def _get_service_priority_for_environment(service: str) -> ServicePriority:
-    """Get service priority based on environment."""
+    """Get service priority based on environment and optional service flags."""
     config = unified_config_manager.get_config()
     env = config.environment.lower()
     
@@ -42,14 +42,29 @@ def _get_service_priority_for_environment(service: str) -> ServicePriority:
     if service in base_priorities:
         return base_priorities[service]
     
-    # Environment-specific priorities
-    if env in ['staging', 'production']:
-        # In staging/production, external services are critical
-        staging_priorities = {
+    # Check for staging infrastructure flags (pragmatic degradation)
+    if env == 'staging':
+        # Apply pragmatic infrastructure flags for staging
+        if service == "redis" and getattr(config, 'redis_optional_in_staging', False):
+            logger.info("Redis is optional in staging - degraded operation allowed")
+            return ServicePriority.OPTIONAL
+        elif service == "clickhouse" and getattr(config, 'clickhouse_optional_in_staging', False):
+            logger.info("ClickHouse is optional in staging - degraded operation allowed")
+            return ServicePriority.OPTIONAL
+        else:
+            # Default staging priorities (strict by default)
+            staging_priorities = {
+                "redis": ServicePriority.CRITICAL,
+                "clickhouse": ServicePriority.CRITICAL,
+            }
+            return staging_priorities.get(service, ServicePriority.IMPORTANT)
+    elif env == 'production':
+        # In production, external services are always critical
+        production_priorities = {
             "redis": ServicePriority.CRITICAL,
             "clickhouse": ServicePriority.CRITICAL,
         }
-        return staging_priorities.get(service, ServicePriority.IMPORTANT)
+        return production_priorities.get(service, ServicePriority.IMPORTANT)
     else:
         # In development, external services are optional
         dev_priorities = {
@@ -123,6 +138,13 @@ async def _execute_postgres_query() -> None:
 async def check_clickhouse_health() -> HealthCheckResult:
     """Check ClickHouse database connectivity and health."""
     start_time = time.time()
+    
+    # Check if ClickHouse should be skipped entirely
+    config = unified_config_manager.get_config()
+    if getattr(config, 'skip_clickhouse_init', False):
+        logger.info("ClickHouse health check skipped - skip_clickhouse_init=True")
+        return _create_disabled_result("clickhouse", "ClickHouse disabled by configuration")
+    
     try:
         return await _process_clickhouse_health_check(start_time)
     except Exception as e:
@@ -161,6 +183,13 @@ def _handle_clickhouse_error(error: Exception, response_time: float) -> HealthCh
 async def check_redis_health() -> HealthCheckResult:
     """Check Redis connectivity and health with graceful degradation."""
     start_time = time.time()
+    
+    # Check if Redis should be skipped entirely
+    config = unified_config_manager.get_config()
+    if getattr(config, 'skip_redis_init', False):
+        logger.info("Redis health check skipped - skip_redis_init=True")
+        return _create_disabled_result("redis", "Redis disabled by configuration")
+    
     try:
         await _execute_redis_ping()
         response_time = (time.time() - start_time) * 1000
@@ -340,7 +369,8 @@ def _create_disabled_result(component: str, reason: str) -> HealthCheckResult:
         response_time_ms=0.0,
         status="healthy",
         response_time=0.0,
-        details=details
+        details=details,
+        metadata={"status": "disabled", "reason": reason}  # Include status in metadata for tests
     )
 
 def _build_disabled_details(component: str, reason: str) -> Dict[str, Any]:
@@ -362,7 +392,7 @@ def _handle_service_failure(component: str, error: str, response_time: float = 0
     - Important services: Return degraded (reduced functionality)
     - Optional services: Return healthy with warning (system continues)
     """
-    priority = SERVICE_PRIORITIES.get(component, ServicePriority.IMPORTANT)
+    priority = _get_service_priority_for_environment(component)
     
     if priority == ServicePriority.CRITICAL:
         return _create_failed_result(component, error, response_time)
@@ -659,7 +689,7 @@ def _get_services_by_priority(results: Dict[str, HealthCheckResult], priority: S
     """Get services filtered by priority level."""
     return {
         name: result for name, result in results.items()
-        if SERVICE_PRIORITIES.get(name, ServicePriority.IMPORTANT) == priority
+        if _get_service_priority_for_environment(name) == priority
     }
 
 
@@ -706,7 +736,7 @@ def _calculate_weighted_health_score(results: Dict[str, HealthCheckResult]) -> f
     weighted_score = 0.0
     
     for name, result in results.items():
-        priority = SERVICE_PRIORITIES.get(name, ServicePriority.IMPORTANT)
+        priority = _get_service_priority_for_environment(name)
         weight = _get_priority_weight(priority)
         service_score = _get_service_health_score(result)
         

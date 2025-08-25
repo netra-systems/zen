@@ -279,6 +279,7 @@ class UnifiedCircuitBreaker:
             self._update_success_metrics(response_time)
             self._track_response_time(response_time)
             self._add_sliding_window_entry(True, response_time)
+            self._adapt_threshold_if_enabled()
             await self._handle_success_state_transitions()
             
     def _update_success_metrics(self, response_time: float) -> None:
@@ -613,6 +614,10 @@ class UnifiedCircuitBreaker:
             return self._is_recovery_timeout_elapsed()
         else:  # HALF_OPEN
             return self._half_open_calls < self.config.half_open_max_calls
+            
+    async def can_execute_async(self) -> bool:
+        """Asynchronous execution check for reliability manager compatibility."""
+        return await self._can_execute()
             
     @property
     def is_open(self) -> bool:

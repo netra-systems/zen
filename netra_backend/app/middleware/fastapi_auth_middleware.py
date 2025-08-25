@@ -57,7 +57,7 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
         
         # Get configuration
         settings = get_settings()
-        self.jwt_secret = jwt_secret or settings.jwt_secret_key
+        self.jwt_secret = self._get_jwt_secret_with_validation(jwt_secret, settings)
         self.jwt_algorithm = jwt_algorithm
         
         # Default excluded paths for health checks and metrics
@@ -132,9 +132,12 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
             )
         except Exception as e:
             logger.error(f"Unexpected auth error for {request.url.path}: {str(e)}")
+            # Always return 401 for authentication failures, never 500
+            # This prevents leaking internal errors and ensures proper HTTP semantics
             raise HTTPException(
-                status_code=500,
-                detail={"error": "auth_system_error", "message": "Authentication system error"}
+                status_code=401,
+                detail={"error": "authentication_failed", "message": "Authentication failed"},
+                headers={"WWW-Authenticate": "Bearer"}
             )
     
     def _is_excluded_path(self, path: str) -> bool:
@@ -235,3 +238,41 @@ class FastAPIAuthMiddleware(BaseHTTPMiddleware):
             return True
         
         return all(perm in user_permissions for perm in required_permissions)
+    
+    def _get_jwt_secret_with_validation(self, jwt_secret: Optional[str], settings) -> str:
+        """Get JWT secret with proper validation and trimming.
+        
+        Args:
+            jwt_secret: Explicit JWT secret passed to middleware
+            settings: Application settings
+            
+        Returns:
+            Clean, validated JWT secret
+            
+        Raises:
+            ValueError: If JWT secret is invalid or missing
+        """
+        # Priority: explicit parameter > settings > error
+        secret = jwt_secret or getattr(settings, 'jwt_secret_key', None)
+        
+        if not secret:
+            raise ValueError(
+                "JWT secret not configured. Set JWT_SECRET_KEY environment variable "
+                "or pass jwt_secret parameter to middleware."
+            )
+        
+        # CRITICAL: Trim whitespace from secrets (common staging issue)
+        secret = secret.strip()
+        
+        if not secret:
+            raise ValueError("JWT secret cannot be empty after trimming whitespace")
+        
+        # Validate minimum length for security
+        if len(secret) < 32:
+            raise ValueError(
+                f"JWT secret must be at least 32 characters for security, "
+                f"got {len(secret)} characters"
+            )
+        
+        logger.info(f"JWT secret configured: {len(secret)} characters")
+        return secret

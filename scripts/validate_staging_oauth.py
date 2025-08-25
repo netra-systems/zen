@@ -159,6 +159,9 @@ class OAuthStagingValidator:
             except subprocess.CalledProcessError:
                 self.log_issue(f"Secret not found or inaccessible: {secret_name}")
                 all_exist = False
+            except FileNotFoundError:
+                self.log_issue("gcloud command not found. Install Google Cloud CLI to validate GCP secrets.")
+                return False
                 
         return all_exist
         
@@ -244,8 +247,13 @@ class OAuthStagingValidator:
         print("3. Ensure all redirect URIs above are added")
         print("4. Save the changes")
         
-        confirmed = input("\nHave you added all redirect URIs? (y/n): ").strip().lower()
-        return confirmed == 'y'
+        try:
+            confirmed = input("\nHave you added all redirect URIs? (y/n): ").strip().lower()
+            return confirmed == 'y'
+        except (EOFError, KeyboardInterrupt):
+            # When running non-interactively, assume this is a validation check
+            print("(Running non-interactively - assuming manual validation is needed)")
+            return False
         
     async def test_oauth_flow(self) -> bool:
         """Test the OAuth flow with actual credentials."""

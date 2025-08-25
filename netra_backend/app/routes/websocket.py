@@ -476,6 +476,19 @@ async def websocket_health_check():
     return response
 
 
+@router.websocket("/websocket")
+async def websocket_legacy_endpoint(websocket: WebSocket):
+    """
+    Legacy WebSocket endpoint for backward compatibility.
+    
+    This endpoint mirrors the main /ws endpoint functionality but provides
+    backward compatibility for existing tests and clients using /websocket.
+    
+    Redirects to the main websocket_endpoint implementation.
+    """
+    return await websocket_endpoint(websocket)
+
+
 @router.websocket("/ws/test")
 async def websocket_test_endpoint(websocket: WebSocket):
     """

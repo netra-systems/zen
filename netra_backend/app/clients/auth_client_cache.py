@@ -135,7 +135,9 @@ class AuthServiceSettings:
         
         self.cache_ttl = int(config.auth_cache_ttl_seconds)  # 5 min
         self.service_id = config.service_id
-        self.service_secret = config.service_secret
+        
+        # CRITICAL: Trim whitespace from service secret (common deployment issue)
+        self.service_secret = config.service_secret.strip() if config.service_secret else None
     
     def is_service_secret_configured(self) -> bool:
         """Check if service secret is configured."""
@@ -143,4 +145,6 @@ class AuthServiceSettings:
     
     def get_service_credentials(self) -> tuple[str, str]:
         """Get service ID and secret."""
-        return self.service_id, self.service_secret
+        # Ensure service secret is cleaned
+        service_secret = self.service_secret.strip() if self.service_secret else None
+        return self.service_id, service_secret

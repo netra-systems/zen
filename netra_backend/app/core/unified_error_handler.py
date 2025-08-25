@@ -26,6 +26,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from uuid import uuid4
 
 from fastapi import HTTPException, Request
+from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from starlette.status import (
@@ -576,8 +577,8 @@ class APIErrorHandler:
         exc: Exception,
         request: Optional[Request] = None,
         trace_id: Optional[str] = None
-    ) -> ErrorResponse:
-        """Handle API exception and return error response."""
+    ) -> JSONResponse:
+        """Handle API exception and return JSONResponse."""
         context = ErrorContext(
             trace_id=trace_id or str(uuid4()),
             operation="api_request",
@@ -586,7 +587,15 @@ class APIErrorHandler:
         )
         
         result = await self._handler.handle_error(exc, context)
-        return result if isinstance(result, ErrorResponse) else result
+        if isinstance(result, ErrorResponse):
+            # Convert ErrorResponse to JSONResponse with proper HTTP status code
+            status_code = self._handler.get_http_status_code(result.error_code)
+            return JSONResponse(
+                status_code=status_code,
+                content=result.model_dump(),
+                headers={"Content-Type": "application/json"}
+            )
+        return result
     
     def _extract_request_id(self, request: Optional[Request]) -> Optional[str]:
         """Extract request ID from request if available."""
@@ -779,7 +788,7 @@ def handle_exception(
     exc: Exception,
     request: Optional[Request] = None,
     trace_id: Optional[str] = None
-) -> ErrorResponse:
+) -> JSONResponse:
     """Synchronous convenience function for API exception handling."""
     import asyncio
     return asyncio.run(api_error_handler.handle_exception(exc, request, trace_id))
@@ -796,29 +805,134 @@ def get_error_statistics() -> Dict[str, Any]:
 
 
 # =============================================================================
+# DECORATOR FOR AGENT ERROR HANDLING
+# =============================================================================
+
+def handle_agent_error(
+    agent_name: str, 
+    operation_name: str, 
+    max_retries: int = 3,
+    retry_delay: float = 1.0,
+    error_handler: Optional['AgentErrorHandler'] = None
+):
+    """
+    Decorator for automatic agent error handling and recovery.
+    
+    Args:
+        agent_name: Name of the agent for context
+        operation_name: Name of the operation for context
+        max_retries: Maximum number of retry attempts
+        retry_delay: Base delay between retries (with exponential backoff)
+        error_handler: Custom error handler instance (defaults to global)
+    
+    Usage:
+        @handle_agent_error(agent_name="DataAgent", operation_name="process_data")
+        async def process_data():
+            # Function that might fail
+            pass
+    """
+    import functools
+    import inspect
+    
+    def decorator(func: Callable) -> Callable:
+        handler = error_handler or agent_error_handler
+        
+        if inspect.iscoroutinefunction(func):
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                context = ErrorContext(
+                    trace_id=str(uuid4()),
+                    operation=operation_name,
+                    agent_name=agent_name,
+                    operation_name=operation_name,
+                    timestamp=datetime.now(timezone.utc)
+                )
+                
+                for attempt in range(max_retries + 1):
+                    try:
+                        context.retry_count = attempt
+                        return await func(*args, **kwargs)
+                    except Exception as e:
+                        # Store error in handler
+                        if isinstance(e, AgentError):
+                            if not e.context:
+                                e.context = context
+                            handler._store_error(e)
+                        else:
+                            agent_error = handler._convert_to_agent_error(e, context)
+                            handler._store_error(agent_error)
+                        
+                        # Check if should retry
+                        if attempt < max_retries and handler._handler._is_recoverable_error(e):
+                            delay = retry_delay * (2 ** attempt)  # Exponential backoff
+                            await asyncio.sleep(delay)
+                            continue
+                        else:
+                            # Re-raise the original exception after max retries or non-recoverable
+                            raise e
+            
+            return async_wrapper
+        else:
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                context = ErrorContext(
+                    trace_id=str(uuid4()),
+                    operation=operation_name,
+                    agent_name=agent_name,
+                    operation_name=operation_name,
+                    timestamp=datetime.now(timezone.utc)
+                )
+                
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    # Store error in handler
+                    if isinstance(e, AgentError):
+                        if not e.context:
+                            e.context = context
+                        handler._store_error(e)
+                    else:
+                        agent_error = handler._convert_to_agent_error(e, context)
+                        handler._store_error(agent_error)
+                    
+                    # For sync functions, don't retry, just store and re-raise
+                    raise e
+            
+            return sync_wrapper
+    
+    return decorator
+
+
+# Backward compatibility alias - factory function to create AgentErrorHandler
+def ErrorHandler():
+    """Factory function to create AgentErrorHandler with default unified handler."""
+    return AgentErrorHandler(_unified_error_handler)
+
+
+# =============================================================================
 # FASTAPI EXCEPTION HANDLERS
 # =============================================================================
 
-async def unified_exception_handler(request: Request, exc: Exception) -> ErrorResponse:
+async def unified_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Unified exception handler for FastAPI."""
     return await api_error_handler.handle_exception(exc, request)
 
 
-async def validation_exception_handler(request: Request, exc: ValidationError) -> ErrorResponse:
+async def validation_exception_handler(request: Request, exc: ValidationError) -> JSONResponse:
     """Validation exception handler for FastAPI."""
     return await api_error_handler.handle_exception(exc, request)
 
 
-async def http_exception_handler(request: Request, exc: HTTPException) -> ErrorResponse:
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """HTTP exception handler for FastAPI."""
     return await api_error_handler.handle_exception(exc, request)
 
 
-async def netra_exception_handler(request: Request, exc: NetraException) -> ErrorResponse:
+async def netra_exception_handler(request: Request, exc: NetraException) -> JSONResponse:
     """Netra exception handler for FastAPI."""
     return await api_error_handler.handle_exception(exc, request)
 
 
-async def general_exception_handler(request: Request, exc: Exception) -> ErrorResponse:
+async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """General exception handler for FastAPI."""
     return await api_error_handler.handle_exception(exc, request)

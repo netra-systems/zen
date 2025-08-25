@@ -351,6 +351,12 @@ class AppConfig(BaseModel):
     skip_migrations: str = Field(default="false", description="Skip migrations flag")
     disable_startup_checks: str = Field(default="false", description="Disable startup checks flag")
     
+    # Service availability flags for staging infrastructure (pragmatic degradation)
+    redis_optional_in_staging: bool = Field(default=False, description="Allow staging to run without Redis (graceful degradation)")
+    clickhouse_optional_in_staging: bool = Field(default=False, description="Allow staging to run without ClickHouse (graceful degradation)")
+    skip_redis_init: bool = Field(default=False, description="Skip Redis initialization for optional operation")
+    skip_clickhouse_init: bool = Field(default=False, description="Skip ClickHouse initialization for optional operation")
+    
     # Robust startup configuration
     use_robust_startup: str = Field(default="true", description="Use robust startup manager with dependency resolution")
     graceful_startup_mode: str = Field(default="true", description="Allow graceful degradation during startup")
@@ -393,6 +399,13 @@ class AppConfig(BaseModel):
         if v is None or v == "":
             # JWT secret key is optional in some contexts, but warn if missing
             return v
+        
+        # CRITICAL: Clean whitespace from secrets (common staging deployment issue)
+        v = v.strip() if v else v
+        
+        if not v:
+            # After trimming, if empty, return None
+            return None
         
         # Validate minimum length for security
         if len(v) < 32:
@@ -576,6 +589,12 @@ class StagingConfig(AppConfig):
     debug: bool = False
     log_level: str = "INFO"
     # Staging uses production-like settings but with relaxed validation
+    
+    # Pragmatic infrastructure flags for staging (allows graceful degradation)
+    redis_optional_in_staging: bool = True  # Allow staging to run without Redis
+    clickhouse_optional_in_staging: bool = True  # Allow staging to run without ClickHouse
+    skip_redis_init: bool = False  # Still try to initialize Redis but don't fail
+    skip_clickhouse_init: bool = False  # Still try to initialize ClickHouse but don't fail
     
     def __init__(self, **data):
         """Initialize staging config with environment variables.

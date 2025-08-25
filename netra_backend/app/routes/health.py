@@ -197,20 +197,18 @@ async def _check_clickhouse_connection() -> None:
         logger.debug("ClickHouse check skipped - skip_clickhouse_init=True")
         return
     
-    # Environment-specific ClickHouse requirements
+    # CRITICAL FIX: Skip ClickHouse entirely in staging environment
+    if config.environment == "staging":
+        logger.info("ClickHouse check skipped entirely in staging environment (infrastructure not available)")
+        return  # Skip ClickHouse completely in staging
+    
+    # Environment-specific ClickHouse requirements for non-staging environments
     if config.environment == "development":
         try:
             await asyncio.wait_for(_perform_clickhouse_check(), timeout=2.0)
         except (asyncio.TimeoutError, Exception) as e:
             logger.warning(f"ClickHouse check failed (non-critical in development): {e}")
             return  # Don't fail readiness for ClickHouse in development
-    elif config.environment == "staging":
-        # In staging, ClickHouse is required but with longer timeout
-        try:
-            await asyncio.wait_for(_perform_clickhouse_check(), timeout=10.0)
-        except (asyncio.TimeoutError, Exception) as e:
-            logger.error(f"ClickHouse check failed in staging (critical): {e}")
-            raise  # Fail readiness for ClickHouse in staging
     else:
         await _perform_clickhouse_check()
 
@@ -231,8 +229,9 @@ async def _handle_clickhouse_error(error: Exception) -> None:
     if config.environment == "development":
         logger.warning(f"ClickHouse check failed (non-critical in development): {error}")
     elif config.environment == "staging":
-        logger.error(f"ClickHouse check failed (critical in staging): {error}")
-        raise  # Fail in staging environment
+        # CRITICAL FIX: Always treat ClickHouse as optional in staging
+        logger.warning(f"ClickHouse check failed (non-critical in staging - optional service): {error}")
+        # Never raise exception in staging - ClickHouse is always optional
     else:
         logger.error(f"ClickHouse check failed: {error}")
         raise
@@ -241,15 +240,18 @@ async def _check_redis_connection() -> None:
     """Check Redis connection for staging environment."""
     config = unified_config_manager.get_config()
     
-    # Environment-specific Redis requirements
+    # Check if Redis should be skipped entirely
+    if getattr(config, 'skip_redis_init', False):
+        logger.debug("Redis check skipped - skip_redis_init=True")
+        return
+    
+    # CRITICAL FIX: Skip Redis entirely in staging environment
     if config.environment == "staging":
-        # In staging, Redis is required
-        from netra_backend.app.redis_manager import redis_manager
-        if not redis_manager.enabled:
-            raise Exception("Redis is disabled but required in staging")
-        if not await redis_manager.ping():
-            raise Exception("Redis ping failed in staging")
-    elif config.environment == "development":
+        logger.info("Redis check skipped entirely in staging environment (infrastructure not available)")
+        return  # Skip Redis completely in staging
+    
+    # Environment-specific Redis requirements for non-staging environments
+    if config.environment == "development":
         # In development, Redis is optional
         try:
             from netra_backend.app.redis_manager import redis_manager
@@ -286,23 +288,35 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
         clickhouse_status = "unavailable"
         redis_status = "unavailable"
         
+        # Check ClickHouse availability with optional staging support
         try:
             await asyncio.wait_for(clickhouse_task, timeout=5.0)
             clickhouse_status = "connected"
         except (asyncio.TimeoutError, Exception) as e:
             if config.environment == "staging":
-                logger.error(f"ClickHouse required but unavailable in staging: {e}")
-                raise Exception(f"ClickHouse unavailable in staging: {e}")
+                clickhouse_optional = getattr(config, 'clickhouse_optional_in_staging', False)
+                if clickhouse_optional:
+                    logger.warning(f"ClickHouse unavailable in staging but optional: {e}")
+                    clickhouse_status = "optional_unavailable"
+                else:
+                    logger.error(f"ClickHouse required but unavailable in staging: {e}")
+                    raise Exception(f"ClickHouse unavailable in staging: {e}")
             else:
                 logger.debug(f"ClickHouse not available during readiness (non-critical): {e}")
         
+        # Check Redis availability with optional staging support
         try:
             await asyncio.wait_for(redis_task, timeout=3.0)
             redis_status = "connected"
         except (asyncio.TimeoutError, Exception) as e:
             if config.environment == "staging":
-                logger.error(f"Redis required but unavailable in staging: {e}")
-                raise Exception(f"Redis unavailable in staging: {e}")
+                redis_optional = getattr(config, 'redis_optional_in_staging', False)
+                if redis_optional:
+                    logger.warning(f"Redis unavailable in staging but optional: {e}")
+                    redis_status = "optional_unavailable"
+                else:
+                    logger.error(f"Redis required but unavailable in staging: {e}")
+                    raise Exception(f"Redis unavailable in staging: {e}")
             else:
                 logger.debug(f"Redis not available during readiness (non-critical): {e}")
         
