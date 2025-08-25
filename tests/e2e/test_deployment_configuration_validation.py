@@ -53,7 +53,7 @@ class TestDeploymentConfigurationFailures:
                 "GOOGLE_CLIENT_ID",
                 "GOOGLE_CLIENT_SECRET",
                 "SERVICE_SECRET",
-                "CLICKHOUSE_DEFAULT_PASSWORD",
+                "CLICKHOUSE_PASSWORD",
                 "REDIS_URL"  # This is typically missing
             ],
             "auth": [

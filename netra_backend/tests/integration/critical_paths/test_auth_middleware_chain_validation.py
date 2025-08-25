@@ -98,7 +98,7 @@ class TestAuthMiddlewareChainValidation:
         
         # Initialize middlewares in order
         cors_middleware = CORSMiddleware(
-            allowed_origins=["http://localhost:3000", "https://app.netra.io"],
+            allowed_origins=["http://localhost:3000", "https://app.netrasystems.ai"],
             allowed_methods=["GET", "POST", "PUT", "DELETE"],
             allowed_headers=["Authorization", "Content-Type"]
         )
@@ -402,7 +402,7 @@ class TestAuthMiddlewareChainValidation:
         
         test_origins = [
             ("http://localhost:3000", True),  # Allowed
-            ("https://app.netra.io", True),   # Allowed
+            ("https://app.netrasystems.ai", True),   # Allowed
             ("http://evil.com", False),       # Not allowed
             (None, False)                      # No origin
         ]

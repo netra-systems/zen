@@ -101,7 +101,7 @@ class TestAuthFailoverScenarios:
             "primary": AuthNode(
                 node_id="auth-primary-1",
                 region="us-east-1",
-                url="http://auth-primary.netra.io",
+                url="http://auth-primary.netrasystems.ai",
                 role="primary",
                 status="healthy",
                 last_heartbeat=datetime.utcnow(),
@@ -112,7 +112,7 @@ class TestAuthFailoverScenarios:
             "secondary": AuthNode(
                 node_id="auth-secondary-1",
                 region="us-west-2",
-                url="http://auth-secondary.netra.io",
+                url="http://auth-secondary.netrasystems.ai",
                 role="secondary",
                 status="healthy",
                 last_heartbeat=datetime.utcnow(),
@@ -123,7 +123,7 @@ class TestAuthFailoverScenarios:
             "standby": AuthNode(
                 node_id="auth-standby-1",
                 region="eu-central-1",
-                url="http://auth-standby.netra.io",
+                url="http://auth-standby.netrasystems.ai",
                 role="standby",
                 status="healthy",
                 last_heartbeat=datetime.utcnow(),

@@ -27,7 +27,7 @@ class TestUnifiedEnvLoading:
         env_vars_to_clear = [
             'ENVIRONMENT', 'GEMINI_API_KEY', 'GOOGLE_CLIENT_ID',
             'GOOGLE_CLIENT_SECRET', 'JWT_SECRET_KEY', 'FERNET_KEY',
-            'SERVICE_SECRET', 'CLICKHOUSE_DEFAULT_PASSWORD',
+            'SERVICE_SECRET', 'CLICKHOUSE_PASSWORD',
             'ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'DATABASE_URL',
             'REDIS_URL', 'CLICKHOUSE_HOST', 'CLICKHOUSE_PORT',
             'LLM_MODE', 'REDIS_MODE', 'CLICKHOUSE_MODE',
@@ -52,7 +52,7 @@ class TestUnifiedEnvLoading:
         os.environ['JWT_SECRET_KEY'] = 'test_jwt_key'
         os.environ['FERNET_KEY'] = 'test_fernet_key'
         os.environ['SERVICE_SECRET'] = 'test_service_secret'
-        os.environ['CLICKHOUSE_DEFAULT_PASSWORD'] = 'test_clickhouse_pwd'
+        os.environ['CLICKHOUSE_PASSWORD'] = 'test_clickhouse_pwd'
         os.environ['DATABASE_URL'] = 'postgresql://test@localhost/testdb'
         os.environ['REDIS_URL'] = 'redis://localhost:6379'
         os.environ['ANTHROPIC_API_KEY'] = 'test_anthropic_key'
@@ -124,7 +124,7 @@ class TestUnifiedEnvLoading:
         os.environ['JWT_SECRET_KEY'] = 'test_jwt'
         os.environ['FERNET_KEY'] = 'test_fernet'
         os.environ['SERVICE_SECRET'] = 'test_service'
-        os.environ['CLICKHOUSE_DEFAULT_PASSWORD'] = 'test_clickhouse'
+        os.environ['CLICKHOUSE_PASSWORD'] = 'test_clickhouse'
         
         # Force reload of configuration
         config_manager._config_cache = None
