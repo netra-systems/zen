@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Staging Backend Service Failure Tests 2025</name>
+        <type>TestDrivenCorrection</type>
+        <version>1.0</version>
+        <date>2025-08-25</date>
+        <description>Comprehensive failing tests for staging backend service issues using Test-Driven Correction (TDC) methodology</description>
+    </metadata>
+
+    <business_value_justification>
+        <segment>Platform/Internal</segment>
+        <business_goal>Infrastructure Reliability, Production Readiness, Risk Reduction</business_goal>
+        <value_impact>Prevents complete platform unavailability by catching critical backend service configuration failures before production</value_impact>
+        <strategic_impact>Ensures staging environment accurately validates production readiness, preventing revenue loss from authentication breakdown and service failures</strategic_impact>
+    </business_value_justification>
+
+    <test_driven_correction_approach>
+        <title>Staging Backend Service Failure Validation</title>
+        <methodology>
+            <step>1. Define Discrepancy: Document exact gap between expected staging behavior and actual broken behavior</step>
+            <step>2. Create Failing Tests: Write tests that expose specific configuration and connectivity issues</step>
+            <step>3. Enable Surgical Fixes: Provide detailed error categorization for targeted infrastructure remediation</step>
+            <step>4. Prevent Regression: Ensure tests continue to validate proper configuration after fixes</step>
+        </methodology>
+        <principle>Tests should FAIL to demonstrate current issues, then PASS after infrastructure fixes</principle>
+    </test_driven_correction_approach>
+
+    <critical_issues_replicated>
+        <auth_service_database_failure>
+            <title>Auth Service DATABASE_URL Not Configured - Complete Authentication Breakdown</title>
+            <issue>Auth service DATABASE_URL undefined causing complete auth service startup failure</issue>
+            <expected_behavior>Auth service connects to staging PostgreSQL database via Cloud SQL</expected_behavior>
+            <actual_behavior>DATABASE_URL missing or pointing to localhost/non-existent database</actual_behavior>
+            <business_impact>100% authentication failure = 100% revenue loss</business_impact>
+            <test_file>tests/e2e/test_staging_backend_service_failures.py</test_file>
+            <test_methods>
+                <method>test_auth_service_database_url_not_configured_complete_failure</method>
+                <method>test_auth_service_database_connection_attempt_fails_completely</method>
+                <method>test_auth_service_environment_variable_loading_cascade_failure</method>
+            </test_methods>
+        </auth_service_database_failure>
+
+        <clickhouse_connectivity_timeout>
+            <title>ClickHouse Connectivity Timeout - Analytics System Failure</title>
+            <issue>ClickHouse connections to clickhouse.staging.netrasystems.ai:8123 timeout causing health check 503 responses</issue>
+            <expected_behavior>ClickHouse accessible within 5 seconds for health validation and analytics</expected_behavior>
+            <actual_behavior>Connection timeout, DNS resolution may work but service unavailable</actual_behavior>
+            <business_impact>Analytics broken, deployment validation fails, monitoring gaps, release pipeline blocked</business_impact>
+            <test_file>tests/e2e/test_staging_clickhouse_connectivity_failures.py</test_file>
+            <test_methods>
+                <method>test_clickhouse_staging_host_network_connectivity_timeout</method>
+                <method>test_clickhouse_application_client_connection_timeout_failure</method>
+                <method>test_clickhouse_health_check_endpoint_503_failure_analysis</method>
+                <method>test_clickhouse_service_provisioning_staging_infrastructure_gap</method>
+            </test_methods>
+        </clickhouse_connectivity_timeout>
+
+        <redis_connectivity_failure>
+            <title>Redis Connectivity Failure - Cache and Session Degradation</title>
+            <issue>Redis connections fail but service inappropriately continues in no-Redis mode masking infrastructure issues</issue>
+            <expected_behavior>Redis required in staging with fail-fast behavior when unavailable</expected_behavior>
+            <actual_behavior>REDIS_FALLBACK_ENABLED=true allows service to continue without Redis, masking provisioning gaps</actual_behavior>
+            <business_impact>Performance degradation 5-10x, session persistence broken, cache misses, inappropriate fallback masking</business_impact>
+            <test_file>tests/e2e/test_staging_redis_connectivity_failures.py</test_file>
+            <test_methods>
+                <method>test_redis_connectivity_failure_with_inappropriate_fallback_masking</method>
+                <method>test_redis_client_connection_failure_with_session_degradation</method>
+                <method>test_redis_fallback_mode_enabled_masking_infrastructure_issues</method>
+                <method>test_redis_cache_degradation_performance_impact_validation</method>
+            </test_methods>
+        </redis_connectivity_failure>
+
+        <environment_behavior_enforcement>
+            <title>Environment Behavior Enforcement - Development Behavior in Staging</title>
+            <issue>Staging environment behaves like development with inappropriate fallbacks instead of enforcing production-like strict validation</issue>
+            <expected_behavior>Staging enforces strict validation, fail-fast behavior, and external service requirements</expected_behavior>
+            <actual_behavior>Development fallbacks allowed, silent degradation, infrastructure issues masked</actual_behavior>
+            <business_impact>Staging validation gaps allow issues that break production, false confidence in production readiness</business_impact>
+            <test_file>tests/e2e/test_staging_backend_configuration_audit_failures.py</test_file>
+            <test_methods>
+                <method>test_comprehensive_backend_configuration_cascade_failure_analysis</method>
+                <method>test_environment_behavior_enforcement_staging_vs_development_drift</method>
+                <method>test_service_dependency_validation_external_service_requirements</method>
+            </test_methods>
+        </environment_behavior_enforcement>
+    </critical_issues_replicated>
+
+    <test_coverage_matrix>
+        <test_file name="test_staging_backend_service_failures.py">
+            <purpose>Primary backend service configuration failures</purpose>
+            <focus>Auth service DATABASE_URL, environment variable cascade, WebSocket imports</focus>
+            <test_count>12</test_count>
+            <criticality>CRITICAL - 8, MEDIUM - 4</criticality>
+        </test_file>
+
+        <test_file name="test_staging_clickhouse_connectivity_failures.py">
+            <purpose>ClickHouse connectivity and provisioning validation</purpose>
+            <focus>Network connectivity, application client, health checks, service provisioning</focus>
+            <test_count>8</test_count>
+            <criticality>CRITICAL - 6, MEDIUM - 2</criticality>
+        </test_file>
+
+        <test_file name="test_staging_redis_connectivity_failures.py">
+            <purpose>Redis connectivity, fallback behavior, session persistence</purpose>
+            <focus>Connection failures, inappropriate fallbacks, cache performance, session management</focus>
+            <test_count>7</test_count>
+            <criticality>CRITICAL - 5, MEDIUM - 2</criticality>
+        </test_file>
+
+        <test_file name="test_staging_backend_configuration_audit_failures.py">
+            <purpose>Comprehensive configuration audit and environment behavior validation</purpose>
+            <focus>Configuration cascade, dependency validation, environment enforcement</focus>
+            <test_count>6</test_count>
+            <criticality>CRITICAL - 4, HIGH - 2</criticality>
+        </test_file>
+
+        <total_test_coverage>
+            <total_tests>33</total_tests>
+            <critical_tests>23</critical_tests>
+            <high_tests>2</high_tests>
+            <medium_tests>8</medium_tests>
+            <coverage_areas>Database, Authentication, Analytics, Cache, Environment, Health Checks</coverage_areas>
+        </total_test_coverage>
+    </test_coverage_matrix>
+
+    <anti_pattern_validation>
+        <silent_fallbacks>
+            <description>Tests validate that staging does NOT allow silent fallbacks to development behavior</description>
+            <examples>
+                <example>REDIS_FALLBACK_ENABLED should be false in staging</example>
+                <example>DATABASE_URL should not fallback to localhost</example>
+                <example>External services should be required, not optional</example>
+            </examples>
+            <business_risk>Silent fallbacks mask infrastructure issues causing production failures not caught in staging</business_risk>
+        </silent_fallbacks>
+
+        <development_behavior_in_staging>
+            <description>Tests validate that staging enforces production-like strict validation</description>
+            <examples>
+                <example>Environment detection should trigger staging behavior enforcement</example>
+                <example>Configuration validation should be strict, not permissive</example>
+                <example>External service failures should cause service startup failure</example>
+            </examples>
+            <business_risk>Development behavior patterns in staging create dangerous staging/production drift</business_risk>
+        </development_behavior_in_staging>
+
+        <health_check_validation_gap>
+            <description>Tests validate that service health accurately reflects operational capability</description>
+            <examples>
+                <example>Health endpoints should return 503 when external services unavailable</example>
+                <example>Service readiness should match actual operational capability</example>
+                <example>Deployment validation should catch external service dependency failures</example>
+            </examples>
+            <business_risk>Health check gaps cause deployment validation false positives leading to production failures</business_risk>
+        </health_check_validation_gap>
+    </anti_pattern_validation>
+
+    <environment_requirements>
+        <staging_markers>
+            <marker>@pytest.mark.env("staging")</marker>
+            <description>All tests require staging environment to validate staging-specific configuration</description>
+        </staging_markers>
+
+        <configuration_dependencies>
+            <database>DATABASE_URL with staging database and Cloud SQL configuration</database>
+            <redis>REDIS_URL pointing to staging Redis, REDIS_FALLBACK_ENABLED=false</redis>
+            <clickhouse>CLICKHOUSE_HOST=clickhouse.staging.netrasystems.ai, CLICKHOUSE_PORT=8123</clickhouse>
+            <environment>NETRA_ENVIRONMENT=staging for behavior enforcement</environment>
+            <auth>AUTH_SERVICE_URL pointing to staging auth service</auth>
+        </configuration_dependencies>
+
+        <external_service_dependencies>
+            <auth_service>Required for authentication validation</auth_service>
+            <postgresql>Required for data persistence</postgresql>
+            <redis>Required for cache and sessions (no fallback in staging)</redis>
+            <clickhouse>Required for analytics (no fallback in staging)</clickhouse>
+        </external_service_dependencies>
+    </environment_requirements>
+
+    <expected_vs_actual_behavior_documentation>
+        <auth_service_database>
+            <expected>Auth service connects to staging PostgreSQL via Cloud SQL with proper SSL configuration</expected>
+            <actual>DATABASE_URL undefined or misconfigured causing complete auth service startup failure</actual>
+            <validation_method>Database connection test with staging credentials and SSL parameters</validation_method>
+        </auth_service_database>
+
+        <clickhouse_connectivity>
+            <expected>ClickHouse accessible at clickhouse.staging.netrasystems.ai:8123 within 5 seconds</expected>
+            <actual>Connection timeout causing health checks to return 503 and deployment validation to fail</actual>
+            <validation_method>Progressive connectivity testing: DNS resolution → TCP connection → HTTP ping → Application client</validation_method>
+        </clickhouse_connectivity>
+
+        <redis_connectivity>
+            <expected>Redis required in staging with fail-fast behavior when unavailable</expected>
+            <actual>Redis connection fails but service continues with REDIS_FALLBACK_ENABLED=true masking infrastructure issues</actual>
+            <validation_method>Redis connectivity test with fallback configuration validation</validation_method>
+        </redis_connectivity>
+
+        <environment_enforcement>
+            <expected>Staging environment enforces production-like strict validation and external service requirements</expected>
+            <actual>Environment detection fails or enforcement disabled allowing development fallback patterns</actual>
+            <validation_method>Environment detection validation with strict configuration enforcement verification</validation_method>
+        </environment_enforcement>
+    </expected_vs_actual_behavior_documentation>
+
+    <surgical_fix_guidance>
+        <auth_service_database_fix>
+            <area>Environment Configuration</area>
+            <fix_scope>Configure DATABASE_URL in GCP Secret Manager pointing to staging PostgreSQL</fix_scope>
+            <validation>Run test_auth_service_database_url_not_configured_complete_failure to verify fix</validation>
+        </auth_service_database_fix>
+
+        <clickhouse_connectivity_fix>
+            <area>Service Provisioning</area>
+            <fix_scope>Provision ClickHouse service in staging, configure network access, validate DNS</fix_scope>
+            <validation>Run test_clickhouse_staging_host_network_connectivity_timeout to verify fix</validation>
+        </clickhouse_connectivity_fix>
+
+        <redis_connectivity_fix>
+            <area>Service Configuration and Fallback Policy</area>
+            <fix_scope>Provision Redis in staging, set REDIS_FALLBACK_ENABLED=false, configure REDIS_URL</fix_scope>
+            <validation>Run test_redis_fallback_mode_enabled_masking_infrastructure_issues to verify fix</validation>
+        </redis_connectivity_fix>
+
+        <environment_enforcement_fix>
+            <area>Environment Detection and Behavior Enforcement</area>
+            <fix_scope>Configure NETRA_ENVIRONMENT=staging, enable strict validation mode, disable fallbacks</fix_scope>
+            <validation>Run test_environment_behavior_enforcement_staging_vs_development_drift to verify fix</validation>
+        </environment_enforcement_fix>
+    </surgical_fix_guidance>
+
+    <regression_prevention>
+        <continuous_validation>
+            <description>These tests should be run regularly in staging CI/CD to catch configuration drift</description>
+            <frequency>Every staging deployment, weekly infrastructure validation</frequency>
+            <automation>Include in unified_test_runner.py --env staging --level critical</automation>
+        </continuous_validation>
+
+        <configuration_monitoring>
+            <description>Monitor staging configuration for drift from production-like requirements</description>
+            <alerts>Alert when fallback modes enabled in staging, localhost configurations detected</alerts>
+            <validation>Automated configuration validation in deployment pipeline</validation>
+        </configuration_monitoring>
+
+        <infrastructure_validation>
+            <description>Pre-deployment validation of external service dependencies</description>
+            <scope>Database connectivity, Redis availability, ClickHouse accessibility</scope>
+            <integration>Include in deployment validation scripts before releasing to staging</integration>
+        </infrastructure_validation>
+    </regression_prevention>
+
+    <key_learnings>
+        <critical_takeaway context="Test-Driven Correction">CRITICAL: Create failing tests BEFORE fixing staging issues to validate root cause understanding and prevent regressions.</critical_takeaway>
+        <critical_takeaway context="Auth Service Configuration">Auth service DATABASE_URL undefined causes 100% authentication breakdown - requires staging PostgreSQL with Cloud SQL configuration.</critical_takeaway>
+        <critical_takeaway context="ClickHouse Connectivity">ClickHouse connection timeouts to clickhouse.staging.netrasystems.ai:8123 cause health check 503 responses blocking deployment validation.</critical_takeaway>
+        <critical_takeaway context="Redis Fallback Masking">REDIS_FALLBACK_ENABLED=true in staging masks infrastructure issues - should be false to catch Redis provisioning gaps.</critical_takeaway>
+        <critical_takeaway context="Environment Behavior Enforcement">Staging must enforce production-like strict validation - development fallbacks create dangerous staging/production drift.</critical_takeaway>
+        <critical_takeaway context="Health Check Validation Gap">Service health endpoints should return 503 when external dependencies unavailable - health != operational capability.</critical_takeaway>
+        <critical_takeaway context="Configuration Cascade Failures">Multiple configuration failures compound exponentially - missing env vars → wrong defaults → connection failures → service degradation.</critical_takeaway>
+        <critical_takeaway context="External Service Dependencies">External services must be required in staging, not optional - validates infrastructure provisioning for production readiness.</critical_takeaway>
+        <critical_takeaway context="Silent Degradation Anti-Pattern">Silent fallbacks and degraded mode operation in staging hide critical infrastructure issues that break production.</critical_takeaway>
+        <critical_takeaway context="Progressive Connectivity Testing">Use progressive testing (DNS → TCP → HTTP → Application) to identify exact failure points in service provisioning.</critical_takeaway>
+    </key_learnings>
+
+    <test_execution_requirements>
+        <environment_markers>
+            <staging_required>All tests require @pytest.mark.env("staging") to run in staging environment</staging_required>
+            <criticality_marking>Tests marked with @pytest.mark.critical for essential infrastructure validation</criticality_marking>
+        </environment_markers>
+
+        <dependencies>
+            <external_services>Tests require actual staging external services (PostgreSQL, Redis, ClickHouse)</external_services>
+            <network_access>Tests require network connectivity to staging infrastructure</network_access>
+            <configuration_access>Tests require access to staging environment variables and secrets</configuration_access>
+        </dependencies>
+
+        <execution_context>
+            <isolation>Tests use IsolatedEnvironment for configuration isolation and cleanup</isolation>
+            <timeout_handling>Progressive timeouts: 3s for quick checks, 10s for client connections, 15s for health endpoints</timeout_handling>
+            <error_categorization>Detailed error categorization for surgical infrastructure fixes</error_categorization>
+        </execution_context>
+    </test_execution_requirements>
+
+    <business_impact_analysis>
+        <authentication_breakdown>
+            <impact>100% authentication failure when auth service DATABASE_URL undefined</impact>
+            <revenue_risk>Complete platform unavailability = 100% revenue loss</revenue_risk>
+            <customer_impact>Users cannot log in, all authenticated features inaccessible</customer_impact>
+            <recovery_time>Service restart required after DATABASE_URL configuration</recovery_time>
+        </authentication_breakdown>
+
+        <analytics_system_failure>
+            <impact>Analytics and metrics collection completely broken when ClickHouse unreachable</impact>
+            <business_intelligence_risk>No data for business decisions, reporting dashboards empty</business_intelligence_risk>
+            <monitoring_impact>Health checks fail, deployment validation blocked, monitoring gaps</monitoring_impact>
+            <scalability_risk>Cannot measure system performance for optimization</scalability_risk>
+        </analytics_system_failure>
+
+        <cache_session_degradation>
+            <impact>5-10x performance degradation without Redis cache, session persistence broken</impact>
+            <user_experience_risk>Slow page loads, forced re-authentication, session loss</user_experience_risk>
+            <infrastructure_masking>Silent fallback hides provisioning issues until production</infrastructure_masking>
+            <scalability_impact>Database overload without caching layer</scalability_impact>
+        </cache_session_degradation>
+
+        <deployment_validation_failure>
+            <impact>Health check 503 responses block GCP Cloud Run deployment validation</impact>
+            <release_pipeline_risk>Cannot deploy to production, feature delivery blocked</release_pipeline_risk>
+            <monitoring_false_positives>Service marked unhealthy despite partial functionality</monitoring_false_positives>
+            <infrastructure_confidence>Staging validation provides false negatives</infrastructure_confidence>
+        </deployment_validation_failure>
+    </business_impact_analysis>
+
+    <anti_regression_patterns>
+        <fail_fast_validation>
+            <pattern>Services should fail immediately when critical dependencies unavailable in staging</pattern>
+            <anti_pattern>Silent fallbacks that mask infrastructure provisioning issues</anti_pattern>
+            <validation>Test that services fail startup when external dependencies unreachable</validation>
+        </fail_fast_validation>
+
+        <environment_specific_behavior>
+            <pattern>Staging should enforce production-like strict validation and requirements</pattern>
+            <anti_pattern>Development behavior patterns (permissive, fallback-heavy) in staging</anti_pattern>
+            <validation>Test environment detection triggers appropriate behavior enforcement</validation>
+        </environment_specific_behavior>
+
+        <configuration_source_priority>
+            <pattern>Staging configuration should come from GCP Secret Manager with proper source priority</pattern>
+            <anti_pattern>Environment variables overriding secrets, development values in staging</anti_pattern>
+            <validation>Test configuration source priority and staging-appropriate values</validation>
+        </configuration_source_priority>
+
+        <health_check_accuracy>
+            <pattern>Health endpoints should accurately reflect operational capability including external dependencies</pattern>
+            <anti_pattern>Health checks passing while critical functionality degraded or broken</anti_pattern>
+            <validation>Test health endpoints return 503 when external services unavailable</validation>
+        </health_check_accuracy>
+    </anti_regression_patterns>
+
+    <integration_with_existing_tests>
+        <existing_backend_auth_tests>
+            <file>netra_backend/tests/integration/backend-authentication-integration-failures.py</file>
+            <relationship>Complements existing backend auth tests with staging-specific infrastructure validation</relationship>
+            <focus_difference>Existing tests focus on auth logic, new tests focus on infrastructure and configuration</focus_difference>
+        </existing_backend_auth_tests>
+
+        <staging_test_helpers>
+            <file>tests/e2e/staging_test_helpers.py</file>
+            <relationship>Uses StagingTestSuite and helper functions for consistent test setup</relationship>
+            <shared_utilities>ServiceHealthStatus, ConfigurationValidationResult, environment validation</shared_utilities>
+        </staging_test_helpers>
+
+        <unified_test_runner>
+            <integration>Tests executable via unified_test_runner.py --env staging --level critical</integration>
+            <environment_aware>Uses environment-aware testing markers for staging-only execution</environment_aware>
+        </unified_test_runner>
+    </integration_with_existing_tests>
+
+    <deployment_pipeline_integration>
+        <pre_deployment_validation>
+            <description>Run these tests before staging deployment to catch configuration issues early</description>
+            <command>python unified_test_runner.py --env staging --level critical --pattern "*staging*service*failures*"</command>
+            <success_criteria>All tests should PASS after infrastructure fixes are applied</success_criteria>
+        </pre_deployment_validation>
+
+        <continuous_monitoring>
+            <description>Include in staging health monitoring to detect configuration drift</description>
+            <frequency>Daily automated execution, alert on failures</frequency>
+            <integration>Include in monitoring dashboard for staging infrastructure health</integration>
+        </continuous_monitoring>
+
+        <production_readiness_gate>
+            <description>These tests validate production readiness requirements in staging</description>
+            <criteria>All external service dependencies accessible, no fallback modes enabled, strict validation enforced</criteria>
+            <gate_logic>Block production deployment if staging infrastructure validation fails</gate_logic>
+        </production_readiness_gate>
+    </deployment_pipeline_integration>
+</specification>

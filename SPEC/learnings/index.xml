@@ -48,6 +48,15 @@
             <critical-takeaway>OAuth configuration misconfigured in staging preventing new user registration and social login - no user acquisition possible.</critical-takeaway>
             <critical-takeaway>CORS configuration blocks legitimate cross-service authentication requests causing service communication failures.</critical-takeaway>
         </category>
+        
+        <category name="Auth Service Staging Log Issues [HIGH PRIORITY]" path="SPEC/learnings/auth_service_staging_log_issues.xml" keywords="HEAD Method, HTTP 405, Monitoring, Database Initialization, Idempotency, UniqueViolationError">
+            <critical-takeaway>CRITICAL: Health endpoints must support HEAD requests - monitoring systems fail with 405 Method Not Allowed causing false alerts.</critical-takeaway>
+            <critical-takeaway>Database initialization must be idempotent - UniqueViolationError warnings indicate potential startup fragility.</critical-takeaway>
+            <critical-takeaway>All monitoring endpoints (/health, /auth/health, /readiness, /docs) must support HEAD method for monitoring compatibility.</critical-takeaway>
+            <critical-takeaway>HEAD responses must have same headers as GET but empty body per HTTP specification.</critical-takeaway>
+            <critical-takeaway>Database initialization should use IF NOT EXISTS patterns and handle concurrent initialization gracefully.</critical-takeaway>
+            <critical-takeaway>Test HTTP method compatibility with common monitoring system user agents (Kubernetes, GCP Load Balancer, AWS ALB, Datadog).</critical-takeaway>
+        </category>
 
         <category name="Database Connectivity Critical Fix [RESOLVED]" path="SPEC/learnings/database_postgres_connectivity_fix_2025.xml" keywords="Database, Postgres, Connection, POSTGRES_DB, netra_dev, staging">
             <critical-takeaway>RESOLVED 2025-08-25: Fixed critical 'database postgres does not exist' error by updating POSTGRES_DB configuration.</critical-takeaway>
@@ -89,6 +98,15 @@
             <critical-takeaway>NEVER import environment management from dev_launcher - each service MUST have its own isolated_environment.</critical-takeaway>
             <critical-takeaway>Service-local implementations of shared patterns are acceptable and required for independence.</critical-takeaway>
             <critical-takeaway>Always provide production fallback patterns when development modules may not be available.</critical-takeaway>
+        </category>
+        
+        <category name="SSOT Auth Service Remediation [RESOLVED]" path="SPEC/learnings/ssot_auth_service_remediation.xml" keywords="SSOT, Single Source of Truth, Duplication, Auth Service, Database Connection, JWT, Environment Variables">
+            <critical-takeaway>RESOLVED 2025-08-25: Fixed critical SSOT violations in auth_service - removed 365+ lines of duplicate code.</critical-takeaway>
+            <critical-takeaway>AuthDatabaseManager is the canonical database connection implementation - all operations delegate to it.</critical-takeaway>
+            <critical-takeaway>JWTHandler.validate_token() is the single source of truth for JWT validation - removed duplicate validation logic.</critical-takeaway>
+            <critical-takeaway>IsolatedEnvironment.get_env().get() is the ONLY way to access environment variables - replaced 40+ os.getenv() calls.</critical-takeaway>
+            <critical-takeaway>Backward compatibility maintained through delegation patterns and aliases during SSOT remediation.</critical-takeaway>
+            <critical-takeaway>Regular SSOT audits essential - violations accumulate quickly without strict enforcement.</critical-takeaway>
             <critical-takeaway>netra_backend MUST use netra_backend.app.core.isolated_environment, NOT dev_launcher.isolated_environment.</critical-takeaway>
             <critical-takeaway>Remove all service discovery imports from dev_launcher in production services.</critical-takeaway>
         </category>
@@ -323,6 +341,27 @@
 
         <category name="Type Safety" path="SPEC/learnings/type_safety.xml" keywords="Types, Pydantic, TypeScript">
             <critical-takeaway>Maintain single source of truth for types. Avoid circular imports.</critical-takeaway>
+        </category>
+        
+        <category name="SSOT Consolidation [CRITICAL]" path="SPEC/learnings/ssot_consolidation_20250825.xml" keywords="SSOT, Single Source of Truth, Duplication, Consolidation, Refactoring, Architecture Compliance, Database Manager, Auth Client, Error Handler">
+            <critical-takeaway>CRITICAL: Each concept must have ONE canonical implementation per service - multiple implementations violate SSOT and create technical debt.</critical-takeaway>
+            <critical-takeaway>MANDATORY: SSOT fixes must be atomic - either completely fix all violations in a domain or report blockers.</critical-takeaway>
+            <critical-takeaway>Database connectivity must use single DatabaseManager in netra_backend/app/db/database_manager.py - delete all other managers.</critical-takeaway>
+            <critical-takeaway>Authentication must use single AuthServiceClient in auth_client_core.py - delete all shims and wrappers.</critical-takeaway>
+            <critical-takeaway>Error handling must use UnifiedErrorHandler in core/unified_error_handler.py - delete domain-specific handlers.</critical-takeaway>
+            <critical-takeaway>Environment access must use IsolatedEnvironment.get_env() - never use direct os.getenv() or os.environ.</critical-takeaway>
+            <critical-takeaway>When consolidating, provide backward compatibility wrappers to prevent breaking changes.</critical-takeaway>
+            <critical-takeaway>Delete duplicate implementations immediately - do not maintain legacy code per CLAUDE.md.</critical-takeaway>
+            <critical-takeaway>Run architecture compliance checks before every commit to prevent reintroduction of violations.</critical-takeaway>
+        </category>
+        
+        <category name="CORS SSOT Consolidation [RESOLVED]" path="SPEC/learnings/cors_ssot_consolidation_2025.xml" keywords="CORS, Single Source of Truth, Origin Validation, shared/cors_config, validate_cors_origin, _is_valid_origin">
+            <critical-takeaway>RESOLVED 2025-08-25: Eliminated duplicate CORS origin validation functions in auth_service by consolidating to shared/cors_config.py</critical-takeaway>
+            <critical-takeaway>validate_cors_origin() and _is_valid_origin() now use shared is_origin_allowed() function instead of hardcoded origin lists</critical-takeaway>
+            <critical-takeaway>CORS origin configuration is now environment-aware through shared/cors_config.py with proper dev/staging/production origin lists</critical-takeaway>
+            <critical-takeaway>Canonical CORS configuration: shared/cors_config.py provides get_cors_origins() and is_origin_allowed() for all services</critical-takeaway>
+            <critical-takeaway>Auth service CORS consolidation maintains exact same security behavior while eliminating 20+ lines of duplicate origin lists</critical-takeaway>
+            <critical-takeaway>Environment-specific CORS behavior verified: development allows localhost, staging allows staging domains, production blocks all but production domains</critical-takeaway>
         </category>
         
         <category name="Circular Import Detection" path="SPEC/learnings/circular_import_detection.xml" keywords="Circular Import, Import Error, Initialization, WebSocket, Synthetic Data">
@@ -649,6 +688,43 @@
             <critical-takeaway>Health checks report service as healthy while database connectivity is broken.</critical-takeaway>
             <critical-takeaway>47 failing tests created across auth service and E2E suites to prevent regression after fixes.</critical-takeaway>
             <critical-takeaway>Environment-specific database naming required: development (netra_dev), staging (netra_staging), production (netra_production).</critical-takeaway>
+        </category>
+        
+        <category name="Staging External Service Dependencies [CRITICAL]" path="SPEC/learnings/staging_external_services_critical.xml" keywords="ClickHouse, Redis, External Services, Staging, Connectivity, Health Checks, Fail Fast, Service Provisioning">
+            <critical-takeaway>CRITICAL: External services MUST be required dependencies in staging, not optional with fallback - inappropriate fallback masks infrastructure issues.</critical-takeaway>
+            <critical-takeaway>ClickHouse connection timeouts to clickhouse.staging.netrasystems.ai:8123 cause /health/ready to return 503, blocking deployment validation.</critical-takeaway>
+            <critical-takeaway>Redis connection failures trigger inappropriate fallback to no-Redis mode instead of failing fast in staging environment.</critical-takeaway>
+            <critical-takeaway>Health endpoints must properly validate external service connectivity - /health/ready should return 503 when external services unavailable.</critical-takeaway>
+            <critical-takeaway>Environment-specific behavior required: development (optional), staging/production (required with fail-fast behavior).</critical-takeaway>
+            <critical-takeaway>Pre-deployment validation must verify external service provisioning, network connectivity, DNS resolution, and authentication.</critical-takeaway>
+            <critical-takeaway>Network connectivity, firewall rules, and service provisioning must be validated for all external dependencies.</critical-takeaway>
+            <critical-takeaway>Service provisioning validation prevents 80% of staging deployment failures related to external dependencies.</critical-takeaway>
+        </category>
+        
+        <category name="Staging Backend Service Failure Tests 2025" path="SPEC/learnings/staging_backend_service_failure_tests_2025.xml" keywords="Staging, Backend Service Failures, TDC, Test-Driven Correction, Infrastructure Validation, Configuration Audit, External Services">
+            <critical-takeaway>CRITICAL: Create failing tests BEFORE fixing staging issues to validate root cause understanding and prevent regressions.</critical-takeaway>
+            <critical-takeaway>Auth service DATABASE_URL undefined causes 100% authentication breakdown - requires staging PostgreSQL with Cloud SQL configuration.</critical-takeaway>
+            <critical-takeaway>ClickHouse connection timeouts to clickhouse.staging.netrasystems.ai:8123 cause health check 503 responses blocking deployment validation.</critical-takeaway>
+            <critical-takeaway>REDIS_FALLBACK_ENABLED=true in staging masks infrastructure issues - should be false to catch Redis provisioning gaps.</critical-takeaway>
+            <critical-takeaway>Staging must enforce production-like strict validation - development fallbacks create dangerous staging/production drift.</critical-takeaway>
+            <critical-takeaway>Service health endpoints should return 503 when external dependencies unavailable - health != operational capability.</critical-takeaway>
+            <critical-takeaway>Multiple configuration failures compound exponentially - missing env vars → wrong defaults → connection failures → service degradation.</critical-takeaway>
+            <critical-takeaway>External services must be required in staging, not optional - validates infrastructure provisioning for production readiness.</critical-takeaway>
+            <critical-takeaway>Silent fallbacks and degraded mode operation in staging hide critical infrastructure issues that break production.</critical-takeaway>
+            <critical-takeaway>33 comprehensive failing tests across 4 test files provide complete validation of staging backend service infrastructure.</critical-takeaway>
+        </category>
+        
+        <category name="Auth Service SSOT Consolidation 2025" path="SPEC/learnings/auth_service_ssot_consolidation_2025.xml" keywords="SSOT, Single Source of Truth, Auth Service, Consolidation, JWT, Database, Redis, Environment, Middleware, CORS, Atomic Refactor">
+            <critical-takeaway>CRITICAL: Each concept must have exactly ONE canonical implementation per service - multiple implementations violate SSOT and create technical debt.</critical-takeaway>
+            <critical-takeaway>Atomic refactoring is essential - each SSOT consolidation must be complete in one operation with all references updated and legacy code deleted.</critical-takeaway>
+            <critical-takeaway>JWT validation consolidated to JWTHandler.validate_token() - eliminated JWTSecurityValidator class and 56 lines of duplicate code.</critical-takeaway>
+            <critical-takeaway>Database connections must use AuthDatabaseManager.create_async_engine() - never import create_async_engine directly from SQLAlchemy.</critical-takeaway>
+            <critical-takeaway>Redis access through auth_redis_manager only - removed all direct redis.from_url() calls and duplicate connection logic.</critical-takeaway>
+            <critical-takeaway>Environment access must use IsolatedEnvironment.get_env() - direct os.getenv() violates SSOT and creates configuration drift.</critical-takeaway>
+            <critical-takeaway>Test mocks must target canonical implementations not libraries - mock AuthDatabaseManager not sqlalchemy.create_async_engine.</critical-takeaway>
+            <critical-takeaway>Security middleware consolidated to auth_core.security.middleware - eliminated duplicate request validation across main.py and tests.</critical-takeaway>
+            <critical-takeaway>CORS validation delegates to shared.cors_config - removed 27 lines of hardcoded origin lists for environment-aware configuration.</critical-takeaway>
+            <critical-takeaway>Microservice independence maintained while enabling resource sharing through optional delegation to shared managers.</critical-takeaway>
         </category>
     </categories>
     

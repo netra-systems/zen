@@ -1,0 +1,163 @@
+{
+  "timestamp": "2025-08-25T10:36:29.762719",
+  "auth_service_url": "https://netra-auth-service-701982941522.us-central1.run.app",
+  "test_execution": {
+    "total_tests": 6,
+    "passed_tests": 6,
+    "failed_tests": 0,
+    "success_rate": 100.0
+  },
+  "readiness_assessment": {
+    "service_ready": true,
+    "critical_systems_healthy": true,
+    "oauth_systems_functional": true
+  },
+  "detailed_results": [
+    {
+      "test_name": "service_health_comprehensive",
+      "status": "completed",
+      "checks": {
+        "health_endpoint": {
+          "status_code": 200,
+          "success": true
+        },
+        "health_data": {
+          "status": "healthy",
+          "service": "auth-service",
+          "version": "1.0.0",
+          "timestamp": "2025-08-25T17:36:29.174878+00:00",
+          "uptime_seconds": 945.83385,
+          "database_status": "connected",
+          "environment": "staging"
+        },
+        "health_status": {
+          "present": true,
+          "value": "healthy"
+        },
+        "health_service": {
+          "present": true,
+          "value": "auth-service"
+        },
+        "health_version": {
+          "present": true,
+          "value": "1.0.0"
+        },
+        "health_database_status": {
+          "present": true,
+          "value": "connected"
+        },
+        "health_environment": {
+          "present": true,
+          "value": "staging"
+        },
+        "root_endpoint": {
+          "status_code": 200,
+          "success": true
+        }
+      }
+    },
+    {
+      "test_name": "oauth_configuration_comprehensive",
+      "status": "completed",
+      "checks": {
+        "config_endpoint": {
+          "status_code": 200,
+          "success": true
+        },
+        "config_data": {
+          "google_client_id": "placeholder_google_client_id\n",
+          "endpoints": {
+            "login": "https://auth.staging.netrasystems.ai/auth/login",
+            "logout": "https://auth.staging.netrasystems.ai/auth/logout",
+            "callback": "https://app.staging.netrasystems.ai/auth/callback",
+            "token": "https://auth.staging.netrasystems.ai/auth/token",
+            "user": "https://auth.staging.netrasystems.ai/auth/verify",
+            "dev_login": null,
+            "validate_token": "https://auth.staging.netrasystems.ai/auth/validate",
+            "refresh": "https://auth.staging.netrasystems.ai/auth/refresh",
+            "health": "https://auth.staging.netrasystems.ai/auth/health"
+          },
+          "development_mode": false,
+          "user": null,
+          "authorized_javascript_origins": [
+            "https://app.staging.netrasystems.ai"
+          ],
+          "authorized_redirect_uris": [
+            "https://app.staging.netrasystems.ai/auth/callback"
+          ],
+          "pr_number": null,
+          "use_proxy": false,
+          "proxy_url": null
+        },
+        "oauth_validation": {
+          "google_client_id": true,
+          "redirect_uris": true,
+          "endpoints": true
+        }
+      }
+    },
+    {
+      "test_name": "oauth_login_flow_comprehensive",
+      "status": "completed",
+      "checks": {
+        "login_initiation": {
+          "status_code": 302,
+          "success": true
+        },
+        "redirect_url": {
+          "url": "https://accounts.google.com/o/oauth2/v2/auth?client_id=placeholder_google_client_id%0A&redirect_uri=https://app.staging.netrasystems.ai/auth/callback&response_type=code&scope=openid%20email%20profile&state=BqVpfuyJPuNtZqifqQI5LpZr0gnwdMJHSUlHshuu-Zw",
+          "valid_google": true
+        }
+      }
+    },
+    {
+      "test_name": "jwt_validation_comprehensive",
+      "status": "completed",
+      "checks": {
+        "invalid_token_validation": {
+          "status_code": 401,
+          "success": true
+        },
+        "validation_response": {
+          "detail": "Invalid token"
+        },
+        "malformed_request": {
+          "status_code": 422,
+          "success": true
+        }
+      }
+    },
+    {
+      "test_name": "user_registration_comprehensive",
+      "status": "completed",
+      "checks": {
+        "registration_endpoint": {
+          "status_code": 400,
+          "success": true
+        },
+        "registration_response": {
+          "detail": "Passwords do not match"
+        },
+        "malformed_registration": {
+          "status_code": 400,
+          "success": true
+        }
+      }
+    },
+    {
+      "test_name": "cors_configuration",
+      "status": "completed",
+      "checks": {
+        "cors_preflight": {
+          "status_code": 200,
+          "success": true
+        },
+        "cors_headers": {
+          "access_control_allow_origin": "https://app.staging.netrasystems.ai",
+          "access_control_allow_methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+          "access_control_allow_headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, X-Cross-Service-Auth, X-Request-ID, X-Requested-With, X-Service-ID, X-Trace-ID"
+        }
+      }
+    }
+  ]
+}
