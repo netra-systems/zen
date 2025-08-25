@@ -13,7 +13,8 @@ import pytest
 import asyncio
 from unittest.mock import MagicMock, patch, AsyncMock
 from sqlalchemy import event
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncEngine
+# SSOT compliance: Use AuthDatabaseManager.create_async_engine instead of create_async_engine
 from sqlalchemy.pool import NullPool, AsyncAdaptedQueuePool
 
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
@@ -137,9 +138,12 @@ class TestPostgresCompliance:
     @pytest.mark.asyncio
     async def test_connection_events_setup(self):
         """Test connection event handlers are properly configured."""
-        # Create a test engine
+        # Use SSOT-compliant engine creation via AuthDatabaseManager
+        from auth_service.auth_core.database.database_manager import AuthDatabaseManager
+        
+        # Create test engine using canonical SSOT method
         test_url = "sqlite+aiosqlite:///:memory:"
-        engine = create_async_engine(test_url, poolclass=NullPool)
+        engine = AuthDatabaseManager.create_async_engine(test_url, poolclass=NullPool)
         
         # Setup events
         setup_auth_async_engine_events(engine)
@@ -181,7 +185,7 @@ class TestPostgresCompliance:
         # Mock environment for testing
         with patch.dict(os.environ, {'ENVIRONMENT': 'test', 'AUTH_FAST_TEST_MODE': 'true'}):
             # Mock: Database access isolation for fast, reliable unit testing
-            with patch('auth_service.auth_core.database.connection.create_async_engine') as mock_create_engine:
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine') as mock_create_engine:
                 # Mock: Service component isolation for predictable testing behavior
                 mock_engine = MagicMock(spec=AsyncEngine)
                 mock_create_engine.return_value = mock_engine

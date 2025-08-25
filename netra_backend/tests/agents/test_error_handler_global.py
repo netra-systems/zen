@@ -13,16 +13,12 @@ from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 
-from netra_backend.app.agents.error_handler import (
-    AgentErrorHandler as ErrorHandler,
+from netra_backend.app.core.unified_error_handler import (
+    agent_error_handler as ErrorHandler,
 )
-from netra_backend.app.agents.error_handler import (
+from netra_backend.app.agents.agent_error_types import (
     AgentValidationError as ValidationError,
-)
-from netra_backend.app.agents.error_handler import (
     NetworkError,
-    global_error_handler,
-    handle_agent_error,
 )
 
 class TestGlobalErrorHandler:
@@ -35,7 +31,7 @@ class TestGlobalErrorHandler:
     
     def test_global_error_handler_singleton(self):
         """Test global error handler is singleton."""
-        from netra_backend.app.agents.error_handler import (
+        from netra_backend.app.core.unified_error_handler import (
             global_error_handler as global_handler_2,
         )
         assert global_error_handler is global_handler_2

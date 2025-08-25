@@ -37,7 +37,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch, patch
 
 import jwt
 import pytest
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.config import get_settings

@@ -79,7 +79,7 @@ class SecureWebSocketManager:
             raise HTTPException(status_code=1008, detail="No secure JWT token provided")
         
         # Validate token using auth client
-        from netra_backend.app.clients.auth_client import auth_client
+        from netra_backend.app.clients.auth_client_core import auth_client
         validation_result = auth_client.validate_token_jwt(jwt_token)
         
         if not validation_result.get("valid", False):

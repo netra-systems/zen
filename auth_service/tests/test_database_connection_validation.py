@@ -49,7 +49,7 @@ class TestDatabaseConnectionValidation:
             mock_engine = AsyncMock()
             mock_engine.connect = AsyncMock(side_effect=OperationalError("auth failure", None, None))
             
-            with patch('auth_service.auth_core.database.connection.create_async_engine', return_value=mock_engine):
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine', return_value=mock_engine):
                 with patch.object(test_auth_db, 'create_tables', side_effect=OperationalError("auth failure", None, None)):
                     with patch.object(test_auth_db, 'is_test_mode', False):
                         with patch.object(AuthConfig, 'get_database_url', return_value="postgresql+asyncpg://invalid:creds@localhost:5432/test"):
@@ -87,7 +87,7 @@ class TestDatabaseConnectionValidation:
         mock_connection.commit = AsyncMock()
         mock_engine.connect.return_value.__aenter__.return_value = mock_connection
         
-        with patch('auth_service.auth_core.database.connection.create_async_engine', return_value=mock_engine):
+        with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine', return_value=mock_engine):
             with patch.object(test_auth_db, 'is_test_mode', False):
                 with patch.object(AuthConfig, 'get_database_url', return_value="postgresql+asyncpg://postgres:wrong@localhost:5432/test"):
                     
@@ -162,7 +162,7 @@ class TestDatabaseConnectionValidation:
         auth_error = OperationalError("password authentication failed", None, None)
         mock_engine.connect.side_effect = auth_error
         
-        with patch('auth_service.auth_core.database.connection.create_async_engine', return_value=mock_engine):
+        with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine', return_value=mock_engine):
             with patch.object(test_auth_db, 'is_test_mode', False):
                 with patch.object(AuthConfig, 'get_database_url', return_value="postgresql+asyncpg://invalid:wrong@localhost:5432/test"):
                     
@@ -273,7 +273,7 @@ class TestDatabaseConnectionValidation:
             # Events are set up, but they don't prevent auth failures
             mock_setup_events.return_value = None
             
-            with patch('auth_service.auth_core.database.connection.create_async_engine', return_value=mock_engine):
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine', return_value=mock_engine):
                 with patch.object(test_auth_db, 'create_tables', side_effect=auth_error):
                     with patch.object(test_auth_db, 'is_test_mode', False):
                         with patch.object(AuthConfig, 'get_database_url', return_value="postgresql+asyncpg://postgres:wrong@localhost:5432/test"):

@@ -39,7 +39,7 @@ import pytest
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 
 # Removed broken import statement
 # # # #     AuditEvent, AuditQuery, ComplianceReport,  # Class may not exist, commented out  # Class may not exist, commented out  # Class may not exist, commented out

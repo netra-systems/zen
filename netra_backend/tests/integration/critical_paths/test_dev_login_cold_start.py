@@ -33,7 +33,7 @@ os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
 from netra_backend.app.auth_dependencies import get_db_session, get_security_service
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.clients.auth_client_config import Environment, OAuthConfig
 from netra_backend.app.main import app
 

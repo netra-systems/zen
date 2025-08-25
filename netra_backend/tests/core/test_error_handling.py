@@ -14,13 +14,7 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError as PydanticValidationError
 from sqlalchemy.exc import IntegrityError
 
-from netra_backend.app.core.error_context import (
-    AsyncErrorContextManager as ErrorContextManager,
-)
-from netra_backend.app.core.error_context import (
-    ErrorContext,
-    get_enriched_error_context,
-)
+from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.core.error_handlers import (
     ApiErrorHandler,
     general_exception_handler,

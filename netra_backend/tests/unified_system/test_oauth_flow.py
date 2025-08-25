@@ -39,7 +39,7 @@ except ImportError:
     SecurityService = Mock
 
 try:
-    from netra_backend.app.clients.auth_client import auth_client
+    from netra_backend.app.clients.auth_client_core import auth_client
 
 except ImportError:
 

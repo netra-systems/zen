@@ -69,7 +69,7 @@ class TestCriticalDatabaseConnectionFailures:
                 )
             
             # Test should fail with the database does not exist error
-            with patch('sqlalchemy.ext.asyncio.create_async_engine') as mock_create_engine:
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine') as mock_create_engine:
                 mock_engine = AsyncMock()
                 mock_engine.connect.return_value.__aenter__.side_effect = mock_failing_connection
                 mock_create_engine.return_value = mock_engine
@@ -121,7 +121,7 @@ class TestCriticalDatabaseConnectionFailures:
                         None, None
                     )
                 
-                with patch('sqlalchemy.ext.asyncio.create_async_engine') as mock_create_engine:
+                with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine') as mock_create_engine:
                     mock_engine = AsyncMock()
                     mock_engine.connect.return_value.__aenter__.side_effect = mock_db_not_exist
                     mock_create_engine.return_value = mock_engine
@@ -170,7 +170,7 @@ class TestCriticalDatabaseConnectionFailures:
                     None, None
                 )
             
-            with patch('sqlalchemy.ext.asyncio.create_async_engine') as mock_create_engine:
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine') as mock_create_engine:
                 mock_engine = AsyncMock()
                 mock_engine.connect.return_value.__aenter__.side_effect = mock_cloud_sql_db_not_exist
                 mock_create_engine.return_value = mock_engine
@@ -262,7 +262,7 @@ class TestStagingDatabaseSSLConnectionFailures:
                     None, None
                 )
             
-            with patch('sqlalchemy.ext.asyncio.create_async_engine') as mock_create_engine:
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine') as mock_create_engine:
                 mock_engine = AsyncMock()
                 mock_engine.connect.return_value.__aenter__.side_effect = mock_ssl_connection_failure
                 mock_create_engine.return_value = mock_engine
@@ -298,7 +298,7 @@ class TestStagingDatabaseSSLConnectionFailures:
                 await asyncio.sleep(0.1)  # Small delay to simulate timeout
                 raise asyncio.TimeoutError("Connection timeout occurred")
             
-            with patch('sqlalchemy.ext.asyncio.create_async_engine') as mock_create_engine:
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine') as mock_create_engine:
                 mock_engine = AsyncMock()
                 mock_engine.connect.return_value.__aenter__.side_effect = mock_connection_timeout
                 mock_create_engine.return_value = mock_engine

@@ -39,7 +39,7 @@ import websockets
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.core.configuration import get_configuration, unified_config_manager
 from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
 # get_async_db doesn't exist - using get_db_session

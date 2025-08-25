@@ -9,7 +9,7 @@ from test_framework.conftest_base import *
 # Import auth-specific utilities
 from test_framework.fixtures.auth_fixtures import *
 from test_framework.fixtures.database_fixtures import test_db_session
-from test_framework.mocks.database_mocks import MockAsyncDatabaseFactory
+# SSOT compliance: Use auth_db directly instead of custom database mocks
 
 import asyncio
 import os
@@ -20,18 +20,24 @@ from unittest.mock import patch
 import pytest
 import pytest_asyncio
 
+# Use auth service isolated environment
+from auth_service.auth_core.isolated_environment import get_env
+
 # Set auth-specific environment variables (common ones handled by root conftest)
 # CRITICAL: Only set test environment if we're actually running tests
 # This prevents the dev launcher from being affected when modules are imported
-if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
-    os.environ["ENVIRONMENT"] = "test"  # Use test environment for proper test setup
-    os.environ["AUTH_FAST_TEST_MODE"] = "false"  # Disable fast test mode for integration tests
-    os.environ["JWT_SECRET"] = "test_jwt_secret_key_that_is_long_enough_for_testing_purposes"
-    os.environ["GOOGLE_CLIENT_ID"] = "test_google_client_id"
-    os.environ["GOOGLE_CLIENT_SECRET"] = "test_google_client_secret"
-    os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///test_auth.db"
-    os.environ["AUTH_USE_FILE_DB"] = "true"  # Force file-based DB for tests
-    os.environ["REDIS_URL"] = "redis://localhost:6379/1"
+# Check pytest context using get_env for consistency
+if "pytest" in sys.modules or get_env().get("PYTEST_CURRENT_TEST"):
+    env = get_env()
+    env.enable_isolation()  # Enable isolation for tests
+    env.set("ENVIRONMENT", "test", "auth_conftest")  # Use test environment for proper test setup
+    env.set("AUTH_FAST_TEST_MODE", "false", "auth_conftest")  # Disable fast test mode for integration tests
+    env.set("JWT_SECRET", "test_jwt_secret_key_that_is_long_enough_for_testing_purposes", "auth_conftest")
+    env.set("GOOGLE_CLIENT_ID", "test_google_client_id", "auth_conftest")
+    env.set("GOOGLE_CLIENT_SECRET", "test_google_client_secret", "auth_conftest")
+    env.set("DATABASE_URL", "sqlite+aiosqlite:///test_auth.db", "auth_conftest")
+    env.set("AUTH_USE_FILE_DB", "true", "auth_conftest")  # Force file-based DB for tests
+    env.set("REDIS_URL", "redis://localhost:6379/1", "auth_conftest")
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -165,11 +171,12 @@ def test_user_data():
 
 @pytest.fixture
 def clean_environment():
-    """Clean test environment"""
-    original_env = dict(os.environ)
+    """Clean test environment using IsolatedEnvironment"""
+    env = get_env()
+    # Enable isolation and backup state
+    env.enable_isolation(backup_original=True)
     yield
-    # Restore original environment
-    os.environ.clear()
-    os.environ.update(original_env)
+    # Restore original environment state
+    env.disable_isolation(restore_original=True)
 
 # REMOVED: Duplicate mock_auth_redis fixture - use the one above at line 130

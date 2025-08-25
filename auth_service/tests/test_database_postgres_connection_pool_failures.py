@@ -77,7 +77,7 @@ class TestDatabaseConnectionPoolFailures:
             
             mock_engine.connect.side_effect = mock_connection_failure
             
-            with patch('sqlalchemy.ext.asyncio.create_async_engine', return_value=mock_engine):
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine', return_value=mock_engine):
                 # Pool initialization should detect the database issue
                 with pytest.raises(OperationalError) as exc_info:
                     await test_auth_db.initialize()
@@ -144,7 +144,7 @@ class TestDatabaseConnectionPoolFailures:
             
             mock_engine.connect.side_effect = mock_failing_connection
             
-            with patch('sqlalchemy.ext.asyncio.create_async_engine', return_value=mock_engine):
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine', return_value=mock_engine):
                 # Initialize the database (may succeed incorrectly)
                 try:
                     await test_auth_db.initialize()
@@ -226,7 +226,7 @@ class TestDatabaseConnectionPoolFailures:
             
             mock_engine.connect.side_effect = mock_connection_with_recovery
             
-            with patch('sqlalchemy.ext.asyncio.create_async_engine', return_value=mock_engine):
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine', return_value=mock_engine):
                 # Initialize database (will fail initially)
                 try:
                     await test_auth_db.initialize()
@@ -298,7 +298,7 @@ class TestDatabaseTableInitializationFailures:
             
             mock_connection.run_sync = AsyncMock(side_effect=mock_run_sync_failure)
             
-            with patch('sqlalchemy.ext.asyncio.create_async_engine', return_value=mock_engine):
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine', return_value=mock_engine):
                 # Table creation should fail explicitly
                 with pytest.raises(OperationalError) as exc_info:
                     await test_auth_db.create_tables()
@@ -344,7 +344,7 @@ class TestDatabaseTableInitializationFailures:
             
             mock_connection.execute = AsyncMock(side_effect=mock_execute_failure)
             
-            with patch('sqlalchemy.ext.asyncio.create_async_engine', return_value=mock_engine):
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine', return_value=mock_engine):
                 # Schema validation should fail
                 with pytest.raises(OperationalError) as exc_info:
                     async with mock_engine.connect() as conn:
@@ -432,7 +432,7 @@ class TestDatabaseConnectionEventHandling:
             
             mock_engine.connect.side_effect = mock_failing_connection
             
-            with patch('sqlalchemy.ext.asyncio.create_async_engine', return_value=mock_engine):
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine', return_value=mock_engine):
                 # Connection events don't prevent the postgres database error
                 with pytest.raises(OperationalError) as exc_info:
                     await test_auth_db.initialize()

@@ -108,7 +108,7 @@ class TestUser:
 @dataclass
 class WebSocketClient:
     """WebSocket client for testing."""
-    connection: websockets.WebSocketServerProtocol
+    connection: websockets.ServerConnection
     url: str
     is_connected: bool = True
 

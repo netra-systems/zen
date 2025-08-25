@@ -48,7 +48,7 @@ os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
 # Test infrastructure imports
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 
 from netra_backend.app.core.exceptions_websocket import WebSocketAuthenticationError
 

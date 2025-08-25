@@ -254,11 +254,18 @@ def setup_real_infrastructure():
 
     agent_service, apex_tool_selector, state_persistence_service_mock, tool_dispatcher = _create_additional_mocks()
     
+    # Create supervisor with the required components
+    supervisor = Supervisor(db_session, llm_manager, websocket_manager, tool_dispatcher)
+    supervisor.thread_id = str(uuid.uuid4())
+    supervisor.user_id = str(uuid.uuid4())
+    
     return {
 
         "config": config, "db_session": db_session, "llm_manager": llm_manager,
 
         "websocket_manager": websocket_manager, "tool_dispatcher": tool_dispatcher,
+
+        "supervisor": supervisor,
 
         "synthetic_data_service": synthetic_data_service, "quality_gate_service": quality_gate_service,
 

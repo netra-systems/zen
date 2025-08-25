@@ -14,17 +14,15 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
-from netra_backend.app.agents.error_handler import (
-    AgentError,
+from netra_backend.app.core.exceptions_agent import AgentError
+from netra_backend.app.agents.agent_error_types import (
     DatabaseError,
     NetworkError,
-)
-
-from netra_backend.app.core.error_handlers import (
-    AgentErrorHandler as ErrorHandler,
-)
-from netra_backend.app.agents.error_handler import (
     AgentValidationError as ValidationError,
+)
+from netra_backend.app.core.unified_error_handler import (
+    AgentErrorHandler,
+    agent_error_handler,
 )
 from netra_backend.app.core.error_codes import ErrorSeverity
 from netra_backend.app.schemas.shared_types import ErrorContext
@@ -35,7 +33,9 @@ class TestErrorHandler:
     @pytest.fixture
     def error_handler(self):
         """Create error handler for testing."""
-        return ErrorHandler()
+        from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
+        unified_handler = UnifiedErrorHandler()
+        return AgentErrorHandler(unified_handler)
     
     @pytest.fixture
     def sample_context(self):
@@ -49,7 +49,7 @@ class TestErrorHandler:
     
     def _assert_error_handler_initialization(self, handler):
         """Assert error handler initialization"""
-        assert handler.max_history == 100  # Default value as seen in BaseErrorHandler
+        assert handler.max_history == 1000  # Updated for unified error handler
         assert len(handler.error_history) == 0
         assert handler._error_metrics['total_errors'] == 0
 
@@ -128,7 +128,7 @@ class TestErrorHandler:
             agent_error = error_handler._convert_to_agent_error(error, sample_context)
             error_handler._store_error(agent_error)
         
-        stats = error_handler.get_comprehensive_stats()
+        stats = error_handler.get_error_statistics()
         _assert_error_statistics_format(stats)
 
     def _create_errors_for_logging_test(self):
@@ -178,7 +178,7 @@ class TestErrorHandler:
     def test_store_error_history_limit(self, error_handler):
         """Test error history size limit."""
         self._fill_error_history_to_limit(error_handler)
-        assert len(error_handler.error_history) == 100  # Should be capped at max_history
+        assert len(error_handler.error_history) == 1000  # Should be capped at max_history
 
     def _create_context_with_max_retries_exceeded(self):
         """Create context with max retries exceeded"""
@@ -195,8 +195,9 @@ class TestErrorHandler:
         """Test should_retry_operation when max retries exceeded."""
         context = self._create_context_with_max_retries_exceeded()
         error = NetworkError("Network error")
-        agent_error = error_handler._convert_to_agent_error(error, context)
-        should_retry = error_handler.recovery_coordinator.strategy.should_retry(agent_error)
+        # Since NetworkError extends AgentError, use it directly and set context
+        error.context = context
+        should_retry = error_handler.recovery_coordinator.strategy.should_retry(error)
         assert should_retry is False
 
     def _create_retryable_network_error(self):
@@ -209,8 +210,9 @@ class TestErrorHandler:
         sample_context.retry_count = 1
         sample_context.max_retries = 3
         
-        agent_error = error_handler._convert_to_agent_error(error, sample_context)
-        should_retry = error_handler.recovery_coordinator.strategy.should_retry(agent_error)
+        # Since NetworkError extends AgentError, use it directly and set context
+        error.context = sample_context
+        should_retry = error_handler.recovery_coordinator.strategy.should_retry(error)
         assert should_retry is True
 
     def test_error_handler_memory_usage(self, error_handler):

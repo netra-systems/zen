@@ -148,7 +148,7 @@ class TestDatabaseAuthenticationFailures:
         test_auth_db = AuthDatabase()
         
         # Mock the create_async_engine to simulate authentication failure
-        with patch('auth_service.auth_core.database.connection.create_async_engine') as mock_create_engine:
+        with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine') as mock_create_engine:
             # Configure mock to raise authentication error
             mock_create_engine.side_effect = RuntimeError("password authentication failed for user 'postgres'")
             
@@ -258,7 +258,7 @@ class TestDatabaseAuthenticationFailures:
         test_auth_db = AuthDatabase()
         
         # Mock the engine to consistently fail with authentication error
-        with patch('auth_service.auth_core.database.connection.create_async_engine') as mock_create_engine:
+        with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine') as mock_create_engine:
             # Simulate persistent authentication failure
             auth_error = RuntimeError("FATAL: password authentication failed for user 'postgres'")
             mock_create_engine.side_effect = auth_error
@@ -376,7 +376,7 @@ class TestDatabaseGracefulShutdownFailures:
         for error_message, error_type in failure_scenarios:
             test_auth_db = AuthDatabase()
             
-            with patch('auth_service.auth_core.database.connection.create_async_engine') as mock_create_engine:
+            with patch('auth_service.auth_core.database.database_manager.AuthDatabaseManager.create_async_engine') as mock_create_engine:
                 mock_create_engine.side_effect = error_type(error_message)
                 
                 with patch.object(test_auth_db, 'is_test_mode', False):

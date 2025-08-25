@@ -199,7 +199,7 @@ class TestJWTSecretIntegration:
         from unittest.mock import AsyncMock, MagicMock
 
         from netra_backend.app.auth_integration.auth import get_current_user
-        from netra_backend.app.clients.auth_client import auth_client
+        from netra_backend.app.clients.auth_client_core import auth_client
         
         test_secret = "backend-integration-test-secret-32"
         

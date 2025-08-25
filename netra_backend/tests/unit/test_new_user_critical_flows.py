@@ -31,7 +31,7 @@ from netra_backend.app.auth_integration.auth import (
     get_password_hash,
     validate_token_jwt,
 )
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.db.models_postgres import Secret, ToolUsageLog, User
 from netra_backend.app.schemas.registry import UserCreate
 from netra_backend.app.services.user_service import user_service

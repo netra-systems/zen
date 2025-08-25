@@ -25,7 +25,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set
 import pytest
 from test_framework.containers_utils import TestcontainerHelper
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.services.user_service import CRUDUser
 from netra_backend.app.db.models_postgres import User

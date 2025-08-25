@@ -10,14 +10,14 @@ Business Value Justification (BVJ):
 - Value Impact: Ensures auth tests run correctly in isolated environments
 - Strategic Impact: Enables reliable CI/CD and development workflows
 """
-import os
 import pytest
+from auth_service.auth_core.isolated_environment import get_env
 
 
 def test_database_url_is_sqlite_during_tests():
     """Test that DATABASE_URL is set to SQLite during pytest execution."""
     # This should be SQLite as set by conftest.py
-    database_url = os.environ.get("DATABASE_URL", "")
+    database_url = get_env().get("DATABASE_URL", "")
     assert database_url.startswith("sqlite"), f"Expected SQLite URL, got: {database_url}"
 
 

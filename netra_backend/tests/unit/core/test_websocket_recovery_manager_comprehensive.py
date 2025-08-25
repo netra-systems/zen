@@ -9,7 +9,7 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, Any
 
-from netra_backend.app.core.websocket_recovery_manager import (
+from netra_backend.app.core.websocket_recovery_strategies import (
     WebSocketRecoveryManager, websocket_recovery_manager
 )
 from netra_backend.app.core.websocket_recovery_types import (

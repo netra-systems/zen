@@ -35,7 +35,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import httpx
 import pytest
 
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 
 # # # HealthStatus, FailoverEvent - these don't exist in auth_types, using generic structures  # Class may not exist, commented out  # Class may not exist, commented out
 from netra_backend.app.core.config import get_settings

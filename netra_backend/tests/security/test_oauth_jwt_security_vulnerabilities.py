@@ -32,7 +32,7 @@ from fastapi.testclient import TestClient
 from fastapi import HTTPException
 
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client_core import auth_client
 
 
 class TestOAuthJWTSecurityVulnerabilities:
@@ -400,7 +400,7 @@ fGnJm6gOdrj8ym3rFkEjWT2btf31mrD5oKH6cPHa+xj9z3mz4QH6H8M=
         # This test will FAIL until proper JWT validation is implemented
         # It tests the actual auth client implementation
         
-        from netra_backend.app.clients.auth_client import auth_client
+        from netra_backend.app.clients.auth_client_core import auth_client
         
         # Create a malicious JWT token with 'none' algorithm
         malicious_payload = {
