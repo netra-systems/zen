@@ -246,21 +246,27 @@
       </driver>
     </driver_requirements>
     
-    <testing_requirements>
-      <requirement>
-        Test primary path: DatabaseURLBuilder available
-      </requirement>
-      <requirement>
-        Test fallback path: Mock ImportError for DatabaseURLBuilder
-      </requirement>
-      <requirement>
-        Test SSL parameter conversion for each driver
-      </requirement>
-      <requirement>
-        Test Cloud SQL URL handling
-      </requirement>
-    </testing_requirements>
+    <enforcement>
+      <rule>
+        Code review MUST reject any PR with try/except ImportError for DatabaseURLBuilder
+      </rule>
+      <rule>
+        Architecture compliance check MUST fail if fallback URL logic is detected
+      </rule>
+      <rule>
+        All services MUST import DatabaseURLBuilder directly with no fallbacks
+      </rule>
+    </enforcement>
     
-    <tags>database, fallback, ssl-parameters, asyncpg, critical</tags>
+    <extension_points>
+      DatabaseURLBuilder provides hooks for future extensibility:
+      - register_driver_handler(): Add support for new database drivers
+      - register_normalization_rule(): Add custom normalization patterns
+      - get_driver_requirements(): Retrieve driver-specific requirements
+      
+      These hooks ensure future needs can be met without creating fallback logic.
+    </extension_points>
+    
+    <tags>database, no-fallbacks, centralization, critical, fail-fast</tags>
   </learning>
 </learnings>

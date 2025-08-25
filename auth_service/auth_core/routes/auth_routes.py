@@ -1098,18 +1098,43 @@ async def oauth_callback_post(
         raise HTTPException(status_code=500, detail=f"OAuth authentication failed: {str(e)}")
 
 @router.get("/health", response_model=HealthResponse)
-async def health_check():
-    """Health check endpoint"""
+async def health_check(request: Request):
+    """Health check endpoint with API versioning support"""
+    # Handle API versioning
+    requested_version = request.headers.get("Accept-Version") or request.headers.get("API-Version", "current")
+    
     redis_ok = auth_service.session_manager.health_check()
     redis_enabled = auth_service.session_manager.redis_enabled
     
     # If Redis is disabled by design, the service is still healthy
     service_status = "healthy" if (redis_ok or not redis_enabled) else "degraded"
     
-    return HealthResponse(
+    response = HealthResponse(
         status=service_status,
         redis_connected=redis_ok if redis_enabled else None,  # None when Redis is disabled
         database_connected=True  # Placeholder
+    )
+    
+    # Add version-specific fields for newer API versions
+    if requested_version in ["1.0", "2024-08-01"]:
+        response_dict = response.dict()
+        response_dict["version_info"] = {
+            "api_version": requested_version,
+            "service_version": "1.0.0",
+            "supported_versions": ["current", "1.0", "2024-08-01"]
+        }
+        # Return JSONResponse to include custom headers and modified response
+        return JSONResponse(
+            content=response_dict,
+            headers={"API-Version": requested_version}
+        )
+    
+    # For current version, return standard response with version header
+    from fastapi import Response
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        content=response.dict(),
+        headers={"API-Version": requested_version}
     )
 
 @router.post("/password-reset/request", response_model=PasswordResetResponse)

@@ -1,56 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <specification>
     <metadata>
-        <name>API Versioning Anti-Pattern</name>
-        <version>1.0</version>
+        <name>API Versioning Anti-Pattern - RESOLVED</name>
+        <version>2.0</version>
         <date>2025-08-25</date>
-        <description>Critical learning: The v1 API versioning pattern causes confusion and bugs - use direct paths instead</description>
+        <description>Critical learning: The v1 API versioning pattern has been successfully removed - all services now use clean paths</description>
         <priority>CRITICAL</priority>
+        <status>RESOLVED</status>
     </metadata>
 
     <problem-statement>
-        The current codebase has inconsistent API versioning patterns causing multiple issues:
-        1. Auth service mounts routes at /api/auth/* 
-        2. Backend has some routes at /api/* and others without versioning
-        3. Frontend must know which services use v1 and which don't
-        4. This causes 404 errors when paths don't match expectations
+        The codebase HAD inconsistent API versioning patterns that were causing multiple issues:
+        1. Auth service mounted routes at /api/v1/auth/* 
+        2. Backend had mixed /api/v1/* and /api/* routes
+        3. Frontend had to know which services used v1
+        4. This caused 404 errors when paths didn't match expectations
+        
+        STATUS: RESOLVED - All v1 references have been removed (2025-08-25)
     </problem-statement>
+
+    <resolution-summary>
+        <date>2025-08-25</date>
+        <description>
+            Successfully removed all v1 API references from all services.
+            The system now uses clean, direct paths without version prefixes.
+        </description>
+        <changes-made>
+            <auth-service>
+                - Changed main.py:474 from prefix="/api/v1" to prefix=""
+                - Routes now mount at /auth/* directly
+                - Updated all test files to use clean paths
+            </auth-service>
+            <backend-service>
+                - Removed api_v1_compatibility.py entirely
+                - Removed v1 router configuration from app_factory_route_configs.py
+                - All routes now use clean /api/* or direct paths
+                - Updated test expectations
+            </backend-service>
+            <frontend-service>
+                - Updated all test files to expect clean paths
+                - Removed v1 pattern expectations
+                - WebSocket protocol changed from 'netra-v1' to 'netra'
+            </frontend-service>
+        </changes-made>
+    </resolution-summary>
 
     <current-state>
         <service name="auth-service">
-            <issue>Mounts all routes with /api/v1 prefix (auth_service/main.py:474)</issue>
+            <status>CLEAN - No v1 references</status>
             <example>
-                Server: app.include_router(auth_router, prefix="/api/v1")
-                Result: /api/auth/config, /api/auth/login, etc.
+                Server: app.include_router(auth_router, prefix="")
+                Result: /auth/config, /auth/login, /auth/token, etc.
             </example>
         </service>
         
         <service name="backend">
-            <issue>Mixed versioning - some routes use /api/v1, others use /api directly</issue>
+            <status>CLEAN - No v1 references</status>
             <examples>
-                <with-version>
-                    - /api/threads (via api_v1_router)
+                <clean-paths>
+                    - /api/threads (direct, no version)
                     - /api/discovery (discovery router)
-                </with-version>
-                <without-version>
                     - /api/auth/* (auth_router)
                     - /api/agent/* (agent_router)
                     - /api/supply/* (supply router)
                     - /api/generation/* (generation router)
                     - /api/users/* (users router)
                     - /api/tools/* (unified_tools router)
-                </without-version>
+                    - /health/* (health endpoints)
+                </clean-paths>
             </examples>
         </service>
 
         <service name="frontend">
-            <issue>Must hardcode knowledge of which endpoints use v1</issue>
-            <complexity>
-                - Auth endpoints: /api/auth/*
-                - Threads endpoint: /api/threads
-                - Other endpoints: mixed versioning
-                - Test mocks must match production paths exactly
-            </complexity>
+            <status>CLEAN - No v1 references</status>
+            <simplification>
+                - Auth endpoints: /auth/*
+                - API endpoints: /api/*
+                - WebSocket: 'netra' protocol (not 'netra-v1')
+                - No version logic needed
+                - Test mocks simplified
+            </simplification>
         </service>
     </current-state>
 

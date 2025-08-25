@@ -395,10 +395,10 @@ describe('Missing API Routes 404 Errors - Staging Replication', () => {
       
       // All backend API calls should use consistent base path
       const threadsPath = new URL(config.endpoints.threads).pathname;
-      expect(threadsPath).toMatch(/^\/api\/v1\//);
+      expect(threadsPath).toMatch(/^\/api\//);
       
-      // Should not have inconsistent versioning
-      expect(threadsPath).not.toBe('/api/threads'); // Missing version
+      // Should use clean paths without version prefixes
+      expect(threadsPath).toBe('/api/threads'); // Clean path without versioning
       expect(threadsPath).not.toBe('/threads'); // Missing api prefix
     });
   });

@@ -11,14 +11,13 @@ def get_core_route_configs(modules: dict) -> dict:
 
 def _get_auth_route_configs(modules: dict) -> dict:
     """Get authentication route configurations."""
-    return {"auth": (modules["auth_router"], "/api/auth", ["auth"]),
-        "agent": (modules["agent_router"], "/api/agent", ["agent"])}
+    # Auth router not needed - auth is handled by separate auth service
+    return {"agent": (modules["agent_router"], "/api/agent", ["agent"])}
 
 
 def _get_api_route_configs(modules: dict) -> dict:
     """Get API route configurations."""
-    return {"api_v1": (modules["api_v1_router"], "/api/v1", ["api-v1"]),
-        "threads": (modules["threads_router"], "", ["threads"]),
+    return {"threads": (modules["threads_router"], "", ["threads"]),
         "llm_cache": (modules["llm_cache_router"], "/api/llm-cache", ["llm-cache"]),
         "mcp": (modules["mcp_router"], "/api/mcp", ["mcp"])}
 

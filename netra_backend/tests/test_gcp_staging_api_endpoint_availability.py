@@ -66,9 +66,9 @@ class TestCriticalEndpointAvailability:
             assert "404" in error_msg or "not found" in error_msg, \
                 f"Expected 404 error for /health/live, got: {exc_info.value}"
 
-    def test_api_v1_endpoints_404_error(self):
+    def test_api_endpoints_404_error(self):
         """
-        Test: API v1 endpoints should be available
+        Test: API endpoints should be available
         This test SHOULD FAIL until API routes are properly registered
         """
         critical_api_endpoints = [
@@ -186,8 +186,8 @@ class TestRouteRegistrationIssues:
         """
         route_prefix_tests = [
             {"module": "health", "expected_prefix": "/health", "test_path": "/health/ready"},
-            {"module": "threads", "expected_prefix": "/api/v1", "test_path": "/api/threads"},
-            {"module": "agents", "expected_prefix": "/api/v1", "test_path": "/api/agents"}
+            {"module": "threads", "expected_prefix": "", "test_path": "/threads"},
+            {"module": "agents", "expected_prefix": "/api/agent", "test_path": "/api/agent"}
         ]
         
         for route_test in route_prefix_tests:

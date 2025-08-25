@@ -59,7 +59,7 @@ class DatabaseURLBuilder:
         @property
         def is_cloud_sql(self) -> bool:
             """Check if this is a Cloud SQL configuration."""
-            return "/cloudsql/" in self.parent.postgres_host
+            return self.parent.postgres_host is not None and "/cloudsql/" in self.parent.postgres_host
         
         @property
         def async_url(self) -> Optional[str]:
@@ -118,7 +118,7 @@ class DatabaseURLBuilder:
         @property
         def has_config(self) -> bool:
             """Check if TCP configuration is available."""
-            return bool(self.parent.postgres_host and not "/cloudsql/" in self.parent.postgres_host)
+            return bool(self.parent.postgres_host and not ("/cloudsql/" in self.parent.postgres_host))
         
         @property
         def async_url(self) -> Optional[str]:

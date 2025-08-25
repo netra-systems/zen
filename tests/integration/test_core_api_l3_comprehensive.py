@@ -30,7 +30,7 @@ def health():
     return {"status": "healthy", "timestamp": "2024-01-01T00:00:00Z"}
 
 @app.get("/api/users")
-def get_users_v1():
+def get_users_clean():
     return {"users": []}
 
 @app.get("/api/users")
@@ -145,13 +145,13 @@ class TestCoreAPIL3Integration:
     # Test 62: API versioning
     def test_api_versioning(self, client):
         """Test API versioning support."""
-        # V1 endpoint
-        response_v1 = client.get("/api/users")
-        assert response_v1.status_code in [200, 404]
+        # Clean endpoint (no versioning)
+        response_clean = client.get("/api/users")
+        assert response_clean.status_code in [200, 404]
         
-        # V2 endpoint (if exists)
-        response_v2 = client.get("/api/v2/users")
-        assert response_v2.status_code in [200, 404]
+        # Legacy versioned endpoint should not exist
+        response_legacy = client.get("/api/v1/users")
+        assert response_legacy.status_code == 404
         
         # Version in header
         response = client.get("/api/users", headers={"API-Version": "1.0"})

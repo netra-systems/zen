@@ -39,7 +39,7 @@ class TestAPIVersioningConsistency:
         Business Impact: API consumers confused by different versioning schemes
         """
         services = [
-            {"name": "main_backend", "url": "http://localhost:8000", "expected_prefix": "/api/v1"},
+            {"name": "main_backend", "url": "http://localhost:8000", "expected_prefix": "/api"},
             {"name": "auth_service", "url": "http://localhost:8081", "expected_prefix": "/api/auth"}
         ]
         

@@ -73,6 +73,12 @@ describe('Thread Navigation Integration Tests', () => {
 
     it('should handle rapid thread switching without state corruption', async () => {
       const user = userEvent.setup();
+      
+      // Set initial active thread BEFORE configuring hooks
+      testSetup.configureStore({
+        activeThreadId: 'thread-1' 
+      });
+      
       testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
@@ -83,14 +89,34 @@ describe('Thread Navigation Integration Tests', () => {
       const thread2 = screen.getByTestId('thread-item-thread-2');
       const thread3 = screen.getByTestId('thread-item-thread-3');
       
-      // Rapid clicking
-      await user.click(thread1);
-      await user.click(thread2);
-      await user.click(thread3);
+      // Initial state: thread-1 should be active
+      expect(thread1).toHaveClass('bg-emerald-50');
+      expect(thread2).not.toHaveClass('bg-emerald-50');
+      expect(thread3).not.toHaveClass('bg-emerald-50');
       
+      // Click thread-2 and wait for state change
+      await user.click(thread2);
+      await waitFor(() => {
+        expect(thread2).toHaveClass('bg-emerald-50');
+        expect(thread1).not.toHaveClass('bg-emerald-50');
+        expect(thread3).not.toHaveClass('bg-emerald-50');
+      }, { timeout: 1000 });
+      
+      // Click thread-3 and wait for state change
+      await user.click(thread3);
       await waitFor(() => {
         expect(thread3).toHaveClass('bg-emerald-50');
-      });
+        expect(thread1).not.toHaveClass('bg-emerald-50');
+        expect(thread2).not.toHaveClass('bg-emerald-50');
+      }, { timeout: 1000 });
+      
+      // Quick switch back to thread-1 to ensure no corruption
+      await user.click(thread1);
+      await waitFor(() => {
+        expect(thread1).toHaveClass('bg-emerald-50');
+        expect(thread2).not.toHaveClass('bg-emerald-50');
+        expect(thread3).not.toHaveClass('bg-emerald-50');
+      }, { timeout: 1000 });
     });
 
     it('should debounce thread switching to prevent excessive calls', async () => {

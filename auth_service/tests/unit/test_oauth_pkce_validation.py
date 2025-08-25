@@ -132,16 +132,19 @@ class TestOAuthPKCEValidation:
             pytest.fail("PKCE validation should handle unicode input gracefully, not crash")
     
     def test_pkce_code_verifier_null_handling(self):
-        """Test PKCE validation handles null/None input gracefully - EXPECTED TO FAIL"""
+        """Test PKCE validation handles null/None input gracefully - SHOULD FAIL TO EXPOSE BUG"""
         code_challenge = base64.urlsafe_b64encode(
             hashlib.sha256("test".encode()).digest()
         ).decode().rstrip("=")
         
-        # Test with None/null code verifier
-        result = self.security_manager.validate_pkce_challenge(None, code_challenge)
-        
-        # THIS WILL FAIL if implementation doesn't handle None input
-        assert result is False, "Should reject None code verifier"
+        # Test with None/null code verifier - THIS SHOULD FAIL
+        try:
+            result = self.security_manager.validate_pkce_challenge(None, code_challenge)
+            # If we get here, the implementation handles None gracefully
+            assert result is False, "Should reject None code verifier"
+        except AttributeError as e:
+            # This is the expected failure - None.encode() will fail
+            pytest.fail(f"PKCE validation crashed on None input: {e}")
         
         # Test with empty string code verifier
         result = self.security_manager.validate_pkce_challenge("", code_challenge)

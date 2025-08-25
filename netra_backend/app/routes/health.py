@@ -52,11 +52,15 @@ def _create_error_response(status_code: int, response_data: Dict[str, Any]) -> R
     )
 
 @router.get("/")
-async def health(request: Request) -> Dict[str, Any]:
+async def health(request: Request, response: Response) -> Dict[str, Any]:
     """
     Basic health check endpoint - returns healthy if the application is running.
     Checks startup state to ensure proper readiness signaling during cold starts.
+    Supports API versioning through Accept-Version and API-Version headers.
     """
+    # Handle API versioning
+    requested_version = request.headers.get("Accept-Version") or request.headers.get("API-Version", "current")
+    response.headers["API-Version"] = requested_version
     # Check if application startup is complete
     app_state = getattr(request.app, 'state', None)
     if app_state:
@@ -139,16 +143,26 @@ async def health(request: Request) -> Dict[str, Any]:
             })
     
     # Startup is complete, proceed with normal health check
-    return await health_interface.get_health_status(HealthLevel.BASIC)
+    health_status = await health_interface.get_health_status(HealthLevel.BASIC)
+    
+    # Add version-specific fields based on requested API version
+    if requested_version in ["1.0", "2024-08-01"]:
+        health_status["version_info"] = {
+            "api_version": requested_version,
+            "service_version": "1.0.0",
+            "supported_versions": ["current", "1.0", "2024-08-01"]
+        }
+    
+    return health_status
 
 
 # Add separate endpoint for /health (without trailing slash) to handle direct requests
 @router.get("", include_in_schema=False)  # This will match /health exactly
-async def health_no_slash(request: Request) -> Dict[str, Any]:
+async def health_no_slash(request: Request, response: Response) -> Dict[str, Any]:
     """
     Health check endpoint without trailing slash - redirects to main health endpoint logic.
     """
-    return await health(request)
+    return await health(request, response)
 
 @router.get("/live")
 async def live() -> Dict[str, Any]:

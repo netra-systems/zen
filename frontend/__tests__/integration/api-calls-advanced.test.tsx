@@ -21,17 +21,9 @@ import { getApiUrl } from '@/services/api';
 const mockApiUrl = 'http://localhost:8000';
 
 const createAdvancedHandlers = () => [
-  // Versioned endpoints
+  // Clean API endpoints without versioning
   http.get(`${mockApiUrl}/api/threads`, () => {
     return HttpResponse.json({
-      version: '1.0',
-      threads: []
-    });
-  }),
-
-  http.get(`${mockApiUrl}/api/v2/threads`, () => {
-    return HttpResponse.json({
-      version: '2.0',
       threads: []
     });
   }),
@@ -60,10 +52,7 @@ const createAdvancedHandlers = () => [
     return HttpResponse.json({
       paths: {
         '/api/threads': {
-          get: { summary: 'get_threads_v1' }
-        },
-        '/api/v2/threads': {
-          get: { summary: 'get_threads_v2' }
+          get: { summary: 'get_threads' }
         },
         '/api/interceptor-test': {
           get: { summary: 'interceptor_test' }
@@ -154,7 +143,7 @@ afterAll(() => {
 describe('API Calls - Request Interceptors', () => {
   it('handles API spec fetching for endpoint resolution', async () => {
     // The apiClient.get() call should first fetch the OpenAPI spec
-    const result = await apiClient.get('get_threads_v1', 'test-token');
+    const result = await apiClient.get('get_threads', 'test-token');
     
     // Verify the call completed successfully (endpoint was resolved)
     expect(result).toBeDefined();
@@ -245,33 +234,22 @@ describe('API Calls - Request Interceptors', () => {
 // ============================================================================
 
 describe('API Calls - API Versioning', () => {
-  it('supports versioned API endpoints', async () => {
-    server.use(
-      http.get(`${mockApiUrl}/api/v2/threads`, () => {
-        return HttpResponse.json({
-          version: '2.0',
-          threads: []
-        });
-      })
-    );
-
-    const url = getApiUrl('/api/v2/threads');
+  it('supports clean API endpoints without versioning', async () => {
+    const url = getApiUrl('/api/threads');
     const response = await fetch(url);
     const data = await response.json();
     
-    expect(data.version).toBe('2.0');
+    expect(data.threads).toBeDefined();
+    expect(Array.isArray(data.threads)).toBe(true);
   });
 
-  it('handles version-specific endpoints in OpenAPI spec', async () => {
+  it('handles clean endpoints in OpenAPI spec', async () => {
     server.use(
       http.get(`${mockApiUrl}/openapi.json`, () => {
         return HttpResponse.json({
           paths: {
             '/api/threads': {
-              get: { summary: 'get_threads_v1' }
-            },
-            '/api/v2/threads': {
-              get: { summary: 'get_threads_v2' }
+              get: { summary: 'get_threads' }
             }
           }
         });
@@ -281,39 +259,28 @@ describe('API Calls - API Versioning', () => {
     // Clear any cached spec
     (apiClient as any).spec = null;
     
-    const result = await apiClient.get('get_threads_v2', 'test-token');
+    const result = await apiClient.get('get_threads', 'test-token');
     
-    // Verify v2 endpoint was successfully called
+    // Verify endpoint was successfully called
     expect(result).toBeDefined();
-    // Verify the API client can handle multiple versions
     expect(apiClient.get).toBeDefined();
   });
 
-  it('handles version migration scenarios', async () => {
-    // Test calling both v1 and v2 endpoints
-    const v1Response = await apiClient.get('get_threads_v1', 'test-token');
-    const v2Response = await apiClient.get('get_threads_v2', 'test-token');
+  it('handles consistent endpoint structure', async () => {
+    // Test calling clean endpoints without versioning
+    const response = await apiClient.get('get_threads', 'test-token');
     
-    expect(v1Response.version).toBe('1.0');
-    expect(v2Response.version).toBe('2.0');
+    expect(response.threads).toBeDefined();
+    expect(Array.isArray(response.threads)).toBe(true);
   });
 
-  it('validates version compatibility', async () => {
-    server.use(
-      http.get(`${mockApiUrl}/api/v99/threads`, () => {
-        return HttpResponse.json({
-          error: 'Unsupported API version',
-          supported_versions: ['v1', 'v2']
-        }, { status: 400 });
-      })
-    );
-
-    const url = getApiUrl('/api/v99/threads');
+  it('validates clean endpoint availability', async () => {
+    const url = getApiUrl('/api/threads');
     const response = await fetch(url);
     
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.error).toContain('Unsupported API version');
+    expect(data.threads).toBeDefined();
   });
 });
 
@@ -323,10 +290,10 @@ describe('API Calls - API Versioning', () => {
 
 describe('API Calls - Response Interceptors', () => {
   it('parses JSON responses correctly', async () => {
-    const response = await apiClient.get('get_threads_v1', 'test-token');
+    const response = await apiClient.get('get_threads', 'test-token');
     
     expect(typeof response).toBe('object');
-    expect(response.version).toBe('1.0');
+    expect(response.threads).toBeDefined();
   });
 
   it('handles empty response bodies', async () => {
@@ -428,7 +395,7 @@ describe('API Calls - Response Interceptors', () => {
 describe('API Calls - Performance', () => {
   it('handles concurrent requests efficiently', async () => {
     const promises = Array.from({ length: 10 }, (_, i) => 
-      apiClient.get('get_threads_v1', `token-${i}`)
+      apiClient.get('get_threads', `token-${i}`)
     );
     
     const startTime = performance.now();

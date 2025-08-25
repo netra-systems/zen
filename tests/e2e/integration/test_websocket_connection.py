@@ -203,7 +203,7 @@ async def test_websocket_subprotocol_negotiation(connection_tester):
     ws = await websockets.connect(
         "ws://localhost:8000/websocket",
         extra_headers={"Authorization": f"Bearer {valid_token}"},
-        subprotocols=["netra-v1"]
+        subprotocols=["netra"]
     )
     connection_tester.active_connections.append(ws)
     

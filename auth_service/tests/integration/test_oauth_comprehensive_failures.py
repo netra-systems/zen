@@ -138,7 +138,7 @@ class TestOAuthComprehensiveFailures:
                 # Use unique code to avoid reuse detection across test runs
                 unique_code = f"test_auth_code_{secrets.token_urlsafe(8)}"
                 response = client.post(
-                    "/api/auth/callback/google",
+                    "/auth/callback/google",
                     json={
                         "code": unique_code,
                         "state": state,
@@ -169,7 +169,7 @@ class TestOAuthComprehensiveFailures:
         ).decode().rstrip("=")
         
         response = client.post(
-            "/api/auth/callback/google",
+            "/auth/callback/google",
             json={
                 "code": f"valid_code_with_pkce_{secrets.token_urlsafe(8)}",
                 "state": secrets.token_urlsafe(32),
@@ -244,7 +244,7 @@ class TestOAuthComprehensiveFailures:
                 # Try to reuse the same nonce (use unique code to avoid code reuse check)
                 unique_code = f"unique_code_{secrets.token_urlsafe(8)}"
                 response = client.post(
-                    "/api/auth/callback/google",
+                    "/auth/callback/google",
                     json={
                         "code": unique_code,
                         "state": state,
@@ -278,13 +278,13 @@ class TestOAuthComprehensiveFailures:
             }
             
             response1 = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={"code": code, "state": state}
             )
         
         # Second use should fail
         response2 = client.post(
-            "/api/auth/callback/google",
+            "/auth/callback/google",
             json={"code": code, "state": state}
         )
         # Handle endpoint not implemented (404) during development
@@ -316,7 +316,7 @@ class TestOAuthComprehensiveFailures:
         
         # Try with different session (use unique code)
         response = client.post(
-            "/api/auth/callback/google",
+            "/auth/callback/google",
             json={"code": f"csrf_test_code_{secrets.token_urlsafe(8)}", "state": state},
             cookies={"session_id": "correct_session_67890"}
         )
@@ -351,7 +351,7 @@ class TestOAuthComprehensiveFailures:
         ).decode()
         
         response = client.post(
-            "/api/auth/callback/google",
+            "/auth/callback/google",
             json={
                 "code": f"hmac_test_code_{secrets.token_urlsafe(8)}",
                 "state": tampered_state,
@@ -378,7 +378,7 @@ class TestOAuthComprehensiveFailures:
         ).decode()
         
         response = client.post(
-            "/api/auth/callback/google",
+            "/auth/callback/google",
             json={
                 "code": f"valid_code_{secrets.token_urlsafe(8)}",
                 "state": expired_state,
@@ -428,7 +428,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.get.return_value = mock_user_response
             
             response = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={
                     "code": f"valid_code_{secrets.token_urlsafe(8)}",
                     "state": secrets.token_urlsafe(32),
@@ -478,7 +478,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.get.return_value = mock_user_response
             
             response = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={
                     "code": f"valid_code_{secrets.token_urlsafe(8)}",
                     "state": secrets.token_urlsafe(32),
@@ -518,7 +518,7 @@ class TestOAuthComprehensiveFailures:
             }
             
             response = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={
                     "code": f"valid_code_{secrets.token_urlsafe(8)}",
                     "state": secrets.token_urlsafe(32),
@@ -566,7 +566,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.get.return_value = mock_user_response
             
             response = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={
                     "code": f"valid_code_{secrets.token_urlsafe(8)}",
                     "state": secrets.token_urlsafe(32),
@@ -607,7 +607,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.get.return_value = mock_user_response
             
             response = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={
                     "code": f"valid_code_{secrets.token_urlsafe(8)}",
                     "state": secrets.token_urlsafe(32),
@@ -648,7 +648,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.get.return_value = mock_user_response
             
             response = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={
                     "code": f"valid_code_{secrets.token_urlsafe(8)}",
                     "state": secrets.token_urlsafe(32),
@@ -701,7 +701,7 @@ class TestOAuthComprehensiveFailures:
             
             # Test that the auth service accepts and preserves tracing headers
             response = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={
                     "code": f"valid_code_{secrets.token_urlsafe(8)}",
                     "state": secrets.token_urlsafe(32),
@@ -740,7 +740,7 @@ class TestOAuthComprehensiveFailures:
                 
                 # Use unique codes to avoid code reuse detection
                 response = client.post(
-                    "/api/auth/callback/google",
+                    "/auth/callback/google",
                     json={
                         "code": f"circuit_test_code_{i}_{secrets.token_urlsafe(8)}",
                         "state": secrets.token_urlsafe(32),
@@ -749,7 +749,7 @@ class TestOAuthComprehensiveFailures:
         
         # Circuit breaker should be open now - test with another unique code
         response = client.post(
-            "/api/auth/callback/google",
+            "/auth/callback/google",
             json={
                 "code": f"circuit_final_test_{secrets.token_urlsafe(8)}",
                 "state": secrets.token_urlsafe(32),
@@ -770,7 +770,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.post.side_effect = httpx.ConnectError("Connection failed")
             
             response = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={
                     "code": f"valid_code_{secrets.token_urlsafe(8)}",
                     "state": secrets.token_urlsafe(32),
@@ -821,7 +821,7 @@ class TestOAuthComprehensiveFailures:
                 mock_db.side_effect = Exception("Database connection failed")
                 
                 response = client.post(
-                    "/api/auth/callback/google",
+                    "/auth/callback/google",
                     json={
                         "code": f"valid_code_{secrets.token_urlsafe(8)}",
                         "state": secrets.token_urlsafe(32),
@@ -870,7 +870,7 @@ class TestOAuthComprehensiveFailures:
                 mock_session.side_effect = Exception("Redis connection failed")
                 
                 response = client.post(
-                    "/api/auth/callback/google",
+                    "/auth/callback/google",
                     json={
                         "code": f"valid_code_{secrets.token_urlsafe(8)}",
                         "state": secrets.token_urlsafe(32),
@@ -919,7 +919,7 @@ class TestOAuthComprehensiveFailures:
                 mock_async_client.get.return_value = mock_user_response
                 
                 return client.post(
-                    "/api/auth/callback/google",
+                    "/auth/callback/google",
                     json={
                         "code": f"valid_code_{attempt_num}_{uuid.uuid4()}",
                         "state": secrets.token_urlsafe(32),
@@ -1045,7 +1045,7 @@ class TestOAuthComprehensiveFailures:
     async def test_22_cross_origin_cors_failure(self):
         """Test 22: CORS failure for cross-origin OAuth requests"""
         response = client.post(
-            "/api/auth/callback/google",
+            "/auth/callback/google",
             json={
                 "code": f"valid_code_{secrets.token_urlsafe(8)}",
                 "state": secrets.token_urlsafe(32),
@@ -1066,7 +1066,7 @@ class TestOAuthComprehensiveFailures:
     async def test_23_redirect_uri_mismatch_attack(self):
         """Test 23: Redirect URI mismatch attack prevention"""
         response = client.post(
-            "/api/auth/callback/google",
+            "/auth/callback/google",
             json={
                 "code": f"redirect_test_code_{secrets.token_urlsafe(8)}",
                 "state": secrets.token_urlsafe(32),
@@ -1119,7 +1119,7 @@ class TestOAuthComprehensiveFailures:
         fixed_session_id = "FIXED_SESSION_12345"
         
         response = client.post(
-            "/api/auth/callback/google",
+            "/auth/callback/google",
             json={
                 "code": f"valid_code_{secrets.token_urlsafe(8)}",
                 "state": secrets.token_urlsafe(32),
@@ -1166,7 +1166,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.get.return_value = mock_user_response
             
             response = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={
                     "code": f"valid_code_{secrets.token_urlsafe(8)}",
                     "state": secrets.token_urlsafe(32),
@@ -1210,7 +1210,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.get.return_value = mock_user_response
             
             response = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={
                     "code": f"valid_code_{secrets.token_urlsafe(8)}",
                     "state": secrets.token_urlsafe(32),
@@ -1258,7 +1258,7 @@ class TestOAuthComprehensiveFailures:
             mock_async_client.get.return_value = mock_user_response
             
             response = client.post(
-                "/api/auth/callback/google",
+                "/auth/callback/google",
                 json={
                     "code": f"valid_code_{secrets.token_urlsafe(8)}",
                     "state": secrets.token_urlsafe(32),
@@ -1307,7 +1307,7 @@ class TestOAuthComprehensiveFailures:
                 mock_async_client.get.return_value = mock_user_response
                 
                 return client.post(
-                    "/api/auth/callback/google",
+                    "/auth/callback/google",
                     json={
                         "code": f"valid_code_{attempt_num}_{secrets.token_urlsafe(8)}",
                         "state": secrets.token_urlsafe(32),
@@ -1330,7 +1330,7 @@ class TestOAuthComprehensiveFailures:
         """Test 30: Token refresh while session is actively being used"""
         # Get initial tokens
         initial_response = client.post(
-            "/api/auth/callback/google",
+            "/auth/callback/google",
             json={
                 "code": f"valid_code_{secrets.token_urlsafe(8)}",
                 "state": secrets.token_urlsafe(32),

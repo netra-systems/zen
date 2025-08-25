@@ -470,8 +470,8 @@ async def security_and_service_middleware(request: Request, call_next):
     
     return response
 
-# Include routers with API versioning
-app.include_router(auth_router, prefix="/api/v1")
+# Include routers without API versioning
+app.include_router(auth_router, prefix="")
 
 # Root endpoint
 @app.get("/")

@@ -34,7 +34,8 @@ from alembic.script import ScriptDirectory
 
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment
-from netra_backend.app.db.migration_utils import run_migrations
+from netra_backend.app.db.migration_utils import execute_migration
+from netra_backend.app.core.unified_logging import get_logger
 
 
 class TestMigrationLockIssues:
@@ -62,7 +63,7 @@ class TestMigrationLockIssues:
             
             try:
                 # Try to run migrations - should fail to acquire lock
-                await run_migrations()
+                execute_migration(get_logger())
                 
                 pytest.fail("Expected migration to fail due to lock acquisition failure")
                 
@@ -104,7 +105,7 @@ class TestMigrationLockIssues:
                     mock_engine.return_value.begin.return_value.__aenter__.return_value = mock_conn
                     
                     # Try to run migration
-                    await run_migrations()
+                    execute_migration(get_logger())
                     return f"Migration {migration_id} succeeded unexpectedly"
                     
             except Exception as e:
@@ -160,7 +161,7 @@ class TestMigrationLockIssues:
                 
                 # Set short timeout to prevent hanging
                 async with asyncio.timeout(3.0):
-                    await run_migrations()
+                    execute_migration(get_logger())
                 
                 pytest.fail("Expected migration to fail due to stale lock")
                 
@@ -213,7 +214,7 @@ class TestMigrationLockIssues:
             max_retries = 3
             for retry in range(max_retries):
                 try:
-                    await run_migrations()
+                    execute_migration(get_logger())
                     print(f"✅ Migration succeeded on retry {retry + 1}/{max_retries}")
                     break
                 except Exception as e:
@@ -334,7 +335,7 @@ class TestMigrationLockIssues:
             mock_engine.return_value.begin.return_value.__aenter__.return_value = mock_conn
             
             try:
-                await run_migrations()
+                execute_migration(get_logger())
                 pytest.fail("Expected migration to fail")
                 
             except Exception as e:
@@ -365,7 +366,7 @@ class TestMigrationLockIssues:
             mock_engine.return_value.begin.side_effect = mock_connection_pool_exhausted
             
             try:
-                await run_migrations()
+                execute_migration(get_logger())
                 pytest.fail("Expected migration to fail due to connection pool exhaustion")
                 
             except Exception as e:
@@ -413,7 +414,7 @@ class TestMigrationLockIssues:
             mock_engine.return_value.begin.return_value.__aenter__.return_value = mock_conn
             
             try:
-                await run_migrations()
+                execute_migration(get_logger())
                 pytest.fail("Expected migration to fail and rollback")
                 
             except Exception as e:

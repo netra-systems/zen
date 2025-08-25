@@ -297,7 +297,7 @@ export const handlers = [
   http.get('/api/websocket/info', () => {
     return HttpResponse.json({
       url: 'ws://localhost:8000/ws',
-      protocols: ['netra-v1'],
+      protocols: ['netra'],
       heartbeat_interval: 30000,
       max_message_size: 1048576
     });
